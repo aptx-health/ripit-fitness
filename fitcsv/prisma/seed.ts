@@ -53,7 +53,7 @@ async function main() {
   })
 
   // Day 1 Exercises
-  const benchPress = await prisma.exercise.create({
+  await prisma.exercise.create({
     data: {
       name: 'Bench Press',
       order: 1,
@@ -68,7 +68,7 @@ async function main() {
     },
   })
 
-  const rows = await prisma.exercise.create({
+  await prisma.exercise.create({
     data: {
       name: 'Barbell Rows',
       order: 2,
@@ -94,7 +94,7 @@ async function main() {
     },
   })
 
-  const squat = await prisma.exercise.create({
+  await prisma.exercise.create({
     data: {
       name: 'Squat',
       order: 1,
@@ -109,7 +109,7 @@ async function main() {
     },
   })
 
-  const rdl = await prisma.exercise.create({
+  await prisma.exercise.create({
     data: {
       name: 'Romanian Deadlift',
       order: 2,
@@ -135,7 +135,7 @@ async function main() {
     },
   })
 
-  const deadlift = await prisma.exercise.create({
+  await prisma.exercise.create({
     data: {
       name: 'Deadlift',
       order: 1,
@@ -150,7 +150,7 @@ async function main() {
     },
   })
 
-  const ohp = await prisma.exercise.create({
+  await prisma.exercise.create({
     data: {
       name: 'Overhead Press',
       order: 2,

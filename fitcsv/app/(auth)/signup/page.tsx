@@ -49,7 +49,7 @@ export default function SignupPage() {
 
       // Success - redirect to login
       router.push('/login?message=Check your email to confirm your account')
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred')
       setLoading(false)
     }
