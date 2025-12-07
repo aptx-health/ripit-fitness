@@ -1,0 +1,116 @@
+// FitCSV Database Schema
+// See docs/ARCHITECTURE.md for design decisions
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// User table is managed by Supabase Auth
+// We just reference it with the userId String
+
+model Program {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  userId      String   // References auth.users in Supabase
+  isActive    Boolean  @default(false) // Only one active strength program per user
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  weeks Week[]
+
+  @@index([userId, isActive])
+  @@index([userId])
+}
+
+model Week {
+  id         String  @id @default(cuid())
+  weekNumber Int     // 1, 2, 3...
+  programId  String
+  program    Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  workouts Workout[]
+
+  @@unique([programId, weekNumber])
+  @@index([programId])
+}
+
+model Workout {
+  id        String @id @default(cuid())
+  name      String // "Day 1: Upper Power", "Monday", etc.
+  dayNumber Int    // Position within week (1, 2, 3...)
+  weekId    String
+  week      Week   @relation(fields: [weekId], references: [id], onDelete: Cascade)
+
+  exercises   Exercise[]
+  completions WorkoutCompletion[]
+
+  @@unique([weekId, dayNumber])
+  @@index([weekId])
+}
+
+model Exercise {
+  id        String  @id @default(cuid())
+  name      String  // "Bench Press", "Squat"
+  order     Int     // Order within workout
+  workoutId String
+  workout   Workout @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  notes     String? // Optional notes from CSV
+
+  prescribedSets PrescribedSet[]
+  loggedSets     LoggedSet[]
+
+  @@index([workoutId])
+}
+
+model PrescribedSet {
+  id         String   @id @default(cuid())
+  setNumber  Int      // 1, 2, 3...
+  reps       Int      // Target reps
+  weight     String?  // Flexible: "135lbs", "65%", "RPE 8", etc.
+  rpe        Int?     // Rated Perceived Exertion (1-10)
+  rir        Int?     // Reps in Reserve (0-5)
+  exerciseId String
+  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@index([exerciseId])
+}
+
+model WorkoutCompletion {
+  id          String   @id @default(cuid())
+  workoutId   String
+  workout     Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  userId      String   // References auth.users in Supabase
+  completedAt DateTime @default(now())
+  status      String   // "completed", "incomplete", "abandoned"
+  notes       String?
+
+  loggedSets LoggedSet[]
+
+  @@index([workoutId, userId])
+  @@index([userId, completedAt])
+}
+
+model LoggedSet {
+  id           String            @id @default(cuid())
+  setNumber    Int               // Actual set number logged
+  reps         Int               // Actual reps completed
+  weight       Float             // Actual weight used (numeric)
+  weightUnit   String            @default("lbs") // "lbs" or "kg"
+  rpe          Int?              // Actual RPE if tracked
+  rir          Int?              // Actual RIR if tracked
+  exerciseId   String
+  exercise     Exercise          @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  completionId String
+  completion   WorkoutCompletion @relation(fields: [completionId], references: [id], onDelete: Cascade)
+  createdAt    DateTime          @default(now())
+
+  @@index([exerciseId])
+  @@index([completionId])
+}
