@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
 import Link from 'next/link'
+import { CsvUploader } from '@/components/features/CsvUploader'
 
 export default async function ProgramsPage() {
   const supabase = await createClient()
@@ -22,22 +23,24 @@ export default async function ProgramsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">My Programs</h1>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-            Import CSV
-          </button>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-6">My Programs</h1>
+          {programs.length > 0 && (
+            <div className="bg-white rounded-lg p-6 mb-6">
+              <CsvUploader />
+            </div>
+          )}
         </div>
 
         {programs.length === 0 ? (
-          <div className="bg-white rounded-lg p-12 text-center">
-            <h2 className="text-xl font-semibold mb-2">No programs yet</h2>
-            <p className="text-gray-600 mb-6">
-              Import your first training program from a CSV file to get started
-            </p>
-            <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-              Import CSV Program
-            </button>
+          <div className="bg-white rounded-lg p-8">
+            <div className="text-center mb-8">
+              <h2 className="text-xl font-semibold mb-2">No programs yet</h2>
+              <p className="text-gray-600">
+                Import your first training program from a CSV file to get started
+              </p>
+            </div>
+            <CsvUploader />
           </div>
         ) : (
           <div className="space-y-4">

@@ -56,12 +56,13 @@ model Workout {
 }
 
 model Exercise {
-  id        String  @id @default(cuid())
-  name      String  // "Bench Press", "Squat"
-  order     Int     // Order within workout
-  workoutId String
-  workout   Workout @relation(fields: [workoutId], references: [id], onDelete: Cascade)
-  notes     String? // Optional notes from CSV
+  id            String  @id @default(cuid())
+  name          String  // "Bench Press", "Squat"
+  order         Int     // Order within workout
+  exerciseGroup String? // "A", "B", "C" for supersets/circuits
+  workoutId     String
+  workout       Workout @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  notes         String? // Optional notes from CSV
 
   prescribedSets PrescribedSet[]
   loggedSets     LoggedSet[]

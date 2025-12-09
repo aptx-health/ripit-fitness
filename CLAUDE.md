@@ -321,3 +321,5 @@ git commit -m "feat: add feature"
 - RLS policies must be created for all user-owned tables
 - No emojis in code or commits unless explicitly requested
 - Keep solutions simple - avoid over-engineering
+- **Prisma version**: Stay on v6.x (Supabase recommendation). Use `npx prisma@6.19.0` to avoid installing v7
+- **Prisma migrations**: If `migrate dev` fails with "permission denied to terminate process", use `db push` instead (Supabase pooler limitation)

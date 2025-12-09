@@ -1,0 +1,23 @@
+week,day,workout_name,exercise,set,reps,weight,rir,notes,exercise_group
+1,1,Upper Power,Bench Press,1,5,135lbs,2,,A
+1,1,Upper Power,Barbell Row,1,8,95lbs,2,Pause at chest,A
+1,1,Upper Power,Bench Press,2,5,135lbs,2,,A
+1,1,Upper Power,Barbell Row,2,8,95lbs,2,Pause at chest,A
+1,1,Upper Power,Bench Press,3,5,135lbs,1,,A
+1,1,Upper Power,Barbell Row,3,8,95lbs,1,Pause at chest,A
+1,1,Upper Power,Overhead Press,1,8,65lbs,2,,
+1,1,Upper Power,Overhead Press,2,8,65lbs,2,,
+1,1,Upper Power,Overhead Press,3,8,65lbs,1,,
+1,2,Lower Power,Squat,1,5,225lbs,2,,
+1,2,Lower Power,Squat,2,5,225lbs,2,,
+1,2,Lower Power,Squat,3,5,225lbs,1,,
+1,2,Lower Power,Deadlift,1,5,275lbs,2,,
+1,2,Lower Power,Deadlift,2,5,275lbs,2,,
+1,2,Lower Power,Leg Curl,1,12,60lbs,2,,
+1,2,Lower Power,Leg Curl,2,12,60lbs,1,,
+2,1,Upper Power,Bench Press,1,5,140lbs,2,,
+2,1,Upper Power,Bench Press,2,5,140lbs,2,,
+2,1,Upper Power,Bench Press,3,5,140lbs,1,,
+2,1,Upper Power,Barbell Row,1,8,100lbs,2,,
+2,1,Upper Power,Barbell Row,2,8,100lbs,2,,
+2,1,Upper Power,Barbell Row,3,8,100lbs,1,,
