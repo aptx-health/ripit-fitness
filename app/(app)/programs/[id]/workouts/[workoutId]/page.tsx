@@ -2,6 +2,7 @@ import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
 import WorkoutDetail from '@/components/WorkoutDetail'
+import { getLastExercisePerformance } from '@/lib/queries/exercise-history'
 
 export default async function WorkoutDetailPage({
   params,
@@ -36,6 +37,7 @@ export default async function WorkoutDetailPage({
           order: 'asc',
         },
         include: {
+          exerciseDefinition: true, // NEW: Include exercise definition
           prescribedSets: {
             orderBy: {
               setNumber: 'asc',
@@ -73,5 +75,29 @@ export default async function WorkoutDetailPage({
 
   const isCompleted = workout.completions.length > 0
 
-  return <WorkoutDetail workout={workout} programId={programId} isCompleted={isCompleted} />
+  // NEW: Fetch exercise history for each exercise
+  const exerciseHistory = await Promise.all(
+    workout.exercises.map(async (exercise) => ({
+      exerciseId: exercise.id,
+      history: await getLastExercisePerformance(
+        exercise.exerciseDefinitionId,
+        user.id,
+        new Date() // Get history before now
+      ),
+    }))
+  )
+
+  // Convert to map for easy lookup in components
+  const historyMap = Object.fromEntries(
+    exerciseHistory.map((h) => [h.exerciseId, h.history])
+  )
+
+  return (
+    <WorkoutDetail
+      workout={workout}
+      programId={programId}
+      isCompleted={isCompleted}
+      exerciseHistory={historyMap} // NEW: Pass history to component
+    />
+  )
 }

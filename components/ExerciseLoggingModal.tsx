@@ -5,7 +5,7 @@ import { useState } from 'react'
 type PrescribedSet = {
   id: string
   setNumber: number
-  reps: number
+  reps: string // Changed from number to support ranges like "8-12"
   weight: string | null
   rpe: number | null
   rir: number | null
@@ -30,6 +30,21 @@ type LoggedSet = {
   rir: number | null
 }
 
+type ExerciseHistorySet = {
+  setNumber: number
+  reps: number
+  weight: number
+  weightUnit: string
+  rpe: number | null
+  rir: number | null
+}
+
+type ExerciseHistory = {
+  completedAt: Date
+  workoutName: string
+  sets: ExerciseHistorySet[]
+}
+
 type Props = {
   isOpen: boolean
   onClose: () => void
@@ -37,6 +52,7 @@ type Props = {
   workoutId: string
   workoutName: string
   onComplete: (loggedSets: LoggedSet[]) => Promise<void>
+  exerciseHistory?: Record<string, ExerciseHistory | null> // NEW: Exercise history map
 }
 
 export default function ExerciseLoggingModal({
@@ -45,6 +61,7 @@ export default function ExerciseLoggingModal({
   exercises,
   workoutName,
   onComplete,
+  exerciseHistory,
 }: Props) {
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0)
   const [loggedSets, setLoggedSets] = useState<LoggedSet[]>([])
@@ -195,7 +212,7 @@ export default function ExerciseLoggingModal({
             <div className="flex items-center justify-center gap-2">
               {isSuperset && (
                 <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs font-bold rounded">
-                  {supersetLabel}
+                  Superset {supersetLabel}
                 </span>
               )}
               <h3 className="text-lg font-semibold">{currentExercise.name}</h3>
@@ -218,9 +235,27 @@ export default function ExerciseLoggingModal({
 
         {/* Scrollable content area */}
         <div className="flex-1 overflow-y-auto px-4 py-4">
+          {/* Last Performance (if available) */}
+          {exerciseHistory && exerciseHistory[currentExercise.id] && (
+            <div className="mb-4">
+              <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                Last Time ({new Date(exerciseHistory[currentExercise.id]!.completedAt).toLocaleDateString()})
+              </h4>
+              <div className="bg-blue-50 rounded-lg p-3 space-y-1 border border-blue-200">
+                {exerciseHistory[currentExercise.id]!.sets.map((set) => (
+                  <div key={set.setNumber} className="text-sm text-blue-900">
+                    Set {set.setNumber}: {set.reps} reps @ {set.weight}{set.weightUnit}
+                    {set.rir !== null && ` • RIR ${set.rir}`}
+                    {set.rpe !== null && ` • RPE ${set.rpe}`}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Prescribed Sets Reference */}
           <div className="mb-4">
-            <h4 className="text-sm font-semibold text-gray-700 mb-2">Prescribed Sets</h4>
+            <h4 className="text-sm font-semibold text-gray-700 mb-2">Today's Target</h4>
             <div className="bg-gray-50 rounded-lg p-3 space-y-1">
               {currentPrescribedSets.map((set) => (
                 <div key={set.id} className="text-sm text-gray-700">

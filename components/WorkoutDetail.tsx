@@ -8,7 +8,7 @@ import ExerciseLoggingModal from './ExerciseLoggingModal'
 type PrescribedSet = {
   id: string
   setNumber: number
-  reps: number
+  reps: string // Changed from number to support ranges like "8-12"
   weight: string | null
   rpe: number | null
   rir: number | null
@@ -51,10 +51,26 @@ type Workout = {
   completions: WorkoutCompletion[]
 }
 
+type ExerciseHistorySet = {
+  setNumber: number
+  reps: number
+  weight: number
+  weightUnit: string
+  rpe: number | null
+  rir: number | null
+}
+
+type ExerciseHistory = {
+  completedAt: Date
+  workoutName: string
+  sets: ExerciseHistorySet[]
+}
+
 type Props = {
   workout: Workout
   programId: string
   isCompleted: boolean
+  exerciseHistory?: Record<string, ExerciseHistory | null> // NEW: Exercise history map
 }
 
 type LoggedSetInput = {
@@ -67,7 +83,7 @@ type LoggedSetInput = {
   rir: number | null
 }
 
-export default function WorkoutDetail({ workout, programId, isCompleted }: Props) {
+export default function WorkoutDetail({ workout, programId, isCompleted, exerciseHistory }: Props) {
   const router = useRouter()
   const [isLoggingModalOpen, setIsLoggingModalOpen] = useState(false)
   const completion = workout.completions[0]
@@ -321,6 +337,7 @@ export default function WorkoutDetail({ workout, programId, isCompleted }: Props
         workoutId={workout.id}
         workoutName={workout.name}
         onComplete={handleCompleteWorkout}
+        exerciseHistory={exerciseHistory} // NEW: Pass exercise history
       />
     </div>
   )
