@@ -158,7 +158,7 @@ export async function importProgramToDatabase(
     exerciseDefinitionMap.set(normalized, definition.id);
   }
 
-  // Now do the transaction with cached exercise definitions
+  // Now do the transaction with nested creates (much faster - single query!)
   const result = await prisma.$transaction(async (tx) => {
     // Deactivate any existing active programs
     await tx.program.updateMany({
@@ -166,72 +166,57 @@ export async function importProgramToDatabase(
       data: { isActive: false },
     });
 
-    // Create program
+    // Create entire program hierarchy in one nested create
     const program = await tx.program.create({
       data: {
         name: structuredProgram.metadata.name,
         userId,
         isActive: true,
+        weeks: {
+          create: structuredProgram.weeks.map((week) => ({
+            weekNumber: week.weekNumber,
+            workouts: {
+              create: week.workouts.map((workout) => ({
+                name: workout.name,
+                dayNumber: workout.dayNumber,
+                exercises: {
+                  create: workout.exercises.map((exercise) => {
+                    const exerciseDefinitionId = exerciseDefinitionMap.get(
+                      exercise.name.trim().toLowerCase()
+                    );
+
+                    if (!exerciseDefinitionId) {
+                      throw new Error(`Exercise definition not found for: ${exercise.name}`);
+                    }
+
+                    return {
+                      name: exercise.name,
+                      exerciseDefinitionId,
+                      order: exercise.order,
+                      exerciseGroup: exercise.exerciseGroup,
+                      notes: exercise.notes,
+                      prescribedSets: {
+                        create: exercise.prescribedSets.map((set) => ({
+                          setNumber: set.setNumber,
+                          reps: set.reps,
+                          weight: set.weight,
+                          rpe: set.rpe,
+                          rir: set.rir,
+                        })),
+                      },
+                    };
+                  }),
+                },
+              })),
+            },
+          })),
+        },
       },
     });
 
-    // Create weeks with workouts, exercises, and prescribed sets
-    for (const week of structuredProgram.weeks) {
-      const weekRecord = await tx.week.create({
-        data: {
-          weekNumber: week.weekNumber,
-          programId: program.id,
-        },
-      });
-
-      for (const workout of week.workouts) {
-        const workoutRecord = await tx.workout.create({
-          data: {
-            name: workout.name,
-            dayNumber: workout.dayNumber,
-            weekId: weekRecord.id,
-          },
-        });
-
-        for (const exercise of workout.exercises) {
-          // Get cached exercise definition ID
-          const exerciseDefinitionId = exerciseDefinitionMap.get(
-            exercise.name.trim().toLowerCase()
-          );
-
-          if (!exerciseDefinitionId) {
-            throw new Error(`Exercise definition not found for: ${exercise.name}`);
-          }
-
-          const exerciseRecord = await tx.exercise.create({
-            data: {
-              name: exercise.name,
-              exerciseDefinitionId,
-              order: exercise.order,
-              exerciseGroup: exercise.exerciseGroup,
-              notes: exercise.notes,
-              workoutId: workoutRecord.id,
-            },
-          });
-
-          // Create prescribed sets (reps now string)
-          await tx.prescribedSet.createMany({
-            data: exercise.prescribedSets.map((set) => ({
-              setNumber: set.setNumber,
-              reps: set.reps, // Already string from validator
-              weight: set.weight,
-              rpe: set.rpe,
-              rir: set.rir,
-              exerciseId: exerciseRecord.id,
-            })),
-          });
-        }
-      }
-    }
-
     return { programId: program.id };
   }, {
-    timeout: 30000, // Increase timeout to 30 seconds
+    timeout: 10000, // Can reduce timeout now that we're faster
   });
 
   return result;
