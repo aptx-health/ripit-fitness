@@ -27,7 +27,7 @@ week,day,workout_name,exercise,set,reps,weight,rir,notes
 | `workout_name` | String | Name of the workout | `Upper Power`, `Monday`, `Push Day` |
 | `exercise` | String | Exercise name | `Bench Press`, `Squat`, `Deadlift` |
 | `set` | Integer | Set number | `1`, `2`, `3` |
-| `reps` | Integer | Target reps | `5`, `10`, `12` |
+| `reps` | String | Target reps (number or range) | `5`, `10`, `8-12` |
 | `weight` | String | Target weight (flexible) | `135lbs`, `65%`, `RPE 8` |
 
 ## Optional Columns
@@ -58,7 +58,7 @@ The `weight` column accepts multiple formats:
 | Bodyweight | `BW` | User's bodyweight |
 | Variable | `AMRAP`, `max` | As many reps as possible, max effort |
 
-## Metadata
+## Metadata & Exercise Matching
 
 Program-level metadata is inferred automatically:
 
@@ -67,6 +67,22 @@ Program-level metadata is inferred automatically:
   - `nsuns-531.csv` → "Nsuns 531"
 - **Program type**: Defaults to `strength`
 - **Optional columns**: Auto-detected from headers
+
+### Exercise Name Matching
+
+FitCSV automatically matches exercise names to a built-in exercise library:
+
+1. **Exact match**: Checks for exact name match (case-insensitive)
+   - `Barbell Bench Press` matches system exercise "Barbell Bench Press"
+2. **Alias match**: Checks against common aliases
+   - `Bench Press`, `bench`, `flat bench` all match "Barbell Bench Press"
+3. **Auto-create**: Unknown exercises are automatically added as custom exercises
+   - `My Custom Exercise` creates a new custom exercise definition
+
+**Benefits:**
+- Track performance history across workouts by exercise
+- See your last performance when logging a workout
+- Consistent exercise naming across programs
 
 ## Example Programs
 
@@ -85,16 +101,16 @@ week,day,workout_name,exercise,set,reps,weight
 1,2,Day B,Deadlift,3,5,185lbs
 ```
 
-### With RIR Tracking
+### With RIR Tracking and Rep Ranges
 
 ```csv
 week,day,workout_name,exercise,set,reps,weight,rir
-1,1,Upper Power,Bench Press,1,5,135lbs,3
-1,1,Upper Power,Bench Press,2,5,135lbs,2
-1,1,Upper Power,Bench Press,3,5,135lbs,1
-1,1,Upper Power,Rows,1,8,95lbs,2
-1,1,Upper Power,Rows,2,8,95lbs,2
-1,1,Upper Power,Rows,3,8,95lbs,1
+1,1,Upper Power,Bench Press,1,8-12,135lbs,3
+1,1,Upper Power,Bench Press,2,8-12,135lbs,2
+1,1,Upper Power,Bench Press,3,8-12,135lbs,2
+1,1,Upper Power,Rows,1,10-15,95lbs,2
+1,1,Upper Power,Rows,2,10-15,95lbs,2
+1,1,Upper Power,Rows,3,10-15,95lbs,2
 ```
 
 ### With Notes
@@ -145,7 +161,7 @@ week,day,workout_name,exercise,exercise_group,set,reps,weight
 - `workout_name`: Cannot be empty
 - `exercise`: Cannot be empty
 - `set`: Must be positive integer (≥ 1)
-- `reps`: Must be positive integer (≥ 1)
+- `reps`: Must be a positive integer (e.g., `10`) or a range (e.g., `8-12`)
 - `weight`: Cannot be empty
 
 ### Optional Field Validation
