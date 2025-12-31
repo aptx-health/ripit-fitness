@@ -24,7 +24,7 @@ describe('Draft API - Critical Deletion Tests', () => {
         status: 'draft'
       })
       
-      const { workout, completion } = scenario
+      const { workout } = scenario
       
       // Verify initial state - 3 sets exist
       let currentCompletion = await prisma.workoutCompletion.findFirst({
@@ -46,7 +46,7 @@ describe('Draft API - Critical Deletion Tests', () => {
       })
       
       expect(currentCompletion?.loggedSets).toHaveLength(0)
-      expect(response.draft.setsCount).toBe(0)
+      expect(response.draft?.setsCount).toBe(0)
     })
 
     it('should handle deletion of specific sets while keeping others', async () => {
@@ -84,7 +84,7 @@ describe('Draft API - Critical Deletion Tests', () => {
       
       // Assert: Only 2 sets remain
       expect(response.success).toBe(true)
-      expect(response.draft.setsCount).toBe(2)
+      expect(response.draft?.setsCount).toBe(2)
       
       const currentCompletion = await prisma.workoutCompletion.findFirst({
         where: { workoutId: workout.id },
@@ -127,7 +127,7 @@ describe('Draft API - Critical Deletion Tests', () => {
       
       // Assert: Draft completion created with sets
       expect(response.success).toBe(true)
-      expect(response.draft.setsCount).toBe(1)
+      expect(response.draft?.setsCount).toBe(1)
       
       const createdCompletion = await prisma.workoutCompletion.findFirst({
         where: { workoutId: workout.id },
@@ -177,12 +177,12 @@ describe('Draft API - Critical Deletion Tests', () => {
       const invalidSets = [
         {
           // Missing exerciseId, invalid setNumber
-          setNumber: 'invalid',
+          setNumber: 'invalid' as unknown as number,
           reps: 10,
           weight: 135,
           weightUnit: 'lbs'
         }
-      ] as any
+      ]
       
       const response = await simulateDraftAPI(prisma, workout.id, userId, invalidSets)
       
@@ -195,7 +195,7 @@ describe('Draft API - Critical Deletion Tests', () => {
       const { workout } = scenario
       
       // Simulate malformed request without loggedSets property
-      const response = await simulateDraftAPI(prisma, workout.id, userId, null as any)
+      const response = await simulateDraftAPI(prisma, workout.id, userId, null as unknown as never[])
       
       expect(response.success).toBe(false)
       expect(response.error).toContain('loggedSets array is required')
@@ -208,7 +208,7 @@ async function simulateDraftAPI(
   prisma: PrismaClient,
   workoutId: string,
   userId: string,
-  loggedSets: any
+  loggedSets: unknown
 ) {
   try {
     // Enhanced input validation (matching real API)
@@ -275,7 +275,7 @@ async function simulateDraftAPI(
     // Find or create draft completion
     const result = await prisma.$transaction(async (tx) => {
       // Look for existing draft and get current set count for safety logging
-      let existingDraft = await tx.workoutCompletion.findFirst({
+      const existingDraft = await tx.workoutCompletion.findFirst({
         where: {
           workoutId,
           userId,
@@ -326,7 +326,15 @@ async function simulateDraftAPI(
       // Create all logged sets for the draft
       if (loggedSets.length > 0) {
         await tx.loggedSet.createMany({
-          data: loggedSets.map((set: any) => ({
+          data: loggedSets.map((set: {
+            exerciseId: string;
+            setNumber: number;
+            reps: number;
+            weight: number;
+            weightUnit: string;
+            rpe?: number | null;
+            rir?: number | null;
+          }) => ({
             exerciseId: set.exerciseId,
             completionId: draftCompletion.id,
             setNumber: set.setNumber,

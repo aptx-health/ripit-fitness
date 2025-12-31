@@ -100,7 +100,7 @@ export async function POST(
     // Find or create draft completion
     const result = await prisma.$transaction(async (tx) => {
       // Look for existing draft and get current set count for safety logging
-      let existingDraft = await tx.workoutCompletion.findFirst({
+      const existingDraft = await tx.workoutCompletion.findFirst({
         where: {
           workoutId,
           userId: user.id,

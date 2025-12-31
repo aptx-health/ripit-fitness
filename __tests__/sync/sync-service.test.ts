@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { WorkoutSyncService } from '@/lib/sync/workoutSync'
-import type { LoggedSet, SyncCallbacks } from '@/lib/sync/workoutSync'
+import type { SyncCallbacks } from '@/lib/sync/workoutSync'
+import type { LoggedSet } from '@/hooks/useWorkoutStorage'
 
 // Mock fetch for testing API calls
 const mockFetch = vi.fn()
@@ -59,9 +60,12 @@ describe('WorkoutSyncService', () => {
         {
           // Missing required fields
           exerciseId: '',
-          setNumber: 'invalid' as any,
+          setNumber: 'invalid' as unknown as number,
           reps: 10,
-          weight: 135
+          weight: 135,
+          weightUnit: 'lbs',
+          rpe: null,
+          rir: null
         }
       ]
       
@@ -81,7 +85,7 @@ describe('WorkoutSyncService', () => {
     })
 
     it('should reject non-array currentSets', async () => {
-      await syncService.syncCurrentState(testWorkoutId, 'invalid' as any)
+      await syncService.syncCurrentState(testWorkoutId, 'invalid' as unknown as LoggedSet[])
       
       expect(callbacks.onSyncError).toHaveBeenCalledWith('Invalid sets data', false)
       expect(mockFetch).not.toHaveBeenCalled()

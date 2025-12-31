@@ -129,7 +129,7 @@ describe('useWorkoutStorage', () => {
     })
 
     it('should not save when no sets are present', () => {
-      const { result } = renderHook(() => useWorkoutStorage(testWorkoutId))
+      renderHook(() => useWorkoutStorage(testWorkoutId))
       
       // Sets start empty and remain empty
       expect(localStorageMock.setItem).not.toHaveBeenCalled()

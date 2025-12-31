@@ -10,7 +10,7 @@ beforeAll(async () => {
     const { execSync } = await import('child_process')
     execSync('docker --version', { stdio: 'pipe' })
     console.log('✅ Docker is available')
-  } catch (error) {
+  } catch {
     console.error('❌ Docker is not available or not running')
     console.error('Please make sure Docker is installed and running')
     process.exit(1)

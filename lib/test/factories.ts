@@ -79,7 +79,7 @@ export async function createTestProgram(
   const exercisesPerWorkout = overrides.exercisesPerWorkout || 1
 
   // Create exercise definitions first
-  const exerciseDefinitions = []
+  const exerciseDefinitions: TestExerciseDefinition[] = []
   for (let i = 0; i < exercisesPerWorkout; i++) {
     const exerciseDef = await createTestExerciseDefinition(prisma, {
       name: `Test Exercise ${i + 1}`,
