@@ -7,7 +7,10 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
@@ -20,16 +23,23 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@testcontainers/postgresql": "^10.14.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.1",
     "@types/node": "^20.19.25",
     "@types/papaparse": "^5.5.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/ui": "^2.1.8",
     "eslint": "^9",
     "eslint-config-next": "16.0.7",
+    "jsdom": "^27.4.0",
     "prisma": "^6.19.0",
     "tailwindcss": "^4",
+    "testcontainers": "^10.14.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^2.1.8"
   },
   "description": "A focused strength training tracker that lets you import programs from CSV and track workouts without rigid app constraints.",
   "main": "index.js",

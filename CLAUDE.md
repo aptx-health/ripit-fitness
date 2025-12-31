@@ -323,3 +323,4 @@ git commit -m "feat: add feature"
 - Keep solutions simple - avoid over-engineering
 - **Prisma version**: Stay on v6.x (Supabase recommendation). Use `npx prisma@6.19.0` to avoid installing v7
 - **Prisma migrations**: If `migrate dev` fails with "permission denied to terminate process", use `db push` instead (Supabase pooler limitation)
+- For local testing, use the doppler config `dev_test`. Example: `doppler run --config dev_test -- npm run test` This will ensure that the proper Testcontainer with the test database is utilized.
