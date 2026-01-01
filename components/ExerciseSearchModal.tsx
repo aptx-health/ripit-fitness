@@ -145,6 +145,39 @@ export default function ExerciseSearchModal({
     intensityValue?: number
   }>>(initialState.sets)
 
+  useEffect(() => {
+    if (!editingExercise) return
+  
+    const firstSet = editingExercise.prescribedSets[0]
+    let intensityType: 'RIR' | 'RPE' | 'NONE' = 'NONE'
+  
+    if (firstSet?.rpe != null) intensityType = 'RPE'
+    else if (firstSet?.rir != null) intensityType = 'RIR'
+  
+    setSelectedExercise({
+      ...editingExercise.exerciseDefinition,
+      equipment: [],
+      instructions: undefined,
+    })
+  
+    setSetCount(editingExercise.prescribedSets.length)
+    setExerciseIntensityType(intensityType)
+    setExerciseNotes(editingExercise.notes || '')
+    setSets(
+      editingExercise.prescribedSets.map(set => ({
+        setNumber: set.setNumber,
+        reps: set.reps,
+        intensityValue:
+          intensityType === 'RPE'
+            ? set.rpe ?? undefined
+            : intensityType === 'RIR'
+            ? set.rir ?? undefined
+            : undefined,
+      }))
+    )
+  }, [editingExercise])
+  
+
   const searchExercises = useCallback(async () => {
     setIsLoading(true)
     setError(null)
@@ -294,7 +327,7 @@ export default function ExerciseSearchModal({
 
         {(selectedExercise || editingExercise) ? (
           /* Exercise Configuration Form */
-          <>
+          <div className="h-[calc(100vh-200px)] overflow-y-auto">
             {/* Exercise Details */}
             <div className="p-6 border-b bg-gray-50">
               <div className="flex items-start gap-4">
@@ -442,7 +475,7 @@ export default function ExerciseSearchModal({
                 </button>
               </div>
             </div>
-          </>
+          </div>
         ) : (
           /* Exercise Search Interface */
           <>
