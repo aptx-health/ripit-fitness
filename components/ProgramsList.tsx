@@ -93,12 +93,20 @@ export default function ProgramsList({ programs }: Props) {
               {deletingId === activeProgram.id ? 'Deleting...' : 'Delete'}
             </button>
           </div>
-          <Link
-            href={`/programs/${activeProgram.id}`}
-            className="inline-block mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Open Program
-          </Link>
+          <div className="flex gap-3 mt-4">
+            <Link
+              href={`/programs/${activeProgram.id}`}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Open Program
+            </Link>
+            <Link
+              href={`/programs/${activeProgram.id}/edit`}
+              className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50"
+            >
+              Edit Program
+            </Link>
+          </div>
         </div>
       )}
 
@@ -132,6 +140,12 @@ export default function ProgramsList({ programs }: Props) {
                 className="inline-block px-4 py-2 text-blue-600 hover:text-blue-700 font-medium"
               >
                 View
+              </Link>
+              <Link
+                href={`/programs/${program.id}/edit`}
+                className="inline-block px-4 py-2 text-gray-600 hover:text-gray-700 font-medium"
+              >
+                Edit
               </Link>
               <button
                 onClick={() => handleSetActive(program.id)}
