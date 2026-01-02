@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import ExerciseSearchModal from './ExerciseSearchModal'
+import FAUVolumeVisualization from './FAUVolumeVisualization'
 
 type Week = {
   id: string
@@ -783,15 +784,9 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
         )}
       </div>
 
-      {/* Sidebar - FAU Visualization (Placeholder) */}
+      {/* Sidebar - FAU Visualization */}
       <div className="lg:col-span-1">
-        <div className="bg-white rounded-lg p-6">
-          <h3 className="font-semibold mb-4">Muscle Group Balance</h3>
-          <div className="text-gray-500 text-sm">
-            Add exercises to see volume distribution across muscle groups
-          </div>
-          {/* TODO: Real-time FAU visualization will go here */}
-        </div>
+        <FAUVolumeVisualization weeks={weeks} />
       </div>
 
       {/* Exercise Search Modal */}
