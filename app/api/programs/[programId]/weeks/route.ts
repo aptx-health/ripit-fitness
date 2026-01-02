@@ -104,9 +104,29 @@ export async function POST(
         })
 
         // Prepare all data for batch creation
-        const workoutsToCreate = []
-        const exercisesToCreate = []
-        const prescribedSetsToCreate = []
+        const workoutsToCreate: Array<{
+          id: string
+          name: string
+          dayNumber: number
+          weekId: string
+        }> = []
+        const exercisesToCreate: Array<{
+          id: string
+          name: string
+          exerciseDefinitionId: string
+          order: number
+          exerciseGroup: string | null
+          workoutId: string
+          notes: string | null
+        }> = []
+        const prescribedSetsToCreate: Array<{
+          setNumber: number
+          reps: string
+          weight: string | null
+          rpe: number | null
+          rir: number | null
+          exerciseId: string
+        }> = []
 
         // Build data structures for batch creation
         for (const workout of sourceWeek.workouts) {
@@ -158,9 +178,12 @@ export async function POST(
         const exercisesData = exercisesToCreate.map(({ id: tempId, workoutId: tempWorkoutId, ...data }) => {
           const tempWorkout = workoutsToCreate.find(w => w.id === tempWorkoutId)
           const realWorkout = createdWorkouts.find(w => w.dayNumber === tempWorkout?.dayNumber)
-          return { ...data, workoutId: realWorkout?.id }
+          if (!realWorkout?.id) {
+            throw new Error('Failed to map workout ID during week duplication')
+          }
+          return { ...data, workoutId: realWorkout.id }
         })
-        
+
         await tx.exercise.createMany({ data: exercisesData })
 
         // Get created exercises to map IDs for prescribed sets
@@ -173,7 +196,14 @@ export async function POST(
 
         // Create prescribed sets with real exercise IDs
         if (prescribedSetsToCreate.length > 0) {
-          const prescribedSetsWithRealIds = []
+          const prescribedSetsWithRealIds: Array<{
+            setNumber: number
+            reps: string
+            weight: string | null
+            rpe: number | null
+            rir: number | null
+            exerciseId: string
+          }> = []
           
           for (const setData of prescribedSetsToCreate) {
             const { exerciseId: tempExerciseId, ...data } = setData
