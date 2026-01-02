@@ -103,43 +103,95 @@ export async function POST(
           }
         })
 
-        // Duplicate all workouts
+        // Prepare all data for batch creation
+        const workoutsToCreate = []
+        const exercisesToCreate = []
+        const prescribedSetsToCreate = []
+
+        // Build data structures for batch creation
         for (const workout of sourceWeek.workouts) {
-          const newWorkout = await tx.workout.create({
-            data: {
-              name: workout.name,
-              dayNumber: workout.dayNumber,
-              weekId: week.id,
-            }
+          const workoutId = `temp_workout_${workout.id}`
+          workoutsToCreate.push({
+            id: workoutId,
+            name: workout.name,
+            dayNumber: workout.dayNumber,
+            weekId: week.id,
           })
 
-          // Duplicate all exercises
           for (const exercise of workout.exercises) {
-            const newExercise = await tx.exercise.create({
-              data: {
-                name: exercise.name,
-                exerciseDefinitionId: exercise.exerciseDefinitionId,
-                order: exercise.order,
-                exerciseGroup: exercise.exerciseGroup,
-                workoutId: newWorkout.id,
-                notes: exercise.notes,
-              }
+            const exerciseId = `temp_exercise_${exercise.id}`
+            exercisesToCreate.push({
+              id: exerciseId,
+              name: exercise.name,
+              exerciseDefinitionId: exercise.exerciseDefinitionId,
+              order: exercise.order,
+              exerciseGroup: exercise.exerciseGroup,
+              workoutId: workoutId,
+              notes: exercise.notes,
             })
 
-            // Duplicate all prescribed sets
-            if (exercise.prescribedSets.length > 0) {
-              await tx.prescribedSet.createMany({
-                data: exercise.prescribedSets.map(set => ({
-                  setNumber: set.setNumber,
-                  reps: set.reps,
-                  weight: set.weight,
-                  rpe: set.rpe,
-                  rir: set.rir,
-                  exerciseId: newExercise.id,
-                }))
+            // Collect prescribed sets for this exercise
+            for (const set of exercise.prescribedSets) {
+              prescribedSetsToCreate.push({
+                setNumber: set.setNumber,
+                reps: set.reps,
+                weight: set.weight,
+                rpe: set.rpe,
+                rir: set.rir,
+                exerciseId: exerciseId,
               })
             }
           }
+        }
+
+        // Create all workouts at once
+        const workoutsData = workoutsToCreate.map(({ id, ...data }) => data)
+        await tx.workout.createMany({ data: workoutsData })
+
+        // Get created workouts to map IDs
+        const createdWorkouts = await tx.workout.findMany({
+          where: { weekId: week.id },
+          select: { id: true, dayNumber: true }
+        })
+
+        // Create exercises with real workout IDs
+        const exercisesData = exercisesToCreate.map(({ id: tempId, workoutId: tempWorkoutId, ...data }) => {
+          const tempWorkout = workoutsToCreate.find(w => w.id === tempWorkoutId)
+          const realWorkout = createdWorkouts.find(w => w.dayNumber === tempWorkout?.dayNumber)
+          return { ...data, workoutId: realWorkout?.id }
+        })
+        
+        await tx.exercise.createMany({ data: exercisesData })
+
+        // Get created exercises to map IDs for prescribed sets
+        const createdExercises = await tx.exercise.findMany({
+          where: { 
+            workout: { weekId: week.id }
+          },
+          select: { id: true, workoutId: true, order: true }
+        })
+
+        // Create prescribed sets with real exercise IDs
+        if (prescribedSetsToCreate.length > 0) {
+          const prescribedSetsWithRealIds = []
+          
+          for (const setData of prescribedSetsToCreate) {
+            const { exerciseId: tempExerciseId, ...data } = setData
+            const tempExercise = exercisesToCreate.find(e => e.id === tempExerciseId)
+            const tempWorkout = workoutsToCreate.find(w => w.id === tempExercise?.workoutId)
+            const realWorkout = createdWorkouts.find(w => w.dayNumber === tempWorkout?.dayNumber)
+            const realExercise = createdExercises.find(e => 
+              e.workoutId === realWorkout?.id && e.order === tempExercise?.order
+            )
+            
+            if (realExercise) {
+              prescribedSetsWithRealIds.push({ ...data, exerciseId: realExercise.id })
+            }
+          }
+
+          await tx.prescribedSet.createMany({
+            data: prescribedSetsWithRealIds
+          })
         }
 
         return week
