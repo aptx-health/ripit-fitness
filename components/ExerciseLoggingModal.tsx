@@ -155,16 +155,20 @@ export default function ExerciseLoggingModal({
     }
 
     // Update local state (automatically saves to localStorage)
-    setLoggedSets(prev => [...prev, newLoggedSet])
-    
-    console.log('About to add set to sync queue:', newLoggedSet)
-    
-    // Add to sync queue for background syncing
-    addSets([newLoggedSet])
-    addPendingSets(1)
-    setHasUnsavedChanges(true)
-    
-    console.log('Added set to sync queue and updated pending count')
+    setLoggedSets(prev => {
+      const updatedSets = [...prev, newLoggedSet]
+
+      console.log('About to add set to sync queue:', newLoggedSet)
+
+      // Add to sync queue for background syncing, passing ALL accumulated sets
+      addSets([newLoggedSet], updatedSets)
+      addPendingSets(1)
+      setHasUnsavedChanges(true)
+
+      console.log('Added set to sync queue and updated pending count')
+
+      return updatedSets
+    })
     
     // Reset form
     setCurrentSet({

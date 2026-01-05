@@ -109,22 +109,22 @@ describe('WorkoutSyncService', () => {
       })
       
       // Add sets one by one - should trigger sync on 3rd set
-      syncService.addSets([sets[0]], testWorkoutId)
+      syncService.addSets([sets[0]], testWorkoutId, [sets[0]])
       expect(mockFetch).not.toHaveBeenCalled()
-      
-      syncService.addSets([sets[1]], testWorkoutId)
+
+      syncService.addSets([sets[1]], testWorkoutId, [sets[0], sets[1]])
       expect(mockFetch).not.toHaveBeenCalled()
-      
-      syncService.addSets([sets[2]], testWorkoutId)
-      
-      expect(consoleSpy).toHaveBeenCalledWith('Threshold reached, triggering sync')
+
+      syncService.addSets([sets[2]], testWorkoutId, [sets[0], sets[1], sets[2]])
+
+      expect(consoleSpy).toHaveBeenCalledWith('Threshold reached, triggering sync with all', 3, 'sets')
     })
 
     it('should not sync before threshold', () => {
       const sets = [createValidLoggedSet(1), createValidLoggedSet(2)]
-      
-      syncService.addSets(sets, testWorkoutId)
-      
+
+      syncService.addSets(sets, testWorkoutId, sets)
+
       expect(mockFetch).not.toHaveBeenCalled()
       expect(syncService.getQueueStatus().pendingCount).toBe(2)
     })
@@ -136,15 +136,15 @@ describe('WorkoutSyncService', () => {
         createValidLoggedSet(3),
         createValidLoggedSet(4)
       ]
-      
+
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => ({ success: true })
       })
-      
+
       // Add 4 sets at once - should trigger sync immediately (> threshold)
-      syncService.addSets(sets, testWorkoutId)
-      
+      syncService.addSets(sets, testWorkoutId, sets)
+
       expect(mockFetch).toHaveBeenCalledTimes(1)
     })
   })
@@ -208,11 +208,11 @@ describe('WorkoutSyncService', () => {
     it('should track pending sets correctly', () => {
       const sets1 = [createValidLoggedSet(1)]
       const sets2 = [createValidLoggedSet(2)]
-      
-      syncService.addSets(sets1, testWorkoutId)
+
+      syncService.addSets(sets1, testWorkoutId, sets1)
       expect(syncService.getQueueStatus().pendingCount).toBe(1)
-      
-      syncService.addSets(sets2, testWorkoutId)
+
+      syncService.addSets(sets2, testWorkoutId, [...sets1, ...sets2])
       expect(syncService.getQueueStatus().pendingCount).toBe(2)
     })
 
@@ -222,28 +222,28 @@ describe('WorkoutSyncService', () => {
         createValidLoggedSet(2),
         createValidLoggedSet(3)
       ]
-      
+
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => ({ success: true })
       })
-      
+
       // Add sets to trigger sync
-      syncService.addSets(sets, testWorkoutId)
-      
+      syncService.addSets(sets, testWorkoutId, sets)
+
       // Wait for async sync to complete
       await new Promise(resolve => setTimeout(resolve, 10))
-      
+
       expect(syncService.getQueueStatus().pendingCount).toBe(0)
       expect(callbacks.onSyncSuccess).toHaveBeenCalledWith(3)
     })
 
     it('should allow manual queue clearing', () => {
       const sets = [createValidLoggedSet(1), createValidLoggedSet(2)]
-      
-      syncService.addSets(sets, testWorkoutId)
+
+      syncService.addSets(sets, testWorkoutId, sets)
       expect(syncService.getQueueStatus().pendingCount).toBe(2)
-      
+
       syncService.clearQueue()
       expect(syncService.getQueueStatus().pendingCount).toBe(0)
     })
@@ -276,8 +276,8 @@ describe('WorkoutSyncService', () => {
     it('should sync current state regardless of queue', async () => {
       // Add some sets to queue but don't trigger auto-sync
       const queuedSets = [createValidLoggedSet(1)]
-      syncService.addSets(queuedSets, testWorkoutId)
-      
+      syncService.addSets(queuedSets, testWorkoutId, queuedSets)
+
       // Different current state to sync manually
       const currentSets = [
         createValidLoggedSet(2),

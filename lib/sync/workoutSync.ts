@@ -29,6 +29,7 @@ export type SyncCallbacks = {
  */
 export class WorkoutSyncService {
   private pendingQueue: LoggedSet[] = []
+  private allCurrentSets: LoggedSet[] = [] // Track all accumulated sets
   private isCurrentlySyncing = false
   private retryTimeouts: Set<NodeJS.Timeout> = new Set()
   private callbacks: SyncCallbacks = {}
@@ -59,16 +60,21 @@ export class WorkoutSyncService {
 
   /**
    * Add sets to the pending queue and trigger sync if threshold is reached
+   * @param sets - New sets to add to queue
+   * @param workoutId - Workout ID for syncing
+   * @param allCurrentSets - All accumulated sets (for full state sync)
    */
-  addSets = (sets: LoggedSet[], workoutId: string): void => {
+  addSets = (sets: LoggedSet[], workoutId: string, allCurrentSets: LoggedSet[]): void => {
     this.pendingQueue.push(...sets)
+    this.allCurrentSets = allCurrentSets // Update full state
     console.log(`Added ${sets.length} set(s) to sync queue. Queue length: ${this.pendingQueue.length}`)
+    console.log(`Total accumulated sets: ${this.allCurrentSets.length}`)
     console.log('Current options:', this.options)
     console.log('Threshold check:', this.pendingQueue.length, '>=', this.options.syncThreshold)
 
     // Trigger sync if we've reached the threshold
     if (this.pendingQueue.length >= this.options.syncThreshold) {
-      console.log('Threshold reached, triggering sync')
+      console.log('Threshold reached, triggering sync with all', this.allCurrentSets.length, 'sets')
       this.syncNow(workoutId)
     } else {
       console.log('Threshold not reached yet, waiting for more sets')
@@ -223,6 +229,8 @@ export class WorkoutSyncService {
 
   /**
    * Attempt to sync current batch with retry logic
+   * IMPORTANT: Sends ALL accumulated sets, not just pending queue
+   * This prevents data loss when draft API deletes and recreates sets
    */
   private attemptSync = async (workoutId: string, retryCount: number): Promise<void> => {
     if (this.isCurrentlySyncing) {
@@ -231,29 +239,31 @@ export class WorkoutSyncService {
     }
 
     this.isCurrentlySyncing = true
-    const batch = [...this.pendingQueue] // Copy current queue
+    const pendingCount = this.pendingQueue.length // Track for queue management
+    const setsToSync = [...this.allCurrentSets] // Send ALL accumulated sets
     const willRetry = retryCount < this.options.maxRetries
 
-    console.log(`Sync attempt ${retryCount + 1} for ${batch.length} sets to workoutId: ${workoutId}`)
+    console.log(`Sync attempt ${retryCount + 1}: Sending ${setsToSync.length} total sets (${pendingCount} pending) to workoutId: ${workoutId}`)
 
     try {
       console.log('Calling onSyncStart callback')
-      this.callbacks.onSyncStart?.(batch.length)
+      this.callbacks.onSyncStart?.(pendingCount)
 
       // Call the draft API to save current progress
+      // CRITICAL: Send ALL accumulated sets so draft API replacement pattern works correctly
       console.log('Making API call to:', `/api/workouts/${workoutId}/draft`)
-      console.log('With payload:', { loggedSets: batch })
-      
+      console.log('With payload:', { loggedSets: setsToSync })
+
       const response = await fetch(`/api/workouts/${workoutId}/draft`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          loggedSets: batch
+          loggedSets: setsToSync
         })
       })
-      
+
       console.log('API response status:', response.status)
 
       if (!response.ok) {
@@ -262,11 +272,11 @@ export class WorkoutSyncService {
         throw new Error(errorMessage)
       }
 
-      // Success - remove synced sets from queue
-      this.pendingQueue = this.pendingQueue.slice(batch.length)
-      this.callbacks.onSyncSuccess?.(batch.length)
+      // Success - clear pending queue (we've synced all current sets)
+      this.pendingQueue = []
+      this.callbacks.onSyncSuccess?.(pendingCount)
 
-      console.log(`Successfully synced ${batch.length} sets. Remaining queue: ${this.pendingQueue.length}`)
+      console.log(`Successfully synced ${setsToSync.length} total sets. Queue cleared.`)
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown sync error'
@@ -394,7 +404,7 @@ export function useWorkoutSyncService(
   }, [syncService])
 
   // Enhanced callbacks that include workoutId
-  const addSets = useCallback((sets: LoggedSet[]) => syncService.addSets(sets, workoutId), [syncService, workoutId])
+  const addSets = useCallback((sets: LoggedSet[], allCurrentSets: LoggedSet[]) => syncService.addSets(sets, workoutId, allCurrentSets), [syncService, workoutId])
   const syncNow = useCallback(() => syncService.syncNow(workoutId), [syncService, workoutId])
   const syncCurrentState = useCallback((currentSets: LoggedSet[]) => syncService.syncCurrentState(workoutId, currentSets), [syncService, workoutId])
   const syncRemaining = useCallback(() => syncService.syncRemaining(workoutId), [syncService, workoutId])

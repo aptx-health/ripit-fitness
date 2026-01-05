@@ -15,18 +15,21 @@ datasource db {
 // We just reference it with the userId String
 
 model Program {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  userId      String   // References auth.users in Supabase
-  isActive    Boolean  @default(false) // Only one active strength program per user
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  userId        String   // References auth.users in Supabase
+  isActive      Boolean  @default(false) // Only one active strength program per user
+  programType   String   @default("strength") // "strength", "hypertrophy", "powerlifting"
+  isUserCreated Boolean  @default(false) // true for in-app created, false for CSV imported
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   weeks Week[]
 
   @@index([userId, isActive])
   @@index([userId])
+  @@index([userId, isUserCreated])
 }
 
 model Week {
@@ -60,7 +63,11 @@ model ExerciseDefinition {
   name           String   // Canonical name: "Barbell Bench Press"
   normalizedName String   @unique // Lowercase for fast matching
   aliases        String[] // ["bench press", "bench", "flat bench"]
-  category       String?  // "chest", "back", "legs" (future use)
+  category       String?  // "chest", "back", "legs" (legacy - replaced by FAUs)
+  primaryFAUs    String[] @default([]) // Primary Functional Aesthetic Units ["chest", "triceps"]
+  secondaryFAUs  String[] @default([]) // Secondary FAUs ["rear-delts"]
+  equipment      String[] @default([]) // ["barbell", "bench", "dumbbell"]
+  instructions   String?  // Setup and execution notes
   isSystem       Boolean  @default(false) // System vs user-created
   createdBy      String?  // User ID (null for system exercises)
   createdAt      DateTime @default(now())
@@ -71,6 +78,7 @@ model ExerciseDefinition {
   @@index([normalizedName])
   @@index([isSystem])
   @@index([createdBy])
+  @@index([primaryFAUs])
 }
 
 model Exercise {
