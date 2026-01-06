@@ -73,9 +73,6 @@ export default async function WorkoutDetailPage({
     notFound()
   }
 
-  // Only mark as completed if there's a completion with status 'completed' (not 'draft')
-  const isCompleted = workout.completions.length > 0 && workout.completions[0].status === 'completed'
-
   // NEW: Fetch exercise history for each exercise
   const exerciseHistory = await Promise.all(
     workout.exercises.map(async (exercise) => ({
@@ -97,7 +94,6 @@ export default async function WorkoutDetailPage({
     <WorkoutDetail
       workout={workout}
       programId={programId}
-      isCompleted={isCompleted}
       exerciseHistory={historyMap} // NEW: Pass history to component
     />
   )

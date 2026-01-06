@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { Clock } from 'lucide-react'
 
 type WorkoutCompletion = {
   id: string
@@ -229,6 +230,7 @@ export default function WeekView({
             {workouts.map((workout) => {
               const completion = workout.completions[0]
               const isCompleted = completion?.status === 'completed'
+              const isDraft = completion?.status === 'draft'
               const isSkipped = completion?.status === 'skipped'
               const hasStatus = !!completion
 
@@ -245,6 +247,8 @@ export default function WeekView({
                       ${
                         isCompleted
                           ? 'border-green-500 bg-green-50'
+                          : isDraft
+                          ? 'border-amber-500 bg-amber-50'
                           : isSkipped
                           ? 'border-gray-400 bg-gray-50'
                           : 'border-gray-200 hover:border-blue-300'
@@ -272,6 +276,16 @@ export default function WeekView({
                                 </svg>
                               </div>
                             )}
+                            {isDraft && (
+                              <>
+                                <div className="flex items-center justify-center w-6 h-6 rounded-full bg-amber-500">
+                                  <Clock className="w-4 h-4 text-white" />
+                                </div>
+                                <span className="px-2 py-0.5 bg-amber-500 text-white text-xs font-semibold rounded">
+                                  IN PROGRESS
+                                </span>
+                              </>
+                            )}
                             {isSkipped && (
                               <span className="px-2 py-0.5 bg-gray-400 text-white text-xs font-semibold rounded">
                                 SKIPPED
@@ -284,11 +298,19 @@ export default function WeekView({
                           {completion && (
                             <p
                               className={`text-sm mt-1 ${
-                                isCompleted ? 'text-green-700' : 'text-gray-600'
+                                isCompleted
+                                  ? 'text-green-700'
+                                  : isDraft
+                                  ? 'text-amber-700'
+                                  : 'text-gray-600'
                               }`}
                             >
                               {isCompleted
                                 ? `Completed on ${new Date(
+                                    completion.completedAt
+                                  ).toLocaleDateString()}`
+                                : isDraft
+                                ? `Started on ${new Date(
                                     completion.completedAt
                                   ).toLocaleDateString()}`
                                 : `Skipped on ${new Date(
@@ -315,8 +337,8 @@ export default function WeekView({
                       </div>
                     </div>
                   </Link>
-                  {/* Skip button for incomplete workouts */}
-                  {!hasStatus && (
+                  {/* Skip button for incomplete workouts (not draft) */}
+                  {!hasStatus && !isDraft && (
                     <button
                       onClick={(e) => {
                         e.preventDefault()

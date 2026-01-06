@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { Clock } from 'lucide-react'
 import ExerciseLoggingModal from './ExerciseLoggingModal'
 
 type PrescribedSet = {
@@ -37,6 +38,7 @@ type Exercise = {
 type WorkoutCompletion = {
   id: string
   completedAt: Date
+  status: string // 'draft' | 'completed' | 'abandoned'
   loggedSets: LoggedSet[]
 }
 
@@ -69,7 +71,6 @@ type ExerciseHistory = {
 type Props = {
   workout: Workout
   programId: string
-  isCompleted: boolean
   exerciseHistory?: Record<string, ExerciseHistory | null> // NEW: Exercise history map
 }
 
@@ -83,10 +84,14 @@ type LoggedSetInput = {
   rir: number | null
 }
 
-export default function WorkoutDetail({ workout, programId, isCompleted, exerciseHistory }: Props) {
+export default function WorkoutDetail({ workout, programId, exerciseHistory }: Props) {
   const router = useRouter()
   const [isLoggingModalOpen, setIsLoggingModalOpen] = useState(false)
   const completion = workout.completions[0]
+
+  // Determine workout status
+  const isDraft = completion?.status === 'draft'
+  const isWorkoutCompleted = completion?.status === 'completed'
 
   const handleCompleteWorkout = async (loggedSets: LoggedSetInput[]) => {
     try {
@@ -155,7 +160,7 @@ export default function WorkoutDetail({ workout, programId, isCompleted, exercis
               </div>
               <h1 className="text-2xl font-bold text-gray-900">{workout.name}</h1>
             </div>
-            {isCompleted && (
+            {isWorkoutCompleted && (
               <div className="flex items-center justify-center w-10 h-10 rounded-full bg-green-500">
                 <svg
                   className="w-6 h-6 text-white"
@@ -170,10 +175,20 @@ export default function WorkoutDetail({ workout, programId, isCompleted, exercis
                 </svg>
               </div>
             )}
+            {isDraft && (
+              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-amber-500">
+                <Clock className="w-6 h-6 text-white" />
+              </div>
+            )}
           </div>
-          {isCompleted && completion && (
+          {isWorkoutCompleted && completion && (
             <p className="text-sm text-green-700 mt-1">
               Completed on {new Date(completion.completedAt).toLocaleDateString()}
+            </p>
+          )}
+          {isDraft && completion && (
+            <p className="text-sm text-amber-700 mt-1">
+              In progress - {completion.loggedSets.length} set{completion.loggedSets.length !== 1 ? 's' : ''} logged
             </p>
           )}
         </div>
@@ -184,7 +199,7 @@ export default function WorkoutDetail({ workout, programId, isCompleted, exercis
         <div className="space-y-4">
           {workout.exercises.map((exercise, index) => {
             // Get logged sets for this exercise from the completion
-            const exerciseLoggedSets = isCompleted && completion
+            const exerciseLoggedSets = (isWorkoutCompleted || isDraft) && completion
               ? completion.loggedSets.filter((ls) => ls.exerciseId === exercise.id)
               : []
 
@@ -244,7 +259,7 @@ export default function WorkoutDetail({ workout, programId, isCompleted, exercis
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                      {isCompleted ? (
+                      {(isWorkoutCompleted || isDraft) ? (
                         // Show logged sets
                         exerciseLoggedSets.map((loggedSet) => (
                           <tr key={loggedSet.id} className="hover:bg-gray-50">
@@ -306,16 +321,36 @@ export default function WorkoutDetail({ workout, programId, isCompleted, exercis
       {/* Bottom Action Bar - Fixed at bottom for mobile */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-20">
         <div className="max-w-2xl mx-auto px-4 py-4">
-          {isCompleted ? (
+          {isWorkoutCompleted ? (
             <div className="space-y-2">
               <button
                 onClick={handleClearWorkout}
                 className="w-full py-4 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 active:bg-gray-300 transition-colors"
               >
-                Clear & Redo Workout
+                Reset
               </button>
               <p className="text-xs text-center text-gray-500">
                 This will delete your logged data for this workout
+              </p>
+            </div>
+          ) : isDraft ? (
+            <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => setIsLoggingModalOpen(true)}
+                  className="py-4 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-sm"
+                >
+                  Continue Logging
+                </button>
+                <button
+                  onClick={handleClearWorkout}
+                  className="py-4 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 active:bg-gray-300 transition-colors"
+                >
+                  Reset
+                </button>
+              </div>
+              <p className="text-xs text-center text-gray-500">
+                Reset will delete all logged data for this workout
               </p>
             </div>
           ) : (
