@@ -73,7 +73,8 @@ export default async function WorkoutDetailPage({
     notFound()
   }
 
-  const isCompleted = workout.completions.length > 0
+  // Only mark as completed if there's a completion with status 'completed' (not 'draft')
+  const isCompleted = workout.completions.length > 0 && workout.completions[0].status === 'completed'
 
   // NEW: Fetch exercise history for each exercise
   const exerciseHistory = await Promise.all(
