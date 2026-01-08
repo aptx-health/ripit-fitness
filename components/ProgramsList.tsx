@@ -19,7 +19,7 @@ type Props = {
 export default function ProgramsList({ programs }: Props) {
   const router = useRouter()
   const [activatingId, setActivatingId] = useState<string | null>(null)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [archivingId, setArchivingId] = useState<string | null>(null)
 
   const activeProgram = programs.find((p) => p.isActive)
 
@@ -44,28 +44,28 @@ export default function ProgramsList({ programs }: Props) {
     }
   }
 
-  const handleDelete = async (programId: string, programName: string) => {
-    if (!confirm(`Are you sure you want to delete "${programName}"? This cannot be undone.`)) {
+  const handleArchive = async (programId: string, programName: string) => {
+    if (!confirm(`Archive "${programName}"? The program will be hidden but your workout history will be preserved.`)) {
       return
     }
 
-    setDeletingId(programId)
+    setArchivingId(programId)
     try {
       const response = await fetch(`/api/programs/${programId}/delete`, {
         method: 'DELETE',
       })
 
       if (!response.ok) {
-        throw new Error('Failed to delete program')
+        throw new Error('Failed to archive program')
       }
 
       // Refresh the page to show updated state
       router.refresh()
     } catch (error) {
-      console.error('Error deleting program:', error)
-      alert('Failed to delete program. Please try again.')
+      console.error('Error archiving program:', error)
+      alert('Failed to archive program. Please try again.')
     } finally {
-      setDeletingId(null)
+      setArchivingId(null)
     }
   }
 
@@ -85,12 +85,12 @@ export default function ProgramsList({ programs }: Props) {
               )}
             </div>
             <button
-              onClick={() => handleDelete(activeProgram.id, activeProgram.name)}
-              disabled={deletingId === activeProgram.id}
-              className="text-red-600 hover:text-red-700 font-medium disabled:opacity-50"
-              title="Delete program"
+              onClick={() => handleArchive(activeProgram.id, activeProgram.name)}
+              disabled={archivingId === activeProgram.id}
+              className="text-gray-600 hover:text-gray-700 font-medium disabled:opacity-50"
+              title="Archive program"
             >
-              {deletingId === activeProgram.id ? 'Deleting...' : 'Delete'}
+              {archivingId === activeProgram.id ? 'Archiving...' : 'Archive'}
             </button>
           </div>
           <div className="flex gap-3 mt-4">
@@ -126,12 +126,12 @@ export default function ProgramsList({ programs }: Props) {
                 )}
               </div>
               <button
-                onClick={() => handleDelete(program.id, program.name)}
-                disabled={deletingId === program.id}
-                className="text-red-600 hover:text-red-700 font-medium disabled:opacity-50"
-                title="Delete program"
+                onClick={() => handleArchive(program.id, program.name)}
+                disabled={archivingId === program.id}
+                className="text-gray-600 hover:text-gray-700 font-medium disabled:opacity-50"
+                title="Archive program"
               >
-                {deletingId === program.id ? 'Deleting...' : 'Delete'}
+                {archivingId === program.id ? 'Archiving...' : 'Archive'}
               </button>
             </div>
             <div className="mt-4 space-x-2">

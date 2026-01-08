@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
 
-export async function DELETE(
+export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ programId: string }> }
 ) {
@@ -33,23 +33,21 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
-    // Archive program instead of deleting (preserves historical workout data)
-    // If program was active, deactivate it
-    const archivedProgram = await prisma.program.update({
+    // Unarchive program (set isArchived = false, archivedAt = null)
+    const unarchivedProgram = await prisma.program.update({
       where: { id: programId },
       data: {
-        isArchived: true,
-        archivedAt: new Date(),
-        isActive: false, // Deactivate when archiving
+        isArchived: false,
+        archivedAt: null,
       },
     })
 
     return NextResponse.json({
       success: true,
-      program: archivedProgram,
+      program: unarchivedProgram,
     })
   } catch (error) {
-    console.error('Error deleting program:', error)
+    console.error('Error unarchiving program:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

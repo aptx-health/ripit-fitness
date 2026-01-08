@@ -77,23 +77,49 @@ export async function POST(
       )
     }
 
-    // Create completion and logged sets in a transaction
+    // Create or update completion and logged sets in a transaction
     const completion = await prisma.$transaction(async (tx) => {
-      // Create workout completion
-      const newCompletion = await tx.workoutCompletion.create({
-        data: {
+      // Check for existing draft completion
+      const existingDraft = await tx.workoutCompletion.findFirst({
+        where: {
           workoutId,
           userId: user.id,
-          status: 'completed',
-          completedAt: new Date(),
+          status: 'draft',
         },
       })
+
+      // Create or update workout completion
+      const completionRecord = existingDraft
+        ? await tx.workoutCompletion.update({
+            where: { id: existingDraft.id },
+            data: {
+              status: 'completed',
+              completedAt: new Date(),
+            },
+          })
+        : await tx.workoutCompletion.create({
+            data: {
+              workoutId,
+              userId: user.id,
+              status: 'completed',
+              completedAt: new Date(),
+            },
+          })
+
+      // Delete existing logged sets (if updating from draft)
+      if (existingDraft) {
+        await tx.loggedSet.deleteMany({
+          where: {
+            completionId: completionRecord.id,
+          },
+        })
+      }
 
       // Create all logged sets
       await tx.loggedSet.createMany({
         data: loggedSets.map((set) => ({
           exerciseId: set.exerciseId,
-          completionId: newCompletion.id,
+          completionId: completionRecord.id,
           setNumber: set.setNumber,
           reps: set.reps,
           weight: set.weight,
@@ -103,7 +129,7 @@ export async function POST(
         })),
       })
 
-      return newCompletion
+      return completionRecord
     })
 
     return NextResponse.json({

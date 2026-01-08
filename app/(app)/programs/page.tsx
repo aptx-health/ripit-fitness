@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
 import { CsvUploader } from '@/components/features/CsvUploader'
 import ProgramsList from '@/components/ProgramsList'
+import ArchivedProgramsList from '@/components/ArchivedProgramsList'
 
 export default async function ProgramsPage() {
   const supabase = await createClient()
@@ -13,10 +14,22 @@ export default async function ProgramsPage() {
     redirect('/login')
   }
 
-  // Fetch user's programs
+  // Fetch user's active programs
   const programs = await prisma.program.findMany({
-    where: { userId: user.id },
+    where: {
+      userId: user.id,
+      isArchived: false,
+    },
     orderBy: { createdAt: 'desc' },
+  })
+
+  // Fetch user's archived programs
+  const archivedPrograms = await prisma.program.findMany({
+    where: {
+      userId: user.id,
+      isArchived: true,
+    },
+    orderBy: { archivedAt: 'desc' },
   })
 
   return (
@@ -63,7 +76,14 @@ export default async function ProgramsPage() {
             </div>
           </div>
         ) : (
-          <ProgramsList programs={programs} />
+          <>
+            <ProgramsList programs={programs} />
+            {archivedPrograms.length > 0 && (
+              <div className="mt-6">
+                <ArchivedProgramsList programs={archivedPrograms} />
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

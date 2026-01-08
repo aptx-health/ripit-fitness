@@ -91,10 +91,11 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const userCreatedOnly = searchParams.get('userCreated') === 'true'
 
-    // Fetch user's programs
+    // Fetch user's programs (exclude archived)
     const programs = await prisma.program.findMany({
       where: {
         userId: user.id,
+        isArchived: false,
         ...(userCreatedOnly && { isUserCreated: true })
       },
       include: {

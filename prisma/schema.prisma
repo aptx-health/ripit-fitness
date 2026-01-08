@@ -15,21 +15,24 @@ datasource db {
 // We just reference it with the userId String
 
 model Program {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String
   description   String?
-  userId        String   // References auth.users in Supabase
-  isActive      Boolean  @default(false) // Only one active strength program per user
-  programType   String   @default("strength") // "strength", "hypertrophy", "powerlifting"
-  isUserCreated Boolean  @default(false) // true for in-app created, false for CSV imported
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  userId        String    // References auth.users in Supabase
+  isActive      Boolean   @default(false) // Only one active strength program per user
+  isArchived    Boolean   @default(false) // Archived programs are hidden but preserved
+  archivedAt    DateTime? // When the program was archived
+  programType   String    @default("strength") // "strength", "hypertrophy", "powerlifting"
+  isUserCreated Boolean   @default(false) // true for in-app created, false for CSV imported
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   weeks Week[]
 
   @@index([userId, isActive])
   @@index([userId])
   @@index([userId, isUserCreated])
+  @@index([userId, isArchived])
 }
 
 model Week {
