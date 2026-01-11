@@ -29,7 +29,7 @@ export default function SyncDetailsModal({
   const timeSinceSync = getTimeSinceLastSync()
 
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-30 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 backdrop-blur-md bg-black/40 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg max-w-md w-full p-4 shadow-lg">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-semibold text-gray-900">Sync Status</h3>

@@ -306,7 +306,7 @@ export default function ExerciseLoggingModal({
   // Don't render until storage is loaded to prevent flash of empty state
   if (!isLoaded) {
     return isOpen ? (
-      <div className="fixed inset-0 z-50 bg-gray-900 bg-opacity-50 flex items-center justify-center">
+      <div className="fixed inset-0 z-50 backdrop-blur-md bg-black/40 flex items-center justify-center">
         <div className="bg-white rounded-lg p-8">
           <div className="animate-pulse text-center">Loading workout...</div>
         </div>
@@ -327,7 +327,7 @@ export default function ExerciseLoggingModal({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 bg-gray-900 bg-opacity-50 flex items-end sm:items-center justify-center">
+    <div className="fixed inset-0 z-50 backdrop-blur-md bg-black/40 flex items-end sm:items-center justify-center">
       {/* Sync Status Icon */}
       <SyncStatusIcon
         status={syncState.status}
@@ -646,30 +646,44 @@ export default function ExerciseLoggingModal({
  
             {/* Workout completion confirmation modal */}
             {isConfirming && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60">
-                <div className="bg-white p-6 rounded-lg text-center">
-                  <p>Complete this workout?</p>
-                  <div className="mt-4 flex justify-center space-x-3">
-                    <button
-                      onClick={() => setIsConfirming(false)}
-                      className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleCompleteWorkout}
-                      className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                    >
-                      Confirm
-                    </button>
-                  </div>
+              <div className="fixed inset-0 backdrop-blur-md bg-black/40 flex items-center justify-center z-60">
+                <div className="bg-white p-6 rounded-lg text-center min-w-[300px]">
+                  {!isSubmitting ? (
+                    <>
+                      <p className="text-lg mb-4">Complete this workout?</p>
+                      <div className="flex justify-center space-x-3">
+                        <button
+                          onClick={() => setIsConfirming(false)}
+                          className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={handleCompleteWorkout}
+                          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                        >
+                          Confirm
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="mb-3">
+                        <svg className="animate-spin h-8 w-8 mx-auto text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      </div>
+                      <p className="text-gray-700">Completing workout...</p>
+                    </>
+                  )}
                 </div>
               </div>
             )}
 
             {/* Deletion confirmation modal */}
             {showDeleteConfirm.show && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60">
+              <div className="fixed inset-0 backdrop-blur-md bg-black/40 flex items-center justify-center z-60">
                 <div className="bg-white p-6 rounded-lg text-center max-w-sm">
                   <div className="text-amber-600 mb-4">
                     <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
