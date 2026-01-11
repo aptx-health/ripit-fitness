@@ -24,6 +24,30 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+                const updateDarkMode = (e) => {
+                  if (e.matches) {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                };
+
+                // Set initial state
+                updateDarkMode(darkModeMediaQuery);
+
+                // Listen for changes
+                darkModeMediaQuery.addEventListener('change', updateDarkMode);
+              })();
+            `,
+          }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
