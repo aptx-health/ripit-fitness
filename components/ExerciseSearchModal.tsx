@@ -310,16 +310,16 @@ export default function ExerciseSearchModal({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 backdrop-blur-md bg-black/40 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg w-full max-w-4xl max-h-[80vh] flex flex-col">
+    <div className="fixed inset-0 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-900 rounded-lg w-full max-w-4xl max-h-[80vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-semibold">
+        <div className="flex items-center justify-between p-6 border-b dark:border-gray-700">
+          <h2 className="text-xl font-semibold dark:text-gray-100">
             {editingExercise ? 'Edit Exercise' : selectedExercise ? 'Configure Exercise' : 'Add Exercise'}
           </h2>
           <button
             onClick={handleClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
           >
             <X size={24} />
           </button>
@@ -329,24 +329,24 @@ export default function ExerciseSearchModal({
           /* Exercise Configuration Form */
           <div className="h-[calc(100vh-200px)] overflow-y-auto">
             {/* Exercise Details */}
-            <div className="p-6 border-b bg-gray-50">
+            <div className="p-6 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
               <div className="flex items-start gap-4">
                 {!editingExercise && (
                   <button
                     onClick={handleBackToSearch}
-                    className="text-blue-600 hover:text-blue-700 text-sm flex items-center gap-1"
+                    className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm flex items-center gap-1"
                   >
                     ← Back to search
                   </button>
                 )}
               </div>
               <div className="mt-3">
-                <h3 className="font-medium text-gray-900 text-lg">
+                <h3 className="font-medium text-gray-900 dark:text-gray-100 text-lg">
                   {editingExercise ? editingExercise.exerciseDefinition.name : selectedExercise?.name}
                 </h3>
                 {((editingExercise?.exerciseDefinition.primaryFAUs || selectedExercise?.primaryFAUs)?.length ?? 0) > 0 && (
                   <div className="mt-2">
-                    <span className="text-sm text-gray-600">Primary: </span>
+                    <span className="text-sm text-gray-600 dark:text-gray-300">Primary: </span>
                     {(editingExercise?.exerciseDefinition.primaryFAUs || selectedExercise?.primaryFAUs)
                       ?.map(fau => FAU_DISPLAY_NAMES[fau] || fau).join(', ')}
                   </div>
@@ -360,7 +360,7 @@ export default function ExerciseSearchModal({
                 <div className="grid grid-cols-2 gap-6">
                   {/* Set Count */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                       Number of Sets
                     </label>
                     <input
@@ -369,19 +369,19 @@ export default function ExerciseSearchModal({
                       max="20"
                       value={setCount}
                       onChange={(e) => handleSetCountChange(parseInt(e.target.value) || 1)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
                     />
                   </div>
 
                   {/* Exercise-level Intensity Type */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                       Intensity Type (All Sets)
                     </label>
                     <select
                       value={exerciseIntensityType}
                       onChange={(e) => setExerciseIntensityType(e.target.value as 'RIR' | 'RPE' | 'NONE')}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
                     >
                       <option value="NONE">None</option>
                       <option value="RIR">RIR (Reps in Reserve)</option>
@@ -392,31 +392,31 @@ export default function ExerciseSearchModal({
 
                 {/* Individual Set Configuration */}
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">Set Configuration</h4>
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-3">Set Configuration</h4>
                   <div className="space-y-3">
                     {sets.map((set, index) => (
-                      <div key={set.setNumber} className="border border-gray-200 rounded-lg p-4">
+                      <div key={set.setNumber} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                         <div className="flex items-center gap-4">
                           <div className="flex-shrink-0 w-12">
-                            <span className="text-sm font-medium text-gray-600">Set {set.setNumber}</span>
+                            <span className="text-sm font-medium text-gray-600 dark:text-gray-300">Set {set.setNumber}</span>
                           </div>
-                          
+
                           {/* Reps */}
                           <div className="flex-1">
-                            <label className="block text-xs text-gray-500 mb-1">Reps</label>
+                            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Reps</label>
                             <input
                               type="text"
                               value={set.reps}
                               onChange={(e) => handleSetUpdate(index, 'reps', e.target.value)}
                               placeholder="8-12"
-                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
                             />
                           </div>
 
                           {/* Intensity Value */}
                           {exerciseIntensityType !== 'NONE' && (
                             <div className="flex-1">
-                              <label className="block text-xs text-gray-500 mb-1">
+                              <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                                 {exerciseIntensityType} Value
                               </label>
                               <input
@@ -427,7 +427,7 @@ export default function ExerciseSearchModal({
                                 value={set.intensityValue || ''}
                                 onChange={(e) => handleSetUpdate(index, 'intensityValue', e.target.value ? parseFloat(e.target.value) : undefined)}
                                 placeholder={exerciseIntensityType === 'RIR' ? '0-5' : '1-10'}
-                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
                               />
                             </div>
                           )}
@@ -435,8 +435,8 @@ export default function ExerciseSearchModal({
                       </div>
                     ))}
                   </div>
-                  
-                  <div className="mt-3 text-xs text-gray-500">
+
+                  <div className="mt-3 text-xs text-gray-500 dark:text-gray-400">
                     <p><strong>RIR:</strong> Reps in Reserve (0 = failure, 3 = could do 3 more reps)</p>
                     <p><strong>RPE:</strong> Rate of Perceived Exertion (1-10 scale, half values allowed)</p>
                   </div>
@@ -444,7 +444,7 @@ export default function ExerciseSearchModal({
 
                 {/* Exercise Notes */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                     Exercise Notes (Optional)
                   </label>
                   <textarea
@@ -452,18 +452,18 @@ export default function ExerciseSearchModal({
                     onChange={(e) => setExerciseNotes(e.target.value)}
                     placeholder="Add any notes for this exercise (e.g., form cues, modifications, etc.)"
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm dark:bg-gray-800 dark:text-gray-100"
                   />
                 </div>
               </div>
             </div>
 
             {/* Actions */}
-            <div className="p-6 border-t bg-gray-50">
+            <div className="p-6 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
               <div className="flex gap-3 justify-end">
                 <button
                   onClick={handleClose}
-                  className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-4 py-2 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600"
                 >
                   Cancel
                 </button>
@@ -480,7 +480,7 @@ export default function ExerciseSearchModal({
           /* Exercise Search Interface */
           <>
             {/* Search */}
-            <div className="p-6 border-b">
+            <div className="p-6 border-b dark:border-gray-700">
               <div className="relative mb-4">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                 <input
@@ -488,13 +488,13 @@ export default function ExerciseSearchModal({
                   placeholder="Search exercises..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
                 />
               </div>
 
               {/* FAU Filters */}
               <div>
-                <div className="text-sm font-medium text-gray-700 mb-2">Filter by Muscle Group:</div>
+                <div className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Filter by Muscle Group:</div>
                 <div className="flex flex-wrap gap-2">
                   {ALL_FAUS.map((fau) => (
                     <button
@@ -503,7 +503,7 @@ export default function ExerciseSearchModal({
                       className={`px-3 py-1 text-xs rounded-full border transition-colors ${
                         selectedFAUs.includes(fau)
                           ? 'bg-blue-600 text-white border-blue-600'
-                          : 'bg-white text-gray-700 border-gray-300 hover:border-blue-300'
+                          : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-600'
                       }`}
                     >
                       {FAU_DISPLAY_NAMES[fau] || fau}
@@ -516,19 +516,19 @@ export default function ExerciseSearchModal({
             {/* Results */}
             <div className="flex-1 overflow-auto p-6">
               {error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-                  <div className="text-red-800">{error}</div>
+                <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4">
+                  <div className="text-red-800 dark:text-red-400">{error}</div>
                 </div>
               )}
 
               {isLoading ? (
                 <div className="text-center py-8">
-                  <div className="text-gray-600">Searching exercises...</div>
+                  <div className="text-gray-600 dark:text-gray-300">Searching exercises...</div>
                 </div>
               ) : exercises.length === 0 ? (
                 <div className="text-center py-8">
-                  <div className="text-gray-600">
-                    {searchQuery || selectedFAUs.length > 0 
+                  <div className="text-gray-600 dark:text-gray-300">
+                    {searchQuery || selectedFAUs.length > 0
                       ? 'No exercises found matching your search'
                       : 'No exercises available'
                     }
@@ -539,40 +539,40 @@ export default function ExerciseSearchModal({
                   {exercises.map((exercise) => (
                     <div
                       key={exercise.id}
-                      className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors"
+                      className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-blue-300 dark:hover:border-blue-600 transition-colors"
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <h3 className="font-medium text-gray-900 mb-2">{exercise.name}</h3>
-                          
+                          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2">{exercise.name}</h3>
+
                           {exercise.primaryFAUs.length > 0 && (
                             <div className="mb-2">
-                              <span className="text-sm text-gray-600">Primary: </span>
+                              <span className="text-sm text-gray-600 dark:text-gray-300">Primary: </span>
                               {exercise.primaryFAUs.map(fau => FAU_DISPLAY_NAMES[fau] || fau).join(', ')}
                             </div>
                           )}
-                          
+
                           {exercise.secondaryFAUs.length > 0 && (
                             <div className="mb-2">
-                              <span className="text-sm text-gray-600">Secondary: </span>
+                              <span className="text-sm text-gray-600 dark:text-gray-300">Secondary: </span>
                               {exercise.secondaryFAUs.map(fau => FAU_DISPLAY_NAMES[fau] || fau).join(', ')}
                             </div>
                           )}
 
                           {exercise.equipment.length > 0 && (
                             <div className="mb-2">
-                              <span className="text-sm text-gray-600">Equipment: </span>
+                              <span className="text-sm text-gray-600 dark:text-gray-300">Equipment: </span>
                               {exercise.equipment.join(', ')}
                             </div>
                           )}
 
                           {exercise.instructions && (
-                            <div className="text-sm text-gray-600 mt-2">
+                            <div className="text-sm text-gray-600 dark:text-gray-300 mt-2">
                               {exercise.instructions}
                             </div>
                           )}
                         </div>
-                        
+
                         <button
                           onClick={() => handleExerciseSelect(exercise)}
                           className="ml-4 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center gap-1"

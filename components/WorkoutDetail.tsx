@@ -143,22 +143,22 @@ export default function WorkoutDetail({ workout, programId, exerciseHistory }: P
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24">
       {/* Header - Fixed at top */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 py-4">
           <Link
             href={`/programs/${programId}/weeks/${workout.week.weekNumber}`}
-            className="text-blue-600 hover:text-blue-700 font-medium inline-block mb-2"
+            className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium inline-block mb-2"
           >
             ← Week {workout.week.weekNumber}
           </Link>
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-sm text-gray-500 font-medium">
+              <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
                 Day {workout.dayNumber}
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">{workout.name}</h1>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{workout.name}</h1>
             </div>
             {isWorkoutCompleted && (
               <div className="flex items-center justify-center w-10 h-10 rounded-full bg-green-500">
@@ -182,12 +182,12 @@ export default function WorkoutDetail({ workout, programId, exerciseHistory }: P
             )}
           </div>
           {isWorkoutCompleted && completion && (
-            <p className="text-sm text-green-700 mt-1">
+            <p className="text-sm text-green-700 dark:text-green-400 mt-1">
               Completed on {new Date(completion.completedAt).toLocaleDateString()}
             </p>
           )}
           {isDraft && completion && (
-            <p className="text-sm text-amber-700 mt-1">
+            <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
               In progress - {completion.loggedSets.length} set{completion.loggedSets.length !== 1 ? 's' : ''} logged
             </p>
           )}
@@ -206,25 +206,25 @@ export default function WorkoutDetail({ workout, programId, exerciseHistory }: P
             return (
               <div
                 key={exercise.id}
-                className="bg-white rounded-lg border border-gray-200 overflow-hidden"
+                className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
               >
                 {/* Exercise Header */}
-                <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                <div className="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
                   <div className="flex items-center gap-2">
                     <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold">
                       {index + 1}
                     </span>
                     {exercise.exerciseGroup && (
-                      <span className="px-2 py-0.5 bg-purple-100 text-purple-800 text-xs font-bold rounded">
+                      <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs font-bold rounded">
                         {exercise.exerciseGroup}
                       </span>
                     )}
-                    <h3 className="text-lg font-semibold text-gray-900">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                       {exercise.name}
                     </h3>
                   </div>
                   {exercise.notes && (
-                    <p className="text-sm text-gray-600 mt-1 ml-8">
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 ml-8">
                       {exercise.notes}
                     </p>
                   )}
@@ -233,53 +233,53 @@ export default function WorkoutDetail({ workout, programId, exerciseHistory }: P
                 {/* Sets Table */}
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
-                    <thead className="bg-gray-50 border-b border-gray-200">
+                    <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                       <tr>
-                        <th className="px-4 py-2 text-left font-semibold text-gray-700">
+                        <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">
                           Set
                         </th>
-                        <th className="px-4 py-2 text-left font-semibold text-gray-700">
+                        <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">
                           Reps
                         </th>
-                        <th className="px-4 py-2 text-left font-semibold text-gray-700">
+                        <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">
                           Weight
                         </th>
                         {(exercise.prescribedSets.some((s) => s.rir !== null) ||
                           exerciseLoggedSets.some((s) => s.rir !== null)) && (
-                          <th className="px-4 py-2 text-left font-semibold text-gray-700">
+                          <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">
                             RIR
                           </th>
                         )}
                         {(exercise.prescribedSets.some((s) => s.rpe !== null) ||
                           exerciseLoggedSets.some((s) => s.rpe !== null)) && (
-                          <th className="px-4 py-2 text-left font-semibold text-gray-700">
+                          <th className="px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">
                             RPE
                           </th>
                         )}
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200">
+                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                       {(isWorkoutCompleted || isDraft) ? (
                         // Show logged sets
                         exerciseLoggedSets.map((loggedSet) => (
-                          <tr key={loggedSet.id} className="hover:bg-gray-50">
-                            <td className="px-4 py-3 font-medium text-gray-900">
+                          <tr key={loggedSet.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">
                               {loggedSet.setNumber}
                             </td>
-                            <td className="px-4 py-3 text-gray-900">
+                            <td className="px-4 py-3 text-gray-900 dark:text-gray-100">
                               {loggedSet.reps}
                             </td>
-                            <td className="px-4 py-3 text-gray-900">
+                            <td className="px-4 py-3 text-gray-900 dark:text-gray-100">
                               {loggedSet.weight}
                               {loggedSet.weightUnit}
                             </td>
                             {exerciseLoggedSets.some((s) => s.rir !== null) && (
-                              <td className="px-4 py-3 text-gray-900">
+                              <td className="px-4 py-3 text-gray-900 dark:text-gray-100">
                                 {loggedSet.rir ?? '-'}
                               </td>
                             )}
                             {exerciseLoggedSets.some((s) => s.rpe !== null) && (
-                              <td className="px-4 py-3 text-gray-900">
+                              <td className="px-4 py-3 text-gray-900 dark:text-gray-100">
                                 {loggedSet.rpe ?? '-'}
                               </td>
                             )}
@@ -288,21 +288,21 @@ export default function WorkoutDetail({ workout, programId, exerciseHistory }: P
                       ) : (
                         // Show prescribed sets
                         exercise.prescribedSets.map((set) => (
-                          <tr key={set.id} className="hover:bg-gray-50">
-                            <td className="px-4 py-3 font-medium text-gray-700">
+                          <tr key={set.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <td className="px-4 py-3 font-medium text-gray-700 dark:text-gray-200">
                               {set.setNumber}
                             </td>
-                            <td className="px-4 py-3 text-gray-700">{set.reps}</td>
-                            <td className="px-4 py-3 text-gray-700">
+                            <td className="px-4 py-3 text-gray-700 dark:text-gray-200">{set.reps}</td>
+                            <td className="px-4 py-3 text-gray-700 dark:text-gray-200">
                               {set.weight || '-'}
                             </td>
                             {exercise.prescribedSets.some((s) => s.rir !== null) && (
-                              <td className="px-4 py-3 text-gray-700">
+                              <td className="px-4 py-3 text-gray-700 dark:text-gray-200">
                                 {set.rir ?? '-'}
                               </td>
                             )}
                             {exercise.prescribedSets.some((s) => s.rpe !== null) && (
-                              <td className="px-4 py-3 text-gray-700">
+                              <td className="px-4 py-3 text-gray-700 dark:text-gray-200">
                                 {set.rpe ?? '-'}
                               </td>
                             )}
@@ -319,17 +319,17 @@ export default function WorkoutDetail({ workout, programId, exerciseHistory }: P
       </div>
 
       {/* Bottom Action Bar - Fixed at bottom for mobile */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-20">
+      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg z-20">
         <div className="max-w-2xl mx-auto px-4 py-4">
           {isWorkoutCompleted ? (
             <div className="space-y-2">
               <button
                 onClick={handleClearWorkout}
-                className="w-full py-4 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 active:bg-gray-300 transition-colors"
+                className="w-full py-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 active:bg-gray-300 dark:active:bg-gray-500 transition-colors"
               >
                 Reset
               </button>
-              <p className="text-xs text-center text-gray-500">
+              <p className="text-xs text-center text-gray-500 dark:text-gray-400">
                 This will delete your logged data for this workout
               </p>
             </div>
@@ -344,12 +344,12 @@ export default function WorkoutDetail({ workout, programId, exerciseHistory }: P
                 </button>
                 <button
                   onClick={handleClearWorkout}
-                  className="py-4 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 active:bg-gray-300 transition-colors"
+                  className="py-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 active:bg-gray-300 dark:active:bg-gray-500 transition-colors"
                 >
                   Reset
                 </button>
               </div>
-              <p className="text-xs text-center text-gray-500">
+              <p className="text-xs text-center text-gray-500 dark:text-gray-400">
                 Reset will delete all logged data for this workout
               </p>
             </div>
