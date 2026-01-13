@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
+import Image from 'next/image'
 
 export default async function AppLayout({
   children,
@@ -19,7 +21,16 @@ export default async function AppLayout({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <span className="text-xl font-bold dark:text-gray-100">FitCSV</span>
+              <Link href="/programs" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                <Image
+                  src="/icon-192.png"
+                  alt="Ripit"
+                  width={32}
+                  height={32}
+                  className="rounded"
+                />
+                <span className="text-xl font-bold dark:text-gray-100">Ripit</span>
+              </Link>
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-600 dark:text-gray-300">{user.email}</span>

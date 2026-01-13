@@ -13,13 +13,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FitCSV - Strength Training Tracker",
-  description: "Track your strength training workouts with CSV import support",
+  title: "Ripit - Strength Training Tracker",
+  description: "Track your strength training workouts",
   manifest: "/site.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "FitCSV",
+    title: "Ripit",
   },
   icons: {
     icon: [

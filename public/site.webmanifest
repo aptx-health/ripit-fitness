@@ -1,7 +1,7 @@
 {
-  "name": "FitCSV",
-  "short_name": "FitCSV",
-  "description": "Strength training tracker with CSV import",
+  "name": "Ripit",
+  "short_name": "Ripit",
+  "description": "Strength training tracker",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
