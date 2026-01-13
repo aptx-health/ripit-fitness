@@ -48,60 +48,158 @@ LoggedCardioSession (standalone, optionally references PrescribedCardioSession)
 
 ---
 
-## Proposed Schema (Draft)
+## Equipment and Intensity Zone Definitions
+
+### Equipment Enum (Exhaustive List)
+```typescript
+type CardioEquipment =
+  // Bikes
+  | "stationary_bike"
+  | "spin_bike"
+  | "air_bike"      // Assault Bike, Rogue Echo
+  | "recumbent_bike"
+
+  // Running/Walking
+  | "treadmill"
+  | "outdoor_run"
+  | "track_run"
+  | "trail_run"
+
+  // Rowing/Skiing
+  | "rower"         // Concept2, etc.
+  | "ski_erg"
+
+  // Elliptical/Steppers
+  | "elliptical"
+  | "stairmaster"
+  | "stair_climber"
+  | "stepper"
+
+  // Swimming
+  | "pool_swim"
+  | "open_water_swim"
+
+  // Other
+  | "jump_rope"
+  | "battle_ropes"
+  | "sled_push"
+  | "sled_pull"
+  | "mountain_bike"
+  | "road_bike"
+  | "other"
+```
+
+### Intensity Zone Enum (Standard HR Zones)
+```typescript
+type IntensityZone =
+  | "zone1"      // Recovery: 50-60% max HR
+  | "zone2"      // Endurance: 60-70% max HR
+  | "zone3"      // Tempo: 70-80% max HR
+  | "zone4"      // Threshold: 80-90% max HR
+  | "zone5"      // VO2 Max: 90-100% max HR
+  | "hiit"       // High-Intensity Interval Training
+  | "sprint"     // All-out effort
+```
+
+---
+
+## Finalized Schema
+
+### CardioProgram
+```prisma
+model CardioProgram {
+  id            String    @id @default(cuid())
+  name          String
+  description   String?
+  userId        String    // References auth.users in Supabase
+  isActive      Boolean   @default(false)  // Only one active cardio program per user
+  isArchived    Boolean   @default(false)
+  archivedAt    DateTime?
+  isUserCreated Boolean   @default(false)  // true for in-app, false for CSV imported
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  weeks CardioWeek[]
+
+  @@index([userId, isActive])
+  @@index([userId, isArchived])
+}
+```
+
+### CardioWeek
+```prisma
+model CardioWeek {
+  id              String        @id @default(cuid())
+  weekNumber      Int           // 1, 2, 3...
+  cardioProgramId String
+  cardioProgram   CardioProgram @relation(fields: [cardioProgramId], references: [id], onDelete: Cascade)
+
+  sessions PrescribedCardioSession[]
+
+  @@unique([cardioProgramId, weekNumber])
+  @@index([cardioProgramId])
+}
+```
 
 ### PrescribedCardioSession
-```typescript
-PrescribedCardioSession {
-  id: string
-  weekId: FK  // Links to Week table
-  dayNumber: number  // 1, 2, 3... (position in week)
-  name: string  // "Zone 2 Endurance", "HIIT Intervals"
-  description?: string  // Freeform notes
+```prisma
+model PrescribedCardioSession {
+  id          String     @id @default(cuid())
+  weekId      String
+  week        CardioWeek @relation(fields: [weekId], references: [id], onDelete: Cascade)
+  dayNumber   Int        // Position within week (1, 2, 3...)
+  name        String     // "Zone 2 Endurance", "HIIT Intervals"
+  description String?    // Freeform notes
 
   // Prescription details
-  targetDuration: number  // minutes
-  intensityZone?: string  // "zone2", "zone3", "threshold", "HIIT"
-  equipment?: string  // "bike", "run", "elliptical", "airbike"
+  targetDuration     Int     // minutes
+  intensityZone      String? // "zone1", "zone2", "zone3", "zone4", "zone5", "hiit", "sprint"
+  equipment          String? // CardioEquipment enum (see above)
+  targetHRRange      String? // "140-150" (flexible text)
+  targetPowerRange   String? // "150-180W" (flexible text)
+  intervalStructure  String? // "8x30s/90s" for HIIT
+  notes              String? // "If weather bad, use elliptical"
 
-  // Optional guidance
-  targetHRRange?: string  // "140-150" (text, flexible)
-  targetPowerRange?: string  // "150-180W"
-  intervalStructure?: string  // "8x30s/90s" for HIIT
-  notes?: string  // "If weather bad, use elliptical"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  createdAt: DateTime
-  updatedAt: DateTime
+  loggedSessions LoggedCardioSession[]
+
+  @@unique([weekId, dayNumber])
+  @@index([weekId])
 }
 ```
 
 ### LoggedCardioSession
-```typescript
-LoggedCardioSession {
-  id: string
-  prescribedSessionId?: FK  // Optional link to plan
-  userId: string  // References auth.users
-  completedAt: DateTime
+```prisma
+model LoggedCardioSession {
+  id                  String                   @id @default(cuid())
+  prescribedSessionId String?                  // Optional link to prescribed session
+  prescribedSession   PrescribedCardioSession? @relation(fields: [prescribedSessionId], references: [id])
+  userId              String                   // References auth.users in Supabase
+  completedAt         DateTime                 @default(now())
+  status              String                   @default("completed") // "completed", "incomplete", "abandoned"
 
   // What you actually did
-  name: string  // Copy from prescribed or user enters
-  equipment: string  // What you actually used
-  duration: number  // Actual minutes
+  name      String  // Copy from prescribed or user enters
+  equipment String  // CardioEquipment enum
+  duration  Int     // Actual minutes
 
   // Metrics (all optional)
-  avgHR?: number
-  peakHR?: number
-  avgPower?: number
-  peakPower?: number
-  calories?: number
-  distance?: number  // For runs/bikes
+  avgHR     Int?    // Average heart rate
+  peakHR    Int?    // Peak heart rate
+  avgPower  Int?    // Average power (watts)
+  peakPower Int?    // Peak power (watts)
+  calories  Int?    // Total calories
+  distance  Float?  // Distance (miles or km)
 
   // Context
-  intensityZone?: string  // What zone you aimed for
-  intervalStructure?: string  // What you did for HIIT
-  notes?: string  // Freeform
+  intensityZone     String? // What zone you aimed for
+  intervalStructure String? // What you did for HIIT (e.g., "8x30s/90s")
+  notes             String? // Freeform
 
-  createdAt: DateTime
+  @@index([prescribedSessionId])
+  @@index([userId, completedAt])
 }
 ```
 
@@ -151,21 +249,29 @@ Program (isActive: one per user)
         └── Exercise
             ├── PrescribedSet (template)
             └── LoggedSet (actual performance)
+
+WorkoutCompletion (tracks completion, has status)
+├── References Workout
+└── Contains LoggedSet[]
 ```
 
 ### Cardio (Proposed)
 ```
-CardioProgram (isActive: TBD)
-└── Week
+CardioProgram (isActive: one per user)
+└── CardioWeek
     └── PrescribedCardioSession (template)
 
-LoggedCardioSession (standalone, optional reference to prescribed)
+LoggedCardioSession (serves as BOTH completion record AND logged data)
+├── Optional reference to PrescribedCardioSession
+└── Has status field ("completed", "incomplete", "abandoned")
 ```
 
 **Key Differences**:
-- No "Workout" container for cardio (session is atomic)
-- No set-level granularity (session is the unit)
-- More flexibility in logging (can log without program)
+1. **No "Workout" container**: Session is atomic (one session per day)
+2. **No granular sub-units**: No sets/intervals - session level only
+3. **Simpler completion model**: LoggedCardioSession serves as both completion and data (no separate completion table)
+4. **More flexible logging**: Can log without any program (prescribedSessionId is optional)
+5. **Parallel tables**: CardioProgram/CardioWeek separate from Program/Week
 
 ---
 
