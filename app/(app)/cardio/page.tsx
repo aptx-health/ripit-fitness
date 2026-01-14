@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import CardioHistoryList from '@/components/CardioHistoryList'
 import LogCardioButton from '@/components/LogCardioButton'
 
@@ -51,7 +52,15 @@ export default async function CardioPage() {
               Track your cardio sessions and monitor progress
             </p>
           </div>
-          <LogCardioButton />
+          <div className="flex gap-3">
+            <Link
+              href="/cardio/programs"
+              className="px-6 py-3 border border-primary text-primary hover:bg-primary-muted doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
+            >
+              PROGRAMS
+            </Link>
+            <LogCardioButton />
+          </div>
         </div>
 
         {/* Stats Summary */}
