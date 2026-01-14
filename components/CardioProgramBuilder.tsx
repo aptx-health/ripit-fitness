@@ -57,6 +57,9 @@ export default function CardioProgramBuilder({ editMode = false, existingProgram
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showActivationModal, setShowActivationModal] = useState(false)
+  const [newProgramId, setNewProgramId] = useState<string | null>(null)
+  const [existingActiveProgram, setExistingActiveProgram] = useState<{ id: string; name: string } | null>(null)
 
   // Program state
   const [programName, setProgramName] = useState(editMode && existingProgram ? existingProgram.name : '')
@@ -163,6 +166,39 @@ export default function CardioProgramBuilder({ editMode = false, existingProgram
     }))
   }
 
+  // Activate program
+  const handleActivateProgram = async () => {
+    if (!newProgramId) return
+
+    setIsLoading(true)
+    try {
+      const response = await fetch(`/api/cardio/programs/${newProgramId}/activate`, {
+        method: 'POST'
+      })
+
+      const data = await response.json()
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to activate program')
+      }
+
+      router.push('/cardio/programs')
+      router.refresh()
+    } catch (err) {
+      console.error('Error activating program:', err)
+      setError(err instanceof Error ? err.message : 'Failed to activate program')
+      setShowActivationModal(false)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Skip activation
+  const handleSkipActivation = () => {
+    setShowActivationModal(false)
+    router.push('/cardio/programs')
+    router.refresh()
+  }
+
   // Save program
   const handleSave = async () => {
     setError(null)
@@ -225,9 +261,26 @@ export default function CardioProgramBuilder({ editMode = false, existingProgram
         throw new Error(builderData.error || 'Failed to save program structure')
       }
 
-      // Redirect to programs page
-      router.push('/cardio/programs')
-      router.refresh()
+      // If this was a new program (not edit), show activation modal
+      if (!editMode) {
+        // Check for existing active program
+        const programsResponse = await fetch('/api/cardio/programs')
+        const programsData = await programsResponse.json()
+
+        if (programsData.success) {
+          const activeProgram = programsData.programs.find((p: any) => p.isActive && p.id !== currentProgramId)
+          if (activeProgram) {
+            setExistingActiveProgram({ id: activeProgram.id, name: activeProgram.name })
+          }
+        }
+
+        setNewProgramId(currentProgramId)
+        setShowActivationModal(true)
+      } else {
+        // Edit mode - just redirect
+        router.push('/cardio/programs')
+        router.refresh()
+      }
     } catch (err) {
       console.error('Error saving program:', err)
       setError(err instanceof Error ? err.message : 'Failed to save program')
@@ -371,6 +424,46 @@ export default function CardioProgramBuilder({ editMode = false, existingProgram
           {isLoading ? 'SAVING...' : 'SAVE PROGRAM'}
         </button>
       </div>
+
+      {/* Activation Modal */}
+      {showActivationModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-card border-2 border-primary p-6 max-w-md w-full doom-noise doom-card shadow-2xl">
+            <h3 className="text-2xl font-bold text-foreground doom-heading mb-4">
+              ACTIVATE PROGRAM?
+            </h3>
+
+            <p className="text-muted-foreground mb-4">
+              Would you like to make this your active cardio program?
+            </p>
+
+            {existingActiveProgram && (
+              <div className="bg-warning-muted border border-warning-border p-3 mb-4">
+                <p className="text-sm text-warning-text">
+                  <span className="font-semibold">Warning:</span> This will replace your current active program: <span className="font-bold">{existingActiveProgram.name}</span>
+                </p>
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleSkipActivation}
+                disabled={isLoading}
+                className="flex-1 px-4 py-3 border-2 border-border text-foreground hover:bg-muted disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
+              >
+                NO, KEEP INACTIVE
+              </button>
+              <button
+                onClick={handleActivateProgram}
+                disabled={isLoading}
+                className="flex-1 px-4 py-3 bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
+              >
+                {isLoading ? 'ACTIVATING...' : 'YES, ACTIVATE'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

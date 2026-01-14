@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import CardioHistoryList from '@/components/CardioHistoryList'
 import LogCardioButton from '@/components/LogCardioButton'
+import CardioCurrentWeek from '@/components/CardioCurrentWeek'
 
 export default async function CardioPage() {
   // Get authenticated user
@@ -39,6 +40,43 @@ export default async function CardioPage() {
     }
   })
 
+  // Fetch active cardio program with weeks and sessions
+  const activeProgram = await prisma.cardioProgram.findFirst({
+    where: {
+      userId: user.id,
+      isActive: true,
+      isArchived: false
+    },
+    include: {
+      weeks: {
+        orderBy: { weekNumber: 'asc' },
+        include: {
+          sessions: {
+            orderBy: { dayNumber: 'asc' },
+            include: {
+              loggedSessions: {
+                where: { userId: user.id, status: 'completed' },
+                orderBy: { completedAt: 'desc' },
+                take: 1
+              }
+            }
+          }
+        }
+      }
+    }
+  })
+
+  // Determine current week (first incomplete week)
+  let currentWeek = null
+  if (activeProgram && activeProgram.weeks.length > 0) {
+    currentWeek = activeProgram.weeks.find(week => {
+      const completedCount = week.sessions.filter(s =>
+        s.loggedSessions.length > 0 && s.loggedSessions[0].status === 'completed'
+      ).length
+      return completedCount < week.sessions.length
+    }) || activeProgram.weeks[activeProgram.weeks.length - 1] // Default to last week if all complete
+  }
+
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -62,6 +100,14 @@ export default async function CardioPage() {
             <LogCardioButton />
           </div>
         </div>
+
+        {/* Current Week from Active Program */}
+        {activeProgram && currentWeek && (
+          <CardioCurrentWeek
+            program={{ id: activeProgram.id, name: activeProgram.name }}
+            week={currentWeek}
+          />
+        )}
 
         {/* Stats Summary */}
         {stats._count > 0 && (
