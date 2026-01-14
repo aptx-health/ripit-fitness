@@ -147,3 +147,122 @@ model LoggedSet {
   @@index([exerciseId])
   @@index([completionId])
 }
+
+// ============================================
+// CARDIO TRAINING MODELS
+// See docs/CARDIO_DESIGN.md for design decisions
+// ============================================
+
+model CardioProgram {
+  id            String     @id @default(cuid())
+  name          String
+  description   String?
+  userId        String     // References auth.users in Supabase
+  isActive      Boolean    @default(false) // Only one active cardio program per user
+  isArchived    Boolean    @default(false) // Archived programs are hidden but preserved
+  archivedAt    DateTime?  // When the program was archived
+  isUserCreated Boolean    @default(false) // true for in-app created, false for CSV imported
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  weeks CardioWeek[]
+
+  @@index([userId, isActive])
+  @@index([userId, isArchived])
+}
+
+model CardioWeek {
+  id              String        @id @default(cuid())
+  weekNumber      Int           // 1, 2, 3...
+  cardioProgramId String
+  cardioProgram   CardioProgram @relation(fields: [cardioProgramId], references: [id], onDelete: Cascade)
+
+  sessions PrescribedCardioSession[]
+
+  @@unique([cardioProgramId, weekNumber])
+  @@index([cardioProgramId])
+}
+
+model PrescribedCardioSession {
+  id          String     @id @default(cuid())
+  weekId      String
+  week        CardioWeek @relation(fields: [weekId], references: [id], onDelete: Cascade)
+  dayNumber   Int        // Position within week (1, 2, 3...)
+  name        String     // "Zone 2 Endurance", "HIIT Intervals"
+  description String?    // Freeform notes
+
+  // Prescription details
+  targetDuration    Int     // minutes (required)
+  intensityZone     String? // "zone1", "zone2", "zone3", "zone4", "zone5", "hiit", "sprint"
+  equipment         String? // CardioEquipment enum (e.g., "rower", "outdoor_run")
+  targetHRRange     String? // "140-150" (flexible text)
+  targetPowerRange  String? // "150-180W" (flexible text)
+  intervalStructure String? // "8x30s/90s" for HIIT (freeform text)
+  notes             String? // "If weather bad, use elliptical"
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  loggedSessions LoggedCardioSession[]
+
+  @@unique([weekId, dayNumber])
+  @@index([weekId])
+}
+
+model LoggedCardioSession {
+  id                  String                   @id @default(cuid())
+  prescribedSessionId String?                  // Optional link to prescribed session
+  prescribedSession   PrescribedCardioSession? @relation(fields: [prescribedSessionId], references: [id])
+  userId              String                   // References auth.users in Supabase
+  completedAt         DateTime                 @default(now())
+  status              String                   @default("completed") // "completed", "incomplete", "abandoned"
+
+  // What you actually did
+  name     String // Copy from prescribed or user enters
+  equipment String // CardioEquipment enum (what actually used)
+  duration Int    // Actual minutes (required)
+
+  // Heart Rate Metrics
+  avgHR  Int? // Average heart rate (bpm)
+  peakHR Int? // Peak heart rate (bpm)
+
+  // Power Metrics
+  avgPower  Int? // Average power (watts)
+  peakPower Int? // Peak power (watts)
+
+  // Distance & Elevation
+  distance      Float? // Distance (miles or km - user preference)
+  elevationGain Int?   // Elevation gained (feet or meters)
+  elevationLoss Int?   // Elevation lost (feet or meters)
+
+  // Pace & Cadence
+  avgPace String? // Average pace: "8:30/mi" or "5:20/km" (text)
+  cadence Int?    // Cadence: RPM (cycling) or steps/min (running)
+
+  // Rowing/Swimming Specific
+  strokeRate  Int? // Strokes per minute
+  strokeCount Int? // Total strokes
+
+  // General
+  calories Int? // Total calories burned
+
+  // Context
+  intensityZone     String? // What zone you aimed for
+  intervalStructure String? // What you did for HIIT (e.g., "8x30s/90s")
+  notes             String? // Freeform notes
+
+  @@index([prescribedSessionId])
+  @@index([userId, completedAt])
+}
+
+model UserCardioMetricPreferences {
+  id            String   @id @default(cuid())
+  userId        String   // References auth.users in Supabase
+  equipment     String   // CardioEquipment enum
+  customMetrics String[] // User's selected metrics (overrides defaults)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([userId, equipment])
+  @@index([userId])
+}
