@@ -39,12 +39,14 @@ model Week {
   id         String  @id @default(cuid())
   weekNumber Int     // 1, 2, 3...
   programId  String
+  userId     String  // Denormalized from Program for RLS performance
   program    Program @relation(fields: [programId], references: [id], onDelete: Cascade)
 
   workouts Workout[]
 
   @@unique([programId, weekNumber])
   @@index([programId])
+  @@index([userId])
 }
 
 model Workout {
@@ -52,6 +54,7 @@ model Workout {
   name      String // "Day 1: Upper Power", "Monday", etc.
   dayNumber Int    // Position within week (1, 2, 3...)
   weekId    String
+  userId    String // Denormalized from Week for RLS performance
   week      Week   @relation(fields: [weekId], references: [id], onDelete: Cascade)
 
   exercises   Exercise[]
@@ -59,6 +62,7 @@ model Workout {
 
   @@unique([weekId, dayNumber])
   @@index([weekId])
+  @@index([userId])
 }
 
 model ExerciseDefinition {
@@ -92,6 +96,7 @@ model Exercise {
   order                Int                // Order within workout
   exerciseGroup        String?            // "A", "B", "C" for supersets/circuits
   workoutId            String
+  userId               String             // Denormalized from Workout for RLS performance
   workout              Workout            @relation(fields: [workoutId], references: [id], onDelete: Cascade)
   notes                String?            // Optional notes from CSV
 
@@ -100,6 +105,7 @@ model Exercise {
 
   @@index([workoutId])
   @@index([exerciseDefinitionId])
+  @@index([userId])
 }
 
 model PrescribedSet {
@@ -110,9 +116,11 @@ model PrescribedSet {
   rpe        Int?     // Rated Perceived Exertion (1-10)
   rir        Int?     // Reps in Reserve (0-5)
   exerciseId String
+  userId     String   // Denormalized from Exercise for RLS performance
   exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
 
   @@index([exerciseId])
+  @@index([userId])
 }
 
 model WorkoutCompletion {
@@ -175,17 +183,20 @@ model CardioWeek {
   id              String        @id @default(cuid())
   weekNumber      Int           // 1, 2, 3...
   cardioProgramId String
+  userId          String        // Denormalized from CardioProgram for RLS performance
   cardioProgram   CardioProgram @relation(fields: [cardioProgramId], references: [id], onDelete: Cascade)
 
   sessions PrescribedCardioSession[]
 
   @@unique([cardioProgramId, weekNumber])
   @@index([cardioProgramId])
+  @@index([userId])
 }
 
 model PrescribedCardioSession {
   id          String     @id @default(cuid())
   weekId      String
+  userId      String     // Denormalized from CardioWeek for RLS performance
   week        CardioWeek @relation(fields: [weekId], references: [id], onDelete: Cascade)
   dayNumber   Int        // Position within week (1, 2, 3...)
   name        String     // "Zone 2 Endurance", "HIIT Intervals"
@@ -207,6 +218,7 @@ model PrescribedCardioSession {
 
   @@unique([weekId, dayNumber])
   @@index([weekId])
+  @@index([userId])
 }
 
 model LoggedCardioSession {
