@@ -99,6 +99,7 @@ export async function POST(
           exerciseGroup: exerciseGroup || null,
           workoutId,
           notes: notes || null,
+          userId: user.id,
         }
       })
 
@@ -112,6 +113,7 @@ export async function POST(
             rpe: set.rpe || null,
             rir: set.rir || null,
             exerciseId: exercise.id,
+            userId: user.id,
           }))
         })
       }

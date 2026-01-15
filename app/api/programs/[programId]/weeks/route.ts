@@ -100,6 +100,7 @@ export async function POST(
           data: {
             weekNumber,
             programId,
+            userId: user.id,
           }
         })
 
@@ -109,6 +110,7 @@ export async function POST(
           name: string
           dayNumber: number
           weekId: string
+          userId: string
         }> = []
         const exercisesToCreate: Array<{
           id: string
@@ -118,6 +120,7 @@ export async function POST(
           exerciseGroup: string | null
           workoutId: string
           notes: string | null
+          userId: string
         }> = []
         const prescribedSetsToCreate: Array<{
           setNumber: number
@@ -126,6 +129,7 @@ export async function POST(
           rpe: number | null
           rir: number | null
           exerciseId: string
+          userId: string
         }> = []
 
         // Build data structures for batch creation
@@ -136,6 +140,7 @@ export async function POST(
             name: workout.name,
             dayNumber: workout.dayNumber,
             weekId: week.id,
+            userId: user.id,
           })
 
           for (const exercise of workout.exercises) {
@@ -148,6 +153,7 @@ export async function POST(
               exerciseGroup: exercise.exerciseGroup,
               workoutId: workoutId,
               notes: exercise.notes,
+              userId: user.id,
             })
 
             // Collect prescribed sets for this exercise
@@ -159,6 +165,7 @@ export async function POST(
                 rpe: set.rpe,
                 rir: set.rir,
                 exerciseId: exerciseId,
+                userId: user.id,
               })
             }
           }
@@ -203,6 +210,7 @@ export async function POST(
             rpe: number | null
             rir: number | null
             exerciseId: string
+            userId: string
           }> = []
           
           for (const setData of prescribedSetsToCreate) {
@@ -215,7 +223,7 @@ export async function POST(
             )
             
             if (realExercise) {
-              prescribedSetsWithRealIds.push({ ...data, exerciseId: realExercise.id })
+              prescribedSetsWithRealIds.push({ ...data, exerciseId: realExercise.id, userId: user.id })
             }
           }
 
@@ -232,6 +240,7 @@ export async function POST(
         data: {
           weekNumber,
           programId,
+          userId: user.id,
         }
       })
     }

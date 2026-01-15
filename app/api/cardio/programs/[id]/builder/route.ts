@@ -62,7 +62,8 @@ export async function PUT(
         const createdWeek = await tx.cardioWeek.create({
           data: {
             cardioProgramId: programId,
-            weekNumber: week.weekNumber
+            weekNumber: week.weekNumber,
+            userId: user.id
           }
         })
 
@@ -94,7 +95,8 @@ export async function PUT(
                 targetHRRange: session.targetHRRange?.trim() || null,
                 targetPowerRange: session.targetPowerRange?.trim() || null,
                 intervalStructure: session.intervalStructure?.trim() || null,
-                notes: session.notes?.trim() || null
+                notes: session.notes?.trim() || null,
+                userId: user.id
               }
             })
           }

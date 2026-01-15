@@ -95,6 +95,7 @@ export async function POST(
             name: calculatedName,
             dayNumber: calculatedDayNumber,
             weekId,
+            userId: user.id,
           }
         })
 
@@ -108,6 +109,7 @@ export async function POST(
               exerciseGroup: exercise.exerciseGroup,
               workoutId: workout.id,
               notes: exercise.notes,
+              userId: user.id,
             }
           })
 
@@ -121,6 +123,7 @@ export async function POST(
                 rpe: set.rpe,
                 rir: set.rir,
                 exerciseId: newExercise.id,
+                userId: user.id,
               }))
             })
           }
@@ -135,6 +138,7 @@ export async function POST(
           name: calculatedName,
           dayNumber: calculatedDayNumber,
           weekId,
+          userId: user.id,
         }
       })
     }

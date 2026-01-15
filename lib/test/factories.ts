@@ -98,17 +98,20 @@ export async function createTestProgram(
       weeks: {
         create: Array.from({ length: weekCount }, (_, weekIndex) => ({
           weekNumber: weekIndex + 1,
+          userId,
           workouts: {
             create: Array.from({ length: workoutsPerWeek }, (_, workoutIndex) => ({
               name: `Day ${workoutIndex + 1}`,
               dayNumber: workoutIndex + 1,
+              userId,
               exercises: {
                 create: exerciseDefinitions.map((exerciseDef, exerciseIndex) => ({
                   name: exerciseDef.name,
                   exerciseDefinitionId: exerciseDef.id,
                   order: exerciseIndex + 1,
                   exerciseGroup: null,
-                  notes: null
+                  notes: null,
+                  userId
                 }))
               }
             }))
@@ -202,10 +205,11 @@ export async function createTestLoggedSets(
 export async function createTestPrescribedSets(
   prisma: PrismaClient,
   exerciseId: string,
+  userId: string,
   setCount: number = 3
 ) {
   const prescribedSets = []
-  
+
   for (let i = 1; i <= setCount; i++) {
     const prescribedSet = await prisma.prescribedSet.create({
       data: {
@@ -214,12 +218,13 @@ export async function createTestPrescribedSets(
         reps: '10',
         weight: '135lbs',
         rpe: 8,
-        rir: 2
+        rir: 2,
+        userId
       }
     })
     prescribedSets.push(prescribedSet)
   }
-  
+
   return prescribedSets
 }
 
@@ -240,7 +245,7 @@ export async function createCompleteTestScenario(
   const exercise = workout.exercises[0]
   
   // Create prescribed sets
-  await createTestPrescribedSets(prisma, exercise.id, 3)
+  await createTestPrescribedSets(prisma, exercise.id, userId, 3)
   
   // Create workout completion
   const completion = await createTestWorkoutCompletion(

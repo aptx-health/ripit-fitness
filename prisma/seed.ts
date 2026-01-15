@@ -219,6 +219,7 @@ async function main() {
     data: {
       weekNumber: 1,
       programId: program.id,
+      userId,
     },
   })
 
@@ -230,6 +231,7 @@ async function main() {
       name: 'Upper Body',
       dayNumber: 1,
       weekId: week1.id,
+      userId,
     },
   })
 
@@ -240,11 +242,12 @@ async function main() {
       exerciseDefinitionId: benchPressDefinition.id,
       order: 1,
       workoutId: day1.id,
+      userId,
       prescribedSets: {
         create: [
-          { setNumber: 1, reps: '5', weight: '135lbs', rir: 3 },
-          { setNumber: 2, reps: '5', weight: '135lbs', rir: 2 },
-          { setNumber: 3, reps: '5', weight: '135lbs', rir: 1 },
+          { setNumber: 1, reps: '5', weight: '135lbs', rir: 3, userId },
+          { setNumber: 2, reps: '5', weight: '135lbs', rir: 2, userId },
+          { setNumber: 3, reps: '5', weight: '135lbs', rir: 1, userId },
         ],
       },
     },
@@ -256,11 +259,12 @@ async function main() {
       exerciseDefinitionId: rowDefinition.id,
       order: 2,
       workoutId: day1.id,
+      userId,
       prescribedSets: {
         create: [
-          { setNumber: 1, reps: '8', weight: '95lbs', rir: 2 },
-          { setNumber: 2, reps: '8', weight: '95lbs', rir: 2 },
-          { setNumber: 3, reps: '8', weight: '95lbs', rir: 1 },
+          { setNumber: 1, reps: '8', weight: '95lbs', rir: 2, userId },
+          { setNumber: 2, reps: '8', weight: '95lbs', rir: 2, userId },
+          { setNumber: 3, reps: '8', weight: '95lbs', rir: 1, userId },
         ],
       },
     },
@@ -274,6 +278,7 @@ async function main() {
       name: 'Lower Body',
       dayNumber: 2,
       weekId: week1.id,
+      userId,
     },
   })
 
@@ -283,11 +288,12 @@ async function main() {
       exerciseDefinitionId: squatDefinition.id,
       order: 1,
       workoutId: day2.id,
+      userId,
       prescribedSets: {
         create: [
-          { setNumber: 1, reps: '5', weight: '185lbs', rir: 3 },
-          { setNumber: 2, reps: '5', weight: '185lbs', rir: 2 },
-          { setNumber: 3, reps: '5', weight: '185lbs', rir: 1 },
+          { setNumber: 1, reps: '5', weight: '185lbs', rir: 3, userId },
+          { setNumber: 2, reps: '5', weight: '185lbs', rir: 2, userId },
+          { setNumber: 3, reps: '5', weight: '185lbs', rir: 1, userId },
         ],
       },
     },
@@ -299,11 +305,12 @@ async function main() {
       exerciseDefinitionId: rdlDefinition.id,
       order: 2,
       workoutId: day2.id,
+      userId,
       prescribedSets: {
         create: [
-          { setNumber: 1, reps: '8', weight: '135lbs', rir: 2 },
-          { setNumber: 2, reps: '8', weight: '135lbs', rir: 2 },
-          { setNumber: 3, reps: '8', weight: '135lbs', rir: 1 },
+          { setNumber: 1, reps: '8', weight: '135lbs', rir: 2, userId },
+          { setNumber: 2, reps: '8', weight: '135lbs', rir: 2, userId },
+          { setNumber: 3, reps: '8', weight: '135lbs', rir: 1, userId },
         ],
       },
     },
@@ -317,6 +324,7 @@ async function main() {
       name: 'Full Body',
       dayNumber: 3,
       weekId: week1.id,
+      userId,
     },
   })
 
@@ -326,11 +334,12 @@ async function main() {
       exerciseDefinitionId: deadliftDefinition.id,
       order: 1,
       workoutId: day3.id,
+      userId,
       prescribedSets: {
         create: [
-          { setNumber: 1, reps: '5', weight: '225lbs', rir: 3 },
-          { setNumber: 2, reps: '5', weight: '225lbs', rir: 2 },
-          { setNumber: 3, reps: '5', weight: '225lbs', rir: 1 },
+          { setNumber: 1, reps: '5', weight: '225lbs', rir: 3, userId },
+          { setNumber: 2, reps: '5', weight: '225lbs', rir: 2, userId },
+          { setNumber: 3, reps: '5', weight: '225lbs', rir: 1, userId },
         ],
       },
     },
@@ -342,11 +351,12 @@ async function main() {
       exerciseDefinitionId: ohpDefinition.id,
       order: 2,
       workoutId: day3.id,
+      userId,
       prescribedSets: {
         create: [
-          { setNumber: 1, reps: '8', weight: '75lbs', rir: 2 },
-          { setNumber: 2, reps: '8', weight: '75lbs', rir: 2 },
-          { setNumber: 3, reps: '8', weight: '75lbs', rir: 1 },
+          { setNumber: 1, reps: '8', weight: '75lbs', rir: 2, userId },
+          { setNumber: 2, reps: '8', weight: '75lbs', rir: 2, userId },
+          { setNumber: 3, reps: '8', weight: '75lbs', rir: 1, userId },
         ],
       },
     },
