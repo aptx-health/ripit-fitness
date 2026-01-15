@@ -35,6 +35,14 @@ export default async function ProgramsPage() {
     <div className="min-h-screen bg-background doom-page-enter">
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="mb-8">
+          <div className="mb-4">
+            <Link
+              href="/training"
+              className="text-primary hover:text-primary-hover font-medium"
+            >
+              ← STRENGTH DASHBOARD
+            </Link>
+          </div>
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-3xl font-bold text-foreground doom-title">STRENGTH PROGRAMS</h1>

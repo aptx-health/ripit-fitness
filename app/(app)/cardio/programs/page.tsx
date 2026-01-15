@@ -38,6 +38,16 @@ export default async function CardioProgramsPage() {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-6xl mx-auto space-y-6">
+        {/* Back Link */}
+        <div>
+          <Link
+            href="/cardio"
+            className="text-primary hover:text-primary-hover font-medium"
+          >
+            ← CARDIO DASHBOARD
+          </Link>
+        </div>
+
         {/* Header */}
         <div className="flex justify-between items-start">
           <div>
