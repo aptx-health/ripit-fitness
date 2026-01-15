@@ -61,80 +61,52 @@ export default async function TrainingPage() {
     }) || activeProgram.weeks[activeProgram.weeks.length - 1]
   }
 
-  // Fetch history only (stats commented out for performance)
-  // const startOfWeek = new Date()
-  // startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay())
-  // startOfWeek.setHours(0, 0, 0, 0)
-
-  const recentCompletions = await
-    // const [totalWorkouts, thisWeekWorkouts, recentCompletions] = await Promise.all([
-    // prisma.workoutCompletion.count({
-    //   where: {
-    //     userId: user.id,
-    //     status: 'completed'
-    //   }
-    // }),
-    // prisma.workoutCompletion.count({
-    //   where: {
-    //     userId: user.id,
-    //     status: 'completed',
-    //     completedAt: { gte: startOfWeek }
-    //   }
-    // }),
-    // Fetch recent completions
-    prisma.workoutCompletion.findMany({
-      where: {
-        userId: user.id,
-        status: { in: ['completed', 'draft'] }
-      },
-      orderBy: { completedAt: 'desc' },
-      take: 10, // Reduced from 50 to 10 for faster initial load
-      select: {
-        id: true,
-        status: true,
-        completedAt: true,
-        notes: true,
-        workout: {
-          select: {
-            id: true,
-            name: true,
-            week: {
-              select: {
-                weekNumber: true,
-                program: {
-                  select: { name: true }
-                }
+  // Fetch recent workout history
+  const recentCompletions = await prisma.workoutCompletion.findMany({
+    where: {
+      userId: user.id,
+      status: { in: ['completed', 'draft'] }
+    },
+    orderBy: { completedAt: 'desc' },
+    take: 5, // Reduced from 10 to 5 for faster load
+    select: {
+      id: true,
+      status: true,
+      completedAt: true,
+      workout: {
+        select: {
+          id: true,
+          name: true,
+          week: {
+            select: {
+              program: {
+                select: { name: true }
               }
             }
           }
-        },
-        loggedSets: {
-          select: {
-            id: true,
-            setNumber: true,
-            reps: true,
-            weight: true,
-            weightUnit: true,
-            rpe: true,
-            rir: true,
-            exercise: {
-              select: {
-                name: true,
-                exerciseGroup: true,
-                order: true
-              }
-            }
-          },
-          orderBy: [
-            { exercise: { order: 'asc' } },
-            { setNumber: 'asc' }
-          ]
-        },
-        _count: {
-          select: { loggedSets: true }
         }
+      },
+      loggedSets: {
+        select: {
+          id: true,
+          setNumber: true,
+          reps: true,
+          weight: true,
+          weightUnit: true,
+          exercise: {
+            select: {
+              name: true,
+              exerciseGroup: true,
+              order: true
+            }
+          }
+        }
+      },
+      _count: {
+        select: { loggedSets: true }
       }
-    })
+    }
+  })
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -171,22 +143,6 @@ export default async function TrainingPage() {
           />
         )}
 
-        {/* Stats Summary - Commented out for performance */}
-        {/* {totalWorkouts > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <StatCard
-              label="Total Workouts"
-              value={totalWorkouts.toString()}
-              icon="💪"
-            />
-            <StatCard
-              label="This Week"
-              value={thisWeekWorkouts.toString()}
-              icon="📅"
-            />
-          </div>
-        )} */}
-
         {/* Workout History */}
         <div>
           <h2 className="text-2xl font-bold text-foreground doom-heading mb-4">
@@ -195,23 +151,6 @@ export default async function TrainingPage() {
           <WorkoutHistoryList completions={recentCompletions} />
         </div>
       </div>
-    </div>
-  )
-}
-
-// Stat Card Component
-function StatCard({ label, value, icon }: { label: string; value: string; icon: string }) {
-  return (
-    <div className="bg-card border border-border p-6 doom-noise doom-card">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-3xl">{icon}</span>
-        <span className="text-xs font-semibold text-muted-foreground doom-label">
-          {label}
-        </span>
-      </div>
-      <p className="text-3xl font-bold text-foreground doom-stat">
-        {value}
-      </p>
     </div>
   )
 }

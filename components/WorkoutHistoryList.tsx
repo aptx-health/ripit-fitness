@@ -72,7 +72,7 @@ export default function WorkoutHistoryList({ completions }: Props) {
         const isExpanded = expandedIds.has(completion.id)
         const isCompleted = completion.status === 'completed'
 
-        // Group logged sets by exercise
+        // Group logged sets by exercise and sort
         const exerciseGroups = new Map<string, LoggedSet[]>()
         completion.loggedSets.forEach(set => {
           const key = `${set.exercise.name}-${set.exercise.order}`
@@ -81,6 +81,11 @@ export default function WorkoutHistoryList({ completions }: Props) {
           }
           exerciseGroups.get(key)!.push(set)
         })
+
+        // Sort exercises by order, then sets by setNumber
+        const sortedExercises = Array.from(exerciseGroups.entries())
+          .sort((a, b) => a[1][0].exercise.order - b[1][0].exercise.order)
+          .map(([key, sets]) => [key, sets.sort((a, b) => a.setNumber - b.setNumber)] as const)
 
         return (
           <div
@@ -149,7 +154,7 @@ export default function WorkoutHistoryList({ completions }: Props) {
 
             {isExpanded && (
               <div className="border-t border-border p-4 space-y-4">
-                {Array.from(exerciseGroups.entries()).map(([key, sets]) => {
+                {sortedExercises.map(([key, sets]) => {
                   const exercise = sets[0].exercise
                   return (
                     <div key={key} className="bg-muted/50 p-3 rounded">
