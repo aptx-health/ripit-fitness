@@ -6,9 +6,9 @@ export default async function Home() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  // If user is logged in, redirect to training page
+  // If user is logged in, redirect to programs page
   if (user) {
-    redirect('/training')
+    redirect('/programs')
   }
 
   // Landing page for non-authenticated users
@@ -17,7 +17,7 @@ export default async function Home() {
       <div className="max-w-2xl mx-auto px-4 text-center">
         <h1 className="text-6xl font-bold text-gray-900 mb-4">FitCSV</h1>
         <p className="text-xl text-gray-600 mb-8">
-          Your flexible strength training tracker. Import programs from CSV and log workouts without constraints.
+          Your flexible strength training tracker. Create custom programs and log workouts without constraints.
         </p>
 
         <div className="space-x-4">
@@ -37,8 +37,8 @@ export default async function Home() {
 
         <div className="mt-16 grid md:grid-cols-3 gap-8 text-left">
           <div>
-            <h3 className="font-semibold text-lg mb-2">CSV Import</h3>
-            <p className="text-gray-600">Import any program from a simple CSV file. No rigid app templates.</p>
+            <h3 className="font-semibold text-lg mb-2">Flexible Programs</h3>
+            <p className="text-gray-600">Create and manage custom training programs that fit your needs.</p>
           </div>
           <div>
             <h3 className="font-semibold text-lg mb-2">Track Progress</h3>
@@ -46,7 +46,7 @@ export default async function Home() {
           </div>
           <div>
             <h3 className="font-semibold text-lg mb-2">Your Data</h3>
-            <p className="text-gray-600">Your programs, your way. Export anytime.</p>
+            <p className="text-gray-600">Your programs, your way. Full control over your training data.</p>
           </div>
         </div>
       </div>

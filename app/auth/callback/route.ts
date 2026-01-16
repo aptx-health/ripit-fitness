@@ -12,5 +12,5 @@ export async function GET(request: NextRequest) {
   }
 
   // URL to redirect to after sign in process completes
-  return NextResponse.redirect(`${origin}/training`)
+  return NextResponse.redirect(`${origin}/programs`)
 }

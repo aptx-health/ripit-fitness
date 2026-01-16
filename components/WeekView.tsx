@@ -104,10 +104,10 @@ export default function WeekView({
         <div className="max-w-2xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-2">
             <Link
-              href="/training"
-              className="text-primary hover:text-primary-hover font-medium"
+              href="/programs"
+              className="px-3 py-1.5 bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d font-semibold uppercase tracking-wider text-xs transition-colors"
             >
-              ← Strength Dashboard
+              ← PROGRAMS
             </Link>
             {/* Hamburger Menu */}
             <div className="relative">

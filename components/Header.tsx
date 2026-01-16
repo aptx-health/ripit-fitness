@@ -19,7 +19,7 @@ export default function Header({ userEmail }: Props) {
           <div className="flex justify-between items-center h-16">
             {/* Left: Logo + Nav Links */}
             <div className="flex items-center gap-4 sm:gap-8">
-              <Link href="/training" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <Link href="/programs" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
                 <Image
                   src="/icon-192.png"
                   alt="Ripit"
@@ -30,6 +30,13 @@ export default function Header({ userEmail }: Props) {
                 <span className="text-xl font-bold text-foreground">Ripit</span>
               </Link>
               <div className="flex items-center gap-3 sm:gap-4">
+                <Link
+                  href="/programs"
+                  className="px-3 py-1.5 text-xs sm:text-sm font-bold text-primary hover:bg-primary-muted border border-primary uppercase tracking-wider transition-colors"
+                >
+                  Programs
+                </Link>
+                <div className="h-6 w-px bg-border" />
                 <Link
                   href="/training"
                   className="text-xs sm:text-sm font-semibold text-foreground hover:text-primary doom-link uppercase tracking-wider"

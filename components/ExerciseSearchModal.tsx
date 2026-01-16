@@ -111,9 +111,10 @@ export default function ExerciseSearchModal({
         exerciseIntensityType: intensityType,
         exerciseNotes: editingExercise.notes || '',
         sets: editingExercise.prescribedSets.map(set => ({
+          id: set.id,
           setNumber: set.setNumber,
           reps: set.reps,
-          intensityValue: intensityType === 'RPE' ? (set.rpe ?? undefined) : 
+          intensityValue: intensityType === 'RPE' ? (set.rpe ?? undefined) :
                          intensityType === 'RIR' ? (set.rir ?? undefined) : undefined
         }))
       }
@@ -140,10 +141,12 @@ export default function ExerciseSearchModal({
   const [exerciseIntensityType, setExerciseIntensityType] = useState<'RIR' | 'RPE' | 'NONE'>(initialState.exerciseIntensityType)
   const [exerciseNotes, setExerciseNotes] = useState(initialState.exerciseNotes)
   const [sets, setSets] = useState<Array<{
+    id?: string
     setNumber: number
     reps: string
     intensityValue?: number
   }>>(initialState.sets)
+  const [duplicatingSetId, setDuplicatingSetId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!editingExercise) return
@@ -165,6 +168,7 @@ export default function ExerciseSearchModal({
     setExerciseNotes(editingExercise.notes || '')
     setSets(
       editingExercise.prescribedSets.map(set => ({
+        id: set.id,
         setNumber: set.setNumber,
         reps: set.reps,
         intensityValue:
@@ -257,6 +261,48 @@ export default function ExerciseSearchModal({
       return set
     }))
   }, [])
+
+  const handleDuplicateSet = useCallback(async (setId: string) => {
+    if (!setId) return
+
+    setDuplicatingSetId(setId)
+    setError(null)
+
+    try {
+      const response = await fetch(`/api/prescribed-sets/${setId}/duplicate`, {
+        method: 'POST',
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to duplicate set')
+      }
+
+      const { exercise } = await response.json()
+
+      // Update local state with new sets from server
+      const intensityType = exerciseIntensityType
+      setSets(
+        exercise.prescribedSets.map((set: any) => ({
+          id: set.id,
+          setNumber: set.setNumber,
+          reps: set.reps,
+          intensityValue:
+            intensityType === 'RPE'
+              ? set.rpe ?? undefined
+              : intensityType === 'RIR'
+              ? set.rir ?? undefined
+              : undefined,
+        }))
+      )
+      setSetCount(exercise.prescribedSets.length)
+    } catch (error) {
+      console.error('Error duplicating set:', error)
+      setError(error instanceof Error ? error.message : 'Failed to duplicate set')
+    } finally {
+      setDuplicatingSetId(null)
+    }
+  }, [exerciseIntensityType])
 
   const handleConfirmExercise = useCallback(() => {
     if (!selectedExercise) return
@@ -429,6 +475,21 @@ export default function ExerciseSearchModal({
                                 placeholder={exerciseIntensityType === 'RIR' ? '0-5' : '1-10'}
                                 className="w-full px-3 py-2 text-sm border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-muted text-foreground"
                               />
+                            </div>
+                          )}
+
+                          {/* Duplicate Button - Only show when editing existing exercise */}
+                          {editingExercise && set.id && (
+                            <div className="flex-shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => handleDuplicateSet(set.id!)}
+                                disabled={duplicatingSetId !== null}
+                                className="p-2 text-primary hover:text-primary-hover hover:bg-primary-muted rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Duplicate this set"
+                              >
+                                <Plus size={20} />
+                              </button>
                             </div>
                           )}
                         </div>
