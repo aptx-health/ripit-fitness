@@ -115,6 +115,17 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
   const [openWeekMenuId, setOpenWeekMenuId] = useState<string | null>(null)
   const weekMenuRef = useRef<HTMLDivElement>(null)
 
+  // Workout menu state
+  const [openWorkoutMenuId, setOpenWorkoutMenuId] = useState<string | null>(null)
+  const workoutMenuRef = useRef<HTMLDivElement>(null)
+
+  // Workout action modals
+  const [showDuplicateWorkoutModal, setShowDuplicateWorkoutModal] = useState(false)
+  const [showSwapWorkoutModal, setShowSwapWorkoutModal] = useState(false)
+  const [selectedWorkoutForAction, setSelectedWorkoutForAction] = useState<{ id: string; name: string } | null>(null)
+  const [targetWeekForDuplicate, setTargetWeekForDuplicate] = useState<string>('')
+  const [targetWeekForSwap, setTargetWeekForSwap] = useState<string>('')
+
   const createProgram = useCallback(async () => {
     if (!programName.trim()) {
       setError('Program name is required')
@@ -437,6 +448,85 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
     }
   }, [])
 
+  const handleDuplicateWorkout = useCallback(async () => {
+    if (!selectedWorkoutForAction || !targetWeekForDuplicate) return
+
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const response = await fetch(`/api/workouts/${selectedWorkoutForAction.id}/duplicate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetWeekId: targetWeekForDuplicate }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to duplicate workout')
+      }
+
+      const { workout: newWorkout } = await response.json()
+
+      // Add duplicated workout to the target week
+      setWeeks(prev => prev.map(week =>
+        week.id === targetWeekForDuplicate
+          ? { ...week, workouts: [...week.workouts, newWorkout] }
+          : week
+      ))
+
+      console.log('Workout duplicated successfully')
+      setShowDuplicateWorkoutModal(false)
+      setSelectedWorkoutForAction(null)
+      setTargetWeekForDuplicate('')
+    } catch (error) {
+      console.error('Error duplicating workout:', error)
+      setError(error instanceof Error ? error.message : 'Failed to duplicate workout')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [selectedWorkoutForAction, targetWeekForDuplicate])
+
+  const handleSwapWorkout = useCallback(async () => {
+    if (!selectedWorkoutForAction || !targetWeekForSwap) return
+
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const response = await fetch(`/api/workouts/${selectedWorkoutForAction.id}/swap`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetWeekId: targetWeekForSwap }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to swap workout')
+      }
+
+      const { workout: updatedWorkout } = await response.json()
+
+      // Move workout to target week
+      setWeeks(prev => prev.map(week => ({
+        ...week,
+        workouts: week.id === targetWeekForSwap
+          ? [...week.workouts.filter(w => w.id !== selectedWorkoutForAction.id), updatedWorkout]
+          : week.workouts.filter(w => w.id !== selectedWorkoutForAction.id)
+      })))
+
+      console.log('Workout swapped successfully')
+      setShowSwapWorkoutModal(false)
+      setSelectedWorkoutForAction(null)
+      setTargetWeekForSwap('')
+    } catch (error) {
+      console.error('Error swapping workout:', error)
+      setError(error instanceof Error ? error.message : 'Failed to swap workout')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [selectedWorkoutForAction, targetWeekForSwap])
+
   const toggleWorkoutCollapse = useCallback((workoutId: string) => {
     setCollapsedWorkouts(prev => {
       const newSet = new Set(prev)
@@ -603,6 +693,20 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
       return () => document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [openWeekMenuId])
+
+  // Close workout menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (workoutMenuRef.current && !workoutMenuRef.current.contains(event.target as Node)) {
+        setOpenWorkoutMenuId(null)
+      }
+    }
+
+    if (openWorkoutMenuId) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [openWorkoutMenuId])
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -789,12 +893,64 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
                                   <span className="text-xs text-muted-foreground">
                                     ({workout.exercises.length} exercise{workout.exercises.length !== 1 ? 's' : ''})
                                   </span>
-                                  <button
-                                    onClick={() => handleStartWorkoutEdit(workout.id, workout.name)}
-                                    className="px-2 py-1 bg-secondary text-secondary-foreground text-xs rounded hover:bg-secondary-hover"
-                                  >
-                                    Rename
-                                  </button>
+
+                                  {/* Workout Menu */}
+                                  <div className="relative" ref={openWorkoutMenuId === workout.id ? workoutMenuRef : null}>
+                                    <button
+                                      onClick={() => setOpenWorkoutMenuId(openWorkoutMenuId === workout.id ? null : workout.id)}
+                                      disabled={isLoading || deletingWorkoutId === workout.id}
+                                      className="p-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded disabled:opacity-50 transition-colors"
+                                      title="Workout options"
+                                    >
+                                      <MoreVertical size={16} />
+                                    </button>
+
+                                    {openWorkoutMenuId === workout.id && (
+                                      <div className="absolute left-0 top-full mt-1 w-48 bg-card border border-border rounded-lg shadow-lg z-10 doom-corners">
+                                        <button
+                                          onClick={() => {
+                                            handleStartWorkoutEdit(workout.id, workout.name)
+                                            setOpenWorkoutMenuId(null)
+                                          }}
+                                          className="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2"
+                                        >
+                                          Rename
+                                        </button>
+                                        <button
+                                          onClick={() => {
+                                            setSelectedWorkoutForAction({ id: workout.id, name: workout.name })
+                                            setShowDuplicateWorkoutModal(true)
+                                            setOpenWorkoutMenuId(null)
+                                          }}
+                                          disabled={isLoading}
+                                          className="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-muted transition-colors disabled:opacity-50 flex items-center gap-2"
+                                        >
+                                          Duplicate
+                                        </button>
+                                        <button
+                                          onClick={() => {
+                                            setSelectedWorkoutForAction({ id: workout.id, name: workout.name })
+                                            setShowSwapWorkoutModal(true)
+                                            setOpenWorkoutMenuId(null)
+                                          }}
+                                          disabled={isLoading}
+                                          className="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-muted transition-colors disabled:opacity-50 flex items-center gap-2"
+                                        >
+                                          Move to Week
+                                        </button>
+                                        <button
+                                          onClick={() => {
+                                            handleDeleteWorkout(workout.id, workout.name)
+                                            setOpenWorkoutMenuId(null)
+                                          }}
+                                          disabled={deletingWorkoutId === workout.id}
+                                          className="w-full px-4 py-2 text-left text-sm text-error hover:bg-error-muted transition-colors disabled:opacity-50 flex items-center gap-2"
+                                        >
+                                          {deletingWorkoutId === workout.id ? 'Deleting...' : 'Delete'}
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
                               )}
                               <div className="flex gap-1">
@@ -804,13 +960,6 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
                                   className="px-2 py-1 bg-success text-success-foreground text-xs rounded hover:bg-success-hover disabled:opacity-50"
                                 >
                                   Add Exercise
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteWorkout(workout.id, workout.name)}
-                                  disabled={deletingWorkoutId === workout.id || editingWorkoutId === workout.id}
-                                  className="px-2 py-1 bg-error text-error-foreground text-xs rounded hover:bg-error-hover disabled:opacity-50"
-                                >
-                                  {deletingWorkoutId === workout.id ? 'Deleting...' : 'Delete'}
                                 </button>
                               </div>
                             </div>
@@ -898,6 +1047,96 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
         onExerciseSelect={handleExerciseSelect}
         editingExercise={editingExercise}
       />
+
+      {/* Duplicate Workout Modal */}
+      {showDuplicateWorkoutModal && selectedWorkoutForAction && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-card border border-border rounded-lg p-6 max-w-md w-full mx-4 doom-corners">
+            <h3 className="text-lg font-semibold text-foreground mb-4">
+              Duplicate "{selectedWorkoutForAction.name}"
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Select the week to duplicate this workout into:
+            </p>
+            <select
+              value={targetWeekForDuplicate}
+              onChange={(e) => setTargetWeekForDuplicate(e.target.value)}
+              className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-muted text-foreground mb-4"
+            >
+              <option value="">Select a week...</option>
+              {weeks.map(week => (
+                <option key={week.id} value={week.id}>
+                  Week {week.weekNumber}
+                </option>
+              ))}
+            </select>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => {
+                  setShowDuplicateWorkoutModal(false)
+                  setSelectedWorkoutForAction(null)
+                  setTargetWeekForDuplicate('')
+                }}
+                className="px-4 py-2 text-foreground bg-card border border-input rounded-lg hover:bg-muted"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDuplicateWorkout}
+                disabled={!targetWeekForDuplicate || isLoading}
+                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover disabled:opacity-50"
+              >
+                {isLoading ? 'Duplicating...' : 'Duplicate'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Swap Workout Modal */}
+      {showSwapWorkoutModal && selectedWorkoutForAction && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-card border border-border rounded-lg p-6 max-w-md w-full mx-4 doom-corners">
+            <h3 className="text-lg font-semibold text-foreground mb-4">
+              Move "{selectedWorkoutForAction.name}"
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Select the week to move this workout to:
+            </p>
+            <select
+              value={targetWeekForSwap}
+              onChange={(e) => setTargetWeekForSwap(e.target.value)}
+              className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-muted text-foreground mb-4"
+            >
+              <option value="">Select a week...</option>
+              {weeks.map(week => (
+                <option key={week.id} value={week.id}>
+                  Week {week.weekNumber}
+                </option>
+              ))}
+            </select>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => {
+                  setShowSwapWorkoutModal(false)
+                  setSelectedWorkoutForAction(null)
+                  setTargetWeekForSwap('')
+                }}
+                className="px-4 py-2 text-foreground bg-card border border-input rounded-lg hover:bg-muted"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSwapWorkout}
+                disabled={!targetWeekForSwap || isLoading}
+                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover disabled:opacity-50"
+              >
+                {isLoading ? 'Moving...' : 'Move'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
