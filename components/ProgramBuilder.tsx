@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronDown, ChevronRight } from 'lucide-react'
+import { ChevronDown, ChevronRight, MoreVertical } from 'lucide-react'
 import ExerciseSearchModal from './ExerciseSearchModal'
 import FAUVolumeVisualization from './FAUVolumeVisualization'
 
@@ -106,9 +106,14 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
   // Deletion state
   const [deletingExerciseId, setDeletingExerciseId] = useState<string | null>(null)
   const [deletingWorkoutId, setDeletingWorkoutId] = useState<string | null>(null)
-  
+  const [deletingWeekId, setDeletingWeekId] = useState<string | null>(null)
+
   // Collapsed workouts state
   const [collapsedWorkouts, setCollapsedWorkouts] = useState<Set<string>>(new Set())
+
+  // Week menu state
+  const [openWeekMenuId, setOpenWeekMenuId] = useState<string | null>(null)
+  const weekMenuRef = useRef<HTMLDivElement>(null)
 
   const createProgram = useCallback(async () => {
     if (!programName.trim()) {
@@ -371,6 +376,67 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
     }
   }, [])
 
+  const handleDeleteWeek = useCallback(async (weekId: string, weekNumber: number) => {
+    if (!confirm(`Are you sure you want to delete Week ${weekNumber} and all its workouts? This cannot be undone.`)) {
+      return
+    }
+
+    setDeletingWeekId(weekId)
+    setError(null)
+
+    try {
+      // Delete all workouts in the week
+      const week = weeks.find(w => w.id === weekId)
+      if (!week) return
+
+      for (const workout of week.workouts) {
+        await fetch(`/api/workouts/${workout.id}`, {
+          method: 'DELETE',
+        })
+      }
+
+      // Remove week from state
+      setWeeks(prev => prev.filter(w => w.id !== weekId))
+
+      console.log('Week deleted successfully')
+    } catch (error) {
+      console.error('Error deleting week:', error)
+      setError(error instanceof Error ? error.message : 'Failed to delete week')
+    } finally {
+      setDeletingWeekId(null)
+      setOpenWeekMenuId(null)
+    }
+  }, [weeks])
+
+  const handleDuplicateWeek = useCallback(async (weekId: string) => {
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const response = await fetch(`/api/weeks/${weekId}/duplicate`, {
+        method: 'POST',
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to duplicate week')
+      }
+
+      const { week: newWeek } = await response.json()
+
+      // Add duplicated week to state
+      setWeeks(prev => [...prev, newWeek])
+
+      console.log('Week duplicated successfully')
+    } catch (error) {
+      console.error('Error duplicating week:', error)
+      setError(error instanceof Error ? error.message : 'Failed to duplicate week')
+    } finally {
+      setIsLoading(false)
+      setOpenWeekMenuId(null)
+    }
+  }, [])
+
   const toggleWorkoutCollapse = useCallback((workoutId: string) => {
     setCollapsedWorkouts(prev => {
       const newSet = new Set(prev)
@@ -524,6 +590,20 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
     return () => clearTimeout(timeoutId)
   }, [editMode, updateProgramDetails])
 
+  // Close week menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (weekMenuRef.current && !weekMenuRef.current.contains(event.target as Node)) {
+        setOpenWeekMenuId(null)
+      }
+    }
+
+    if (openWeekMenuId) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [openWeekMenuId])
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
       {/* Main Content */}
@@ -614,7 +694,41 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
                 {weeks.map((week) => (
                   <div key={week.id} className="border border-border p-4 doom-noise doom-corners">
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-medium text-foreground doom-heading">WEEK {week.weekNumber}</h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-medium text-foreground doom-heading">WEEK {week.weekNumber}</h3>
+
+                        {/* Week Menu */}
+                        <div className="relative" ref={openWeekMenuId === week.id ? weekMenuRef : null}>
+                          <button
+                            onClick={() => setOpenWeekMenuId(openWeekMenuId === week.id ? null : week.id)}
+                            disabled={isLoading || deletingWeekId === week.id}
+                            className="p-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded disabled:opacity-50 transition-colors"
+                            title="Week options"
+                          >
+                            <MoreVertical size={18} />
+                          </button>
+
+                          {openWeekMenuId === week.id && (
+                            <div className="absolute left-0 top-full mt-1 w-48 bg-card border border-border rounded-lg shadow-lg z-10 doom-corners">
+                              <button
+                                onClick={() => handleDuplicateWeek(week.id)}
+                                disabled={isLoading}
+                                className="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-muted transition-colors disabled:opacity-50 flex items-center gap-2"
+                              >
+                                Duplicate Week
+                              </button>
+                              <button
+                                onClick={() => handleDeleteWeek(week.id, week.weekNumber)}
+                                disabled={deletingWeekId === week.id}
+                                className="w-full px-4 py-2 text-left text-sm text-error hover:bg-error-muted transition-colors disabled:opacity-50 flex items-center gap-2"
+                              >
+                                {deletingWeekId === week.id ? 'Deleting...' : 'Delete Week'}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
                       <button
                         onClick={() => addWorkout(week.id)}
                         disabled={isLoading}
@@ -748,25 +862,13 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
                   </div>
                 ))}
 
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => addWeek()}
-                    disabled={isLoading}
-                    className="px-4 py-2 bg-success text-success-foreground hover:bg-success-hover disabled:opacity-50 doom-button-3d font-semibold uppercase tracking-wider"
-                  >
-                    ADD WEEK {weeks.length + 1}
-                  </button>
-                  
-                  {weeks.length > 0 && (
-                    <button
-                      onClick={() => addWeek(weeks[weeks.length - 1].id)}
-                      disabled={isLoading}
-                      className="px-4 py-2 bg-warning text-warning-foreground hover:bg-warning-hover disabled:opacity-50 doom-button-3d font-semibold uppercase tracking-wider"
-                    >
-                      DUPLICATE WEEK {weeks.length}
-                    </button>
-                  )}
-                </div>
+                <button
+                  onClick={() => addWeek()}
+                  disabled={isLoading}
+                  className="px-4 py-2 bg-success text-success-foreground hover:bg-success-hover disabled:opacity-50 doom-button-3d font-semibold uppercase tracking-wider"
+                >
+                  ADD WEEK {weeks.length + 1}
+                </button>
               </div>
             )}
 
