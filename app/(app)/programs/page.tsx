@@ -226,7 +226,11 @@ export default function ProgramsPage() {
         }
 
         setSyncStatus('Loading programs...')
-        console.log('[PowerSync] Data fetch completed')
+        console.log('[PowerSync] Data fetch completed successfully')
+        console.log('[PowerSync] Total programs loaded:', {
+          strength: strengthResults.length,
+          cardio: cardioProgramsMap.size
+        })
         setLoading(false)
       } catch (error) {
         console.error('[PowerSync] Failed to load programs:', error)

@@ -180,13 +180,22 @@ export async function waitForInitialSync(
     console.log('[PowerSync] Waiting for initial sync...');
 
     let pollCount = 0;
+    let lastStatusLog = Date.now();
+
     // Poll for hasSynced status
     while (!powerSync.currentStatus?.hasSynced) {
       pollCount++;
 
       // Check timeout
       if (Date.now() - startTime > timeoutMs) {
+        console.error('[PowerSync] TIMEOUT after', timeoutMs, 'ms - sync never completed');
         throw new Error('Initial sync timeout - data may not be available');
+      }
+
+      // Warn if sync is taking unusually long
+      const elapsed = Date.now() - startTime;
+      if (elapsed > 15000 && elapsed % 5000 < 500) {
+        console.warn('[PowerSync] Sync taking longer than expected:', elapsed, 'ms');
       }
 
       // Check if we're connected (might have disconnected)
