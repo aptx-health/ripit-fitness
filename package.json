@@ -10,7 +10,8 @@
     "type-check": "tsc --noEmit",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "postinstall": "powersync-web copy-assets"
   },
   "dependencies": {
     "@powersync/common": "^1.45.0",

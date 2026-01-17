@@ -12,6 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **Next.js 15** (App Router, TypeScript, React 19)
 - **Supabase** (PostgreSQL + Auth)
+- **PowerSync** (local-first sync, offline support)
 - **Prisma** (ORM)
 - **Doppler** (secrets management)
 - **Tailwind CSS** (styling)
@@ -48,6 +49,25 @@ doppler run -- npm run lint
 - **Production**: ONLY deploy via migration files, never `db push`
 - **Always commit migration files** with schema changes
 
+### PowerSync Setup
+
+PowerSync provides local-first architecture with instant queries and offline support by maintaining a local SQLite database that syncs with Supabase.
+
+**Worker Assets**: PowerSync requires web worker files to be served from the `public` directory:
+```bash
+# Automatically copied on npm install via postinstall script
+npx powersync-web copy-assets
+```
+
+This copies workers to `public/@powersync/worker/` (including `WASQLiteDB.umd.js`).
+
+**Important Notes**:
+- Worker path must be `'/@powersync/worker/WASQLiteDB.umd.js'` (note the `@` symbol)
+- The `worker` property goes directly in factory options, NOT inside `flags`
+- Middleware must exclude `.js` and `.wasm` files from auth checks
+- See `lib/powersync/db.ts` for initialization pattern
+- Full setup docs: `/docs/POWERSYNC_SETUP.md`
+
 ## Project Structure
 
 ```
@@ -60,6 +80,7 @@ doppler run -- npm run lint
 
 /lib                    # Business logic (max 200 lines per file)
   /db                   # Database client and utilities
+  /powersync            # PowerSync local-first sync
   /csv                  # CSV parsing and validation
   /auth                 # Auth utilities (if needed)
 

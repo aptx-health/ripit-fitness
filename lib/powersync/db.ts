@@ -38,14 +38,12 @@ export function getPowerSync(): PowerSyncDatabase {
 
   console.log('[PowerSync DB] Creating new PowerSync instance');
 
-  //Initialize PowerSync database with explicit worker path
+  // Initialize PowerSync database with explicit worker path
   const factory = new WASQLitePowerSyncDatabaseOpenFactory({
     schema: AppSchema,
     dbFilename: 'fitcsv-local.db',
-    flags: {
-      // Point to worker in public directory
-      workerUrl: '/powersync/WASQLiteDB.worker.js',
-    },
+    // Point to worker in public directory (copied via npx powersync-web copy-assets)
+    worker: '/@powersync/worker/WASQLiteDB.umd.js',
   });
 
   powerSyncInstance = factory.getInstance();

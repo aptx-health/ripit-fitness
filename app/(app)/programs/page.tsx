@@ -69,11 +69,22 @@ export default function ProgramsPage() {
         console.log('[PowerSync] PowerSync instance:', powerSync)
         console.log('[PowerSync] PowerSync connected:', powerSync.connected)
 
-        // Wait for PowerSync to connect
+        // Wait for PowerSync to connect (with timeout)
         if (!powerSync.connected) {
           console.log('[PowerSync] Waiting for connection...')
-          await powerSync.waitForReady()
-          console.log('[PowerSync] Connection ready!')
+
+          // Add 10 second timeout
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('PowerSync connection timeout after 10s')), 10000)
+          )
+
+          try {
+            await Promise.race([powerSync.waitForReady(), timeoutPromise])
+            console.log('[PowerSync] Connection ready!')
+          } catch (timeoutError) {
+            console.error('[PowerSync] Connection failed:', timeoutError)
+            throw timeoutError
+          }
         }
 
         // Query 1: Active strength programs
