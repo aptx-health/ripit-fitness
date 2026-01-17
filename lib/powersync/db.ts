@@ -1,5 +1,4 @@
 import { PowerSyncDatabase } from '@powersync/web';
-import { WASQLitePowerSyncDatabaseOpenFactory } from '@powersync/web';
 import { AppSchema } from './schema';
 import { SupabaseConnector } from './SupabaseConnector';
 
@@ -37,20 +36,22 @@ export function getPowerSync(): PowerSyncDatabase {
 
   console.log('[PowerSync DB] Initializing PowerSync with worker: /@powersync/worker/WASQLiteDB.umd.js');
 
-  // Initialize PowerSync database with explicit worker path
-  const factory = new WASQLitePowerSyncDatabaseOpenFactory({
+  // Initialize PowerSync database with modern constructor API
+  powerSyncInstance = new PowerSyncDatabase({
     schema: AppSchema,
-    dbFilename: 'fitcsv-local.db',
-    // Point to worker in public directory (copied via npx powersync-web copy-assets)
-    worker: '/@powersync/worker/WASQLiteDB.umd.js',
+    database: {
+      dbFilename: 'fitcsv-local.db',
+    },
+    sync: {
+      // Point to worker in public directory (copied via npx powersync-web copy-assets)
+      worker: '/@powersync/worker/WASQLiteDB.umd.js',
+    },
     flags: {
       // Disable web workers to fix Chrome stalling issue
       // See: https://docs.powersync.com/resources/troubleshooting
       useWebWorker: false,
     },
   });
-
-  powerSyncInstance = factory.getInstance();
 
   // Connect to Supabase via PowerSync
   const connector = new SupabaseConnector();
