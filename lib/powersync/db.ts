@@ -32,11 +32,10 @@ export function getPowerSync(): PowerSyncDatabase {
   }
 
   if (powerSyncInstance) {
-    console.log('[PowerSync DB] Returning existing instance');
     return powerSyncInstance;
   }
 
-  console.log('[PowerSync DB] Creating new PowerSync instance');
+  console.log('[PowerSync DB] Initializing PowerSync with worker: /@powersync/worker/WASQLiteDB.umd.js');
 
   // Initialize PowerSync database with explicit worker path
   const factory = new WASQLitePowerSyncDatabaseOpenFactory({
@@ -47,8 +46,6 @@ export function getPowerSync(): PowerSyncDatabase {
   });
 
   powerSyncInstance = factory.getInstance();
-
-  console.log('[PowerSync DB] PowerSync instance created, connecting to Supabase');
 
   // Connect to Supabase via PowerSync
   const connector = new SupabaseConnector();

@@ -65,35 +65,34 @@ export default function ProgramsPage() {
 
     const fetchData = async () => {
       try {
-        console.log('[PowerSync] Starting data fetch for userId:', userId)
-        console.log('[PowerSync] PowerSync instance:', powerSync)
-        console.log('[PowerSync] PowerSync connected:', powerSync.connected)
+        console.log('[PowerSync] Fetching data for user:', userId)
 
-        // Wait for PowerSync to connect (with timeout)
+        // Wait for PowerSync to connect
         if (!powerSync.connected) {
           console.log('[PowerSync] Waiting for connection...')
-
-          // Add 10 second timeout
           const timeoutPromise = new Promise((_, reject) =>
             setTimeout(() => reject(new Error('PowerSync connection timeout after 10s')), 10000)
           )
-
-          try {
-            await Promise.race([powerSync.waitForReady(), timeoutPromise])
-            console.log('[PowerSync] Connection ready!')
-          } catch (timeoutError) {
-            console.error('[PowerSync] Connection failed:', timeoutError)
-            throw timeoutError
-          }
+          await Promise.race([powerSync.waitForReady(), timeoutPromise])
+          console.log('[PowerSync] Connected successfully')
         }
 
+        // Check sync status for debugging
+        console.log('[PowerSync] Sync status:', {
+          connected: powerSync.connected,
+          hasSynced: powerSync.currentStatus?.hasSynced,
+          lastSyncedAt: powerSync.currentStatus?.lastSyncedAt,
+        })
+
         // Query 1: Active strength programs
-        console.log('[PowerSync] Querying strength programs...')
         const strengthResults = await powerSync.getAll(
           'SELECT * FROM Program WHERE userId = ? AND isArchived = ? ORDER BY createdAt DESC',
           [userId, 0]
         )
-        console.log('[PowerSync] Strength programs result:', strengthResults)
+        console.log('[PowerSync] Active strength programs:', strengthResults.length, 'rows')
+        if (strengthResults.length === 0) {
+          console.warn('[PowerSync] No active strength programs found. Check: RLS policies, sync rules, or data exists in Supabase')
+        }
         if (isSubscribed) {
           setStrengthPrograms(strengthResults.map(transformProgram))
         }
@@ -103,6 +102,7 @@ export default function ProgramsPage() {
           'SELECT * FROM Program WHERE userId = ? AND isArchived = ? ORDER BY archivedAt DESC',
           [userId, 1]
         )
+        console.log('[PowerSync] Archived strength programs:', archivedStrengthResults.length, 'rows')
         if (isSubscribed) {
           setArchivedStrengthPrograms(archivedStrengthResults.map(transformProgram))
         }
@@ -211,6 +211,10 @@ export default function ProgramsPage() {
           }
         }
 
+        console.log('[PowerSync] Active cardio programs:', cardioProgramsMap.size, 'programs,', cardioResults.length, 'total rows')
+        if (cardioResults.length === 0) {
+          console.warn('[PowerSync] No active cardio programs found. Check: RLS policies, sync rules, or data exists in Supabase')
+        }
         if (isSubscribed) {
           setCardioPrograms(Array.from(cardioProgramsMap.values()))
         }
@@ -220,18 +224,25 @@ export default function ProgramsPage() {
           'SELECT * FROM CardioProgram WHERE userId = ? AND isArchived = ? ORDER BY archivedAt DESC',
           [userId, 1]
         )
+        console.log('[PowerSync] Archived cardio programs:', archivedCardioResults.length, 'rows')
         if (isSubscribed) {
           setArchivedCardioPrograms(archivedCardioResults.map(transformCardioProgram))
         }
 
-        console.log('[PowerSync] All queries completed successfully')
+        console.log('[PowerSync] Data fetch completed')
         setLoading(false)
       } catch (error) {
-        console.error('[PowerSync] Error fetching programs:', error)
-        console.error('[PowerSync] Error details:', {
-          message: error instanceof Error ? error.message : String(error),
-          stack: error instanceof Error ? error.stack : undefined,
-        })
+        console.error('[PowerSync] Query failed:', error)
+        if (error instanceof Error) {
+          // Check for common issues
+          if (error.message.includes('no such column')) {
+            console.error('[PowerSync] Column missing in schema. Check that PowerSync schema matches database.')
+          } else if (error.message.includes('no such table')) {
+            console.error('[PowerSync] Table missing. Check that sync rules are configured and initial sync completed.')
+          } else if (error.message.includes('timeout')) {
+            console.error('[PowerSync] Connection timeout. Check network and PowerSync service status.')
+          }
+        }
         setLoading(false)
       }
     }
