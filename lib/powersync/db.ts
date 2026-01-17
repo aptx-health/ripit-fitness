@@ -43,6 +43,11 @@ export function getPowerSync(): PowerSyncDatabase {
     dbFilename: 'fitcsv-local.db',
     // Point to worker in public directory (copied via npx powersync-web copy-assets)
     worker: '/@powersync/worker/WASQLiteDB.umd.js',
+    flags: {
+      // Disable web workers to fix Chrome stalling issue
+      // See: https://docs.powersync.com/resources/troubleshooting
+      useWebWorker: false,
+    },
   });
 
   powerSyncInstance = factory.getInstance();
