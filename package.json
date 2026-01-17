@@ -13,6 +13,8 @@
     "test:run": "vitest run"
   },
   "dependencies": {
+    "@powersync/common": "^1.45.0",
+    "@powersync/web": "^1.31.0",
     "@prisma/client": "^6.19.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.86.2",
