@@ -1,4 +1,5 @@
 import { PowerSyncDatabase } from '@powersync/web';
+import { WASQLitePowerSyncDatabaseOpenFactory } from '@powersync/web';
 import { AppSchema } from './schema';
 import { SupabaseConnector } from './SupabaseConnector';
 
@@ -25,6 +26,11 @@ import { SupabaseConnector } from './SupabaseConnector';
 let powerSyncInstance: PowerSyncDatabase | null = null;
 
 export function getPowerSync(): PowerSyncDatabase {
+  // Only initialize on client side
+  if (typeof window === 'undefined') {
+    throw new Error('PowerSync can only be used in the browser');
+  }
+
   if (powerSyncInstance) {
     console.log('[PowerSync DB] Returning existing instance');
     return powerSyncInstance;
@@ -32,13 +38,17 @@ export function getPowerSync(): PowerSyncDatabase {
 
   console.log('[PowerSync DB] Creating new PowerSync instance');
 
-  // Initialize PowerSync database
-  powerSyncInstance = new PowerSyncDatabase({
+  //Initialize PowerSync database with explicit worker path
+  const factory = new WASQLitePowerSyncDatabaseOpenFactory({
     schema: AppSchema,
-    database: {
-      dbFilename: 'fitcsv-local.db', // Stored in IndexedDB
+    dbFilename: 'fitcsv-local.db',
+    flags: {
+      // Point to worker in public directory
+      workerUrl: '/powersync/WASQLiteDB.worker.js',
     },
   });
+
+  powerSyncInstance = factory.getInstance();
 
   console.log('[PowerSync DB] PowerSync instance created, connecting to Supabase');
 
@@ -51,5 +61,14 @@ export function getPowerSync(): PowerSyncDatabase {
   return powerSyncInstance;
 }
 
-// Export singleton instance
-export const powerSync = getPowerSync();
+// Lazy initialization - only create when first accessed on client
+let _powerSyncClient: PowerSyncDatabase | null = null;
+
+export const powerSync = new Proxy({} as PowerSyncDatabase, {
+  get(target, prop) {
+    if (!_powerSyncClient) {
+      _powerSyncClient = getPowerSync();
+    }
+    return (_powerSyncClient as any)[prop];
+  },
+});
