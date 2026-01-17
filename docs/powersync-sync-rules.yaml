@@ -1,0 +1,27 @@
+bucket_definitions:
+  user_strength_data:
+    parameters: SELECT request.user_id() as user_id
+    data:
+      - SELECT * FROM "Program" WHERE "userId" = bucket.user_id
+      - SELECT * FROM "Week" WHERE "userId" = bucket.user_id
+      - SELECT * FROM "Workout" WHERE "userId" = bucket.user_id
+      - SELECT * FROM "Exercise" WHERE "userId" = bucket.user_id
+      - SELECT * FROM "PrescribedSet" WHERE "userId" = bucket.user_id
+      - SELECT * FROM "WorkoutCompletion" WHERE "userId" = bucket.user_id
+      - SELECT * FROM "LoggedSet" WHERE "userId" = bucket.user_id
+
+  user_cardio_data:
+    parameters: SELECT request.user_id() as user_id
+    data:
+      - SELECT * FROM "CardioProgram" WHERE "userId" = bucket.user_id
+      - SELECT * FROM "CardioWeek" WHERE "userId" = bucket.user_id
+      - SELECT * FROM "PrescribedCardioSession" WHERE "userId" = bucket.user_id
+      - SELECT * FROM "LoggedCardioSession" WHERE "userId" = bucket.user_id
+      - SELECT * FROM "UserCardioMetricPreferences" WHERE "userId" = bucket.user_id
+
+  user_exercises:
+    parameters:
+      - SELECT request.user_id() as user_id
+      - SELECT '00000000-0000-0000-0000-000000000000' as user_id
+    data:
+      - SELECT * FROM "ExerciseDefinition" WHERE "userId" = bucket.user_id

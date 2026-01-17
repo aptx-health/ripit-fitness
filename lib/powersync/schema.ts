@@ -73,6 +73,7 @@ const exerciseDefinition = new Table(
     instructions: column.text, // nullable
     isSystem: column.integer, // boolean → 0/1
     createdBy: column.text, // nullable
+    userId: column.text, // System exercises: 00000000-0000-0000-0000-000000000000, User exercises: actual userId
     createdAt: column.text, // DateTime → ISO 8601
     updatedAt: column.text, // DateTime → ISO 8601
   },
@@ -81,6 +82,7 @@ const exerciseDefinition = new Table(
       normalizedName_idx: ['normalizedName'],
       isSystem_idx: ['isSystem'],
       createdBy_idx: ['createdBy'],
+      userId_idx: ['userId'],
     },
   }
 );
@@ -153,12 +155,14 @@ const loggedSet = new Table(
     rir: column.integer, // nullable
     exerciseId: column.text,
     completionId: column.text,
+    userId: column.text, // Denormalized from WorkoutCompletion for PowerSync
     createdAt: column.text, // DateTime → ISO 8601
   },
   {
     indexes: {
       exerciseId_idx: ['exerciseId'],
       completionId_idx: ['completionId'],
+      userId_idx: ['userId'],
     },
   }
 );
