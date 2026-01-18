@@ -154,6 +154,7 @@ export async function POST(
           data: loggedSets.map((set) => ({
             exerciseId: set.exerciseId,
             completionId: draftCompletion.id,
+            userId: user.id,
             setNumber: set.setNumber,
             reps: set.reps,
             weight: set.weight,

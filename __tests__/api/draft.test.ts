@@ -337,6 +337,7 @@ async function simulateDraftAPI(
           }) => ({
             exerciseId: set.exerciseId,
             completionId: draftCompletion.id,
+            userId,
             setNumber: set.setNumber,
             reps: set.reps,
             weight: set.weight,

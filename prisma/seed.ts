@@ -143,7 +143,8 @@ async function seedExerciseDefinitions() {
         aliases: ex.aliases,
         category: ex.category,
         isSystem: true,
-        createdBy: null
+        createdBy: null,
+        userId: '00000000-0000-0000-0000-000000000000' // System exercises use special UUID
       },
       update: {
         aliases: ex.aliases,

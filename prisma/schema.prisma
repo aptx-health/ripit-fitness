@@ -77,6 +77,7 @@ model ExerciseDefinition {
   instructions   String?  // Setup and execution notes
   isSystem       Boolean  @default(false) // System vs user-created
   createdBy      String?  // User ID (null for system exercises)
+  userId         String   // System exercises: 00000000-0000-0000-0000-000000000000, User exercises: actual userId (for PowerSync)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -86,6 +87,7 @@ model ExerciseDefinition {
   @@index([isSystem])
   @@index([createdBy])
   @@index([primaryFAUs])
+  @@index([userId])
 }
 
 model Exercise {
@@ -151,10 +153,12 @@ model LoggedSet {
   exercise     Exercise          @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
   completionId String
   completion   WorkoutCompletion @relation(fields: [completionId], references: [id], onDelete: Cascade)
+  userId       String            // Denormalized from WorkoutCompletion for PowerSync/RLS
   createdAt    DateTime          @default(now())
 
   @@index([exerciseId])
   @@index([completionId])
+  @@index([userId])
 }
 
 // ============================================
