@@ -39,12 +39,12 @@ export async function createTestUser(): Promise<TestUser> {
 }
 
 export async function createTestExerciseDefinition(
-  prisma: PrismaClient, 
+  prisma: PrismaClient,
   overrides: Partial<{ name: string; aliases: string[] }> = {}
 ): Promise<TestExerciseDefinition> {
   const name = overrides.name || 'Barbell Bench Press'
   const normalizedName = name.toLowerCase().replace(/[^a-z0-9]/g, '')
-  
+
   const exerciseDefinition = await prisma.exerciseDefinition.create({
     data: {
       name,
@@ -52,10 +52,11 @@ export async function createTestExerciseDefinition(
       aliases: overrides.aliases || ['bench press', 'bench'],
       category: 'chest',
       isSystem: true,
-      createdBy: null
+      createdBy: null,
+      userId: '00000000-0000-0000-0000-000000000000' // System exercises use special UUID
     }
   })
-  
+
   return {
     id: exerciseDefinition.id,
     name: exerciseDefinition.name,
@@ -179,15 +180,17 @@ export async function createTestLoggedSets(
   prisma: PrismaClient,
   completionId: string,
   exerciseId: string,
+  userId: string,
   setCount: number = 3
 ) {
   const loggedSets = []
-  
+
   for (let i = 1; i <= setCount; i++) {
     const loggedSet = await prisma.loggedSet.create({
       data: {
         completionId,
         exerciseId,
+        userId,
         setNumber: i,
         reps: 10,
         weight: 135.0,
@@ -198,7 +201,7 @@ export async function createTestLoggedSets(
     })
     loggedSets.push(loggedSet)
   }
-  
+
   return loggedSets
 }
 
@@ -260,9 +263,10 @@ export async function createCompleteTestScenario(
     prisma,
     completion.id,
     exercise.id,
+    userId,
     loggedSetCount
   )
-  
+
   return {
     program,
     workout,
