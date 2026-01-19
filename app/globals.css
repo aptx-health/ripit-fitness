@@ -220,8 +220,6 @@
   --primary-active: #9A3412;      /* orange-800 */
   --primary-muted: #431407;       /* orange-950 */
   --primary-muted-dark: #EA580C;  /* orange-600 for borders */
-
-  /* Primary RGB (for rgba usage) */
   --primary-rgb: 234, 88, 12;
 
   /* Secondary (Zinc) */
@@ -238,6 +236,7 @@
   --success-muted: #052E16;       /* green-950 */
   --success-text: #4ADE80;        /* green-400 */
   --success-border: #15803D;      /* green-700 */
+  --success-rgb: 21, 128, 61;
 
   /* Warning (Orange) - In-progress workouts */
   --warning: #EA580C;     /* orange-600 */
@@ -246,6 +245,7 @@
   --warning-muted: #431407;       /* orange-950 */
   --warning-text: #FB923C;        /* orange-400 */
   --warning-border: #EA580C;      /* orange-600 */
+  --warning-rgb: 234, 88, 12;
 
   /* Error/Danger (Red) */
   --error: #DC2626;       /* red-600 */
@@ -254,6 +254,7 @@
   --error-muted: #450A0A;         /* red-950 */
   --error-text: #F87171;          /* red-400 */
   --error-border: #DC2626;        /* red-600 */
+  --error-rgb: 220, 38, 38;
 
   /* Accent (Purple) - for supersets */
   --accent: #9333EA;      /* purple-600 */
@@ -261,6 +262,7 @@
   --accent-hover: #7E22CE;        /* purple-700 */
   --accent-muted: #3B0764;        /* purple-950 */
   --accent-text: #C084FC;         /* purple-400 */
+  --accent-rgb: 147, 51, 234;
 }
 
 /* DOOM Theme - Dark Mode */
@@ -286,8 +288,6 @@
   --primary-active: #9A3412;      /* orange-800 */
   --primary-muted: #431407;       /* orange-950 */
   --primary-muted-dark: #F97316;  /* orange-500 for borders */
-
-  /* Primary RGB */
   --primary-rgb: 234, 88, 12;
 
   /* Secondary (Zinc) */
@@ -304,6 +304,7 @@
   --success-muted: #052E16;       /* green-950 */
   --success-text: #4ADE80;        /* green-400 */
   --success-border: #16A34A;      /* green-600 */
+  --success-rgb: 22, 163, 74;
 
   /* Warning (Orange) - In-progress workouts */
   --warning: #F97316;     /* orange-500 */
@@ -312,6 +313,7 @@
   --warning-muted: #431407;       /* orange-950 */
   --warning-text: #FB923C;        /* orange-400 */
   --warning-border: #F97316;      /* orange-500 */
+  --warning-rgb: 249, 115, 22;
 
   /* Error/Danger (Red) */
   --error: #EF4444;       /* red-500 */
@@ -320,6 +322,7 @@
   --error-muted: #450A0A;         /* red-950 */
   --error-text: #F87171;          /* red-400 */
   --error-border: #EF4444;        /* red-500 */
+  --error-rgb: 239, 68, 68;
 
   /* Accent (Purple) - for supersets */
   --accent: #A855F7;      /* purple-500 */
@@ -327,6 +330,7 @@
   --accent-hover: #9333EA;        /* purple-600 */
   --accent-muted: #3B0764;        /* purple-950 */
   --accent-text: #C084FC;         /* purple-400 */
+  --accent-rgb: 168, 85, 247;
 }
 
 /* CYBER Theme - Light Mode (Synthwave meets Matrix) */
@@ -370,6 +374,7 @@
   --success-muted: #002B20;
   --success-text: #00FF9F;
   --success-border: #00FF9F;
+  --success-rgb: 0, 255, 159;
 
   /* Warning (Orange) */
   --warning: #FF9500;
@@ -378,6 +383,7 @@
   --warning-muted: #2B1F00;
   --warning-text: #FFA726;
   --warning-border: #FF9500;
+  --warning-rgb: 255, 149, 0;
 
   /* Error (Hot Pink) */
   --error: #FF10F0;
@@ -386,6 +392,7 @@
   --error-muted: #2B0026;
   --error-text: #FF66F6;
   --error-border: #FF10F0;
+  --error-rgb: 255, 16, 240;
 
   /* Accent (Hot Pink) */
   --accent: #FF10F0;
@@ -393,6 +400,7 @@
   --accent-hover: #E600D6;
   --accent-muted: #2B0026;
   --accent-text: #FF66F6;
+  --accent-rgb: 255, 16, 240;
 }
 
 /* CYBER Theme - Dark Mode */
@@ -436,6 +444,7 @@
   --success-muted: #001A14;
   --success-text: #00FF9F;
   --success-border: #00FF9F;
+  --success-rgb: 0, 255, 159;
 
   /* Warning (Orange) */
   --warning: #FFA500;
@@ -444,6 +453,7 @@
   --warning-muted: #1F1500;
   --warning-text: #FFB84D;
   --warning-border: #FFA500;
+  --warning-rgb: 255, 165, 0;
 
   /* Error (Hot Pink) */
   --error: #FF00FF;       /* magenta */
@@ -452,6 +462,7 @@
   --error-muted: #1F001F;
   --error-text: #FF66FF;
   --error-border: #FF00FF;
+  --error-rgb: 255, 0, 255;
 
   /* Accent (Hot Pink) */
   --accent: #FF00FF;
@@ -459,6 +470,7 @@
   --accent-hover: #E600E6;
   --accent-muted: #1F001F;
   --accent-text: #FF66FF;
+  --accent-rgb: 255, 0, 255;
 }
 
 /* FOREST Theme - Light Mode (Monokai meets Nature) */
@@ -502,6 +514,7 @@
   --success-muted: #F0FDF4;
   --success-text: #16A34A;
   --success-border: #15803D;
+  --success-rgb: 21, 128, 61;
 
   /* Warning (Amber) */
   --warning: #D97706;
@@ -510,6 +523,7 @@
   --warning-muted: #FEF3C7;
   --warning-text: #F59E0B;
   --warning-border: #D97706;
+  --warning-rgb: 217, 119, 6;
 
   /* Error (Red) */
   --error: #DC2626;
@@ -518,6 +532,7 @@
   --error-muted: #FEE2E2;
   --error-text: #EF4444;
   --error-border: #DC2626;
+  --error-rgb: 220, 38, 38;
 
   /* Accent (Teal) */
   --accent: #14B8A6;
@@ -525,6 +540,7 @@
   --accent-hover: #0D9488;
   --accent-muted: #F0FDFA;
   --accent-text: #2DD4BF;
+  --accent-rgb: 20, 184, 166;
 }
 
 /* FOREST Theme - Dark Mode */
@@ -568,6 +584,7 @@
   --success-muted: #052E16;
   --success-text: #22C55E;
   --success-border: #16A34A;
+  --success-rgb: 22, 163, 74;
 
   /* Warning (Amber) */
   --warning: #F59E0B;
@@ -576,6 +593,7 @@
   --warning-muted: #1C0E03;
   --warning-text: #FBBF24;
   --warning-border: #F59E0B;
+  --warning-rgb: 245, 158, 11;
 
   /* Error (Red) */
   --error: #EF4444;
@@ -584,6 +602,7 @@
   --error-muted: #1C0404;
   --error-text: #F87171;
   --error-border: #EF4444;
+  --error-rgb: 239, 68, 68;
 
   /* Accent (Teal) */
   --accent: #2DD4BF;
@@ -591,6 +610,7 @@
   --accent-hover: #14B8A6;
   --accent-muted: #042F2E;
   --accent-text: #5EEAD4;
+  --accent-rgb: 45, 212, 191;
 }
 
 body {
@@ -609,7 +629,7 @@ body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5), 0 0 20px rgba(234, 88, 12, 0.3);
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5), 0 0 20px rgba(var(--primary-rgb), 0.3);
 }
 
 .doom-heading {
@@ -706,7 +726,7 @@ body {
 .doom-button-3d:hover:not(:disabled) {
   box-shadow:
     0 4px 0 var(--primary-active),
-    0 0 30px rgba(234, 88, 12, 0.6),
+    0 0 30px rgba(var(--primary-rgb), 0.6),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
@@ -728,8 +748,8 @@ body {
 }
 
 .doom-card:hover {
-  border-color: rgba(234, 88, 12, 0.5);
-  box-shadow: 0 0 20px rgba(234, 88, 12, 0.2);
+  border-color: rgba(var(--primary-rgb), 0.5);
+  box-shadow: 0 0 20px rgba(var(--primary-rgb), 0.2);
 }
 
 /* ============================================
@@ -738,30 +758,30 @@ body {
 
 /* Workout States */
 .doom-workout-completed {
-  background: linear-gradient(135deg, rgba(21, 128, 61, 0.15) 0%, rgba(21, 128, 61, 0.05) 100%), var(--card);
+  background: linear-gradient(135deg, rgba(var(--success-rgb), 0.15) 0%, rgba(var(--success-rgb), 0.05) 100%), var(--card);
   border-color: var(--success-border);
-  box-shadow: 0 0 20px rgba(34, 197, 94, 0.3), inset 0 1px 0 rgba(34, 197, 94, 0.1);
+  box-shadow: 0 0 20px rgba(var(--success-rgb), 0.3), inset 0 1px 0 rgba(var(--success-rgb), 0.1);
   transition: all 0.3s ease;
 }
 
 .doom-workout-completed:hover {
   border-color: var(--success);
-  box-shadow: 0 0 30px rgba(34, 197, 94, 0.5), inset 0 1px 0 rgba(34, 197, 94, 0.2);
+  box-shadow: 0 0 30px rgba(var(--success-rgb), 0.5), inset 0 1px 0 rgba(var(--success-rgb), 0.2);
 }
 
 .doom-workout-progress {
-  background: linear-gradient(135deg, rgba(234, 88, 12, 0.15) 0%, rgba(234, 88, 12, 0.05) 100%), var(--card);
+  background: linear-gradient(135deg, rgba(var(--warning-rgb), 0.15) 0%, rgba(var(--warning-rgb), 0.05) 100%), var(--card);
   border-color: var(--warning-border);
   animation: doom-pulse 2s ease-in-out infinite;
-  box-shadow: 0 0 20px rgba(234, 88, 12, 0.3), inset 0 1px 0 rgba(234, 88, 12, 0.1);
+  box-shadow: 0 0 20px rgba(var(--warning-rgb), 0.3), inset 0 1px 0 rgba(var(--warning-rgb), 0.1);
 }
 
 @keyframes doom-pulse {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(234, 88, 12, 0.3), inset 0 1px 0 rgba(234, 88, 12, 0.1);
+    box-shadow: 0 0 20px rgba(var(--warning-rgb), 0.3), inset 0 1px 0 rgba(var(--warning-rgb), 0.1);
   }
   50% {
-    box-shadow: 0 0 40px rgba(234, 88, 12, 0.6), inset 0 1px 0 rgba(234, 88, 12, 0.2);
+    box-shadow: 0 0 40px rgba(var(--warning-rgb), 0.6), inset 0 1px 0 rgba(var(--warning-rgb), 0.2);
   }
 }
 
@@ -794,13 +814,13 @@ body {
 .doom-badge-completed {
   background: var(--success);
   color: var(--success-foreground);
-  box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+  box-shadow: 0 0 10px rgba(var(--success-rgb), 0.5);
 }
 
 .doom-badge-progress {
   background: var(--warning);
   color: var(--warning-foreground);
-  box-shadow: 0 0 10px rgba(234, 88, 12, 0.5);
+  box-shadow: 0 0 10px rgba(var(--warning-rgb), 0.5);
   animation: doom-badge-pulse 1.5s ease-in-out infinite;
 }
 
@@ -824,7 +844,7 @@ body {
   box-shadow:
     0 0 0 3px var(--background),
     0 0 0 6px var(--primary),
-    0 0 20px rgba(234, 88, 12, 0.6);
+    0 0 20px rgba(var(--primary-rgb), 0.6);
 }
 
 /* Link Styling */
@@ -849,7 +869,7 @@ body {
 
 .doom-link:hover {
   color: var(--primary-hover);
-  text-shadow: 0 0 10px rgba(234, 88, 12, 0.5);
+  text-shadow: 0 0 10px rgba(var(--primary-rgb), 0.5);
 }
 
 .doom-link:hover::after {
@@ -878,7 +898,7 @@ body {
 }
 
 .doom-hover-glow:hover {
-  filter: drop-shadow(0 0 15px rgba(234, 88, 12, 0.5));
+  filter: drop-shadow(0 0 15px rgba(var(--primary-rgb), 0.5));
 }
 
 /* Table Row Hover */
@@ -887,7 +907,7 @@ body {
 }
 
 .doom-table-row:hover {
-  background: rgba(234, 88, 12, 0.05);
+  background: rgba(var(--primary-rgb), 0.05);
   border-left: 3px solid var(--primary);
   padding-left: calc(1rem - 3px);
 }
@@ -907,7 +927,7 @@ body {
 .doom-input:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 20px rgba(234, 88, 12, 0.3);
+  box-shadow: 0 0 20px rgba(var(--primary-rgb), 0.3);
   background: var(--card);
 }
 
