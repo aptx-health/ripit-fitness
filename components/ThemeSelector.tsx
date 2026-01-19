@@ -16,6 +16,7 @@ export function ThemeSelector() {
   const [preference, setPreference] = useState<ThemePreference | null>(null);
   const [mounted, setMounted] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [menuPosition, setMenuPosition] = useState<'bottom' | 'top'>('bottom');
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -62,6 +63,19 @@ export function ThemeSelector() {
     setIsMenuOpen(false);
   };
 
+  const handleMenuToggle = () => {
+    if (!isMenuOpen && buttonRef.current) {
+      // Calculate if there's enough space below
+      const buttonRect = buttonRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - buttonRect.bottom;
+      const menuHeight = 250; // Approximate height of menu with 5 items
+
+      // If not enough space below, show above
+      setMenuPosition(spaceBelow < menuHeight ? 'top' : 'bottom');
+    }
+    setIsMenuOpen(!isMenuOpen);
+  };
+
   const handleModeToggle = () => {
     if (!preference) return;
 
@@ -91,7 +105,7 @@ export function ThemeSelector() {
       <div className="relative">
         <button
           ref={buttonRef}
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          onClick={handleMenuToggle}
           className="h-9 w-9 flex items-center justify-center cursor-pointer border-2 bg-input transition-all hover:border-primary hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
           style={{
             borderColor: 'var(--border)',
@@ -107,7 +121,9 @@ export function ThemeSelector() {
         {isMenuOpen && (
           <div
             ref={menuRef}
-            className="absolute top-full mt-2 right-0 bg-card border-2 border-primary shadow-lg z-50 min-w-[180px]"
+            className={`absolute right-0 bg-card border-2 border-primary shadow-lg z-50 min-w-[180px] ${
+              menuPosition === 'bottom' ? 'top-full mt-2' : 'bottom-full mb-2'
+            }`}
           >
             {THEMES.map((themeName) => (
               <button
