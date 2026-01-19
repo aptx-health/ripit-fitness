@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { Palette, Sun, Moon } from 'lucide-react';
 import {
   getThemePreference,
   saveThemePreference,
   applyTheme,
   THEME_LABELS,
+  THEMES,
   type ThemeName,
   type ThemePreference,
 } from '@/lib/theme';
@@ -13,12 +15,38 @@ import {
 export function ThemeSelector() {
   const [preference, setPreference] = useState<ThemePreference | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   // Hydration-safe: Only render after mounting
   useEffect(() => {
-    setPreference(getThemePreference());
+    const currentPreference = getThemePreference();
+    setPreference(currentPreference);
     setMounted(true);
+
+    // Don't apply theme on mount - it's already applied by SSR script
+    // Only apply when user changes it
   }, []);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        menuRef.current &&
+        buttonRef.current &&
+        !menuRef.current.contains(event.target as Node) &&
+        !buttonRef.current.contains(event.target as Node)
+      ) {
+        setIsMenuOpen(false);
+      }
+    }
+
+    if (isMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isMenuOpen]);
 
   const handleThemeChange = (themeName: ThemeName) => {
     if (!preference) return;
@@ -31,6 +59,7 @@ export function ThemeSelector() {
     setPreference(newPreference);
     saveThemePreference(newPreference);
     applyTheme(newPreference);
+    setIsMenuOpen(false);
   };
 
   const handleModeToggle = () => {
@@ -50,7 +79,7 @@ export function ThemeSelector() {
   if (!mounted || !preference) {
     return (
       <div className="flex items-center gap-3">
-        <div className="w-24 h-9 bg-muted rounded animate-pulse" />
+        <div className="w-9 h-9 bg-muted rounded animate-pulse" />
         <div className="w-9 h-9 bg-muted rounded animate-pulse" />
       </div>
     );
@@ -58,62 +87,59 @@ export function ThemeSelector() {
 
   return (
     <div className="flex items-center gap-3">
-      {/* Theme Dropdown */}
-      <select
-        value={preference.themeName}
-        onChange={(e) => handleThemeChange(e.target.value as ThemeName)}
-        className="doom-input h-9 px-3 text-sm font-semibold uppercase tracking-wider cursor-pointer transition-all hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
-        aria-label="Select theme"
-      >
-        {Object.entries(THEME_LABELS).map(([key, label]) => (
-          <option key={key} value={key}>
-            {label}
-          </option>
-        ))}
-      </select>
+      {/* Theme Palette Button with Dropdown */}
+      <div className="relative">
+        <button
+          ref={buttonRef}
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="h-9 w-9 flex items-center justify-center cursor-pointer border-2 bg-input transition-all hover:border-primary hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
+          style={{
+            borderColor: 'var(--border)',
+            color: 'var(--foreground)'
+          }}
+          aria-label="Select theme"
+          aria-expanded={isMenuOpen}
+        >
+          <Palette className="w-5 h-5" strokeWidth={2} />
+        </button>
+
+        {/* Dropdown Menu */}
+        {isMenuOpen && (
+          <div
+            ref={menuRef}
+            className="absolute top-full mt-2 right-0 bg-card border-2 border-primary shadow-lg z-50 min-w-[180px]"
+          >
+            {THEMES.map((themeName) => (
+              <button
+                key={themeName}
+                onClick={() => handleThemeChange(themeName)}
+                className={`w-full px-4 py-2.5 text-left text-sm font-semibold uppercase tracking-wider transition-colors ${
+                  preference.themeName === themeName
+                    ? 'bg-primary text-primary-foreground'
+                    : 'hover:bg-muted text-foreground'
+                }`}
+              >
+                {THEME_LABELS[themeName]}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Mode Toggle Button */}
       <button
         onClick={handleModeToggle}
-        className="doom-input h-9 w-9 flex items-center justify-center cursor-pointer transition-all hover:border-primary hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
+        className="h-9 w-9 flex items-center justify-center cursor-pointer border-2 bg-input transition-all hover:border-primary hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
+        style={{
+          borderColor: 'var(--border)',
+          color: 'var(--foreground)'
+        }}
         aria-label={`Switch to ${preference.mode === 'dark' ? 'light' : 'dark'} mode`}
       >
         {preference.mode === 'dark' ? (
-          // Sun icon (for switching to light mode)
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="w-5 h-5"
-          >
-            <circle cx="12" cy="12" r="5" />
-            <line x1="12" y1="1" x2="12" y2="3" />
-            <line x1="12" y1="21" x2="12" y2="23" />
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-            <line x1="1" y1="12" x2="3" y2="12" />
-            <line x1="21" y1="12" x2="23" y2="12" />
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-          </svg>
+          <Sun className="w-5 h-5" strokeWidth={2} />
         ) : (
-          // Moon icon (for switching to dark mode)
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="w-5 h-5"
-          >
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-          </svg>
+          <Moon className="w-5 h-5" strokeWidth={2} />
         )}
       </button>
     </div>
