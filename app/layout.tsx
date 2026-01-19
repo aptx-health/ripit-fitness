@@ -107,16 +107,33 @@ export default function RootLayout({
           zIndex: 9999,
           transition: 'opacity 0.3s ease-out',
         }}>
-          <img
-            src="/splash-1179x2556.png"
-            alt="Ripit"
-            style={{
-              maxWidth: '100%',
-              maxHeight: '100%',
-              objectFit: 'contain',
-              animation: 'pulse 2s ease-in-out infinite',
-            }}
-          />
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '20px',
+          }}>
+            <img
+              src="/icon-512.png"
+              alt="Ripit"
+              style={{
+                width: '200px',
+                height: '200px',
+                animation: 'pulse 2s ease-in-out infinite',
+              }}
+            />
+            <div style={{
+              fontFamily: 'var(--font-rajdhani)',
+              fontSize: '48px',
+              fontWeight: 700,
+              color: '#EA580C',
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              textShadow: '2px 2px 0 rgba(0, 0, 0, 0.5), 0 0 20px rgba(234, 88, 12, 0.3)',
+            }}>
+              RIPIT
+            </div>
+          </div>
           <div style={{
             position: 'absolute',
             bottom: '40px',
