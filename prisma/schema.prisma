@@ -1,6 +1,3 @@
-// FitCSV Database Schema
-// See docs/ARCHITECTURE.md for design decisions
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,23 +8,19 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// User table is managed by Supabase Auth
-// We just reference it with the userId String
-
 model Program {
   id            String    @id @default(cuid())
   name          String
   description   String?
-  userId        String    // References auth.users in Supabase
-  isActive      Boolean   @default(false) // Only one active strength program per user
-  isArchived    Boolean   @default(false) // Archived programs are hidden but preserved
-  archivedAt    DateTime? // When the program was archived
-  programType   String    @default("strength") // "strength", "hypertrophy", "powerlifting"
-  isUserCreated Boolean   @default(false) // true for in-app created, false for CSV imported
+  userId        String
+  isActive      Boolean   @default(false)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-
-  weeks Week[]
+  isUserCreated Boolean   @default(false)
+  programType   String    @default("strength")
+  isArchived    Boolean   @default(false)
+  archivedAt    DateTime?
+  weeks         Week[]
 
   @@index([userId, isActive])
   @@index([userId])
@@ -36,13 +29,12 @@ model Program {
 }
 
 model Week {
-  id         String  @id @default(cuid())
-  weekNumber Int     // 1, 2, 3...
+  id         String    @id @default(cuid())
+  weekNumber Int
   programId  String
-  userId     String  // Denormalized from Program for RLS performance
-  program    Program @relation(fields: [programId], references: [id], onDelete: Cascade)
-
-  workouts Workout[]
+  userId     String
+  program    Program   @relation(fields: [programId], references: [id], onDelete: Cascade)
+  workouts   Workout[]
 
   @@unique([programId, weekNumber])
   @@index([programId])
@@ -50,14 +42,13 @@ model Week {
 }
 
 model Workout {
-  id        String @id @default(cuid())
-  name      String // "Day 1: Upper Power", "Monday", etc.
-  dayNumber Int    // Position within week (1, 2, 3...)
-  weekId    String
-  userId    String // Denormalized from Week for RLS performance
-  week      Week   @relation(fields: [weekId], references: [id], onDelete: Cascade)
-
+  id          String              @id @default(cuid())
+  name        String
+  dayNumber   Int
+  weekId      String
+  userId      String
   exercises   Exercise[]
+  week        Week                @relation(fields: [weekId], references: [id], onDelete: Cascade)
   completions WorkoutCompletion[]
 
   @@unique([weekId, dayNumber])
@@ -66,22 +57,21 @@ model Workout {
 }
 
 model ExerciseDefinition {
-  id             String   @id @default(cuid())
-  name           String   // Canonical name: "Barbell Bench Press"
-  normalizedName String   @unique // Lowercase for fast matching
-  aliases        String[] // ["bench press", "bench", "flat bench"]
-  category       String?  // "chest", "back", "legs" (legacy - replaced by FAUs)
-  primaryFAUs    String[] @default([]) // Primary Functional Aesthetic Units ["chest", "triceps"]
-  secondaryFAUs  String[] @default([]) // Secondary FAUs ["rear-delts"]
-  equipment      String[] @default([]) // ["barbell", "bench", "dumbbell"]
-  instructions   String?  // Setup and execution notes
-  isSystem       Boolean  @default(false) // System vs user-created
-  createdBy      String?  // User ID (null for system exercises)
-  userId         String   // System exercises: 00000000-0000-0000-0000-000000000000, User exercises: actual userId (for PowerSync)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  exercises Exercise[]
+  id             String     @id @default(cuid())
+  name           String
+  normalizedName String     @unique
+  aliases        String[]
+  category       String?
+  isSystem       Boolean    @default(false)
+  createdBy      String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  equipment      String[]   @default([])
+  instructions   String?
+  primaryFAUs    String[]   @default([])
+  secondaryFAUs  String[]   @default([])
+  userId         String
+  exercises      Exercise[]
 
   @@index([normalizedName])
   @@index([isSystem])
@@ -92,34 +82,33 @@ model ExerciseDefinition {
 
 model Exercise {
   id                   String             @id @default(cuid())
-  name                 String             // Display name (can differ from definition)
+  name                 String
   exerciseDefinitionId String
-  exerciseDefinition   ExerciseDefinition @relation(fields: [exerciseDefinitionId], references: [id])
-  order                Int                // Order within workout
-  exerciseGroup        String?            // "A", "B", "C" for supersets/circuits
+  order                Int
+  exerciseGroup        String?
   workoutId            String
-  userId               String             // Denormalized from Workout for RLS performance
+  notes                String?
+  userId               String
+  exerciseDefinition   ExerciseDefinition @relation(fields: [exerciseDefinitionId], references: [id])
   workout              Workout            @relation(fields: [workoutId], references: [id], onDelete: Cascade)
-  notes                String?            // Optional notes from CSV
-
-  prescribedSets PrescribedSet[]
-  loggedSets     LoggedSet[]
+  loggedSets           LoggedSet[]
+  prescribedSets       PrescribedSet[]
 
   @@index([workoutId])
   @@index([exerciseDefinitionId])
   @@index([userId])
-  @@index([exerciseDefinitionId, userId]) // For exercise history queries
+  @@index([exerciseDefinitionId, userId])
 }
 
 model PrescribedSet {
   id         String   @id @default(cuid())
-  setNumber  Int      // 1, 2, 3...
-  reps       String   // Target reps or range: "10" or "8-12"
-  weight     String?  // Flexible: "135lbs", "65%", "RPE 8", etc.
-  rpe        Int?     // Rated Perceived Exertion (1-10)
-  rir        Int?     // Reps in Reserve (0-5)
+  setNumber  Int
+  reps       String
+  weight     String?
+  rpe        Int?
+  rir        Int?
   exerciseId String
-  userId     String   // Denormalized from Exercise for RLS performance
+  userId     String
   exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
 
   @@index([exerciseId])
@@ -127,15 +116,14 @@ model PrescribedSet {
 }
 
 model WorkoutCompletion {
-  id          String   @id @default(cuid())
+  id          String      @id @default(cuid())
   workoutId   String
-  workout     Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
-  userId      String   // References auth.users in Supabase
-  completedAt DateTime @default(now())
-  status      String   // "completed", "incomplete", "abandoned"
+  userId      String
+  completedAt DateTime    @default(now())
+  status      String
   notes       String?
-
-  loggedSets LoggedSet[]
+  loggedSets  LoggedSet[]
+  workout     Workout     @relation(fields: [workoutId], references: [id], onDelete: Cascade)
 
   @@index([workoutId, userId])
   @@index([userId, completedAt])
@@ -144,56 +132,49 @@ model WorkoutCompletion {
 
 model LoggedSet {
   id           String            @id @default(cuid())
-  setNumber    Int               // Actual set number logged
-  reps         Int               // Actual reps completed
-  weight       Float             // Actual weight used (numeric)
-  weightUnit   String            @default("lbs") // "lbs" or "kg"
-  rpe          Int?              // Actual RPE if tracked
-  rir          Int?              // Actual RIR if tracked
+  setNumber    Int
+  reps         Int
+  weight       Float
+  weightUnit   String            @default("lbs")
+  rpe          Int?
+  rir          Int?
   exerciseId   String
-  exercise     Exercise          @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
   completionId String
-  completion   WorkoutCompletion @relation(fields: [completionId], references: [id], onDelete: Cascade)
-  userId       String            // Denormalized from WorkoutCompletion for PowerSync/RLS
   createdAt    DateTime          @default(now())
+  userId       String
+  completion   WorkoutCompletion @relation(fields: [completionId], references: [id], onDelete: Cascade)
+  exercise     Exercise          @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
 
   @@index([exerciseId])
   @@index([completionId])
   @@index([userId])
-  @@index([completionId, exerciseId]) // For filtering logged sets by completion and exercise
+  @@index([completionId, exerciseId])
 }
 
-// ============================================
-// CARDIO TRAINING MODELS
-// See docs/CARDIO_DESIGN.md for design decisions
-// ============================================
-
 model CardioProgram {
-  id            String     @id @default(cuid())
+  id            String       @id @default(cuid())
   name          String
   description   String?
-  userId        String     // References auth.users in Supabase
-  isActive      Boolean    @default(false) // Only one active cardio program per user
-  isArchived    Boolean    @default(false) // Archived programs are hidden but preserved
-  archivedAt    DateTime?  // When the program was archived
-  isUserCreated Boolean    @default(false) // true for in-app created, false for CSV imported
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-
-  weeks CardioWeek[]
+  userId        String
+  isActive      Boolean      @default(false)
+  isArchived    Boolean      @default(false)
+  archivedAt    DateTime?
+  isUserCreated Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  weeks         CardioWeek[]
 
   @@index([userId, isActive])
   @@index([userId, isArchived])
 }
 
 model CardioWeek {
-  id              String        @id @default(cuid())
-  weekNumber      Int           // 1, 2, 3...
+  id              String                    @id @default(cuid())
+  weekNumber      Int
   cardioProgramId String
-  userId          String        // Denormalized from CardioProgram for RLS performance
-  cardioProgram   CardioProgram @relation(fields: [cardioProgramId], references: [id], onDelete: Cascade)
-
-  sessions PrescribedCardioSession[]
+  userId          String
+  cardioProgram   CardioProgram             @relation(fields: [cardioProgramId], references: [id], onDelete: Cascade)
+  sessions        PrescribedCardioSession[]
 
   @@unique([cardioProgramId, weekNumber])
   @@index([cardioProgramId])
@@ -201,27 +182,23 @@ model CardioWeek {
 }
 
 model PrescribedCardioSession {
-  id          String     @id @default(cuid())
-  weekId      String
-  userId      String     // Denormalized from CardioWeek for RLS performance
-  week        CardioWeek @relation(fields: [weekId], references: [id], onDelete: Cascade)
-  dayNumber   Int        // Position within week (1, 2, 3...)
-  name        String     // "Zone 2 Endurance", "HIIT Intervals"
-  description String?    // Freeform notes
-
-  // Prescription details
-  targetDuration    Int     // minutes (required)
-  intensityZone     String? // "zone1", "zone2", "zone3", "zone4", "zone5", "hiit", "sprint"
-  equipment         String? // CardioEquipment enum (e.g., "rower", "outdoor_run")
-  targetHRRange     String? // "140-150" (flexible text)
-  targetPowerRange  String? // "150-180W" (flexible text)
-  intervalStructure String? // "8x30s/90s" for HIIT (freeform text)
-  notes             String? // "If weather bad, use elliptical"
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  loggedSessions LoggedCardioSession[]
+  id                String                @id @default(cuid())
+  weekId            String
+  dayNumber         Int
+  name              String
+  description       String?
+  targetDuration    Int
+  intensityZone     String?
+  equipment         String?
+  targetHRRange     String?
+  targetPowerRange  String?
+  intervalStructure String?
+  notes             String?
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  userId            String
+  loggedSessions    LoggedCardioSession[]
+  week              CardioWeek            @relation(fields: [weekId], references: [id], onDelete: Cascade)
 
   @@unique([weekId, dayNumber])
   @@index([weekId])
@@ -230,57 +207,41 @@ model PrescribedCardioSession {
 
 model LoggedCardioSession {
   id                  String                   @id @default(cuid())
-  prescribedSessionId String?                  // Optional link to prescribed session
-  prescribedSession   PrescribedCardioSession? @relation(fields: [prescribedSessionId], references: [id])
-  userId              String                   // References auth.users in Supabase
+  prescribedSessionId String?
+  userId              String
   completedAt         DateTime                 @default(now())
-  status              String                   @default("completed") // "completed", "incomplete", "abandoned"
-
-  // What you actually did
-  name     String // Copy from prescribed or user enters
-  equipment String // CardioEquipment enum (what actually used)
-  duration Int    // Actual minutes (required)
-
-  // Heart Rate Metrics
-  avgHR  Int? // Average heart rate (bpm)
-  peakHR Int? // Peak heart rate (bpm)
-
-  // Power Metrics
-  avgPower  Int? // Average power (watts)
-  peakPower Int? // Peak power (watts)
-
-  // Distance & Elevation
-  distance      Float? // Distance (miles or km - user preference)
-  elevationGain Int?   // Elevation gained (feet or meters)
-  elevationLoss Int?   // Elevation lost (feet or meters)
-
-  // Pace & Cadence
-  avgPace String? // Average pace: "8:30/mi" or "5:20/km" (text)
-  cadence Int?    // Cadence: RPM (cycling) or steps/min (running)
-
-  // Rowing/Swimming Specific
-  strokeRate  Int? // Strokes per minute
-  strokeCount Int? // Total strokes
-
-  // General
-  calories Int? // Total calories burned
-
-  // Context
-  intensityZone     String? // What zone you aimed for
-  intervalStructure String? // What you did for HIIT (e.g., "8x30s/90s")
-  notes             String? // Freeform notes
+  status              String                   @default("completed")
+  name                String
+  equipment           String
+  duration            Int
+  avgHR               Int?
+  peakHR              Int?
+  avgPower            Int?
+  peakPower           Int?
+  distance            Float?
+  elevationGain       Int?
+  elevationLoss       Int?
+  avgPace             String?
+  cadence             Int?
+  strokeRate          Int?
+  strokeCount         Int?
+  calories            Int?
+  intensityZone       String?
+  intervalStructure   String?
+  notes               String?
+  prescribedSession   PrescribedCardioSession? @relation(fields: [prescribedSessionId], references: [id])
 
   @@index([prescribedSessionId])
   @@index([userId, completedAt])
   @@index([userId, status, completedAt])
-  @@index([prescribedSessionId, userId, completedAt]) // For filtering logged sessions by prescription
+  @@index([prescribedSessionId, userId, completedAt])
 }
 
 model UserCardioMetricPreferences {
   id            String   @id @default(cuid())
-  userId        String   // References auth.users in Supabase
-  equipment     String   // CardioEquipment enum
-  customMetrics String[] // User's selected metrics (overrides defaults)
+  userId        String
+  equipment     String
+  customMetrics String[]
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
