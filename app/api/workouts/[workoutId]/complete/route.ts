@@ -41,17 +41,29 @@ export async function POST(
       )
     }
 
-    // Verify workout exists and user owns it
-    const workout = await prisma.workout.findUnique({
-      where: { id: workoutId },
-      include: {
-        week: {
-          include: {
-            program: true,
-          },
+    // Verify workout exists and check existing completion in parallel
+    const [workout, existingCompletion] = await Promise.all([
+      prisma.workout.findUnique({
+        where: { id: workoutId },
+        select: {
+          id: true,
+          week: {
+            select: {
+              program: {
+                select: { userId: true }
+              }
+            }
+          }
+        }
+      }),
+      prisma.workoutCompletion.findFirst({
+        where: {
+          workoutId,
+          userId: user.id,
+          status: 'completed',
         },
-      },
-    })
+      })
+    ])
 
     if (!workout) {
       return NextResponse.json({ error: 'Workout not found' }, { status: 404 })
@@ -60,15 +72,6 @@ export async function POST(
     if (workout.week.program.userId !== user.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
-
-    // Check if workout is already completed
-    const existingCompletion = await prisma.workoutCompletion.findFirst({
-      where: {
-        workoutId,
-        userId: user.id,
-        status: 'completed',
-      },
-    })
 
     if (existingCompletion) {
       return NextResponse.json(
