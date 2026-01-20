@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ThemeSelector } from '@/components/ThemeSelector'
+import { EasterEggModal } from '@/components/EasterEggModal'
 
 type Props = {
   userEmail: string
@@ -11,6 +12,18 @@ type Props = {
 
 export default function Header({ userEmail }: Props) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [showEasterEgg, setShowEasterEgg] = useState(false)
+  const [clickCount, setClickCount] = useState(0)
+
+  const handleLogoClick = () => {
+    const newCount = clickCount + 1
+    setClickCount(newCount)
+
+    if (newCount >= 3) {
+      setShowEasterEgg(true)
+      setClickCount(0) // Reset counter
+    }
+  }
 
   return (
     <>
@@ -19,7 +32,10 @@ export default function Header({ userEmail }: Props) {
           <div className="flex justify-between items-center h-16">
             {/* Left: Logo + Nav Links */}
             <div className="flex items-center gap-4 sm:gap-8">
-              <Link href="/programs" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <button
+                onClick={handleLogoClick}
+                className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+              >
                 <Image
                   src="/icon-192.png"
                   alt="Ripit"
@@ -28,7 +44,7 @@ export default function Header({ userEmail }: Props) {
                   className="rounded"
                 />
                 <span className="text-xl font-bold text-foreground">Ripit</span>
-              </Link>
+              </button>
               <div className="flex items-center gap-3 sm:gap-4">
                 <Link
                   href="/programs"
@@ -145,6 +161,12 @@ export default function Header({ userEmail }: Props) {
           </form>
         </div>
       </div>
+
+      {/* Easter Egg Modal */}
+      <EasterEggModal
+        isOpen={showEasterEgg}
+        onClose={() => setShowEasterEgg(false)}
+      />
     </>
   )
 }
