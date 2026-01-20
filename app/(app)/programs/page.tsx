@@ -11,49 +11,47 @@ export default async function ProgramsPage() {
     redirect('/login')
   }
 
-  // Fetch strength programs
-  const strengthPrograms = await prisma.program.findMany({
-    where: {
-      userId: user.id,
-      isArchived: false,
-    },
-    orderBy: { createdAt: 'desc' },
-  })
-
-  const archivedStrengthPrograms = await prisma.program.findMany({
-    where: {
-      userId: user.id,
-      isArchived: true,
-    },
-    orderBy: { archivedAt: 'desc' },
-  })
-
-  // Fetch cardio programs
-  const cardioPrograms = await prisma.cardioProgram.findMany({
-    where: {
-      userId: user.id,
-      isArchived: false,
-    },
-    orderBy: [{ isActive: 'desc' }, { createdAt: 'desc' }],
-    include: {
-      weeks: {
-        orderBy: { weekNumber: 'asc' },
-        include: {
-          sessions: {
-            orderBy: { dayNumber: 'asc' },
+  // Fetch all programs in parallel for faster load times
+  const [strengthPrograms, archivedStrengthPrograms, cardioPrograms, archivedCardioPrograms] = await Promise.all([
+    prisma.program.findMany({
+      where: {
+        userId: user.id,
+        isArchived: false,
+      },
+      orderBy: { createdAt: 'desc' },
+    }),
+    prisma.program.findMany({
+      where: {
+        userId: user.id,
+        isArchived: true,
+      },
+      orderBy: { archivedAt: 'desc' },
+    }),
+    prisma.cardioProgram.findMany({
+      where: {
+        userId: user.id,
+        isArchived: false,
+      },
+      orderBy: [{ isActive: 'desc' }, { createdAt: 'desc' }],
+      include: {
+        weeks: {
+          orderBy: { weekNumber: 'asc' },
+          include: {
+            sessions: {
+              orderBy: { dayNumber: 'asc' },
+            },
           },
         },
       },
-    },
-  })
-
-  const archivedCardioPrograms = await prisma.cardioProgram.findMany({
-    where: {
-      userId: user.id,
-      isArchived: true,
-    },
-    orderBy: { archivedAt: 'desc' },
-  })
+    }),
+    prisma.cardioProgram.findMany({
+      where: {
+        userId: user.id,
+        isArchived: true,
+      },
+      orderBy: { archivedAt: 'desc' },
+    })
+  ])
 
   return (
     <ConsolidatedProgramsView
