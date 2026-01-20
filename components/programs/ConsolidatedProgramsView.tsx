@@ -31,12 +31,10 @@ type CardioProgram = {
   isActive: boolean
   createdAt: Date
   weeks: Array<{
-    weekNumber: number
-    sessions: Array<{
-      dayNumber: number
-      name: string
-      targetDuration: number
-    }>
+    id: string
+    _count: {
+      sessions: number
+    }
   }>
 }
 
@@ -219,7 +217,7 @@ export default function ConsolidatedProgramsView({
                 : sortedCardioPrograms.map((program) => {
                     const weekCount = program.weeks.length
                     const sessionCount = program.weeks.reduce(
-                      (sum, w) => sum + w.sessions.length,
+                      (sum, w) => sum + w._count.sessions,
                       0
                     )
 

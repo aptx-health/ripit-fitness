@@ -27,6 +27,7 @@ export default async function ProgramsPage() {
       },
       orderBy: { archivedAt: 'desc' },
     }),
+    // Only fetch week and session counts for preview cards, not full data
     prisma.cardioProgram.findMany({
       where: {
         userId: user.id,
@@ -35,12 +36,12 @@ export default async function ProgramsPage() {
       orderBy: [{ isActive: 'desc' }, { createdAt: 'desc' }],
       include: {
         weeks: {
-          orderBy: { weekNumber: 'asc' },
-          include: {
-            sessions: {
-              orderBy: { dayNumber: 'asc' },
-            },
-          },
+          select: {
+            id: true,
+            _count: {
+              select: { sessions: true }
+            }
+          }
         },
       },
     }),
