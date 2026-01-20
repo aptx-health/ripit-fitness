@@ -35,7 +35,8 @@ export async function getBatchExercisePerformance(
     return new Map();
   }
 
-  // Get all completed workouts that contain any of these exercises
+  // Fetch recent completed workouts that contain any of these exercises
+  // Limit to 50 most recent to avoid fetching entire workout history
   const completions = await prisma.workoutCompletion.findMany({
     where: {
       userId,
@@ -50,7 +51,9 @@ export async function getBatchExercisePerformance(
       }
     },
     orderBy: { completedAt: 'desc' },
-    include: {
+    take: 50, // Limit to recent workouts - sufficient for finding last performance
+    select: {
+      completedAt: true,
       workout: { select: { name: true } },
       loggedSets: {
         where: {
@@ -58,7 +61,13 @@ export async function getBatchExercisePerformance(
             exerciseDefinitionId: { in: exerciseDefinitionIds }
           }
         },
-        include: {
+        select: {
+          setNumber: true,
+          reps: true,
+          weight: true,
+          weightUnit: true,
+          rpe: true,
+          rir: true,
           exercise: {
             select: { exerciseDefinitionId: true }
           }

@@ -21,26 +21,47 @@ export default async function WorkoutDetailPage({
     redirect('/login')
   }
 
-  // Fetch workout with exercises, prescribed sets, and completion status
+  // Fetch only the workout data needed for display (optimized for LCP)
   const workout = await prisma.workout.findUnique({
     where: {
       id: workoutId,
     },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      dayNumber: true,
       week: {
-        include: {
-          program: true,
+        select: {
+          weekNumber: true,
+          program: {
+            select: {
+              userId: true, // Only for auth check
+            },
+          },
         },
       },
       exercises: {
         orderBy: {
           order: 'asc',
         },
-        include: {
-          exerciseDefinition: true, // NEW: Include exercise definition
+        select: {
+          id: true,
+          name: true,
+          order: true,
+          exerciseGroup: true,
+          notes: true,
+          exerciseDefinitionId: true, // For history lookup
           prescribedSets: {
             orderBy: {
               setNumber: 'asc',
+            },
+            select: {
+              id: true,
+              setNumber: true,
+              reps: true,
+              weight: true,
+              rpe: true,
+              rir: true,
             },
           },
         },
@@ -53,10 +74,23 @@ export default async function WorkoutDetailPage({
           completedAt: 'desc',
         },
         take: 1,
-        include: {
+        select: {
+          id: true,
+          completedAt: true,
+          status: true,
           loggedSets: {
             orderBy: {
               setNumber: 'asc',
+            },
+            select: {
+              id: true,
+              setNumber: true,
+              reps: true,
+              weight: true,
+              weightUnit: true,
+              rpe: true,
+              rir: true,
+              exerciseId: true,
             },
           },
         },
