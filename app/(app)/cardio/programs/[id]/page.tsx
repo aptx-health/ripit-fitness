@@ -20,23 +20,45 @@ export default async function ViewCardioProgramPage({
   // Await params (Next.js 15 pattern)
   const { id } = await params
 
-  // Fetch program with weeks, sessions, and completion data
+  // Fetch only required program data for display (optimized for performance)
   const program = await prisma.cardioProgram.findFirst({
     where: {
       id,
       userId: user.id
     },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      isActive: true,
       weeks: {
         orderBy: { weekNumber: 'asc' },
-        include: {
+        select: {
+          id: true,
+          weekNumber: true,
           sessions: {
             orderBy: { dayNumber: 'asc' },
-            include: {
+            select: {
+              id: true,
+              dayNumber: true,
+              name: true,
+              description: true,
+              targetDuration: true,
+              intensityZone: true,
+              equipment: true,
+              targetHRRange: true,
+              targetPowerRange: true,
+              intervalStructure: true,
+              notes: true,
               loggedSessions: {
-                where: { userId: user.id },
+                where: { userId: user.id, status: 'completed' },
                 orderBy: { completedAt: 'desc' },
-                take: 1 // Most recent log per session
+                take: 1, // Most recent completed log per session
+                select: {
+                  id: true,
+                  status: true,
+                  completedAt: true,
+                }
               }
             }
           }
