@@ -63,26 +63,6 @@ export default function ConsolidatedProgramsView({
     }
   }, [searchParams])
 
-  // Prefetch likely next pages for faster navigation
-  // Priority: strength training (most common) > cardio (secondary)
-  useEffect(() => {
-    const activeStrength = strengthPrograms.find(p => p.isActive)
-    const activeCardio = cardioPrograms.find(p => p.isActive)
-
-    // Priority 1: Strength training (most common user flow)
-    if (activeStrength) {
-      router.prefetch('/training')
-      // Prefetch program detail page in background
-      setTimeout(() => router.prefetch(`/programs/${activeStrength.id}`), 100)
-    }
-
-    // Priority 2: Cardio (secondary flow)
-    if (activeCardio) {
-      // Defer cardio prefetch slightly to prioritize strength
-      setTimeout(() => router.prefetch('/cardio'), 200)
-      setTimeout(() => router.prefetch(`/cardio/programs/${activeCardio.id}`), 300)
-    }
-  }, [router, strengthPrograms, cardioPrograms])
 
   const handleTabChange = (tab: 'strength' | 'cardio') => {
     setActiveTab(tab)
