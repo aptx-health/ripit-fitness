@@ -1345,3 +1345,13 @@ body {
   font-size: 0.875rem;
   letter-spacing: 0.05em;
 }
+
+/* ============================================
+   LOADING ANIMATIONS
+   ============================================ */
+
+/* Frog Squat Loading Animation */
+@keyframes frog-squat {
+  from { background-position: 0 0; }
+  to { background-position: var(--frog-end-position, -320px) 0; }
+}

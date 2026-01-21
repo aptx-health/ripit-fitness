@@ -19,6 +19,7 @@ import {
   formStateToRequest,
   type CardioSessionFormState
 } from '@/lib/cardio'
+import { LoadingFrog } from '@/components/ui/loading-frog'
 
 type Props = {
   isOpen: boolean
@@ -432,6 +433,18 @@ export default function LogCardioModal({
           </div>
         </form>
       </div>
+
+      {/* Loading overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center z-60">
+          <div className="bg-card p-6 rounded-lg text-center min-w-[300px]">
+            <div className="mb-3 flex justify-center">
+              <LoadingFrog size={64} speed={0.8} />
+            </div>
+            <p className="text-foreground">Saving session...</p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
