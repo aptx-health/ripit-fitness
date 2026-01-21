@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Clock } from 'lucide-react'
 import ExerciseLoggingModal from './ExerciseLoggingModal'
+import { useWorkoutStorage } from '@/hooks/useWorkoutStorage'
 
 type PrescribedSet = {
   id: string
@@ -87,6 +88,7 @@ type LoggedSetInput = {
 export default function WorkoutDetail({ workout, programId, exerciseHistory }: Props) {
   const router = useRouter()
   const [isLoggingModalOpen, setIsLoggingModalOpen] = useState(false)
+  const { clearStoredWorkout } = useWorkoutStorage(workout.id)
   const completion = workout.completions[0]
 
   // Determine workout status
@@ -115,7 +117,7 @@ export default function WorkoutDetail({ workout, programId, exerciseHistory }: P
     }
   }
 
-  const handleClearWorkout = async () => {
+  const handleClearWorkout = useCallback(async () => {
     if (!completion) return
 
     if (
@@ -135,12 +137,15 @@ export default function WorkoutDetail({ workout, programId, exerciseHistory }: P
         throw new Error('Failed to clear workout')
       }
 
+      // Clear localStorage to prevent stale data
+      clearStoredWorkout()
+
       router.refresh()
     } catch (error) {
       console.error('Error clearing workout:', error)
       alert('Failed to clear workout. Please try again.')
     }
-  }
+  }, [completion, workout.id, clearStoredWorkout, router])
 
   return (
     <div className="min-h-screen bg-background pb-24">
