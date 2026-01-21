@@ -37,7 +37,7 @@ export default function Header({ userEmail }: Props) {
                 className="flex items-center gap-2 hover:opacity-80 transition-opacity"
               >
                 <Image
-                  src="/icon-192.png"
+                  src="/frog-icon-64x64.png"
                   alt="Ripit"
                   width={32}
                   height={32}
