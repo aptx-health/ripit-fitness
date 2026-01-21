@@ -1,5 +1,6 @@
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { getCurrentCardioWeek } from '@/lib/db/current-week'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import CardioHistoryList from '@/components/CardioHistoryList'
@@ -17,68 +18,16 @@ export default async function CardioPage() {
     redirect('/login')
   }
 
-  // Fetch active program and recent sessions in parallel for faster load times
-  const [activeProgram, sessions] = await Promise.all([
-    prisma.cardioProgram.findFirst({
-      where: {
-        userId: user.id,
-        isActive: true,
-        isArchived: false
-      },
-      select: {
-        id: true,
-        name: true,
-        weeks: {
-          select: {
-            id: true,
-            weekNumber: true,
-            sessions: {
-              select: {
-                id: true,
-                name: true,
-                dayNumber: true,
-                description: true,
-                targetDuration: true,
-                intensityZone: true,
-                equipment: true,
-                targetHRRange: true,
-                targetPowerRange: true,
-                intervalStructure: true,
-                notes: true,
-                loggedSessions: {
-                  where: { userId: user.id, status: 'completed' },
-                  select: { id: true, status: true, completedAt: true },
-                  orderBy: { completedAt: 'desc' },
-                  take: 1
-                }
-              },
-              orderBy: { dayNumber: 'asc' }
-            }
-          },
-          orderBy: { weekNumber: 'asc' }
-        }
-      }
-    }),
-    prisma.loggedCardioSession.findMany({
+  // Fetch current week and session count in parallel for faster load times
+  // getCurrentCardioWeek only fetches the current week (85-90% data reduction)
+  const [currentWeekData, sessionCount] = await Promise.all([
+    getCurrentCardioWeek(user.id),
+    prisma.loggedCardioSession.count({
       where: {
         userId: user.id
-      },
-      orderBy: {
-        completedAt: 'desc'
-      },
-      take: 10 // Reduced from 50 to 10
+      }
     })
   ])
-
-  // Determine current week (first incomplete week) - fast in JS
-  let currentWeek = null
-  if (activeProgram && activeProgram.weeks.length > 0) {
-    currentWeek = activeProgram.weeks.find(week => {
-      const totalSessions = week.sessions.length
-      const completedSessions = week.sessions.filter(s => s.loggedSessions.length > 0).length
-      return completedSessions < totalSessions
-    }) || activeProgram.weeks[activeProgram.weeks.length - 1]
-  }
 
   return (
     <div className="min-h-screen bg-background px-6 py-4">
@@ -105,11 +54,26 @@ export default async function CardioPage() {
         </div>
 
         {/* Current Week from Active Program */}
-        {activeProgram && currentWeek && (
+        {currentWeekData ? (
           <CardioCurrentWeek
-            program={{ id: activeProgram.id, name: activeProgram.name }}
-            week={currentWeek}
+            program={currentWeekData.program}
+            week={currentWeekData.week}
           />
+        ) : (
+          <div className="bg-card border border-border doom-noise doom-card p-8 text-center">
+            <h2 className="text-2xl font-bold text-foreground doom-heading mb-2">
+              NO ACTIVE PROGRAM
+            </h2>
+            <p className="text-muted-foreground mb-4">
+              Activate a cardio program to start tracking sessions
+            </p>
+            <Link
+              href="/cardio/programs"
+              className="inline-block px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
+            >
+              VIEW PROGRAMS
+            </Link>
+          </div>
         )}
 
         {/* Session History */}
@@ -117,7 +81,7 @@ export default async function CardioPage() {
           <h2 className="text-2xl font-bold text-foreground doom-heading mb-4">
             SESSION HISTORY
           </h2>
-          <CardioHistoryList sessions={sessions} />
+          <CardioHistoryList count={sessionCount} />
         </div>
       </div>
     </div>

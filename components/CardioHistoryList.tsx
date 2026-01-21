@@ -1,22 +1,54 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { EQUIPMENT_LABELS, INTENSITY_ZONE_LABELS, type CardioEquipment, type IntensityZone } from '@/lib/cardio'
 import type { LoggedCardioSession } from '@prisma/client'
 
 type Props = {
-  sessions: LoggedCardioSession[]
+  count: number
 }
 
-export default function CardioHistoryList({ sessions }: Props) {
+export default function CardioHistoryList({ count }: Props) {
+  const [sessions, setSessions] = useState<LoggedCardioSession[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
-  if (sessions.length === 0) {
+  // Fetch session history on mount
+  useEffect(() => {
+    async function fetchSessions() {
+      try {
+        const response = await fetch('/api/cardio/history?limit=50')
+        const data = await response.json()
+
+        if (data.success) {
+          setSessions(data.sessions)
+        } else {
+          console.error('Failed to fetch sessions:', data.error)
+        }
+      } catch (error) {
+        console.error('Error fetching sessions:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchSessions()
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div className="bg-card border border-border p-8 text-center doom-noise">
+        <p className="text-muted-foreground">Loading session history...</p>
+      </div>
+    )
+  }
+
+  if (count === 0) {
     return (
       <div className="bg-card border border-border p-8 text-center doom-noise">
         <p className="text-muted-foreground text-lg">NO CARDIO SESSIONS LOGGED YET</p>
         <p className="text-muted-foreground text-sm mt-2">
-          Click "Log Cardio" to record your first session
+          Click &ldquo;Log Cardio&rdquo; to record your first session
         </p>
       </div>
     )
