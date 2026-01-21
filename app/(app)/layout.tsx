@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { getCurrentUser } from '@/lib/auth/server'
 import { redirect } from 'next/navigation'
 import Header from '@/components/Header'
 
@@ -7,10 +7,9 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { user, error } = await getCurrentUser()
 
-  if (!user) {
+  if (error || !user) {
     redirect('/login')
   }
 

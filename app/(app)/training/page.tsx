@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -10,8 +10,7 @@ export const revalidate = 30
 
 export default async function TrainingPage() {
   // Get authenticated user
-  const supabase = await createClient()
-  const { data: { user }, error } = await supabase.auth.getUser()
+  const { user, error } = await getCurrentUser()
 
   if (error || !user) {
     redirect('/login')

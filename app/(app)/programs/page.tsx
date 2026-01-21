@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import ConsolidatedProgramsView from '@/components/programs/ConsolidatedProgramsView'
 
@@ -7,8 +7,7 @@ import ConsolidatedProgramsView from '@/components/programs/ConsolidatedPrograms
 export const revalidate = 30
 
 export default async function ProgramsPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { user } = await getCurrentUser()
 
   if (!user) {
     redirect('/login')

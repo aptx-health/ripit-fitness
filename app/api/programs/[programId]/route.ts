@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 
 export async function PATCH(
@@ -10,13 +10,9 @@ export async function PATCH(
     const { programId } = await params
 
     // Get authenticated user
-    const supabase = await createClient()
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
+    const { user, error } = await getCurrentUser()
 
-    if (authError || !user) {
+    if (error || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

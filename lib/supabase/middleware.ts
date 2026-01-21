@@ -7,6 +7,15 @@ export async function updateSession(request: NextRequest) {
     request,
   })
 
+  // Mock auth mode - skip Supabase auth entirely
+  if (process.env.USE_MOCK_AUTH === 'true') {
+    const mockUserId = process.env.MOCK_USER_ID || 'dev-user-local'
+    const user = { id: mockUserId, email: 'dev@local.dev' }
+
+    // Allow access to all routes in mock mode (skip auth redirects)
+    return supabaseResponse
+  }
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,

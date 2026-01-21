@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { isValidEquipment } from '@/lib/cardio'
 
@@ -13,10 +13,9 @@ export async function DELETE(
 ) {
   try {
     // Get authenticated user
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const { user, error } = await getCurrentUser()
 
-    if (authError || !user) {
+    if (error || !user) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }

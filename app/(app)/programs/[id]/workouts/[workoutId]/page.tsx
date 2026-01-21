@@ -1,5 +1,5 @@
 import { redirect, notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import WorkoutDetail from '@/components/WorkoutDetail'
 import { getBatchExercisePerformance } from '@/lib/queries/exercise-history'
@@ -12,10 +12,7 @@ export default async function WorkoutDetailPage({
   const { id: programId, workoutId } = await params
 
   // Get authenticated user
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { user } = await getCurrentUser()
 
   if (!user) {
     redirect('/login')

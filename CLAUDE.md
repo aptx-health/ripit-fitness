@@ -310,9 +310,16 @@ git commit -m "feat: add feature"
 
 ## Reference Documents
 
-- `/docs/ARCHITECTURE.md` - Complete architecture and design decisions
-- `/docs/CSV_SPEC.md` - CSV format specification and examples
+### Active Documentation
+- `/docs/STYLING.md` - DOOM theme color system and styling guide
+- `/docs/features/CARDIO_DESIGN.md` - Cardio tracking system design
+- `/docs/features/EXERCISE_PERFORMANCE_TRACKING.md` - Exercise tracking features
+- `/docs/features/PROGRAM_MANAGEMENT_IMPROVEMENTS.md` - Program management enhancements
+- `/docs/features/PERFORMANCE_ANALYSIS.md` - Performance analysis and optimizations
+
+### Reference Material
 - `/NEW_PROJECT_REFERENCE.md` - Next.js + Supabase best practices (reference only, contains multi-tenant patterns we're NOT using)
+- `/docs/archive/` - Historical design discussions and planning documents (may be outdated)
 
 ## Important Notes
 

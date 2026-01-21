@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -10,8 +10,7 @@ export default async function ViewCardioProgramPage({
   params: Promise<{ id: string }>
 }) {
   // Get authenticated user
-  const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  const { user, error: authError } = await getCurrentUser()
 
   if (authError || !user) {
     redirect('/login')
