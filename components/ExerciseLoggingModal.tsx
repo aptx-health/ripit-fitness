@@ -7,6 +7,11 @@ import { useWorkoutSyncService } from '@/lib/sync/workoutSync'
 import SyncStatusIcon from './SyncStatusIcon'
 import SyncDetailsModal from './SyncDetailsModal'
 import { LoadingFrog } from '@/components/ui/loading-frog'
+import { Plus, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react'
+import ScopeSelectionDialog from './ScopeSelectionDialog'
+import SetDefinitionModal, { type PrescribedSetInput } from './SetDefinitionModal'
+import ExerciseSearchModal from './ExerciseSearchModal'
+import ActionsMenu, { type ActionItem } from './ActionsMenu'
 
 type PrescribedSet = {
   id: string
@@ -23,6 +28,7 @@ type Exercise = {
   order: number
   exerciseGroup: string | null
   notes: string | null
+  isOneOff?: boolean // For one-off exercises added during logging
   prescribedSets: PrescribedSet[]
 }
 
@@ -50,6 +56,7 @@ type Props = {
   exercises: Exercise[]
   workoutId: string
   workoutName: string
+  workoutCompletionId?: string // Completion ID for one-off exercises
   onComplete: (loggedSets: LoggedSet[]) => Promise<void>
   exerciseHistory?: Record<string, ExerciseHistory | null> // NEW: Exercise history map
 }
@@ -60,6 +67,7 @@ export default function ExerciseLoggingModal({
   onClose,
   exercises,
   workoutId,
+  workoutCompletionId,
   onComplete,
   exerciseHistory,
 }: Props) {
@@ -81,6 +89,17 @@ export default function ExerciseLoggingModal({
     setNumber?: number
     isDeleteAll?: boolean
   }>({ show: false })
+
+  // Exercise swap and add state
+  const [showExerciseSearch, setShowExerciseSearch] = useState(false)
+  const [showScopeDialog, setShowScopeDialog] = useState(false)
+  const [showSetDefinitionModal, setShowSetDefinitionModal] = useState(false)
+  const [pendingAction, setPendingAction] = useState<{
+    type: 'replace' | 'add'
+    exerciseDefinitionId: string
+    exerciseName: string
+  } | null>(null)
+  const [pendingSets, setPendingSets] = useState<PrescribedSetInput[]>([])
 
   // Enhanced persistence with localStorage backing
   const { loggedSets, setLoggedSets, isLoaded, clearStoredWorkout } = useWorkoutStorage(workoutId)
@@ -207,6 +226,115 @@ export default function ExerciseLoggingModal({
     }
   }
 
+  const handleReplaceExercise = () => {
+    setShowExerciseSearch(true)
+    setPendingAction({ type: 'replace', exerciseDefinitionId: '', exerciseName: '' })
+  }
+
+  const handleAddExercise = () => {
+    // Check if there's any one-off exercise without logged sets
+    const oneOffExercises = exercises.filter(ex => ex.isOneOff)
+    const hasUnloggedOneOff = oneOffExercises.some(ex => {
+      const exerciseSets = loggedSets.filter(s => s.exerciseId === ex.id)
+      return exerciseSets.length === 0
+    })
+
+    if (hasUnloggedOneOff) {
+      // TODO: Show toast notification
+      alert('Please log at least one set for the newly added exercise before adding another')
+      return
+    }
+
+    setShowExerciseSearch(true)
+    setPendingAction({ type: 'add', exerciseDefinitionId: '', exerciseName: '' })
+  }
+
+  const handleExerciseSearchSelect = (exercise: any, prescription: any) => {
+    if (!pendingAction) return
+
+    // Update pending action with exercise details
+    setPendingAction({
+      ...pendingAction,
+      exerciseDefinitionId: exercise.id,
+      exerciseName: exercise.name
+    })
+
+    if (pendingAction.type === 'replace') {
+      // Go directly to scope selection for replace
+      setShowExerciseSearch(false)
+      setShowScopeDialog(true)
+    } else {
+      // For add, go to set definition first
+      setPendingSets(prescription.sets)
+      setShowExerciseSearch(false)
+      setShowSetDefinitionModal(true)
+    }
+  }
+
+  const handleSetDefinitionSubmit = async (sets: PrescribedSetInput[]) => {
+    setPendingSets(sets)
+    setShowSetDefinitionModal(false)
+    setShowScopeDialog(true)
+  }
+
+  const handleScopeSelected = async (applyToFuture: boolean) => {
+    if (!pendingAction) return
+
+    try {
+      if (pendingAction.type === 'replace') {
+        // Call replace API
+        const response = await fetch(`/api/exercises/${currentExercise.id}/replace`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            newExerciseDefinitionId: pendingAction.exerciseDefinitionId,
+            applyToFuture
+          })
+        })
+
+        if (!response.ok) throw new Error('Failed to replace exercise')
+
+        const data = await response.json()
+
+        // TODO: Show success toast
+        alert(`Exercise replaced${applyToFuture ? ` in ${data.updatedCount} workouts` : ''}`)
+
+        // Refresh the page to show updated exercise
+        window.location.reload()
+      } else {
+        // Call add-during-logging API
+        const response = await fetch(`/api/workouts/${workoutId}/exercises/add-during-logging`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            exerciseDefinitionId: pendingAction.exerciseDefinitionId,
+            applyToFuture,
+            workoutCompletionId: applyToFuture ? undefined : workoutCompletionId,
+            prescribedSets: pendingSets
+          })
+        })
+
+        if (!response.ok) throw new Error('Failed to add exercise')
+
+        const data = await response.json()
+
+        // TODO: Show success toast
+        alert(`Exercise added${applyToFuture ? ` to ${data.addedToCount} workouts` : ''}`)
+
+        // Refresh the page to show new exercise
+        window.location.reload()
+      }
+    } catch (error) {
+      console.error('Error:', error)
+      // TODO: Show error toast
+      alert('Failed to update exercise. Please try again.')
+    } finally {
+      setShowScopeDialog(false)
+      setPendingAction(null)
+      setPendingSets([])
+    }
+  }
+
   const handleCompleteWorkout = async () => {
     setIsSubmitting(true)
     try {
@@ -328,13 +456,14 @@ export default function ExerciseLoggingModal({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-end sm:items-center justify-center">
-      {/* Sync Status Icon */}
-      <SyncStatusIcon
-        status={syncState.status}
-        pendingCount={syncState.pendingSets}
-        onClick={() => setShowSyncDetails(true)}
-      />
+    <>
+      <div className="fixed inset-0 z-50 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-end sm:items-center justify-center">
+        {/* Sync Status Icon */}
+        <SyncStatusIcon
+          status={syncState.status}
+          pendingCount={syncState.pendingSets}
+          onClick={() => setShowSyncDetails(true)}
+        />
 
       {/* Sync Details Modal */}
       <SyncDetailsModal
@@ -373,14 +502,17 @@ export default function ExerciseLoggingModal({
           <button
             onClick={handlePreviousExercise}
             disabled={currentExerciseIndex === 0}
-            className="p-2 rounded-lg hover:bg-muted disabled:opacity-30 disabled:hover:bg-transparent"
+            className={`p-3 rounded-lg transition-all duration-200 border-2 border-transparent ${
+              currentExerciseIndex === 0
+                ? 'bg-muted opacity-30 cursor-not-allowed'
+                : 'bg-primary-muted hover:bg-primary hover:border-primary hover:text-white'
+            }`}
+            aria-label="Previous exercise"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
+            <ChevronLeft size={24} strokeWidth={2.5} />
           </button>
 
-          <div className="text-center flex-1">
+          <div className="text-center flex-1 px-2">
             <div className="flex items-center justify-center gap-2">
               {isSuperset && (
                 <span className="px-2 py-1 bg-accent-muted text-accent-text text-xs font-bold rounded">
@@ -397,11 +529,14 @@ export default function ExerciseLoggingModal({
           <button
             onClick={handleNextExercise}
             disabled={currentExerciseIndex === exercises.length - 1}
-            className="p-2 rounded-lg hover:bg-muted disabled:opacity-30 disabled:hover:bg-transparent"
+            className={`p-3 rounded-lg transition-all duration-200 border-2 border-transparent ${
+              currentExerciseIndex === exercises.length - 1
+                ? 'bg-muted opacity-30 cursor-not-allowed'
+                : 'bg-primary-muted hover:bg-primary hover:border-primary hover:text-white'
+            }`}
+            aria-label="Next exercise"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
+            <ChevronRight size={24} strokeWidth={2.5} />
           </button>
         </div>
 
@@ -610,32 +745,23 @@ export default function ExerciseLoggingModal({
         </div>
 
         {/* Bottom Actions */}
-        <div className="border-t border-border px-4 py-3 bg-muted flex-shrink-0 space-y-2">
-          {/* Log Set Button - Full width */}
-          {!hasLoggedAllPrescribed && (
+        <div className="border-t border-border px-4 py-3 bg-muted flex-shrink-0">
+          {/* Single Actions Row */}
+          <div className="grid grid-cols-[45%_45%_10%] gap-2">
+            {/* Log Set Button */}
             <button
               onClick={handleLogSet}
-              disabled={!canLogSet}
-              className="w-full py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary-hover active:bg-primary-active disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              disabled={!canLogSet || hasLoggedAllPrescribed}
+              className="py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary-hover active:bg-primary-active disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Log Set {nextSetNumber}
             </button>
-          )}
 
-          {/* Navigation buttons - Side by side */}
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={handleNextExercise}
-              disabled={currentExerciseIndex === exercises.length - 1}
-              className="py-2.5 bg-accent text-accent-foreground rounded-lg font-semibold hover:bg-accent-hover active:bg-accent-active disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Next Exercise →
-            </button>
-
+            {/* Complete Workout Button */}
             <button
               onClick={handleCompleteWorkout}
               disabled={isSubmitting || totalLoggedSets === 0}
-              className="py-2.5 bg-success text-success-foreground rounded-lg font-semibold hover:bg-success-hover active:bg-success-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="py-3 bg-success text-success-foreground rounded-lg font-semibold hover:bg-success-hover active:bg-success-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               onMouseDown={(e) => {
                 if (isSubmitting || totalLoggedSets === 0) return;
                 e.preventDefault();
@@ -644,6 +770,28 @@ export default function ExerciseLoggingModal({
             >
               {isSubmitting ? 'Saving...' : `Complete (${totalLoggedSets})`}
             </button>
+
+            {/* Actions Menu */}
+            <ActionsMenu
+              variant="accent"
+              size="md"
+              className="h-full"
+              actions={[
+                {
+                  label: 'Add an exercise',
+                  icon: Plus,
+                  onClick: handleAddExercise,
+                  disabled: false
+                },
+                {
+                  label: 'Swap this exercise',
+                  icon: RefreshCw,
+                  onClick: handleReplaceExercise,
+                  disabled: false
+                }
+              ]}
+            />
+          </div>
  
             {/* Workout completion confirmation modal */}
             {isConfirming && (
@@ -713,6 +861,46 @@ export default function ExerciseLoggingModal({
           </div>
         </div>
       </div>
-    </div>
+
+    {/* Exercise Search Modal */}
+    <ExerciseSearchModal
+      isOpen={showExerciseSearch}
+      onClose={() => {
+        setShowExerciseSearch(false)
+        // Don't touch pendingAction - if user selected an exercise, the flow continues
+        // If they cancelled, they can close other modals or the entire logging modal
+      }}
+      onExerciseSelect={handleExerciseSearchSelect}
+    />
+
+    {/* Scope Selection Dialog */}
+    {pendingAction && (
+      <ScopeSelectionDialog
+        isOpen={showScopeDialog}
+        onClose={() => {
+          setShowScopeDialog(false)
+          setPendingAction(null)
+          setPendingSets([])
+        }}
+        onSelect={handleScopeSelected}
+        actionType={pendingAction.type}
+        exerciseName={pendingAction.exerciseName}
+      />
+    )}
+
+    {/* Set Definition Modal */}
+    {pendingAction && pendingAction.type === 'add' && (
+      <SetDefinitionModal
+        isOpen={showSetDefinitionModal}
+        onClose={() => {
+          setShowSetDefinitionModal(false)
+          setPendingAction(null)
+          setPendingSets([])
+        }}
+        exerciseName={pendingAction.exerciseName}
+        onSubmit={handleSetDefinitionSubmit}
+      />
+    )}
+    </>
   )
 }
