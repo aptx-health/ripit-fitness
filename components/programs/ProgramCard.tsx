@@ -27,7 +27,7 @@ export default function ProgramCard({
         p-6 doom-noise doom-corners
         ${
           isActive
-            ? 'bg-primary-muted border-2 border-primary'
+            ? 'bg-accent-muted border-2 border-accent'
             : 'bg-card border border-border hover:shadow-md transition'
         }
       `}
@@ -36,7 +36,7 @@ export default function ProgramCard({
       <div className="flex justify-between items-start mb-2">
         <div className="flex-1">
           {isActive && (
-            <span className="inline-block px-2 py-1 bg-primary text-primary-foreground text-xs font-semibold mb-2 doom-label uppercase tracking-wider">
+            <span className="inline-block px-2 py-1 bg-accent text-accent-foreground text-xs font-semibold mb-2 doom-label uppercase tracking-wider">
               ACTIVE
             </span>
           )}

@@ -165,10 +165,10 @@ export default function WeekView({
             {hasPrevWeek ? (
               <Link
                 href={`/programs/${programId}/weeks/${weekNumber - 1}`}
-                className="flex items-center justify-center w-12 h-12 rounded-lg bg-primary-muted hover:bg-primary active:bg-primary-hover transition-colors"
+                className="flex items-center justify-center w-12 h-12 rounded-lg bg-accent-muted hover:bg-accent active:bg-accent-hover transition-colors"
               >
                 <svg
-                  className="w-6 h-6 text-primary"
+                  className="w-6 h-6 text-accent"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -196,10 +196,10 @@ export default function WeekView({
             {hasNextWeek ? (
               <Link
                 href={`/programs/${programId}/weeks/${weekNumber + 1}`}
-                className="flex items-center justify-center w-12 h-12 rounded-lg bg-primary-muted hover:bg-primary active:bg-primary-hover transition-colors"
+                className="flex items-center justify-center w-12 h-12 rounded-lg bg-accent-muted hover:bg-accent active:bg-accent-hover transition-colors"
               >
                 <svg
-                  className="w-6 h-6 text-primary"
+                  className="w-6 h-6 text-accent"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -278,10 +278,10 @@ export default function WeekView({
                             )}
                             {isDraft && (
                               <>
-                                <div className="flex items-center justify-center w-6 h-6 rounded-full bg-warning">
-                                  <Clock className="w-4 h-4 text-warning-foreground" />
+                                <div className="flex items-center justify-center w-6 h-6 rounded-full bg-accent">
+                                  <Clock className="w-4 h-4 text-accent-foreground" />
                                 </div>
-                                <span className="doom-badge doom-badge-progress">
+                                <span className="doom-badge doom-badge-accent">
                                   IN PROGRESS
                                 </span>
                               </>

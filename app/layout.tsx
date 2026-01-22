@@ -62,7 +62,7 @@ export default function RootLayout({
                 // Theme System: Load preference with migration support
                 const STORAGE_KEY = 'themePreference';
                 const OLD_STORAGE_KEY = 'darkMode';
-                const DEFAULT_THEME = 'doom';
+                const DEFAULT_THEME = 'ripit';
 
                 let themeName = DEFAULT_THEME;
                 let mode = 'dark';
