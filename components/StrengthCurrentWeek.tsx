@@ -49,7 +49,7 @@ export default function StrengthCurrentWeek({ program, week }: Props) {
         </div>
         <Link
           href={`/programs/${program.id}/weeks/${week.weekNumber}`}
-          className="text-sm text-primary hover:underline doom-focus-ring"
+          className="text-sm text-accent hover:underline doom-focus-ring"
         >
           VIEW FULL WEEK →
         </Link>
@@ -86,7 +86,7 @@ export default function StrengthCurrentWeek({ program, week }: Props) {
                       </span>
                     )}
                     {isDraft && (
-                      <span className="doom-badge doom-badge-warning">
+                      <span className="doom-badge doom-badge-accent">
                         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
@@ -111,7 +111,7 @@ export default function StrengthCurrentWeek({ program, week }: Props) {
 
                 <Link
                   href={`/programs/${program.id}/workouts/${workout.id}`}
-                  className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider text-sm"
+                  className={`px-4 py-2 ${isDraft ? 'bg-accent text-accent-foreground hover:bg-accent-hover doom-button-3d-accent' : 'bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d'} doom-focus-ring font-semibold uppercase tracking-wider text-sm`}
                 >
                   {isCompleted ? 'REVIEW' : isDraft ? 'CONTINUE' : 'LOG WORKOUT'}
                 </Link>

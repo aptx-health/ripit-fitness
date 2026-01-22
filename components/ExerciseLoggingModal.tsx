@@ -627,7 +627,7 @@ export default function ExerciseLoggingModal({
             <button
               onClick={handleNextExercise}
               disabled={currentExerciseIndex === exercises.length - 1}
-              className="py-2.5 bg-secondary text-white rounded-lg font-semibold hover:bg-secondary-hover active:bg-secondary-active disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="py-2.5 bg-accent text-accent-foreground rounded-lg font-semibold hover:bg-accent-hover active:bg-accent-active disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Next Exercise →
             </button>

@@ -10,7 +10,7 @@
 // Type Definitions
 // ============================================================================
 
-export type ThemeName = 'doom' | 'cyber' | 'forest' | 'synthwave' | 'dracula' | 'github';
+export type ThemeName = 'doom' | 'cyber' | 'forest' | 'synthwave' | 'dracula' | 'github' | 'ripit';
 export type ThemeMode = 'light' | 'dark';
 
 export interface ThemePreference {
@@ -22,15 +22,16 @@ export interface ThemePreference {
 // Constants
 // ============================================================================
 
-export const THEMES: ThemeName[] = ['doom', 'cyber', 'forest', 'synthwave', 'dracula', 'github'];
+export const THEMES: ThemeName[] = ['ripit', 'doom', 'cyber', 'forest', 'synthwave', 'dracula', 'github'];
 export const MODES: ThemeMode[] = ['light', 'dark'];
 
 export const DEFAULT_THEME: ThemePreference = {
-  themeName: 'doom',
+  themeName: 'ripit',
   mode: 'dark',
 };
 
 export const THEME_LABELS: Record<ThemeName, string> = {
+  ripit: 'RIPIT',
   doom: 'DOOM',
   cyber: 'CYBER',
   forest: 'FOREST',

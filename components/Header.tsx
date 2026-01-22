@@ -48,20 +48,20 @@ export default function Header({ userEmail }: Props) {
               <div className="flex items-center gap-3 sm:gap-4">
                 <Link
                   href="/programs"
-                  className="px-3 py-1.5 text-xs sm:text-sm font-bold text-primary hover:bg-primary-muted border border-primary uppercase tracking-wider transition-colors"
+                  className="px-3 py-1.5 text-xs sm:text-sm font-bold text-primary hover:bg-primary-muted hover:border-accent hover:text-accent border border-primary uppercase tracking-wider transition-colors"
                 >
                   Programs
                 </Link>
                 <div className="h-6 w-px bg-border" />
                 <Link
                   href="/training"
-                  className="text-xs sm:text-sm font-semibold text-foreground hover:text-primary doom-link uppercase tracking-wider"
+                  className="text-xs sm:text-sm font-semibold text-foreground hover:text-accent doom-link uppercase tracking-wider"
                 >
                   Strength
                 </Link>
                 <Link
                   href="/cardio"
-                  className="text-xs sm:text-sm font-semibold text-foreground hover:text-primary doom-link uppercase tracking-wider"
+                  className="text-xs sm:text-sm font-semibold text-foreground hover:text-accent doom-link uppercase tracking-wider"
                 >
                   Cardio
                 </Link>
