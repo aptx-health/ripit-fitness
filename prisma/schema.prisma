@@ -81,16 +81,19 @@ model ExerciseDefinition {
 }
 
 model Exercise {
-  id                   String             @id @default(cuid())
+  id                   String              @id @default(cuid())
   name                 String
   exerciseDefinitionId String
   order                Int
   exerciseGroup        String?
-  workoutId            String
+  workoutId            String?
   notes                String?
+  isOneOff             Boolean             @default(false)
+  workoutCompletionId  String?
   userId               String
-  exerciseDefinition   ExerciseDefinition @relation(fields: [exerciseDefinitionId], references: [id])
-  workout              Workout            @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  exerciseDefinition   ExerciseDefinition  @relation(fields: [exerciseDefinitionId], references: [id])
+  workout              Workout?            @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  workoutCompletion    WorkoutCompletion?  @relation(fields: [workoutCompletionId], references: [id], onDelete: Cascade)
   loggedSets           LoggedSet[]
   prescribedSets       PrescribedSet[]
 
@@ -98,6 +101,7 @@ model Exercise {
   @@index([exerciseDefinitionId])
   @@index([userId])
   @@index([exerciseDefinitionId, userId])
+  @@index([workoutCompletionId])
 }
 
 model PrescribedSet {
@@ -123,6 +127,7 @@ model WorkoutCompletion {
   status      String
   notes       String?
   loggedSets  LoggedSet[]
+  exercises   Exercise[]
   workout     Workout     @relation(fields: [workoutId], references: [id], onDelete: Cascade)
 
   @@index([workoutId, userId])
