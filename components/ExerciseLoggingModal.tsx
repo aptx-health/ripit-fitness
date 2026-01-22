@@ -9,10 +9,17 @@ import SyncDetailsModal from './SyncDetailsModal'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import { Plus, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react'
 import ScopeSelectionDialog from './ScopeSelectionDialog'
-import SetDefinitionModal, { type PrescribedSetInput } from './SetDefinitionModal'
 import ExerciseSearchModal from './ExerciseSearchModal'
 import ActionsMenu, { type ActionItem } from './ActionsMenu'
 import LoadingSuccessModal from './LoadingSuccessModal'
+
+// PrescribedSetInput type from ExerciseSearchModal
+type PrescribedSetInput = {
+  setNumber: number
+  reps: string
+  intensityType: 'RIR' | 'RPE' | 'NONE'
+  intensityValue?: number
+}
 
 type PrescribedSet = {
   id: string
@@ -96,7 +103,6 @@ export default function ExerciseLoggingModal({
   // Exercise swap and add state
   const [showExerciseSearch, setShowExerciseSearch] = useState(false)
   const [showScopeDialog, setShowScopeDialog] = useState(false)
-  const [showSetDefinitionModal, setShowSetDefinitionModal] = useState(false)
   const [operationStatus, setOperationStatus] = useState<{
     isLoading: boolean
     isSuccess: boolean
@@ -268,21 +274,14 @@ export default function ExerciseLoggingModal({
       exerciseName: exercise.name
     })
 
-    if (pendingAction.type === 'replace') {
-      // Go directly to scope selection for replace
-      setShowExerciseSearch(false)
-      setShowScopeDialog(true)
-    } else {
-      // For add, go to set definition first
+    // Store prescription sets for add action
+    if (pendingAction.type === 'add') {
       setPendingSets(prescription.sets)
-      setShowExerciseSearch(false)
-      setShowSetDefinitionModal(true)
     }
-  }
 
-  const handleSetDefinitionSubmit = async (sets: PrescribedSetInput[]) => {
-    setPendingSets(sets)
-    setShowSetDefinitionModal(false)
+    // Go directly to scope selection for both replace and add
+    // (ExerciseSearchModal already collected set definition for add)
+    setShowExerciseSearch(false)
     setShowScopeDialog(true)
   }
 
@@ -952,20 +951,6 @@ export default function ExerciseLoggingModal({
       loadingMessage={operationStatus.message}
       successMessage={operationStatus.successMessage}
     />
-
-    {/* Set Definition Modal */}
-    {pendingAction && pendingAction.type === 'add' && (
-      <SetDefinitionModal
-        isOpen={showSetDefinitionModal}
-        onClose={() => {
-          setShowSetDefinitionModal(false)
-          setPendingAction(null)
-          setPendingSets([])
-        }}
-        exerciseName={pendingAction.exerciseName}
-        onSubmit={handleSetDefinitionSubmit}
-      />
-    )}
     </>
   )
 }
