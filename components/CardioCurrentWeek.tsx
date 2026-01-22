@@ -57,7 +57,7 @@ export default function CardioCurrentWeek({ program, week }: Props) {
           </div>
           <Link
             href={`/cardio/programs/${program.id}`}
-            className="text-sm text-primary hover:underline doom-focus-ring"
+            className="text-sm text-accent hover:underline doom-focus-ring"
           >
             VIEW FULL PROGRAM →
           </Link>

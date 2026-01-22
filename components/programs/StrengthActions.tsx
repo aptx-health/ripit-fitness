@@ -28,7 +28,7 @@ export function StrengthPrimaryActions({
       </Link>
       <Link
         href={`/programs/${programId}/edit`}
-        className="px-4 py-2 border border-primary text-primary hover:bg-primary-muted doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider md:inline-block w-full md:w-auto text-center"
+        className="px-4 py-2 border border-accent text-accent hover:bg-accent-muted doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider md:inline-block w-full md:w-auto text-center"
       >
         EDIT PROGRAM
       </Link>
@@ -123,7 +123,7 @@ export function StrengthUtilityActions({
             <button
               onClick={handleDuplicate}
               disabled={duplicating}
-              className="p-2 text-muted-foreground hover:text-primary hover:bg-muted rounded transition-colors disabled:opacity-50"
+              className="p-2 text-muted-foreground hover:text-accent hover:bg-muted rounded transition-colors disabled:opacity-50"
               title="Duplicate"
               aria-label="Duplicate program"
             >
@@ -132,7 +132,7 @@ export function StrengthUtilityActions({
             <button
               onClick={handleSetActive}
               disabled={activating}
-              className="p-2 text-muted-foreground hover:text-primary hover:bg-muted rounded transition-colors disabled:opacity-50"
+              className="p-2 text-muted-foreground hover:text-accent hover:bg-muted rounded transition-colors disabled:opacity-50"
               title="Set Active"
               aria-label="Set as active program"
             >
@@ -160,14 +160,14 @@ export function StrengthUtilityActions({
           <button
             onClick={handleDuplicate}
             disabled={duplicating}
-            className="px-3 py-1.5 text-sm text-muted-foreground hover:text-primary hover:bg-muted transition-colors font-medium disabled:opacity-50"
+            className="px-3 py-1.5 text-sm text-muted-foreground hover:text-accent hover:bg-muted transition-colors font-medium disabled:opacity-50"
           >
             {duplicating ? 'Duplicating...' : 'Duplicate'}
           </button>
           <button
             onClick={handleSetActive}
             disabled={activating}
-            className="px-3 py-1.5 text-sm text-muted-foreground hover:text-primary hover:bg-muted transition-colors font-medium disabled:opacity-50"
+            className="px-3 py-1.5 text-sm text-muted-foreground hover:text-accent hover:bg-muted transition-colors font-medium disabled:opacity-50"
           >
             {activating ? 'Activating...' : 'Set Active'}
           </button>

@@ -1,67 +1,67 @@
 @import "tailwindcss";
 
 :root {
-  /* DOOM Theme - Brutal Gray (Light Mode) */
+  /* DOOM Theme - Classic 1993 (Light Mode Default) */
 
   /* Base colors */
-  --background: #18181B;  /* zinc-900 */
+  --background: #1C1917;  /* stone-900 */
   --foreground: #FFF7ED;  /* orange-50 */
 
   /* Surface colors */
-  --card: #27272A;        /* zinc-800 */
+  --card: #292524;        /* stone-800 */
   --card-foreground: #FFF7ED;
-  --muted: #3F3F46;       /* zinc-700 */
-  --muted-foreground: #A1A1AA;  /* zinc-400 */
+  --muted: #44403C;       /* stone-700 */
+  --muted-foreground: #A8A29E;  /* stone-400 */
 
   /* Border colors */
-  --border: #3F3F46;      /* zinc-700 */
-  --input: #52525B;       /* zinc-600 */
+  --border: #57534E;      /* stone-600 */
+  --input: #57534E;
 
-  /* Primary (Orange) */
+  /* Primary (Hell Fire Orange) */
   --primary: #EA580C;     /* orange-600 */
-  --primary-foreground: #FFF7ED;  /* orange-50 */
+  --primary-foreground: #FFF7ED;
   --primary-hover: #C2410C;       /* orange-700 */
   --primary-active: #9A3412;      /* orange-800 */
   --primary-muted: #431407;       /* orange-950 */
-  --primary-muted-dark: #EA580C;  /* orange-600 for borders */
+  --primary-muted-dark: #EA580C;
 
-  /* Secondary (Zinc) */
+  /* Secondary (Steel Gray) */
   --secondary: #71717A;   /* zinc-500 */
   --secondary-foreground: #FFF7ED;
-  --secondary-hover: #52525B;     /* zinc-600 */
-  --secondary-active: #3F3F46;    /* zinc-700 */
-  --secondary-muted: #3F3F46;     /* zinc-700 */
+  --secondary-hover: #52525B;
+  --secondary-active: #3F3F46;
+  --secondary-muted: #44403C;
 
-  /* Success (Green) - Completed workouts */
+  /* Success (Armor Green) */
   --success: #15803D;     /* green-700 */
   --success-foreground: #FFF7ED;
-  --success-hover: #166534;       /* green-800 */
-  --success-muted: #052E16;       /* green-950 */
-  --success-text: #4ADE80;        /* green-400 */
-  --success-border: #15803D;      /* green-700 */
+  --success-hover: #166534;
+  --success-muted: #052E16;
+  --success-text: #4ADE80;
+  --success-border: #15803D;
 
-  /* Warning (Orange) - In-progress workouts */
+  /* Warning (Amber Item) */
   --warning: #EA580C;     /* orange-600 */
   --warning-foreground: #FFF7ED;
-  --warning-hover: #C2410C;       /* orange-700 */
-  --warning-muted: #431407;       /* orange-950 */
-  --warning-text: #FB923C;        /* orange-400 */
-  --warning-border: #EA580C;      /* orange-600 */
+  --warning-hover: #C2410C;
+  --warning-muted: #431407;
+  --warning-text: #FB923C;
+  --warning-border: #EA580C;
 
-  /* Error/Danger (Red) */
+  /* Error (Blood Red) */
   --error: #DC2626;       /* red-600 */
   --error-foreground: #FFF7ED;
-  --error-hover: #B91C1C;         /* red-700 */
-  --error-muted: #450A0A;         /* red-950 */
-  --error-text: #F87171;          /* red-400 */
-  --error-border: #DC2626;        /* red-600 */
+  --error-hover: #B91C1C;
+  --error-muted: #450A0A;
+  --error-text: #F87171;
+  --error-border: #DC2626;
 
-  /* Accent (Purple) - for supersets */
-  --accent: #9333EA;      /* purple-600 */
-  --accent-foreground: #FFF7ED;
-  --accent-hover: #7E22CE;        /* purple-700 */
-  --accent-muted: #3B0764;        /* purple-950 */
-  --accent-text: #C084FC;         /* purple-400 */
+  /* Accent (Toxic Green) */
+  --accent: #22C55E;      /* green-500 - radioactive waste, armor */
+  --accent-foreground: #000000;
+  --accent-hover: #16A34A;
+  --accent-muted: #052E16;
+  --accent-text: #4ADE80;
 }
 
 @theme inline {
@@ -82,6 +82,7 @@
   --color-primary-active: var(--primary-active);
   --color-primary-muted: var(--primary-muted);
   --color-primary-muted-dark: var(--primary-muted-dark);
+  --color-primary-rgb: 234, 88, 12;  /* orange-600 for DOOM light */
 
   /* Secondary */
   --color-secondary: var(--secondary);
@@ -97,6 +98,7 @@
   --color-success-muted: var(--success-muted);
   --color-success-text: var(--success-text);
   --color-success-border: var(--success-border);
+  --color-success-rgb: 21, 128, 61;  /* green-700 */
 
   /* Warning */
   --color-warning: var(--warning);
@@ -105,6 +107,7 @@
   --color-warning-muted: var(--warning-muted);
   --color-warning-text: var(--warning-text);
   --color-warning-border: var(--warning-border);
+  --color-warning-rgb: 234, 88, 12;  /* orange-600 */
 
   /* Error */
   --color-error: var(--error);
@@ -113,6 +116,7 @@
   --color-error-muted: var(--error-muted);
   --color-error-text: var(--error-text);
   --color-error-border: var(--error-border);
+  --color-error-rgb: 220, 38, 38;  /* red-600 */
 
   /* Accent */
   --color-accent: var(--accent);
@@ -120,6 +124,7 @@
   --color-accent-hover: var(--accent-hover);
   --color-accent-muted: var(--accent-muted);
   --color-accent-text: var(--accent-text);
+  --color-accent-rgb: 34, 197, 94;  /* green-500 - toxic green */
 
   /* Fonts */
   --font-sans: var(--font-geist-sans);
@@ -130,207 +135,209 @@
 @custom-variant dark ([data-mode="dark"] &);
 
 .dark {
-  /* DOOM Theme - Pure Darkness (Dark Mode) */
+  /* DOOM Theme - Hell's Depths (Dark Mode Default) */
 
   /* Base colors */
   --background: #000000;  /* pure black */
   --foreground: #FFF7ED;  /* orange-50 */
 
   /* Surface colors */
-  --card: #09090B;        /* zinc-950 */
+  --card: #0C0A09;        /* stone-950 */
   --card-foreground: #FFF7ED;
-  --muted: #18181B;       /* zinc-900 */
-  --muted-foreground: #A1A1AA;  /* zinc-400 */
+  --muted: #1C1917;       /* stone-900 */
+  --muted-foreground: #A8A29E;  /* stone-400 */
 
   /* Border colors */
-  --border: #27272A;      /* zinc-800 */
-  --input: #3F3F46;       /* zinc-700 */
+  --border: #292524;      /* stone-800 */
+  --input: #44403C;       /* stone-700 */
 
-  /* Primary (Orange) */
-  --primary: #EA580C;     /* orange-600 */
+  /* Primary (Hell Fire Orange) */
+  --primary: #F97316;     /* orange-500 */
   --primary-foreground: #FFF7ED;
-  --primary-hover: #C2410C;       /* orange-700 */
-  --primary-active: #9A3412;      /* orange-800 */
-  --primary-muted: #431407;       /* orange-950 */
-  --primary-muted-dark: #F97316;  /* orange-500 for borders */
+  --primary-hover: #EA580C;
+  --primary-active: #C2410C;
+  --primary-muted: #431407;
+  --primary-muted-dark: #F97316;
 
-  /* Secondary (Zinc) */
-  --secondary: #71717A;   /* zinc-500 */
+  /* Secondary (Steel Gray) */
+  --secondary: #71717A;
   --secondary-foreground: #FFF7ED;
-  --secondary-hover: #52525B;     /* zinc-600 */
-  --secondary-active: #3F3F46;    /* zinc-700 */
-  --secondary-muted: #27272A;     /* zinc-800 */
+  --secondary-hover: #52525B;
+  --secondary-active: #3F3F46;
+  --secondary-muted: #292524;
 
-  /* Success (Green) - Completed workouts */
-  --success: #16A34A;     /* green-600 */
-  --success-foreground: #FFF7ED;
-  --success-hover: #15803D;       /* green-700 */
-  --success-muted: #052E16;       /* green-950 */
-  --success-text: #4ADE80;        /* green-400 */
-  --success-border: #16A34A;      /* green-600 */
+  /* Success (Armor Green) */
+  --success: #22C55E;     /* green-500 */
+  --success-foreground: #000000;
+  --success-hover: #16A34A;
+  --success-muted: #052E16;
+  --success-text: #4ADE80;
+  --success-border: #22C55E;
 
-  /* Warning (Orange) - In-progress workouts */
-  --warning: #F97316;     /* orange-500 */
+  /* Warning (Amber Item) */
+  --warning: #F97316;
   --warning-foreground: #FFF7ED;
-  --warning-hover: #EA580C;       /* orange-600 */
-  --warning-muted: #431407;       /* orange-950 */
-  --warning-text: #FB923C;        /* orange-400 */
-  --warning-border: #F97316;      /* orange-500 */
+  --warning-hover: #EA580C;
+  --warning-muted: #431407;
+  --warning-text: #FB923C;
+  --warning-border: #F97316;
 
-  /* Error/Danger (Red) */
+  /* Error (Blood Red) */
   --error: #EF4444;       /* red-500 */
   --error-foreground: #FFF7ED;
-  --error-hover: #DC2626;         /* red-600 */
-  --error-muted: #450A0A;         /* red-950 */
-  --error-text: #F87171;          /* red-400 */
-  --error-border: #EF4444;        /* red-500 */
+  --error-hover: #DC2626;
+  --error-muted: #450A0A;
+  --error-text: #F87171;
+  --error-border: #EF4444;
 
-  /* Accent (Purple) - for supersets */
-  --accent: #A855F7;      /* purple-500 */
-  --accent-foreground: #FFF7ED;
-  --accent-hover: #9333EA;        /* purple-600 */
-  --accent-muted: #3B0764;        /* purple-950 */
-  --accent-text: #C084FC;         /* purple-400 */
+  /* Accent (Toxic Green) */
+  --accent: #22C55E;      /* green-500 */
+  --accent-foreground: #000000;
+  --accent-hover: #16A34A;
+  --accent-muted: #052E16;
+  --accent-text: #4ADE80;
 }
 
 /* ============================================================================
    THEME DEFINITIONS
    ============================================================================ */
 
-/* DOOM Theme - Light Mode */
+/* DOOM Theme - Light Mode (Classic 1993) */
 [data-theme="doom"] {
-  /* Base colors */
-  --background: #18181B;  /* zinc-900 */
+  /* Base colors - stone and metal */
+  --background: #1C1917;  /* stone-900 - darker brown-gray */
   --foreground: #FFF7ED;  /* orange-50 */
 
   /* Surface colors */
-  --card: #27272A;        /* zinc-800 */
+  --card: #292524;        /* stone-800 */
   --card-foreground: #FFF7ED;
-  --muted: #3F3F46;       /* zinc-700 */
-  --muted-foreground: #A1A1AA;  /* zinc-400 */
+  --muted: #44403C;       /* stone-700 */
+  --muted-foreground: #A8A29E;  /* stone-400 */
 
   /* Border colors */
-  --border: #3F3F46;      /* zinc-700 */
-  --input: #52525B;       /* zinc-600 */
+  --border: #57534E;      /* stone-600 */
+  --input: #57534E;
 
-  /* Primary (Orange) */
-  --primary: #EA580C;     /* orange-600 */
-  --primary-foreground: #FFF7ED;  /* orange-50 */
-  --primary-hover: #C2410C;       /* orange-700 */
-  --primary-active: #9A3412;      /* orange-800 */
-  --primary-muted: #431407;       /* orange-950 */
-  --primary-muted-dark: #EA580C;  /* orange-600 for borders */
-  --primary-rgb: 234, 88, 12;
-
-  /* Secondary (Zinc) */
-  --secondary: #71717A;   /* zinc-500 */
-  --secondary-foreground: #FFF7ED;
-  --secondary-hover: #52525B;     /* zinc-600 */
-  --secondary-active: #3F3F46;    /* zinc-700 */
-  --secondary-muted: #3F3F46;     /* zinc-700 */
-
-  /* Success (Green) - Completed workouts */
-  --success: #15803D;     /* green-700 */
-  --success-foreground: #FFF7ED;
-  --success-hover: #166534;       /* green-800 */
-  --success-muted: #052E16;       /* green-950 */
-  --success-text: #4ADE80;        /* green-400 */
-  --success-border: #15803D;      /* green-700 */
-  --success-rgb: 21, 128, 61;
-
-  /* Warning (Orange) - In-progress workouts */
-  --warning: #EA580C;     /* orange-600 */
-  --warning-foreground: #FFF7ED;
-  --warning-hover: #C2410C;       /* orange-700 */
-  --warning-muted: #431407;       /* orange-950 */
-  --warning-text: #FB923C;        /* orange-400 */
-  --warning-border: #EA580C;      /* orange-600 */
-  --warning-rgb: 234, 88, 12;
-
-  /* Error/Danger (Red) */
-  --error: #DC2626;       /* red-600 */
-  --error-foreground: #FFF7ED;
-  --error-hover: #B91C1C;         /* red-700 */
-  --error-muted: #450A0A;         /* red-950 */
-  --error-text: #F87171;          /* red-400 */
-  --error-border: #DC2626;        /* red-600 */
-  --error-rgb: 220, 38, 38;
-
-  /* Accent (Purple) - for supersets */
-  --accent: #9333EA;      /* purple-600 */
-  --accent-foreground: #FFF7ED;
-  --accent-hover: #7E22CE;        /* purple-700 */
-  --accent-muted: #3B0764;        /* purple-950 */
-  --accent-text: #C084FC;         /* purple-400 */
-  --accent-rgb: 147, 51, 234;
-}
-
-/* DOOM Theme - Dark Mode */
-[data-theme="doom"][data-mode="dark"] {
-  /* Base colors */
-  --background: #000000;  /* pure black */
-  --foreground: #FFF7ED;  /* orange-50 */
-
-  /* Surface colors */
-  --card: #09090B;        /* zinc-950 */
-  --card-foreground: #FFF7ED;
-  --muted: #18181B;       /* zinc-900 */
-  --muted-foreground: #A1A1AA;  /* zinc-400 */
-
-  /* Border colors */
-  --border: #27272A;      /* zinc-800 */
-  --input: #3F3F46;       /* zinc-700 */
-
-  /* Primary (Orange) */
-  --primary: #EA580C;     /* orange-600 */
+  /* Primary (Hell Fire Orange) */
+  --primary: #EA580C;     /* orange-600 - cacodemon, fire */
   --primary-foreground: #FFF7ED;
   --primary-hover: #C2410C;       /* orange-700 */
   --primary-active: #9A3412;      /* orange-800 */
   --primary-muted: #431407;       /* orange-950 */
-  --primary-muted-dark: #F97316;  /* orange-500 for borders */
+  --primary-muted-dark: #EA580C;
   --primary-rgb: 234, 88, 12;
 
-  /* Secondary (Zinc) */
+  /* Secondary (Steel Gray) */
   --secondary: #71717A;   /* zinc-500 */
   --secondary-foreground: #FFF7ED;
-  --secondary-hover: #52525B;     /* zinc-600 */
-  --secondary-active: #3F3F46;    /* zinc-700 */
-  --secondary-muted: #27272A;     /* zinc-800 */
+  --secondary-hover: #52525B;
+  --secondary-active: #3F3F46;
+  --secondary-muted: #44403C;
 
-  /* Success (Green) - Completed workouts */
-  --success: #16A34A;     /* green-600 */
+  /* Success (Armor Green) */
+  --success: #15803D;     /* green-700 - armor pickups */
   --success-foreground: #FFF7ED;
-  --success-hover: #15803D;       /* green-700 */
-  --success-muted: #052E16;       /* green-950 */
+  --success-hover: #166534;
+  --success-muted: #052E16;
   --success-text: #4ADE80;        /* green-400 */
-  --success-border: #16A34A;      /* green-600 */
-  --success-rgb: 22, 163, 74;
+  --success-border: #15803D;
+  --success-rgb: 21, 128, 61;
 
-  /* Warning (Orange) - In-progress workouts */
+  /* Warning (Amber Item) */
+  --warning: #EA580C;     /* orange-600 */
+  --warning-foreground: #FFF7ED;
+  --warning-hover: #C2410C;
+  --warning-muted: #431407;
+  --warning-text: #FB923C;
+  --warning-border: #EA580C;
+  --warning-rgb: 234, 88, 12;
+
+  /* Error (Blood Red) */
+  --error: #DC2626;       /* red-600 - damage, blood */
+  --error-foreground: #FFF7ED;
+  --error-hover: #B91C1C;
+  --error-muted: #450A0A;
+  --error-text: #F87171;
+  --error-border: #DC2626;
+  --error-rgb: 220, 38, 38;
+
+  /* Accent (Toxic Green) */
+  --accent: #22C55E;      /* green-500 - radioactive waste, armor */
+  --accent-foreground: #000000;
+  --accent-hover: #16A34A;        /* green-600 */
+  --accent-active: #15803D;       /* green-700 */
+  --accent-muted: #052E16;        /* green-950 */
+  --accent-text: #4ADE80;         /* green-400 */
+  --accent-rgb: 34, 197, 94;
+}
+
+/* DOOM Theme - Dark Mode (Hell's Depths) */
+[data-theme="doom"][data-mode="dark"] {
+  /* Base colors - pure darkness */
+  --background: #000000;  /* pure black - the void */
+  --foreground: #FFF7ED;  /* orange-50 */
+
+  /* Surface colors */
+  --card: #0C0A09;        /* stone-950 */
+  --card-foreground: #FFF7ED;
+  --muted: #1C1917;       /* stone-900 */
+  --muted-foreground: #A8A29E;  /* stone-400 */
+
+  /* Border colors */
+  --border: #292524;      /* stone-800 */
+  --input: #44403C;       /* stone-700 */
+
+  /* Primary (Hell Fire Orange) */
+  --primary: #F97316;     /* orange-500 - brighter in darkness */
+  --primary-foreground: #FFF7ED;
+  --primary-hover: #EA580C;       /* orange-600 */
+  --primary-active: #C2410C;      /* orange-700 */
+  --primary-muted: #431407;       /* orange-950 */
+  --primary-muted-dark: #F97316;
+  --primary-rgb: 249, 115, 22;
+
+  /* Secondary (Steel Gray) */
+  --secondary: #71717A;
+  --secondary-foreground: #FFF7ED;
+  --secondary-hover: #52525B;
+  --secondary-active: #3F3F46;
+  --secondary-muted: #292524;
+
+  /* Success (Armor Green) */
+  --success: #22C55E;     /* green-500 - armor pickups */
+  --success-foreground: #000000;
+  --success-hover: #16A34A;
+  --success-muted: #052E16;
+  --success-text: #4ADE80;        /* green-400 */
+  --success-border: #22C55E;
+  --success-rgb: 34, 197, 94;
+
+  /* Warning (Amber Item) */
   --warning: #F97316;     /* orange-500 */
   --warning-foreground: #FFF7ED;
-  --warning-hover: #EA580C;       /* orange-600 */
-  --warning-muted: #431407;       /* orange-950 */
-  --warning-text: #FB923C;        /* orange-400 */
-  --warning-border: #F97316;      /* orange-500 */
+  --warning-hover: #EA580C;
+  --warning-muted: #431407;
+  --warning-text: #FB923C;
+  --warning-border: #F97316;
   --warning-rgb: 249, 115, 22;
 
-  /* Error/Danger (Red) */
-  --error: #EF4444;       /* red-500 */
+  /* Error (Blood Red) */
+  --error: #EF4444;       /* red-500 - damage, blood */
   --error-foreground: #FFF7ED;
-  --error-hover: #DC2626;         /* red-600 */
-  --error-muted: #450A0A;         /* red-950 */
-  --error-text: #F87171;          /* red-400 */
-  --error-border: #EF4444;        /* red-500 */
+  --error-hover: #DC2626;
+  --error-muted: #450A0A;
+  --error-text: #F87171;
+  --error-border: #EF4444;
   --error-rgb: 239, 68, 68;
 
-  /* Accent (Purple) - for supersets */
-  --accent: #A855F7;      /* purple-500 */
-  --accent-foreground: #FFF7ED;
-  --accent-hover: #9333EA;        /* purple-600 */
-  --accent-muted: #3B0764;        /* purple-950 */
-  --accent-text: #C084FC;         /* purple-400 */
-  --accent-rgb: 168, 85, 247;
+  /* Accent (Toxic Green) */
+  --accent: #22C55E;      /* green-500 - radioactive waste */
+  --accent-foreground: #000000;
+  --accent-hover: #16A34A;
+  --accent-active: #15803D;
+  --accent-muted: #052E16;
+  --accent-text: #4ADE80;
+  --accent-rgb: 34, 197, 94;
 }
 
 /* CYBER Theme - Light Mode (Synthwave meets Matrix) */
@@ -1021,6 +1028,144 @@
   --accent-rgb: 163, 113, 247;
 }
 
+/* RIPIT Theme - Light Mode (Donkey Kong Jungle) */
+[data-theme="ripit"] {
+  /* Base colors - warm brown-tinted background */
+  --background: #FBF8F3;  /* warm cream with brown undertones */
+  --foreground: #3A2817;  /* rich dark brown */
+
+  /* Surface colors */
+  --card: #FFFCF7;        /* slightly warmer white */
+  --card-foreground: #3A2817;
+  --muted: #F5EFE6;       /* warm tan */
+  --muted-foreground: #78573B;  /* medium brown */
+
+  /* Border colors */
+  --border: #D4C4B0;      /* sandy brown border */
+  --input: #F5EFE6;
+
+  /* Primary (Emerald Jungle Green) */
+  --primary: #10B981;     /* emerald green - DK jungle */
+  --primary-foreground: #FFFFFF;
+  --primary-hover: #059669;
+  --primary-active: #047857;
+  --primary-muted: #D1FAE5;
+  --primary-muted-dark: #10B981;
+  --primary-rgb: 16, 185, 129;
+
+  /* Secondary (Barrel Brown) */
+  --secondary: #92400E;   /* rich barrel brown */
+  --secondary-foreground: #FEF3C7;
+  --secondary-hover: #78350F;
+  --secondary-active: #65290D;
+  --secondary-muted: #FEF3C7;
+
+  /* Success (Bright Green) */
+  --success: #10B981;
+  --success-foreground: #FFFFFF;
+  --success-hover: #059669;
+  --success-muted: #D1FAE5;
+  --success-text: #047857;
+  --success-border: #10B981;
+  --success-rgb: 16, 185, 129;
+
+  /* Warning (Banana Yellow/Gold) */
+  --warning: #F59E0B;
+  --warning-foreground: #3A2817;
+  --warning-hover: #D97706;
+  --warning-muted: #FEF3C7;
+  --warning-text: #92400E;
+  --warning-border: #F59E0B;
+  --warning-rgb: 245, 158, 11;
+
+  /* Error (DK Tie Red) */
+  --error: #DC2626;
+  --error-foreground: #FFFFFF;
+  --error-hover: #B91C1C;
+  --error-muted: #FEE2E2;
+  --error-text: #DC2626;
+  --error-border: #DC2626;
+  --error-rgb: 220, 38, 38;
+
+  /* Accent (Banana Gold) */
+  --accent: #FBBF24;      /* golden yellow - banana! */
+  --accent-foreground: #3A2817;
+  --accent-hover: #F59E0B;
+  --accent-active: #D97706;
+  --accent-muted: #FEF9E6;
+  --accent-text: #92400E;
+  --accent-rgb: 251, 191, 36;
+}
+
+/* RIPIT Theme - Dark Mode (Night Jungle) */
+[data-theme="ripit"][data-mode="dark"] {
+  /* Base colors - dark jungle with brown undertones */
+  --background: #1A1108;  /* very dark brown */
+  --foreground: #FEF3C7;  /* warm cream foreground */
+
+  /* Surface colors */
+  --card: #251A0F;        /* dark warm brown */
+  --card-foreground: #FEF3C7;
+  --muted: #3A2817;       /* medium dark brown */
+  --muted-foreground: #D4C4B0;
+
+  /* Border colors */
+  --border: #4A3420;      /* brown border */
+  --input: #3A2817;
+
+  /* Primary (Emerald Green) */
+  --primary: #10B981;     /* emerald green */
+  --primary-foreground: #FFFFFF;
+  --primary-hover: #059669;
+  --primary-active: #047857;
+  --primary-muted: #064E3B;
+  --primary-muted-dark: #10B981;
+  --primary-rgb: 16, 185, 129;
+
+  /* Secondary (Barrel Brown) */
+  --secondary: #92400E;
+  --secondary-foreground: #FEF3C7;
+  --secondary-hover: #78350F;
+  --secondary-active: #65290D;
+  --secondary-muted: #3A1A03;
+
+  /* Success (Bright Green) */
+  --success: #10B981;
+  --success-foreground: #FFFFFF;
+  --success-hover: #059669;
+  --success-muted: #064E3B;
+  --success-text: #34D399;
+  --success-border: #10B981;
+  --success-rgb: 16, 185, 129;
+
+  /* Warning (Banana Yellow) */
+  --warning: #FBBF24;
+  --warning-foreground: #1A1108;
+  --warning-hover: #F59E0B;
+  --warning-muted: #451A03;
+  --warning-text: #FDE68A;
+  --warning-border: #FBBF24;
+  --warning-rgb: 251, 191, 36;
+
+  /* Error (DK Tie Red) */
+  --error: #EF4444;
+  --error-foreground: #FFFFFF;
+  --error-hover: #DC2626;
+  --error-muted: #450A0A;
+  --error-text: #F87171;
+  --error-border: #EF4444;
+  --error-rgb: 239, 68, 68;
+
+  /* Accent (Banana Gold) */
+  --accent: #FBBF24;      /* golden yellow */
+  --accent-foreground: #1A1108;
+  --accent-hover: #F59E0B;
+  --accent-active: #D97706;
+  --accent-muted: #451A03;
+  --accent-text: #FDE68A;
+  --accent-rgb: 251, 191, 36;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -1158,6 +1303,54 @@ body {
 .doom-card:hover {
   border-color: rgba(var(--primary-rgb), 0.5);
   box-shadow: 0 0 20px rgba(var(--primary-rgb), 0.2);
+}
+
+/* Accent Variants */
+.doom-badge-accent {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.5);
+}
+
+.doom-link-accent {
+  color: var(--accent);
+}
+
+.doom-link-accent:hover {
+  color: var(--accent-hover);
+  text-shadow: 0 0 10px rgba(var(--accent-rgb), 0.5);
+}
+
+.doom-button-3d-accent {
+  box-shadow:
+    0 4px 0 var(--accent-hover),
+    0 6px 8px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.doom-button-3d-accent:hover:not(:disabled) {
+  box-shadow:
+    0 4px 0 var(--accent-hover),
+    0 0 30px rgba(var(--accent-rgb), 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.doom-button-3d-accent:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow:
+    0 0 0 var(--accent-hover),
+    0 2px 4px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.doom-corners-accent::before {
+  border-top-color: var(--accent);
+  border-left-color: var(--accent);
+}
+
+.doom-corners-accent::after {
+  border-bottom-color: var(--accent);
+  border-right-color: var(--accent);
 }
 
 /* ============================================
@@ -1354,4 +1547,36 @@ body {
 @keyframes frog-squat {
   from { background-position: 0 0; }
   to { background-position: var(--frog-end-position, -320px) 0; }
+}
+
+/* ============================================
+   RIPIT THEME ENHANCEMENTS (Donkey Kong)
+   ============================================ */
+
+/* Primary buttons get golden glow */
+[data-theme="ripit"] .bg-primary:hover {
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); /* emerald green glow */
+}
+
+/* Accent elements get golden shimmer */
+[data-theme="ripit"] .border-accent:hover,
+[data-theme="ripit"] .text-accent:hover {
+  box-shadow: 0 0 15px rgba(251, 191, 36, 0.3); /* golden glow */
+}
+
+/* Active nav items get gold accent */
+[data-theme="ripit"] [aria-current="page"] {
+  border-bottom: 3px solid #FBBF24; /* golden underline */
+}
+
+/* Focus rings with golden warmth */
+[data-theme="ripit"] *:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.2); /* golden outer ring */
+}
+
+/* Cards get subtle golden borders on hover */
+[data-theme="ripit"] .bg-card:hover {
+  border-color: rgba(251, 191, 36, 0.3); /* golden tint */
 }
