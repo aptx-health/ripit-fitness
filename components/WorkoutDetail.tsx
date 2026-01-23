@@ -32,6 +32,7 @@ type Exercise = {
   order: number
   exerciseGroup: string | null
   notes: string | null
+  isOneOff?: boolean
   prescribedSets: PrescribedSet[]
 }
 
@@ -92,6 +93,10 @@ export default function WorkoutDetail({ workout, programId, exerciseHistory }: P
   // Determine workout status
   const isDraft = completion?.status === 'draft'
   const isWorkoutCompleted = completion?.status === 'completed'
+
+  const handleRefresh = () => {
+    router.refresh()
+  }
 
   const handleCompleteWorkout = async (loggedSets: LoggedSetInput[]) => {
     try {
@@ -371,7 +376,9 @@ export default function WorkoutDetail({ workout, programId, exerciseHistory }: P
         exercises={workout.exercises}
         workoutId={workout.id}
         workoutName={workout.name}
+        workoutCompletionId={completion?.id} // Pass completion ID for one-off exercises
         onComplete={handleCompleteWorkout}
+        onRefresh={handleRefresh}
         exerciseHistory={exerciseHistory} // NEW: Pass exercise history
       />
     </div>

@@ -43,8 +43,15 @@ export async function POST(
       )
     }
 
-    if (prescribedSet.exercise.workout.week.program.userId !== user.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    // Check ownership - either through workout or direct userId for one-offs
+    if (prescribedSet.exercise.workout) {
+      if (prescribedSet.exercise.workout.week.program.userId !== user.id) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+      }
+    } else {
+      if (prescribedSet.exercise.userId !== user.id) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+      }
     }
 
     // Duplicate the set in a transaction

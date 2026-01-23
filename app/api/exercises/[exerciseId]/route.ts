@@ -40,8 +40,15 @@ export async function PATCH(
       return NextResponse.json({ error: 'Exercise not found' }, { status: 404 })
     }
 
-    if (exercise.workout.week.program.userId !== user.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    // Check ownership - either through workout or direct userId for one-offs
+    if (exercise.workout) {
+      if (exercise.workout.week.program.userId !== user.id) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+      }
+    } else {
+      if (exercise.userId !== user.id) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+      }
     }
 
     // Update exercise and prescribed sets in transaction
@@ -141,8 +148,15 @@ export async function DELETE(
       return NextResponse.json({ error: 'Exercise not found' }, { status: 404 })
     }
 
-    if (exercise.workout.week.program.userId !== user.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    // Check ownership - either through workout or direct userId for one-offs
+    if (exercise.workout) {
+      if (exercise.workout.week.program.userId !== user.id) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+      }
+    } else {
+      if (exercise.userId !== user.id) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+      }
     }
 
     // Delete exercise and all related data in transaction
