@@ -7,7 +7,7 @@ import { useWorkoutSyncService } from '@/lib/sync/workoutSync'
 import SyncStatusIcon from './SyncStatusIcon'
 import SyncDetailsModal from './SyncDetailsModal'
 import { LoadingFrog } from '@/components/ui/loading-frog'
-import { Plus, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Plus, RefreshCw, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react'
 import ScopeSelectionDialog from './ScopeSelectionDialog'
 import ExerciseSearchModal from './ExerciseSearchModal'
 import ActionsMenu, { type ActionItem } from './ActionsMenu'
@@ -110,7 +110,7 @@ export default function ExerciseLoggingModal({
     successMessage: string
   }>({ isLoading: false, isSuccess: false, message: '', successMessage: '' })
   const [pendingAction, setPendingAction] = useState<{
-    type: 'replace' | 'add'
+    type: 'replace' | 'add' | 'delete'
     exerciseDefinitionId: string
     exerciseName: string
   } | null>(null)
@@ -251,6 +251,15 @@ export default function ExerciseLoggingModal({
     setPendingAction({ type: 'add', exerciseDefinitionId: '', exerciseName: '' })
   }
 
+  const handleDeleteExercise = () => {
+    setPendingAction({
+      type: 'delete',
+      exerciseDefinitionId: currentExercise.id, // For delete, we use exercise ID not definition ID
+      exerciseName: currentExercise.name
+    })
+    setShowScopeDialog(true)
+  }
+
   const handleExerciseSearchSelect = (exercise: any, prescription: any) => {
     if (!pendingAction) return
 
@@ -305,6 +314,20 @@ export default function ExerciseLoggingModal({
 
         data = await response.json()
         successMsg = `Exercise replaced${applyToFuture ? ` in ${data.updatedCount} workout${data.updatedCount !== 1 ? 's' : ''}` : ''}!`
+      } else if (pendingAction.type === 'delete') {
+        // Call delete API
+        const response = await fetch(`/api/exercises/${currentExercise.id}/delete`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            applyToFuture
+          })
+        })
+
+        if (!response.ok) throw new Error('Failed to delete exercise')
+
+        data = await response.json()
+        successMsg = `Exercise deleted${applyToFuture ? ` from ${data.deletedCount} workout${data.deletedCount !== 1 ? 's' : ''}` : ''}!`
       } else {
         // Call add-during-logging API
         const response = await fetch(`/api/workouts/${workoutId}/exercises/add-during-logging`, {
@@ -472,6 +495,34 @@ export default function ExerciseLoggingModal({
     window.addEventListener('beforeunload', handleBeforeUnload)
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
   }, [isOpen, loggedSets.length, syncState.pendingSets])
+
+  // Handle exercise deletion - adjust index if current exercise was deleted
+  useEffect(() => {
+    if (!isOpen || exercises.length === 0) {
+      // No exercises left - close modal
+      if (isOpen && exercises.length === 0) {
+        onClose()
+      }
+      return
+    }
+
+    // Check if current exercise still exists
+    const currentExerciseStillExists = exercises.some(ex => ex.id === currentExercise?.id)
+
+    if (!currentExerciseStillExists) {
+      // Current exercise was deleted - navigate to previous or next
+      if (currentExerciseIndex > 0) {
+        // Go to previous exercise
+        setCurrentExerciseIndex(currentExerciseIndex - 1)
+      } else if (exercises.length > 0) {
+        // We were at index 0, stay at 0 (which is now a different exercise)
+        setCurrentExerciseIndex(0)
+      }
+    } else if (currentExerciseIndex >= exercises.length) {
+      // Index out of bounds - go to last exercise
+      setCurrentExerciseIndex(exercises.length - 1)
+    }
+  }, [exercises, isOpen, currentExerciseIndex, currentExercise?.id, onClose])
 
   // Don't render until storage is loaded to prevent flash of empty state
   if (!isLoaded) {
@@ -836,6 +887,15 @@ export default function ExerciseLoggingModal({
                   icon: RefreshCw,
                   onClick: handleReplaceExercise,
                   disabled: false
+                },
+                {
+                  label: 'Delete this exercise',
+                  icon: Trash2,
+                  onClick: handleDeleteExercise,
+                  disabled: false,
+                  variant: 'danger' as const,
+                  requiresConfirmation: true,
+                  confirmationMessage: `Are you sure you want to delete "${currentExercise.name}"?`
                 }
               ]}
             />

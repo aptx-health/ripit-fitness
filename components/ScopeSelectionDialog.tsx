@@ -6,7 +6,7 @@ interface ScopeSelectionDialogProps {
   isOpen: boolean
   onClose: () => void
   onSelect: (applyToFuture: boolean) => void
-  actionType: 'replace' | 'add'
+  actionType: 'replace' | 'add' | 'delete'
   exerciseName: string
   isLoading?: boolean
 }
@@ -33,7 +33,9 @@ export default function ScopeSelectionDialog({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-border">
           <h2 className="text-xl font-semibold text-foreground">
-            {actionType === 'replace' ? 'Replace' : 'Add'} "{exerciseName}"
+            {actionType === 'replace' && `Replace "${exerciseName}"`}
+            {actionType === 'add' && `Add "${exerciseName}"`}
+            {actionType === 'delete' && `Delete "${exerciseName}"`}
           </h2>
           <button
             onClick={onClose}
@@ -46,9 +48,9 @@ export default function ScopeSelectionDialog({
         {/* Content */}
         <div className="p-6">
           <p className="text-sm text-muted-foreground mb-6">
-            {actionType === 'replace'
-              ? 'Do you want to replace this exercise for just this workout, or for all future weeks in your program?'
-              : 'Do you want to add this exercise for just this workout, or for all future weeks in your program?'}
+            {actionType === 'replace' && 'Do you want to replace this exercise for just this workout, or for all future weeks in your program?'}
+            {actionType === 'add' && 'Do you want to add this exercise for just this workout, or for all future weeks in your program?'}
+            {actionType === 'delete' && 'Do you want to remove this exercise from just this workout, or from all future weeks in your program?'}
           </p>
 
           <div className="space-y-3">
@@ -58,7 +60,11 @@ export default function ScopeSelectionDialog({
               className="w-full p-4 border-2 border-border rounded-lg hover:border-primary hover:bg-primary-muted transition-colors text-left disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <div className="font-semibold text-foreground">Just This Workout</div>
-              <div className="text-sm text-muted-foreground">One-time change, won't affect program</div>
+              <div className="text-sm text-muted-foreground">
+                {actionType === 'delete'
+                  ? 'Remove from this workout only'
+                  : 'One-time change, won\'t affect program'}
+              </div>
             </button>
 
             <button
@@ -66,11 +72,13 @@ export default function ScopeSelectionDialog({
               disabled={isLoading}
               className="w-full p-4 border-2 border-border rounded-lg hover:border-primary hover:bg-primary-muted transition-colors text-left disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <div className="font-semibold text-foreground">Update Program</div>
+              <div className="font-semibold text-foreground">
+                {actionType === 'delete' ? 'Remove from Program' : 'Update Program'}
+              </div>
               <div className="text-sm text-muted-foreground">
-                {actionType === 'replace'
-                  ? 'Replace all matching exercises in future weeks'
-                  : 'Add to this workout in all future weeks'}
+                {actionType === 'replace' && 'Replace all matching exercises in future weeks'}
+                {actionType === 'add' && 'Add to this workout in all future weeks'}
+                {actionType === 'delete' && 'Remove all matching exercises from future weeks'}
               </div>
             </button>
           </div>
