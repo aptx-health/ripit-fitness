@@ -156,6 +156,53 @@ export async function createTestProgram(
   }
 }
 
+/**
+ * Creates a multi-week program for testing future-week logic
+ * Returns flattened arrays for easier test assertions
+ */
+export async function createMultiWeekProgram(
+  prisma: PrismaClient,
+  userId: string,
+  options: {
+    weekCount?: number
+    workoutsPerWeek?: number
+    exercisesPerWorkout?: number
+  } = {}
+) {
+  const weekCount = options.weekCount ?? 4
+  const workoutsPerWeek = options.workoutsPerWeek ?? 3
+  const exercisesPerWorkout = options.exercisesPerWorkout ?? 2
+
+  const program = await createTestProgram(prisma, userId, {
+    weeks: weekCount,
+    workoutsPerWeek,
+    exercisesPerWorkout
+  })
+
+  // Fetch and return all nested data for test assertions
+  const weeks = await prisma.week.findMany({
+    where: { programId: program.id },
+    include: {
+      workouts: {
+        include: {
+          exercises: {
+            include: {
+              prescribedSets: true
+            }
+          }
+        },
+        orderBy: { dayNumber: 'asc' }
+      }
+    },
+    orderBy: { weekNumber: 'asc' }
+  })
+
+  const workouts = weeks.flatMap(w => w.workouts)
+  const exercises = workouts.flatMap(w => w.exercises)
+
+  return { program, weeks, workouts, exercises }
+}
+
 export async function createTestWorkoutCompletion(
   prisma: PrismaClient,
   workoutId: string,

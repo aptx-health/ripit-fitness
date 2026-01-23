@@ -75,6 +75,9 @@ doppler run -- npm run lint
   ARCHITECTURE.md       # Architecture decisions and design
   CSV_SPEC.md          # CSV format specification
 
+/__tests__              # Integration tests
+  /api                  # API route tests
+
 /types                  # Shared TypeScript types
 /hooks                  # React hooks
 ```
@@ -254,6 +257,98 @@ const weeks = await prisma.week.findMany({
   include: { workouts: true }
 });
 ```
+
+## Testing
+
+### Test Infrastructure
+
+- **Framework**: Vitest
+- **Database**: Testcontainers (PostgreSQL 15)
+- **Approach**: Integration tests for API routes
+
+### Running Tests
+
+```bash
+# Run all tests
+doppler run --config dev_test -- npm test
+
+# Run specific test file
+doppler run --config dev_test -- npm test exercise-modifications
+
+# Run with UI
+doppler run --config dev_test -- npm run test:ui
+```
+
+**Note**: Docker must be running for Testcontainers to work.
+
+### Test Structure
+
+```
+__tests__/
+  api/
+    draft.test.ts                    # Draft/logging API tests
+    exercise-modifications.test.ts   # Add/swap/delete exercise tests
+```
+
+### Writing Tests
+
+Tests use simulation functions that replicate API logic without HTTP requests:
+
+```typescript
+import { describe, it, expect, beforeEach } from 'vitest'
+import { PrismaClient } from '@prisma/client'
+import { getTestDatabase } from '@/lib/test/database'
+import { createTestUser, createMultiWeekProgram } from '@/lib/test/factories'
+
+describe('API Feature', () => {
+  let prisma: PrismaClient
+  let userId: string
+
+  beforeEach(async () => {
+    const testDb = await getTestDatabase()
+    prisma = testDb.getPrismaClient()
+    await testDb.reset()
+
+    const user = await createTestUser()
+    userId = user.id
+  })
+
+  it('should test feature', async () => {
+    // Arrange
+    const { workouts } = await createMultiWeekProgram(prisma, userId, {
+      weekCount: 2
+    })
+
+    // Act
+    const result = await simulateApiCall(prisma, workouts[0].id, userId, {
+      // request data
+    })
+
+    // Assert
+    expect(result.success).toBe(true)
+  })
+})
+```
+
+### Test Factories
+
+Helper functions in `/lib/test/factories.ts`:
+
+- `createTestUser()` - Creates test user
+- `createTestProgram()` - Creates program with weeks/workouts
+- `createMultiWeekProgram()` - Creates multi-week program for future-week testing
+- `createTestExerciseDefinition()` - Creates exercise definition
+- `createTestWorkoutCompletion()` - Creates workout completion
+- `createTestPrescribedSets()` - Creates prescribed sets
+- `createTestLoggedSets()` - Creates logged sets
+
+### Coverage Philosophy
+
+- Focus on API layer (not UI components)
+- Test critical paths and edge cases
+- Verify database state, not just API responses
+- Test authorization and validation
+- Avoid excessive permutations
 
 ## Development Workflow
 
