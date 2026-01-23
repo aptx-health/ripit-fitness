@@ -53,8 +53,8 @@ describe('Theme System', () => {
     it('returns default theme when no preference stored', () => {
       const preference = getThemePreference();
 
-      // Should return doom theme with system preference (mocked as dark)
-      expect(preference.themeName).toBe('doom');
+      // Should return ripit theme with system preference (mocked as dark)
+      expect(preference.themeName).toBe('ripit');
       expect(preference.mode).toBe('dark');
     });
 
@@ -120,7 +120,7 @@ describe('Theme System', () => {
       const preference = getThemePreference();
 
       // Should fall back to default with system preference
-      expect(preference.themeName).toBe('doom');
+      expect(preference.themeName).toBe('ripit');
       expect(preference.mode).toBe('dark');
     });
 
@@ -134,7 +134,7 @@ describe('Theme System', () => {
       const preference = getThemePreference();
 
       // Should fall back to default
-      expect(preference.themeName).toBe('doom');
+      expect(preference.themeName).toBe('ripit');
       expect(preference.mode).toBe('dark');
     });
 
@@ -146,7 +146,7 @@ describe('Theme System', () => {
 
       const preference = getThemePreference();
 
-      expect(preference.themeName).toBe('doom');
+      expect(preference.themeName).toBe('ripit');
       expect(preference.mode).toBe('light');
     });
   });
