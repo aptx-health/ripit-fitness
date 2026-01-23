@@ -6,7 +6,7 @@ interface ScopeSelectionDialogProps {
   isOpen: boolean
   onClose: () => void
   onSelect: (applyToFuture: boolean) => void
-  actionType: 'replace' | 'add' | 'delete'
+  actionType: 'replace' | 'add' | 'delete' | 'edit'
   exerciseName: string
   isLoading?: boolean
 }
@@ -36,6 +36,7 @@ export default function ScopeSelectionDialog({
             {actionType === 'replace' && `Replace "${exerciseName}"`}
             {actionType === 'add' && `Add "${exerciseName}"`}
             {actionType === 'delete' && `Delete "${exerciseName}"`}
+            {actionType === 'edit' && `Edit "${exerciseName}"`}
           </h2>
           <button
             onClick={onClose}
@@ -51,6 +52,7 @@ export default function ScopeSelectionDialog({
             {actionType === 'replace' && 'Do you want to replace this exercise for just this workout, or for all future weeks in your program?'}
             {actionType === 'add' && 'Do you want to add this exercise for just this workout, or for all future weeks in your program?'}
             {actionType === 'delete' && 'Do you want to remove this exercise from just this workout, or from all future weeks in your program?'}
+            {actionType === 'edit' && 'Do you want to update this exercise for just this workout, or for all future weeks in your program?'}
           </p>
 
           <div className="space-y-3">
@@ -79,6 +81,7 @@ export default function ScopeSelectionDialog({
                 {actionType === 'replace' && 'Replace all matching exercises in future weeks'}
                 {actionType === 'add' && 'Add to this workout in all future weeks'}
                 {actionType === 'delete' && 'Remove all matching exercises from future weeks'}
+                {actionType === 'edit' && 'Update all matching exercises in future weeks'}
               </div>
             </button>
           </div>

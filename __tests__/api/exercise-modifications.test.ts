@@ -573,6 +573,196 @@ async function simulateDeleteExercise(
   }
 }
 
+type EditExerciseRequest = {
+  notes?: string
+  applyToFuture: boolean
+  prescribedSets: Array<{
+    setNumber: number
+    reps: string
+    rpe: number | null
+    rir: number | null
+  }>
+}
+
+async function simulateEditExercise(
+  prisma: PrismaClient,
+  exerciseId: string,
+  userId: string,
+  request: EditExerciseRequest
+) {
+  const { notes, prescribedSets, applyToFuture } = request
+
+  // Verify exercise exists and user owns it
+  const exercise = await prisma.exercise.findUnique({
+    where: { id: exerciseId },
+    include: {
+      workout: {
+        include: {
+          week: {
+            include: {
+              program: true
+            }
+          }
+        }
+      },
+      exerciseDefinition: true
+    }
+  })
+
+  if (!exercise) {
+    return { success: false, error: 'Exercise not found', status: 404 }
+  }
+
+  // Check ownership through workout/program
+  if (exercise.workout) {
+    if (exercise.workout.week.program.userId !== userId) {
+      return { success: false, error: 'Unauthorized', status: 403 }
+    }
+  } else {
+    if (exercise.userId !== userId) {
+      return { success: false, error: 'Unauthorized', status: 403 }
+    }
+  }
+
+  let updatedCount = 0
+  let updatedExercises: any[] = []
+
+  if (!applyToFuture || !exercise.workout) {
+    // Update only this exercise
+    const updated = await prisma.$transaction(async (tx) => {
+      // Update exercise notes
+      const ex = await tx.exercise.update({
+        where: { id: exerciseId },
+        data: {
+          notes: notes || null,
+        }
+      })
+
+      // Delete existing prescribed sets
+      await tx.prescribedSet.deleteMany({
+        where: { exerciseId }
+      })
+
+      // Create new prescribed sets
+      if (prescribedSets && prescribedSets.length > 0) {
+        await tx.prescribedSet.createMany({
+          data: prescribedSets.map((set: any) => ({
+            setNumber: set.setNumber,
+            reps: set.reps,
+            rpe: set.rpe || null,
+            rir: set.rir || null,
+            exerciseId: ex.id,
+            userId
+          }))
+        })
+      }
+
+      // Return exercise with all relations
+      return await tx.exercise.findUnique({
+        where: { id: ex.id },
+        include: {
+          prescribedSets: {
+            orderBy: { setNumber: 'asc' }
+          }
+        }
+      })
+    })
+
+    updatedCount = 1
+    updatedExercises = [updated!]
+  } else {
+    // Apply to future weeks: update matching exercises in current + future weeks
+    const currentWeek = exercise.workout.week
+    const programId = currentWeek.programId
+    const currentWeekNumber = currentWeek.weekNumber
+    const exerciseDefinitionId = exercise.exerciseDefinitionId
+
+    await prisma.$transaction(async (tx) => {
+      // Find all weeks with weekNumber >= currentWeekNumber in the same program
+      const futureWeeks = await tx.week.findMany({
+        where: {
+          programId,
+          weekNumber: {
+            gte: currentWeekNumber
+          }
+        },
+        include: {
+          workouts: {
+            include: {
+              exercises: true
+            }
+          }
+        }
+      })
+
+      // Find all exercises with matching exerciseDefinitionId in those weeks
+      const exercisesToUpdate: string[] = []
+
+      for (const week of futureWeeks) {
+        for (const workout of week.workouts) {
+          for (const ex of workout.exercises) {
+            if (ex.exerciseDefinitionId === exerciseDefinitionId) {
+              exercisesToUpdate.push(ex.id)
+            }
+          }
+        }
+      }
+
+      // Update all matching exercises
+      for (const exerciseIdToUpdate of exercisesToUpdate) {
+        // Update exercise notes
+        await tx.exercise.update({
+          where: { id: exerciseIdToUpdate },
+          data: {
+            notes: notes || null
+          }
+        })
+
+        // Delete existing prescribed sets
+        await tx.prescribedSet.deleteMany({
+          where: { exerciseId: exerciseIdToUpdate }
+        })
+
+        // Create new prescribed sets
+        if (prescribedSets && prescribedSets.length > 0) {
+          await tx.prescribedSet.createMany({
+            data: prescribedSets.map((set: any) => ({
+              setNumber: set.setNumber,
+              reps: set.reps,
+              rpe: set.rpe || null,
+              rir: set.rir || null,
+              exerciseId: exerciseIdToUpdate,
+              userId
+            }))
+          })
+        }
+      }
+
+      updatedCount = exercisesToUpdate.length
+
+      // Fetch updated exercises for response
+      updatedExercises = await tx.exercise.findMany({
+        where: {
+          id: {
+            in: exercisesToUpdate
+          }
+        },
+        include: {
+          prescribedSets: {
+            orderBy: { setNumber: 'asc' }
+          }
+        }
+      })
+    })
+  }
+
+  return {
+    success: true,
+    updatedCount,
+    exercises: updatedExercises
+  }
+}
+
 // ============================================================================
 // TESTS
 // ============================================================================
@@ -1607,6 +1797,217 @@ describe('Exercise Modifications API', () => {
       expect(response.success).toBe(false)
       expect(response.status).toBe(404)
       expect(response.error).toBe('New exercise definition not found')
+    })
+  })
+
+  // ==========================================================================
+  // EDIT EXERCISE TESTS
+  // ==========================================================================
+
+  describe('Edit Exercise', () => {
+    describe('One-off mode', () => {
+      it('should update exercise sets and notes for single workout', async () => {
+        // Arrange
+        const { workouts, exercises } = await createMultiWeekProgram(prisma, userId, {
+          weekCount: 2
+        })
+        const exercise = exercises.find(e => e.workoutId === workouts[0].id)!
+
+        // Create initial prescribed sets
+        await prisma.prescribedSet.createMany({
+          data: [
+            { exerciseId: exercise.id, setNumber: 1, reps: '8', userId },
+            { exerciseId: exercise.id, setNumber: 2, reps: '8', userId }
+          ]
+        })
+
+        // Verify initial state
+        const initialExercise = await prisma.exercise.findUnique({
+          where: { id: exercise.id },
+          include: { prescribedSets: true }
+        })
+        expect(initialExercise?.prescribedSets).toHaveLength(2)
+
+        // Act: Update with new sets and notes
+        const response = await simulateEditExercise(prisma, exercise.id, userId, {
+          notes: 'Updated form cue',
+          applyToFuture: false,
+          prescribedSets: [
+            { setNumber: 1, reps: '10', rpe: 8, rir: null },
+            { setNumber: 2, reps: '10', rpe: 9, rir: null },
+            { setNumber: 3, reps: '8', rpe: 9, rir: null }
+          ]
+        })
+
+        // Assert: Verify response
+        expect(response.success).toBe(true)
+        expect(response.updatedCount).toBe(1)
+        expect(response.exercises).toHaveLength(1)
+        expect(response.exercises![0].notes).toBe('Updated form cue')
+        expect(response.exercises![0].prescribedSets).toHaveLength(3)
+
+        // Assert: Verify database state
+        const updatedExercise = await prisma.exercise.findUnique({
+          where: { id: exercise.id },
+          include: { prescribedSets: { orderBy: { setNumber: 'asc' } } }
+        })
+        expect(updatedExercise?.notes).toBe('Updated form cue')
+        expect(updatedExercise?.prescribedSets).toHaveLength(3)
+        expect(updatedExercise?.prescribedSets[0].reps).toBe('10')
+        expect(updatedExercise?.prescribedSets[0].rpe).toBe(8)
+
+        // Assert: Verify other workout unaffected
+        const futureExercise = exercises.find(e => e.workoutId === workouts[1].id)!
+        const unchangedExercise = await prisma.exercise.findUnique({
+          where: { id: futureExercise.id },
+          include: { prescribedSets: true }
+        })
+        expect(unchangedExercise?.prescribedSets).toHaveLength(0) // No prescribed sets created for this exercise
+        expect(unchangedExercise?.notes).toBeNull() // No notes
+      })
+
+      it('should change intensity type from RIR to RPE', async () => {
+        // Arrange
+        const { exercises } = await createMultiWeekProgram(prisma, userId, {
+          weekCount: 1
+        })
+        const exercise = exercises[0]
+
+        // Set initial RIR values
+        await prisma.prescribedSet.createMany({
+          data: [
+            { exerciseId: exercise.id, setNumber: 1, reps: '10', rir: 3, userId }
+          ]
+        })
+
+        // Act: Change to RPE
+        const response = await simulateEditExercise(prisma, exercise.id, userId, {
+          applyToFuture: false,
+          prescribedSets: [
+            { setNumber: 1, reps: '10', rpe: 7, rir: null }
+          ]
+        })
+
+        // Assert
+        expect(response.success).toBe(true)
+
+        const updatedExercise = await prisma.exercise.findUnique({
+          where: { id: exercise.id },
+          include: { prescribedSets: true }
+        })
+        expect(updatedExercise?.prescribedSets).toHaveLength(1)
+        expect(updatedExercise?.prescribedSets[0].rpe).toBe(7)
+        expect(updatedExercise?.prescribedSets[0].rir).toBeNull()
+      })
+    })
+
+    describe('Program-wide mode', () => {
+      it('should update matching exercises in current and all future weeks', async () => {
+        // Arrange: 4-week program, edit in week 2
+        const { weeks, workouts, exercises } = await createMultiWeekProgram(
+          prisma,
+          userId,
+          { weekCount: 4, workoutsPerWeek: 1 }
+        )
+
+        const week2 = weeks[1]
+        const week2Workout = workouts.find(w => w.weekId === week2.id)!
+        const week2Exercise = exercises.find(e => e.workoutId === week2Workout.id)!
+        const exerciseDefId = week2Exercise.exerciseDefinitionId
+
+        // Create initial prescribed sets for all exercises
+        for (const ex of exercises) {
+          await prisma.prescribedSet.createMany({
+            data: [
+              { exerciseId: ex.id, setNumber: 1, reps: '10', userId },
+              { exerciseId: ex.id, setNumber: 2, reps: '10', userId }
+            ]
+          })
+        }
+
+        // Act: Update with new sets and notes
+        const response = await simulateEditExercise(prisma, week2Exercise.id, userId, {
+          notes: 'Focus on tempo 3-1-1',
+          applyToFuture: true,
+          prescribedSets: [
+            { setNumber: 1, reps: '12', rpe: null, rir: 3 },
+            { setNumber: 2, reps: '12', rpe: null, rir: 2 }
+          ]
+        })
+
+        // Assert: Verify response (should update weeks 2, 3, 4)
+        expect(response.success).toBe(true)
+        expect(response.updatedCount).toBeGreaterThanOrEqual(3)
+
+        // Verify week 1 unchanged
+        const week1Exercises = await prisma.exercise.findMany({
+          where: {
+            workoutId: { in: weeks[0].workouts.map(w => w.id) },
+            exerciseDefinitionId: exerciseDefId
+          },
+          include: { prescribedSets: true }
+        })
+        expect(week1Exercises.length).toBeGreaterThan(0)
+        expect(week1Exercises[0].notes).toBeNull()
+        expect(week1Exercises[0].prescribedSets).toHaveLength(2) // Original count
+
+        // Verify weeks 2-4 updated
+        for (let i = 1; i < 4; i++) {
+          const weekExercises = await prisma.exercise.findMany({
+            where: {
+              workoutId: { in: weeks[i].workouts.map(w => w.id) },
+              exerciseDefinitionId: exerciseDefId
+            },
+            include: { prescribedSets: { orderBy: { setNumber: 'asc' } } }
+          })
+          expect(weekExercises.length).toBeGreaterThan(0)
+          expect(weekExercises[0].notes).toBe('Focus on tempo 3-1-1')
+          expect(weekExercises[0].prescribedSets).toHaveLength(2)
+          expect(weekExercises[0].prescribedSets[0].reps).toBe('12')
+          expect(weekExercises[0].prescribedSets[0].rir).toBe(3)
+        }
+      })
+
+      it('should update set count program-wide (3 sets to 5 sets)', async () => {
+        // Arrange
+        const { weeks, workouts, exercises } = await createMultiWeekProgram(
+          prisma,
+          userId,
+          { weekCount: 3, workoutsPerWeek: 1, exercisesPerWorkout: 1 }
+        )
+
+        const week1Workout = workouts.find(w => w.weekId === weeks[0].id)!
+        const week1Exercise = exercises.find(e => e.workoutId === week1Workout.id)!
+
+        // Act: Update to 5 sets
+        const response = await simulateEditExercise(prisma, week1Exercise.id, userId, {
+          applyToFuture: true,
+          prescribedSets: [
+            { setNumber: 1, reps: '5', rpe: null, rir: 4 },
+            { setNumber: 2, reps: '5', rpe: null, rir: 3 },
+            { setNumber: 3, reps: '5', rpe: null, rir: 2 },
+            { setNumber: 4, reps: '5', rpe: null, rir: 1 },
+            { setNumber: 5, reps: '5', rpe: null, rir: 0 }
+          ]
+        })
+
+        // Assert
+        expect(response.success).toBe(true)
+        expect(response.updatedCount).toBe(3) // All 3 weeks
+
+        // Verify all weeks have 5 sets
+        const allExercises = await prisma.exercise.findMany({
+          where: {
+            exerciseDefinitionId: week1Exercise.exerciseDefinitionId
+          },
+          include: { prescribedSets: true }
+        })
+
+        expect(allExercises).toHaveLength(3) // One per week
+        for (const ex of allExercises) {
+          expect(ex.prescribedSets).toHaveLength(5)
+        }
+      })
     })
   })
 })

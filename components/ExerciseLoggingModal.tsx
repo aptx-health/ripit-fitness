@@ -7,19 +7,12 @@ import { useWorkoutSyncService } from '@/lib/sync/workoutSync'
 import SyncStatusIcon from './SyncStatusIcon'
 import SyncDetailsModal from './SyncDetailsModal'
 import { LoadingFrog } from '@/components/ui/loading-frog'
-import { Plus, RefreshCw, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react'
+import { Plus, RefreshCw, ChevronLeft, ChevronRight, Trash2, Pencil } from 'lucide-react'
 import ScopeSelectionDialog from './ScopeSelectionDialog'
 import ExerciseSearchModal from './ExerciseSearchModal'
 import ActionsMenu, { type ActionItem } from './ActionsMenu'
 import LoadingSuccessModal from './LoadingSuccessModal'
-
-// PrescribedSetInput type from ExerciseSearchModal
-type PrescribedSetInput = {
-  setNumber: number
-  reps: string
-  intensityType: 'RIR' | 'RPE' | 'NONE'
-  intensityValue?: number
-}
+import SetDefinitionModal, { type PrescribedSetInput } from './SetDefinitionModal'
 
 type PrescribedSet = {
   id: string
@@ -103,6 +96,7 @@ export default function ExerciseLoggingModal({
   // Exercise swap and add state
   const [showExerciseSearch, setShowExerciseSearch] = useState(false)
   const [showScopeDialog, setShowScopeDialog] = useState(false)
+  const [showEditExerciseModal, setShowEditExerciseModal] = useState(false)
   const [operationStatus, setOperationStatus] = useState<{
     isLoading: boolean
     isSuccess: boolean
@@ -110,7 +104,7 @@ export default function ExerciseLoggingModal({
     successMessage: string
   }>({ isLoading: false, isSuccess: false, message: '', successMessage: '' })
   const [pendingAction, setPendingAction] = useState<{
-    type: 'replace' | 'add' | 'delete'
+    type: 'replace' | 'add' | 'delete' | 'edit'
     exerciseDefinitionId: string
     exerciseName: string
   } | null>(null)
@@ -262,6 +256,25 @@ export default function ExerciseLoggingModal({
     setShowScopeDialog(true)
   }
 
+  const handleEditExercise = () => {
+    setPendingAction({
+      type: 'edit',
+      exerciseDefinitionId: currentExercise.id,
+      exerciseName: currentExercise.name
+    })
+    setShowEditExerciseModal(true)
+  }
+
+  const handleEditExerciseSubmit = (sets: PrescribedSetInput[], notes?: string) => {
+    // Store the sets and notes
+    setPendingSets(sets)
+    setPendingNotes(notes || '')
+
+    // Close the modal and show scope selection
+    setShowEditExerciseModal(false)
+    setShowScopeDialog(true)
+  }
+
   const handleExerciseSearchSelect = (exercise: any, prescription: any) => {
     if (!pendingAction) return
 
@@ -331,6 +344,27 @@ export default function ExerciseLoggingModal({
 
         data = await response.json()
         successMsg = `Exercise deleted${applyToFuture ? ` from ${data.deletedCount} workout${data.deletedCount !== 1 ? 's' : ''}` : ''}!`
+      } else if (pendingAction.type === 'edit') {
+        // Call edit API (PATCH)
+        const response = await fetch(`/api/exercises/${currentExercise.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            notes: pendingNotes,
+            applyToFuture,
+            prescribedSets: pendingSets.map(set => ({
+              setNumber: set.setNumber,
+              reps: set.reps,
+              rpe: set.intensityType === 'RPE' ? set.intensityValue : null,
+              rir: set.intensityType === 'RIR' ? set.intensityValue : null
+            }))
+          })
+        })
+
+        if (!response.ok) throw new Error('Failed to update exercise')
+
+        data = await response.json()
+        successMsg = `Exercise updated${applyToFuture ? ` in ${data.updatedCount} workout${data.updatedCount !== 1 ? 's' : ''}` : ''}!`
       } else {
         // Call add-during-logging API
         const response = await fetch(`/api/workouts/${workoutId}/exercises/add-during-logging`, {
@@ -886,7 +920,7 @@ export default function ExerciseLoggingModal({
         {/* Bottom Actions */}
         <div className="border-t border-border px-4 py-3 bg-muted flex-shrink-0">
           {/* Single Actions Row */}
-          <div className="grid grid-cols-[55%_35%_10%] gap-3">
+          <div className="grid grid-cols-[53%_34%_10%] sm:grid-cols-[55%_35%_10%] gap-3">
             {/* Log Set Button */}
             <button
               onClick={handleLogSet}
@@ -923,6 +957,12 @@ export default function ExerciseLoggingModal({
               size="md"
               className="h-full aspect-square"
               actions={[
+                {
+                  label: 'Edit this exercise',
+                  icon: Pencil,
+                  onClick: handleEditExercise,
+                  disabled: false
+                },
                 {
                   label: 'Add an exercise',
                   icon: Plus,
@@ -1026,6 +1066,22 @@ export default function ExerciseLoggingModal({
         // If they cancelled, they can close other modals or the entire logging modal
       }}
       onExerciseSelect={handleExerciseSearchSelect}
+    />
+
+    {/* Edit Exercise Modal */}
+    <SetDefinitionModal
+      isOpen={showEditExerciseModal}
+      onClose={() => {
+        setShowEditExerciseModal(false)
+        setPendingAction(null)
+        setPendingSets([])
+        setPendingNotes('')
+      }}
+      exerciseName={currentExercise?.name || ''}
+      onSubmit={handleEditExerciseSubmit}
+      initialSets={currentExercise?.prescribedSets}
+      initialNotes={currentExercise?.notes}
+      mode="edit"
     />
 
     {/* Scope Selection Dialog */}

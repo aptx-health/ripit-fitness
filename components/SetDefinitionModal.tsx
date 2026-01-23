@@ -7,7 +7,15 @@ interface SetDefinitionModalProps {
   isOpen: boolean
   onClose: () => void
   exerciseName: string
-  onSubmit: (sets: PrescribedSetInput[]) => void
+  onSubmit: (sets: PrescribedSetInput[], notes?: string) => void
+  initialSets?: Array<{
+    setNumber: number
+    reps: string
+    rpe: number | null
+    rir: number | null
+  }>
+  initialNotes?: string | null
+  mode?: 'add' | 'edit'
 }
 
 export interface PrescribedSetInput {
@@ -21,28 +29,60 @@ export default function SetDefinitionModal({
   isOpen,
   onClose,
   exerciseName,
-  onSubmit
+  onSubmit,
+  initialSets,
+  initialNotes,
+  mode = 'add'
 }: SetDefinitionModalProps) {
   const [setCount, setSetCount] = useState(3)
   const [exerciseIntensityType, setExerciseIntensityType] = useState<'RIR' | 'RPE' | 'NONE'>('NONE')
+  const [notes, setNotes] = useState('')
   const [sets, setSets] = useState<PrescribedSetInput[]>([
     { setNumber: 1, reps: '8-12', intensityType: 'NONE' },
     { setNumber: 2, reps: '8-12', intensityType: 'NONE' },
     { setNumber: 3, reps: '8-12', intensityType: 'NONE' }
   ])
 
-  // Reset form when modal opens
+  // Initialize form when modal opens
   useEffect(() => {
     if (isOpen) {
-      setSetCount(3)
-      setExerciseIntensityType('NONE')
-      setSets([
-        { setNumber: 1, reps: '8-12', intensityType: 'NONE' },
-        { setNumber: 2, reps: '8-12', intensityType: 'NONE' },
-        { setNumber: 3, reps: '8-12', intensityType: 'NONE' }
-      ])
+      if (initialSets && initialSets.length > 0) {
+        // Edit mode - populate from existing data
+        const firstSet = initialSets[0]
+        let intensityType: 'RIR' | 'RPE' | 'NONE' = 'NONE'
+        if (firstSet.rpe !== null) {
+          intensityType = 'RPE'
+        } else if (firstSet.rir !== null) {
+          intensityType = 'RIR'
+        }
+
+        setExerciseIntensityType(intensityType)
+        setSetCount(initialSets.length)
+        setNotes(initialNotes || '')
+
+        const convertedSets: PrescribedSetInput[] = initialSets.map(set => ({
+          setNumber: set.setNumber,
+          reps: set.reps,
+          intensityType,
+          intensityValue: intensityType === 'RPE' ? (set.rpe || undefined) :
+                         intensityType === 'RIR' ? (set.rir || undefined) :
+                         undefined
+        }))
+
+        setSets(convertedSets)
+      } else {
+        // Add mode - reset to defaults
+        setSetCount(3)
+        setExerciseIntensityType('NONE')
+        setNotes('')
+        setSets([
+          { setNumber: 1, reps: '8-12', intensityType: 'NONE' },
+          { setNumber: 2, reps: '8-12', intensityType: 'NONE' },
+          { setNumber: 3, reps: '8-12', intensityType: 'NONE' }
+        ])
+      }
     }
-  }, [isOpen])
+  }, [isOpen, initialSets, initialNotes])
 
   const handleSetCountChange = (count: number) => {
     const validCount = Math.max(1, Math.min(20, count))
@@ -87,7 +127,7 @@ export default function SetDefinitionModal({
       intensityType: exerciseIntensityType,
       intensityValue: exerciseIntensityType === 'NONE' ? undefined : set.intensityValue
     }))
-    onSubmit(finalSets)
+    onSubmit(finalSets, notes)
     // Don't call onClose() - let parent handle closing after state updates
   }
 
@@ -99,7 +139,7 @@ export default function SetDefinitionModal({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-border">
           <h2 className="text-xl font-semibold text-foreground">
-            Define Sets for "{exerciseName}"
+            {mode === 'edit' ? `Edit Exercise: ${exerciseName}` : `Define Sets for "${exerciseName}"`}
           </h2>
           <button
             onClick={onClose}
@@ -111,6 +151,20 @@ export default function SetDefinitionModal({
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
+          {/* Notes Section */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Exercise Notes
+            </label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Add notes for this exercise (e.g., form cues, tempo, rest time)..."
+              className="w-full px-3 py-2 bg-background border-2 border-border rounded text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary resize-none"
+              rows={3}
+            />
+          </div>
+
           {/* Set Count & Intensity Type Grid */}
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div>
@@ -200,7 +254,7 @@ export default function SetDefinitionModal({
             onClick={handleSubmit}
             className="flex-1 px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg transition-colors"
           >
-            Add Exercise
+            {mode === 'edit' ? 'Save Changes' : 'Add Exercise'}
           </button>
         </div>
       </div>
