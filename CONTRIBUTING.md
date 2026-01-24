@@ -1,4 +1,4 @@
-# Contributing to FitCSV
+# Contributing to Ripit Fitness
 
 Thanks for your interest in contributing! This is an early-stage personal project that I created for my own use and enjoyment, now opened to the public. Read on to understand the current state and how you can help.
 
@@ -50,8 +50,8 @@ Key resources:
 
 ```bash
 # Fork the repo on GitHub, then:
-git clone https://github.com/YOUR_USERNAME/fitcsv.git
-cd fitcsv
+git clone https://github.com/YOUR_USERNAME/ripit-fitness.git
+cd ripit-fitness
 ```
 
 ### 2. Set Up Your Environment
@@ -254,7 +254,7 @@ Before working on major features:
 
 ## Recognition
 
-Contributors will be recognized in the project. Every merged PR helps make FitCSV better!
+Contributors will be recognized in the project. Every merged PR helps make Ripit Fitness better!
 
 ## License
 

@@ -17,7 +17,7 @@ export class TestDatabase {
 
     // Start PostgreSQL 15 container (matching Supabase version)
     this.container = await new PostgreSqlContainer('postgres:15')
-      .withDatabase('fitcsv_test')
+      .withDatabase('ripit_test')
       .withUsername('test_user')
       .withPassword('test_password')
       .withExposedPorts(5432)

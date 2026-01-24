@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**FitCSV** is a strength training tracker focused on flexibility and user control. Users import training programs via CSV and track workout completion without rigid app constraints.
+**Ripit Fitness** is a strength training tracker focused on flexibility and user control. Users import training programs via CSV and track workout completion without rigid app constraints.
 
 **Key Principle**: No multi-tenancy. Single user per account.
 

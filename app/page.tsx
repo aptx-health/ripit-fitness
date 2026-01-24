@@ -14,7 +14,7 @@ export default async function Home() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-gray-100">
       <div className="max-w-2xl mx-auto px-4 text-center">
-        <h1 className="text-6xl font-bold text-gray-900 mb-4">FitCSV</h1>
+        <h1 className="text-6xl font-bold text-gray-900 mb-4">Ripit Fitness</h1>
         <p className="text-xl text-gray-600 mb-8">
           Your flexible strength training tracker. Create custom programs and log workouts without constraints.
         </p>
