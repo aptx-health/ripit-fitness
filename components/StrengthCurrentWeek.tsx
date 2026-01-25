@@ -60,6 +60,7 @@ export default function StrengthCurrentWeek({ program, week }: Props) {
           const latestCompletion = workout.completions[0]
           const isCompleted = latestCompletion && latestCompletion.status === 'completed'
           const isDraft = latestCompletion && latestCompletion.status === 'draft'
+          const isSkipped = latestCompletion && latestCompletion.status === 'skipped'
 
           return (
             <div
@@ -69,6 +70,8 @@ export default function StrengthCurrentWeek({ program, week }: Props) {
                   ? 'border-success-border bg-success-muted/50 doom-workout-completed'
                   : isDraft
                   ? 'border-warning-border bg-warning-muted/50'
+                  : isSkipped
+                  ? 'border-muted-foreground bg-muted opacity-60'
                   : 'border-border bg-muted'
               }`}
             >
@@ -93,6 +96,14 @@ export default function StrengthCurrentWeek({ program, week }: Props) {
                         IN PROGRESS
                       </span>
                     )}
+                    {isSkipped && (
+                      <span className="doom-badge bg-muted-foreground/20 text-muted-foreground">
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                        </svg>
+                        SKIPPED
+                      </span>
+                    )}
                   </div>
 
                   <div className="flex gap-4 text-sm">
@@ -111,9 +122,15 @@ export default function StrengthCurrentWeek({ program, week }: Props) {
 
                 <Link
                   href={`/programs/${program.id}/workouts/${workout.id}`}
-                  className={`px-4 py-2 ${isDraft ? 'bg-accent text-accent-foreground hover:bg-accent-hover doom-button-3d-accent' : 'bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d'} doom-focus-ring font-semibold uppercase tracking-wider text-sm`}
+                  className={`px-4 py-2 ${
+                    isDraft
+                      ? 'bg-accent text-accent-foreground hover:bg-accent-hover doom-button-3d-accent'
+                      : isSkipped
+                      ? 'bg-secondary text-secondary-foreground hover:bg-secondary-hover doom-button-3d'
+                      : 'bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d'
+                  } doom-focus-ring font-semibold uppercase tracking-wider text-sm`}
                 >
-                  {isCompleted ? 'REVIEW' : isDraft ? 'CONTINUE' : 'LOG WORKOUT'}
+                  {isCompleted ? 'REVIEW' : isDraft ? 'CONTINUE' : isSkipped ? 'RETRY' : 'LOG WORKOUT'}
                 </Link>
               </div>
             </div>
