@@ -253,3 +253,15 @@ model UserCardioMetricPreferences {
   @@unique([userId, equipment])
   @@index([userId])
 }
+
+model UserSettings {
+  id                       String   @id @default(cuid())
+  userId                   String   @unique
+  displayName              String?
+  defaultWeightUnit        String   @default("lbs")
+  defaultIntensityRating   String   @default("rpe")
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  @@index([userId])
+}
