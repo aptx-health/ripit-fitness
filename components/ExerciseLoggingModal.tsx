@@ -6,10 +6,10 @@ import { useSyncState } from '@/hooks/useSyncState'
 import { useWorkoutSyncService } from '@/lib/sync/workoutSync'
 import SyncDetailsModal from './SyncDetailsModal'
 import { LoadingFrog } from '@/components/ui/loading-frog'
-import ScopeSelectionDialog from './ScopeSelectionDialog'
-import ExerciseSearchModal from './ExerciseSearchModal'
-import LoadingSuccessModal from './LoadingSuccessModal'
-import SetDefinitionModal, { type PrescribedSetInput } from './SetDefinitionModal'
+import { AddExerciseWizard } from './workout-logging/wizards/AddExerciseWizard'
+import { SwapExerciseWizard } from './workout-logging/wizards/SwapExerciseWizard'
+import { EditExerciseWizard } from './workout-logging/wizards/EditExerciseWizard'
+import { DeleteExerciseWizard } from './workout-logging/wizards/DeleteExerciseWizard'
 import ExerciseLoggingHeader from './workout-logging/ExerciseLoggingHeader'
 import ExerciseNavigation from './workout-logging/ExerciseNavigation'
 import SetList from './workout-logging/SetList'
@@ -104,23 +104,8 @@ export default function ExerciseLoggingModal({
   }>({ show: false })
   const [showExitConfirm, setShowExitConfirm] = useState(false)
 
-  // Exercise swap and add state
-  const [showExerciseSearch, setShowExerciseSearch] = useState(false)
-  const [showScopeDialog, setShowScopeDialog] = useState(false)
-  const [showEditExerciseModal, setShowEditExerciseModal] = useState(false)
-  const [operationStatus, setOperationStatus] = useState<{
-    isLoading: boolean
-    isSuccess: boolean
-    message: string
-    successMessage: string
-  }>({ isLoading: false, isSuccess: false, message: '', successMessage: '' })
-  const [pendingAction, setPendingAction] = useState<{
-    type: 'replace' | 'add' | 'delete' | 'edit'
-    exerciseDefinitionId: string
-    exerciseName: string
-  } | null>(null)
-  const [pendingSets, setPendingSets] = useState<PrescribedSetInput[]>([])
-  const [pendingNotes, setPendingNotes] = useState<string>('')
+  // Wizard state
+  const [activeWizard, setActiveWizard] = useState<'add' | 'swap' | 'edit' | 'delete' | null>(null)
   const [navigateToLastExercise, setNavigateToLastExercise] = useState(false)
 
   // Enhanced persistence with localStorage backing
@@ -245,31 +230,19 @@ export default function ExerciseLoggingModal({
   }
 
   const handleReplaceExercise = () => {
-    setShowExerciseSearch(true)
-    setPendingAction({ type: 'replace', exerciseDefinitionId: '', exerciseName: '' })
+    setActiveWizard('swap')
   }
 
   const handleAddExercise = () => {
-    setShowExerciseSearch(true)
-    setPendingAction({ type: 'add', exerciseDefinitionId: '', exerciseName: '' })
+    setActiveWizard('add')
   }
 
   const handleDeleteExercise = () => {
-    setPendingAction({
-      type: 'delete',
-      exerciseDefinitionId: currentExercise.id, // For delete, we use exercise ID not definition ID
-      exerciseName: currentExercise.name
-    })
-    setShowScopeDialog(true)
+    setActiveWizard('delete')
   }
 
   const handleEditExercise = () => {
-    setPendingAction({
-      type: 'edit',
-      exerciseDefinitionId: currentExercise.id,
-      exerciseName: currentExercise.name
-    })
-    setShowEditExerciseModal(true)
+    setActiveWizard('edit')
   }
 
   const handleExitWorkout = () => {
@@ -291,194 +264,22 @@ export default function ExerciseLoggingModal({
     onClose()
   }
 
-  const handleEditExerciseSubmit = (sets: PrescribedSetInput[], notes?: string) => {
-    // Store the sets and notes
-    setPendingSets(sets)
-    setPendingNotes(notes || '')
-
-    // Close the modal and show scope selection
-    setShowEditExerciseModal(false)
-    setShowScopeDialog(true)
-  }
-
-  const handleExerciseSearchSelect = (exercise: any, prescription: any) => {
-    if (!pendingAction) return
-
-    // Update pending action with exercise details
-    setPendingAction({
-      ...pendingAction,
-      exerciseDefinitionId: exercise.id,
-      exerciseName: exercise.name
-    })
-
-    // Store prescription sets and notes for both add and replace actions
-    setPendingSets(prescription.sets)
-    setPendingNotes(prescription.notes || '')
-
-    // Go directly to scope selection for both replace and add
-    // (ExerciseSearchModal already collected set definition)
-    setShowExerciseSearch(false)
-    setShowScopeDialog(true)
-  }
-
-  const handleScopeSelected = async (applyToFuture: boolean) => {
-    if (!pendingAction) return
-
-    const startTime = Date.now()
-    const MINIMUM_LOADING_TIME = 1500 // 1.5 seconds
-
-    // Show loading modal immediately
-    setOperationStatus({
-      isLoading: true,
-      isSuccess: false,
-      message: 'Applying changes...',
-      successMessage: ''
-    })
-
-    try {
-      let data: any
-      let successMsg: string
-
-      if (pendingAction.type === 'replace') {
-        // Call replace API
-        const response = await fetch(`/api/exercises/${currentExercise.id}/replace`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            newExerciseDefinitionId: pendingAction.exerciseDefinitionId,
-            applyToFuture,
-            prescribedSets: pendingSets,
-            notes: pendingNotes
-          })
-        })
-
-        if (!response.ok) throw new Error('Failed to replace exercise')
-
-        data = await response.json()
-        successMsg = `Exercise replaced${applyToFuture ? ` in ${data.updatedCount} workout${data.updatedCount !== 1 ? 's' : ''}` : ''}!`
-      } else if (pendingAction.type === 'delete') {
-        // Call delete API
-        const response = await fetch(`/api/exercises/${currentExercise.id}/delete`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            applyToFuture
-          })
-        })
-
-        if (!response.ok) throw new Error('Failed to delete exercise')
-
-        data = await response.json()
-        successMsg = `Exercise deleted${applyToFuture ? ` from ${data.deletedCount} workout${data.deletedCount !== 1 ? 's' : ''}` : ''}!`
-      } else if (pendingAction.type === 'edit') {
-        // Call edit API (PATCH)
-        const response = await fetch(`/api/exercises/${currentExercise.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            notes: pendingNotes,
-            applyToFuture,
-            prescribedSets: pendingSets.map(set => ({
-              setNumber: set.setNumber,
-              reps: set.reps,
-              rpe: set.intensityType === 'RPE' ? set.intensityValue : null,
-              rir: set.intensityType === 'RIR' ? set.intensityValue : null
-            }))
-          })
-        })
-
-        if (!response.ok) throw new Error('Failed to update exercise')
-
-        data = await response.json()
-        successMsg = `Exercise updated${applyToFuture ? ` in ${data.updatedCount} workout${data.updatedCount !== 1 ? 's' : ''}` : ''}!`
-      } else {
-        // Call add-during-logging API
-        const response = await fetch(`/api/workouts/${workoutId}/exercises/add-during-logging`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            exerciseDefinitionId: pendingAction.exerciseDefinitionId,
-            applyToFuture,
-            workoutCompletionId: applyToFuture ? undefined : workoutCompletionId,
-            prescribedSets: pendingSets,
-            notes: pendingNotes
-          })
-        })
-
-        if (!response.ok) throw new Error('Failed to add exercise')
-
-        data = await response.json()
-        successMsg = `Exercise added${applyToFuture ? ` to ${data.addedToCount} workout${data.addedToCount !== 1 ? 's' : ''}` : ''}!`
-      }
-
-      // Calculate remaining time to reach minimum loading time
-      const elapsedTime = Date.now() - startTime
-      const remainingTime = Math.max(0, MINIMUM_LOADING_TIME - elapsedTime)
-
-      // Wait for remaining time before showing success
-      if (remainingTime > 0) {
-        await new Promise(resolve => setTimeout(resolve, remainingTime))
-      }
-
-      // Show success state
-      setOperationStatus({
-        isLoading: false,
-        isSuccess: true,
-        message: '',
-        successMessage: successMsg
-      })
-
-      // Wait 1 second to show success
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
-      // Show refreshing state
-      setOperationStatus({
-        isLoading: true,
-        isSuccess: false,
-        message: 'Refreshing workout...',
-        successMessage: ''
-      })
-
-      // Trigger refresh and wait for it to complete
-      if (onRefresh) {
-        onRefresh()
-      }
-
-      // Wait 2.5 seconds for refresh to complete
-      await new Promise(resolve => setTimeout(resolve, 2500))
-
-      // If we added an exercise, navigate to it (it will be at the end)
-      if (pendingAction.type === 'add') {
-        setNavigateToLastExercise(true)
-      }
-
-      // Close dialogs and reset state
-      setShowScopeDialog(false)
-      setPendingAction(null)
-      setPendingSets([])
-      setPendingNotes('')
-      setOperationStatus({
-        isLoading: false,
-        isSuccess: false,
-        message: '',
-        successMessage: ''
-      })
-    } catch (error) {
-      console.error('Error:', error)
-      setOperationStatus({
-        isLoading: false,
-        isSuccess: false,
-        message: '',
-        successMessage: ''
-      })
-      alert('Failed to update exercise. Please try again.')
-
-      // Close dialogs on error
-      setShowScopeDialog(false)
-      setPendingAction(null)
-      setPendingSets([])
-      setPendingNotes('')
+  const handleWizardComplete = async () => {
+    // Trigger refresh
+    if (onRefresh) {
+      onRefresh()
     }
+
+    // Wait for refresh to complete
+    await new Promise(resolve => setTimeout(resolve, 2500))
+
+    // If we added an exercise, navigate to it (it will be at the end)
+    if (activeWizard === 'add') {
+      setNavigateToLastExercise(true)
+    }
+
+    // Reset wizard state
+    setActiveWizard(null)
   }
 
   const handleCompleteWorkout = async () => {
@@ -800,57 +601,45 @@ export default function ExerciseLoggingModal({
       </div>
 
       {/* Exercise Search Modal */}
-      <ExerciseSearchModal
-        isOpen={showExerciseSearch}
-        onClose={() => {
-          setShowExerciseSearch(false)
-          // Don't touch pendingAction - if user selected an exercise, the flow continues
-          // If they cancelled, they can close other modals or the entire logging modal
-        }}
-        onExerciseSelect={handleExerciseSearchSelect}
-      />
-
-      {/* Edit Exercise Modal */}
-      <SetDefinitionModal
-        isOpen={showEditExerciseModal}
-        onClose={() => {
-          setShowEditExerciseModal(false)
-          setPendingAction(null)
-          setPendingSets([])
-          setPendingNotes('')
-        }}
-        exerciseName={currentExercise?.name || ''}
-        onSubmit={handleEditExerciseSubmit}
-        initialSets={currentExercise?.prescribedSets}
-        initialNotes={currentExercise?.notes}
-        mode="edit"
-      />
-
-      {/* Scope Selection Dialog */}
-      {pendingAction && (
-        <ScopeSelectionDialog
-          isOpen={showScopeDialog}
-          onClose={() => {
-            setShowScopeDialog(false)
-            setPendingAction(null)
-            setPendingSets([])
-            setPendingNotes('')
-          }}
-          onSelect={handleScopeSelected}
-          actionType={pendingAction.type}
-          exerciseName={pendingAction.exerciseName}
-          isLoading={operationStatus.isLoading}
+      {/* Wizards */}
+      {activeWizard === 'add' && (
+        <AddExerciseWizard
+          open={true}
+          onOpenChange={(open) => !open && setActiveWizard(null)}
+          workoutId={workoutId}
+          workoutCompletionId={workoutCompletionId}
+          onComplete={handleWizardComplete}
         />
       )}
 
-      {/* Loading/Success Modal - Outside pendingAction check so it persists during cleanup */}
-      <LoadingSuccessModal
-        isOpen={operationStatus.isLoading || operationStatus.isSuccess}
-        isLoading={operationStatus.isLoading}
-        isSuccess={operationStatus.isSuccess}
-        loadingMessage={operationStatus.message}
-        successMessage={operationStatus.successMessage}
-      />
+      {activeWizard === 'swap' && currentExercise && (
+        <SwapExerciseWizard
+          open={true}
+          onOpenChange={(open) => !open && setActiveWizard(null)}
+          currentExerciseId={currentExercise.id}
+          currentExerciseName={currentExercise.name}
+          onComplete={handleWizardComplete}
+        />
+      )}
+
+      {activeWizard === 'edit' && currentExercise && (
+        <EditExerciseWizard
+          open={true}
+          onOpenChange={(open) => !open && setActiveWizard(null)}
+          exercise={currentExercise}
+          onComplete={handleWizardComplete}
+        />
+      )}
+
+      {activeWizard === 'delete' && currentExercise && (
+        <DeleteExerciseWizard
+          open={true}
+          onOpenChange={(open) => !open && setActiveWizard(null)}
+          exerciseId={currentExercise.id}
+          exerciseName={currentExercise.name}
+          onComplete={handleWizardComplete}
+        />
+      )}
 
       {/* Exit workout confirmation dialog */}
       <Dialog open={showExitConfirm} onOpenChange={setShowExitConfirm}>
