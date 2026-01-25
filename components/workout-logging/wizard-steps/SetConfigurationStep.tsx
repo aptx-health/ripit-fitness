@@ -160,10 +160,10 @@ export function SetConfigurationStep({
   )
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full w-full">
       {/* Exercise Details */}
-      <div className="mb-6 p-4 border border-zinc-700 rounded-lg bg-zinc-900">
-        <h3 className="font-medium text-orange-50 text-lg">{exercise.name}</h3>
+      <div className="mb-6 p-3 sm:p-4 border border-zinc-700 rounded-lg bg-zinc-900 w-full">
+        <h3 className="font-medium text-orange-50 text-lg break-words">{exercise.name}</h3>
         {exercise.primaryFAUs.length > 0 && (
           <div className="mt-2">
             <span className="text-sm text-zinc-400">Primary: </span>
@@ -175,8 +175,8 @@ export function SetConfigurationStep({
       </div>
 
       {/* Configuration Form */}
-      <div className="space-y-6">
-        <div className="grid grid-cols-2 gap-6">
+      <div className="space-y-6 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           {/* Set Count */}
           <div>
             <label className="block text-sm font-medium text-orange-50 mb-2">Number of Sets</label>
@@ -221,36 +221,36 @@ export function SetConfigurationStep({
         </div>
 
         {/* Individual Set Configuration */}
-        <div>
+        <div className="w-full">
           <h4 className="text-sm font-medium text-orange-50 mb-3">Set Configuration</h4>
-          <div className="space-y-3">
+          <div className="space-y-3 w-full">
             {sets.map((set, index) => (
               <div
                 key={set.setNumber}
-                className="border border-zinc-700 rounded-lg p-4 bg-zinc-900"
+                className="border border-zinc-700 rounded-lg p-3 sm:p-4 bg-zinc-900 w-full"
               >
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                   <div className="flex-shrink-0 w-12">
                     <span className="text-sm font-medium text-zinc-400">Set {set.setNumber}</span>
                   </div>
 
                   {/* Reps */}
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <label className="block text-xs text-zinc-400 mb-1">Reps</label>
                     <input
                       type="text"
                       value={set.reps}
                       onChange={(e) => handleSetUpdate(index, 'reps', e.target.value)}
                       placeholder="8-12"
-                      className="w-full px-3 py-2 text-sm border border-zinc-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-zinc-800 text-white"
+                      className="w-full px-2 sm:px-3 py-2 text-sm border border-zinc-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-zinc-800 text-white"
                     />
                   </div>
 
                   {/* Intensity Value */}
                   {exerciseIntensityType !== 'NONE' && (
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <label className="block text-xs text-zinc-400 mb-1">
-                        {exerciseIntensityType} Value
+                        {exerciseIntensityType}
                       </label>
                       <input
                         type="number"
@@ -266,7 +266,7 @@ export function SetConfigurationStep({
                           )
                         }
                         placeholder={exerciseIntensityType === 'RIR' ? '0-5' : '1-10'}
-                        className="w-full px-3 py-2 text-sm border border-zinc-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-zinc-800 text-white"
+                        className="w-full px-2 sm:px-3 py-2 text-sm border border-zinc-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-zinc-800 text-white"
                       />
                     </div>
                   )}

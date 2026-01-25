@@ -34,7 +34,7 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       style={!fullScreenMobile ? { position: 'fixed', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' } : undefined}
-      className={`z-[70] bg-zinc-800 border border-zinc-700 rounded-xl shadow-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 ${
+      className={`z-[70] bg-zinc-800 border border-zinc-700 rounded-xl shadow-xl overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 ${
         fullScreenMobile
           ? 'fixed inset-0 h-[100dvh] sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%] pb-[env(safe-area-inset-bottom)]'
           : position === 'bottom'
@@ -106,7 +106,7 @@ const DialogBody = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={`flex-1 overflow-y-auto px-4 py-4 ${className}`}
+    className={`flex-1 overflow-y-auto overflow-x-hidden px-4 py-4 ${className}`}
     {...props}
   />
 )

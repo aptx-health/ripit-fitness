@@ -105,7 +105,7 @@ export function ExerciseSearchStep({ onSelect }: ExerciseSearchStepProps) {
   }, [])
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full w-full overflow-hidden">
       {/* Search */}
       <div className="mb-4">
         <div className="relative mb-4">
@@ -168,11 +168,11 @@ export function ExerciseSearchStep({ onSelect }: ExerciseSearchStepProps) {
             {exercises.map((exercise) => (
               <div
                 key={exercise.id}
-                className="border border-zinc-700 rounded-lg p-4 hover:border-orange-500 transition-colors bg-zinc-900"
+                className="border border-zinc-700 rounded-lg p-3 sm:p-4 hover:border-orange-500 transition-colors bg-zinc-900 w-full"
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h3 className="font-medium text-orange-50 mb-2">{exercise.name}</h3>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-orange-50 mb-2 break-words">{exercise.name}</h3>
 
                     {exercise.primaryFAUs.length > 0 && (
                       <div className="mb-2">
