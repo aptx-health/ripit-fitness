@@ -81,7 +81,7 @@ export function WizardDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent showClose={false} fullScreenMobile={true} className="w-full h-full sm:w-[90vw] sm:max-w-2xl sm:h-auto sm:max-h-[90vh] rounded-none sm:rounded-xl">
+      <DialogContent showClose={false} fullScreenMobile={true} className="w-full h-full sm:w-[90vw] sm:max-w-3xl sm:h-[95vh] rounded-none sm:rounded-xl">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div className="flex-1">

@@ -164,7 +164,7 @@ export function SetConfigurationStep({
   return (
     <div className="flex flex-col h-full w-full">
       {/* Exercise Details */}
-      <div className="mb-6 p-3 sm:p-4 border border-border rounded-lg bg-muted w-full">
+      <div className="mb-6 p-3 sm:p-4 border border-border rounded-xl bg-muted w-full">
         <h3 className="font-medium text-foreground text-base sm:text-lg break-words">{exercise.name}</h3>
         {exercise.primaryFAUs.length > 0 && (
           <div className="mt-2">
@@ -200,7 +200,7 @@ export function SetConfigurationStep({
             {sets.map((set, index) => (
               <div
                 key={set.setNumber}
-                className="border border-border rounded-lg p-3 sm:p-4 bg-muted w-full"
+                className="border border-border rounded-xl p-3 sm:p-4 bg-muted w-full"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                   <div className="flex-shrink-0 w-12">
@@ -268,7 +268,7 @@ export function SetConfigurationStep({
             <button
               type="button"
               onClick={handleAddSet}
-              className="flex items-center gap-2 px-4 py-2 text-sm sm:text-base rounded-lg bg-success/20 text-success hover:bg-success/30 transition-colors font-medium"
+              className="flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 text-sm sm:text-base rounded-xl bg-success/20 text-success hover:bg-success/30 transition-colors font-medium"
               title="Add a new set (copies last set configuration)"
             >
               <PlusCircle size={20} />
@@ -278,7 +278,7 @@ export function SetConfigurationStep({
               type="button"
               onClick={handleRemoveSet}
               disabled={sets.length <= 1}
-              className="flex items-center gap-2 px-4 py-2 text-sm sm:text-base rounded-lg bg-error/20 text-error hover:bg-error/30 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 text-sm sm:text-base rounded-xl bg-error/20 text-error hover:bg-error/30 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               title="Remove last set"
             >
               <MinusCircle size={20} />

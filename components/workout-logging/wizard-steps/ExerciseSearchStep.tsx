@@ -168,7 +168,7 @@ export function ExerciseSearchStep({ onSelect }: ExerciseSearchStepProps) {
             {exercises.map((exercise) => (
               <div
                 key={exercise.id}
-                className="border border-border rounded-lg p-3 sm:p-4 hover:border-primary transition-colors bg-muted w-full"
+                className="border border-border rounded-xl p-3 sm:p-4 hover:border-primary transition-colors bg-muted w-full"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">

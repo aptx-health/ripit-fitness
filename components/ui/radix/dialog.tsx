@@ -45,8 +45,8 @@ const DialogContent = React.forwardRef<
     >
       {children}
       {showClose && (
-        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-          <X className="h-4 w-4" />
+        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-full p-1 opacity-70 ring-offset-background transition-opacity hover:opacity-100 hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:pointer-events-none">
+          <X className="h-5 w-5" />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
       )}
@@ -60,7 +60,7 @@ const DialogHeader = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={`flex flex-col space-y-1.5 text-center sm:text-left bg-primary text-primary-foreground px-4 py-3 sm:py-4 border-b-2 border-primary/80 flex-shrink-0 ${className}`}
+    className={`flex flex-col space-y-1.5 text-center sm:text-left bg-primary text-primary-foreground px-4 sm:px-6 py-4 sm:py-5 border-b border-border/50 flex-shrink-0 ${className}`}
     {...props}
   />
 )
@@ -71,7 +71,7 @@ const DialogFooter = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={`flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 p-4 border-t border-border flex-shrink-0 ${className}`}
+    className={`flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 px-4 sm:px-6 py-4 border-t border-border flex-shrink-0 ${className}`}
     {...props}
   />
 )
@@ -106,7 +106,7 @@ const DialogBody = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={`flex-1 overflow-y-auto overflow-x-hidden px-4 py-4 ${className}`}
+    className={`flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-6 py-4 sm:py-5 ${className}`}
     {...props}
   />
 )

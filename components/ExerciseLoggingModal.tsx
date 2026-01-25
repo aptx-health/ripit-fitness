@@ -6,6 +6,7 @@ import { useSyncState } from '@/hooks/useSyncState'
 import { useWorkoutSyncService } from '@/lib/sync/workoutSync'
 import SyncDetailsModal from './SyncDetailsModal'
 import { LoadingFrog } from '@/components/ui/loading-frog'
+import { AlertTriangle } from 'lucide-react'
 import { AddExerciseWizard } from './workout-logging/wizards/AddExerciseWizard'
 import { SwapExerciseWizard } from './workout-logging/wizards/SwapExerciseWizard'
 import { EditExerciseWizard } from './workout-logging/wizards/EditExerciseWizard'
@@ -642,42 +643,60 @@ export default function ExerciseLoggingModal({
       )}
 
       {/* Exit workout confirmation dialog */}
-      <Dialog open={showExitConfirm} onOpenChange={setShowExitConfirm}>
-        <DialogContent showClose={false}>
-          <DialogHeader>
-            <DialogTitle>Exit Workout?</DialogTitle>
-            <DialogDescription>
+      {showExitConfirm && (
+        <div className="fixed inset-0 backdrop-blur-md bg-background/80 flex items-center justify-center z-[60] p-4">
+          <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 text-center max-w-sm w-full shadow-xl">
+            <div className="text-warning mb-4 flex justify-center">
+              <AlertTriangle size={56} strokeWidth={2} />
+            </div>
+            <h3 className="text-xl sm:text-2xl font-semibold text-foreground mb-2">
+              {totalLoggedSets > 0 ? 'Exit Workout?' : 'Confirm Exit'}
+            </h3>
+            <p className="text-base sm:text-lg text-muted-foreground mb-6">
               {totalLoggedSets > 0
-                ? 'You have logged sets. What would you like to do?'
+                ? 'You have logged sets. Do you want to save as draft or discard?'
                 : 'Are you sure you want to exit?'}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <div className="flex flex-col w-full gap-3 mt-4">
-              {totalLoggedSets > 0 && (
+            </p>
+            {totalLoggedSets > 0 ? (
+              <div className="flex flex-col gap-3">
                 <button
                   onClick={handleExitSaveAsDraft}
-                  className="w-full px-4 py-2.5 bg-orange-600 border-2 border-orange-600 text-white font-semibold hover:bg-orange-700 hover:border-orange-700 transition-colors"
+                  className="w-full px-4 py-3 text-base sm:text-lg bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-colors font-medium"
                 >
                   Save as Draft
                 </button>
-              )}
-              <button
-                onClick={handleExitDiscard}
-                className="w-full px-4 py-2.5 bg-red-600 border-2 border-red-600 text-white font-semibold hover:bg-red-700 hover:border-red-700 transition-colors"
-              >
-                {totalLoggedSets > 0 ? 'Discard All' : 'Exit'}
-              </button>
-              <button
-                onClick={() => setShowExitConfirm(false)}
-                className="w-full px-4 py-2.5 bg-transparent border-2 border-zinc-600 text-zinc-300 font-semibold hover:bg-zinc-700 hover:text-orange-50 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+                <button
+                  onClick={handleExitDiscard}
+                  className="w-full px-4 py-3 text-base sm:text-lg bg-error text-error-foreground rounded-xl hover:bg-error/90 transition-colors font-medium"
+                >
+                  Discard All
+                </button>
+                <button
+                  onClick={() => setShowExitConfirm(false)}
+                  className="w-full px-4 py-3 text-base sm:text-lg bg-muted text-foreground rounded-xl hover:bg-secondary transition-colors font-medium"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowExitConfirm(false)}
+                  className="flex-1 px-4 py-3 text-base sm:text-lg bg-muted text-foreground rounded-xl hover:bg-secondary transition-colors font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleExitDiscard}
+                  className="flex-1 px-4 py-3 text-base sm:text-lg bg-error text-error-foreground rounded-xl hover:bg-error/90 transition-colors font-medium"
+                >
+                  Exit
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </>
   )
 }

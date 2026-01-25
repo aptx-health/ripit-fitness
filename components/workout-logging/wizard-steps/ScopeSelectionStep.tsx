@@ -27,7 +27,7 @@ export function ScopeSelectionStep({
       <div className="space-y-3">
         <button
           onClick={() => onSelect(false)}
-          className="w-full p-4 border border-border rounded-lg hover:border-primary hover:bg-muted transition-colors text-left"
+          className="w-full p-4 sm:p-5 border border-border rounded-xl hover:border-primary hover:bg-muted transition-colors text-left"
         >
           <div className="font-semibold text-foreground text-base sm:text-lg">Just This Workout</div>
           <div className="text-sm sm:text-base text-muted-foreground">
@@ -39,7 +39,7 @@ export function ScopeSelectionStep({
 
         <button
           onClick={() => onSelect(true)}
-          className="w-full p-4 border border-border rounded-lg hover:border-primary hover:bg-muted transition-colors text-left"
+          className="w-full p-4 sm:p-5 border border-border rounded-xl hover:border-primary hover:bg-muted transition-colors text-left"
         >
           <div className="font-semibold text-foreground text-base sm:text-lg">
             {actionType === 'delete' ? 'Remove from Program' : 'Update Program'}
