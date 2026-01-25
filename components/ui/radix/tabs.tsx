@@ -11,7 +11,7 @@ const TabsList = React.forwardRef<
 >(({ className = '', ...props }, ref) => (
   <TabsPrimitive.List
     ref={ref}
-    className={`inline-flex h-10 items-center justify-start bg-zinc-900 doom-noise border-b-2 border-zinc-700 w-full overflow-x-auto ${className}`}
+    className={`inline-flex h-11 sm:h-12 items-center justify-start w-full bg-muted/50 p-1 text-muted-foreground border-b border-border overflow-x-auto ${className}`}
     {...props}
   />
 ))
@@ -23,7 +23,7 @@ const TabsTrigger = React.forwardRef<
 >(({ className = '', ...props }, ref) => (
   <TabsPrimitive.Trigger
     ref={ref}
-    className={`inline-flex items-center justify-center whitespace-nowrap px-4 py-2.5 text-sm font-medium text-zinc-400 transition-all hover:text-orange-400 hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:text-orange-500 data-[state=active]:bg-zinc-800 data-[state=active]:border-b-2 data-[state=active]:border-orange-500 data-[state=active]:-mb-[2px] ${className}`}
+    className={`inline-flex items-center justify-center whitespace-nowrap rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm ${className}`}
     {...props}
   />
 ))
@@ -35,7 +35,7 @@ const TabsContent = React.forwardRef<
 >(({ className = '', ...props }, ref) => (
   <TabsPrimitive.Content
     ref={ref}
-    className={`mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 ${className}`}
+    className={`mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${className}`}
     {...props}
   />
 ))

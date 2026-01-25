@@ -13,7 +13,7 @@ import { EditExerciseWizard } from './workout-logging/wizards/EditExerciseWizard
 import { DeleteExerciseWizard } from './workout-logging/wizards/DeleteExerciseWizard'
 import ExerciseLoggingHeader from './workout-logging/ExerciseLoggingHeader'
 import ExerciseNavigation from './workout-logging/ExerciseNavigation'
-import SetList from './workout-logging/SetList'
+import ExerciseDisplayTabs from './workout-logging/ExerciseDisplayTabs'
 import SetLoggingForm from './workout-logging/SetLoggingForm'
 import ExerciseActionsFooter from './workout-logging/ExerciseActionsFooter'
 import {
@@ -493,10 +493,10 @@ export default function ExerciseLoggingModal({
             onNext={handleNextExercise}
           />
 
-          {/* Scrollable content area */}
-          <div className="flex-1 overflow-y-auto px-4 py-4">
-            {/* Set List (History, Prescribed, Logged) */}
-            <SetList
+          {/* Scrollable content area with tabs */}
+          <div className="flex-1 overflow-hidden px-4 py-4">
+            <ExerciseDisplayTabs
+              exercise={currentExercise}
               prescribedSets={currentPrescribedSets}
               loggedSets={currentExerciseLoggedSets}
               exerciseHistory={exerciseHistory?.[currentExercise.id] || null}
