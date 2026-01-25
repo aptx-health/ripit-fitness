@@ -88,7 +88,7 @@ export function WizardDialog({
               <DialogTitle>{step.title}</DialogTitle>
               {step.description && <DialogDescription>{step.description}</DialogDescription>}
             </div>
-            <div className="text-sm text-orange-50 opacity-60 ml-4">
+            <div className="text-sm sm:text-base text-primary-foreground opacity-75 ml-4">
               Step {currentStep + 1} of {steps.length}
             </div>
           </div>
@@ -104,7 +104,7 @@ export function WizardDialog({
                   onClick={handleBack}
                   variant="ghost"
                   disabled={isProcessing}
-                  className="text-zinc-300 hover:text-white"
+                  className="text-muted-foreground hover:text-foreground"
                 >
                   <ChevronLeft className="w-4 h-4 mr-1" />
                   Back
@@ -118,7 +118,7 @@ export function WizardDialog({
                   onClick={handleCancel}
                   variant="ghost"
                   disabled={isProcessing}
-                  className="text-zinc-400 hover:text-white"
+                  className="text-muted-foreground hover:text-foreground"
                 >
                   <X className="w-4 h-4 mr-1" />
                   Cancel
@@ -129,7 +129,7 @@ export function WizardDialog({
                 <Button
                   onClick={handleNext}
                   disabled={isProcessing}
-                  className="bg-orange-600 hover:bg-orange-700 text-white"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
                   {isProcessing ? 'Processing...' : step.nextLabel || 'Next'}
                 </Button>

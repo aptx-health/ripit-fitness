@@ -23,17 +23,17 @@ export function LoadingSuccessStep({
           <div className="mb-4">
             <LoadingFrog size={64} speed={0.8} />
           </div>
-          <p className="text-orange-50 text-center">{loadingMessage}</p>
+          <p className="text-foreground text-center text-base sm:text-lg">{loadingMessage}</p>
         </>
       )}
       {isSuccess && (
         <>
           <div className="mb-4">
-            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-green-600">
-              <Check className="w-10 h-10 text-white" strokeWidth={3} />
+            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-success">
+              <Check className="w-10 h-10 text-success-foreground" strokeWidth={3} />
             </div>
           </div>
-          <p className="text-orange-50 font-semibold text-center">{successMessage}</p>
+          <p className="text-foreground font-semibold text-center text-base sm:text-lg">{successMessage}</p>
         </>
       )}
     </div>

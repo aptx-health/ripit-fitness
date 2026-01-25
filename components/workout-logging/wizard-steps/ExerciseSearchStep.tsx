@@ -110,7 +110,7 @@ export function ExerciseSearchStep({ onSelect }: ExerciseSearchStepProps) {
       <div className="mb-4">
         <div className="relative mb-4">
           <Search
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400"
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
             size={20}
           />
           <input
@@ -118,22 +118,22 @@ export function ExerciseSearchStep({ onSelect }: ExerciseSearchStepProps) {
             placeholder="Search exercises..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-zinc-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-zinc-800 text-white"
+            className="w-full pl-10 pr-4 py-2 sm:py-3 text-base border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
           />
         </div>
 
         {/* FAU Filters */}
         <div>
-          <div className="text-sm font-medium text-orange-50 mb-2">Filter by Muscle Group:</div>
+          <div className="text-sm sm:text-base font-medium text-foreground mb-2">Filter by Muscle Group:</div>
           <div className="flex flex-wrap gap-2">
             {ALL_FAUS.map((fau) => (
               <button
                 key={fau}
                 onClick={() => handleFAUToggle(fau)}
-                className={`px-3 py-1 text-xs rounded-full border transition-colors ${
+                className={`px-3 py-1 text-xs sm:text-sm rounded-full border transition-colors ${
                   selectedFAUs.includes(fau)
-                    ? 'bg-orange-600 text-white border-orange-600'
-                    : 'bg-zinc-700 text-zinc-300 border-zinc-600 hover:border-orange-500'
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-muted text-foreground border-border hover:border-primary'
                 }`}
               >
                 {FAU_DISPLAY_NAMES[fau] || fau}
@@ -146,18 +146,18 @@ export function ExerciseSearchStep({ onSelect }: ExerciseSearchStepProps) {
       {/* Results */}
       <div className="flex-1 overflow-auto">
         {error && (
-          <div className="bg-red-950 border border-red-600 rounded-lg p-4 mb-4">
-            <div className="text-red-400">{error}</div>
+          <div className="bg-error/10 border border-error rounded-lg p-4 mb-4">
+            <div className="text-error text-sm sm:text-base">{error}</div>
           </div>
         )}
 
         {isLoading ? (
           <div className="text-center py-8">
-            <div className="text-zinc-400">Searching exercises...</div>
+            <div className="text-muted-foreground text-base">Searching exercises...</div>
           </div>
         ) : exercises.length === 0 ? (
           <div className="text-center py-8">
-            <div className="text-zinc-400">
+            <div className="text-muted-foreground text-base">
               {searchQuery || selectedFAUs.length > 0
                 ? 'No exercises found matching your search'
                 : 'No exercises available'}
@@ -168,16 +168,16 @@ export function ExerciseSearchStep({ onSelect }: ExerciseSearchStepProps) {
             {exercises.map((exercise) => (
               <div
                 key={exercise.id}
-                className="border border-zinc-700 rounded-lg p-3 sm:p-4 hover:border-orange-500 transition-colors bg-zinc-900 w-full"
+                className="border border-border rounded-lg p-3 sm:p-4 hover:border-primary transition-colors bg-muted w-full"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-orange-50 mb-2 break-words">{exercise.name}</h3>
+                    <h3 className="font-medium text-foreground text-base sm:text-lg mb-2 break-words">{exercise.name}</h3>
 
                     {exercise.primaryFAUs.length > 0 && (
                       <div className="mb-2">
-                        <span className="text-sm text-zinc-400">Primary: </span>
-                        <span className="text-sm text-zinc-300">
+                        <span className="text-sm sm:text-base text-muted-foreground">Primary: </span>
+                        <span className="text-sm sm:text-base text-foreground">
                           {exercise.primaryFAUs.map((fau) => FAU_DISPLAY_NAMES[fau] || fau).join(', ')}
                         </span>
                       </div>
@@ -185,8 +185,8 @@ export function ExerciseSearchStep({ onSelect }: ExerciseSearchStepProps) {
 
                     {exercise.secondaryFAUs.length > 0 && (
                       <div className="mb-2">
-                        <span className="text-sm text-zinc-400">Secondary: </span>
-                        <span className="text-sm text-zinc-300">
+                        <span className="text-sm sm:text-base text-muted-foreground">Secondary: </span>
+                        <span className="text-sm sm:text-base text-foreground">
                           {exercise.secondaryFAUs
                             .map((fau) => FAU_DISPLAY_NAMES[fau] || fau)
                             .join(', ')}
@@ -196,19 +196,19 @@ export function ExerciseSearchStep({ onSelect }: ExerciseSearchStepProps) {
 
                     {exercise.equipment.length > 0 && (
                       <div className="mb-2">
-                        <span className="text-sm text-zinc-400">Equipment: </span>
-                        <span className="text-sm text-zinc-300">{exercise.equipment.join(', ')}</span>
+                        <span className="text-sm sm:text-base text-muted-foreground">Equipment: </span>
+                        <span className="text-sm sm:text-base text-foreground">{exercise.equipment.join(', ')}</span>
                       </div>
                     )}
 
                     {exercise.instructions && (
-                      <div className="text-sm text-zinc-400 mt-2">{exercise.instructions}</div>
+                      <div className="text-sm sm:text-base text-muted-foreground mt-2">{exercise.instructions}</div>
                     )}
                   </div>
 
                   <button
                     onClick={() => onSelect(exercise)}
-                    className="ml-4 px-3 py-1 bg-orange-600 text-white rounded hover:bg-orange-700 transition-colors flex items-center gap-1 flex-shrink-0"
+                    className="ml-4 px-3 py-1.5 sm:py-2 text-sm sm:text-base bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors flex items-center gap-1 flex-shrink-0"
                   >
                     <Plus size={16} />
                     Select
