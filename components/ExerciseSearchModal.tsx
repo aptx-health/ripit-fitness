@@ -51,7 +51,7 @@ type ExercisePrescription = {
 // All available FAUs for filtering
 const ALL_FAUS = [
   'chest', 'mid-back', 'lower-back', 'front-delts', 'side-delts', 'rear-delts',
-  'lats', 'traps', 'upper-arm-anterior', 'triceps', 'forearms', 'neck',
+  'lats', 'traps', 'biceps', 'triceps', 'forearms',
   'quads', 'adductors', 'hamstrings', 'glutes', 'calves', 'abs', 'obliques'
 ]
 
@@ -64,10 +64,9 @@ const FAU_DISPLAY_NAMES: Record<string, string> = {
   'rear-delts': 'Rear Delts',
   'lats': 'Lats',
   'traps': 'Traps',
-  'upper-arm-anterior': 'Biceps',
+  'biceps': 'Biceps',
   'triceps': 'Triceps',
   'forearms': 'Forearms',
-  'neck': 'Neck',
   'quads': 'Quads',
   'adductors': 'Adductors',
   'hamstrings': 'Hamstrings',
