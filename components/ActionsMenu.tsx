@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { MoreVertical, AlertTriangle } from 'lucide-react'
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 
 export type ActionItem = {
   label: string
@@ -33,57 +34,15 @@ export default function ActionsMenu({
   variant = 'default',
   className = ''
 }: ActionsMenuProps) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [menuPosition, setMenuPosition] = useState<'bottom' | 'top'>('bottom')
   const [confirmingAction, setConfirmingAction] = useState<ActionItem | null>(null)
-  const menuRef = useRef<HTMLDivElement>(null)
-  const buttonRef = useRef<HTMLButtonElement>(null)
-
-  // Close menu when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        menuRef.current &&
-        buttonRef.current &&
-        !menuRef.current.contains(event.target as Node) &&
-        !buttonRef.current.contains(event.target as Node)
-      ) {
-        setIsMenuOpen(false)
-      }
-    }
-
-    if (isMenuOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-      return () => document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [isMenuOpen])
-
-  const handleMenuToggle = () => {
-    if (disabled) return
-
-    if (!isMenuOpen && buttonRef.current) {
-      // Calculate if there's enough space below
-      const buttonRect = buttonRef.current.getBoundingClientRect()
-      const spaceBelow = window.innerHeight - buttonRect.bottom
-      const menuHeight = actions.length * 48 + 16 // Approximate height
-
-      // If not enough space below, show above
-      setMenuPosition(spaceBelow < menuHeight ? 'top' : 'bottom')
-    }
-    setIsMenuOpen(!isMenuOpen)
-  }
 
   const handleActionClick = (action: ActionItem) => {
     if (action.disabled) return
 
     if (action.requiresConfirmation) {
       setConfirmingAction(action)
-      setIsMenuOpen(false)
     } else {
       action.onClick()
-      if (action.hideAfterClick !== false) {
-        setIsMenuOpen(false)
-      }
     }
   }
 
@@ -134,37 +93,34 @@ export default function ActionsMenu({
 
   return (
     <>
-      <div className={`relative ${className}`}>
-        <button
-          ref={buttonRef}
-          onClick={handleMenuToggle}
-          disabled={disabled}
-          className={`${label ? 'py-3 px-4' : sizeClasses[size]} flex items-center justify-center gap-2 cursor-pointer border-2 border-border transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed ${variantClasses[variant]} ${className.includes('w-full') ? 'w-full' : label ? 'w-auto' : ''} ${className.includes('h-full') ? 'h-full' : ''}`}
-          aria-label={label || 'Actions menu'}
-          aria-expanded={isMenuOpen}
-        >
-          <Icon size={iconSizes[size]} className="flex-shrink-0" />
-          {label && <span className="font-semibold whitespace-nowrap">{label}</span>}
-        </button>
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger asChild>
+          <button
+            disabled={disabled}
+            className={`${label ? 'py-3 px-4' : sizeClasses[size]} flex items-center justify-center gap-2 cursor-pointer border-2 border-border transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed ${variantClasses[variant]} ${className.includes('w-full') ? 'w-full' : label ? 'w-auto' : ''} ${className.includes('h-full') ? 'h-full' : ''}`}
+            aria-label={label || 'Actions menu'}
+          >
+            <Icon size={iconSizes[size]} className="flex-shrink-0" />
+            {label && <span className="font-semibold whitespace-nowrap">{label}</span>}
+          </button>
+        </DropdownMenu.Trigger>
 
-        {/* Dropdown Menu */}
-        {isMenuOpen && (
-          <div
-            ref={menuRef}
-            className={`absolute right-2 bg-card border-2 border-primary shadow-lg z-50 min-w-[200px] ${
-              menuPosition === 'bottom' ? 'top-full mt-2' : 'bottom-full mb-2'
-            }`}
+        <DropdownMenu.Portal>
+          <DropdownMenu.Content
+            className="bg-card border-2 border-primary shadow-lg z-50 min-w-[200px]"
+            sideOffset={5}
+            align="end"
           >
             {actions.map((action, index) => {
               const ActionIcon = action.icon
               const isDisabled = action.disabled || false
 
               return (
-                <button
+                <DropdownMenu.Item
                   key={index}
                   onClick={() => handleActionClick(action)}
                   disabled={isDisabled}
-                  className={`w-full px-4 py-3 text-left text-sm font-medium transition-colors flex items-center gap-3 ${
+                  className={`w-full px-4 py-3 text-left text-sm font-medium transition-colors flex items-center gap-3 cursor-pointer outline-none ${
                     isDisabled
                       ? 'opacity-50 cursor-not-allowed bg-muted/50'
                       : getActionVariantClasses(action.variant)
@@ -174,12 +130,12 @@ export default function ActionsMenu({
                     <ActionIcon size={18} className="flex-shrink-0" />
                   )}
                   <span className="flex-1">{action.label}</span>
-                </button>
+                </DropdownMenu.Item>
               )
             })}
-          </div>
-        )}
-      </div>
+          </DropdownMenu.Content>
+        </DropdownMenu.Portal>
+      </DropdownMenu.Root>
 
       {/* Confirmation Dialog */}
       {confirmingAction && (
