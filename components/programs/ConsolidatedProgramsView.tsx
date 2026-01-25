@@ -59,13 +59,15 @@ export default function ConsolidatedProgramsView({
   useEffect(() => {
     const tab = searchParams.get('tab')
     if (tab === 'cardio' || tab === 'strength') {
-      setActiveTab(tab)
+      // Only update if different to prevent unnecessary re-renders
+      setActiveTab(current => current === tab ? current : tab)
     }
   }, [searchParams])
 
 
   const handleTabChange = (tab: 'strength' | 'cardio') => {
-    setActiveTab(tab)
+    // Don't update state here - let the URL change trigger the useEffect
+    // This prevents double state updates and potential loops
     router.push(`/programs?tab=${tab}`, { scroll: false })
   }
 

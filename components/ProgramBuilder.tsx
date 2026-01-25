@@ -242,10 +242,29 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
   }, [])
 
   const handleComplete = useCallback(() => {
+    // Validate all workouts have at least 1 exercise
+    const emptyWorkouts: string[] = []
+
+    weeks.forEach(week => {
+      week.workouts.forEach(workout => {
+        if (workout.exercises.length === 0) {
+          emptyWorkouts.push(`Week ${week.weekNumber} - ${workout.name}`)
+        }
+      })
+    })
+
+    if (emptyWorkouts.length > 0) {
+      setError(
+        `Cannot save program with empty workouts: ${emptyWorkouts.join(', ')}. ` +
+        `Add at least one exercise to each workout or delete them.`
+      )
+      return
+    }
+
     if (programId) {
       router.push(`/programs/${programId}`)
     }
-  }, [programId, router])
+  }, [programId, router, weeks])
 
   const handleAddExercise = useCallback((workoutId: string) => {
     setSelectedWorkoutId(workoutId)
@@ -396,14 +415,14 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
     setError(null)
 
     try {
-      // Delete all workouts in the week
-      const week = weeks.find(w => w.id === weekId)
-      if (!week) return
+      // Delete the week (API will cascade delete all workouts and related data)
+      const response = await fetch(`/api/weeks/${weekId}`, {
+        method: 'DELETE',
+      })
 
-      for (const workout of week.workouts) {
-        await fetch(`/api/workouts/${workout.id}`, {
-          method: 'DELETE',
-        })
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to delete week')
       }
 
       // Remove week from state
@@ -417,7 +436,7 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
       setDeletingWeekId(null)
       setOpenWeekMenuId(null)
     }
-  }, [weeks])
+  }, [])
 
   const handleDuplicateWeek = useCallback(async (weekId: string) => {
     setIsLoading(true)

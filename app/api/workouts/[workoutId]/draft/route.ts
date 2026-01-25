@@ -66,6 +66,7 @@ export async function POST(
             program: true,
           },
         },
+        exercises: true,
       },
     })
 
@@ -75,6 +76,21 @@ export async function POST(
 
     if (workout.week.program.userId !== user.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    }
+
+    // Validate that all exerciseIds exist in this workout
+    const validExerciseIds = new Set(workout.exercises.map(e => e.id))
+    const invalidSets = loggedSets.filter(set => !validExerciseIds.has(set.exerciseId))
+
+    if (invalidSets.length > 0) {
+      console.error('Draft API: Invalid exercise IDs detected:', invalidSets.map(s => s.exerciseId))
+      return NextResponse.json(
+        {
+          error: 'Some exercises no longer exist in this workout. Please refresh and try again.',
+          invalidExerciseIds: invalidSets.map(s => s.exerciseId)
+        },
+        { status: 422 }
+      )
     }
 
     // Check if workout is already completed
