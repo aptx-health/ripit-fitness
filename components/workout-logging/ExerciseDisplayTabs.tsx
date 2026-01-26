@@ -80,6 +80,11 @@ export default function ExerciseDisplayTabs({
 }: ExerciseDisplayTabsProps) {
   const loggedCount = loggedSets.length
   const totalCount = prescribedSets.length
+  const hasNotes = !!(exercise.notes || exercise.exerciseDefinition?.instructions ||
+    exercise.exerciseDefinition?.primaryFAUs?.length ||
+    exercise.exerciseDefinition?.secondaryFAUs?.length ||
+    exercise.exerciseDefinition?.equipment?.length)
+  const hasHistory = !!exerciseHistory
 
   return (
     <Tabs defaultValue="log-sets" className="w-full h-full flex flex-col">
@@ -92,11 +97,21 @@ export default function ExerciseDisplayTabs({
             </span>
           )}
         </TabsTrigger>
-        <TabsTrigger value="notes">Notes</TabsTrigger>
-        {exerciseHistory && <TabsTrigger value="history">History</TabsTrigger>}
+        <TabsTrigger value="notes" className="relative">
+          <span>Notes</span>
+          {hasNotes && (
+            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500"></span>
+          )}
+        </TabsTrigger>
+        <TabsTrigger value="history" className="relative">
+          <span>History</span>
+          {hasHistory && (
+            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500"></span>
+          )}
+        </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="log-sets" className="flex-1 overflow-y-auto px-1 flex flex-col gap-3">
+      <TabsContent value="log-sets" className="flex-1 overflow-y-auto px-4 flex flex-col gap-3">
         <SetList
           prescribedSets={prescribedSets}
           loggedSets={loggedSets}
@@ -106,78 +121,84 @@ export default function ExerciseDisplayTabs({
         {loggingForm}
       </TabsContent>
 
-      <TabsContent value="notes" className="flex-1 overflow-y-auto px-1">
-        <div className="space-y-6">
-          {exercise.exerciseDefinition?.instructions && (
-            <div>
-              <h4 className="text-base sm:text-lg font-semibold text-foreground mb-3">Instructions</h4>
-              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
-                {exercise.exerciseDefinition.instructions}
-              </p>
-            </div>
-          )}
-
-          {exercise.exerciseDefinition?.primaryFAUs && exercise.exerciseDefinition.primaryFAUs.length > 0 && (
-            <div>
-              <h4 className="text-base sm:text-lg font-semibold text-foreground mb-3">Primary Muscles</h4>
-              <div className="flex flex-wrap gap-2">
-                {exercise.exerciseDefinition.primaryFAUs.map((fau) => (
-                  <span
-                    key={fau}
-                    className="px-3 py-1.5 text-sm sm:text-base font-medium bg-primary/20 text-primary rounded-full"
-                  >
-                    {FAU_DISPLAY_NAMES[fau] || fau}
-                  </span>
-                ))}
+      <TabsContent value="notes" className="flex-1 overflow-y-auto px-4">
+        {hasNotes ? (
+          <div className="space-y-6">
+            {exercise.exerciseDefinition?.instructions && (
+              <div>
+                <h4 className="text-lg sm:text-xl font-semibold text-foreground mb-3">Instructions</h4>
+                <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed">
+                  {exercise.exerciseDefinition.instructions}
+                </p>
               </div>
-            </div>
-          )}
+            )}
 
-          {exercise.exerciseDefinition?.secondaryFAUs && exercise.exerciseDefinition.secondaryFAUs.length > 0 && (
-            <div>
-              <h4 className="text-base sm:text-lg font-semibold text-foreground mb-3">Secondary Muscles</h4>
-              <div className="flex flex-wrap gap-2">
-                {exercise.exerciseDefinition.secondaryFAUs.map((fau) => (
-                  <span
-                    key={fau}
-                    className="px-3 py-1.5 text-sm sm:text-base font-medium bg-muted text-foreground rounded-full"
-                  >
-                    {FAU_DISPLAY_NAMES[fau] || fau}
-                  </span>
-                ))}
+            {exercise.exerciseDefinition?.primaryFAUs && exercise.exerciseDefinition.primaryFAUs.length > 0 && (
+              <div>
+                <h4 className="text-lg sm:text-xl font-semibold text-foreground mb-3">Primary Muscles</h4>
+                <div className="flex flex-wrap gap-2">
+                  {exercise.exerciseDefinition.primaryFAUs.map((fau) => (
+                    <span
+                      key={fau}
+                      className="px-3 py-1.5 text-base sm:text-lg font-medium bg-primary/20 text-primary rounded-full"
+                    >
+                      {FAU_DISPLAY_NAMES[fau] || fau}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {exercise.exerciseDefinition?.equipment && exercise.exerciseDefinition.equipment.length > 0 && (
-            <div>
-              <h4 className="text-base sm:text-lg font-semibold text-foreground mb-3">Equipment</h4>
-              <div className="flex flex-wrap gap-2">
-                {exercise.exerciseDefinition.equipment.map((item) => (
-                  <span
-                    key={item}
-                    className="px-3 py-1.5 text-sm sm:text-base font-medium bg-muted text-foreground rounded-full border border-border"
-                  >
-                    {item}
-                  </span>
-                ))}
+            {exercise.exerciseDefinition?.secondaryFAUs && exercise.exerciseDefinition.secondaryFAUs.length > 0 && (
+              <div>
+                <h4 className="text-lg sm:text-xl font-semibold text-foreground mb-3">Secondary Muscles</h4>
+                <div className="flex flex-wrap gap-2">
+                  {exercise.exerciseDefinition.secondaryFAUs.map((fau) => (
+                    <span
+                      key={fau}
+                      className="px-3 py-1.5 text-base sm:text-lg font-medium bg-muted text-foreground rounded-full"
+                    >
+                      {FAU_DISPLAY_NAMES[fau] || fau}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {exercise.notes && (
-            <div>
-              <h4 className="text-base sm:text-lg font-semibold text-foreground mb-3">Notes</h4>
-              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
-                {exercise.notes}
-              </p>
-            </div>
-          )}
-        </div>
+            {exercise.exerciseDefinition?.equipment && exercise.exerciseDefinition.equipment.length > 0 && (
+              <div>
+                <h4 className="text-lg sm:text-xl font-semibold text-foreground mb-3">Equipment</h4>
+                <div className="flex flex-wrap gap-2">
+                  {exercise.exerciseDefinition.equipment.map((item) => (
+                    <span
+                      key={item}
+                      className="px-3 py-1.5 text-base sm:text-lg font-medium bg-muted text-foreground rounded-full border border-border"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {exercise.notes && (
+              <div>
+                <h4 className="text-lg sm:text-xl font-semibold text-foreground mb-3">Notes</h4>
+                <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed">
+                  {exercise.notes}
+                </p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="flex items-center justify-center h-full py-12">
+            <p className="text-base sm:text-lg text-muted-foreground">No notes available for this exercise</p>
+          </div>
+        )}
       </TabsContent>
 
-      {exerciseHistory && (
-        <TabsContent value="history" className="flex-1 overflow-y-auto px-1">
+      <TabsContent value="history" className="flex-1 overflow-y-auto px-4">
+        {exerciseHistory ? (
           <div className="space-y-6">
             <div>
               <h4 className="text-base sm:text-lg font-semibold text-foreground mb-2">Last Performed</h4>
@@ -189,46 +210,31 @@ export default function ExerciseDisplayTabs({
 
             <div>
               <h4 className="text-base sm:text-lg font-semibold text-foreground mb-3">Sets Completed</h4>
-              <div className="space-y-3">
+              <div className="space-y-1.5">
                 {exerciseHistory.sets.map((set) => (
                   <div
                     key={set.setNumber}
-                    className="flex items-center gap-4 p-4 bg-muted rounded-xl border border-border"
+                    className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg text-base sm:text-lg"
                   >
-                    <div className="w-14 text-center font-semibold text-base sm:text-lg text-muted-foreground">
-                      Set {set.setNumber}
-                    </div>
-                    <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-3 text-base">
-                      <div>
-                        <div className="text-sm text-muted-foreground mb-1">Reps</div>
-                        <div className="font-semibold text-lg text-foreground">{set.reps}</div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-muted-foreground mb-1">Weight</div>
-                        <div className="font-semibold text-lg text-foreground">
-                          {set.weight} {set.weightUnit}
-                        </div>
-                      </div>
-                      {set.rpe !== null && (
-                        <div>
-                          <div className="text-sm text-muted-foreground mb-1">RPE</div>
-                          <div className="font-semibold text-lg text-foreground">{set.rpe}</div>
-                        </div>
-                      )}
-                      {set.rir !== null && (
-                        <div>
-                          <div className="text-sm text-muted-foreground mb-1">RIR</div>
-                          <div className="font-semibold text-lg text-foreground">{set.rir}</div>
-                        </div>
-                      )}
-                    </div>
+                    <span className="font-semibold text-muted-foreground">Set {set.setNumber}:</span>
+                    <span className="font-semibold text-foreground">{set.reps} reps @ {set.weight}{set.weightUnit}</span>
+                    {set.rpe !== null && (
+                      <span className="text-muted-foreground">• RPE {set.rpe}</span>
+                    )}
+                    {set.rir !== null && (
+                      <span className="text-muted-foreground">• RIR {set.rir}</span>
+                    )}
                   </div>
                 ))}
               </div>
             </div>
           </div>
-        </TabsContent>
-      )}
+        ) : (
+          <div className="flex items-center justify-center h-full py-12">
+            <p className="text-base sm:text-lg text-muted-foreground">No history available for this exercise</p>
+          </div>
+        )}
+      </TabsContent>
     </Tabs>
   )
 }

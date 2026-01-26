@@ -494,7 +494,7 @@ export default function ExerciseLoggingModal({
           />
 
           {/* Content area with tabs - tabs handle their own scrolling */}
-          <div className="flex-1 overflow-hidden px-4 py-2">
+          <div className="flex-1 overflow-hidden pb-2">
             <ExerciseDisplayTabs
               exercise={currentExercise}
               prescribedSets={currentPrescribedSets}
