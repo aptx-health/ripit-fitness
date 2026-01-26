@@ -162,7 +162,7 @@ async function cloneStrengthProgramData(
           }
         }
       }
-    }, { timeout: 30000 }); // 30 second timeout for large programs
+    }, { timeout: 60000 }); // 60 second timeout for very large programs
 
     // Mark as ready
     await prisma.program.update({
@@ -264,7 +264,7 @@ async function cloneCardioProgramData(
           });
         }
       }
-    }, { timeout: 30000 }); // 30 second timeout for large programs
+    }, { timeout: 60000 }); // 60 second timeout for very large programs
 
     // Mark as ready
     await prisma.cardioProgram.update({
