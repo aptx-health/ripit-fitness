@@ -80,6 +80,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 <button
                   className="flex-shrink-0 hover:opacity-80 transition-opacity"
                   aria-label="Close"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.currentTarget.blur()
+                  }}
                 >
                   <X size={18} />
                 </button>
