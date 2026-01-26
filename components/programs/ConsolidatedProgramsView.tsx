@@ -62,6 +62,7 @@ export default function ConsolidatedProgramsView({
   const [cloningProgramId, setCloningProgramId] = useState<string | null>(null)
   const [completedClones, setCompletedClones] = useState<Set<string>>(new Set())
   const [localCopyStatuses, setLocalCopyStatuses] = useState<Record<string, string>>({})
+  const [deletedPrograms, setDeletedPrograms] = useState<Set<string>>(new Set())
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   // Sync state from URL on initial load or direct navigation (e.g., shared links)
@@ -132,6 +133,7 @@ export default function ConsolidatedProgramsView({
         // Program not found - likely failed and was deleted
         if (!completedClones.has(programId)) {
           setCompletedClones(prev => new Set(prev).add(programId))
+          setDeletedPrograms(prev => new Set(prev).add(programId))
           toast.error('Failed to copy program', 'The program cloning failed. Please try again.')
           cleanupCloningState()
           router.refresh()
@@ -162,6 +164,7 @@ export default function ConsolidatedProgramsView({
         // Program was deleted (cloning failed)
         if (!completedClones.has(programId)) {
           setCompletedClones(prev => new Set(prev).add(programId))
+          setDeletedPrograms(prev => new Set(prev).add(programId))
           toast.error('Failed to copy program', 'The program cloning failed. Please try again.')
           cleanupCloningState()
           router.refresh()
@@ -205,17 +208,22 @@ export default function ConsolidatedProgramsView({
   const isStrengthTab = activeTab === 'strength'
 
   // Sort programs: active first, then by creation date
-  const sortedStrengthPrograms = [...strengthPrograms].sort((a, b) => {
-    if (a.isActive && !b.isActive) return -1
-    if (!a.isActive && b.isActive) return 1
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  })
+  // Filter out locally deleted programs
+  const sortedStrengthPrograms = [...strengthPrograms]
+    .filter(p => !deletedPrograms.has(p.id))
+    .sort((a, b) => {
+      if (a.isActive && !b.isActive) return -1
+      if (!a.isActive && b.isActive) return 1
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    })
 
-  const sortedCardioPrograms = [...cardioPrograms].sort((a, b) => {
-    if (a.isActive && !b.isActive) return -1
-    if (!a.isActive && b.isActive) return 1
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  })
+  const sortedCardioPrograms = [...cardioPrograms]
+    .filter(p => !deletedPrograms.has(p.id))
+    .sort((a, b) => {
+      if (a.isActive && !b.isActive) return -1
+      if (!a.isActive && b.isActive) return 1
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    })
 
   // URL for create button changes based on active tab
   const createProgramUrl = isStrengthTab

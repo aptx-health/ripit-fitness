@@ -17,6 +17,39 @@ import {
 } from '@/lib/community/publishing';
 import { cloneCommunityProgram } from '@/lib/community/cloning';
 
+/**
+ * Helper to wait for background cloning to complete
+ * Polls the copyStatus field until it becomes 'ready' or times out
+ */
+async function waitForCloningComplete(
+  prisma: PrismaClient,
+  programId: string,
+  programType: 'strength' | 'cardio' = 'strength',
+  timeoutMs: number = 10000
+): Promise<void> {
+  const startTime = Date.now();
+  const pollInterval = 100; // Poll every 100ms
+
+  while (Date.now() - startTime < timeoutMs) {
+    const program = programType === 'strength'
+      ? await prisma.program.findUnique({ where: { id: programId }, select: { copyStatus: true } })
+      : await prisma.cardioProgram.findUnique({ where: { id: programId }, select: { copyStatus: true } });
+
+    if (!program) {
+      throw new Error('Program not found - cloning may have failed');
+    }
+
+    if (program.copyStatus === 'ready') {
+      return; // Cloning complete
+    }
+
+    // Wait before next poll
+    await new Promise(resolve => setTimeout(resolve, pollInterval));
+  }
+
+  throw new Error(`Cloning timed out after ${timeoutMs}ms`);
+}
+
 describe('Community Programs API', () => {
   let prisma: PrismaClient;
   let userId: string;
@@ -368,6 +401,9 @@ describe('Community Programs API', () => {
       expect(cloneResult.success).toBe(true);
       expect(cloneResult.programId).toBeDefined();
 
+      // Wait for background cloning to complete
+      await waitForCloningComplete(prisma, cloneResult.programId!, 'strength');
+
       // Verify cloned program in database
       const clonedProgram = await prisma.program.findUnique({
         where: { id: cloneResult.programId },
@@ -428,6 +464,9 @@ describe('Community Programs API', () => {
         publishResult.communityProgramId!,
         otherUserId
       );
+
+      // Wait for background cloning to complete
+      await waitForCloningComplete(prisma, cloneResult.programId!, 'strength');
 
       // Act: Delete the original personal program
       await prisma.program.delete({

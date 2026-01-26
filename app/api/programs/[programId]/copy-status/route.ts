@@ -32,10 +32,46 @@ export async function GET(
         id: true,
         name: true,
         copyStatus: true,
+        createdAt: true,
+        _count: {
+          select: { weeks: true }
+        }
       },
     });
 
     if (strengthProgram) {
+      // Detect stuck clones
+      if (strengthProgram.copyStatus === 'cloning') {
+        const cloneAge = Date.now() - new Date(strengthProgram.createdAt).getTime();
+        const hasData = strengthProgram._count.weeks > 0;
+
+        // If cloning completed (has weeks), mark as ready
+        if (hasData) {
+          await prisma.program.update({
+            where: { id: programId },
+            data: { copyStatus: 'ready' }
+          });
+
+          return NextResponse.json({
+            status: 'ready',
+            programType: 'strength',
+            name: strengthProgram.name,
+          });
+        }
+
+        // If stuck for >60 seconds with no data, delete it
+        if (cloneAge > 60000 && !hasData) {
+          await prisma.program.delete({
+            where: { id: programId }
+          });
+
+          return NextResponse.json({
+            status: 'not_found',
+            error: 'Clone timed out and was cleaned up',
+          }, { status: 404 });
+        }
+      }
+
       return NextResponse.json({
         status: strengthProgram.copyStatus || 'ready',
         programType: 'strength',
@@ -53,10 +89,46 @@ export async function GET(
         id: true,
         name: true,
         copyStatus: true,
+        createdAt: true,
+        _count: {
+          select: { weeks: true }
+        }
       },
     });
 
     if (cardioProgram) {
+      // Detect stuck clones
+      if (cardioProgram.copyStatus === 'cloning') {
+        const cloneAge = Date.now() - new Date(cardioProgram.createdAt).getTime();
+        const hasData = cardioProgram._count.weeks > 0;
+
+        // If cloning completed (has weeks), mark as ready
+        if (hasData) {
+          await prisma.cardioProgram.update({
+            where: { id: programId },
+            data: { copyStatus: 'ready' }
+          });
+
+          return NextResponse.json({
+            status: 'ready',
+            programType: 'cardio',
+            name: cardioProgram.name,
+          });
+        }
+
+        // If stuck for >60 seconds with no data, delete it
+        if (cloneAge > 60000 && !hasData) {
+          await prisma.cardioProgram.delete({
+            where: { id: programId }
+          });
+
+          return NextResponse.json({
+            status: 'not_found',
+            error: 'Clone timed out and was cleaned up',
+          }, { status: 404 });
+        }
+      }
+
       return NextResponse.json({
         status: cardioProgram.copyStatus || 'ready',
         programType: 'cardio',
