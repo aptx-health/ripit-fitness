@@ -23,7 +23,10 @@ export default function ExerciseLoggingHeader({
   onSyncClick,
 }: ExerciseLoggingHeaderProps) {
   return (
-    <div className="bg-primary text-white px-4 py-3 border-b border-primary-muted-dark flex-shrink-0 sm:rounded-t-2xl">
+    <div
+      className="bg-primary text-white px-4 py-3 border-b border-primary-muted-dark flex-shrink-0 sm:rounded-t-2xl"
+      style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.75rem)' }}
+    >
       <div className="flex items-center justify-between gap-2">
         <div className="text-sm text-primary-foreground opacity-80">
           Exercise {currentExerciseIndex + 1} of {totalExercises} • {totalLoggedSets}/
