@@ -19,7 +19,7 @@ export default function Header({ userEmail }: Props) {
 
   return (
     <>
-      <nav className="bg-card border-b border-border">
+      <nav className="bg-card border-b border-border" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Left: Logo + Nav Links */}
@@ -122,7 +122,8 @@ export default function Header({ userEmail }: Props) {
         `}
         style={{
           maxHeight: isMenuOpen ? '80vh' : '0',
-          overflow: isMenuOpen ? 'visible' : 'hidden'
+          overflow: isMenuOpen ? 'visible' : 'hidden',
+          paddingBottom: 'env(safe-area-inset-bottom)'
         }}
       >
         <div className="p-6 space-y-6 doom-noise">
