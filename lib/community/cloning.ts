@@ -139,7 +139,7 @@ async function cloneStrengthProgram(
     }
 
     return newProgram;
-  });
+  }, { timeout: 15000 }); // 15 second timeout for large programs
 
   return {
     success: true,
@@ -205,7 +205,7 @@ async function cloneCardioProgram(
     }
 
     return newProgram;
-  });
+  }, { timeout: 15000 }); // 15 second timeout for large programs
 
   return {
     success: true,
