@@ -111,17 +111,24 @@ export class TestDatabase {
     }
 
     console.log('🔄 Resetting test database...')
-    
+
     // Clear all data in reverse order to handle foreign key constraints
     const tablesToClear = [
+      'LoggedCardioSession',
+      'PrescribedCardioSession',
+      'CardioWeek',
+      'CardioProgram',
+      'UserCardioMetricPreferences',
       'LoggedSet',
-      'WorkoutCompletion', 
+      'WorkoutCompletion',
       'PrescribedSet',
       'Exercise',
       'ExerciseDefinition',
       'Workout',
       'Week',
-      'Program'
+      'Program',
+      'CommunityProgram',
+      'UserSettings'
     ]
 
     for (const table of tablesToClear) {
@@ -131,7 +138,7 @@ export class TestDatabase {
         console.warn(`⚠️ Error clearing table ${table}:`, error)
       }
     }
-    
+
     console.log('✅ Test database reset completed')
   }
 

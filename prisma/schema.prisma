@@ -265,3 +265,27 @@ model UserSettings {
 
   @@index([userId])
 }
+
+model CommunityProgram {
+  id                String   @id @default(cuid())
+  name              String
+  description       String
+  programType       String   @default("strength")
+  authorUserId      String
+  displayName       String
+  publishedAt       DateTime @default(now())
+  originalProgramId String   @unique
+
+  // Denormalized program data for immutability
+  programData Json
+
+  // Metadata for browsing
+  weekCount     Int
+  workoutCount  Int
+  exerciseCount Int
+
+  @@index([programType])
+  @@index([publishedAt(sort: Desc)])
+  @@index([authorUserId])
+  @@index([originalProgramId])
+}

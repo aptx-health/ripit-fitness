@@ -45,6 +45,20 @@ export async function createTestExerciseDefinition(
   const name = overrides.name || 'Barbell Bench Press'
   const normalizedName = name.toLowerCase().replace(/[^a-z0-9]/g, '')
 
+  // Check if exercise definition already exists
+  const existing = await prisma.exerciseDefinition.findUnique({
+    where: { normalizedName }
+  })
+
+  if (existing) {
+    return {
+      id: existing.id,
+      name: existing.name,
+      normalizedName: existing.normalizedName
+    }
+  }
+
+  // Create new exercise definition
   const exerciseDefinition = await prisma.exerciseDefinition.create({
     data: {
       name,

@@ -10,47 +10,51 @@ type Props = {
 
 export default function SyncStatusIcon({ status, pendingCount = 0, onClick }: Props) {
   const configs = {
-    synced: { 
-      icon: '✓', 
-      color: 'text-success', 
-      bg: 'bg-success-muted',
+    synced: {
+      icon: '✓',
+      color: 'text-green-400',
+      bg: 'bg-green-950',
+      border: 'border-green-600',
       animate: '',
       title: 'All data synced'
     },
-    syncing: { 
-      icon: '↻', 
-      color: 'text-primary', 
-      bg: 'bg-primary-muted',
+    syncing: {
+      icon: '↻',
+      color: 'text-orange-400',
+      bg: 'bg-orange-950',
+      border: 'border-orange-600',
       animate: 'animate-spin',
       title: `Syncing ${pendingCount} set${pendingCount !== 1 ? 's' : ''}...`
     },
-    error: { 
-      icon: '⚠', 
-      color: 'text-warning', 
-      bg: 'bg-warning-muted',
+    error: {
+      icon: '⚠',
+      color: 'text-yellow-400',
+      bg: 'bg-yellow-950',
+      border: 'border-yellow-600',
       animate: '',
       title: `${pendingCount} set${pendingCount !== 1 ? 's' : ''} not saved - click for details`
     },
     offline: {
       icon: '📱',
-      color: 'text-muted-foreground',
-      bg: 'bg-muted',
+      color: 'text-zinc-400',
+      bg: 'bg-zinc-800',
+      border: 'border-zinc-600',
       animate: '',
       title: `Working offline - ${pendingCount} set${pendingCount !== 1 ? 's' : ''} stored locally`
     }
   }
-  
+
   const config = configs[status]
 
   return (
     <button
       onClick={onClick}
       title={config.title}
-      className={`fixed top-4 right-4 z-40 w-8 h-8 rounded-full 
-        ${config.bg} ${config.color} ${config.animate} 
+      className={`w-8 h-8 rounded-full
+        ${config.bg} ${config.color} ${config.border} ${config.animate}
         flex items-center justify-center text-sm font-bold
         hover:scale-110 active:scale-95 transition-transform
-        shadow-sm border border-border hover:shadow-md`}
+        border-2 hover:shadow-md flex-shrink-0`}
     >
       {config.icon}
     </button>
