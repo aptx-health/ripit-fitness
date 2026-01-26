@@ -57,6 +57,12 @@ export default function Header({ userEmail }: Props) {
                 >
                   Cardio
                 </Link>
+                <Link
+                  href="/community"
+                  className="text-xs sm:text-sm font-semibold text-foreground hover:text-accent doom-link uppercase tracking-wider"
+                >
+                  Community
+                </Link>
               </div>
             </div>
 
