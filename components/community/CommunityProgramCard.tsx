@@ -84,7 +84,7 @@ export default function CommunityProgramCard({
             <h3 className="text-lg sm:text-xl font-bold text-foreground break-words">
               {program.name}
             </h3>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">
               by {program.displayName}
             </p>
           </div>
@@ -100,7 +100,7 @@ export default function CommunityProgramCard({
 
             {/* Type badge */}
             <span
-              className="px-2 py-1 bg-primary/20 text-primary text-xs font-medium rounded inline-flex items-center gap-1 whitespace-nowrap"
+              className="px-2 py-1 bg-primary text-primary-foreground text-xs font-bold rounded inline-flex items-center gap-1 whitespace-nowrap"
               aria-label={`${program.programType} program`}
             >
               {program.programType === 'strength' ? (
@@ -114,21 +114,19 @@ export default function CommunityProgramCard({
         </div>
 
         {/* Description */}
-        <p className="text-sm text-foreground/80 mb-4 line-clamp-2 break-words">
+        <p className="text-sm text-foreground/80 mb-4 line-clamp-3 break-words">
           {program.description}
         </p>
 
         {/* Metadata */}
-        <div className="flex flex-wrap gap-x-3 sm:gap-x-4 gap-y-1 text-xs sm:text-sm text-muted-foreground mb-3">
+        <div className="flex flex-wrap gap-x-3 sm:gap-x-4 gap-y-1 text-sm sm:text-base text-muted-foreground mb-3">
           <span>{program.weekCount} weeks</span>
           <span className="hidden sm:inline">•</span>
           <span>{program.workoutCount} workouts</span>
-          <span className="hidden sm:inline">•</span>
-          <span>{program.exerciseCount} exercises</span>
         </div>
 
         {/* Published date */}
-        <div className="text-xs text-muted-foreground mb-4">
+        <div className="text-sm text-muted-foreground mb-4">
           Published {formatDate(program.publishedAt)}
         </div>
 

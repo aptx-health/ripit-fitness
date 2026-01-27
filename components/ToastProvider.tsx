@@ -56,7 +56,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             onOpenChange={(open) => {
               if (!open) removeToast(toast.id)
             }}
-            className={`fixed bottom-4 right-4 z-[100] w-full max-w-sm p-4 rounded-lg shadow-lg border animate-in slide-in-from-bottom-5 ${
+            className={`fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 z-[100] sm:w-full sm:max-w-sm p-4 rounded-lg shadow-lg border animate-in slide-in-from-bottom-5 ${
               toast.type === 'success'
                 ? 'bg-success text-success-foreground border-success'
                 : 'bg-error text-error-foreground border-error'
