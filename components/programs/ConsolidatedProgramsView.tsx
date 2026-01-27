@@ -64,6 +64,7 @@ export default function ConsolidatedProgramsView({
   const [localCopyStatuses, setLocalCopyStatuses] = useState<Record<string, string>>({})
   const [deletedPrograms, setDeletedPrograms] = useState<Set<string>>(new Set())
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const completedClonesRef = useRef<Set<string>>(new Set())
 
   // Sync state from URL on initial load or direct navigation (e.g., shared links)
   useEffect(() => {
@@ -121,8 +122,8 @@ export default function ConsolidatedProgramsView({
   }
 
   const checkCopyStatus = async (programId: string): Promise<boolean> => {
-    // Don't check again if we've already completed this clone
-    if (completedClones.has(programId)) {
+    // Don't check again if we've already completed this clone (use ref for synchronous check)
+    if (completedClonesRef.current.has(programId)) {
       return false
     }
 
@@ -131,7 +132,8 @@ export default function ConsolidatedProgramsView({
 
       if (!response.ok) {
         // Program not found - likely failed and was deleted
-        if (!completedClones.has(programId)) {
+        if (!completedClonesRef.current.has(programId)) {
+          completedClonesRef.current.add(programId)
           setCompletedClones(prev => new Set(prev).add(programId))
           setDeletedPrograms(prev => new Set(prev).add(programId))
           toast.error('Failed to copy program', 'The program cloning failed. Please try again.')
@@ -145,7 +147,8 @@ export default function ConsolidatedProgramsView({
 
       if (data.status === 'ready') {
         // Cloning complete!
-        if (!completedClones.has(programId)) {
+        if (!completedClonesRef.current.has(programId)) {
+          completedClonesRef.current.add(programId)
           setCompletedClones(prev => new Set(prev).add(programId))
           // Update local state immediately so card updates
           setLocalCopyStatuses(prev => ({ ...prev, [programId]: 'ready' }))
@@ -162,7 +165,8 @@ export default function ConsolidatedProgramsView({
 
       if (data.status === 'not_found') {
         // Program was deleted (cloning failed)
-        if (!completedClones.has(programId)) {
+        if (!completedClonesRef.current.has(programId)) {
+          completedClonesRef.current.add(programId)
           setCompletedClones(prev => new Set(prev).add(programId))
           setDeletedPrograms(prev => new Set(prev).add(programId))
           toast.error('Failed to copy program', 'The program cloning failed. Please try again.')
