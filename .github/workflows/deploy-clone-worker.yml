@@ -13,6 +13,11 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID || 'ripit-fitness' }}
+      GCP_REGION: ${{ vars.GCP_REGION || 'us-central1' }}
+      ARTIFACT_REPO: program-clone-worker
+      SERVICE_NAME: clone-program
 
     steps:
       - uses: actions/checkout@v4
@@ -26,7 +31,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
 
       - name: Configure Docker for Artifact Registry
-        run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+        run: gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev --quiet
 
       - name: Copy Prisma schema into worker build context
         run: |
@@ -35,23 +40,19 @@ jobs:
 
       - name: Build Docker image
         run: |
-          IMAGE="us-central1-docker.pkg.dev/ripit-fitness/program-clone-worker/clone-program:${{ github.sha }}"
+          IMAGE="${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
           docker build -t "$IMAGE" ./cloud-functions/clone-program
-          docker tag "$IMAGE" "us-central1-docker.pkg.dev/ripit-fitness/program-clone-worker/clone-program:latest"
+          docker tag "$IMAGE" "${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/${{ env.SERVICE_NAME }}:latest"
 
       - name: Push Docker image to Artifact Registry
         run: |
-          docker push "us-central1-docker.pkg.dev/ripit-fitness/program-clone-worker/clone-program:${{ github.sha }}"
-          docker push "us-central1-docker.pkg.dev/ripit-fitness/program-clone-worker/clone-program:latest"
+          docker push "${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
+          docker push "${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/${{ env.SERVICE_NAME }}:latest"
 
       - name: Deploy to Cloud Run
         uses: google-github-actions/deploy-cloudrun@v2
         with:
-          service: clone-program
-          image: us-central1-docker.pkg.dev/ripit-fitness/program-clone-worker/clone-program:${{ github.sha }}
-          region: us-central1
-          timeout: 540s
-          memory: 1Gi
-          env: |
-            DATABASE_URL=${{ secrets.CLONE_WORKER_DATABASE_URL }}
-          no-allow-unauthenticated: true
+          service: ${{ env.SERVICE_NAME }}
+          image: ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
+          region: ${{ env.GCP_REGION }}
+          flags: '--timeout=540s --memory=1Gi --set-env-vars=DATABASE_URL=${{ secrets.CLONE_WORKER_DATABASE_URL }} --no-allow-unauthenticated'
