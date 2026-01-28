@@ -18,6 +18,7 @@ jobs:
       GCP_REGION: ${{ vars.GCP_REGION || 'us-central1' }}
       ARTIFACT_REPO: program-clone-worker
       SERVICE_NAME: clone-program
+      WORKER_SERVICE_ACCOUNT: ${{ vars.WORKER_SERVICE_ACCOUNT || 'clone-worker@ripit-fitness.iam.gserviceaccount.com' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -55,4 +56,4 @@ jobs:
           service: ${{ env.SERVICE_NAME }}
           image: ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
           region: ${{ env.GCP_REGION }}
-          flags: '--timeout=540s --memory=1Gi --set-env-vars=DATABASE_URL=${{ secrets.CLONE_WORKER_DATABASE_URL }} --no-allow-unauthenticated'
+          flags: '--timeout=540s --memory=1Gi --set-env-vars=DATABASE_URL=${{ secrets.CLONE_WORKER_DATABASE_URL }} --service-account=${{ env.WORKER_SERVICE_ACCOUNT }} --no-allow-unauthenticated'
