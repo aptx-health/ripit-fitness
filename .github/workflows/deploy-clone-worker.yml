@@ -35,20 +35,20 @@ jobs:
 
       - name: Build Docker image
         run: |
-          IMAGE="us-docker.pkg.dev/ripit-fitness/program-clone-worker/clone-program:${{ github.sha }}"
+          IMAGE="us-central1-docker.pkg.dev/ripit-fitness/program-clone-worker/clone-program:${{ github.sha }}"
           docker build -t "$IMAGE" ./cloud-functions/clone-program
-          docker tag "$IMAGE" "us-docker.pkg.dev/ripit-fitness/program-clone-worker/clone-program:latest"
+          docker tag "$IMAGE" "us-central1-docker.pkg.dev/ripit-fitness/program-clone-worker/clone-program:latest"
 
       - name: Push Docker image to Artifact Registry
         run: |
-          docker push "us-docker.pkg.dev/ripit-fitness/program-clone-worker/clone-program:${{ github.sha }}"
-          docker push "us-docker.pkg.dev/ripit-fitness/program-clone-worker/clone-program:latest"
+          docker push "us-central1-docker.pkg.dev/ripit-fitness/program-clone-worker/clone-program:${{ github.sha }}"
+          docker push "us-central1-docker.pkg.dev/ripit-fitness/program-clone-worker/clone-program:latest"
 
       - name: Deploy to Cloud Run
         uses: google-github-actions/deploy-cloudrun@v2
         with:
           service: clone-program
-          image: us-docker.pkg.dev/ripit-fitness/program-clone-worker/clone-program:${{ github.sha }}
+          image: us-central1-docker.pkg.dev/ripit-fitness/program-clone-worker/clone-program:${{ github.sha }}
           region: us-central1
           timeout: 540s
           memory: 1Gi
