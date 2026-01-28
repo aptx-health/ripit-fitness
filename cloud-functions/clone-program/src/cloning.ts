@@ -59,21 +59,31 @@ export async function cloneStrengthProgramData(
   programData: { weeks: WeekData[] },
   userId: string
 ): Promise<void> {
-  // Idempotency check: if weeks already exist, job already succeeded (retry scenario)
+  const totalWeeks = programData.weeks.length
+
+  // Idempotency check: if ALL weeks already exist, job already succeeded (retry scenario)
   const existingWeekCount = await prisma.week.count({
     where: { programId },
   })
 
   if (existingWeekCount > 0) {
-    console.log(`Program ${programId} already has ${existingWeekCount} weeks - marking as ready (idempotent retry)`)
-    await prisma.program.update({
-      where: { id: programId },
-      data: { copyStatus: 'ready' },
-    })
-    return
+    if (existingWeekCount === totalWeeks) {
+      console.log(`Program ${programId} already has all ${totalWeeks} weeks - marking as ready (idempotent retry)`)
+      await prisma.program.update({
+        where: { id: programId },
+        data: { copyStatus: 'ready' },
+      })
+      return
+    } else {
+      // Partial weeks exist - corrupted state from previous failed attempt
+      console.error(`Program ${programId} has ${existingWeekCount}/${totalWeeks} weeks - partial clone detected, marking as failed`)
+      await prisma.program.update({
+        where: { id: programId },
+        data: { copyStatus: 'failed' },
+      })
+      throw new Error(`Partial clone detected: ${existingWeekCount}/${totalWeeks} weeks`)
+    }
   }
-
-  const totalWeeks = programData.weeks.length
 
   for (let i = 0; i < programData.weeks.length; i++) {
     const week = programData.weeks[i]
@@ -146,21 +156,31 @@ export async function cloneCardioProgramData(
   programData: { weeks: WeekData[] },
   userId: string
 ): Promise<void> {
-  // Idempotency check: if weeks already exist, job already succeeded (retry scenario)
+  const totalWeeks = programData.weeks.length
+
+  // Idempotency check: if ALL weeks already exist, job already succeeded (retry scenario)
   const existingWeekCount = await prisma.cardioWeek.count({
     where: { cardioProgramId: programId },
   })
 
   if (existingWeekCount > 0) {
-    console.log(`Cardio program ${programId} already has ${existingWeekCount} weeks - marking as ready (idempotent retry)`)
-    await prisma.cardioProgram.update({
-      where: { id: programId },
-      data: { copyStatus: 'ready' },
-    })
-    return
+    if (existingWeekCount === totalWeeks) {
+      console.log(`Cardio program ${programId} already has all ${totalWeeks} weeks - marking as ready (idempotent retry)`)
+      await prisma.cardioProgram.update({
+        where: { id: programId },
+        data: { copyStatus: 'ready' },
+      })
+      return
+    } else {
+      // Partial weeks exist - corrupted state from previous failed attempt
+      console.error(`Cardio program ${programId} has ${existingWeekCount}/${totalWeeks} weeks - partial clone detected, marking as failed`)
+      await prisma.cardioProgram.update({
+        where: { id: programId },
+        data: { copyStatus: 'failed' },
+      })
+      throw new Error(`Partial clone detected: ${existingWeekCount}/${totalWeeks} weeks`)
+    }
   }
-
-  const totalWeeks = programData.weeks.length
 
   for (let i = 0; i < programData.weeks.length; i++) {
     const week = programData.weeks[i]

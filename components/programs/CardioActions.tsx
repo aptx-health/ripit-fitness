@@ -33,7 +33,7 @@ export function CardioPrimaryActions({
       </Link>
       {isCloning ? (
         <div
-          className="px-4 py-2 border border-muted text-muted bg-muted/10 doom-button-3d font-semibold uppercase tracking-wider md:inline-block w-full md:w-auto text-center cursor-not-allowed"
+          className="px-4 py-2 border border-muted-foreground/30 text-muted-foreground/50 bg-background doom-button-3d font-semibold uppercase tracking-wider md:inline-block w-full md:w-auto text-center cursor-not-allowed opacity-60"
           title="Program is still being cloned. Editing is disabled until cloning completes."
         >
           EDIT PROGRAM

@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - feature/community-workouts-v1
     paths:
       - 'cloud-functions/clone-program/**'
       - 'prisma/schema.prisma'

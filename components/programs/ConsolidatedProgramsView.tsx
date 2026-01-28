@@ -75,6 +75,27 @@ export default function ConsolidatedProgramsView({
     }
   }, [searchParams])
 
+  // On mount, resume polling for any programs already in cloning state
+  useEffect(() => {
+    const cloningPrograms = [
+      ...strengthPrograms.filter(p =>
+        p.copyStatus === 'cloning' || p.copyStatus?.startsWith('cloning_week_')
+      ),
+      ...cardioPrograms.filter(p =>
+        p.copyStatus === 'cloning' || p.copyStatus?.startsWith('cloning_week_')
+      )
+    ]
+
+    // Resume polling for first cloning program found
+    if (cloningPrograms.length > 0 && !cloningProgramId) {
+      const programId = cloningPrograms[0].id
+      if (!completedClones.has(programId)) {
+        setCloningProgramId(programId)
+        startPolling(programId)
+      }
+    }
+  }, []) // Only run on mount
+
   // Poll for cloning status if programId is in URL
   useEffect(() => {
     const cloningId = searchParams.get('cloning')
