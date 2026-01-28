@@ -1,53 +1,39 @@
-import { spawn, ChildProcess } from 'child_process';
+import { GenericContainer, StartedTestContainer, Wait } from 'testcontainers';
 
-let emulatorProcess: ChildProcess | null = null;
+const EMULATOR_PORT = 8681;
+
+let container: StartedTestContainer | null = null;
 
 /**
- * Starts the Pub/Sub emulator
+ * Starts the Pub/Sub emulator via Testcontainers.
+ * Uses messagebird/gcloud-pubsub-emulator (publicly available, no GCP auth needed).
+ * Works in both local dev and CI (just needs Docker).
  */
 export async function startPubSubEmulator(): Promise<void> {
-  const projectId = process.env.PUBSUB_PROJECT_ID || 'test-project';
-  const hostPort = process.env.PUBSUB_EMULATOR_HOST || 'localhost:8085';
+  console.log('🚀 Starting Pub/Sub emulator container...');
 
-  console.log('🚀 Starting Pub/Sub emulator...');
+  container = await new GenericContainer('messagebird/gcloud-pubsub-emulator:latest')
+    .withExposedPorts(EMULATOR_PORT)
+    .withWaitStrategy(Wait.forLogMessage(/Server started/))
+    .withStartupTimeout(30000)
+    .start();
 
-  emulatorProcess = spawn('gcloud', [
-    'beta',
-    'emulators',
-    'pubsub',
-    'start',
-    `--project=${projectId}`,
-    `--host-port=${hostPort}`
-  ], {
-    detached: true,
-    stdio: 'ignore' // Don't capture output
-  });
+  const host = container.getHost();
+  const port = container.getMappedPort(EMULATOR_PORT);
+  process.env.PUBSUB_EMULATOR_HOST = `${host}:${port}`;
 
-  emulatorProcess.unref(); // Allow Node to exit even if emulator is still running
-
-  // Wait for emulator to start (simple fixed delay)
-  await new Promise(resolve => setTimeout(resolve, 3000));
-
-  console.log(`✅ Pub/Sub emulator started on ${hostPort}`);
+  console.log(`✅ Pub/Sub emulator running at ${host}:${port}`);
 }
 
 /**
- * Stops the Pub/Sub emulator
+ * Stops the Pub/Sub emulator container
  */
 export async function stopPubSubEmulator(): Promise<void> {
-  if (emulatorProcess) {
-    console.log('🛑 Stopping Pub/Sub emulator...');
-    emulatorProcess.kill('SIGTERM');
-
-    // Wait a bit for graceful shutdown
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Force kill if still running
-    if (!emulatorProcess.killed) {
-      emulatorProcess.kill('SIGKILL');
-    }
-
-    emulatorProcess = null;
+  if (container) {
+    console.log('🛑 Stopping Pub/Sub emulator container...');
+    await container.stop();
+    delete process.env.PUBSUB_EMULATOR_HOST;
+    container = null;
     console.log('✅ Pub/Sub emulator stopped');
   }
 }

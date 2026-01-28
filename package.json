@@ -32,6 +32,7 @@
   "devDependencies": {
     "@google-cloud/pubsub": "^5.2.2",
     "@tailwindcss/postcss": "^4",
+    "@testcontainers/gcloud": "^11.11.0",
     "@testcontainers/postgresql": "^10.14.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",

@@ -17,8 +17,12 @@ beforeAll(async () => {
   }
   
   // Start the test database
-  await getTestDatabase()
-  console.log('✅ Test environment ready')
+  try {
+    await getTestDatabase()
+    console.log('✅ Test environment ready')
+  } catch (e) {
+    console.warn('⚠️ Database setup failed — tests requiring DB will fail:', (e as Error).message)
+  }
 }, 120000) // 2 minute timeout for container startup
 
 // Global cleanup - stop test database after all tests
