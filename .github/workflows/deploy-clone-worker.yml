@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - feature/raw-sql-clone-optimization
     paths:
       - 'cloud-functions/clone-program/**'
       - 'prisma/schema.prisma'
