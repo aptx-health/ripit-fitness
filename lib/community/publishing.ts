@@ -28,77 +28,145 @@ export async function getUserDisplayName(
 }
 
 /**
- * Publishes a program to the community
+ * Publishes a strength program to the community
  */
-export async function publishProgramToCommunity(
+async function publishStrengthProgram(
   prisma: PrismaClient,
   programId: string,
   userId: string
 ): Promise<PublishResult> {
-  try {
-    // Fetch full program with all nested data
-    const program = await prisma.program.findUnique({
-      where: {
-        id: programId,
-        userId: userId,
-      },
-      include: {
-        weeks: {
-          orderBy: { weekNumber: 'asc' },
-          include: {
-            workouts: {
-              orderBy: { dayNumber: 'asc' },
-              include: {
-                exercises: {
-                  orderBy: { order: 'asc' },
-                  include: {
-                    prescribedSets: {
-                      orderBy: { setNumber: 'asc' },
-                    },
-                    exerciseDefinition: true,
+  const program = await prisma.program.findUnique({
+    where: {
+      id: programId,
+      userId: userId,
+    },
+    include: {
+      weeks: {
+        orderBy: { weekNumber: 'asc' },
+        include: {
+          workouts: {
+            orderBy: { dayNumber: 'asc' },
+            include: {
+              exercises: {
+                orderBy: { order: 'asc' },
+                include: {
+                  prescribedSets: {
+                    orderBy: { setNumber: 'asc' },
                   },
+                  exerciseDefinition: true,
                 },
               },
             },
           },
         },
       },
-    });
+    },
+  });
 
-    if (!program) {
-      return {
-        success: false,
-        error: 'Program not found',
-      };
-    }
-
-    // Get user's display name
-    const displayName = await getUserDisplayName(prisma, userId);
-
-    // Calculate program stats
-    const stats = calculateProgramStats(program);
-
-    // Create community program with denormalized data
-    const communityProgram = await prisma.communityProgram.create({
-      data: {
-        id: `comm_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-        name: program.name,
-        description: program.description || '',
-        programType: program.programType,
-        authorUserId: userId,
-        displayName: displayName,
-        originalProgramId: programId,
-        programData: program as any, // Store full program structure as JSON
-        weekCount: stats.weekCount,
-        workoutCount: stats.workoutCount,
-        exerciseCount: stats.exerciseCount,
-      },
-    });
-
+  if (!program) {
     return {
-      success: true,
-      communityProgramId: communityProgram.id,
+      success: false,
+      error: 'Program not found',
     };
+  }
+
+  const displayName = await getUserDisplayName(prisma, userId);
+  const stats = calculateProgramStats(program, 'strength');
+
+  const communityProgram = await prisma.communityProgram.create({
+    data: {
+      id: `comm_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+      name: program.name,
+      description: program.description || '',
+      programType: 'strength',
+      authorUserId: userId,
+      displayName: displayName,
+      originalProgramId: programId,
+      programData: program as any,
+      weekCount: stats.weekCount,
+      workoutCount: stats.workoutCount,
+      exerciseCount: stats.exerciseCount,
+    },
+  });
+
+  return {
+    success: true,
+    communityProgramId: communityProgram.id,
+  };
+}
+
+/**
+ * Publishes a cardio program to the community
+ */
+async function publishCardioProgram(
+  prisma: PrismaClient,
+  programId: string,
+  userId: string
+): Promise<PublishResult> {
+  const program = await prisma.cardioProgram.findUnique({
+    where: {
+      id: programId,
+      userId: userId,
+    },
+    include: {
+      weeks: {
+        orderBy: { weekNumber: 'asc' },
+        include: {
+          sessions: {
+            orderBy: { dayNumber: 'asc' },
+          },
+        },
+      },
+    },
+  });
+
+  if (!program) {
+    return {
+      success: false,
+      error: 'Program not found',
+    };
+  }
+
+  const displayName = await getUserDisplayName(prisma, userId);
+  const stats = calculateProgramStats(program, 'cardio');
+
+  const communityProgram = await prisma.communityProgram.create({
+    data: {
+      id: `comm_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+      name: program.name,
+      description: program.description || '',
+      programType: 'cardio',
+      authorUserId: userId,
+      displayName: displayName,
+      originalProgramId: programId,
+      programData: program as any,
+      weekCount: stats.weekCount,
+      workoutCount: stats.workoutCount,
+      exerciseCount: stats.exerciseCount,
+    },
+  });
+
+  return {
+    success: true,
+    communityProgramId: communityProgram.id,
+  };
+}
+
+/**
+ * Publishes a program to the community
+ * Handles both strength and cardio programs
+ */
+export async function publishProgramToCommunity(
+  prisma: PrismaClient,
+  programId: string,
+  userId: string,
+  programType: 'strength' | 'cardio'
+): Promise<PublishResult> {
+  try {
+    if (programType === 'cardio') {
+      return await publishCardioProgram(prisma, programId, userId);
+    }
+    return await publishStrengthProgram(prisma, programId, userId);
   } catch (error: any) {
     // Handle unique constraint violation (duplicate publication)
     if (error.code === 'P2002' || error.message?.includes('unique constraint')) {

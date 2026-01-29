@@ -24,6 +24,7 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.86.2",
+    "@google-cloud/pubsub": "^5.2.2",
     "lucide-react": "^0.562.0",
     "next": "16.0.7",
     "react": "19.2.0",
@@ -31,6 +32,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@testcontainers/gcloud": "^11.11.0",
     "@testcontainers/postgresql": "^10.14.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",

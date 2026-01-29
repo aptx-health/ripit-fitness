@@ -18,6 +18,8 @@ export async function POST(
     }
 
     // Clone the community program to user's collection
+    // This returns immediately with a shell program (copyStatus='cloning')
+    // The actual cloning happens in the background
     const result = await cloneCommunityProgram(prisma, communityProgramId, user.id);
 
     if (!result.success) {
@@ -30,6 +32,7 @@ export async function POST(
     return NextResponse.json({
       success: true,
       programId: result.programId,
+      status: 'cloning', // Indicates background cloning is in progress
     });
   } catch (error) {
     console.error('Error adding community program:', error);

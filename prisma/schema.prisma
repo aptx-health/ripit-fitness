@@ -20,6 +20,7 @@ model Program {
   programType   String    @default("strength")
   isArchived    Boolean   @default(false)
   archivedAt    DateTime?
+  copyStatus    String?   @default("ready")
   weeks         Week[]
 
   @@index([userId, isActive])
@@ -81,19 +82,19 @@ model ExerciseDefinition {
 }
 
 model Exercise {
-  id                   String              @id @default(cuid())
+  id                   String             @id @default(cuid())
   name                 String
   exerciseDefinitionId String
   order                Int
   exerciseGroup        String?
   workoutId            String?
   notes                String?
-  isOneOff             Boolean             @default(false)
-  workoutCompletionId  String?
   userId               String
-  exerciseDefinition   ExerciseDefinition  @relation(fields: [exerciseDefinitionId], references: [id])
-  workout              Workout?            @relation(fields: [workoutId], references: [id], onDelete: Cascade)
-  workoutCompletion    WorkoutCompletion?  @relation(fields: [workoutCompletionId], references: [id], onDelete: Cascade)
+  isOneOff             Boolean            @default(false)
+  workoutCompletionId  String?
+  exerciseDefinition   ExerciseDefinition @relation(fields: [exerciseDefinitionId], references: [id])
+  workoutCompletion    WorkoutCompletion? @relation(fields: [workoutCompletionId], references: [id], onDelete: Cascade)
+  workout              Workout?           @relation(fields: [workoutId], references: [id], onDelete: Cascade)
   loggedSets           LoggedSet[]
   prescribedSets       PrescribedSet[]
 
@@ -126,8 +127,8 @@ model WorkoutCompletion {
   completedAt DateTime    @default(now())
   status      String
   notes       String?
-  loggedSets  LoggedSet[]
   exercises   Exercise[]
+  loggedSets  LoggedSet[]
   workout     Workout     @relation(fields: [workoutId], references: [id], onDelete: Cascade)
 
   @@index([workoutId, userId])
@@ -167,6 +168,7 @@ model CardioProgram {
   isUserCreated Boolean      @default(false)
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
+  copyStatus    String?      @default("ready")
   weeks         CardioWeek[]
 
   @@index([userId, isActive])
@@ -255,34 +257,30 @@ model UserCardioMetricPreferences {
 }
 
 model UserSettings {
-  id                       String   @id @default(cuid())
-  userId                   String   @unique
-  displayName              String?
-  defaultWeightUnit        String   @default("lbs")
-  defaultIntensityRating   String   @default("rpe")
-  createdAt                DateTime @default(now())
-  updatedAt                DateTime @updatedAt
+  id                     String   @id @default(cuid())
+  userId                 String   @unique
+  displayName            String?
+  defaultWeightUnit      String   @default("lbs")
+  defaultIntensityRating String   @default("rpe")
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
 
   @@index([userId])
 }
 
 model CommunityProgram {
-  id                String   @id @default(cuid())
+  id                String   @id(map: "community_programs_pkey") @default(cuid())
   name              String
   description       String
   programType       String   @default("strength")
   authorUserId      String
   displayName       String
   publishedAt       DateTime @default(now())
-  originalProgramId String   @unique
-
-  // Denormalized program data for immutability
-  programData Json
-
-  // Metadata for browsing
-  weekCount     Int
-  workoutCount  Int
-  exerciseCount Int
+  originalProgramId String   @unique(map: "community_programs_original_program_id_key")
+  programData       Json
+  weekCount         Int
+  workoutCount      Int
+  exerciseCount     Int
 
   @@index([programType])
   @@index([publishedAt(sort: Desc)])

@@ -1,0 +1,293 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Program {
+  id            String    @id @default(cuid())
+  name          String
+  description   String?
+  userId        String
+  isActive      Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  isUserCreated Boolean   @default(false)
+  programType   String    @default("strength")
+  isArchived    Boolean   @default(false)
+  archivedAt    DateTime?
+  copyStatus    String?   @default("ready")
+  weeks         Week[]
+
+  @@index([userId, isActive])
+  @@index([userId])
+  @@index([userId, isUserCreated])
+  @@index([userId, isArchived])
+}
+
+model Week {
+  id         String    @id @default(cuid())
+  weekNumber Int
+  programId  String
+  userId     String
+  program    Program   @relation(fields: [programId], references: [id], onDelete: Cascade)
+  workouts   Workout[]
+
+  @@unique([programId, weekNumber])
+  @@index([programId])
+  @@index([userId])
+}
+
+model Workout {
+  id          String              @id @default(cuid())
+  name        String
+  dayNumber   Int
+  weekId      String
+  userId      String
+  exercises   Exercise[]
+  week        Week                @relation(fields: [weekId], references: [id], onDelete: Cascade)
+  completions WorkoutCompletion[]
+
+  @@unique([weekId, dayNumber])
+  @@index([weekId])
+  @@index([userId])
+}
+
+model ExerciseDefinition {
+  id             String     @id @default(cuid())
+  name           String
+  normalizedName String     @unique
+  aliases        String[]
+  category       String?
+  isSystem       Boolean    @default(false)
+  createdBy      String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  equipment      String[]   @default([])
+  instructions   String?
+  primaryFAUs    String[]   @default([])
+  secondaryFAUs  String[]   @default([])
+  userId         String
+  exercises      Exercise[]
+
+  @@index([normalizedName])
+  @@index([isSystem])
+  @@index([createdBy])
+  @@index([primaryFAUs])
+  @@index([userId])
+}
+
+model Exercise {
+  id                   String              @id @default(cuid())
+  name                 String
+  exerciseDefinitionId String
+  order                Int
+  exerciseGroup        String?
+  workoutId            String?
+  notes                String?
+  isOneOff             Boolean             @default(false)
+  workoutCompletionId  String?
+  userId               String
+  exerciseDefinition   ExerciseDefinition  @relation(fields: [exerciseDefinitionId], references: [id])
+  workout              Workout?            @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  workoutCompletion    WorkoutCompletion?  @relation(fields: [workoutCompletionId], references: [id], onDelete: Cascade)
+  loggedSets           LoggedSet[]
+  prescribedSets       PrescribedSet[]
+
+  @@index([workoutId])
+  @@index([exerciseDefinitionId])
+  @@index([userId])
+  @@index([exerciseDefinitionId, userId])
+  @@index([workoutCompletionId])
+}
+
+model PrescribedSet {
+  id         String   @id @default(cuid())
+  setNumber  Int
+  reps       String
+  weight     String?
+  rpe        Int?
+  rir        Int?
+  exerciseId String
+  userId     String
+  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@index([exerciseId])
+  @@index([userId])
+}
+
+model WorkoutCompletion {
+  id          String      @id @default(cuid())
+  workoutId   String
+  userId      String
+  completedAt DateTime    @default(now())
+  status      String
+  notes       String?
+  loggedSets  LoggedSet[]
+  exercises   Exercise[]
+  workout     Workout     @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+
+  @@index([workoutId, userId])
+  @@index([userId, completedAt])
+  @@index([userId, status, completedAt])
+}
+
+model LoggedSet {
+  id           String            @id @default(cuid())
+  setNumber    Int
+  reps         Int
+  weight       Float
+  weightUnit   String            @default("lbs")
+  rpe          Int?
+  rir          Int?
+  exerciseId   String
+  completionId String
+  createdAt    DateTime          @default(now())
+  userId       String
+  completion   WorkoutCompletion @relation(fields: [completionId], references: [id], onDelete: Cascade)
+  exercise     Exercise          @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@index([exerciseId])
+  @@index([completionId])
+  @@index([userId])
+  @@index([completionId, exerciseId])
+}
+
+model CardioProgram {
+  id            String       @id @default(cuid())
+  name          String
+  description   String?
+  userId        String
+  isActive      Boolean      @default(false)
+  isArchived    Boolean      @default(false)
+  archivedAt    DateTime?
+  isUserCreated Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  copyStatus    String?      @default("ready")
+  weeks         CardioWeek[]
+
+  @@index([userId, isActive])
+  @@index([userId, isArchived])
+}
+
+model CardioWeek {
+  id              String                    @id @default(cuid())
+  weekNumber      Int
+  cardioProgramId String
+  userId          String
+  cardioProgram   CardioProgram             @relation(fields: [cardioProgramId], references: [id], onDelete: Cascade)
+  sessions        PrescribedCardioSession[]
+
+  @@unique([cardioProgramId, weekNumber])
+  @@index([cardioProgramId])
+  @@index([userId])
+}
+
+model PrescribedCardioSession {
+  id                String                @id @default(cuid())
+  weekId            String
+  dayNumber         Int
+  name              String
+  description       String?
+  targetDuration    Int
+  intensityZone     String?
+  equipment         String?
+  targetHRRange     String?
+  targetPowerRange  String?
+  intervalStructure String?
+  notes             String?
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  userId            String
+  loggedSessions    LoggedCardioSession[]
+  week              CardioWeek            @relation(fields: [weekId], references: [id], onDelete: Cascade)
+
+  @@unique([weekId, dayNumber])
+  @@index([weekId])
+  @@index([userId])
+}
+
+model LoggedCardioSession {
+  id                  String                   @id @default(cuid())
+  prescribedSessionId String?
+  userId              String
+  completedAt         DateTime                 @default(now())
+  status              String                   @default("completed")
+  name                String
+  equipment           String
+  duration            Int
+  avgHR               Int?
+  peakHR              Int?
+  avgPower            Int?
+  peakPower           Int?
+  distance            Float?
+  elevationGain       Int?
+  elevationLoss       Int?
+  avgPace             String?
+  cadence             Int?
+  strokeRate          Int?
+  strokeCount         Int?
+  calories            Int?
+  intensityZone       String?
+  intervalStructure   String?
+  notes               String?
+  prescribedSession   PrescribedCardioSession? @relation(fields: [prescribedSessionId], references: [id])
+
+  @@index([prescribedSessionId])
+  @@index([userId, completedAt])
+  @@index([userId, status, completedAt])
+  @@index([prescribedSessionId, userId, completedAt])
+}
+
+model UserCardioMetricPreferences {
+  id            String   @id @default(cuid())
+  userId        String
+  equipment     String
+  customMetrics String[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([userId, equipment])
+  @@index([userId])
+}
+
+model UserSettings {
+  id                       String   @id @default(cuid())
+  userId                   String   @unique
+  displayName              String?
+  defaultWeightUnit        String   @default("lbs")
+  defaultIntensityRating   String   @default("rpe")
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model CommunityProgram {
+  id                String   @id @default(cuid())
+  name              String
+  description       String
+  programType       String   @default("strength")
+  authorUserId      String
+  displayName       String
+  publishedAt       DateTime @default(now())
+  originalProgramId String   @unique
+
+  // Denormalized program data for immutability
+  programData Json
+
+  // Metadata for browsing
+  weekCount     Int
+  workoutCount  Int
+  exerciseCount Int
+
+  @@index([programType])
+  @@index([publishedAt(sort: Desc)])
+  @@index([authorUserId])
+  @@index([originalProgramId])
+}

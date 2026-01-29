@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Copy, Star, Archive } from 'lucide-react'
+import { Copy, Star, Archive, Upload } from 'lucide-react'
+import PublishProgramDialog from '@/components/community/PublishProgramDialog'
 
 type StrengthActionsProps = {
   programId: string
@@ -14,10 +15,14 @@ type StrengthActionsProps = {
 export function StrengthPrimaryActions({
   programId,
   isActive,
+  copyStatus,
 }: {
   programId: string
   isActive: boolean
+  copyStatus?: string | null
 }) {
+  const isCloning = copyStatus === 'cloning' || copyStatus?.startsWith('cloning_week_')
+
   return (
     <>
       <Link
@@ -26,12 +31,21 @@ export function StrengthPrimaryActions({
       >
         {isActive ? 'OPEN PROGRAM' : 'VIEW PROGRAM'}
       </Link>
-      <Link
-        href={`/programs/${programId}/edit`}
-        className="px-4 py-2 border border-accent text-accent hover:bg-accent-muted doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider md:inline-block w-full md:w-auto text-center"
-      >
-        EDIT PROGRAM
-      </Link>
+      {isCloning ? (
+        <div
+          className="px-4 py-2 border border-muted-foreground/30 text-muted-foreground/50 bg-background doom-button-3d font-semibold uppercase tracking-wider md:inline-block w-full md:w-auto text-center cursor-not-allowed opacity-60"
+          title="Program is still being cloned. Editing is disabled until cloning completes."
+        >
+          EDIT PROGRAM
+        </div>
+      ) : (
+        <Link
+          href={`/programs/${programId}/edit`}
+          className="px-4 py-2 border border-accent text-accent hover:bg-accent-muted doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider md:inline-block w-full md:w-auto text-center"
+        >
+          EDIT PROGRAM
+        </Link>
+      )}
     </>
   )
 }
@@ -46,6 +60,7 @@ export function StrengthUtilityActions({
   const [duplicating, setDuplicating] = useState(false)
   const [activating, setActivating] = useState(false)
   const [archiving, setArchiving] = useState(false)
+  const [showPublishDialog, setShowPublishDialog] = useState(false)
 
   const handleDuplicate = async () => {
     if (
@@ -141,6 +156,14 @@ export function StrengthUtilityActions({
           </>
         )}
         <button
+          onClick={() => setShowPublishDialog(true)}
+          className="p-2 text-muted-foreground hover:text-primary hover:bg-muted rounded transition-colors"
+          title="Publish to Community"
+          aria-label="Publish program to community"
+        >
+          <Upload className="w-5 h-5" />
+        </button>
+        <button
           onClick={handleArchive}
           disabled={archiving}
           className="p-2 text-muted-foreground hover:text-error hover:bg-muted rounded transition-colors disabled:opacity-50"
@@ -149,6 +172,12 @@ export function StrengthUtilityActions({
         >
           <Archive className="w-5 h-5" />
         </button>
+        <PublishProgramDialog
+          open={showPublishDialog}
+          onOpenChange={setShowPublishDialog}
+          programId={programId}
+          programName={programName}
+        />
       </>
     )
   }
@@ -174,12 +203,24 @@ export function StrengthUtilityActions({
         </>
       )}
       <button
+        onClick={() => setShowPublishDialog(true)}
+        className="px-3 py-1.5 text-sm text-muted-foreground hover:text-primary hover:bg-muted transition-colors font-medium"
+      >
+        Publish to Community
+      </button>
+      <button
         onClick={handleArchive}
         disabled={archiving}
         className="px-3 py-1.5 text-sm text-muted-foreground hover:text-error hover:bg-muted transition-colors font-medium disabled:opacity-50"
       >
         {archiving ? 'Archiving...' : 'Archive'}
       </button>
+      <PublishProgramDialog
+        open={showPublishDialog}
+        onOpenChange={setShowPublishDialog}
+        programId={programId}
+        programName={programName}
+      />
     </>
   )
 }

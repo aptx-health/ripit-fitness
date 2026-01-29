@@ -12,20 +12,19 @@ export interface ProgramStats {
 }
 
 /**
- * Validates that a program meets all requirements for publishing to the community
+ * Validates a strength program for publishing
  */
-export async function validateProgramForPublishing(
+async function validateStrengthProgram(
   prisma: PrismaClient,
   programId: string,
   userId: string
 ): Promise<ValidationResult> {
   const errors: string[] = [];
 
-  // Fetch program with all nested data
   const program = await prisma.program.findUnique({
     where: {
       id: programId,
-      userId: userId, // Ensure user owns this program
+      userId: userId,
     },
     include: {
       weeks: {
@@ -49,7 +48,6 @@ export async function validateProgramForPublishing(
     return { valid: false, errors };
   }
 
-  // Check required fields
   if (!program.name || program.name.trim() === '') {
     errors.push('Program must have a name');
   }
@@ -58,18 +56,15 @@ export async function validateProgramForPublishing(
     errors.push('Program must have a description before publishing');
   }
 
-  // Check structure
   if (!program.weeks || program.weeks.length === 0) {
     errors.push('Program must have at least one week');
   }
 
-  // Check for workouts
   const hasWorkouts = program.weeks.some((week) => week.workouts.length > 0);
   if (!hasWorkouts) {
     errors.push('Program must have at least one workout');
   }
 
-  // Check for exercises
   const hasExercises = program.weeks.some((week) =>
     week.workouts.some((workout) => workout.exercises.length > 0)
   );
@@ -77,7 +72,6 @@ export async function validateProgramForPublishing(
     errors.push('Program must have at least one exercise');
   }
 
-  // Check that all exercises have prescribed sets
   const exercisesWithoutSets: string[] = [];
   program.weeks.forEach((week) => {
     week.workouts.forEach((workout) => {
@@ -100,26 +94,101 @@ export async function validateProgramForPublishing(
 }
 
 /**
- * Calculates program statistics for metadata
+ * Validates a cardio program for publishing
  */
-export function calculateProgramStats(program: {
-  weeks: {
-    workouts: {
-      exercises: unknown[];
-    }[];
-  }[];
-}): ProgramStats {
+async function validateCardioProgram(
+  prisma: PrismaClient,
+  programId: string,
+  userId: string
+): Promise<ValidationResult> {
+  const errors: string[] = [];
+
+  const program = await prisma.cardioProgram.findUnique({
+    where: {
+      id: programId,
+      userId: userId,
+    },
+    include: {
+      weeks: {
+        include: {
+          sessions: true,
+        },
+      },
+    },
+  });
+
+  if (!program) {
+    errors.push('Program not found');
+    return { valid: false, errors };
+  }
+
+  if (!program.name || program.name.trim() === '') {
+    errors.push('Program must have a name');
+  }
+
+  if (!program.description || program.description.trim() === '') {
+    errors.push('Program must have a description before publishing');
+  }
+
+  if (!program.weeks || program.weeks.length === 0) {
+    errors.push('Program must have at least one week');
+  }
+
+  const hasSessions = program.weeks.some((week) => week.sessions.length > 0);
+  if (!hasSessions) {
+    errors.push('Program must have at least one cardio session');
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
+}
+
+/**
+ * Validates that a program meets all requirements for publishing to the community
+ * Handles both strength and cardio programs
+ */
+export async function validateProgramForPublishing(
+  prisma: PrismaClient,
+  programId: string,
+  userId: string,
+  programType: 'strength' | 'cardio'
+): Promise<ValidationResult> {
+  if (programType === 'cardio') {
+    return validateCardioProgram(prisma, programId, userId);
+  }
+  return validateStrengthProgram(prisma, programId, userId);
+}
+
+/**
+ * Calculates program statistics for metadata
+ * Handles both strength and cardio programs
+ */
+export function calculateProgramStats(
+  program: any,
+  programType: 'strength' | 'cardio'
+): ProgramStats {
   const weekCount = program.weeks.length;
 
   let workoutCount = 0;
   let exerciseCount = 0;
 
-  program.weeks.forEach((week) => {
-    workoutCount += week.workouts.length;
-    week.workouts.forEach((workout) => {
-      exerciseCount += workout.exercises.length;
+  if (programType === 'cardio') {
+    // For cardio: count sessions instead of workouts/exercises
+    program.weeks.forEach((week: any) => {
+      workoutCount += week.sessions?.length || 0;
     });
-  });
+    // Cardio programs don't have exercises, so exerciseCount stays 0
+  } else {
+    // For strength: count workouts and exercises
+    program.weeks.forEach((week: any) => {
+      workoutCount += week.workouts?.length || 0;
+      week.workouts?.forEach((workout: any) => {
+        exerciseCount += workout.exercises?.length || 0;
+      });
+    });
+  }
 
   return {
     weekCount,
