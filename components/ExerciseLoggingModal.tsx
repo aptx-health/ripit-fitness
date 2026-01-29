@@ -4,15 +4,26 @@ import { useState, useEffect, useCallback } from 'react'
 import { useWorkoutStorage } from '@/hooks/useWorkoutStorage'
 import { useSyncState } from '@/hooks/useSyncState'
 import { useWorkoutSyncService } from '@/lib/sync/workoutSync'
-import SyncStatusIcon from './SyncStatusIcon'
 import SyncDetailsModal from './SyncDetailsModal'
 import { LoadingFrog } from '@/components/ui/loading-frog'
-import { Plus, RefreshCw, ChevronLeft, ChevronRight, Trash2, Pencil } from 'lucide-react'
-import ScopeSelectionDialog from './ScopeSelectionDialog'
-import ExerciseSearchModal from './ExerciseSearchModal'
-import ActionsMenu, { type ActionItem } from './ActionsMenu'
-import LoadingSuccessModal from './LoadingSuccessModal'
-import SetDefinitionModal, { type PrescribedSetInput } from './SetDefinitionModal'
+import { AlertTriangle } from 'lucide-react'
+import { AddExerciseWizard } from './workout-logging/wizards/AddExerciseWizard'
+import { SwapExerciseWizard } from './workout-logging/wizards/SwapExerciseWizard'
+import { EditExerciseWizard } from './workout-logging/wizards/EditExerciseWizard'
+import { DeleteExerciseWizard } from './workout-logging/wizards/DeleteExerciseWizard'
+import ExerciseLoggingHeader from './workout-logging/ExerciseLoggingHeader'
+import ExerciseNavigation from './workout-logging/ExerciseNavigation'
+import ExerciseDisplayTabs from './workout-logging/ExerciseDisplayTabs'
+import SetLoggingForm from './workout-logging/SetLoggingForm'
+import ExerciseActionsFooter from './workout-logging/ExerciseActionsFooter'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/radix/dialog'
 
 type PrescribedSet = {
   id: string
@@ -78,7 +89,7 @@ export default function ExerciseLoggingModal({
   const [currentSet, setCurrentSet] = useState({
     reps: '',
     weight: '',
-    weightUnit: 'lbs',
+    weightUnit: 'lbs' as 'lbs' | 'kg',
     rpe: '',
     rir: '',
   })
@@ -92,29 +103,15 @@ export default function ExerciseLoggingModal({
     setNumber?: number
     isDeleteAll?: boolean
   }>({ show: false })
+  const [showExitConfirm, setShowExitConfirm] = useState(false)
 
-  // Exercise swap and add state
-  const [showExerciseSearch, setShowExerciseSearch] = useState(false)
-  const [showScopeDialog, setShowScopeDialog] = useState(false)
-  const [showEditExerciseModal, setShowEditExerciseModal] = useState(false)
-  const [operationStatus, setOperationStatus] = useState<{
-    isLoading: boolean
-    isSuccess: boolean
-    message: string
-    successMessage: string
-  }>({ isLoading: false, isSuccess: false, message: '', successMessage: '' })
-  const [pendingAction, setPendingAction] = useState<{
-    type: 'replace' | 'add' | 'delete' | 'edit'
-    exerciseDefinitionId: string
-    exerciseName: string
-  } | null>(null)
-  const [pendingSets, setPendingSets] = useState<PrescribedSetInput[]>([])
-  const [pendingNotes, setPendingNotes] = useState<string>('')
+  // Wizard state
+  const [activeWizard, setActiveWizard] = useState<'add' | 'swap' | 'edit' | 'delete' | null>(null)
   const [navigateToLastExercise, setNavigateToLastExercise] = useState(false)
 
   // Enhanced persistence with localStorage backing
   const { loggedSets, setLoggedSets, isLoaded, clearStoredWorkout } = useWorkoutStorage(workoutId)
-  
+
   // Sync state management
   const {
     syncState,
@@ -168,10 +165,6 @@ export default function ExerciseLoggingModal({
   const hasRpe = currentPrescribedSets.some((s) => s.rpe !== null)
   const hasRir = currentPrescribedSets.some((s) => s.rir !== null)
 
-  // Check if this exercise is part of a superset
-  const isSuperset = currentExercise?.exerciseGroup !== null
-  const supersetLabel = currentExercise?.exerciseGroup
-
   const handleLogSet = useCallback(() => {
     if (!currentSet.reps || !currentSet.weight) return
 
@@ -200,7 +193,7 @@ export default function ExerciseLoggingModal({
 
       return updatedSets
     })
-    
+
     // Reset form
     setCurrentSet({
       reps: '',
@@ -238,221 +231,56 @@ export default function ExerciseLoggingModal({
   }
 
   const handleReplaceExercise = () => {
-    setShowExerciseSearch(true)
-    setPendingAction({ type: 'replace', exerciseDefinitionId: '', exerciseName: '' })
+    setActiveWizard('swap')
   }
 
   const handleAddExercise = () => {
-    setShowExerciseSearch(true)
-    setPendingAction({ type: 'add', exerciseDefinitionId: '', exerciseName: '' })
+    setActiveWizard('add')
   }
 
   const handleDeleteExercise = () => {
-    setPendingAction({
-      type: 'delete',
-      exerciseDefinitionId: currentExercise.id, // For delete, we use exercise ID not definition ID
-      exerciseName: currentExercise.name
-    })
-    setShowScopeDialog(true)
+    setActiveWizard('delete')
   }
 
   const handleEditExercise = () => {
-    setPendingAction({
-      type: 'edit',
-      exerciseDefinitionId: currentExercise.id,
-      exerciseName: currentExercise.name
-    })
-    setShowEditExerciseModal(true)
+    setActiveWizard('edit')
   }
 
-  const handleEditExerciseSubmit = (sets: PrescribedSetInput[], notes?: string) => {
-    // Store the sets and notes
-    setPendingSets(sets)
-    setPendingNotes(notes || '')
-
-    // Close the modal and show scope selection
-    setShowEditExerciseModal(false)
-    setShowScopeDialog(true)
+  const handleExitWorkout = () => {
+    setShowExitConfirm(true)
   }
 
-  const handleExerciseSearchSelect = (exercise: any, prescription: any) => {
-    if (!pendingAction) return
-
-    // Update pending action with exercise details
-    setPendingAction({
-      ...pendingAction,
-      exerciseDefinitionId: exercise.id,
-      exerciseName: exercise.name
-    })
-
-    // Store prescription sets and notes for both add and replace actions
-    setPendingSets(prescription.sets)
-    setPendingNotes(prescription.notes || '')
-
-    // Go directly to scope selection for both replace and add
-    // (ExerciseSearchModal already collected set definition)
-    setShowExerciseSearch(false)
-    setShowScopeDialog(true)
+  const handleExitSaveAsDraft = () => {
+    // Keep logged sets in localStorage (already handled by useWorkoutStorage)
+    console.log('Saving workout as draft...')
+    setShowExitConfirm(false)
+    onClose()
   }
 
-  const handleScopeSelected = async (applyToFuture: boolean) => {
-    if (!pendingAction) return
+  const handleExitDiscard = () => {
+    // Clear all logged sets from localStorage
+    console.log('Discarding workout...')
+    clearStoredWorkout()
+    setShowExitConfirm(false)
+    onClose()
+  }
 
-    const startTime = Date.now()
-    const MINIMUM_LOADING_TIME = 1500 // 1.5 seconds
-
-    // Show loading modal immediately
-    setOperationStatus({
-      isLoading: true,
-      isSuccess: false,
-      message: 'Applying changes...',
-      successMessage: ''
-    })
-
-    try {
-      let data: any
-      let successMsg: string
-
-      if (pendingAction.type === 'replace') {
-        // Call replace API
-        const response = await fetch(`/api/exercises/${currentExercise.id}/replace`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            newExerciseDefinitionId: pendingAction.exerciseDefinitionId,
-            applyToFuture,
-            prescribedSets: pendingSets,
-            notes: pendingNotes
-          })
-        })
-
-        if (!response.ok) throw new Error('Failed to replace exercise')
-
-        data = await response.json()
-        successMsg = `Exercise replaced${applyToFuture ? ` in ${data.updatedCount} workout${data.updatedCount !== 1 ? 's' : ''}` : ''}!`
-      } else if (pendingAction.type === 'delete') {
-        // Call delete API
-        const response = await fetch(`/api/exercises/${currentExercise.id}/delete`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            applyToFuture
-          })
-        })
-
-        if (!response.ok) throw new Error('Failed to delete exercise')
-
-        data = await response.json()
-        successMsg = `Exercise deleted${applyToFuture ? ` from ${data.deletedCount} workout${data.deletedCount !== 1 ? 's' : ''}` : ''}!`
-      } else if (pendingAction.type === 'edit') {
-        // Call edit API (PATCH)
-        const response = await fetch(`/api/exercises/${currentExercise.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            notes: pendingNotes,
-            applyToFuture,
-            prescribedSets: pendingSets.map(set => ({
-              setNumber: set.setNumber,
-              reps: set.reps,
-              rpe: set.intensityType === 'RPE' ? set.intensityValue : null,
-              rir: set.intensityType === 'RIR' ? set.intensityValue : null
-            }))
-          })
-        })
-
-        if (!response.ok) throw new Error('Failed to update exercise')
-
-        data = await response.json()
-        successMsg = `Exercise updated${applyToFuture ? ` in ${data.updatedCount} workout${data.updatedCount !== 1 ? 's' : ''}` : ''}!`
-      } else {
-        // Call add-during-logging API
-        const response = await fetch(`/api/workouts/${workoutId}/exercises/add-during-logging`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            exerciseDefinitionId: pendingAction.exerciseDefinitionId,
-            applyToFuture,
-            workoutCompletionId: applyToFuture ? undefined : workoutCompletionId,
-            prescribedSets: pendingSets,
-            notes: pendingNotes
-          })
-        })
-
-        if (!response.ok) throw new Error('Failed to add exercise')
-
-        data = await response.json()
-        successMsg = `Exercise added${applyToFuture ? ` to ${data.addedToCount} workout${data.addedToCount !== 1 ? 's' : ''}` : ''}!`
-      }
-
-      // Calculate remaining time to reach minimum loading time
-      const elapsedTime = Date.now() - startTime
-      const remainingTime = Math.max(0, MINIMUM_LOADING_TIME - elapsedTime)
-
-      // Wait for remaining time before showing success
-      if (remainingTime > 0) {
-        await new Promise(resolve => setTimeout(resolve, remainingTime))
-      }
-
-      // Show success state
-      setOperationStatus({
-        isLoading: false,
-        isSuccess: true,
-        message: '',
-        successMessage: successMsg
-      })
-
-      // Wait 1 second to show success
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
-      // Show refreshing state
-      setOperationStatus({
-        isLoading: true,
-        isSuccess: false,
-        message: 'Refreshing workout...',
-        successMessage: ''
-      })
-
-      // Trigger refresh and wait for it to complete
-      if (onRefresh) {
-        onRefresh()
-      }
-
-      // Wait 2.5 seconds for refresh to complete
-      await new Promise(resolve => setTimeout(resolve, 2500))
-
-      // If we added an exercise, navigate to it (it will be at the end)
-      if (pendingAction.type === 'add') {
-        setNavigateToLastExercise(true)
-      }
-
-      // Close dialogs and reset state
-      setShowScopeDialog(false)
-      setPendingAction(null)
-      setPendingSets([])
-      setPendingNotes('')
-      setOperationStatus({
-        isLoading: false,
-        isSuccess: false,
-        message: '',
-        successMessage: ''
-      })
-    } catch (error) {
-      console.error('Error:', error)
-      setOperationStatus({
-        isLoading: false,
-        isSuccess: false,
-        message: '',
-        successMessage: ''
-      })
-      alert('Failed to update exercise. Please try again.')
-
-      // Close dialogs on error
-      setShowScopeDialog(false)
-      setPendingAction(null)
-      setPendingSets([])
-      setPendingNotes('')
+  const handleWizardComplete = async () => {
+    // Trigger refresh
+    if (onRefresh) {
+      onRefresh()
     }
+
+    // Wait for refresh to complete
+    await new Promise(resolve => setTimeout(resolve, 2500))
+
+    // If we added an exercise, navigate to it (it will be at the end)
+    if (activeWizard === 'add') {
+      setNavigateToLastExercise(true)
+    }
+
+    // Reset wizard state
+    setActiveWizard(null)
   }
 
   const handleCompleteWorkout = async () => {
@@ -460,13 +288,13 @@ export default function ExerciseLoggingModal({
     try {
       // Sync any remaining sets before completing
       await syncRemaining()
-      
+
       // Complete the workout through the original API
       await onComplete(loggedSets)
-      
+
       // Clear localStorage after successful completion
       clearStoredWorkout()
-      
+
       onClose()
     } catch (error) {
       console.error('Error completing workout:', error)
@@ -479,7 +307,7 @@ export default function ExerciseLoggingModal({
   const handleDeleteSet = useCallback((setNumber: number) => {
     const exerciseId = currentExercise.id
     const exerciseSets = loggedSets.filter(s => s.exerciseId === exerciseId)
-    
+
     // Show confirmation for dangerous operations
     if (exerciseSets.length === 1) {
       // Deleting the last set for this exercise
@@ -498,21 +326,21 @@ export default function ExerciseLoggingModal({
 
   const performDeleteSet = useCallback((exerciseId: string, setNumber: number) => {
     console.log(`🗑️ Deleting set ${setNumber} for exercise ${exerciseId}`)
-    
+
     const beforeCount = loggedSets.length
     setLoggedSets(prev =>
       prev.filter(
         (s) => !(s.exerciseId === exerciseId && s.setNumber === setNumber)
       )
     )
-    
+
     // Enhanced logging for safety
     const afterCount = loggedSets.length - 1 // Will be one less after filter
     console.log(`📊 Deletion impact: ${beforeCount} → ${afterCount} total sets`)
-    
+
     // Mark that we have unsaved changes (deletions)
     setHasUnsavedChanges(true)
-    
+
     console.log('Set deleted locally - will sync with next batch or manual sync')
   }, [loggedSets, setLoggedSets])
 
@@ -533,7 +361,7 @@ export default function ExerciseLoggingModal({
     }, {} as Record<string, number>))
     console.log('This will REPLACE all server data with current local state')
     console.log('Any deleted sets will be removed from server')
-    
+
     syncCurrentState(loggedSets)
   }, [syncCurrentState, loggedSets])
 
@@ -592,7 +420,7 @@ export default function ExerciseLoggingModal({
   if (!isLoaded) {
     return isOpen ? (
       <div className="fixed inset-0 z-50 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center">
-        <div className="bg-card border-2 border-border p-8 doom-noise doom-corners">
+        <div className="bg-card border border-border rounded-2xl p-8 shadow-xl">
           <div className="animate-pulse text-center">Loading workout...</div>
         </div>
       </div>
@@ -621,7 +449,7 @@ export default function ExerciseLoggingModal({
     // Otherwise, show loading while useEffect adjusts the index
     return (
       <div className="fixed inset-0 z-50 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center">
-        <div className="bg-card border-2 border-border p-8 doom-noise doom-corners">
+        <div className="bg-card border border-border rounded-2xl p-8 shadow-xl">
           <div className="animate-pulse text-center">Loading...</div>
         </div>
       </div>
@@ -631,484 +459,244 @@ export default function ExerciseLoggingModal({
   return (
     <>
       <div className="fixed inset-0 z-50 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-end sm:items-center justify-center">
-        {/* Sync Status Icon */}
-        <SyncStatusIcon
-          status={syncState.status}
-          pendingCount={syncState.pendingSets}
-          onClick={() => setShowSyncDetails(true)}
+        {/* Sync Details Modal */}
+        <SyncDetailsModal
+          isOpen={showSyncDetails}
+          onClose={() => setShowSyncDetails(false)}
+          syncState={syncState}
+          onRetrySync={retrySync}
+          onSyncNow={handleManualSync}
+          hasUnsavedChanges={hasUnsavedChanges}
+          getDisplayError={getDisplayError}
+          getTimeSinceLastSync={getTimeSinceLastSync}
         />
 
-      {/* Sync Details Modal */}
-      <SyncDetailsModal
-        isOpen={showSyncDetails}
-        onClose={() => setShowSyncDetails(false)}
-        syncState={syncState}
-        onRetrySync={retrySync}
-        onSyncNow={handleManualSync}
-        hasUnsavedChanges={hasUnsavedChanges}
-        getDisplayError={getDisplayError}
-        getTimeSinceLastSync={getTimeSinceLastSync}
-      />
+        {/* Modal - Full screen on mobile, centered on desktop */}
+        <div className="bg-card border border-border sm:rounded-2xl w-full h-full sm:h-[85vh] sm:max-h-[85vh] sm:max-w-2xl flex flex-col shadow-xl">
+          {/* Header with Sync Status */}
+          <ExerciseLoggingHeader
+            currentExerciseIndex={currentExerciseIndex}
+            totalExercises={exercises.length}
+            totalLoggedSets={totalLoggedSets}
+            totalPrescribedSets={totalPrescribedSets}
+            syncStatus={syncState.status}
+            pendingSetsCount={syncState.pendingSets}
+            onSyncClick={() => setShowSyncDetails(true)}
+          />
 
-      {/* Modal - Full screen on mobile, centered on desktop */}
-      <div className="bg-card border-2 border-primary w-full h-full sm:h-auto sm:max-h-[90vh] sm:max-w-2xl flex flex-col doom-noise doom-corners">
-        {/* Header */}
-        <div className="bg-primary text-white px-4 py-3 border-b-2 border-primary-muted-dark flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-primary-foreground opacity-80">
-              Exercise {currentExerciseIndex + 1} of {exercises.length} • {totalLoggedSets}/
-              {totalPrescribedSets} sets logged
-            </div>
-            <button
-              onClick={onClose}
-              className="text-white hover:opacity-80 p-1"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
+          {/* Exercise Navigation */}
+          <ExerciseNavigation
+            currentExercise={currentExercise}
+            currentExerciseIndex={currentExerciseIndex}
+            totalExercises={exercises.length}
+            onPrevious={handlePreviousExercise}
+            onNext={handleNextExercise}
+          />
 
-        {/* Exercise Navigation - Title and L/R Buttons */}
-        <div className="border-b border-border px-4 py-3 flex items-center justify-between bg-muted flex-shrink-0">
-          <button
-            onClick={handlePreviousExercise}
-            disabled={currentExerciseIndex === 0}
-            className={`p-3  transition-all duration-200 border-2 border-transparent ${
-              currentExerciseIndex === 0
-                ? 'bg-muted opacity-30 cursor-not-allowed'
-                : 'bg-primary-muted hover:bg-primary hover:border-primary hover:text-white'
-            }`}
-            aria-label="Previous exercise"
-          >
-            <ChevronLeft size={24} strokeWidth={2.5} />
-          </button>
-
-          <div className="text-center flex-1 px-2">
-            <div className="flex items-center justify-center gap-2">
-              {isSuperset && (
-                <span className="px-2 py-1 bg-accent-muted text-accent-text text-xs font-bold rounded">
-                  Superset {supersetLabel}
-                </span>
-              )}
-              <h3 className="text-lg font-semibold text-foreground">{currentExercise.name}</h3>
-            </div>
-            {currentExercise.notes && (
-              <p className="text-sm text-muted-foreground mt-1">{currentExercise.notes}</p>
-            )}
-          </div>
-
-          <button
-            onClick={handleNextExercise}
-            disabled={currentExerciseIndex === exercises.length - 1}
-            className={`p-3  transition-all duration-200 border-2 border-transparent ${
-              currentExerciseIndex === exercises.length - 1
-                ? 'bg-muted opacity-30 cursor-not-allowed'
-                : 'bg-primary-muted hover:bg-primary hover:border-primary hover:text-white'
-            }`}
-            aria-label="Next exercise"
-          >
-            <ChevronRight size={24} strokeWidth={2.5} />
-          </button>
-        </div>
-
-        {/* Scrollable content area */}
-        <div className="flex-1 overflow-y-auto px-4 py-4">
-          {/* Last Performance (if available) */}
-          {exerciseHistory && exerciseHistory[currentExercise.id] && (
-            <div className="mb-4">
-              <h4 className="text-sm font-semibold text-foreground mb-2">
-                Last Time ({new Date(exerciseHistory[currentExercise.id]!.completedAt).toLocaleDateString()})
-              </h4>
-              <div className="bg-primary-muted  p-3 space-y-1 border border-primary-muted-dark">
-                {exerciseHistory[currentExercise.id]!.sets.map((set) => (
-                  <div key={set.setNumber} className="text-sm text-primary">
-                    Set {set.setNumber}: {set.reps} reps @ {set.weight}{set.weightUnit}
-                    {set.rir !== null && ` • RIR ${set.rir}`}
-                    {set.rpe !== null && ` • RPE ${set.rpe}`}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Prescribed Sets Reference */}
-          <div className="mb-4">
-            <h4 className="text-sm font-semibold text-foreground mb-2">Today&apos;s Target</h4>
-            <div className="bg-muted  p-3 space-y-1">
-              {currentPrescribedSets.map((set) => (
-                <div key={set.id} className="text-sm text-foreground">
-                  Set {set.setNumber}: {set.reps} reps @ {set.weight || '—'}
-                  {set.rir !== null && ` • RIR ${set.rir}`}
-                  {set.rpe !== null && ` • RPE ${set.rpe}`}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Logged Sets */}
-          {currentExerciseLoggedSets.length > 0 && (
-            <div className="mb-4">
-              <h4 className="text-sm font-semibold text-foreground mb-2">Logged Sets</h4>
-              <div className="space-y-2">
-                {currentExerciseLoggedSets.map((set) => (
-                  <div
-                    key={`${set.exerciseId}-${set.setNumber}`}
-                    className="bg-success-muted border border-success-border  p-3 flex items-center justify-between"
-                  >
-                    <div className="text-sm">
-                      <span className="font-semibold text-foreground font-semibold">Set {set.setNumber}:</span>{' '}
-                      <span className="text-success-text">
-                        {set.reps} reps @ {set.weight}
-                        {set.weightUnit}
-                        {set.rir !== null && ` • RIR ${set.rir}`}
-                        {set.rpe !== null && ` • RPE ${set.rpe}`}
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => handleDeleteSet(set.setNumber)}
-                      className="text-error hover:text-error-hover p-1"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Log Next Set */}
-          {!hasLoggedAllPrescribed && (
-            <div className="mb-4">
-              <h4 className="text-sm font-semibold text-foreground mb-3">
-                Log Set {nextSetNumber}
-                {prescribedSet && (
-                  <span className="text-muted-foreground font-normal ml-2">
-                    (Target: {prescribedSet.reps} reps @ {prescribedSet.weight || '—'})
-                  </span>
-                )}
-              </h4>
-
-              <div className="space-y-3">
-                {/* Reps and Weight - Side by side */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Reps *
-                    </label>
-                    <input
-                      type="number"
-                      inputMode="numeric"
-                      value={currentSet.reps}
-                      onChange={(e) =>
-                        setCurrentSet({ ...currentSet, reps: e.target.value })
-                      }
-                      placeholder={prescribedSet?.reps.toString() || '0'}
-                      className="w-full px-4 py-3 text-lg border border-input  focus:ring-2 focus:ring-primary focus:border-transparent bg-muted text-foreground"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Weight * ({currentSet.weightUnit})
-                    </label>
-                    <input
-                      type="number"
-                      inputMode="decimal"
-                      step="0.5"
-                      value={currentSet.weight}
-                      onChange={(e) =>
-                        setCurrentSet({ ...currentSet, weight: e.target.value })
-                      }
-                      placeholder={prescribedSet?.weight?.replace(/[^0-9.]/g, '') || '0'}
-                      className="w-full px-4 py-3 text-lg border border-input  focus:ring-2 focus:ring-primary focus:border-transparent bg-muted text-foreground"
-                    />
-                  </div>
-                </div>
-
-                {/* Weight Unit Toggle */}
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setCurrentSet({ ...currentSet, weightUnit: 'lbs' })}
-                    className={`flex-1 py-2  font-medium transition-colors ${
-                      currentSet.weightUnit === 'lbs'
-                        ? 'bg-primary text-white'
-                        : 'bg-muted text-foreground hover:bg-secondary-hover'
-                    }`}
-                  >
-                    lbs
-                  </button>
-                  <button
-                    onClick={() => setCurrentSet({ ...currentSet, weightUnit: 'kg' })}
-                    className={`flex-1 py-2  font-medium transition-colors ${
-                      currentSet.weightUnit === 'kg'
-                        ? 'bg-primary text-white'
-                        : 'bg-muted text-foreground hover:bg-secondary-hover'
-                    }`}
-                  >
-                    kg
-                  </button>
-                </div>
-
-                {/* Optional RPE/RIR */}
-                {(hasRpe || hasRir) && (
-                  <div className="grid grid-cols-2 gap-3">
-                    {hasRir && (
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-1">
-                          RIR (optional)
-                        </label>
-                        <input
-                          type="number"
-                          inputMode="numeric"
-                          min="0"
-                          max="10"
-                          value={currentSet.rir}
-                          onChange={(e) =>
-                            setCurrentSet({ ...currentSet, rir: e.target.value })
-                          }
-                          placeholder={prescribedSet?.rir?.toString() || '—'}
-                          className="w-full px-4 py-3 text-lg border border-input  focus:ring-2 focus:ring-primary focus:border-transparent bg-muted text-foreground"
-                        />
-                      </div>
-                    )}
-
-                    {hasRpe && (
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-1">
-                          RPE (optional)
-                        </label>
-                        <input
-                          type="number"
-                          inputMode="numeric"
-                          min="1"
-                          max="10"
-                          value={currentSet.rpe}
-                          onChange={(e) =>
-                            setCurrentSet({ ...currentSet, rpe: e.target.value })
-                          }
-                          placeholder={prescribedSet?.rpe?.toString() || '—'}
-                          className="w-full px-4 py-3 text-lg border border-input  focus:ring-2 focus:ring-primary focus:border-transparent bg-muted text-foreground"
-                        />
-                      </div>
-                    )}
-                  </div>
-                )}
-
-              </div>
-            </div>
-          )}
-
-          {/* Exercise Complete Message */}
-          {hasLoggedAllPrescribed && (
-            <div className="bg-success-muted border border-success-border  p-4 text-center">
-              <div className="text-success-text font-semibold mb-2">
-                ✓ All prescribed sets logged!
-              </div>
-              <p className="text-sm text-success-text">
-                {currentExerciseIndex < exercises.length - 1
-                  ? 'Continue to next exercise or complete workout'
-                  : 'All exercises complete! Ready to finish workout.'}
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Bottom Actions */}
-        <div className="border-t border-border px-4 py-3 bg-muted flex-shrink-0">
-          {/* Single Actions Row */}
-          <div className="grid grid-cols-[53%_34%_10%] sm:grid-cols-[55%_35%_10%] gap-3">
-            {/* Log Set Button */}
-            <button
-              onClick={handleLogSet}
-              disabled={!canLogSet || hasLoggedAllPrescribed}
-              className="py-3 bg-accent text-accent-foreground font-bold uppercase tracking-wider doom-corners transition-all hover:shadow-lg hover:shadow-accent/50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Log Set {nextSetNumber}
-            </button>
-
-            {/* Complete Workout Button */}
-            <button
-              onClick={handleCompleteWorkout}
-              disabled={isSubmitting || totalLoggedSets === 0}
-              className="py-3 bg-success text-success-foreground font-bold uppercase tracking-wider doom-corners transition-all hover:shadow-lg hover:shadow-success/50 disabled:opacity-50 disabled:cursor-not-allowed"
-              onMouseDown={(e) => {
-                if (isSubmitting || totalLoggedSets === 0) return;
-                e.preventDefault();
-                setIsConfirming(true);
-              }}
-            >
-              {isSubmitting ? (
-                'Saving...'
-              ) : (
-                <div className="flex flex-col items-center justify-center leading-tight">
-                  <span className="text-sm">Complete</span>
-                  <span className="text-xs opacity-80">{totalLoggedSets}/{totalPrescribedSets}</span>
-                </div>
-              )}
-            </button>
-
-            {/* Actions Menu */}
-            <ActionsMenu
-              variant="accent"
-              size="md"
-              className="h-full aspect-square"
-              actions={[
-                {
-                  label: 'Edit this exercise',
-                  icon: Pencil,
-                  onClick: handleEditExercise,
-                  disabled: false
-                },
-                {
-                  label: 'Add an exercise',
-                  icon: Plus,
-                  onClick: handleAddExercise,
-                  disabled: false
-                },
-                {
-                  label: 'Swap this exercise',
-                  icon: RefreshCw,
-                  onClick: handleReplaceExercise,
-                  disabled: false
-                },
-                {
-                  label: 'Delete this exercise',
-                  icon: Trash2,
-                  onClick: handleDeleteExercise,
-                  disabled: false,
-                  variant: 'danger' as const,
-                  requiresConfirmation: true,
-                  confirmationMessage: `Are you sure you want to delete "${currentExercise.name}"?`
-                }
-              ]}
+          {/* Content area with tabs - tabs handle their own scrolling */}
+          <div className="flex-1 overflow-hidden pb-2">
+            <ExerciseDisplayTabs
+              exercise={currentExercise}
+              prescribedSets={currentPrescribedSets}
+              loggedSets={currentExerciseLoggedSets}
+              exerciseHistory={exerciseHistory?.[currentExercise.id] || null}
+              onDeleteSet={handleDeleteSet}
+              loggingForm={
+                <SetLoggingForm
+                  prescribedSet={prescribedSet}
+                  nextSetNumber={nextSetNumber}
+                  hasLoggedAllPrescribed={hasLoggedAllPrescribed}
+                  hasRpe={hasRpe}
+                  hasRir={hasRir}
+                  currentSet={currentSet}
+                  onSetChange={setCurrentSet}
+                />
+              }
             />
           </div>
- 
-            {/* Workout completion confirmation modal */}
-            {isConfirming && (
-              <div className="fixed inset-0 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center z-60">
-                <div className="bg-card p-6  text-center min-w-[300px]">
-                  {!isSubmitting ? (
-                    <>
-                      <p className="text-lg mb-4 text-foreground">Complete this workout?</p>
-                      <div className="flex justify-center space-x-3">
-                        <button
-                          onClick={() => setIsConfirming(false)}
-                          className="px-4 py-2 bg-muted text-foreground rounded hover:bg-secondary-hover"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          onClick={handleCompleteWorkout}
-                          className="px-4 py-2 bg-success text-white rounded hover:bg-success-hover"
-                        >
-                          Confirm
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="mb-3 flex justify-center">
-                        <LoadingFrog size={64} speed={0.8} />
-                      </div>
-                      <p className="text-foreground">Completing workout...</p>
-                    </>
-                  )}
+
+          {/* Actions Footer */}
+          <ExerciseActionsFooter
+            currentExerciseName={currentExercise.name}
+            nextSetNumber={nextSetNumber}
+            totalLoggedSets={totalLoggedSets}
+            totalPrescribedSets={totalPrescribedSets}
+            canLogSet={!!canLogSet}
+            hasLoggedAllPrescribed={hasLoggedAllPrescribed}
+            isSubmitting={isSubmitting}
+            onLogSet={handleLogSet}
+            onCompleteWorkout={() => setIsConfirming(true)}
+            onAddExercise={handleAddExercise}
+            onEditExercise={handleEditExercise}
+            onReplaceExercise={handleReplaceExercise}
+            onDeleteExercise={handleDeleteExercise}
+            onExitWorkout={handleExitWorkout}
+          />
+
+          {/* Workout completion confirmation modal */}
+          {isConfirming && (
+            <div className="fixed inset-0 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center z-60">
+              <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 text-center min-w-[300px] shadow-xl">
+                {!isSubmitting ? (
+                  <>
+                    <p className="text-lg sm:text-xl mb-6 text-foreground font-semibold">Complete this workout?</p>
+                    <div className="flex justify-center gap-3">
+                      <button
+                        onClick={() => setIsConfirming(false)}
+                        className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-muted text-foreground rounded-xl hover:bg-secondary transition-colors font-medium"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleCompleteWorkout}
+                        className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-success text-white rounded-xl hover:bg-success/90 transition-colors font-medium"
+                      >
+                        Confirm
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="mb-3 flex justify-center">
+                      <LoadingFrog size={64} speed={0.8} />
+                    </div>
+                    <p className="text-foreground">Completing workout...</p>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Deletion confirmation modal */}
+          {showDeleteConfirm.show && (
+            <div className="fixed inset-0 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center z-60">
+              <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 text-center max-w-sm shadow-xl">
+                <div className="text-warning mb-4">
+                  <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 15.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2">Delete Last Set?</h3>
+                <p className="text-sm sm:text-base text-muted-foreground mb-6">
+                  This will remove the only remaining set for this exercise. Are you sure?
+                </p>
+                <div className="flex justify-center gap-3">
+                  <button
+                    onClick={() => setShowDeleteConfirm({ show: false })}
+                    className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-muted text-foreground rounded-xl hover:bg-secondary transition-colors font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleConfirmDelete}
+                    className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-error text-white rounded-xl hover:bg-error/90 transition-colors font-medium"
+                  >
+                    Delete Set
+                  </button>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Deletion confirmation modal */}
-            {showDeleteConfirm.show && (
-              <div className="fixed inset-0 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center z-60">
-                <div className="bg-card p-6  text-center max-w-sm">
-                  <div className="text-warning mb-4">
-                    <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 15.5c-.77.833.192 2.5 1.732 2.5z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">Delete Last Set?</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    This will remove the only remaining set for this exercise. Are you sure?
-                  </p>
-                  <div className="flex justify-center space-x-3">
-                    <button
-                      onClick={() => setShowDeleteConfirm({ show: false })}
-                      className="px-4 py-2 bg-muted text-foreground rounded hover:bg-secondary-hover"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleConfirmDelete}
-                      className="px-4 py-2 bg-error text-white rounded hover:bg-error-hover"
-                    >
-                      Delete Set
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-          </div>
         </div>
       </div>
 
-    {/* Exercise Search Modal */}
-    <ExerciseSearchModal
-      isOpen={showExerciseSearch}
-      onClose={() => {
-        setShowExerciseSearch(false)
-        // Don't touch pendingAction - if user selected an exercise, the flow continues
-        // If they cancelled, they can close other modals or the entire logging modal
-      }}
-      onExerciseSelect={handleExerciseSearchSelect}
-    />
+      {/* Exercise Search Modal */}
+      {/* Wizards */}
+      {activeWizard === 'add' && (
+        <AddExerciseWizard
+          open={true}
+          onOpenChange={(open) => !open && setActiveWizard(null)}
+          workoutId={workoutId}
+          workoutCompletionId={workoutCompletionId}
+          onComplete={handleWizardComplete}
+        />
+      )}
 
-    {/* Edit Exercise Modal */}
-    <SetDefinitionModal
-      isOpen={showEditExerciseModal}
-      onClose={() => {
-        setShowEditExerciseModal(false)
-        setPendingAction(null)
-        setPendingSets([])
-        setPendingNotes('')
-      }}
-      exerciseName={currentExercise?.name || ''}
-      onSubmit={handleEditExerciseSubmit}
-      initialSets={currentExercise?.prescribedSets}
-      initialNotes={currentExercise?.notes}
-      mode="edit"
-    />
+      {activeWizard === 'swap' && currentExercise && (
+        <SwapExerciseWizard
+          open={true}
+          onOpenChange={(open) => !open && setActiveWizard(null)}
+          currentExerciseId={currentExercise.id}
+          currentExerciseName={currentExercise.name}
+          onComplete={handleWizardComplete}
+        />
+      )}
 
-    {/* Scope Selection Dialog */}
-    {pendingAction && (
-      <ScopeSelectionDialog
-        isOpen={showScopeDialog}
-        onClose={() => {
-          setShowScopeDialog(false)
-          setPendingAction(null)
-          setPendingSets([])
-          setPendingNotes('')
-        }}
-        onSelect={handleScopeSelected}
-        actionType={pendingAction.type}
-        exerciseName={pendingAction.exerciseName}
-        isLoading={operationStatus.isLoading}
-      />
-    )}
+      {activeWizard === 'edit' && currentExercise && (
+        <EditExerciseWizard
+          open={true}
+          onOpenChange={(open) => !open && setActiveWizard(null)}
+          exercise={currentExercise}
+          onComplete={handleWizardComplete}
+        />
+      )}
 
-    {/* Loading/Success Modal - Outside pendingAction check so it persists during cleanup */}
-    <LoadingSuccessModal
-      isOpen={operationStatus.isLoading || operationStatus.isSuccess}
-      isLoading={operationStatus.isLoading}
-      isSuccess={operationStatus.isSuccess}
-      loadingMessage={operationStatus.message}
-      successMessage={operationStatus.successMessage}
-    />
+      {activeWizard === 'delete' && currentExercise && (
+        <DeleteExerciseWizard
+          open={true}
+          onOpenChange={(open) => !open && setActiveWizard(null)}
+          exerciseId={currentExercise.id}
+          exerciseName={currentExercise.name}
+          onComplete={handleWizardComplete}
+        />
+      )}
+
+      {/* Exit workout confirmation dialog */}
+      {showExitConfirm && (
+        <div className="fixed inset-0 backdrop-blur-md bg-background/80 flex items-center justify-center z-[60] p-4">
+          <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 text-center max-w-sm w-full shadow-xl">
+            <div className="text-warning mb-4 flex justify-center">
+              <AlertTriangle size={56} strokeWidth={2} />
+            </div>
+            <h3 className="text-xl sm:text-2xl font-semibold text-foreground mb-2">
+              {totalLoggedSets > 0 ? 'Exit Workout?' : 'Confirm Exit'}
+            </h3>
+            <p className="text-base sm:text-lg text-muted-foreground mb-6">
+              {totalLoggedSets > 0
+                ? 'You have logged sets. Do you want to save as draft or discard?'
+                : 'Are you sure you want to exit?'}
+            </p>
+            {totalLoggedSets > 0 ? (
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={handleExitSaveAsDraft}
+                  className="w-full px-4 py-3 text-base sm:text-lg bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-colors font-medium"
+                >
+                  Save as Draft
+                </button>
+                <button
+                  onClick={handleExitDiscard}
+                  className="w-full px-4 py-3 text-base sm:text-lg bg-error text-error-foreground rounded-xl hover:bg-error/90 transition-colors font-medium"
+                >
+                  Discard All
+                </button>
+                <button
+                  onClick={() => setShowExitConfirm(false)}
+                  className="w-full px-4 py-3 text-base sm:text-lg bg-muted text-foreground rounded-xl hover:bg-secondary transition-colors font-medium"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowExitConfirm(false)}
+                  className="flex-1 px-4 py-3 text-base sm:text-lg bg-muted text-foreground rounded-xl hover:bg-secondary transition-colors font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleExitDiscard}
+                  className="flex-1 px-4 py-3 text-base sm:text-lg bg-error text-error-foreground rounded-xl hover:bg-error/90 transition-colors font-medium"
+                >
+                  Exit
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </>
   )
 }

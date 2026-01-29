@@ -3,7 +3,10 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { Settings } from 'lucide-react'
 import { ThemeSelector } from '@/components/ThemeSelector'
+import UserSettingsModal from '@/components/UserSettingsModal'
+import { useUserSettings } from '@/hooks/useUserSettings'
 
 type Props = {
   userEmail: string
@@ -11,10 +14,12 @@ type Props = {
 
 export default function Header({ userEmail }: Props) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const { settings, updateSettings } = useUserSettings()
 
   return (
     <>
-      <nav className="bg-card border-b border-border">
+      <nav className="bg-card border-b border-border" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Left: Logo + Nav Links */}
@@ -58,6 +63,13 @@ export default function Header({ userEmail }: Props) {
             {/* Right: Desktop Menu (hidden on mobile) */}
             <div className="hidden md:flex items-center space-x-4">
               <ThemeSelector />
+              <button
+                onClick={() => setIsSettingsOpen(true)}
+                className="h-9 w-9 flex items-center justify-center border-2 border-border bg-input hover:border-primary hover:bg-primary/10 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
+                aria-label="User settings"
+              >
+                <Settings size={20} strokeWidth={2} />
+              </button>
               <span className="text-sm text-muted-foreground">{userEmail}</span>
               <form action="/api/auth/signout" method="POST">
                 <button
@@ -110,7 +122,8 @@ export default function Header({ userEmail }: Props) {
         `}
         style={{
           maxHeight: isMenuOpen ? '80vh' : '0',
-          overflow: isMenuOpen ? 'visible' : 'hidden'
+          overflow: isMenuOpen ? 'visible' : 'hidden',
+          paddingBottom: 'env(safe-area-inset-bottom)'
         }}
       >
         <div className="p-6 space-y-6 doom-noise">
@@ -137,6 +150,18 @@ export default function Header({ userEmail }: Props) {
             <ThemeSelector />
           </div>
 
+          {/* User Settings */}
+          <button
+            onClick={() => {
+              setIsMenuOpen(false)
+              setIsSettingsOpen(true)
+            }}
+            className="w-full px-4 py-3 bg-muted border-2 border-border hover:bg-secondary transition-colors doom-focus-ring font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2"
+          >
+            <Settings size={18} />
+            Settings
+          </button>
+
           {/* Sign Out Button */}
           <form action="/api/auth/signout" method="POST">
             <button
@@ -148,6 +173,14 @@ export default function Header({ userEmail }: Props) {
           </form>
         </div>
       </div>
+
+      {/* User Settings Modal */}
+      <UserSettingsModal
+        open={isSettingsOpen}
+        onOpenChange={setIsSettingsOpen}
+        currentSettings={settings}
+        onSave={updateSettings}
+      />
     </>
   )
 }

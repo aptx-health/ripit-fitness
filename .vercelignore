@@ -1,0 +1,9 @@
+# Cloud Functions are deployed separately to Cloud Run
+# Exclude from Vercel builds
+cloud-functions/
+
+# Test files
+__tests__/
+
+# Documentation
+docs/

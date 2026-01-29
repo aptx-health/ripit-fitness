@@ -32,8 +32,8 @@ jobs:
         run: npm run test:run
         env:
           CI: true
-          # Testcontainers will create its own database and set DATABASE_URL
-          # No Doppler needed for tests
+          # Testcontainers spins up PostgreSQL and Pub/Sub emulator containers automatically
+          TESTCONTAINERS_RYUK_DISABLED: true
 
       - name: Type check
         run: npm run type-check

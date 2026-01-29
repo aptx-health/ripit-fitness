@@ -1088,13 +1088,13 @@
   --error-rgb: 220, 38, 38;
 
   /* Accent (Banana Gold) */
-  --accent: #FBBF24;      /* golden yellow - banana! */
+  --accent: #D4930A;      /* golden honey - improved readability */
   --accent-foreground: #3A2817;
-  --accent-hover: #F59E0B;
-  --accent-active: #D97706;
+  --accent-hover: #B8790A;
+  --accent-active: #A16207;
   --accent-muted: #FEF9E6;
   --accent-text: #92400E;
-  --accent-rgb: 251, 191, 36;
+  --accent-rgb: 212, 147, 10;
 }
 
 /* RIPIT Theme - Dark Mode (Night Jungle) */

@@ -21,6 +21,14 @@ export default async function ProgramsPage() {
         isArchived: false,
       },
       orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        isActive: true,
+        createdAt: true,
+        copyStatus: true,
+      },
     }),
     prisma.program.count({
       where: {
@@ -35,7 +43,13 @@ export default async function ProgramsPage() {
         isArchived: false,
       },
       orderBy: [{ isActive: 'desc' }, { createdAt: 'desc' }],
-      include: {
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        isActive: true,
+        createdAt: true,
+        copyStatus: true,
         weeks: {
           select: {
             id: true,

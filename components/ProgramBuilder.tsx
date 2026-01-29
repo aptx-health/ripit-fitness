@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { ChevronDown, ChevronRight } from 'lucide-react'
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import ExerciseSearchModal from './ExerciseSearchModal'
 import FAUVolumeVisualization from './FAUVolumeVisualization'
 
@@ -110,14 +111,6 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
 
   // Collapsed workouts state
   const [collapsedWorkouts, setCollapsedWorkouts] = useState<Set<string>>(new Set())
-
-  // Week menu state
-  const [openWeekMenuId, setOpenWeekMenuId] = useState<string | null>(null)
-  const weekMenuRef = useRef<HTMLDivElement>(null)
-
-  // Workout menu state
-  const [openWorkoutMenuId, setOpenWorkoutMenuId] = useState<string | null>(null)
-  const workoutMenuRef = useRef<HTMLDivElement>(null)
 
   // Workout action modals
   const [showDuplicateWorkoutModal, setShowDuplicateWorkoutModal] = useState(false)
@@ -434,7 +427,6 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
       setError(error instanceof Error ? error.message : 'Failed to delete week')
     } finally {
       setDeletingWeekId(null)
-      setOpenWeekMenuId(null)
     }
   }, [])
 
@@ -463,7 +455,6 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
       setError(error instanceof Error ? error.message : 'Failed to duplicate week')
     } finally {
       setIsLoading(false)
-      setOpenWeekMenuId(null)
     }
   }, [])
 
@@ -733,34 +724,6 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
     return () => clearTimeout(timeoutId)
   }, [editMode, updateProgramDetails])
 
-  // Close week menu when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (weekMenuRef.current && !weekMenuRef.current.contains(event.target as Node)) {
-        setOpenWeekMenuId(null)
-      }
-    }
-
-    if (openWeekMenuId) {
-      document.addEventListener('mousedown', handleClickOutside)
-      return () => document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [openWeekMenuId])
-
-  // Close workout menu when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (workoutMenuRef.current && !workoutMenuRef.current.contains(event.target as Node)) {
-        setOpenWorkoutMenuId(null)
-      }
-    }
-
-    if (openWorkoutMenuId) {
-      document.addEventListener('mousedown', handleClickOutside)
-      return () => document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [openWorkoutMenuId])
-
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
       {/* Main Content */}
@@ -864,34 +827,38 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
                         <h3 className="font-medium text-foreground doom-heading">WEEK {week.weekNumber}</h3>
 
                         {/* Week Menu */}
-                        <div className="relative" ref={openWeekMenuId === week.id ? weekMenuRef : null}>
-                          <button
-                            onClick={() => setOpenWeekMenuId(openWeekMenuId === week.id ? null : week.id)}
-                            disabled={isLoading || deletingWeekId === week.id}
-                            className="px-3 py-1 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded border border-border transition-colors disabled:opacity-50 uppercase tracking-wide"
-                          >
-                            Options
-                          </button>
+                        <DropdownMenu.Root>
+                          <DropdownMenu.Trigger asChild>
+                            <button
+                              disabled={isLoading || deletingWeekId === week.id}
+                              className="px-3 py-1 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded border border-border transition-colors disabled:opacity-50 uppercase tracking-wide"
+                            >
+                              Options
+                            </button>
+                          </DropdownMenu.Trigger>
 
-                          {openWeekMenuId === week.id && (
-                            <div className="absolute left-full top-0 ml-2 bg-card border border-border shadow-lg z-50 doom-corners overflow-hidden flex">
-                              <button
+                          <DropdownMenu.Portal>
+                            <DropdownMenu.Content
+                              className="bg-card border border-border shadow-lg z-50 doom-corners overflow-hidden min-w-[200px]"
+                              sideOffset={5}
+                            >
+                              <DropdownMenu.Item
                                 onClick={() => handleDuplicateWeek(week.id)}
                                 disabled={isLoading}
-                                className="px-4 py-2.5 text-sm text-foreground hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-50 whitespace-nowrap"
+                                className="px-4 py-2.5 text-sm text-foreground hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-50 cursor-pointer outline-none"
                               >
                                 Duplicate Week
-                              </button>
-                              <button
+                              </DropdownMenu.Item>
+                              <DropdownMenu.Item
                                 onClick={() => handleDeleteWeek(week.id, week.weekNumber)}
                                 disabled={deletingWeekId === week.id}
-                                className="px-4 py-2.5 text-sm text-error hover:bg-error hover:text-error-foreground transition-colors disabled:opacity-50 border-l border-border whitespace-nowrap"
+                                className="px-4 py-2.5 text-sm text-error hover:bg-error hover:text-error-foreground transition-colors disabled:opacity-50 cursor-pointer outline-none border-t border-border"
                               >
                                 {deletingWeekId === week.id ? 'Deleting...' : 'Delete Week'}
-                              </button>
-                            </div>
-                          )}
-                        </div>
+                              </DropdownMenu.Item>
+                            </DropdownMenu.Content>
+                          </DropdownMenu.Portal>
+                        </DropdownMenu.Root>
                       </div>
 
                       <button
@@ -956,61 +923,57 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
                                   </span>
 
                                   {/* Workout Menu */}
-                                  <div className="relative" ref={openWorkoutMenuId === workout.id ? workoutMenuRef : null}>
-                                    <button
-                                      onClick={() => setOpenWorkoutMenuId(openWorkoutMenuId === workout.id ? null : workout.id)}
-                                      disabled={isLoading || deletingWorkoutId === workout.id}
-                                      className="px-2 py-0.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded border border-border transition-colors disabled:opacity-50 uppercase tracking-wide"
-                                    >
-                                      Options
-                                    </button>
+                                  <DropdownMenu.Root>
+                                    <DropdownMenu.Trigger asChild>
+                                      <button
+                                        disabled={isLoading || deletingWorkoutId === workout.id}
+                                        className="px-2 py-0.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded border border-border transition-colors disabled:opacity-50 uppercase tracking-wide"
+                                      >
+                                        Options
+                                      </button>
+                                    </DropdownMenu.Trigger>
 
-                                    {openWorkoutMenuId === workout.id && (
-                                      <div className="absolute left-0 top-full mt-1 bg-card border border-border shadow-lg z-50 doom-corners overflow-hidden flex">
-                                        <button
-                                          onClick={() => {
-                                            handleStartWorkoutEdit(workout.id, workout.name)
-                                            setOpenWorkoutMenuId(null)
-                                          }}
-                                          className="px-4 py-2.5 text-sm text-foreground hover:bg-primary hover:text-primary-foreground transition-colors whitespace-nowrap"
+                                    <DropdownMenu.Portal>
+                                      <DropdownMenu.Content
+                                        className="bg-card border border-border shadow-lg z-50 doom-corners overflow-hidden min-w-[150px]"
+                                        sideOffset={5}
+                                      >
+                                        <DropdownMenu.Item
+                                          onClick={() => handleStartWorkoutEdit(workout.id, workout.name)}
+                                          className="px-4 py-2.5 text-sm text-foreground hover:bg-primary hover:text-primary-foreground transition-colors cursor-pointer outline-none"
                                         >
                                           Rename
-                                        </button>
-                                        <button
+                                        </DropdownMenu.Item>
+                                        <DropdownMenu.Item
                                           onClick={() => {
                                             setSelectedWorkoutForAction({ id: workout.id, name: workout.name })
                                             setShowDuplicateWorkoutModal(true)
-                                            setOpenWorkoutMenuId(null)
                                           }}
                                           disabled={isLoading}
-                                          className="px-4 py-2.5 text-sm text-foreground hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-50 border-l border-border whitespace-nowrap"
+                                          className="px-4 py-2.5 text-sm text-foreground hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-50 cursor-pointer outline-none border-t border-border"
                                         >
                                           Duplicate
-                                        </button>
-                                        <button
+                                        </DropdownMenu.Item>
+                                        <DropdownMenu.Item
                                           onClick={() => {
                                             setSelectedWorkoutForAction({ id: workout.id, name: workout.name })
                                             setShowSwapWorkoutModal(true)
-                                            setOpenWorkoutMenuId(null)
                                           }}
                                           disabled={isLoading}
-                                          className="px-4 py-2.5 text-sm text-foreground hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-50 border-l border-border whitespace-nowrap"
+                                          className="px-4 py-2.5 text-sm text-foreground hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-50 cursor-pointer outline-none border-t border-border"
                                         >
                                           Move to Week
-                                        </button>
-                                        <button
-                                          onClick={() => {
-                                            handleDeleteWorkout(workout.id, workout.name)
-                                            setOpenWorkoutMenuId(null)
-                                          }}
+                                        </DropdownMenu.Item>
+                                        <DropdownMenu.Item
+                                          onClick={() => handleDeleteWorkout(workout.id, workout.name)}
                                           disabled={deletingWorkoutId === workout.id}
-                                          className="px-4 py-2.5 text-sm text-error hover:bg-error hover:text-error-foreground transition-colors disabled:opacity-50 border-l border-border whitespace-nowrap"
+                                          className="px-4 py-2.5 text-sm text-error hover:bg-error hover:text-error-foreground transition-colors disabled:opacity-50 cursor-pointer outline-none border-t border-border"
                                         >
                                           {deletingWorkoutId === workout.id ? 'Deleting...' : 'Delete'}
-                                        </button>
-                                      </div>
-                                    )}
-                                  </div>
+                                        </DropdownMenu.Item>
+                                      </DropdownMenu.Content>
+                                    </DropdownMenu.Portal>
+                                  </DropdownMenu.Root>
                                 </div>
                               )}
                               <div className="flex gap-1">

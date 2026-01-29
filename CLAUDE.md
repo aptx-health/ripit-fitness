@@ -16,6 +16,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Doppler** (secrets management)
 - **Tailwind CSS** (styling)
 - **Vercel** (deployment)
+- **GCP** (Pub/Sub + Cloud Run for background jobs)
 
 ## Development Commands
 
@@ -62,6 +63,7 @@ doppler run -- npm run lint
   /db                   # Database client and utilities
   /csv                  # CSV parsing and validation
   /auth                 # Auth utilities (if needed)
+  /gcp                  # GCP Pub/Sub client
 
 /components             # React components
   /ui                   # Reusable UI components
@@ -74,9 +76,13 @@ doppler run -- npm run lint
 /docs                   # Project documentation
   ARCHITECTURE.md       # Architecture decisions and design
   CSV_SPEC.md          # CSV format specification
+  /gcp                  # GCP setup guides and architecture docs
 
 /__tests__              # Integration tests
   /api                  # API route tests
+
+/cloud-functions        # GCP Cloud Run workers
+  /clone-program        # Background program cloning service
 
 /types                  # Shared TypeScript types
 /hooks                  # React hooks
@@ -119,6 +125,67 @@ Example RLS policy:
 CREATE POLICY "users_own_programs" ON programs
   FOR ALL USING (auth.uid() = user_id);
 ```
+
+### Background Jobs & GCP Integration
+
+**Problem**: Community program cloning with 9+ weeks and 200+ exercises exceeds Vercel's serverless execution limits (90s max).
+
+**Solution**: GCP Pub/Sub + Cloud Run worker architecture for reliable background processing.
+
+#### Architecture
+
+```
+Next.js API (Vercel)
+  └─> Create shell program (copyStatus='cloning')
+  └─> Publish job to Pub/Sub topic
+  └─> Return immediately to user
+
+Pub/Sub Topic (program-clone-jobs)
+  └─> Delivers message to Cloud Run worker
+  └─> Automatic retries on failure
+
+Cloud Run Worker (clone-program service)
+  └─> Receives Eventarc POST request
+  └─> Fetches programData from CommunityProgram table
+  └─> Processes one week per transaction (progressive loading)
+  └─> Updates copyStatus per week (cloning_week_1_of_9, etc.)
+  └─> Marks program as 'ready' when complete
+
+Frontend (polling via /api/programs/[id]/copy-status)
+  └─> Polls every 2 seconds while copyStatus = 'cloning'
+  └─> Shows progress indicator with week count
+  └─> Updates UI when copyStatus = 'ready'
+  └─> Allows viewing/activating partially-cloned programs
+```
+
+#### Key Components
+
+**Publisher** (`lib/gcp/pubsub.ts`):
+- Next.js publishes jobs to Pub/Sub
+- Sends only `communityProgramId` (not full programData) to minimize message size
+- Emulator support for local testing
+
+**Worker** (`cloud-functions/clone-program/`):
+- Express app receives Eventarc POST requests
+- Processes one week per 30s transaction (resilient to failures)
+- Idempotency: detects complete/partial clones on retry
+- Marks as `failed` if partial weeks detected (corrupted state)
+
+**Deployment** (`.github/workflows/deploy-clone-worker.yml`):
+- Triggers on changes to `cloud-functions/clone-program/**` or `prisma/schema.prisma`
+- Builds Docker image, pushes to Artifact Registry (us-central1)
+- Deploys to Cloud Run with 540s timeout, 1GB memory
+- Uses dedicated `clone-worker` service account (zero GCP permissions, only Supabase access)
+
+#### Testing
+
+Integration tests in `__tests__/api/clone-worker.test.ts`:
+- **Testcontainers**: PostgreSQL 15 + Pub/Sub emulator (messagebird image)
+- Tests strength/cardio cloning, progressive loading, idempotency
+- Shared subscription with programId filtering for concurrent execution
+- Run with: `doppler run --config dev_test -- npm test`
+
+See `/docs/gcp/` for detailed setup, architecture decisions, and emergency operations.
 
 ## CSV Import Strategy
 
@@ -402,6 +469,7 @@ git commit -m "feat: add feature"
 - **Infer metadata**: Standard CSV format, user-friendly
 - **Store prescribed + logged**: Enables plan vs actual comparison
 - **Flexible weight field**: Supports "135lbs", "65%", "RPE 8"
+- **GCP Pub/Sub for background jobs**: Move large program cloning off Vercel serverless to Cloud Run (540s timeout, per-week transactions, progressive loading)
 
 ## Reference Documents
 
@@ -411,6 +479,7 @@ git commit -m "feat: add feature"
 - `/docs/features/EXERCISE_PERFORMANCE_TRACKING.md` - Exercise tracking features
 - `/docs/features/PROGRAM_MANAGEMENT_IMPROVEMENTS.md` - Program management enhancements
 - `/docs/features/PERFORMANCE_ANALYSIS.md` - Performance analysis and optimizations
+- `/docs/gcp/` - GCP Pub/Sub setup, clone worker architecture, and operations guides
 
 ### Reference Material
 - `/NEW_PROJECT_REFERENCE.md` - Next.js + Supabase best practices (reference only, contains multi-tenant patterns we're NOT using)

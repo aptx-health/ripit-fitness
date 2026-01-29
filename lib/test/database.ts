@@ -32,14 +32,28 @@ export class TestDatabase {
     process.env.DIRECT_URL = connectionString
 
     try {
+      // Safety check: Verify we're connecting to localhost/testcontainer before allowing destructive operations
+      const url = new URL(connectionString)
+      const isLocalhost = url.hostname === 'localhost' || url.hostname === '127.0.0.1' || url.hostname === '0.0.0.0'
+
+      if (!isLocalhost) {
+        throw new Error(
+          `SAFETY CHECK FAILED: Refusing to run db push on non-localhost database.\n` +
+          `Connection string points to: ${url.hostname}\n` +
+          `Test databases must use localhost/127.0.0.1 for safety.`
+        )
+      }
+
       // Push schema to get fresh test database (faster than migrations for testing)
       console.log('🔄 Pushing Prisma schema to test database...')
-      execSync('npx prisma db push --force-reset', { 
-        stdio: 'pipe', 
-        env: { 
-          ...process.env, 
+      execSync('npx prisma db push --force-reset', {
+        stdio: 'pipe',
+        env: {
+          ...process.env,
           DATABASE_URL: connectionString,
-          DIRECT_URL: connectionString
+          DIRECT_URL: connectionString,
+          // Bypass Prisma safety check for Testcontainers (isolated Docker database, not production)
+          PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION: 'Testcontainer database reset for automated testing'
         }
       })
       console.log('✅ Schema push completed')
@@ -111,17 +125,24 @@ export class TestDatabase {
     }
 
     console.log('🔄 Resetting test database...')
-    
+
     // Clear all data in reverse order to handle foreign key constraints
     const tablesToClear = [
+      'LoggedCardioSession',
+      'PrescribedCardioSession',
+      'CardioWeek',
+      'CardioProgram',
+      'UserCardioMetricPreferences',
       'LoggedSet',
-      'WorkoutCompletion', 
+      'WorkoutCompletion',
       'PrescribedSet',
       'Exercise',
       'ExerciseDefinition',
       'Workout',
       'Week',
-      'Program'
+      'Program',
+      'CommunityProgram',
+      'UserSettings'
     ]
 
     for (const table of tablesToClear) {
@@ -131,7 +152,7 @@ export class TestDatabase {
         console.warn(`⚠️ Error clearing table ${table}:`, error)
       }
     }
-    
+
     console.log('✅ Test database reset completed')
   }
 

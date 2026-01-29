@@ -1,0 +1,59 @@
+name: Deploy Clone Worker to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+      - feature/raw-sql-clone-optimization
+    paths:
+      - 'cloud-functions/clone-program/**'
+      - 'prisma/schema.prisma'
+      - '.github/workflows/deploy-clone-worker.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID || 'ripit-fitness' }}
+      GCP_REGION: ${{ vars.GCP_REGION || 'us-central1' }}
+      ARTIFACT_REPO: program-clone-worker
+      SERVICE_NAME: clone-program
+      WORKER_SERVICE_ACCOUNT: ${{ vars.WORKER_SERVICE_ACCOUNT || 'clone-worker@ripit-fitness.iam.gserviceaccount.com' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_DEPLOY_SERVICE_ACCOUNT_KEY }}
+
+      - name: Configure gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev --quiet
+
+      - name: Copy Prisma schema into worker build context
+        run: |
+          mkdir -p cloud-functions/clone-program/prisma
+          cp prisma/schema.prisma cloud-functions/clone-program/prisma/schema.prisma
+
+      - name: Build Docker image
+        run: |
+          IMAGE="${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
+          docker build -t "$IMAGE" ./cloud-functions/clone-program
+          docker tag "$IMAGE" "${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/${{ env.SERVICE_NAME }}:latest"
+
+      - name: Push Docker image to Artifact Registry
+        run: |
+          docker push "${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
+          docker push "${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/${{ env.SERVICE_NAME }}:latest"
+
+      - name: Deploy to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: ${{ env.SERVICE_NAME }}
+          image: ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
+          region: ${{ env.GCP_REGION }}
+          flags: '--timeout=540s --memory=1Gi --set-env-vars=DATABASE_URL=${{ secrets.CLONE_WORKER_DATABASE_URL }} --service-account=${{ env.WORKER_SERVICE_ACCOUNT }} --no-allow-unauthenticated'
