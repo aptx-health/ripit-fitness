@@ -120,9 +120,9 @@ describe('Program Cloning via Pub/Sub + Worker', () => {
 
           // Call the appropriate cloning function
           if (job.programType === 'cardio') {
-            await cloneCardioProgramData(prisma, job.programId, programData, job.userId);
+            await cloneCardioProgramData(prisma as any, job.programId, programData, job.userId);
           } else {
-            await cloneStrengthProgramData(prisma, job.programId, programData, job.userId);
+            await cloneStrengthProgramData(prisma as any, job.programId, programData, job.userId);
           }
 
           message.ack();
@@ -483,7 +483,7 @@ describe('Program Cloning via Pub/Sub + Worker', () => {
 
       // Call cloning function directly (simulates worker retry without Pub/Sub)
       await cloneStrengthProgramData(
-        prisma,
+        prisma as any,
         cloneResult.programId!,
         communityProgram!.programData as any,
         otherUserId
@@ -553,7 +553,7 @@ describe('Program Cloning via Pub/Sub + Worker', () => {
       let error: any = null;
       try {
         await cloneStrengthProgramData(
-          prisma,
+          prisma as any,
           shellProgram.id,
           communityProgram!.programData as any,
           otherUserId

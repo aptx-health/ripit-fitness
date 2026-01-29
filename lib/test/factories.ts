@@ -7,6 +7,7 @@ export type TestUser = {
 export type TestProgram = {
   id: string
   name: string
+  description: string
   userId: string
   weeks: Array<{
     id: string
@@ -151,6 +152,7 @@ export async function createTestProgram(
   return {
     id: program.id,
     name: program.name,
+    description: program.description || '',
     userId: program.userId,
     weeks: program.weeks.map(week => ({
       id: week.id,
