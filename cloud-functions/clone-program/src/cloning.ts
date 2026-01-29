@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import { batchInsertStrengthWeek, batchInsertCardioWeek } from './batch-insert'
 
 export interface ProgramCloneJob {
   communityProgramId: string
@@ -94,42 +95,7 @@ export async function cloneStrengthProgramData(
     })
 
     await prisma.$transaction(async (tx) => {
-      await tx.week.create({
-        data: {
-          weekNumber: week.weekNumber,
-          programId,
-          userId,
-          workouts: {
-            create: (week.workouts || []).map((workout) => ({
-              name: workout.name,
-              dayNumber: workout.dayNumber,
-              userId,
-              exercises: {
-                create: workout.exercises.map((exercise) => ({
-                  name: exercise.name,
-                  exerciseDefinitionId: exercise.exerciseDefinitionId,
-                  order: exercise.order,
-                  exerciseGroup: exercise.exerciseGroup,
-                  userId,
-                  notes: exercise.notes,
-                  prescribedSets: {
-                    createMany: {
-                      data: (exercise.prescribedSets || []).map((set) => ({
-                        setNumber: set.setNumber,
-                        reps: set.reps,
-                        weight: set.weight,
-                        rpe: set.rpe,
-                        rir: set.rir,
-                        userId,
-                      })),
-                    },
-                  },
-                })),
-              },
-            })),
-          },
-        },
-      })
+      await batchInsertStrengthWeek(tx, week, programId, userId)
     }, { timeout: 30000 })
   }
 
@@ -191,28 +157,7 @@ export async function cloneCardioProgramData(
     })
 
     await prisma.$transaction(async (tx) => {
-      await tx.cardioWeek.create({
-        data: {
-          weekNumber: week.weekNumber,
-          cardioProgramId: programId,
-          userId,
-          sessions: {
-            create: (week.sessions || []).map((session) => ({
-              dayNumber: session.dayNumber,
-              name: session.name,
-              description: session.description,
-              targetDuration: session.targetDuration,
-              intensityZone: session.intensityZone,
-              equipment: session.equipment,
-              targetHRRange: session.targetHRRange,
-              targetPowerRange: session.targetPowerRange,
-              intervalStructure: session.intervalStructure,
-              notes: session.notes,
-              userId,
-            })),
-          },
-        },
-      })
+      await batchInsertCardioWeek(tx, week, programId, userId)
     }, { timeout: 30000 })
   }
 

@@ -1,6 +1,6 @@
 import express from 'express'
 import { PrismaClient } from '@prisma/client'
-import { PubSub } from '@google-cloud/pubsub'
+import { PubSub, Subscription } from '@google-cloud/pubsub'
 import { OAuth2Client } from 'google-auth-library'
 import { ProgramCloneJob, cloneStrengthProgramData, cloneCardioProgramData } from './cloning'
 
@@ -119,32 +119,53 @@ async function startLocalSubscriber() {
 
   const pubsub = new PubSub({
     projectId: process.env.PUBSUB_PROJECT_ID || 'test-project',
-    authClient,
+    authClient: authClient as any, // Type workaround for emulator mode
   })
 
   // Wait for subscription to be created by emulator startup script
   console.log('⏳ Waiting for subscription to be ready...')
-  const subscription = pubsub.subscription('program-clone-jobs-sub')
 
+  // Retry loop: check if subscription exists before attempting to use it
   for (let i = 0; i < 30; i++) {
     try {
+      const subscription = pubsub.subscription('program-clone-jobs-sub')
       const [exists] = await subscription.exists()
+
       if (exists) {
         console.log('✅ Subscription found')
-        break
+
+        // Now that we've confirmed it exists, set up the message handler
+        setupMessageHandler(subscription)
+        return
       }
     } catch (error) {
-      // Ignore errors, keep trying
+      // Ignore errors during startup, emulator may not be ready yet
+      if (i % 5 === 0) {
+        console.log(`   Still waiting... (attempt ${i + 1}/30)`)
+      }
     }
 
     if (i === 29) {
       console.error('❌ Subscription not found after 30 seconds')
       console.error('   Make sure the emulator process has fully started')
+      console.error('   Check that start-pubsub-emulator.sh is running')
       return
     }
 
     await new Promise(resolve => setTimeout(resolve, 1000))
   }
+}
+
+/**
+ * Set up message handler for the subscription
+ * Separated to ensure subscription exists before attaching handlers
+ */
+function setupMessageHandler(subscription: Subscription) {
+  // Handle subscription errors (connection issues, etc.)
+  subscription.on('error', (error: Error) => {
+    console.error('❌ Subscription error:', error)
+    console.error('   The subscription may have been deleted or the emulator stopped')
+  })
 
   subscription.on('message', async (message) => {
     try {
