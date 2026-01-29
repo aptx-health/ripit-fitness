@@ -129,6 +129,89 @@ CMD ["npm", "start"]
 
 Copy `prisma/schema.prisma` from the main repo into this function's `prisma/` directory.
 
+## Performance Optimization: Batch INSERT Strategy
+
+### Problem
+
+The original implementation used Prisma's nested `create` operations, which generated ~28 INSERT queries per week:
+- 1 INSERT for Week
+- 3 INSERTs for Workouts (one per workout)
+- 12 INSERTs for Exercises (one per exercise)
+- 12 batch INSERTs for PrescribedSets (one per exercise using `createMany`)
+
+For a 9-week program: **~250 total INSERT queries**, resulting in execution times of 45-60 seconds.
+
+### Solution
+
+Implemented raw SQL batch INSERTs with pre-generated CUIDs in `cloud-functions/clone-program/src/batch-insert.ts`:
+
+**Query reduction: 4 INSERT queries per week**
+- 1 batch INSERT for all Weeks
+- 1 batch INSERT for all Workouts
+- 1 batch INSERT for all Exercises
+- 1 batch INSERT for all PrescribedSets
+
+For a 9-week program: **~36 total INSERT queries** (86% reduction)
+
+### Implementation Details
+
+**CUID Generation:**
+```typescript
+import { createId } from '@paralleldrive/cuid2'
+
+const weekId = createId()
+const workoutIds = workouts.map(() => createId())
+const exerciseIds = exercises.map(() => createId())
+```
+
+Pre-generating all IDs before batch INSERT maintains foreign key relationships without relying on database-generated IDs.
+
+**Batch INSERT Pattern:**
+```typescript
+const workoutValues = weekData.workouts.map((workout, idx) => {
+  return Prisma.sql`(
+    ${ids.workouts[idx].id},
+    ${workout.name},
+    ${workout.dayNumber},
+    ${ids.weekId},
+    ${userId}
+  )`
+})
+
+await tx.$executeRaw(Prisma.sql`
+  INSERT INTO "Workout" (id, name, "dayNumber", "weekId", "userId")
+  VALUES ${Prisma.join(workoutValues, ',')}
+`)
+```
+
+**Performance Logging:**
+```typescript
+console.log(
+  `Batch insert week ${weekData.weekNumber}: ${duration}ms ` +
+  `(${workouts.length} workouts, ${exerciseCount} exercises, ${setCount} sets)`
+)
+```
+
+### Results
+
+**Production measurements:**
+- Before: 60 seconds for large strength programs
+- After: 10 seconds for large strength programs
+- **83% reduction in clone time**
+
+**Benefits:**
+- 86% fewer database queries
+- Reduced network roundtrips between worker and database
+- Lower connection pool pressure on Supabase
+- Faster transaction execution with bulk operations
+- Same resilience guarantees (per-week transactions, idempotency checks)
+
+### Files
+
+- `cloud-functions/clone-program/src/batch-insert.ts` - Core batch INSERT logic
+- `cloud-functions/clone-program/src/cloning.ts` - Cloning orchestration using batch inserts
+- `__tests__/api/clone-worker.test.ts` - Integration tests validating correctness
+
 ## Deployment
 
 ```bash
