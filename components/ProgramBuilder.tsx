@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronDown, ChevronRight } from 'lucide-react'
+import { ChevronDown, ChevronRight, MoreVertical, Trash2, Pencil } from 'lucide-react'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import ExerciseSearchModal from './ExerciseSearchModal'
 import FAUVolumeVisualization from './FAUVolumeVisualization'
@@ -1060,7 +1060,7 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
                           <DropdownMenu.Trigger asChild>
                             <button
                               disabled={isLoading || deletingWeekId === week.id}
-                              className="px-3 py-1 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded border border-border transition-colors disabled:opacity-50 uppercase tracking-wide"
+                              className="px-3 py-1 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted border border-border transition-colors disabled:opacity-50 uppercase tracking-wide"
                             >
                               Options
                             </button>
@@ -1156,9 +1156,10 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
                                     <DropdownMenu.Trigger asChild>
                                       <button
                                         disabled={isLoading || deletingWorkoutId === workout.id}
-                                        className="px-2 py-0.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded border border-border transition-colors disabled:opacity-50 uppercase tracking-wide"
+                                        className="p-1.5 sm:px-2 sm:py-0.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted border border-border transition-colors disabled:opacity-50 uppercase tracking-wide"
                                       >
-                                        Options
+                                        <MoreVertical size={14} className="sm:hidden" />
+                                        <span className="hidden sm:inline">Options</span>
                                       </button>
                                     </DropdownMenu.Trigger>
 
@@ -1205,25 +1206,16 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
                                   </DropdownMenu.Root>
                                 </div>
                               )}
-                              <div className="flex gap-1">
-                                <button
-                                  onClick={() => handleAddExercise(workout.id)}
-                                  disabled={isLoading || deletingWorkoutId === workout.id}
-                                  className="px-2 py-1 bg-success text-success-foreground text-xs rounded hover:bg-success-hover disabled:opacity-50"
-                                >
-                                  Add Exercise
-                                </button>
-                              </div>
                             </div>
                             
                             {!isCollapsed && (
                               <>
                                 {workout.exercises.length === 0 ? (
-                                  <div className="text-muted-foreground text-xs">No exercises yet</div>
+                                  <div className="text-muted-foreground text-xs mb-2">No exercises yet</div>
                                 ) : (
-                                  <div className="space-y-2">
+                                  <div className="space-y-2 mb-2">
                                     {workout.exercises.map((exercise) => (
-                                      <div key={exercise.id} className="flex items-center justify-between bg-muted rounded p-2">
+                                      <div key={exercise.id} className="flex items-center justify-between bg-muted p-2">
                                         <div className="flex-1">
                                           <span className="font-medium text-sm text-foreground">{exercise.name}</span>
                                           <span className="text-muted-foreground text-sm ml-2">
@@ -1237,22 +1229,31 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
                                           <button
                                             onClick={() => handleEditExercise(exercise, workout.id)}
                                             disabled={isLoading || deletingExerciseId === exercise.id}
-                                            className="px-2 py-1 bg-secondary text-secondary-foreground text-xs rounded hover:bg-secondary-hover disabled:opacity-50"
+                                            className="p-1.5 sm:px-2 sm:py-1 bg-secondary text-secondary-foreground text-xs hover:bg-secondary-hover disabled:opacity-50 font-semibold uppercase"
                                           >
-                                            Edit
+                                            <Pencil size={14} className="sm:hidden" />
+                                            <span className="hidden sm:inline">Edit</span>
                                           </button>
                                           <button
                                             onClick={() => handleDeleteExercise(exercise.id, exercise.name)}
                                             disabled={deletingExerciseId === exercise.id}
-                                            className="px-2 py-1 bg-error text-error-foreground text-xs rounded hover:bg-error-hover disabled:opacity-50"
+                                            className="p-1.5 sm:px-2 sm:py-1 bg-error text-error-foreground text-xs hover:bg-error-hover disabled:opacity-50 font-semibold uppercase"
                                           >
-                                            {deletingExerciseId === exercise.id ? 'Deleting...' : 'Delete'}
+                                            <Trash2 size={14} className="sm:hidden" />
+                                            <span className="hidden sm:inline">{deletingExerciseId === exercise.id ? 'Deleting...' : 'Delete'}</span>
                                           </button>
                                         </div>
                                       </div>
                                     ))}
                                   </div>
                                 )}
+                                <button
+                                  onClick={() => handleAddExercise(workout.id)}
+                                  disabled={isLoading || deletingWorkoutId === workout.id}
+                                  className="w-full py-1.5 bg-success/80 hover:bg-success text-success-foreground text-xs font-semibold uppercase tracking-wide disabled:opacity-50 transition-colors"
+                                >
+                                  + Add Exercise
+                                </button>
                               </>
                             )}
                           </div>
