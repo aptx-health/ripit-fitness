@@ -49,20 +49,20 @@ export default function CardioTabs({ weekData, historyCount }: Props) {
       <Tabs.List className="flex border-b border-border mb-4">
         <Tabs.Trigger
           value="current"
-          className={`px-6 py-3 text-sm font-bold uppercase tracking-wider transition-colors ${
+          className={`px-6 py-3 text-sm font-bold uppercase tracking-wider transition-all ${
             activeTab === 'current'
-              ? 'text-accent border-b-2 border-accent -mb-px'
-              : 'text-muted-foreground hover:text-foreground'
+              ? 'text-accent border border-accent/50 border-b-2 border-b-accent -mb-px bg-accent/5 shadow-[0_0_10px_rgba(var(--accent-rgb),0.3)]'
+              : 'text-muted-foreground border border-transparent hover:text-accent hover:shadow-[0_0_8px_rgba(var(--accent-rgb),0.2)]'
           }`}
         >
           Active Plan
         </Tabs.Trigger>
         <Tabs.Trigger
           value="history"
-          className={`px-6 py-3 text-sm font-bold uppercase tracking-wider transition-colors ${
+          className={`px-6 py-3 text-sm font-bold uppercase tracking-wider transition-all ${
             activeTab === 'history'
-              ? 'text-accent border-b-2 border-accent -mb-px'
-              : 'text-muted-foreground hover:text-foreground'
+              ? 'text-accent border border-accent/50 border-b-2 border-b-accent -mb-px bg-accent/5 shadow-[0_0_10px_rgba(var(--accent-rgb),0.3)]'
+              : 'text-muted-foreground border border-transparent hover:text-accent hover:shadow-[0_0_8px_rgba(var(--accent-rgb),0.2)]'
           }`}
         >
           History
