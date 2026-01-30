@@ -170,10 +170,10 @@ export default function WorkoutDetail({ workout, programId, exerciseHistory }: P
       <div className="bg-card border-b border-border sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 py-4">
           <Link
-            href={`/programs/${programId}/weeks/${workout.week.weekNumber}`}
+            href="/training"
             className="text-primary hover:text-primary-hover font-medium inline-block mb-2"
           >
-            ← Week {workout.week.weekNumber}
+            ← Back to Training
           </Link>
           <div className="flex items-center justify-between">
             <div>

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 
@@ -27,7 +26,6 @@ export default function ArchivedProgramsSection({
   const [isLoading, setIsLoading] = useState(false)
   const [unarchivingId, setUnarchivingId] = useState<string | null>(null)
 
-  const basePath = programType === 'strength' ? '/programs' : '/cardio/programs'
   const apiPath =
     programType === 'strength'
       ? '/api/programs'
@@ -169,12 +167,6 @@ export default function ArchivedProgramsSection({
                       )}
                     </div>
                     <div className="ml-4 flex gap-2">
-                      <Link
-                        href={`${basePath}/${program.id}`}
-                        className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground font-medium"
-                      >
-                        View
-                      </Link>
                       {canUnarchive && (
                         <button
                           onClick={() =>

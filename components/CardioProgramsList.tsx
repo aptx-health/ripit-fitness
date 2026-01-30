@@ -122,10 +122,10 @@ export default function CardioProgramsList({ programs }: Props) {
           </div>
           <div className="flex gap-3 mt-4">
             <Link
-              href={`/cardio/programs/${activeProgram.id}`}
+              href="/cardio"
               className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
             >
-              VIEW PROGRAM
+              OPEN PROGRAM
             </Link>
             <Link
               href={`/cardio/programs/${activeProgram.id}/edit`}
@@ -173,12 +173,6 @@ export default function CardioProgramsList({ programs }: Props) {
               >
                 {activatingId === program.id ? 'ACTIVATING...' : 'SET ACTIVE'}
               </button>
-              <Link
-                href={`/cardio/programs/${program.id}`}
-                className="inline-block px-4 py-2 text-primary hover:text-primary-hover font-medium doom-link"
-              >
-                View
-              </Link>
               <Link
                 href={`/cardio/programs/${program.id}/edit`}
                 className="inline-block px-4 py-2 text-muted-foreground hover:text-foreground font-medium doom-link"
