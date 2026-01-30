@@ -59,6 +59,7 @@ export {
   formStateToRequest,
   isValidEquipment,
   isValidIntensityZone,
+  normalizeEquipment,
   sanitizeString,
   safeParseInt,
   safeParseFloat

@@ -6,6 +6,8 @@ import { CheckCircle } from 'lucide-react'
 import {
   EQUIPMENT_LABELS,
   INTENSITY_ZONE_LABELS,
+  normalizeEquipment,
+  isValidIntensityZone,
   type CardioEquipment,
   type IntensityZone
 } from '@/lib/cardio'
@@ -222,11 +224,7 @@ export default function CardioWeekView({
                             EQUIPMENT
                           </span>
                           <p className="text-foreground">
-                            {
-                              EQUIPMENT_LABELS[
-                                session.equipment as CardioEquipment
-                              ]
-                            }
+                            {EQUIPMENT_LABELS[normalizeEquipment(session.equipment)]}
                           </p>
                         </div>
                       )}
@@ -282,11 +280,11 @@ export default function CardioWeekView({
           prescribedSessionId={loggingSession.id}
           prescribedData={{
             name: loggingSession.name,
-            equipment:
-              (loggingSession.equipment as CardioEquipment) || 'other',
+            equipment: normalizeEquipment(loggingSession.equipment),
             targetDuration: loggingSession.targetDuration,
-            intensityZone:
-              (loggingSession.intensityZone as IntensityZone) || undefined
+            intensityZone: loggingSession.intensityZone && isValidIntensityZone(loggingSession.intensityZone)
+              ? loggingSession.intensityZone
+              : undefined
           }}
         />
       )}
