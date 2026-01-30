@@ -64,8 +64,9 @@ export type CurrentCardioWeekData = {
  * Fetches the current week of the active strength program.
  * "Current" is defined as the first incomplete week (or last week if all complete).
  *
- * Uses a SQL subquery to efficiently find the first week where:
- * completed workouts < total workouts
+ * Optimized to use 2 queries instead of 3-4:
+ * 1. Single query to find active program + current week ID
+ * 2. Prisma query to fetch week details with nested data
  *
  * @param userId - The user's ID
  * @returns Current week data or null if no active program
@@ -74,87 +75,71 @@ export async function getCurrentStrengthWeek(
   userId: string
 ): Promise<CurrentStrengthWeekData | null> {
   try {
-    // Step 1: Find active program with minimal fields
-    const activeProgram = await prisma.program.findFirst({
-      where: {
-        userId,
-        isActive: true,
-        isArchived: false
-      },
-      select: {
-        id: true,
-        name: true,
-        _count: {
-          select: { weeks: true }
-        }
-      }
-    })
-
-    if (!activeProgram) {
-      return null
-    }
-
-    const totalWeeks = activeProgram._count.weeks
-
-    if (totalWeeks === 0) {
-      return null
-    }
-
-    // Step 2: Find first incomplete week using SQL subquery
-    // This is more efficient than fetching all weeks and filtering in JS
-    const incompleteWeek = await prisma.$queryRaw<Array<{ id: string; weekNumber: number }>>`
-      SELECT w.id, w."weekNumber"
-      FROM "Week" w
-      WHERE w."programId" = ${activeProgram.id}
-        AND w."userId" = ${userId}
-        AND (
-          SELECT COUNT(*)
-          FROM "Workout" wo
-          WHERE wo."weekId" = w.id
-        ) > (
-          SELECT COUNT(DISTINCT wc."workoutId")
-          FROM "WorkoutCompletion" wc
-          JOIN "Workout" wo2 ON wc."workoutId" = wo2.id
-          WHERE wo2."weekId" = w.id
-            AND wc."userId" = ${userId}
-            AND wc.status = 'completed'
-        )
-      ORDER BY w."weekNumber" ASC
-      LIMIT 1
+    // Step 1: Single query to find active program AND current week
+    // Combines: find program + find incomplete week + fallback to last week
+    const result = await prisma.$queryRaw<Array<{
+      programId: string
+      programName: string
+      totalWeeks: bigint
+      weekId: string
+      weekNumber: number
+    }>>`
+      WITH active_program AS (
+        SELECT p.id, p.name,
+          (SELECT COUNT(*) FROM "Week" WHERE "programId" = p.id) as total_weeks
+        FROM "Program" p
+        WHERE p."userId" = ${userId}
+          AND p."isActive" = true
+          AND p."isArchived" = false
+        LIMIT 1
+      ),
+      incomplete_week AS (
+        SELECT w.id, w."weekNumber"
+        FROM "Week" w, active_program ap
+        WHERE w."programId" = ap.id
+          AND w."userId" = ${userId}
+          AND (
+            SELECT COUNT(*) FROM "Workout" WHERE "weekId" = w.id
+          ) > (
+            SELECT COUNT(DISTINCT wc."workoutId")
+            FROM "WorkoutCompletion" wc
+            JOIN "Workout" wo ON wc."workoutId" = wo.id
+            WHERE wo."weekId" = w.id
+              AND wc."userId" = ${userId}
+              AND wc.status IN ('completed', 'skipped')
+          )
+        ORDER BY w."weekNumber" ASC
+        LIMIT 1
+      ),
+      last_week AS (
+        SELECT w.id, w."weekNumber"
+        FROM "Week" w, active_program ap
+        WHERE w."programId" = ap.id
+          AND w."userId" = ${userId}
+        ORDER BY w."weekNumber" DESC
+        LIMIT 1
+      )
+      SELECT
+        ap.id as "programId",
+        ap.name as "programName",
+        ap.total_weeks as "totalWeeks",
+        COALESCE(iw.id, lw.id) as "weekId",
+        COALESCE(iw."weekNumber", lw."weekNumber") as "weekNumber"
+      FROM active_program ap
+      LEFT JOIN incomplete_week iw ON true
+      LEFT JOIN last_week lw ON true
+      WHERE ap.id IS NOT NULL
     `
 
-    let weekToFetch: { id: string; weekNumber: number } | null = null
-
-    if (incompleteWeek.length > 0) {
-      weekToFetch = incompleteWeek[0]
-    } else {
-      // All weeks complete - fetch last week
-      const lastWeek = await prisma.week.findFirst({
-        where: {
-          programId: activeProgram.id,
-          userId
-        },
-        select: {
-          id: true,
-          weekNumber: true
-        },
-        orderBy: {
-          weekNumber: 'desc'
-        }
-      })
-
-      if (!lastWeek) {
-        return null
-      }
-
-      weekToFetch = lastWeek
+    if (result.length === 0 || !result[0].weekId) {
+      return null
     }
 
-    // Step 3: Fetch the selected week with minimal workout data
+    const { programId, programName, totalWeeks, weekId } = result[0]
+
+    // Step 2: Fetch the week with workout details using Prisma
     const week = await prisma.week.findUnique({
-      where: {
-        id: weekToFetch.id
-      },
+      where: { id: weekId },
       select: {
         id: true,
         weekNumber: true,
@@ -183,12 +168,9 @@ export async function getCurrentStrengthWeek(
     }
 
     return {
-      program: {
-        id: activeProgram.id,
-        name: activeProgram.name
-      },
+      program: { id: programId, name: programName },
       week,
-      totalWeeks
+      totalWeeks: Number(totalWeeks)
     }
   } catch (error) {
     console.error('[getCurrentStrengthWeek] Error fetching current week:', error)
@@ -200,8 +182,9 @@ export async function getCurrentStrengthWeek(
  * Fetches the current week of the active cardio program.
  * "Current" is defined as the first incomplete week (or last week if all complete).
  *
- * Uses a SQL subquery to efficiently find the first week where:
- * completed sessions < total sessions
+ * Optimized to use 2 queries instead of 3-4:
+ * 1. Single query to find active program + current week ID
+ * 2. Prisma query to fetch week details with nested data
  *
  * @param userId - The user's ID
  * @returns Current week data or null if no active program
@@ -210,84 +193,68 @@ export async function getCurrentCardioWeek(
   userId: string
 ): Promise<CurrentCardioWeekData | null> {
   try {
-    // Step 1: Find active program with minimal fields
-    const activeProgram = await prisma.cardioProgram.findFirst({
-      where: {
-        userId,
-        isActive: true,
-        isArchived: false
-      },
-      select: {
-        id: true,
-        name: true,
-        _count: {
-          select: { weeks: true }
-        }
-      }
-    })
-
-    if (!activeProgram) {
-      return null
-    }
-
-    if (activeProgram._count.weeks === 0) {
-      return null
-    }
-
-    // Step 2: Find first incomplete week using SQL subquery
-    const incompleteWeek = await prisma.$queryRaw<Array<{ id: string; weekNumber: number }>>`
-      SELECT cw.id, cw."weekNumber"
-      FROM "CardioWeek" cw
-      WHERE cw."cardioProgramId" = ${activeProgram.id}
-        AND cw."userId" = ${userId}
-        AND (
-          SELECT COUNT(*)
-          FROM "PrescribedCardioSession" pcs
-          WHERE pcs."weekId" = cw.id
-        ) > (
-          SELECT COUNT(DISTINCT lcs."prescribedSessionId")
-          FROM "LoggedCardioSession" lcs
-          JOIN "PrescribedCardioSession" pcs2 ON lcs."prescribedSessionId" = pcs2.id
-          WHERE pcs2."weekId" = cw.id
-            AND lcs."userId" = ${userId}
-            AND lcs.status = 'completed'
-        )
-      ORDER BY cw."weekNumber" ASC
-      LIMIT 1
+    // Step 1: Single query to find active program AND current week
+    // Combines: find program + find incomplete week + fallback to last week
+    const result = await prisma.$queryRaw<Array<{
+      programId: string
+      programName: string
+      weekId: string
+      weekNumber: number
+    }>>`
+      WITH active_program AS (
+        SELECT cp.id, cp.name
+        FROM "CardioProgram" cp
+        WHERE cp."userId" = ${userId}
+          AND cp."isActive" = true
+          AND cp."isArchived" = false
+        LIMIT 1
+      ),
+      incomplete_week AS (
+        SELECT cw.id, cw."weekNumber"
+        FROM "CardioWeek" cw, active_program ap
+        WHERE cw."cardioProgramId" = ap.id
+          AND cw."userId" = ${userId}
+          AND (
+            SELECT COUNT(*) FROM "PrescribedCardioSession" WHERE "weekId" = cw.id
+          ) > (
+            SELECT COUNT(DISTINCT lcs."prescribedSessionId")
+            FROM "LoggedCardioSession" lcs
+            JOIN "PrescribedCardioSession" pcs ON lcs."prescribedSessionId" = pcs.id
+            WHERE pcs."weekId" = cw.id
+              AND lcs."userId" = ${userId}
+              AND lcs.status IN ('completed', 'skipped')
+          )
+        ORDER BY cw."weekNumber" ASC
+        LIMIT 1
+      ),
+      last_week AS (
+        SELECT cw.id, cw."weekNumber"
+        FROM "CardioWeek" cw, active_program ap
+        WHERE cw."cardioProgramId" = ap.id
+          AND cw."userId" = ${userId}
+        ORDER BY cw."weekNumber" DESC
+        LIMIT 1
+      )
+      SELECT
+        ap.id as "programId",
+        ap.name as "programName",
+        COALESCE(iw.id, lw.id) as "weekId",
+        COALESCE(iw."weekNumber", lw."weekNumber") as "weekNumber"
+      FROM active_program ap
+      LEFT JOIN incomplete_week iw ON true
+      LEFT JOIN last_week lw ON true
+      WHERE ap.id IS NOT NULL
     `
 
-    let weekToFetch: { id: string; weekNumber: number } | null = null
-
-    if (incompleteWeek.length > 0) {
-      weekToFetch = incompleteWeek[0]
-    } else {
-      // All weeks complete - fetch last week
-      const lastWeek = await prisma.cardioWeek.findFirst({
-        where: {
-          cardioProgramId: activeProgram.id,
-          userId
-        },
-        select: {
-          id: true,
-          weekNumber: true
-        },
-        orderBy: {
-          weekNumber: 'desc'
-        }
-      })
-
-      if (!lastWeek) {
-        return null
-      }
-
-      weekToFetch = lastWeek
+    if (result.length === 0 || !result[0].weekId) {
+      return null
     }
 
-    // Step 3: Fetch the selected week with session data
+    const { programId, programName, weekId } = result[0]
+
+    // Step 2: Fetch the week with session details using Prisma
     const week = await prisma.cardioWeek.findUnique({
-      where: {
-        id: weekToFetch.id
-      },
+      where: { id: weekId },
       select: {
         id: true,
         weekNumber: true,
@@ -321,10 +288,7 @@ export async function getCurrentCardioWeek(
     }
 
     return {
-      program: {
-        id: activeProgram.id,
-        name: activeProgram.name
-      },
+      program: { id: programId, name: programName },
       week
     }
   } catch (error) {
