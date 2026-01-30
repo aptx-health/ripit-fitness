@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { usePathname } from 'next/navigation'
 import { Settings } from 'lucide-react'
 import { ThemeSelector } from '@/components/ThemeSelector'
 import UserSettingsModal from '@/components/UserSettingsModal'
@@ -16,6 +17,10 @@ export default function Header({ userEmail }: Props) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const { settings, updateSettings } = useUserSettings()
+  const pathname = usePathname()
+
+  const isStrengthActive = pathname.startsWith('/training')
+  const isCardioActive = pathname.startsWith('/cardio')
 
   return (
     <>
@@ -47,13 +52,21 @@ export default function Header({ userEmail }: Props) {
                 <div className="h-6 w-px bg-border" />
                 <Link
                   href="/training"
-                  className="text-xs sm:text-sm font-semibold text-foreground hover:text-accent doom-link uppercase tracking-wider"
+                  className={`text-xs sm:text-sm font-semibold uppercase tracking-wider transition-colors ${
+                    isStrengthActive
+                      ? 'text-accent border-b-2 border-accent pb-0.5'
+                      : 'text-foreground hover:text-accent doom-link'
+                  }`}
                 >
                   Strength
                 </Link>
                 <Link
                   href="/cardio"
-                  className="text-xs sm:text-sm font-semibold text-foreground hover:text-accent doom-link uppercase tracking-wider"
+                  className={`text-xs sm:text-sm font-semibold uppercase tracking-wider transition-colors ${
+                    isCardioActive
+                      ? 'text-accent border-b-2 border-accent pb-0.5'
+                      : 'text-foreground hover:text-accent doom-link'
+                  }`}
                 >
                   Cardio
                 </Link>

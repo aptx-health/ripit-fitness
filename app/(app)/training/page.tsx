@@ -42,28 +42,8 @@ export default async function TrainingPage({ searchParams }: Props) {
   ])
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-4xl font-bold text-foreground doom-title mb-2">
-              STRENGTH TRAINING
-            </h1>
-            <p className="text-muted-foreground">
-              Track your strength workouts and monitor progress
-            </p>
-          </div>
-          <div className="flex gap-3">
-            <Link
-              href="/programs"
-              className="px-6 py-3 border border-primary text-primary hover:bg-primary-muted doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
-            >
-              PROGRAMS
-            </Link>
-          </div>
-        </div>
-
+    <div className="min-h-screen bg-background sm:px-6 py-4">
+      <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
         {/* Week from Active Program */}
         {weekData ? (
           <StrengthWeekView

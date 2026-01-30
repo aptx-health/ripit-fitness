@@ -118,8 +118,8 @@ export default function CardioWeekView({
 
   return (
     <>
-      <div className="bg-card border border-border doom-noise doom-card p-6">
-        <div className="flex justify-between items-start mb-6">
+      <div className="bg-card border-y sm:border border-border doom-noise doom-card p-4 sm:p-6">
+        <div className="flex justify-between items-start mb-4 sm:mb-6">
           <WeekNavigator
             currentWeek={week.weekNumber}
             totalWeeks={totalWeeks}
