@@ -112,6 +112,9 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
   // Collapsed workouts state
   const [collapsedWorkouts, setCollapsedWorkouts] = useState<Set<string>>(new Set())
 
+  // Week pagination state
+  const [currentWeekIndex, setCurrentWeekIndex] = useState(0)
+
   // Workout action modals
   const [showDuplicateWorkoutModal, setShowDuplicateWorkoutModal] = useState(false)
   const [showSwapWorkoutModal, setShowSwapWorkoutModal] = useState(false)
@@ -185,8 +188,13 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
       }
 
       const { week } = await response.json()
-      setWeeks(prev => [...prev, week].sort((a, b) => a.weekNumber - b.weekNumber))
-      
+      setWeeks(prev => {
+        const updated = [...prev, week].sort((a, b) => a.weekNumber - b.weekNumber)
+        // Navigate to the new week
+        setCurrentWeekIndex(updated.length - 1)
+        return updated
+      })
+
       console.log('Week added successfully:', week)
     } catch (error) {
       console.error('Error adding week:', error)
@@ -418,8 +426,15 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
         throw new Error(error.error || 'Failed to delete week')
       }
 
-      // Remove week from state
-      setWeeks(prev => prev.filter(w => w.id !== weekId))
+      // Remove week from state and adjust pagination
+      setWeeks(prev => {
+        const updated = prev.filter(w => w.id !== weekId)
+        // Adjust current week index if needed
+        if (currentWeekIndex >= updated.length && updated.length > 0) {
+          setCurrentWeekIndex(updated.length - 1)
+        }
+        return updated
+      })
 
       console.log('Week deleted successfully')
     } catch (error) {
@@ -428,7 +443,7 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
     } finally {
       setDeletingWeekId(null)
     }
-  }, [])
+  }, [currentWeekIndex])
 
   const handleDuplicateWeek = useCallback(async (weekId: string) => {
     setIsLoading(true)
@@ -446,8 +461,12 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
 
       const { week: newWeek } = await response.json()
 
-      // Add duplicated week to state
-      setWeeks(prev => [...prev, newWeek])
+      // Add duplicated week to state and navigate to it
+      setWeeks(prev => {
+        const updated = [...prev, newWeek]
+        setCurrentWeekIndex(updated.length - 1)
+        return updated
+      })
 
       console.log('Week duplicated successfully')
     } catch (error) {
@@ -820,7 +839,47 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
               </div>
             ) : (
               <div className="space-y-6 overflow-visible">
-                {weeks.map((week) => (
+                {/* Week Navigation */}
+                <div className="flex items-center justify-between gap-4 mb-4">
+                  <button
+                    onClick={() => setCurrentWeekIndex(prev => Math.max(0, prev - 1))}
+                    disabled={currentWeekIndex === 0}
+                    className={`p-2 border shrink-0 ${
+                      currentWeekIndex > 0
+                        ? 'border-border text-foreground hover:bg-muted doom-focus-ring'
+                        : 'border-border/50 text-muted-foreground cursor-not-allowed opacity-50'
+                    }`}
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+
+                  <div className="flex-1 text-center">
+                    <h3 className="text-lg font-bold text-foreground doom-heading">
+                      WEEK {weeks[currentWeekIndex]?.weekNumber} OF {weeks.length}
+                    </h3>
+                  </div>
+
+                  <button
+                    onClick={() => setCurrentWeekIndex(prev => Math.min(weeks.length - 1, prev + 1))}
+                    disabled={currentWeekIndex >= weeks.length - 1}
+                    className={`p-2 border shrink-0 ${
+                      currentWeekIndex < weeks.length - 1
+                        ? 'border-border text-foreground hover:bg-muted doom-focus-ring'
+                        : 'border-border/50 text-muted-foreground cursor-not-allowed opacity-50'
+                    }`}
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Current Week Content */}
+                {weeks[currentWeekIndex] && (() => {
+                  const week = weeks[currentWeekIndex]
+                  return (
                   <div key={week.id} className="border border-border p-4 doom-noise doom-corners !overflow-visible">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
@@ -1032,7 +1091,8 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
                       </div>
                     )}
                   </div>
-                ))}
+                  )
+                })()}
 
                 <button
                   onClick={() => addWeek()}
