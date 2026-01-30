@@ -1291,7 +1291,7 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
 
       {/* Sidebar - FAU Visualization */}
       <div className="lg:col-span-1">
-        <FAUVolumeVisualization weeks={editMode ? Array.from(weeksCache.values()) : weeks} />
+        <FAUVolumeVisualization week={getCurrentWeekData()} />
       </div>
 
       {/* Exercise Search Modal */}
