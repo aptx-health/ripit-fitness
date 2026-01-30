@@ -787,14 +787,29 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
           }),
         })
 
+        const data = await response.json()
+
         if (!response.ok) {
-          const error = await response.json()
-          throw new Error(error.error || 'Failed to update exercise')
+          throw new Error(data.error || 'Failed to update exercise')
         }
 
-        const { exercise: updatedExercise } = await response.json()
+        const updatedExercise = data.exercises?.[0]
+
+        if (!updatedExercise) {
+          throw new Error('No updated exercise returned from server')
+        }
 
         // Update the weeks state to include the updated exercise
+        // Map the API response to match our Exercise type (exerciseDefinition.name -> name)
+        const mappedExercise: Exercise = {
+          id: updatedExercise.id,
+          name: updatedExercise.exerciseDefinition?.name || editingExercise.name,
+          order: updatedExercise.order ?? editingExercise.order,
+          notes: updatedExercise.notes,
+          prescribedSets: updatedExercise.prescribedSets,
+          exerciseDefinition: updatedExercise.exerciseDefinition || editingExercise.exerciseDefinition
+        }
+
         updateWeekData(week => ({
           ...week,
           workouts: week.workouts.map(workout =>
@@ -802,7 +817,7 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
               ? {
                   ...workout,
                   exercises: workout.exercises.map(ex =>
-                    ex.id === editingExercise.id ? updatedExercise : ex
+                    ex.id === editingExercise.id ? mappedExercise : ex
                   )
                 }
               : workout
