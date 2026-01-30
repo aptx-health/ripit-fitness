@@ -238,6 +238,13 @@ export const EQUIPMENT_PROFILES: Record<CardioEquipment, EquipmentProfile> = {
 // ============================================
 
 /**
+ * Safely get equipment profile, falling back to 'other' if not found
+ */
+function getProfile(equipment: CardioEquipment): EquipmentProfile {
+  return EQUIPMENT_PROFILES[equipment] ?? EQUIPMENT_PROFILES.other
+}
+
+/**
  * Get metrics for equipment (either custom user preferences or default profile)
  * @param equipment - CardioEquipment type
  * @param userPreferences - Optional user custom metrics
@@ -251,7 +258,7 @@ export function getMetricsForEquipment(
     return userPreferences
   }
 
-  const profile = EQUIPMENT_PROFILES[equipment]
+  const profile = getProfile(equipment)
   return [...profile.primary, ...profile.secondary]
 }
 
@@ -261,7 +268,7 @@ export function getMetricsForEquipment(
  * @returns Array of primary metric names
  */
 export function getPrimaryMetrics(equipment: CardioEquipment): CardioMetric[] {
-  return EQUIPMENT_PROFILES[equipment].primary
+  return getProfile(equipment).primary
 }
 
 /**
@@ -270,7 +277,7 @@ export function getPrimaryMetrics(equipment: CardioEquipment): CardioMetric[] {
  * @returns Array of secondary metric names
  */
 export function getSecondaryMetrics(equipment: CardioEquipment): CardioMetric[] {
-  return EQUIPMENT_PROFILES[equipment].secondary
+  return getProfile(equipment).secondary
 }
 
 /**
