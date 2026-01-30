@@ -1040,7 +1040,7 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
 
                   <div className="flex-1 text-center">
                     <h3 className="text-lg font-bold text-foreground doom-heading">
-                      WEEK {currentWeekNumber} OF {totalWeeks}
+                      WEEK {currentWeekIndex + 1} OF {totalWeeks}
                       {isLoadingWeek && <span className="ml-2 text-muted-foreground text-sm">Loading...</span>}
                     </h3>
                   </div>
