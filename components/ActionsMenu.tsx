@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { MoreVertical, AlertTriangle } from 'lucide-react'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 
@@ -137,14 +138,14 @@ export default function ActionsMenu({
         </DropdownMenu.Portal>
       </DropdownMenu.Root>
 
-      {/* Confirmation Dialog */}
-      {confirmingAction && (
-        <div className="fixed inset-0 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center z-[60] p-4">
-          <div className="bg-card border-2 border-border rounded-lg p-6 text-center max-w-sm w-full shadow-xl">
+      {/* Confirmation Dialog - Portal to body for z-index */}
+      {confirmingAction && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center z-[9999] p-4">
+          <div className="bg-card border-2 border-border p-6 text-center max-w-sm w-full shadow-xl doom-corners doom-noise">
             <div className="text-warning mb-4 flex justify-center">
               <AlertTriangle size={48} strokeWidth={2} />
             </div>
-            <h3 className="text-lg font-semibold text-foreground mb-2">
+            <h3 className="text-lg font-bold text-foreground mb-2 doom-heading uppercase">
               Confirm Action
             </h3>
             <p className="text-sm text-muted-foreground mb-6">
@@ -153,23 +154,26 @@ export default function ActionsMenu({
             <div className="flex gap-3">
               <button
                 onClick={handleCancelConfirmation}
-                className="flex-1 px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-secondary transition-colors font-medium"
+                className="flex-1 px-4 py-2 bg-muted text-foreground hover:bg-secondary transition-colors font-semibold uppercase tracking-wide border border-border"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmAction}
-                className={`flex-1 px-4 py-2 rounded-lg transition-colors font-medium ${
+                className={`flex-1 px-4 py-2 transition-colors font-semibold uppercase tracking-wide doom-button-3d ${
                   confirmingAction.variant === 'danger'
                     ? 'bg-error text-error-foreground hover:bg-error-hover'
-                    : 'bg-primary text-primary-foreground hover:bg-primary-hover'
+                    : confirmingAction.variant === 'warning'
+                      ? 'bg-warning text-warning-foreground hover:bg-warning-hover'
+                      : 'bg-primary text-primary-foreground hover:bg-primary-hover'
                 }`}
               >
                 Confirm
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   )
