@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Star } from 'lucide-react'
 import * as Tabs from '@radix-ui/react-tabs'
 import CardioWeekView from '@/components/CardioWeekView'
 import CardioHistoryList from '@/components/CardioHistoryList'
@@ -54,7 +55,7 @@ export default function CardioTabs({ weekData, historyCount }: Props) {
               : 'text-muted-foreground hover:text-foreground'
           }`}
         >
-          Current
+          Active Plan
         </Tabs.Trigger>
         <Tabs.Trigger
           value="history"
@@ -97,8 +98,8 @@ function NoActiveProgram() {
       <h2 className="text-2xl font-bold text-foreground doom-heading mb-2">
         NO ACTIVE PROGRAM
       </h2>
-      <p className="text-muted-foreground mb-4">
-        Activate a cardio program to start tracking sessions
+      <p className="text-muted-foreground mb-6">
+        Go to Cardio Programs and activate one <Star size={14} className="inline text-accent" /> to see it here.
       </p>
       <a
         href="/cardio/programs"

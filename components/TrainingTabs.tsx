@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Star } from 'lucide-react'
 import * as Tabs from '@radix-ui/react-tabs'
 import StrengthWeekView from '@/components/StrengthWeekView'
 import WorkoutHistoryList from '@/components/WorkoutHistoryList'
@@ -49,7 +50,7 @@ export default function TrainingTabs({ weekData, historyCount }: Props) {
               : 'text-muted-foreground hover:text-foreground'
           }`}
         >
-          Current
+          Active Plan
         </Tabs.Trigger>
         <Tabs.Trigger
           value="history"
@@ -72,7 +73,7 @@ export default function TrainingTabs({ weekData, historyCount }: Props) {
             totalWeeks={weekData.totalWeeks}
           />
         ) : (
-          <NoActiveProgram type="strength" />
+          <NoActiveProgram />
         )}
       </Tabs.Content>
 
@@ -86,19 +87,17 @@ export default function TrainingTabs({ weekData, historyCount }: Props) {
   )
 }
 
-function NoActiveProgram({ type }: { type: 'strength' | 'cardio' }) {
-  const href = type === 'strength' ? '/programs' : '/cardio/programs'
-
+function NoActiveProgram() {
   return (
     <div className="bg-card border-y sm:border border-border doom-noise doom-card p-8 text-center">
       <h2 className="text-2xl font-bold text-foreground doom-heading mb-2">
         NO ACTIVE PROGRAM
       </h2>
-      <p className="text-muted-foreground mb-4">
-        Activate a {type} training program to start tracking workouts
+      <p className="text-muted-foreground mb-6">
+        Go to Programs and activate one <Star size={14} className="inline text-accent" /> to see it here.
       </p>
       <a
-        href={href}
+        href="/programs"
         className="inline-block px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
       >
         VIEW PROGRAMS
