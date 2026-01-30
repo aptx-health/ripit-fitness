@@ -365,10 +365,9 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
       return
     }
 
-    if (programId) {
-      router.push(`/programs/${programId}`)
-    }
-  }, [programId, router, editMode, weeksCache, weeks])
+    // Redirect to training page (programs are viewed there now)
+    router.push('/training')
+  }, [router, editMode, weeksCache, weeks])
 
   const handleAddExercise = useCallback((workoutId: string) => {
     setSelectedWorkoutId(workoutId)
