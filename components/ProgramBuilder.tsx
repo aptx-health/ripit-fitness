@@ -104,6 +104,7 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
   const [deletingExerciseId, setDeletingExerciseId] = useState<string | null>(null)
   const [deletingWorkoutId, setDeletingWorkoutId] = useState<string | null>(null)
   const [deletingWeekId, setDeletingWeekId] = useState<string | null>(null)
+  const [duplicatingWeekId, setDuplicatingWeekId] = useState<string | null>(null)
 
   // Collapsed workouts state
   const [collapsedWorkouts, setCollapsedWorkouts] = useState<Set<string>>(new Set())
@@ -609,7 +610,7 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
   }, [editMode, currentWeekIndex])
 
   const handleDuplicateWeek = useCallback(async (weekId: string) => {
-    setIsLoading(true)
+    setDuplicatingWeekId(weekId)
     setError(null)
 
     try {
@@ -645,7 +646,7 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
       console.error('Error duplicating week:', error)
       setError(error instanceof Error ? error.message : 'Failed to duplicate week')
     } finally {
-      setIsLoading(false)
+      setDuplicatingWeekId(null)
     }
   }, [editMode])
 
@@ -1119,10 +1120,10 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
                         <DropdownMenu.Root>
                           <DropdownMenu.Trigger asChild>
                             <button
-                              disabled={isLoading || deletingWeekId === week.id}
+                              disabled={isLoading || deletingWeekId === week.id || duplicatingWeekId === week.id}
                               className="px-3 py-1 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted border border-border transition-colors disabled:opacity-50 uppercase tracking-wide"
                             >
-                              Options
+                              {duplicatingWeekId === week.id ? 'Duplicating...' : 'Options'}
                             </button>
                           </DropdownMenu.Trigger>
 
@@ -1133,10 +1134,10 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
                             >
                               <DropdownMenu.Item
                                 onClick={() => handleDuplicateWeek(week.id)}
-                                disabled={isLoading}
+                                disabled={duplicatingWeekId === week.id}
                                 className="px-4 py-2.5 text-sm text-foreground hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-50 cursor-pointer outline-none"
                               >
-                                Duplicate Week
+                                {duplicatingWeekId === week.id ? 'Duplicating...' : 'Duplicate Week'}
                               </DropdownMenu.Item>
                               <DropdownMenu.Item
                                 onClick={() => handleDeleteWeek(week.id, week.weekNumber)}
