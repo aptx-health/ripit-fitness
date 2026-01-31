@@ -1207,8 +1207,8 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
                                     {isCollapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
                                   </button>
                                   <span className="font-medium text-foreground doom-heading">{workout.name}</span>
-                                  <span className="text-xs text-muted-foreground">
-                                    ({workout.exercises.length} exercise{workout.exercises.length !== 1 ? 's' : ''})
+                                  <span className="text-sm text-muted-foreground">
+                                    ({workout.exercises.length} exercise{workout.exercises.length !== 1 ? 's' : ''}, {workout.exercises.reduce((sum, ex) => sum + ex.prescribedSets.length, 0)} sets)
                                   </span>
 
                                   {/* Workout Menu */}
