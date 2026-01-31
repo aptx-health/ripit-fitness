@@ -1176,7 +1176,7 @@
   --card: #e6e9ef;        /* Latte Mantle */
   --card-foreground: #4c4f69;
   --muted: #ccd0da;       /* Latte Surface 0 */
-  --muted-foreground: #8c8fa1;  /* Latte Overlay 1 */
+  --muted-foreground: #5c5f77;  /* Latte Subtext 1 - stronger contrast */
 
   /* Border colors */
   --border: #acb0be;      /* Latte Surface 2 */
@@ -1245,7 +1245,7 @@
   --card: #313244;        /* Mocha Surface 0 */
   --card-foreground: #cdd6f4;
   --muted: #45475a;       /* Mocha Surface 1 */
-  --muted-foreground: #7f849c;  /* Mocha Overlay 1 */
+  --muted-foreground: #a6adc8;  /* Mocha Subtext 0 - better contrast */
 
   /* Border colors */
   --border: #585b70;      /* Mocha Surface 2 */
