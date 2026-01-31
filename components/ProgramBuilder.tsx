@@ -2,10 +2,11 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronDown, ChevronRight, MoreVertical, Trash2, Pencil } from 'lucide-react'
+import { ChevronDown, ChevronRight, MoreVertical } from 'lucide-react'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import ExerciseSearchModal from './ExerciseSearchModal'
 import FAUVolumeVisualization from './FAUVolumeVisualization'
+import SortableExerciseList from './SortableExerciseList'
 
 type Week = {
   id: string
@@ -380,6 +381,51 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
     setEditingExercise(exercise)
     setShowExerciseModal(true)
   }, [])
+
+  const handleReorderExercises = useCallback(async (workoutId: string, reorderedExercises: Exercise[]) => {
+    // Store original state for rollback
+    const originalCache = editMode ? new Map(weeksCache) : null
+    const originalWeeks = !editMode ? [...weeks] : null
+
+    // Optimistic update
+    updateWeekData(week => ({
+      ...week,
+      workouts: week.workouts.map(workout =>
+        workout.id === workoutId
+          ? { ...workout, exercises: reorderedExercises }
+          : workout
+      )
+    }))
+
+    try {
+      const response = await fetch(`/api/workouts/${workoutId}/exercises/reorder`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          exercises: reorderedExercises.map(e => ({
+            exerciseId: e.id,
+            order: e.order
+          }))
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to reorder exercises')
+      }
+
+      console.log('Exercises reordered successfully')
+    } catch (error) {
+      console.error('Error reordering exercises:', error)
+      setError(error instanceof Error ? error.message : 'Failed to reorder exercises')
+
+      // Rollback on failure
+      if (editMode && originalCache) {
+        setWeeksCache(originalCache)
+      } else if (!editMode && originalWeeks) {
+        setWeeks(originalWeeks)
+      }
+    }
+  }, [editMode, weeksCache, weeks, updateWeekData])
 
   const handleStartWorkoutEdit = useCallback((workoutId: string, currentName: string) => {
     setEditingWorkoutId(workoutId)
@@ -787,14 +833,29 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
           }),
         })
 
+        const data = await response.json()
+
         if (!response.ok) {
-          const error = await response.json()
-          throw new Error(error.error || 'Failed to update exercise')
+          throw new Error(data.error || 'Failed to update exercise')
         }
 
-        const { exercise: updatedExercise } = await response.json()
+        const updatedExercise = data.exercises?.[0]
+
+        if (!updatedExercise) {
+          throw new Error('No updated exercise returned from server')
+        }
 
         // Update the weeks state to include the updated exercise
+        // Map the API response to match our Exercise type (exerciseDefinition.name -> name)
+        const mappedExercise: Exercise = {
+          id: updatedExercise.id,
+          name: updatedExercise.exerciseDefinition?.name || editingExercise.name,
+          order: updatedExercise.order ?? editingExercise.order,
+          notes: updatedExercise.notes,
+          prescribedSets: updatedExercise.prescribedSets,
+          exerciseDefinition: updatedExercise.exerciseDefinition || editingExercise.exerciseDefinition
+        }
+
         updateWeekData(week => ({
           ...week,
           workouts: week.workouts.map(workout =>
@@ -802,7 +863,7 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
               ? {
                   ...workout,
                   exercises: workout.exercises.map(ex =>
-                    ex.id === editingExercise.id ? updatedExercise : ex
+                    ex.id === editingExercise.id ? mappedExercise : ex
                   )
                 }
               : workout
@@ -1025,7 +1086,7 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
 
                   <div className="flex-1 text-center">
                     <h3 className="text-lg font-bold text-foreground doom-heading">
-                      WEEK {currentWeekNumber} OF {totalWeeks}
+                      WEEK {currentWeekIndex + 1} OF {totalWeeks}
                       {isLoadingWeek && <span className="ml-2 text-muted-foreground text-sm">Loading...</span>}
                     </h3>
                   </div>
@@ -1212,39 +1273,15 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
                                 {workout.exercises.length === 0 ? (
                                   <div className="text-muted-foreground text-xs mb-2">No exercises yet</div>
                                 ) : (
-                                  <div className="space-y-2 mb-2">
-                                    {workout.exercises.map((exercise) => (
-                                      <div key={exercise.id} className="flex items-center justify-between bg-muted p-2">
-                                        <div className="flex-1">
-                                          <span className="font-medium text-sm text-foreground">{exercise.name}</span>
-                                          <span className="text-muted-foreground text-sm ml-2">
-                                            ({exercise.prescribedSets.length} set{exercise.prescribedSets.length !== 1 ? 's' : ''})
-                                          </span>
-                                          {exercise.notes && (
-                                            <div className="text-xs text-muted-foreground mt-1">{exercise.notes}</div>
-                                          )}
-                                        </div>
-                                        <div className="flex gap-1">
-                                          <button
-                                            onClick={() => handleEditExercise(exercise, workout.id)}
-                                            disabled={isLoading || deletingExerciseId === exercise.id}
-                                            className="p-1.5 sm:px-2 sm:py-1 bg-secondary text-secondary-foreground text-xs hover:bg-secondary-hover disabled:opacity-50 font-semibold uppercase"
-                                          >
-                                            <Pencil size={14} className="sm:hidden" />
-                                            <span className="hidden sm:inline">Edit</span>
-                                          </button>
-                                          <button
-                                            onClick={() => handleDeleteExercise(exercise.id, exercise.name)}
-                                            disabled={deletingExerciseId === exercise.id}
-                                            className="p-1.5 sm:px-2 sm:py-1 bg-error text-error-foreground text-xs hover:bg-error-hover disabled:opacity-50 font-semibold uppercase"
-                                          >
-                                            <Trash2 size={14} className="sm:hidden" />
-                                            <span className="hidden sm:inline">{deletingExerciseId === exercise.id ? 'Deleting...' : 'Delete'}</span>
-                                          </button>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
+                                  <SortableExerciseList
+                                    exercises={workout.exercises}
+                                    workoutId={workout.id}
+                                    onReorder={handleReorderExercises}
+                                    onEditExercise={(exercise) => handleEditExercise(exercise, workout.id)}
+                                    onDeleteExercise={handleDeleteExercise}
+                                    deletingExerciseId={deletingExerciseId}
+                                    isLoading={isLoading}
+                                  />
                                 )}
                                 <button
                                   onClick={() => handleAddExercise(workout.id)}
