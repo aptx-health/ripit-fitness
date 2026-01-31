@@ -77,20 +77,20 @@ export default function CommunityProgramsView({
   }
 
   return (
-    <div className="min-h-screen bg-background pb-safe">
+    <div className="min-h-screen bg-background pb-safe doom-page-enter">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           <Link
             href="/programs"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-4"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-4 uppercase tracking-wider font-medium"
           >
             <ArrowLeft size={16} />
             Back to My Programs
           </Link>
 
-          <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">
-            Community Programs
+          <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2 doom-title uppercase tracking-wider">
+            COMMUNITY PROGRAMS
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground">
             Discover and add training programs shared by the community
@@ -102,30 +102,30 @@ export default function CommunityProgramsView({
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => handleTypeChange('all')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors text-sm sm:text-base ${
+              className={`px-4 py-2 font-semibold transition-colors text-sm sm:text-base uppercase tracking-wider doom-focus-ring ${
                 selectedType === 'all'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted text-foreground hover:bg-muted/80'
+                  ? 'bg-primary text-primary-foreground doom-button-3d'
+                  : 'border-2 border-border text-foreground hover:border-primary hover:text-primary'
               }`}
             >
-              All Programs ({communityPrograms.length})
+              All ({communityPrograms.length})
             </button>
             <button
               onClick={() => handleTypeChange('strength')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors text-sm sm:text-base ${
+              className={`px-4 py-2 font-semibold transition-colors text-sm sm:text-base uppercase tracking-wider doom-focus-ring ${
                 selectedType === 'strength'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted text-foreground hover:bg-muted/80'
+                  ? 'bg-primary text-primary-foreground doom-button-3d'
+                  : 'border-2 border-border text-foreground hover:border-primary hover:text-primary'
               }`}
             >
               Strength ({communityPrograms.filter((p) => p.programType === 'strength').length})
             </button>
             <button
               onClick={() => handleTypeChange('cardio')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors text-sm sm:text-base ${
+              className={`px-4 py-2 font-semibold transition-colors text-sm sm:text-base uppercase tracking-wider doom-focus-ring ${
                 selectedType === 'cardio'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted text-foreground hover:bg-muted/80'
+                  ? 'bg-primary text-primary-foreground doom-button-3d'
+                  : 'border-2 border-border text-foreground hover:border-primary hover:text-primary'
               }`}
             >
               Cardio ({communityPrograms.filter((p) => p.programType === 'cardio').length})
@@ -143,18 +143,23 @@ export default function CommunityProgramsView({
 
         {/* Empty State */}
         {filteredPrograms.length === 0 ? (
-          <div className="text-center py-12 sm:py-16">
-            <p className="text-base sm:text-lg text-muted-foreground">
+          <div className="bg-card border border-border p-12 text-center doom-noise doom-corners">
+            <h2 className="text-xl font-semibold text-foreground mb-2 doom-heading uppercase tracking-wider">
               {selectedType === 'all'
-                ? 'No community programs yet. Be the first to publish!'
-                : `No ${selectedType} programs published yet.`}
+                ? 'NO COMMUNITY PROGRAMS YET'
+                : `NO ${selectedType.toUpperCase()} PROGRAMS YET`}
+            </h2>
+            <p className="text-muted-foreground mb-6">
+              {selectedType === 'all'
+                ? 'Be the first to publish a program!'
+                : `No ${selectedType} programs have been published yet.`}
             </p>
             {selectedType !== 'all' && (
               <button
                 onClick={() => handleTypeChange('all')}
-                className="mt-4 text-sm text-primary hover:text-primary-hover transition-colors"
+                className="px-4 py-2 border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors uppercase tracking-wider font-semibold doom-focus-ring"
               >
-                View all programs
+                VIEW ALL PROGRAMS
               </button>
             )}
           </div>
@@ -177,9 +182,9 @@ export default function CommunityProgramsView({
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="px-3 sm:px-4 py-2 rounded-lg border border-border text-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:bg-muted transition-colors text-sm sm:text-base"
+                  className="px-3 sm:px-4 py-2 border-2 border-border text-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:border-primary hover:text-primary transition-colors text-sm sm:text-base uppercase tracking-wider font-semibold doom-focus-ring"
                 >
-                  Previous
+                  Prev
                 </button>
 
                 <div className="flex gap-1 sm:gap-2">
@@ -212,10 +217,10 @@ export default function CommunityProgramsView({
                       <button
                         key={page}
                         onClick={() => handlePageChange(page)}
-                        className={`px-3 sm:px-4 py-2 rounded-lg transition-colors text-sm sm:text-base ${
+                        className={`px-3 sm:px-4 py-2 transition-colors text-sm sm:text-base font-semibold doom-focus-ring ${
                           currentPage === page
-                            ? 'bg-primary text-primary-foreground'
-                            : 'border border-border text-foreground hover:bg-muted'
+                            ? 'bg-primary text-primary-foreground doom-button-3d'
+                            : 'border-2 border-border text-foreground hover:border-primary hover:text-primary'
                         }`}
                       >
                         {page}
@@ -227,7 +232,7 @@ export default function CommunityProgramsView({
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className="px-3 sm:px-4 py-2 rounded-lg border border-border text-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:bg-muted transition-colors text-sm sm:text-base"
+                  className="px-3 sm:px-4 py-2 border-2 border-border text-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:border-primary hover:text-primary transition-colors text-sm sm:text-base uppercase tracking-wider font-semibold doom-focus-ring"
                 >
                   Next
                 </button>
