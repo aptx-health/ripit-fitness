@@ -67,7 +67,8 @@ export default async function EditProgramPage({ params, searchParams }: Props) {
                   secondaryFAUs: true
                 }
               }
-            }
+            },
+            orderBy: { order: 'asc' }
           }
         },
         orderBy: { dayNumber: 'asc' }
