@@ -26,7 +26,8 @@ export async function DELETE(
               include: {
                 prescribedSets: true,
                 loggedSets: true
-              }
+              },
+              orderBy: { order: 'asc' }
             }
           }
         },

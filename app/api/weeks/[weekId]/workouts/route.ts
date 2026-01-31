@@ -72,7 +72,8 @@ export async function POST(
           exercises: {
             include: {
               prescribedSets: true
-            }
+            },
+            orderBy: { order: 'asc' }
           }
         }
       })
