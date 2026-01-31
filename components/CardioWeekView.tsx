@@ -56,6 +56,7 @@ export default function CardioWeekView({
   const router = useRouter()
   const [loggingSession, setLoggingSession] = useState<Session | null>(null)
   const [skippingSession, setSkippingSession] = useState<string | null>(null)
+  const [unskippingSession, setUnskippingSession] = useState<string | null>(null)
   const [completingWeek, setCompletingWeek] = useState(false)
 
   const handleSkipSession = async (sessionId: string) => {
@@ -75,6 +76,26 @@ export default function CardioWeekView({
       console.error('Error skipping session:', error)
     } finally {
       setSkippingSession(null)
+    }
+  }
+
+  const handleUnskipSession = async (sessionId: string) => {
+    setUnskippingSession(sessionId)
+    try {
+      const response = await fetch(`/api/cardio/sessions/${sessionId}/clear`, {
+        method: 'POST'
+      })
+
+      if (response.ok) {
+        router.refresh()
+      } else {
+        const data = await response.json()
+        console.error('Failed to unskip session:', data.error)
+      }
+    } catch (error) {
+      console.error('Error unskipping session:', error)
+    } finally {
+      setUnskippingSession(null)
     }
   }
 
@@ -141,6 +162,7 @@ export default function CardioWeekView({
             const isCompleted = latestLog && latestLog.status === 'completed'
             const isSkipped = latestLog && latestLog.status === 'skipped'
             const isSkipping = skippingSession === session.id
+            const isUnskipping = unskippingSession === session.id
 
             return (
               <div
@@ -149,13 +171,13 @@ export default function CardioWeekView({
                   isCompleted
                     ? 'border-success-border bg-success-muted/50 doom-workout-completed'
                     : isSkipped
-                      ? 'border-muted-foreground bg-muted opacity-60'
+                      ? 'border-muted-foreground/50 bg-muted/50'
                       : 'border-border bg-muted'
                 }`}
               >
-                <div className="flex justify-between items-start">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
                       <h3 className="text-lg font-bold text-foreground doom-heading">
                         DAY {session.dayNumber}: {session.name}
                       </h3>
@@ -176,7 +198,7 @@ export default function CardioWeekView({
                         </span>
                       )}
                       {isSkipped && (
-                        <span className="doom-badge bg-muted-foreground/20 text-muted-foreground">
+                        <span className="doom-badge bg-muted-foreground/30 text-foreground/70">
                           <svg
                             className="w-3 h-3"
                             fill="none"
@@ -238,32 +260,35 @@ export default function CardioWeekView({
                     )}
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-row items-center gap-2">
+                    {/* Primary action button */}
+                    {isSkipped ? (
+                      <button
+                        onClick={() => handleUnskipSession(session.id)}
+                        disabled={isUnskipping}
+                        className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider text-sm disabled:opacity-50"
+                      >
+                        {isUnskipping ? 'RESTORING...' : 'UNSKIP'}
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setLoggingSession(session)}
+                        className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider text-sm"
+                      >
+                        {isCompleted ? 'LOG AGAIN' : 'LOG SESSION'}
+                      </button>
+                    )}
+
                     {/* Skip button - only show if no logged status */}
                     {!latestLog && (
                       <button
                         onClick={() => handleSkipSession(session.id)}
                         disabled={isSkipping}
-                        className="px-3 py-2 border border-muted-foreground text-muted-foreground hover:bg-muted doom-focus-ring text-sm font-medium disabled:opacity-50"
+                        className="px-3 py-2 border-2 border-border text-foreground bg-transparent hover:bg-muted hover:border-primary active:bg-muted/80 doom-focus-ring text-sm font-semibold uppercase tracking-wider disabled:opacity-50 transition-colors"
                       >
                         {isSkipping ? 'SKIPPING...' : 'SKIP'}
                       </button>
                     )}
-
-                    <button
-                      onClick={() => setLoggingSession(session)}
-                      className={`px-4 py-2 ${
-                        isSkipped
-                          ? 'bg-secondary text-secondary-foreground hover:bg-secondary-hover doom-button-3d'
-                          : 'bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d'
-                      } doom-focus-ring font-semibold uppercase tracking-wider text-sm`}
-                    >
-                      {isCompleted
-                        ? 'LOG AGAIN'
-                        : isSkipped
-                          ? 'LOG WORKOUT'
-                          : 'LOG WORKOUT'}
-                    </button>
                   </div>
                 </div>
               </div>
