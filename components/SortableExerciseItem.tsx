@@ -74,30 +74,27 @@ export default function SortableExerciseItem({
           <GripVertical size={16} />
         </button>
         <div className="flex-1">
-          <span className="font-medium text-sm text-foreground">{exercise.name}</span>
-          <span className="text-muted-foreground text-sm ml-2">
+          <span className="font-medium text-foreground">{exercise.name}</span>
+          <span className="text-muted-foreground ml-2">
             ({exercise.prescribedSets.length} set{exercise.prescribedSets.length !== 1 ? 's' : ''})
           </span>
-          {exercise.notes && (
-            <div className="text-xs text-muted-foreground mt-1">{exercise.notes}</div>
-          )}
         </div>
       </div>
-      <div className="flex gap-1">
+      <div className="flex gap-2">
         <button
           onClick={onEdit}
           disabled={isLoading || isDeleting}
-          className="p-1.5 sm:px-2 sm:py-1 bg-secondary text-secondary-foreground text-xs hover:bg-secondary-hover disabled:opacity-50 font-semibold uppercase"
+          className="p-2 sm:px-3 sm:py-1.5 bg-secondary text-secondary-foreground text-sm hover:bg-secondary-hover disabled:opacity-50 font-semibold uppercase"
         >
-          <Pencil size={14} className="sm:hidden" />
+          <Pencil size={16} className="sm:hidden" />
           <span className="hidden sm:inline">Edit</span>
         </button>
         <button
           onClick={onDelete}
           disabled={isDeleting}
-          className="p-1.5 sm:px-2 sm:py-1 bg-error text-error-foreground text-xs hover:bg-error-hover disabled:opacity-50 font-semibold uppercase"
+          className="p-2 sm:px-3 sm:py-1.5 bg-error text-error-foreground text-sm hover:bg-error-hover disabled:opacity-50 font-semibold uppercase"
         >
-          <Trash2 size={14} className="sm:hidden" />
+          <Trash2 size={16} className="sm:hidden" />
           <span className="hidden sm:inline">{isDeleting ? 'Deleting...' : 'Delete'}</span>
         </button>
       </div>

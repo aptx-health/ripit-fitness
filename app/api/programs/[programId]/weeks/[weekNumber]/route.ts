@@ -51,7 +51,8 @@ export async function GET(
                     secondaryFAUs: true
                   }
                 }
-              }
+              },
+              orderBy: { order: 'asc' }
             }
           },
           orderBy: { dayNumber: 'asc' }

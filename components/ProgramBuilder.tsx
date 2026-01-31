@@ -1052,7 +1052,7 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
             : weeks[currentWeekIndex]
 
           return (
-          <div className="bg-card p-6 doom-noise doom-card">
+          <div className="bg-card p-3 sm:p-6 doom-noise doom-card">
             <h2 className="text-xl font-semibold text-foreground mb-4 doom-heading">TRAINING WEEKS</h2>
 
             {totalWeeks === 0 ? (
@@ -1110,7 +1110,7 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
                 {currentWeekData && (() => {
                   const week = currentWeekData
                   return (
-                  <div key={week.id} className="border border-border p-4 doom-noise doom-corners !overflow-visible">
+                  <div key={week.id} className="border border-border p-2 sm:p-4 doom-noise doom-corners !overflow-visible">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <h3 className="font-medium text-foreground doom-heading">WEEK {week.weekNumber}</h3>
@@ -1166,7 +1166,7 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
                         {week.workouts.map((workout) => {
                           const isCollapsed = collapsedWorkouts.has(workout.id)
                           return (
-                            <div key={workout.id} className="bg-muted p-3 doom-card relative !overflow-visible">
+                            <div key={workout.id} className="bg-muted p-2 sm:p-3 doom-card relative !overflow-visible">
                               <div className="flex items-center justify-between mb-2">
                                 {editingWorkoutId === workout.id ? (
                                 <div className="flex items-center gap-2 flex-1">
@@ -1207,8 +1207,8 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
                                     {isCollapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
                                   </button>
                                   <span className="font-medium text-foreground doom-heading">{workout.name}</span>
-                                  <span className="text-xs text-muted-foreground">
-                                    ({workout.exercises.length} exercise{workout.exercises.length !== 1 ? 's' : ''})
+                                  <span className="text-sm text-muted-foreground">
+                                    ({workout.exercises.length} exercise{workout.exercises.length !== 1 ? 's' : ''}, {workout.exercises.reduce((sum, ex) => sum + ex.prescribedSets.length, 0)} sets)
                                   </span>
 
                                   {/* Workout Menu */}
