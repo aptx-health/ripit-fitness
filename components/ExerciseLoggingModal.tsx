@@ -420,8 +420,8 @@ export default function ExerciseLoggingModal({
   if (!isLoaded) {
     return isOpen ? (
       <div className="fixed inset-0 z-50 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center">
-        <div className="bg-card border border-border rounded-2xl p-8 shadow-xl">
-          <div className="animate-pulse text-center">Loading workout...</div>
+        <div className="bg-card border-2 border-border p-8 shadow-xl doom-corners">
+          <div className="animate-pulse text-center uppercase tracking-wider font-bold">Loading workout...</div>
         </div>
       </div>
     ) : null
@@ -449,8 +449,8 @@ export default function ExerciseLoggingModal({
     // Otherwise, show loading while useEffect adjusts the index
     return (
       <div className="fixed inset-0 z-50 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center">
-        <div className="bg-card border border-border rounded-2xl p-8 shadow-xl">
-          <div className="animate-pulse text-center">Loading...</div>
+        <div className="bg-card border-2 border-border p-8 shadow-xl doom-corners">
+          <div className="animate-pulse text-center uppercase tracking-wider font-bold">Loading...</div>
         </div>
       </div>
     )
@@ -472,7 +472,7 @@ export default function ExerciseLoggingModal({
         />
 
         {/* Modal - Full screen on mobile, centered on desktop */}
-        <div className="bg-card border border-border sm:rounded-2xl w-full h-full sm:h-[85vh] sm:max-h-[85vh] sm:max-w-2xl flex flex-col shadow-xl">
+        <div className="bg-card border-2 border-border w-full h-full sm:h-[85vh] sm:max-h-[85vh] sm:max-w-2xl flex flex-col shadow-xl">
           {/* Header with Sync Status */}
           <ExerciseLoggingHeader
             currentExerciseIndex={currentExerciseIndex}
@@ -536,20 +536,20 @@ export default function ExerciseLoggingModal({
           {/* Workout completion confirmation modal */}
           {isConfirming && (
             <div className="fixed inset-0 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center z-60">
-              <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 text-center min-w-[300px] shadow-xl">
+              <div className="bg-card border-2 border-border p-6 sm:p-8 text-center min-w-[300px] shadow-xl doom-corners">
                 {!isSubmitting ? (
                   <>
-                    <p className="text-lg sm:text-xl mb-6 text-foreground font-semibold">Complete this workout?</p>
+                    <p className="text-lg sm:text-xl mb-6 text-foreground font-bold uppercase tracking-wider">Complete this workout?</p>
                     <div className="flex justify-center gap-3">
                       <button
                         onClick={() => setIsConfirming(false)}
-                        className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-muted text-foreground rounded-xl hover:bg-secondary transition-colors font-medium"
+                        className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-muted text-foreground hover:bg-secondary transition-colors font-bold uppercase tracking-wider border-2 border-border hover:border-primary doom-focus-ring"
                       >
                         Cancel
                       </button>
                       <button
                         onClick={handleCompleteWorkout}
-                        className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-success text-white rounded-xl hover:bg-success/90 transition-colors font-medium"
+                        className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-success text-white hover:bg-success/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
                       >
                         Confirm
                       </button>
@@ -560,7 +560,7 @@ export default function ExerciseLoggingModal({
                     <div className="mb-3 flex justify-center">
                       <LoadingFrog size={64} speed={0.8} />
                     </div>
-                    <p className="text-foreground">Completing workout...</p>
+                    <p className="text-foreground uppercase tracking-wider font-bold">Completing workout...</p>
                   </>
                 )}
               </div>
@@ -570,26 +570,26 @@ export default function ExerciseLoggingModal({
           {/* Deletion confirmation modal */}
           {showDeleteConfirm.show && (
             <div className="fixed inset-0 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center z-60">
-              <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 text-center max-w-sm shadow-xl">
+              <div className="bg-card border-2 border-error p-6 sm:p-8 text-center max-w-sm shadow-xl doom-corners">
                 <div className="text-warning mb-4">
                   <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 15.5c-.77.833.192 2.5 1.732 2.5z" />
                   </svg>
                 </div>
-                <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2">Delete Last Set?</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2 uppercase tracking-wider">Delete Last Set?</h3>
                 <p className="text-sm sm:text-base text-muted-foreground mb-6">
                   This will remove the only remaining set for this exercise. Are you sure?
                 </p>
                 <div className="flex justify-center gap-3">
                   <button
                     onClick={() => setShowDeleteConfirm({ show: false })}
-                    className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-muted text-foreground rounded-xl hover:bg-secondary transition-colors font-medium"
+                    className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-muted text-foreground hover:bg-secondary transition-colors font-bold uppercase tracking-wider border-2 border-border hover:border-primary doom-focus-ring"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleConfirmDelete}
-                    className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-error text-white rounded-xl hover:bg-error/90 transition-colors font-medium"
+                    className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-error text-white hover:bg-error/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
                   >
                     Delete Set
                   </button>
@@ -645,11 +645,11 @@ export default function ExerciseLoggingModal({
       {/* Exit workout confirmation dialog */}
       {showExitConfirm && (
         <div className="fixed inset-0 backdrop-blur-md bg-background/80 flex items-center justify-center z-[60] p-4">
-          <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 text-center max-w-sm w-full shadow-xl">
+          <div className="bg-card border-2 border-warning p-6 sm:p-8 text-center max-w-sm w-full shadow-xl doom-corners">
             <div className="text-warning mb-4 flex justify-center">
               <AlertTriangle size={56} strokeWidth={2} />
             </div>
-            <h3 className="text-xl sm:text-2xl font-semibold text-foreground mb-2">
+            <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2 uppercase tracking-wider">
               {totalLoggedSets > 0 ? 'Exit Workout?' : 'Confirm Exit'}
             </h3>
             <p className="text-base sm:text-lg text-muted-foreground mb-6">
@@ -661,19 +661,19 @@ export default function ExerciseLoggingModal({
               <div className="flex flex-col gap-3">
                 <button
                   onClick={handleExitSaveAsDraft}
-                  className="w-full px-4 py-3 text-base sm:text-lg bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-colors font-medium"
+                  className="w-full px-4 py-3 text-base sm:text-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
                 >
                   Save as Draft
                 </button>
                 <button
                   onClick={handleExitDiscard}
-                  className="w-full px-4 py-3 text-base sm:text-lg bg-error text-error-foreground rounded-xl hover:bg-error/90 transition-colors font-medium"
+                  className="w-full px-4 py-3 text-base sm:text-lg bg-error text-error-foreground hover:bg-error/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
                 >
                   Discard All
                 </button>
                 <button
                   onClick={() => setShowExitConfirm(false)}
-                  className="w-full px-4 py-3 text-base sm:text-lg bg-muted text-foreground rounded-xl hover:bg-secondary transition-colors font-medium"
+                  className="w-full px-4 py-3 text-base sm:text-lg bg-muted text-foreground hover:bg-secondary transition-colors font-bold uppercase tracking-wider border-2 border-border hover:border-primary doom-focus-ring"
                 >
                   Cancel
                 </button>
@@ -682,13 +682,13 @@ export default function ExerciseLoggingModal({
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowExitConfirm(false)}
-                  className="flex-1 px-4 py-3 text-base sm:text-lg bg-muted text-foreground rounded-xl hover:bg-secondary transition-colors font-medium"
+                  className="flex-1 px-4 py-3 text-base sm:text-lg bg-muted text-foreground hover:bg-secondary transition-colors font-bold uppercase tracking-wider border-2 border-border hover:border-primary doom-focus-ring"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleExitDiscard}
-                  className="flex-1 px-4 py-3 text-base sm:text-lg bg-error text-error-foreground rounded-xl hover:bg-error/90 transition-colors font-medium"
+                  className="flex-1 px-4 py-3 text-base sm:text-lg bg-error text-error-foreground hover:bg-error/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
                 >
                   Exit
                 </button>
