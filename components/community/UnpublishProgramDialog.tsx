@@ -51,14 +51,14 @@ export default function UnpublishProgramDialog({
     <AlertDialog.Root open={open} onOpenChange={onOpenChange}>
       <AlertDialog.Portal>
         <AlertDialog.Overlay className="fixed inset-0 backdrop-blur-md bg-black/40 dark:bg-black/60 z-50 animate-in fade-in" />
-        <AlertDialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card border border-error rounded-lg shadow-xl z-50 w-full max-w-md p-6 animate-in fade-in zoom-in-95">
+        <AlertDialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card border-2 border-error shadow-xl z-50 w-full max-w-md p-6 animate-in fade-in zoom-in-95 doom-corners">
           {/* Icon */}
-          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-error/10 mb-4">
+          <div className="flex items-center justify-center w-12 h-12 bg-error/10 border-2 border-error mb-4">
             <AlertTriangle className="w-6 h-6 text-error" />
           </div>
 
           {/* Title */}
-          <AlertDialog.Title className="text-xl font-bold text-foreground mb-2">
+          <AlertDialog.Title className="text-xl font-bold text-foreground mb-2 uppercase tracking-wider">
             Unpublish Program?
           </AlertDialog.Title>
 
@@ -71,8 +71,8 @@ export default function UnpublishProgramDialog({
 
           {/* Error message */}
           {error && (
-            <div className="mb-4 p-3 bg-error/10 border border-error rounded-lg">
-              <p className="text-sm text-error">{error}</p>
+            <div className="mb-4 p-3 bg-error/10 border-2 border-error">
+              <p className="text-sm text-error font-medium">{error}</p>
             </div>
           )}
 
@@ -81,7 +81,7 @@ export default function UnpublishProgramDialog({
             <AlertDialog.Cancel asChild>
               <button
                 disabled={isDeleting}
-                className="px-4 py-2 border border-border text-foreground rounded-lg hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 border-2 border-border text-foreground hover:border-primary hover:text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider font-semibold text-sm doom-focus-ring"
               >
                 Cancel
               </button>
@@ -90,9 +90,9 @@ export default function UnpublishProgramDialog({
               <button
                 onClick={handleUnpublish}
                 disabled={isDeleting}
-                className="px-4 py-2 bg-error text-error-foreground rounded-lg hover:bg-error-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-error text-error-foreground hover:bg-error-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider font-semibold text-sm doom-button-3d doom-focus-ring"
               >
-                {isDeleting ? 'Unpublishing...' : 'Unpublish'}
+                {isDeleting ? 'UNPUBLISHING...' : 'UNPUBLISH'}
               </button>
             </AlertDialog.Action>
           </div>
