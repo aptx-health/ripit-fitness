@@ -71,7 +71,7 @@ export default function WorkoutPreviewModal({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
-        className="sm:max-w-2xl max-h-[100dvh] sm:max-h-[85vh] h-[100dvh] sm:h-auto"
+        className="sm:max-w-2xl max-h-[100dvh] sm:max-h-[85vh] h-[100dvh] sm:h-[85vh]"
         showClose={true}
         fullScreenMobile={true}
       >

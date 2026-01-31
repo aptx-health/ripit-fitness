@@ -87,6 +87,7 @@ export default function StrengthWeekView({
 }: Props) {
   const router = useRouter()
   const [skippingWorkout, setSkippingWorkout] = useState<string | null>(null)
+  const [unskippingWorkout, setUnskippingWorkout] = useState<string | null>(null)
   const [completingWeek, setCompletingWeek] = useState(false)
   const [modalMode, setModalMode] = useState<ModalMode>(null)
   const [selectedWorkoutId, setSelectedWorkoutId] = useState<string | null>(null)
@@ -181,6 +182,16 @@ export default function StrengthWeekView({
     }
   }
 
+  const handleUnskipWorkout = async (workoutId: string) => {
+    setUnskippingWorkout(workoutId)
+    try {
+      const response = await fetch(`/api/workouts/${workoutId}/clear`, { method: 'POST' })
+      if (response.ok) router.refresh()
+    } finally {
+      setUnskippingWorkout(null)
+    }
+  }
+
   const handleCompleteWeek = async () => {
     setCompletingWeek(true)
     try {
@@ -222,8 +233,10 @@ export default function StrengthWeekView({
             key={workout.id}
             workout={workout}
             isSkipping={skippingWorkout === workout.id}
+            isUnskipping={unskippingWorkout === workout.id}
             isLoading={isLoadingWorkout && selectedWorkoutId === workout.id}
             onSkip={handleSkipWorkout}
+            onUnskip={handleUnskipWorkout}
             onView={handleOpenPreview}
             onLog={handleOpenLogging}
           />

@@ -18,7 +18,9 @@ type Props = {
   workout: Workout
   isSkipping: boolean
   isLoading: boolean
+  isUnskipping: boolean
   onSkip: (workoutId: string) => void
+  onUnskip: (workoutId: string) => void
   onView: (workoutId: string) => void
   onLog: (workoutId: string) => void
 }
@@ -27,7 +29,9 @@ export default function WorkoutCard({
   workout,
   isSkipping,
   isLoading,
+  isUnskipping,
   onSkip,
+  onUnskip,
   onView,
   onLog,
 }: Props) {
@@ -44,7 +48,7 @@ export default function WorkoutCard({
           : isDraft
             ? 'border-warning-border bg-warning-muted/50'
             : isSkipped
-              ? 'border-muted-foreground bg-muted opacity-60'
+              ? 'border-muted-foreground/50 bg-muted/50'
               : 'border-border bg-muted'
       }`}
     >
@@ -79,7 +83,7 @@ export default function WorkoutCard({
               </span>
             )}
             {isSkipped && (
-              <span className="doom-badge bg-muted-foreground/20 text-muted-foreground">
+              <span className="doom-badge bg-muted-foreground/30 text-foreground/70">
                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     strokeLinecap="round"
@@ -109,48 +113,54 @@ export default function WorkoutCard({
           )}
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* Skip button - only show if no completion status */}
-          {!latestCompletion && (
+        <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
+          {/* Primary action button */}
+          {isSkipped ? (
             <button
-              onClick={() => onSkip(workout.id)}
-              disabled={isSkipping}
-              className="px-3 py-2 border-2 border-border text-foreground bg-transparent hover:bg-muted hover:border-primary active:bg-muted/80 doom-focus-ring text-sm font-semibold uppercase tracking-wider disabled:opacity-50 transition-colors"
+              onClick={() => onUnskip(workout.id)}
+              disabled={isUnskipping}
+              className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider text-sm disabled:opacity-50"
             >
-              {isSkipping ? 'SKIPPING...' : 'SKIP'}
+              {isUnskipping ? 'RESTORING...' : 'UNSKIP'}
             </button>
-          )}
-
-          {/* View button - show for non-completed workouts */}
-          {!isCompleted && (
+          ) : (
             <button
-              onClick={() => onView(workout.id)}
+              onClick={() => onLog(workout.id)}
               disabled={isLoading}
-              className="px-3 py-2 border-2 border-border text-foreground bg-transparent hover:bg-muted hover:border-primary active:bg-muted/80 doom-focus-ring text-sm font-semibold uppercase tracking-wider disabled:opacity-50 transition-colors"
+              className={`px-4 py-2 ${
+                isDraft
+                  ? 'bg-accent text-accent-foreground hover:bg-accent-hover doom-button-3d-accent'
+                  : 'bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d'
+              } doom-focus-ring font-semibold uppercase tracking-wider text-sm disabled:opacity-50`}
             >
-              {isLoading ? 'LOADING...' : 'VIEW'}
+              {isCompleted ? 'REVIEW' : isDraft ? 'CONTINUE' : 'LOG WORKOUT'}
             </button>
           )}
 
-          <button
-            onClick={() => onLog(workout.id)}
-            disabled={isLoading}
-            className={`px-4 py-2 ${
-              isDraft
-                ? 'bg-accent text-accent-foreground hover:bg-accent-hover doom-button-3d-accent'
-                : isSkipped
-                  ? 'bg-secondary text-secondary-foreground hover:bg-secondary-hover doom-button-3d'
-                  : 'bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d'
-            } doom-focus-ring font-semibold uppercase tracking-wider text-sm disabled:opacity-50`}
-          >
-            {isCompleted
-              ? 'REVIEW'
-              : isDraft
-                ? 'CONTINUE'
-                : isSkipped
-                  ? 'RETRY'
-                  : 'LOG WORKOUT'}
-          </button>
+          {/* Secondary buttons row */}
+          {!isCompleted && (
+            <div className="flex items-center gap-2">
+              {/* View button - show for non-completed workouts */}
+              <button
+                onClick={() => onView(workout.id)}
+                disabled={isLoading}
+                className="px-3 py-2 border-2 border-border text-foreground bg-transparent hover:bg-muted hover:border-primary active:bg-muted/80 doom-focus-ring text-sm font-semibold uppercase tracking-wider disabled:opacity-50 transition-colors"
+              >
+                {isLoading ? 'LOADING...' : 'VIEW'}
+              </button>
+
+              {/* Skip button - only show if no completion status */}
+              {!latestCompletion && (
+                <button
+                  onClick={() => onSkip(workout.id)}
+                  disabled={isSkipping}
+                  className="px-3 py-2 border-2 border-border text-foreground bg-transparent hover:bg-muted hover:border-primary active:bg-muted/80 doom-focus-ring text-sm font-semibold uppercase tracking-wider disabled:opacity-50 transition-colors"
+                >
+                  {isSkipping ? 'SKIPPING...' : 'SKIP'}
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
