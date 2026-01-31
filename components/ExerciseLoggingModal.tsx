@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { useWorkoutStorage } from '@/hooks/useWorkoutStorage'
 import { useSyncState } from '@/hooks/useSyncState'
 import { useWorkoutSyncService } from '@/lib/sync/workoutSync'
@@ -418,13 +419,16 @@ export default function ExerciseLoggingModal({
 
   // Don't render until storage is loaded to prevent flash of empty state
   if (!isLoaded) {
-    return isOpen ? (
+    if (!isOpen) return null
+    if (typeof document === 'undefined') return null
+    return createPortal(
       <div className="fixed inset-0 z-50 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center">
         <div className="bg-card border-2 border-border p-8 shadow-xl doom-corners">
           <div className="animate-pulse text-center uppercase tracking-wider font-bold">Loading workout...</div>
         </div>
-      </div>
-    ) : null
+      </div>,
+      document.body
+    )
   }
 
   const canLogSet = currentSet.reps && currentSet.weight
@@ -447,18 +451,22 @@ export default function ExerciseLoggingModal({
       return null
     }
     // Otherwise, show loading while useEffect adjusts the index
-    return (
+    if (typeof document === 'undefined') return null
+    return createPortal(
       <div className="fixed inset-0 z-50 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center">
         <div className="bg-card border-2 border-border p-8 shadow-xl doom-corners">
           <div className="animate-pulse text-center uppercase tracking-wider font-bold">Loading...</div>
         </div>
-      </div>
+      </div>,
+      document.body
     )
   }
 
-  return (
+  if (typeof document === 'undefined') return null
+
+  return createPortal(
     <>
-      <div className="fixed inset-0 z-50 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-end sm:items-center justify-center">
+      <div className="fixed inset-0 z-50 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center">
         {/* Sync Details Modal */}
         <SyncDetailsModal
           isOpen={showSyncDetails}
@@ -472,7 +480,7 @@ export default function ExerciseLoggingModal({
         />
 
         {/* Modal - Full screen on mobile, centered on desktop */}
-        <div className="bg-card border-2 border-border w-full h-full sm:h-[85vh] sm:max-h-[85vh] sm:max-w-2xl flex flex-col shadow-xl">
+        <div className="bg-card w-full h-[100dvh] sm:h-[85vh] sm:max-h-[85vh] sm:max-w-2xl sm:border-2 sm:border-border sm:rounded-lg flex flex-col shadow-xl">
           {/* Header with Sync Status */}
           <ExerciseLoggingHeader
             currentExerciseIndex={currentExerciseIndex}
@@ -697,6 +705,7 @@ export default function ExerciseLoggingModal({
           </div>
         </div>
       )}
-    </>
+    </>,
+    document.body
   )
 }
