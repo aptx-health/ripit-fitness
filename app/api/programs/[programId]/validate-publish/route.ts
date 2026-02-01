@@ -92,6 +92,15 @@ export async function GET(
       errors: [],
       stats,
       displayName: displayName === 'Anonymous User' ? null : displayName,
+      metadata: {
+        goals: program.goals,
+        level: program.level,
+        durationWeeks: program.durationWeeks,
+        durationDisplay: program.durationDisplay,
+        targetDaysPerWeek: program.targetDaysPerWeek,
+        equipmentNeeded: program.equipmentNeeded,
+        focusAreas: program.focusAreas,
+      },
     })
   } catch (error) {
     console.error('Error validating program for publishing:', error)

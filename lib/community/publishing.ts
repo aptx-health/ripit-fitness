@@ -86,6 +86,13 @@ async function publishStrengthProgram(
       weekCount: stats.weekCount,
       workoutCount: stats.workoutCount,
       exerciseCount: stats.exerciseCount,
+      goals: program.goals,
+      level: program.level,
+      durationWeeks: program.durationWeeks || stats.weekCount,
+      durationDisplay: program.durationDisplay,
+      targetDaysPerWeek: program.targetDaysPerWeek,
+      equipmentNeeded: program.equipmentNeeded,
+      focusAreas: program.focusAreas,
     },
   });
 
@@ -143,6 +150,13 @@ async function publishCardioProgram(
       weekCount: stats.weekCount,
       workoutCount: stats.workoutCount,
       exerciseCount: stats.exerciseCount,
+      goals: program.goals,
+      level: program.level,
+      durationWeeks: program.durationWeeks || stats.weekCount,
+      durationDisplay: program.durationDisplay,
+      targetDaysPerWeek: program.targetDaysPerWeek,
+      equipmentNeeded: program.equipmentNeeded,
+      focusAreas: program.focusAreas,
     },
   });
 

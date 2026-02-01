@@ -29,6 +29,12 @@ export default async function CommunityPage() {
       weekCount: true,
       workoutCount: true,
       exerciseCount: true,
+      goals: true,
+      level: true,
+      durationDisplay: true,
+      targetDaysPerWeek: true,
+      equipmentNeeded: true,
+      focusAreas: true,
     },
   })
 

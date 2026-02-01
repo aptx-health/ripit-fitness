@@ -9,19 +9,26 @@ datasource db {
 }
 
 model Program {
-  id            String    @id @default(cuid())
-  name          String
-  description   String?
-  userId        String
-  isActive      Boolean   @default(false)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  isUserCreated Boolean   @default(false)
-  programType   String    @default("strength")
-  isArchived    Boolean   @default(false)
-  archivedAt    DateTime?
-  copyStatus    String?   @default("ready")
-  weeks         Week[]
+  id                String    @id @default(cuid())
+  name              String
+  description       String?
+  userId            String
+  isActive          Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  isUserCreated     Boolean   @default(false)
+  programType       String    @default("strength")
+  isArchived        Boolean   @default(false)
+  archivedAt        DateTime?
+  copyStatus        String?   @default("ready")
+  goals             String[]  @default([])
+  level             String?
+  durationWeeks     Int?
+  durationDisplay   String?
+  targetDaysPerWeek Int?
+  equipmentNeeded   String[]  @default([])
+  focusAreas        String[]  @default([])
+  weeks             Week[]
 
   @@index([userId, isActive])
   @@index([userId])
@@ -158,18 +165,25 @@ model LoggedSet {
 }
 
 model CardioProgram {
-  id            String       @id @default(cuid())
-  name          String
-  description   String?
-  userId        String
-  isActive      Boolean      @default(false)
-  isArchived    Boolean      @default(false)
-  archivedAt    DateTime?
-  isUserCreated Boolean      @default(false)
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  copyStatus    String?      @default("ready")
-  weeks         CardioWeek[]
+  id                String       @id @default(cuid())
+  name              String
+  description       String?
+  userId            String
+  isActive          Boolean      @default(false)
+  isArchived        Boolean      @default(false)
+  archivedAt        DateTime?
+  isUserCreated     Boolean      @default(false)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  copyStatus        String?      @default("ready")
+  goals             String[]     @default([])
+  level             String?
+  durationWeeks     Int?
+  durationDisplay   String?
+  targetDaysPerWeek Int?
+  equipmentNeeded   String[]     @default([])
+  focusAreas        String[]     @default([])
+  weeks             CardioWeek[]
 
   @@index([userId, isActive])
   @@index([userId, isArchived])
@@ -281,9 +295,20 @@ model CommunityProgram {
   weekCount         Int
   workoutCount      Int
   exerciseCount     Int
+  goals             String[] @default([])
+  level             String?
+  durationWeeks     Int?
+  durationDisplay   String?
+  targetDaysPerWeek Int?
+  equipmentNeeded   String[] @default([])
+  focusAreas        String[] @default([])
 
   @@index([programType])
   @@index([publishedAt(sort: Desc)])
   @@index([authorUserId])
   @@index([originalProgramId])
+  @@index([level])
+  @@index([goals], type: Gin)
+  @@index([equipmentNeeded], type: Gin)
+  @@index([programType, publishedAt(sort: Desc)])
 }
