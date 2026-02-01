@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import {
   COMMON_EQUIPMENT,
   SPECIALIZED_EQUIPMENT,
+  type Equipment,
 } from '@/lib/constants/program-metadata';
 
 const EQUIPMENT_NORMALIZATION_MAP: Record<string, string> = {
@@ -73,8 +74,8 @@ export async function detectEquipmentNeeded(
               ...Object.values(COMMON_EQUIPMENT),
               ...Object.values(SPECIALIZED_EQUIPMENT),
             ];
-            if (allEquipment.includes(normalized)) {
-              equipmentSet.add(normalized);
+            if (allEquipment.includes(normalized as Equipment)) {
+              equipmentSet.add(normalized as Equipment);
             }
           });
         });
@@ -102,8 +103,8 @@ export async function detectEquipmentNeeded(
             ...Object.values(COMMON_EQUIPMENT),
             ...Object.values(SPECIALIZED_EQUIPMENT),
           ];
-          if (allEquipment.includes(normalized)) {
-            equipmentSet.add(normalized);
+          if (allEquipment.includes(normalized as Equipment)) {
+            equipmentSet.add(normalized as Equipment);
           }
         }
       });
