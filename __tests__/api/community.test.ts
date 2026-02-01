@@ -250,6 +250,15 @@ describe('Community Programs API', () => {
         }
       }
 
+      // Add required metadata
+      await prisma.program.update({
+        where: { id: program.id },
+        data: {
+          level: 'intermediate',
+          goals: ['strength'],
+        },
+      });
+
       // Create user settings with display name
       await prisma.userSettings.create({
         data: {
@@ -318,6 +327,15 @@ describe('Community Programs API', () => {
         }
       }
 
+      // Add required metadata
+      await prisma.program.update({
+        where: { id: program.id },
+        data: {
+          level: 'intermediate',
+          goals: ['strength'],
+        },
+      });
+
       const firstPublish = await publishProgramToCommunity(
         prisma,
         program.id,
@@ -353,6 +371,15 @@ describe('Community Programs API', () => {
           }
         }
       }
+
+      // Add required metadata
+      await prisma.program.update({
+        where: { id: program.id },
+        data: {
+          level: 'intermediate',
+          goals: ['strength'],
+        },
+      });
 
       await publishProgramToCommunity(prisma, program.id, userId, 'strength');
 
@@ -523,6 +550,15 @@ describe('Community Programs API', () => {
         }
       }
 
+      // Add required metadata
+      await prisma.program.update({
+        where: { id: program.id },
+        data: {
+          level: 'intermediate',
+          goals: ['strength'],
+        },
+      });
+
       const publishResult = await publishProgramToCommunity(
         prisma,
         program.id,
@@ -559,6 +595,15 @@ describe('Community Programs API', () => {
           }
         }
       }
+
+      // Add required metadata
+      await prisma.program.update({
+        where: { id: program.id },
+        data: {
+          level: 'intermediate',
+          goals: ['strength'],
+        },
+      });
 
       const publishResult = await publishProgramToCommunity(
         prisma,
@@ -606,6 +651,22 @@ describe('Community Programs API', () => {
           }
         }
       }
+
+      // Add required metadata to both programs
+      await prisma.program.update({
+        where: { id: program1.id },
+        data: {
+          level: 'intermediate',
+          goals: ['strength'],
+        },
+      });
+      await prisma.program.update({
+        where: { id: program2.id },
+        data: {
+          level: 'intermediate',
+          goals: ['strength'],
+        },
+      });
 
       await publishProgramToCommunity(prisma, program1.id, userId, 'strength');
       // Wait a bit to ensure different timestamps
