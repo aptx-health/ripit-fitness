@@ -106,12 +106,18 @@ export default async function DataPage() {
     redirect('/login')
   }
 
-  // Fetch stats
-  const stats = await getBragStripStats(user.id)
+  // Fetch stats and user settings in parallel
+  const [stats, userSettings] = await Promise.all([
+    getBragStripStats(user.id),
+    prisma.userSettings.findUnique({
+      where: { userId: user.id },
+      select: { displayName: true },
+    }),
+  ])
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <BragStrip stats={stats} />
+      <BragStrip stats={stats} displayName={userSettings?.displayName || null} />
     </div>
   )
 }

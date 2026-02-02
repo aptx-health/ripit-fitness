@@ -14,9 +14,10 @@ type BragStripStats = {
 
 type Props = {
   stats: BragStripStats
+  displayName: string | null
 }
 
-export default function BragStrip({ stats }: Props) {
+export default function BragStrip({ stats, displayName }: Props) {
   // Format training start date
   const trainingStart = stats.earliestWorkout
     ? new Date(stats.earliestWorkout).toLocaleDateString('en-US', {
@@ -37,8 +38,8 @@ export default function BragStrip({ stats }: Props) {
         <h1 className="text-2xl sm:text-3xl font-bold text-primary uppercase tracking-wider">
           RIPIT FITNESS
         </h1>
-        <p className="text-sm text-muted-foreground mt-2 uppercase tracking-wide">
-          YOUR STATS
+        <p className="text-base sm:text-lg text-muted-foreground mt-2 uppercase tracking-wide font-semibold">
+          {displayName ? `${displayName}'S STATS` : 'YOUR STATS'}
         </p>
       </div>
 
