@@ -25,7 +25,22 @@ These files provide **~257 total exercises** including legacy exercises and comp
 
 **CRITICAL:** Legacy exercises MUST be seeded FIRST to preserve their CUID IDs for existing programs.
 
-### Option 1: All at Once (Recommended)
+### Option 1: Automated Script (Recommended for Local Supabase)
+
+For local Supabase development with Doppler:
+
+```bash
+cd prisma/seeds
+./reseed_supabase_local.sh
+```
+
+This script:
+- Reads DATABASE_URL from Doppler automatically
+- Clears existing data
+- Seeds all 257 exercises in correct order
+- Verifies counts
+
+### Option 2: Manual SQL Files
 
 Run all files sequentially in Supabase SQL Editor:
 
