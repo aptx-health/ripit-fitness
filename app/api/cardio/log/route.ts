@@ -3,6 +3,7 @@ import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import type { LogCardioSessionRequest } from '@/lib/cardio/types'
 import { isValidEquipment, isValidIntensityZone } from '@/lib/cardio/validation'
+import { recordCardioPerformance } from '@/lib/stats/exercise-performance'
 
 /**
  * POST /api/cardio/log
@@ -104,6 +105,9 @@ export async function POST(request: NextRequest) {
         notes: body.notes
       }
     })
+
+    // Record performance metrics for brag strip
+    await recordCardioPerformance(prisma, session.id, user.id)
 
     return NextResponse.json({
       success: true,
