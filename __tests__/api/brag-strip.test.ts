@@ -122,50 +122,63 @@ describe('Brag Strip Stats', () => {
   })
 
   it('should correctly count workouts by time period', async () => {
-    const now = new Date()
+    // Use a fixed reference date (Wednesday, January 15, 2025 at noon)
+    // This avoids edge cases with month/week boundaries
+    const referenceDate = new Date('2025-01-15T12:00:00Z')
 
-    // Calculate week/month boundaries (same as in production code)
-    const dayOfWeek = now.getDay()
-    const daysUntilMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1
-    const startOfWeek = new Date(now)
-    startOfWeek.setDate(now.getDate() - daysUntilMonday)
-    startOfWeek.setHours(0, 0, 0, 0)
+    // Week starts on Monday Jan 13, 2025
+    const startOfWeek = new Date('2025-01-13T00:00:00Z')
 
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-    startOfMonth.setHours(0, 0, 0, 0)
+    // Month starts on Wednesday Jan 1, 2025
+    const startOfMonth = new Date('2025-01-01T00:00:00Z')
 
-    // Create dates relative to boundaries
-    // This week: after startOfWeek
-    const thisWeek1 = new Date(startOfWeek.getTime() + 86400000 * 1) // 1 day after week start
-    const thisWeek2 = new Date(startOfWeek.getTime() + 86400000 * 3) // 3 days after week start
+    // Create 2 workouts this week (after startOfWeek)
+    await createWorkoutWithSets(
+      new Date('2025-01-14T10:00:00Z'), // Tuesday Jan 14
+      [{ weight: 100, reps: 5 }]
+    )
+    await createWorkoutWithSets(
+      new Date('2025-01-15T10:00:00Z'), // Wednesday Jan 15
+      [{ weight: 100, reps: 5 }]
+    )
 
-    // This month but not this week: after startOfMonth but before startOfWeek
-    const thisMonth1 = new Date(startOfWeek.getTime() - 86400000 * 2) // 2 days before week start
-    const thisMonth2 = new Date(startOfWeek.getTime() - 86400000 * 5) // 5 days before week start
-    const thisMonth3 = new Date(startOfMonth.getTime() + 86400000 * 1) // 1 day after month start
+    // Create 3 workouts this month but not this week (after startOfMonth, before startOfWeek)
+    await createWorkoutWithSets(
+      new Date('2025-01-02T10:00:00Z'), // Thursday Jan 2
+      [{ weight: 100, reps: 5 }]
+    )
+    await createWorkoutWithSets(
+      new Date('2025-01-05T10:00:00Z'), // Sunday Jan 5
+      [{ weight: 100, reps: 5 }]
+    )
+    await createWorkoutWithSets(
+      new Date('2025-01-10T10:00:00Z'), // Friday Jan 10
+      [{ weight: 100, reps: 5 }]
+    )
 
-    // Older: before startOfMonth
-    const older1 = new Date(startOfMonth.getTime() - 86400000 * 10)
-    const older2 = new Date(startOfMonth.getTime() - 86400000 * 20)
-    const older3 = new Date(startOfMonth.getTime() - 86400000 * 30)
-    const older4 = new Date(startOfMonth.getTime() - 86400000 * 40)
-    const older5 = new Date(startOfMonth.getTime() - 86400000 * 50)
+    // Create 5 workouts from previous months (before startOfMonth)
+    await createWorkoutWithSets(
+      new Date('2024-12-15T10:00:00Z'),
+      [{ weight: 100, reps: 5 }]
+    )
+    await createWorkoutWithSets(
+      new Date('2024-11-20T10:00:00Z'),
+      [{ weight: 100, reps: 5 }]
+    )
+    await createWorkoutWithSets(
+      new Date('2024-10-10T10:00:00Z'),
+      [{ weight: 100, reps: 5 }]
+    )
+    await createWorkoutWithSets(
+      new Date('2024-09-05T10:00:00Z'),
+      [{ weight: 100, reps: 5 }]
+    )
+    await createWorkoutWithSets(
+      new Date('2024-08-01T10:00:00Z'),
+      [{ weight: 100, reps: 5 }]
+    )
 
-    // Create workouts
-    await createWorkoutWithSets(thisWeek1, [{ weight: 100, reps: 5 }])
-    await createWorkoutWithSets(thisWeek2, [{ weight: 100, reps: 5 }])
-
-    await createWorkoutWithSets(thisMonth1, [{ weight: 100, reps: 5 }])
-    await createWorkoutWithSets(thisMonth2, [{ weight: 100, reps: 5 }])
-    await createWorkoutWithSets(thisMonth3, [{ weight: 100, reps: 5 }])
-
-    await createWorkoutWithSets(older1, [{ weight: 100, reps: 5 }])
-    await createWorkoutWithSets(older2, [{ weight: 100, reps: 5 }])
-    await createWorkoutWithSets(older3, [{ weight: 100, reps: 5 }])
-    await createWorkoutWithSets(older4, [{ weight: 100, reps: 5 }])
-    await createWorkoutWithSets(older5, [{ weight: 100, reps: 5 }])
-
-    // Query counts
+    // Query counts using the fixed boundaries
     const thisWeekCount = await prisma.workoutCompletion.count({
       where: {
         userId,
@@ -186,9 +199,9 @@ describe('Brag Strip Stats', () => {
       where: { userId, status: 'completed' },
     })
 
-    expect(thisWeekCount).toBe(2)
-    expect(thisMonthCount).toBe(5) // 2 this week + 3 earlier this month
-    expect(allTimeCount).toBe(10)
+    expect(thisWeekCount).toBe(2) // Jan 14 & Jan 15
+    expect(thisMonthCount).toBe(5) // 2 this week + 3 earlier in Jan
+    expect(allTimeCount).toBe(10) // 5 in Jan + 5 from previous months
   })
 
   it('should correctly calculate total volume', async () => {
