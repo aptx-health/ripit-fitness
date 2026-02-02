@@ -1,6 +1,15 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import { Settings } from 'lucide-react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from '@/components/ui/radix/select'
+import { CardioDistanceCategory, CARDIO_CATEGORY_LABELS } from '@/lib/cardio/distance-categories'
 
 type BragStripStats = {
   workoutsThisWeek: number
@@ -20,6 +29,43 @@ type Props = {
 }
 
 export default function BragStrip({ stats, displayName }: Props) {
+  // Cardio distance category state
+  const [cardioCategory, setCardioCategory] = useState<CardioDistanceCategory>('running')
+  const [cardioDistance, setCardioDistance] = useState({
+    miles: stats.totalRunningMiles,
+    km: stats.totalRunningKm
+  })
+  const [isLoadingCardio, setIsLoadingCardio] = useState(false)
+
+  // Load saved preference from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('cardioDistanceCategory')
+    if (saved && ['running', 'biking', 'rowing', 'swimming', 'all'].includes(saved)) {
+      setCardioCategory(saved as CardioDistanceCategory)
+    }
+  }, [])
+
+  // Fetch cardio distance when category changes
+  useEffect(() => {
+    async function fetchCardioDistance() {
+      setIsLoadingCardio(true)
+      try {
+        const response = await fetch(`/api/stats/cardio-distance?category=${cardioCategory}`)
+        if (response.ok) {
+          const data = await response.json()
+          setCardioDistance({ miles: data.miles, km: data.km })
+        }
+      } catch (error) {
+        console.error('Failed to fetch cardio distance:', error)
+      } finally {
+        setIsLoadingCardio(false)
+      }
+    }
+
+    fetchCardioDistance()
+    localStorage.setItem('cardioDistanceCategory', cardioCategory)
+  }, [cardioCategory])
+
   // Format training start date
   const trainingStart = stats.earliestWorkout
     ? new Date(stats.earliestWorkout).toLocaleDateString('en-US', {
@@ -120,26 +166,27 @@ export default function BragStrip({ stats, displayName }: Props) {
               </div>
             </div>
 
-            {/* Running Distance */}
+            {/* Cardio Distance */}
             <div className="bg-card border-2 border-accent p-3 md:p-6 text-center shadow-[0_0_8px_rgba(var(--accent-rgb),0.1)]" style={{ WebkitTapHighlightColor: 'transparent' }}>
+              {/* Distance Stats */}
               <div className="text-4xl md:text-5xl font-bold text-accent mb-0.5 md:mb-1" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)' }}>
-                {stats.totalRunningMiles}
+                {isLoadingCardio ? '...' : cardioDistance.miles}
               </div>
               <div className="text-lg md:text-2xl text-foreground mb-1 md:mb-3">
                 mi
               </div>
               <div className="text-sm md:text-base font-semibold text-foreground uppercase tracking-wider mb-0.5 md:mb-1">
-                Running Distance
+                {CARDIO_CATEGORY_LABELS[cardioCategory]} Distance
               </div>
               <div className="text-sm md:text-base text-muted-foreground">
-                ({stats.totalRunningKm} km)
+                ({isLoadingCardio ? '...' : cardioDistance.km} km)
               </div>
             </div>
           </div>
         </div>
 
         {/* Badge Footer */}
-        <div className="bg-card border-4 border-t-0 border-primary px-3 md:px-6 py-4 md:py-8 doom-corners-accent">
+        <div className="bg-card border-4 border-t-0 border-primary px-3 md:px-6 py-4 md:py-8 doom-corners-accent relative">
           <div className="text-center">
             <p className="text-sm md:text-base font-semibold text-foreground uppercase tracking-wider mb-1 md:mb-2">
               Training Since
@@ -147,6 +194,22 @@ export default function BragStrip({ stats, displayName }: Props) {
             <p className="doom-heading text-lg md:text-xl text-primary">
               {trainingStart}
             </p>
+          </div>
+
+          {/* Cardio Category Selector */}
+          <div className="absolute bottom-3 right-3 md:bottom-6 md:right-6">
+            <Select value={cardioCategory} onValueChange={(value) => setCardioCategory(value as CardioDistanceCategory)}>
+              <SelectTrigger className="h-8 w-8 p-0 border-none bg-transparent hover:bg-muted/50 focus:ring-1 focus:ring-primary flex items-center justify-center rounded">
+                <Settings className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="running">{CARDIO_CATEGORY_LABELS.running}</SelectItem>
+                <SelectItem value="biking">{CARDIO_CATEGORY_LABELS.biking}</SelectItem>
+                <SelectItem value="rowing">{CARDIO_CATEGORY_LABELS.rowing}</SelectItem>
+                <SelectItem value="swimming">{CARDIO_CATEGORY_LABELS.swimming}</SelectItem>
+                <SelectItem value="all">{CARDIO_CATEGORY_LABELS.all}</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>
