@@ -157,10 +157,30 @@ async function main() {
     ...olderDates.map(d => ({ days: d, label: 'older' })),
   ]
 
-  console.log(`Creating ${allDates.length} workout completions...`)
+  // Calculate current ISO week boundaries
+  const now = new Date()
+  const dayOfWeek = now.getDay()
+  const daysUntilMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1
+  const startOfWeek = new Date(now)
+  startOfWeek.setDate(now.getDate() - daysUntilMonday)
+  startOfWeek.setHours(0, 0, 0, 0)
 
-  for (const { days, label } of allDates) {
-    const completedAt = daysAgo(days)
+  // Adjust "this week" workouts to be explicitly within current ISO week
+  // Replace days 1, 3, 5 with dates after startOfWeek
+  const adjustedDates = allDates.map(({ days, label }) => {
+    if (label === 'this week') {
+      // Create dates 1, 2, and 3 days after week start (always in this week)
+      const daysAfterWeekStart = days === 1 ? 1 : days === 3 ? 2 : 3
+      const date = new Date(startOfWeek.getTime() + 86400000 * daysAfterWeekStart)
+      return { date, label }
+    }
+    return { date: daysAgo(days), label }
+  })
+
+  console.log(`Creating ${adjustedDates.length} workout completions...`)
+
+  for (const { date, label } of adjustedDates) {
+    const completedAt = date
 
     // Create workout completion
     const completion = await prisma.workoutCompletion.create({
