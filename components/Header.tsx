@@ -21,6 +21,7 @@ export default function Header({ userEmail }: Props) {
 
   const isStrengthActive = pathname.startsWith('/training')
   const isCardioActive = pathname.startsWith('/cardio')
+  const isDataActive = pathname.startsWith('/data')
 
   return (
     <>
@@ -69,6 +70,16 @@ export default function Header({ userEmail }: Props) {
                   }`}
                 >
                   Cardio
+                </Link>
+                <Link
+                  href="/data"
+                  className={`text-xs sm:text-sm font-semibold uppercase tracking-wider transition-colors ${
+                    isDataActive
+                      ? 'text-accent border-b-2 border-accent pb-0.5'
+                      : 'text-foreground hover:text-accent doom-link'
+                  }`}
+                >
+                  Data
                 </Link>
               </div>
             </div>

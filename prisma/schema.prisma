@@ -312,3 +312,38 @@ model CommunityProgram {
   @@index([equipmentNeeded], type: Gin)
   @@index([programType, publishedAt(sort: Desc)])
 }
+
+model ExercisePerformanceLog {
+  id                   String   @id @default(cuid())
+  userId               String
+  completedAt          DateTime
+  type                 String
+
+  // Exercise reference
+  exerciseDefinitionId String?
+  equipment            String?
+  exerciseName         String
+
+  // Strength metrics
+  totalSets            Int?
+  totalReps            Int?
+  totalVolumeLbs       Float?
+  maxWeightLbs         Float?
+  estimated1RMLbs      Float?
+  avgRPE               Float?
+
+  // Cardio metrics
+  distance             Float?
+  distanceUnit         String?
+  duration             Int?
+  avgPaceSeconds       Int?
+
+  // Reference back to source
+  workoutCompletionId  String?
+  cardioSessionId      String?
+
+  @@index([userId, completedAt])
+  @@index([userId, exerciseDefinitionId, completedAt])
+  @@index([userId, equipment, completedAt])
+  @@index([userId, type, completedAt])
+}
