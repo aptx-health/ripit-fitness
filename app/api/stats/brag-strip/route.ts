@@ -92,13 +92,13 @@ export async function GET(request: NextRequest) {
 
       // Earliest workout date (check both strength and cardio)
       prisma.$queryRaw<Array<{ earliest: Date | null }>>`
-        SELECT MIN(completed_at) as earliest
+        SELECT MIN("completedAt") as earliest
         FROM (
-          SELECT completed_at FROM "WorkoutCompletion"
-          WHERE user_id = ${user.id} AND status = 'completed'
+          SELECT "completedAt" FROM "WorkoutCompletion"
+          WHERE "userId" = ${user.id} AND status = 'completed'
           UNION ALL
-          SELECT completed_at FROM "LoggedCardioSession"
-          WHERE user_id = ${user.id} AND status = 'completed'
+          SELECT "completedAt" FROM "LoggedCardioSession"
+          WHERE "userId" = ${user.id} AND status = 'completed'
         ) AS all_workouts
       `,
     ])

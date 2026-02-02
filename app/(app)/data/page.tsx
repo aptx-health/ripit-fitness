@@ -56,13 +56,13 @@ async function getBragStripStats(userId: string) {
     }),
     // Earliest workout
     prisma.$queryRaw<Array<{ earliest: Date | null }>>`
-      SELECT MIN(completed_at) as earliest
+      SELECT MIN("completedAt") as earliest
       FROM (
-        SELECT completed_at FROM "WorkoutCompletion"
-        WHERE user_id = ${userId} AND status = 'completed'
+        SELECT "completedAt" FROM "WorkoutCompletion"
+        WHERE "userId" = ${userId} AND status = 'completed'
         UNION ALL
-        SELECT completed_at FROM "LoggedCardioSession"
-        WHERE user_id = ${userId} AND status = 'completed'
+        SELECT "completedAt" FROM "LoggedCardioSession"
+        WHERE "userId" = ${userId} AND status = 'completed'
       ) AS all_workouts
     `,
     // Cardio workout counts
