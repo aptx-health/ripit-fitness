@@ -47,28 +47,42 @@ export async function recordStrengthPerformance(
   completionId: string,
   userId: string
 ): Promise<void> {
-  // Fetch workout completion with all logged sets and exercise info
+  // Fetch workout completion
   const completion = await prisma.workoutCompletion.findUnique({
     where: { id: completionId },
-    include: {
-      exercises: {
-        include: {
-          exerciseDefinition: true,
-          loggedSets: true,
-        },
-      },
-    },
   })
 
   if (!completion) {
     throw new Error(`WorkoutCompletion ${completionId} not found`)
   }
 
-  // Group logged sets by exercise
-  for (const exercise of completion.exercises) {
-    const sets = exercise.loggedSets
+  // Fetch all logged sets for this completion with exercise info
+  const loggedSets = await prisma.loggedSet.findMany({
+    where: { completionId },
+    include: {
+      exercise: {
+        include: {
+          exerciseDefinition: true,
+        },
+      },
+    },
+  })
 
+  // Group logged sets by exercise
+  const exerciseMap = new Map<string, typeof loggedSets>()
+  for (const set of loggedSets) {
+    const exerciseId = set.exerciseId
+    if (!exerciseMap.has(exerciseId)) {
+      exerciseMap.set(exerciseId, [])
+    }
+    exerciseMap.get(exerciseId)!.push(set)
+  }
+
+  // Process each exercise
+  for (const [exerciseId, sets] of exerciseMap.entries()) {
     if (sets.length === 0) continue
+
+    const exercise = sets[0].exercise
 
     // Normalize all weights to lbs
     const normalizedSets = sets.map(s => ({
