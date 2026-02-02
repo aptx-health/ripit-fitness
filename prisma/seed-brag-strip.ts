@@ -7,7 +7,7 @@ async function main() {
   console.log('🌱 Seeding brag strip test data...')
 
   // 1. Find or create test user
-  const testEmail = 'test@example.com'
+  const testEmail = 'dev@local.com'
   let user = await prisma.$queryRaw<Array<{ id: string }>>`
     SELECT id FROM auth.users WHERE email = ${testEmail} LIMIT 1
   `
