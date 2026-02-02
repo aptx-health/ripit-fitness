@@ -215,8 +215,8 @@ export default function BragStrip({ stats, displayName, preferredWeightUnit, pre
           {/* Cardio Category Selector */}
           <div className="absolute bottom-3 right-3 md:bottom-6 md:right-6">
             <Select value={cardioCategory} onValueChange={(value) => setCardioCategory(value as CardioDistanceCategory)}>
-              <SelectTrigger className="h-8 w-8 p-0 border-none bg-transparent hover:bg-muted/50 focus:ring-1 focus:ring-primary flex items-center justify-center rounded">
-                <Settings className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />
+              <SelectTrigger className="h-8 w-8 p-0 border-none bg-transparent hover:bg-transparent focus:ring-1 focus:ring-primary flex items-center justify-center rounded [&>*:last-child]:hidden">
+                <Settings className="h-6 w-6 text-muted-foreground hover:text-primary transition-colors" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="running">{CARDIO_CATEGORY_LABELS.running}</SelectItem>
