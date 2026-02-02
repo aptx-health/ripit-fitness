@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { calculateProgramStats } from './validation';
+import { calculateProgramStats, validateProgramMetadata } from './validation';
 
 export interface PublishResult {
   success: boolean;
@@ -70,6 +70,15 @@ async function publishStrengthProgram(
     };
   }
 
+  // Validate metadata
+  const metadataValidation = validateProgramMetadata(program);
+  if (!metadataValidation.valid) {
+    return {
+      success: false,
+      error: `Program metadata incomplete: ${metadataValidation.errors.join(', ')}`,
+    };
+  }
+
   const displayName = await getUserDisplayName(prisma, userId);
   const stats = calculateProgramStats(program, 'strength');
 
@@ -86,6 +95,13 @@ async function publishStrengthProgram(
       weekCount: stats.weekCount,
       workoutCount: stats.workoutCount,
       exerciseCount: stats.exerciseCount,
+      goals: program.goals,
+      level: program.level,
+      durationWeeks: program.durationWeeks || stats.weekCount,
+      durationDisplay: program.durationDisplay,
+      targetDaysPerWeek: program.targetDaysPerWeek,
+      equipmentNeeded: program.equipmentNeeded,
+      focusAreas: program.focusAreas,
     },
   });
 
@@ -127,6 +143,15 @@ async function publishCardioProgram(
     };
   }
 
+  // Validate metadata
+  const metadataValidation = validateProgramMetadata(program);
+  if (!metadataValidation.valid) {
+    return {
+      success: false,
+      error: `Program metadata incomplete: ${metadataValidation.errors.join(', ')}`,
+    };
+  }
+
   const displayName = await getUserDisplayName(prisma, userId);
   const stats = calculateProgramStats(program, 'cardio');
 
@@ -143,6 +168,13 @@ async function publishCardioProgram(
       weekCount: stats.weekCount,
       workoutCount: stats.workoutCount,
       exerciseCount: stats.exerciseCount,
+      goals: program.goals,
+      level: program.level,
+      durationWeeks: program.durationWeeks || stats.weekCount,
+      durationDisplay: program.durationDisplay,
+      targetDaysPerWeek: program.targetDaysPerWeek,
+      equipmentNeeded: program.equipmentNeeded,
+      focusAreas: program.focusAreas,
     },
   });
 

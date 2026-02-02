@@ -31,9 +31,6 @@ export default function ArchivedProgramsSection({
       ? '/api/programs'
       : '/api/cardio/programs'
 
-  // Only strength programs can be unarchived currently
-  const canUnarchive = programType === 'strength'
-
   // Fetch archived programs when expanded
   useEffect(() => {
     if (isExpanded && programs.length === 0) {
@@ -127,10 +124,7 @@ export default function ArchivedProgramsSection({
                       <div className="h-3 bg-muted animate-pulse rounded w-32" />
                     </div>
                     <div className="ml-4 flex gap-2">
-                      <div className="h-7 w-12 bg-muted animate-pulse rounded" />
-                      {canUnarchive && (
-                        <div className="h-7 w-20 bg-muted animate-pulse rounded" />
-                      )}
+                      <div className="h-7 w-20 bg-muted animate-pulse rounded" />
                     </div>
                   </div>
                 </div>
@@ -167,19 +161,17 @@ export default function ArchivedProgramsSection({
                       )}
                     </div>
                     <div className="ml-4 flex gap-2">
-                      {canUnarchive && (
-                        <button
-                          onClick={() =>
-                            handleUnarchive(program.id, program.name)
-                          }
-                          disabled={unarchivingId === program.id}
-                          className="px-3 py-1.5 text-sm bg-primary-muted text-primary hover:bg-primary hover:text-primary-foreground font-medium transition-colors disabled:opacity-50"
-                        >
-                          {unarchivingId === program.id
-                            ? 'Unarchiving...'
-                            : 'Unarchive'}
-                        </button>
-                      )}
+                      <button
+                        onClick={() =>
+                          handleUnarchive(program.id, program.name)
+                        }
+                        disabled={unarchivingId === program.id}
+                        className="px-3 py-1.5 text-sm bg-primary-muted text-primary hover:bg-primary hover:text-primary-foreground font-medium transition-colors disabled:opacity-50"
+                      >
+                        {unarchivingId === program.id
+                          ? 'Unarchiving...'
+                          : 'Unarchive'}
+                      </button>
                     </div>
                   </div>
                 </div>

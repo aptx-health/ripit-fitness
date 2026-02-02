@@ -212,3 +212,33 @@ export async function isProgramPublished(
 
   return existingCommunityProgram !== null;
 }
+
+/**
+ * Validates program metadata (level, goals, etc.)
+ * This should only be called when actually publishing, not during initial validation
+ */
+export function validateProgramMetadata(program: any): ValidationResult {
+  const errors: string[] = [];
+
+  if (!program.level || program.level.trim() === '') {
+    errors.push(
+      'Program must have a fitness level (Beginner, Intermediate, or Advanced)'
+    );
+  }
+
+  if (!program.goals || program.goals.length === 0) {
+    errors.push('Program must have at least one training goal');
+  }
+
+  if (
+    program.targetDaysPerWeek &&
+    (program.targetDaysPerWeek < 1 || program.targetDaysPerWeek > 7)
+  ) {
+    errors.push('Target days per week must be between 1 and 7');
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
+}

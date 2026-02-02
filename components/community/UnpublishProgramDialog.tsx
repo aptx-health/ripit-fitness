@@ -50,8 +50,20 @@ export default function UnpublishProgramDialog({
   return (
     <AlertDialog.Root open={open} onOpenChange={onOpenChange}>
       <AlertDialog.Portal>
-        <AlertDialog.Overlay className="fixed inset-0 backdrop-blur-md bg-black/40 dark:bg-black/60 z-50 animate-in fade-in" />
-        <AlertDialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card border-2 border-error shadow-xl z-50 w-full max-w-md p-6 animate-in fade-in zoom-in-95 doom-corners">
+        <AlertDialog.Overlay
+          className="backdrop-blur-md bg-black/40 dark:bg-black/60"
+          style={{ position: 'fixed', inset: 0, zIndex: 50 }}
+        />
+        <AlertDialog.Content
+          className="bg-card border-2 border-error shadow-xl w-full max-w-md p-6 doom-corners"
+          style={{
+            position: 'fixed',
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 51
+          }}
+        >
           {/* Icon */}
           <div className="flex items-center justify-center w-12 h-12 bg-error/10 border-2 border-error mb-4">
             <AlertTriangle className="w-6 h-6 text-error" />

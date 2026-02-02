@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/server';
 import { prisma } from '@/lib/db';
-import { validateProgramForPublishing, isProgramPublished } from '@/lib/community/validation';
+import {
+  validateProgramForPublishing,
+  validateProgramMetadata,
+  isProgramPublished,
+} from '@/lib/community/validation';
 import { publishProgramToCommunity } from '@/lib/community/publishing';
 
 export async function POST(
@@ -42,8 +46,13 @@ export async function POST(
       );
     }
 
-    // Validate program
-    const validation = await validateProgramForPublishing(prisma, programId, user.id, programType);
+    // Validate program structure
+    const validation = await validateProgramForPublishing(
+      prisma,
+      programId,
+      user.id,
+      programType
+    );
     if (!validation.valid) {
       return NextResponse.json(
         { error: 'Program validation failed', errors: validation.errors },
@@ -51,8 +60,34 @@ export async function POST(
       );
     }
 
+    // Validate metadata
+    const program =
+      programType === 'strength'
+        ? await prisma.program.findUnique({ where: { id: programId } })
+        : await prisma.cardioProgram.findUnique({ where: { id: programId } });
+
+    if (!program) {
+      return NextResponse.json({ error: 'Program not found' }, { status: 404 });
+    }
+
+    const metadataValidation = validateProgramMetadata(program);
+    if (!metadataValidation.valid) {
+      return NextResponse.json(
+        {
+          error: 'Program metadata incomplete',
+          errors: metadataValidation.errors,
+        },
+        { status: 400 }
+      );
+    }
+
     // Publish to community
-    const result = await publishProgramToCommunity(prisma, programId, user.id, programType);
+    const result = await publishProgramToCommunity(
+      prisma,
+      programId,
+      user.id,
+      programType
+    );
 
     if (!result.success) {
       return NextResponse.json(
