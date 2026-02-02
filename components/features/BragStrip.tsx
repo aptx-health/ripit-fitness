@@ -82,7 +82,7 @@ export default function BragStrip({ stats, displayName, preferredWeightUnit, pre
   }
 
   return (
-    <div className="max-w-md md:max-w-3xl mx-auto doom-page-enter">
+    <div className="max-w-md md:max-w-3xl mx-auto doom-page-enter brag-strip-no-hover">
       {/* Trophy Badge Container */}
       <div className="relative doom-noise">
         {/* Top Badge Header with Frog */}
