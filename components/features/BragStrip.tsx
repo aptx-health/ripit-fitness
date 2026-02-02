@@ -69,7 +69,7 @@ export default function BragStrip({ stats, displayName }: Props) {
           {/* Workout Counts - Grid (2 columns on mobile and desktop) */}
           <div className="grid grid-cols-2 gap-2 md:gap-4 mb-3 md:mb-6">
             {/* This Week */}
-            <div className="bg-card border-2 border-border p-3 md:p-5 text-center">
+            <div className="bg-card border-2 border-border p-3 md:p-5 text-center" style={{ WebkitTapHighlightColor: 'transparent' }}>
               <div className="text-5xl md:text-6xl font-bold text-accent mb-1" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)' }}>
                 {stats.workoutsThisWeek}
               </div>
@@ -79,7 +79,7 @@ export default function BragStrip({ stats, displayName }: Props) {
             </div>
 
             {/* This Month */}
-            <div className="bg-card border-2 border-border p-3 md:p-5 text-center">
+            <div className="bg-card border-2 border-border p-3 md:p-5 text-center" style={{ WebkitTapHighlightColor: 'transparent' }}>
               <div className="text-5xl md:text-6xl font-bold text-accent mb-1" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)' }}>
                 {stats.workoutsThisMonth}
               </div>
@@ -89,7 +89,7 @@ export default function BragStrip({ stats, displayName }: Props) {
             </div>
 
             {/* All Time - Spans Both Columns */}
-            <div className="col-span-2 bg-card border-2 border-primary p-4 md:p-6 text-center shadow-[0_0_10px_rgba(var(--primary-rgb),0.15)]">
+            <div className="col-span-2 bg-card border-2 border-primary p-4 md:p-6 text-center shadow-[0_0_10px_rgba(var(--primary-rgb),0.15)]" style={{ WebkitTapHighlightColor: 'transparent' }}>
               <div className="text-6xl md:text-7xl font-bold text-primary mb-1" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)' }}>
                 {stats.workoutsAllTime}
               </div>
@@ -105,7 +105,7 @@ export default function BragStrip({ stats, displayName }: Props) {
           {/* Volume and Running Stats - Grid (2 columns on mobile and desktop) */}
           <div className="grid grid-cols-2 gap-2 md:gap-4">
             {/* Total Volume */}
-            <div className="bg-card border-2 border-primary p-3 md:p-6 text-center">
+            <div className="bg-card border-2 border-primary p-3 md:p-6 text-center" style={{ WebkitTapHighlightColor: 'transparent' }}>
               <div className="text-4xl md:text-5xl font-bold text-primary mb-0.5 md:mb-1" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)' }}>
                 {formatNumber(stats.totalVolumeLbs)}
               </div>
@@ -121,7 +121,7 @@ export default function BragStrip({ stats, displayName }: Props) {
             </div>
 
             {/* Running Distance */}
-            <div className="bg-card border-2 border-accent p-3 md:p-6 text-center shadow-[0_0_8px_rgba(var(--accent-rgb),0.1)]">
+            <div className="bg-card border-2 border-accent p-3 md:p-6 text-center shadow-[0_0_8px_rgba(var(--accent-rgb),0.1)]" style={{ WebkitTapHighlightColor: 'transparent' }}>
               <div className="text-4xl md:text-5xl font-bold text-accent mb-0.5 md:mb-1" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)' }}>
                 {stats.totalRunningMiles}
               </div>
