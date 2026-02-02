@@ -43,11 +43,35 @@ doppler run --config dev_personal -- npx prisma generate
 cd ../..
 
 echo ""
+echo "📊 Checking if Supabase is running..."
+if supabase status >/dev/null 2>&1; then
+  echo "✅ Supabase is running"
+  echo ""
+  echo "🔄 Resetting database with migrations..."
+  supabase db reset
+
+  echo ""
+  echo "🔨 Regenerating Prisma client with migrated schema..."
+  doppler run --config dev_personal -- npx prisma generate
+
+  echo ""
+  echo "✅ Database migrations applied!"
+else
+  echo "⚠️  Supabase not running - skipping database reset"
+  echo ""
+  echo "After starting Supabase, run:"
+  echo "  supabase db reset"
+  echo "  doppler run -- npx prisma generate"
+  echo "  overmind restart app"
+fi
+
+echo ""
 echo "✅ Worktree setup complete!"
 echo ""
 echo "You can now start the development environment with:"
 echo "  overmind start"
 echo ""
 echo "Requirements:"
-echo "  - Doppler configured with 'dev_personal' config"
-echo "  - Docker running (for Pub/Sub emulator)"
+echo "  - Doppler configured with worktree-specific config (dev_personal_worktree1/2/3)"
+echo "  - Docker running (for Supabase and Pub/Sub emulator)"
+echo "  - Supabase started (supabase start)"

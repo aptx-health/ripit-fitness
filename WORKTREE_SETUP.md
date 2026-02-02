@@ -21,13 +21,25 @@ doppler configure set token <TOKEN_FROM_STEP_1>
 # 4. Run standard setup (npm install, Prisma generate)
 ./scripts/setup-worktree.sh
 
-# 5. Start Supabase and get JWT keys
+# 5. Start Supabase, reset database with migrations, and get JWT keys
 supabase start
+supabase db reset  # CRITICAL: Applies all migrations to match schema
+doppler run -- npx prisma generate  # Regenerate client with migrated schema
 supabase status -o env | grep -E '(ANON_KEY|SERVICE_ROLE_KEY)'
 
 # 6. Set JWT keys in Doppler (replace with actual values)
 doppler secrets set NEXT_PUBLIC_SUPABASE_ANON_KEY='<anon_key_from_above>'
 doppler secrets set SUPABASE_SERVICE_ROLE_KEY='<service_role_key_from_above>'
+
+# 7. Start development
+overmind start
+```
+
+**Important**: Any time you switch branches or pull new migrations, run:
+```bash
+supabase db reset
+doppler run -- npx prisma generate
+overmind restart app  # Restart dev server to pick up new Prisma client
 ```
 
 ## What the Setup Script Does
@@ -95,6 +107,40 @@ overmind start
 ```
 
 ## Troubleshooting
+
+### Radix UI Components Not Working (Popover, Dialog, etc.)
+
+**Symptom**: Popovers open but buttons aren't clickable, or dialogs don't position correctly.
+
+**Cause**: Missing `node_modules` packages (e.g., `@radix-ui/react-popover`).
+
+**Solution**:
+```bash
+npm install  # Reinstall all dependencies
+overmind restart app
+```
+
+Each worktree needs its own `node_modules` directory.
+
+### "Unknown argument" or "Invalid Prisma invocation" Errors
+
+**Symptom**: API errors mentioning fields that should exist (e.g., "Unknown argument `goals`").
+
+**Cause**: Database schema doesn't match Prisma schema, or Prisma client is stale.
+
+**Solution**:
+```bash
+# Apply all migrations to local database
+supabase db reset
+
+# Regenerate Prisma client
+doppler run -- npx prisma generate
+
+# Restart dev server to pick up new client
+overmind restart app
+```
+
+**Why this happens**: The Prisma client is generated at build time. If you run migrations without regenerating the client, or if the dev server is already running, it will use the old client that doesn't know about new fields.
 
 ### "PrismaClientConstructorValidationError: Invalid value undefined for datasource"
 
