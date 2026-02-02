@@ -111,13 +111,24 @@ export default async function DataPage() {
     getBragStripStats(user.id),
     prisma.userSettings.findUnique({
       where: { userId: user.id },
-      select: { displayName: true },
+      select: {
+        displayName: true,
+        defaultWeightUnit: true,
+      },
     }),
   ])
 
+  const preferredWeightUnit = userSettings?.defaultWeightUnit || 'lbs'
+  const preferredDistanceUnit = preferredWeightUnit === 'kg' ? 'km' : 'miles'
+
   return (
     <div className="container mx-auto px-2 py-4 md:px-4 md:py-8">
-      <BragStrip stats={stats} displayName={userSettings?.displayName || null} />
+      <BragStrip
+        stats={stats}
+        displayName={userSettings?.displayName || null}
+        preferredWeightUnit={preferredWeightUnit}
+        preferredDistanceUnit={preferredDistanceUnit}
+      />
     </div>
   )
 }

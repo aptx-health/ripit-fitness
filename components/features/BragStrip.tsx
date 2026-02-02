@@ -26,9 +26,11 @@ type BragStripStats = {
 type Props = {
   stats: BragStripStats
   displayName: string | null
+  preferredWeightUnit: 'lbs' | 'kg'
+  preferredDistanceUnit: 'miles' | 'km'
 }
 
-export default function BragStrip({ stats, displayName }: Props) {
+export default function BragStrip({ stats, displayName, preferredWeightUnit, preferredDistanceUnit }: Props) {
   // Cardio distance category state
   const [cardioCategory, setCardioCategory] = useState<CardioDistanceCategory>('running')
   const [cardioDistance, setCardioDistance] = useState({
@@ -153,16 +155,22 @@ export default function BragStrip({ stats, displayName }: Props) {
             {/* Total Volume */}
             <div className="bg-card border-2 border-primary p-3 md:p-6 text-center" style={{ WebkitTapHighlightColor: 'transparent' }}>
               <div className="text-4xl md:text-5xl font-bold text-primary mb-0.5 md:mb-1" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)' }}>
-                {formatNumber(stats.totalVolumeLbs)}
+                {preferredWeightUnit === 'lbs'
+                  ? formatNumber(stats.totalVolumeLbs)
+                  : formatNumber(stats.totalVolumeKg)
+                }
               </div>
               <div className="text-lg md:text-2xl text-foreground mb-1 md:mb-3">
-                lbs
+                {preferredWeightUnit}
               </div>
               <div className="text-sm md:text-base font-semibold text-foreground uppercase tracking-wider mb-0.5 md:mb-1">
                 Total Volume
               </div>
               <div className="text-sm md:text-base text-muted-foreground">
-                ({formatNumber(stats.totalVolumeKg)} kg)
+                ({preferredWeightUnit === 'lbs'
+                  ? `${formatNumber(stats.totalVolumeKg)} kg`
+                  : `${formatNumber(stats.totalVolumeLbs)} lbs`
+                })
               </div>
             </div>
 
@@ -170,16 +178,24 @@ export default function BragStrip({ stats, displayName }: Props) {
             <div className="bg-card border-2 border-accent p-3 md:p-6 text-center shadow-[0_0_8px_rgba(var(--accent-rgb),0.1)]" style={{ WebkitTapHighlightColor: 'transparent' }}>
               {/* Distance Stats */}
               <div className="text-4xl md:text-5xl font-bold text-accent mb-0.5 md:mb-1" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)' }}>
-                {isLoadingCardio ? '...' : cardioDistance.miles}
+                {isLoadingCardio ? '...' : (
+                  preferredDistanceUnit === 'miles'
+                    ? cardioDistance.miles
+                    : cardioDistance.km
+                )}
               </div>
               <div className="text-lg md:text-2xl text-foreground mb-1 md:mb-3">
-                mi
+                {preferredDistanceUnit === 'miles' ? 'mi' : 'km'}
               </div>
               <div className="text-sm md:text-base font-semibold text-foreground uppercase tracking-wider mb-0.5 md:mb-1">
                 {CARDIO_CATEGORY_LABELS[cardioCategory]} Distance
               </div>
               <div className="text-sm md:text-base text-muted-foreground">
-                ({isLoadingCardio ? '...' : cardioDistance.km} km)
+                ({isLoadingCardio ? '...' : (
+                  preferredDistanceUnit === 'miles'
+                    ? `${cardioDistance.km} km`
+                    : `${cardioDistance.miles} mi`
+                )})
               </div>
             </div>
           </div>
