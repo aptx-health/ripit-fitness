@@ -142,6 +142,13 @@ async function main() {
     return date
   }
 
+  // Calculate current ISO week boundaries
+  const dayOfWeek = now.getDay()
+  const daysUntilMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1
+  const startOfWeek = new Date(now)
+  startOfWeek.setDate(now.getDate() - daysUntilMonday)
+  startOfWeek.setHours(0, 0, 0, 0)
+
   // This week: 3 workouts (days 1, 3, 5)
   const thisWeekDates = [1, 3, 5]
 
@@ -157,14 +164,6 @@ async function main() {
     ...olderDates.map(d => ({ days: d, label: 'older' })),
   ]
 
-  // Calculate current ISO week boundaries
-  const now = new Date()
-  const dayOfWeek = now.getDay()
-  const daysUntilMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1
-  const startOfWeek = new Date(now)
-  startOfWeek.setDate(now.getDate() - daysUntilMonday)
-  startOfWeek.setHours(0, 0, 0, 0)
-
   // Adjust "this week" workouts to be explicitly within current ISO week
   // Replace days 1, 3, 5 with dates after startOfWeek
   const adjustedDates = allDates.map(({ days, label }) => {
@@ -179,6 +178,7 @@ async function main() {
 
   console.log(`Creating ${adjustedDates.length} workout completions...`)
 
+  let completedCount = 0
   for (const { date, label } of adjustedDates) {
     const completedAt = date
 
@@ -303,12 +303,13 @@ async function main() {
     // Record performance metrics
     await recordStrengthPerformance(prisma, completion.id, userId)
 
-    if (allDates.indexOf({ days, label }) % 10 === 0) {
-      console.log(`  ✓ Created ${allDates.indexOf({ days, label }) + 1}/${allDates.length} completions`)
+    completedCount++
+    if (completedCount % 10 === 0) {
+      console.log(`  ✓ Created ${completedCount}/${adjustedDates.length} completions`)
     }
   }
 
-  console.log(`✅ Created ${allDates.length} workout completions with performance logs`)
+  console.log(`✅ Created ${adjustedDates.length} workout completions with performance logs`)
 
   // 5. Create cardio sessions
   console.log('Creating cardio sessions...')

@@ -118,8 +118,8 @@ export default async function DataPage() {
     }),
   ])
 
-  const preferredWeightUnit = userSettings?.defaultWeightUnit || 'lbs'
-  const preferredDistanceUnit = preferredWeightUnit === 'kg' ? 'km' : 'miles'
+  const preferredWeightUnit = (userSettings?.defaultWeightUnit || 'lbs') as 'lbs' | 'kg'
+  const preferredDistanceUnit = (preferredWeightUnit === 'kg' ? 'km' : 'miles') as 'miles' | 'km'
 
   return (
     <div className="container mx-auto px-2 py-4 md:px-4 md:py-8">
