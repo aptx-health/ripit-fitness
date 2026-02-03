@@ -1718,3 +1718,14 @@ body {
 [data-theme="ripit"] .bg-card:hover {
   border-color: rgba(251, 191, 36, 0.3); /* golden tint */
 }
+
+/* Disable hover effect for BragStrip stats - preserve original border colors */
+.brag-strip-no-hover .border-border:hover {
+  border-color: var(--border) !important;
+}
+.brag-strip-no-hover .border-primary:hover {
+  border-color: var(--primary) !important;
+}
+.brag-strip-no-hover .border-accent:hover {
+  border-color: var(--accent) !important;
+}

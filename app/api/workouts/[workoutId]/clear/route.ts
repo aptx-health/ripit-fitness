@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { deleteStrengthPerformance } from '@/lib/stats/exercise-performance'
 
 export async function POST(
   request: NextRequest,
@@ -50,6 +51,9 @@ export async function POST(
         { status: 404 }
       )
     }
+
+    // Delete performance logs before deleting completion
+    await deleteStrengthPerformance(prisma, existingCompletion.id, user.id)
 
     // Delete completion (logged sets will be cascade deleted)
     await prisma.workoutCompletion.delete({

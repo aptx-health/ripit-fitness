@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { deleteCardioPerformance } from '@/lib/stats/exercise-performance'
 
 export async function POST(
   request: NextRequest,
@@ -35,6 +36,22 @@ export async function POST(
     if (session.week.cardioProgram.userId !== user.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
+
+    // Get all logged sessions for this prescribed session
+    const loggedSessions = await prisma.loggedCardioSession.findMany({
+      where: {
+        prescribedSessionId: sessionId,
+        userId: user.id,
+      },
+      select: { id: true },
+    })
+
+    // Delete performance logs for each session
+    await Promise.all(
+      loggedSessions.map(session =>
+        deleteCardioPerformance(prisma, session.id, user.id)
+      )
+    )
 
     // Delete all logged sessions for this prescribed session
     const deleted = await prisma.loggedCardioSession.deleteMany({

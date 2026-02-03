@@ -21,6 +21,7 @@ export default function Header({ userEmail }: Props) {
 
   const isStrengthActive = pathname.startsWith('/training')
   const isCardioActive = pathname.startsWith('/cardio')
+  const isDataActive = pathname.startsWith('/data')
 
   return (
     <>
@@ -32,24 +33,19 @@ export default function Header({ userEmail }: Props) {
               <Link
                 href="/programs"
                 className="hover:opacity-80 transition-opacity"
+                aria-label="Programs"
               >
                 <Image
                   src="/rf-logo@1x.png"
-                  alt="Ripit Fitness"
+                  alt="Ripit Fitness - Programs"
                   width={100}
                   height={40}
                   className="h-8 w-auto"
                   priority
                 />
               </Link>
+              <div className="h-6 w-px bg-border" />
               <div className="flex items-center gap-3 sm:gap-4">
-                <Link
-                  href="/programs"
-                  className="px-3 py-1.5 text-xs sm:text-sm font-bold text-primary hover:bg-primary-muted hover:border-accent hover:text-accent border border-primary uppercase tracking-wider transition-colors"
-                >
-                  Programs
-                </Link>
-                <div className="h-6 w-px bg-border" />
                 <Link
                   href="/training"
                   className={`text-xs sm:text-sm font-semibold uppercase tracking-wider transition-colors ${
@@ -69,6 +65,16 @@ export default function Header({ userEmail }: Props) {
                   }`}
                 >
                   Cardio
+                </Link>
+                <Link
+                  href="/data"
+                  className={`text-xs sm:text-sm font-semibold uppercase tracking-wider transition-colors ${
+                    isDataActive
+                      ? 'text-accent border-b-2 border-accent pb-0.5'
+                      : 'text-foreground hover:text-accent doom-link'
+                  }`}
+                >
+                  Data
                 </Link>
               </div>
             </div>
