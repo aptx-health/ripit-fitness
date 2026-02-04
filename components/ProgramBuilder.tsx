@@ -7,6 +7,7 @@ import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import ExerciseSearchModal from './ExerciseSearchModal'
 import FAUVolumeVisualization from './FAUVolumeVisualization'
 import SortableExerciseList from './SortableExerciseList'
+import StrengthActivationModal from './StrengthActivationModal'
 
 type Week = {
   id: string
@@ -120,6 +121,10 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
     }
     return 0
   })
+
+  // Activation modal state
+  const [showActivationModal, setShowActivationModal] = useState(false)
+  const [existingActiveProgram, setExistingActiveProgram] = useState<{ id: string; name: string } | null>(null)
 
   // Get current week data (from cache in edit mode, from weeks array in create mode)
   const getCurrentWeekData = useCallback((): Week | null => {
@@ -344,7 +349,7 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
     }
   }, [editMode])
 
-  const handleComplete = useCallback(() => {
+  const handleComplete = useCallback(async () => {
     // Validate all workouts have at least 1 exercise
     const emptyWorkouts: string[] = []
 
@@ -367,9 +372,33 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
       return
     }
 
-    // Redirect to training page (programs are viewed there now)
-    router.push('/training')
-  }, [router, editMode, weeksCache, weeks])
+    // If in edit mode, just redirect to training page
+    if (editMode) {
+      router.push('/training')
+      return
+    }
+
+    // For new programs, show activation modal
+    if (!programId) return
+
+    // Check for existing active program
+    try {
+      const response = await fetch('/api/programs')
+      const data = await response.json()
+
+      if (data.success && data.programs) {
+        const activeProgram = data.programs.find((p: any) => p.isActive && p.id !== programId)
+        if (activeProgram) {
+          setExistingActiveProgram({ id: activeProgram.id, name: activeProgram.name })
+        }
+      }
+    } catch (error) {
+      console.error('Error checking for active programs:', error)
+      // Continue anyway and show the modal
+    }
+
+    setShowActivationModal(true)
+  }, [router, editMode, weeksCache, weeks, programId])
 
   const handleAddExercise = useCallback((workoutId: string) => {
     setSelectedWorkoutId(workoutId)
@@ -1428,6 +1457,15 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
             </div>
           </div>
         </div>
+      )}
+
+      {/* Activation Modal */}
+      {showActivationModal && programId && (
+        <StrengthActivationModal
+          programId={programId}
+          existingActiveProgram={existingActiveProgram}
+          onClose={() => setShowActivationModal(false)}
+        />
       )}
     </div>
   )
