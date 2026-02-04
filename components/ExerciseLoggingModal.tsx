@@ -113,6 +113,27 @@ export default function ExerciseLoggingModal({
   // Enhanced persistence with localStorage backing
   const { loggedSets, setLoggedSets, isLoaded, clearStoredWorkout } = useWorkoutStorage(workoutId)
 
+  // Validate and clean up localStorage on load to prevent cross-workout contamination
+  useEffect(() => {
+    if (!isLoaded || exercises.length === 0 || loggedSets.length === 0) return
+
+    const validExerciseIds = new Set(exercises.map(e => e.id))
+    const invalidSets = loggedSets.filter(set => !validExerciseIds.has(set.exerciseId))
+
+    // Only update if we found invalid sets (prevents infinite loop)
+    if (invalidSets.length > 0) {
+      console.warn(`⚠️ Found ${invalidSets.length} sets with invalid exercise IDs in localStorage, cleaning up...`)
+      console.log('Invalid exercise IDs:', [...new Set(invalidSets.map(s => s.exerciseId))])
+
+      // Filter out invalid sets
+      const validSets = loggedSets.filter(set => validExerciseIds.has(set.exerciseId))
+      setLoggedSets(validSets)
+
+      console.log(`✅ Cleaned localStorage: ${loggedSets.length} → ${validSets.length} sets`)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded, exercises.length, workoutId]) // Only run when workout changes or loads
+
   // Sync state management
   const {
     syncState,

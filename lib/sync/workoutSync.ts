@@ -338,6 +338,18 @@ export class WorkoutSyncService {
   }
 
   /**
+   * Clear all state (queue, current sets, and retry timeouts)
+   * Called when switching between workouts to prevent state pollution
+   */
+  clearAll = (): void => {
+    this.pendingQueue = []
+    this.allCurrentSets = []
+    this.clearRetryTimeouts()
+    this.isCurrentlySyncing = false
+    console.log('Sync service state fully cleared')
+  }
+
+  /**
    * Clean up resources
    */
   destroy = (): void => {
@@ -391,12 +403,18 @@ export function useWorkoutSyncService(
 
   // Update callbacks when they change using a ref to avoid mutation
   const callbacksRef = useCallback(() => callbacks, [callbacks])
-  
+
   useEffect(() => {
     // Update callbacks using the proper method
     const currentCallbacks = callbacksRef()
     syncService.updateCallbacks(currentCallbacks)
   }, [syncService, callbacksRef])
+
+  // Clear sync service state when workoutId changes to prevent state pollution
+  useEffect(() => {
+    console.log('🔄 WorkoutId changed, clearing sync service state')
+    syncService.clearAll()
+  }, [syncService, workoutId])
 
   // Cleanup on unmount
   useEffect(() => {
@@ -418,6 +436,7 @@ export function useWorkoutSyncService(
     retrySync,
     getQueueStatus: syncService.getQueueStatus,
     clearQueue: syncService.clearQueue,
+    clearAll: syncService.clearAll,
     destroy: syncService.destroy
   }
 }
