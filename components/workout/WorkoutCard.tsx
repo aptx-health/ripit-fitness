@@ -125,7 +125,7 @@ export default function WorkoutCard({
             </button>
           ) : (
             <button
-              onClick={() => onLog(workout.id)}
+              onClick={() => isCompleted ? onView(workout.id) : onLog(workout.id)}
               disabled={isLoading}
               className={`px-4 py-2 ${
                 isDraft
