@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { X, Search, Plus, Trash } from 'lucide-react'
+import { X, Search, Plus, Trash, Filter } from 'lucide-react'
 import { useUserSettings } from '@/hooks/useUserSettings'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/radix/popover'
 
@@ -908,8 +908,14 @@ export default function ExerciseSearchModal({
                 </div>
               ) : !hasSearched ? (
                 <div className="text-center py-8">
-                  <div className="text-muted-foreground">
-                    Enter a search term or select a filter to find exercises
+                  <div className="flex flex-col items-center gap-4 text-muted-foreground">
+                    <div className="flex items-center gap-4">
+                      <Search size={32} className="text-muted-foreground/60" />
+                      <Filter size={32} className="text-muted-foreground/60" />
+                    </div>
+                    <div>
+                      Enter a search term or select a filter to find exercises
+                    </div>
                   </div>
                 </div>
               ) : exercises.length === 0 ? (
