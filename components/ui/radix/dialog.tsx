@@ -15,7 +15,8 @@ const DialogOverlay = React.forwardRef<
 >(({ className = '', ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
-    className={`fixed inset-0 z-[70] backdrop-blur-md bg-background/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 ${className}`}
+    style={{ position: 'fixed', inset: 0, zIndex: 70 }}
+    className={`backdrop-blur-md bg-background/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 ${className}`}
     {...props}
   />
 ))
@@ -33,10 +34,10 @@ const DialogContent = React.forwardRef<
     <DialogOverlay />
     <DialogPrimitive.Content
       ref={ref}
-      style={!fullScreenMobile ? { position: 'fixed', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' } : undefined}
-      className={`z-[70] bg-card border border-border rounded-xl shadow-xl overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 ${
+      style={{ position: 'fixed', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', zIndex: 71 }}
+      className={`bg-card border border-border rounded-xl shadow-xl overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 ${
         fullScreenMobile
-          ? 'fixed inset-0 h-[100dvh] sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]'
+          ? 'w-full h-full sm:h-auto sm:w-[90vw] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]'
           : position === 'bottom'
           ? 'w-full h-full sm:h-auto sm:max-h-[90vh] sm:max-w-2xl'
           : 'w-[90vw] max-w-lg max-h-[90vh]'
