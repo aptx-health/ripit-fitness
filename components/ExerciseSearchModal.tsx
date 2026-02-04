@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { X, Search, Plus } from 'lucide-react'
+import { X, Search, Plus, Trash } from 'lucide-react'
+import { useUserSettings } from '@/hooks/useUserSettings'
 
 type ExerciseDefinition = {
   id: string
@@ -82,12 +83,13 @@ export default function ExerciseSearchModal({
   onExerciseSelect,
   editingExercise
 }: ExerciseSearchModalProps) {
+  const { settings } = useUserSettings()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedFAUs, setSelectedFAUs] = useState<string[]>([])
   const [exercises, setExercises] = useState<ExerciseDefinition[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  
+
   // Helper function to get initial form state
   const getInitialFormState = () => {
     if (editingExercise) {
@@ -119,15 +121,21 @@ export default function ExerciseSearchModal({
       }
     }
 
+    // When adding new exercise: use user's preferred setting
+    const defaultIntensityType = (): 'RIR' | 'RPE' | 'NONE' => {
+      if (!settings?.defaultIntensityRating) return 'NONE'
+      return settings.defaultIntensityRating === 'rpe' ? 'RPE'
+        : settings.defaultIntensityRating === 'rir' ? 'RIR'
+        : 'NONE'
+    }
+
     return {
       selectedExercise: null,
-      setCount: 3,
-      exerciseIntensityType: 'NONE' as const,
+      setCount: 1,
+      exerciseIntensityType: defaultIntensityType(),
       exerciseNotes: '',
       sets: [
-        { setNumber: 1, reps: '8-12' },
-        { setNumber: 2, reps: '8-12' },
-        { setNumber: 3, reps: '8-12' }
+        { setNumber: 1, reps: '8-12' }
       ]
     }
   }
@@ -145,23 +153,22 @@ export default function ExerciseSearchModal({
     reps: string
     intensityValue?: number
   }>>(initialState.sets)
-  const [duplicatingSetId, setDuplicatingSetId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!editingExercise) return
-  
+
     const firstSet = editingExercise.prescribedSets[0]
     let intensityType: 'RIR' | 'RPE' | 'NONE' = 'NONE'
-  
+
     if (firstSet?.rpe != null) intensityType = 'RPE'
     else if (firstSet?.rir != null) intensityType = 'RIR'
-  
+
     setSelectedExercise({
       ...editingExercise.exerciseDefinition,
       equipment: [],
       instructions: undefined,
     })
-  
+
     setSetCount(editingExercise.prescribedSets.length)
     setExerciseIntensityType(intensityType)
     setExerciseNotes(editingExercise.notes || '')
@@ -179,6 +186,17 @@ export default function ExerciseSearchModal({
       }))
     )
   }, [editingExercise])
+
+  // Update intensity type when settings load (only for new exercises, not when editing)
+  useEffect(() => {
+    if (editingExercise || !settings?.defaultIntensityRating) return
+
+    const defaultType = settings.defaultIntensityRating === 'rpe' ? 'RPE'
+      : settings.defaultIntensityRating === 'rir' ? 'RIR'
+      : 'NONE'
+
+    setExerciseIntensityType(defaultType)
+  }, [settings, editingExercise])
   
 
   const searchExercises = useCallback(async () => {
@@ -231,27 +249,6 @@ export default function ExerciseSearchModal({
     setSelectedExercise(exercise)
   }, [])
 
-  const handleSetCountChange = useCallback((newCount: number) => {
-    setSetCount(newCount)
-    setSets(prev => {
-      const newSets = []
-      for (let i = 0; i < newCount; i++) {
-        if (i < prev.length) {
-          // Keep existing set data
-          newSets.push({ ...prev[i], setNumber: i + 1 })
-        } else {
-          // Add new set with defaults
-          newSets.push({
-            setNumber: i + 1,
-            reps: '8-12',
-            intensityValue: undefined
-          })
-        }
-      }
-      return newSets
-    })
-  }, [])
-
   const handleSetUpdate = useCallback((setIndex: number, field: 'reps' | 'intensityValue', value: string | number | undefined) => {
     setSets(prev => prev.map((set, index) => {
       if (index === setIndex) {
@@ -261,47 +258,31 @@ export default function ExerciseSearchModal({
     }))
   }, [])
 
-  const handleDuplicateSet = useCallback(async (setId: string) => {
-    if (!setId) return
-
-    setDuplicatingSetId(setId)
-    setError(null)
-
-    try {
-      const response = await fetch(`/api/prescribed-sets/${setId}/duplicate`, {
-        method: 'POST',
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to duplicate set')
+  const handleAddSet = useCallback(() => {
+    setSets(prev => {
+      const lastSet = prev[prev.length - 1]
+      const newSet = {
+        setNumber: prev.length + 1,
+        reps: lastSet.reps,
+        intensityValue: lastSet.intensityValue
       }
+      return [...prev, newSet]
+    })
+    setSetCount(sets.length + 1)
+  }, [sets.length])
 
-      const { exercise } = await response.json()
+  const handleDeleteSet = useCallback((setIndex: number) => {
+    if (sets.length <= 1) return
 
-      // Update local state with new sets from server
-      const intensityType = exerciseIntensityType
-      setSets(
-        exercise.prescribedSets.map((set: any) => ({
-          id: set.id,
-          setNumber: set.setNumber,
-          reps: set.reps,
-          intensityValue:
-            intensityType === 'RPE'
-              ? set.rpe ?? undefined
-              : intensityType === 'RIR'
-              ? set.rir ?? undefined
-              : undefined,
-        }))
-      )
-      setSetCount(exercise.prescribedSets.length)
-    } catch (error) {
-      console.error('Error duplicating set:', error)
-      setError(error instanceof Error ? error.message : 'Failed to duplicate set')
-    } finally {
-      setDuplicatingSetId(null)
-    }
-  }, [exerciseIntensityType])
+    setSets(prev => {
+      const updated = prev.filter((_, index) => index !== setIndex)
+      return updated.map((set, index) => ({
+        ...set,
+        setNumber: index + 1
+      }))
+    })
+    setSetCount(sets.length - 1)
+  }, [sets.length])
 
   const handleConfirmExercise = useCallback(() => {
     if (!selectedExercise) return
@@ -317,19 +298,19 @@ export default function ExerciseSearchModal({
     }
     
     onExerciseSelect(selectedExercise, prescription)
-    
+
     // Reset form
     setSelectedExercise(null)
-    setSetCount(3)
-    setExerciseIntensityType('NONE')
+    setSetCount(1)
+    setExerciseIntensityType(settings?.defaultIntensityRating === 'rpe' ? 'RPE'
+      : settings?.defaultIntensityRating === 'rir' ? 'RIR'
+      : 'NONE')
     setExerciseNotes('')
     setSets([
-      { setNumber: 1, reps: '8-12' },
-      { setNumber: 2, reps: '8-12' },
-      { setNumber: 3, reps: '8-12' }
+      { setNumber: 1, reps: '8-12' }
     ])
     onClose()
-  }, [selectedExercise, sets, exerciseIntensityType, exerciseNotes, onExerciseSelect, onClose])
+  }, [selectedExercise, sets, exerciseIntensityType, exerciseNotes, onExerciseSelect, onClose, settings])
 
   const handleBackToSearch = useCallback(() => {
     setSelectedExercise(null)
@@ -341,25 +322,25 @@ export default function ExerciseSearchModal({
     setExercises([])
     setError(null)
     setSelectedExercise(null)
-    setSetCount(3)
-    setExerciseIntensityType('NONE')
+    setSetCount(1)
+    setExerciseIntensityType(settings?.defaultIntensityRating === 'rpe' ? 'RPE'
+      : settings?.defaultIntensityRating === 'rir' ? 'RIR'
+      : 'NONE')
     setExerciseNotes('')
     setSets([
-      { setNumber: 1, reps: '8-12' },
-      { setNumber: 2, reps: '8-12' },
-      { setNumber: 3, reps: '8-12' }
+      { setNumber: 1, reps: '8-12' }
     ])
     onClose()
-  }, [onClose])
+  }, [onClose, settings])
 
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-card rounded-lg w-full max-w-4xl max-h-[80vh] flex flex-col">
+    <div className="fixed inset-0 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center z-50 p-0 sm:p-4">
+      <div className="bg-card border-2 border-border w-full h-full sm:h-auto sm:max-w-3xl sm:max-h-[85vh] flex flex-col mx-auto doom-card">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-border">
-          <h2 className="text-xl font-semibold text-foreground">
+        <div className="flex items-center justify-between p-4 border-b-2 border-border">
+          <h2 className="text-xl font-bold text-foreground tracking-wide uppercase">
             {editingExercise ? 'Edit Exercise' : selectedExercise ? 'Configure Exercise' : 'Add Exercise'}
           </h2>
           <button
@@ -372,25 +353,26 @@ export default function ExerciseSearchModal({
 
         {(selectedExercise || editingExercise) ? (
           /* Exercise Configuration Form */
-          <div className="h-[calc(100vh-200px)] overflow-y-auto">
+          <>
+          <div className="flex-1 overflow-y-auto min-h-0">
             {/* Exercise Details */}
-            <div className="p-6 border-b border-border bg-muted">
+            <div className="p-4 border-b-2 border-border bg-muted">
               <div className="flex items-start gap-4">
                 {!editingExercise && (
                   <button
                     onClick={handleBackToSearch}
-                    className="text-primary hover:text-primary-hover text-sm flex items-center gap-1"
+                    className="text-primary hover:text-primary-hover text-sm flex items-center gap-1 font-bold tracking-wide doom-link"
                   >
-                    ← Back to search
+                    ← Back to Search
                   </button>
                 )}
               </div>
-              <div className="mt-3">
-                <h3 className="font-medium text-foreground text-lg">
+              <div className="mt-2">
+                <h3 className="font-bold text-foreground text-lg tracking-wide">
                   {editingExercise ? editingExercise.exerciseDefinition.name : selectedExercise?.name}
                 </h3>
                 {((editingExercise?.exerciseDefinition.primaryFAUs || selectedExercise?.primaryFAUs)?.length ?? 0) > 0 && (
-                  <div className="mt-2">
+                  <div className="mt-1">
                     <span className="text-sm text-muted-foreground">Primary: </span>
                     {(editingExercise?.exerciseDefinition.primaryFAUs || selectedExercise?.primaryFAUs)
                       ?.map(fau => FAU_DISPLAY_NAMES[fau] || fau).join(', ')}
@@ -400,69 +382,52 @@ export default function ExerciseSearchModal({
             </div>
 
             {/* Configuration Form */}
-            <div className="flex-1 p-6">
-              <div className="max-w-2xl space-y-6">
-                <div className="grid grid-cols-2 gap-6">
-                  {/* Set Count */}
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      Number of Sets
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      max="20"
-                      value={setCount}
-                      onChange={(e) => handleSetCountChange(parseInt(e.target.value) || 1)}
-                      className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-muted text-foreground"
-                    />
-                  </div>
-
-                  {/* Exercise-level Intensity Type */}
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      Intensity Type (All Sets)
-                    </label>
-                    <select
-                      value={exerciseIntensityType}
-                      onChange={(e) => setExerciseIntensityType(e.target.value as 'RIR' | 'RPE' | 'NONE')}
-                      className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-muted text-foreground"
-                    >
-                      <option value="NONE">None</option>
-                      <option value="RIR">RIR (Reps in Reserve)</option>
-                      <option value="RPE">RPE (Rate of Perceived Exertion)</option>
-                    </select>
-                  </div>
+            <div className="p-4">
+              <div className="space-y-4">
+                {/* Exercise-level Intensity Type */}
+                <div>
+                  <label className="block text-sm font-bold text-foreground mb-2 tracking-wide">
+                    Intensity Type (All Sets)
+                  </label>
+                  <select
+                    value={exerciseIntensityType}
+                    onChange={(e) => setExerciseIntensityType(e.target.value as 'RIR' | 'RPE' | 'NONE')}
+                    className="w-full px-3 py-2 border-2 border-input focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-muted text-foreground doom-input"
+                  >
+                    <option value="NONE">None</option>
+                    <option value="RIR">RIR (Reps in Reserve)</option>
+                    <option value="RPE">RPE (Rate of Perceived Exertion)</option>
+                  </select>
                 </div>
 
                 {/* Individual Set Configuration */}
                 <div>
-                  <h4 className="text-sm font-medium text-foreground mb-3">Set Configuration</h4>
-                  <div className="space-y-3">
+                  <h4 className="text-sm font-bold text-foreground mb-2 tracking-wide">Set Configuration</h4>
+                  <div className="space-y-2">
                     {sets.map((set, index) => (
-                      <div key={set.setNumber} className="border border-border rounded-lg p-4">
+                      <div key={set.setNumber} className="border-2 border-border p-3 bg-muted">
                         <div className="flex items-center gap-4">
                           <div className="flex-shrink-0 w-12">
-                            <span className="text-sm font-medium text-muted-foreground">Set {set.setNumber}</span>
+                            <span className="text-sm font-bold text-foreground tracking-wide">Set {set.setNumber}</span>
                           </div>
 
                           {/* Reps */}
                           <div className="flex-1">
-                            <label className="block text-xs text-muted-foreground mb-1">Reps</label>
+                            <label className="block text-sm font-bold text-foreground mb-1 tracking-wide">Reps</label>
                             <input
                               type="text"
                               value={set.reps}
                               onChange={(e) => handleSetUpdate(index, 'reps', e.target.value)}
                               placeholder="8-12"
-                              className="w-full px-3 py-2 text-sm border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-muted text-foreground"
+                              className="w-full px-3 py-2 text-sm border-2 border-input focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-card text-foreground"
                             />
                           </div>
 
                           {/* Intensity Value */}
                           {exerciseIntensityType !== 'NONE' && (
                             <div className="flex-1">
-                              <label className="block text-xs text-muted-foreground mb-1">
-                                {exerciseIntensityType} Value
+                              <label className="block text-sm font-bold text-foreground mb-1 tracking-wide">
+                                {exerciseIntensityType} Value (Optional)
                               </label>
                               <input
                                 type="number"
@@ -472,22 +437,21 @@ export default function ExerciseSearchModal({
                                 value={set.intensityValue || ''}
                                 onChange={(e) => handleSetUpdate(index, 'intensityValue', e.target.value ? parseFloat(e.target.value) : undefined)}
                                 placeholder={exerciseIntensityType === 'RIR' ? '0-5' : '1-10'}
-                                className="w-full px-3 py-2 text-sm border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-muted text-foreground"
+                                className="w-full px-3 py-2 text-sm border-2 border-input focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-card text-foreground"
                               />
                             </div>
                           )}
 
-                          {/* Duplicate Button - Only show when editing existing exercise */}
-                          {editingExercise && set.id && (
+                          {/* Delete Button */}
+                          {sets.length > 1 && (
                             <div className="flex-shrink-0">
                               <button
                                 type="button"
-                                onClick={() => handleDuplicateSet(set.id!)}
-                                disabled={duplicatingSetId !== null}
-                                className="p-2 text-primary hover:text-primary-hover hover:bg-primary-muted rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                title="Duplicate this set"
+                                onClick={() => handleDeleteSet(index)}
+                                className="p-2 text-error hover:text-error-hover hover:bg-error-muted border-2 border-transparent hover:border-error transition-colors"
+                                title="Delete this set"
                               >
-                                <Plus size={20} />
+                                <Trash size={20} />
                               </button>
                             </div>
                           )}
@@ -496,15 +460,20 @@ export default function ExerciseSearchModal({
                     ))}
                   </div>
 
-                  <div className="mt-3 text-xs text-muted-foreground">
-                    <p><strong>RIR:</strong> Reps in Reserve (0 = failure, 3 = could do 3 more reps)</p>
-                    <p><strong>RPE:</strong> Rate of Perceived Exertion (1-10 scale, half values allowed)</p>
-                  </div>
+                  {/* Add Set Button */}
+                  <button
+                    type="button"
+                    onClick={handleAddSet}
+                    className="w-full mt-3 px-6 py-3 bg-primary text-primary-foreground hover:bg-primary-hover transition-colors flex items-center justify-center gap-2 font-bold uppercase tracking-wider doom-button-3d"
+                  >
+                    <Plus size={18} />
+                    Add Set
+                  </button>
                 </div>
 
                 {/* Exercise Notes */}
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
+                  <label className="block text-sm font-bold text-foreground mb-1 tracking-wide">
                     Exercise Notes (Optional)
                   </label>
                   <textarea
@@ -512,57 +481,58 @@ export default function ExerciseSearchModal({
                     onChange={(e) => setExerciseNotes(e.target.value)}
                     placeholder="Add any notes for this exercise (e.g., form cues, modifications, etc.)"
                     rows={3}
-                    className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm bg-muted text-foreground"
+                    className="w-full px-3 py-2 border-2 border-input focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] text-sm bg-card text-foreground"
                   />
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Actions */}
-            <div className="p-6 border-t border-border bg-muted">
+          {/* Actions */}
+          <div className="p-4 border-t-2 border-border bg-muted">
               <div className="flex gap-3 justify-end">
                 <button
                   onClick={handleClose}
-                  className="px-4 py-2 text-foreground bg-card border border-input rounded-lg hover:bg-muted"
+                  className="px-6 py-3 text-secondary-foreground bg-secondary border-2 border-secondary hover:bg-secondary-hover font-bold uppercase tracking-wider transition-all shadow-[0_3px_0_var(--secondary-active),0_5px_8px_rgba(0,0,0,0.4)] hover:shadow-[0_3px_0_var(--secondary-active),0_0_20px_rgba(0,0,0,0.6)] active:translate-y-[3px] active:shadow-[0_0_0_var(--secondary-active),0_2px_4px_rgba(0,0,0,0.4)]"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleConfirmExercise}
-                  className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover"
+                  className="px-6 py-3 bg-primary text-primary-foreground hover:bg-primary-hover font-bold uppercase tracking-wider doom-button-3d"
                 >
                   {editingExercise ? 'Update Exercise' : 'Add Exercise'}
                 </button>
               </div>
             </div>
-          </div>
+          </>
         ) : (
           /* Exercise Search Interface */
           <>
             {/* Search */}
-            <div className="p-6 border-b border-border">
-              <div className="relative mb-4">
+            <div className="p-4 border-b-2 border-border">
+              <div className="relative mb-3">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
                 <input
                   type="text"
                   placeholder="Search exercises..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-muted text-foreground"
+                  className="w-full pl-10 pr-4 py-2 border-2 border-input focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-card text-foreground doom-input"
                 />
               </div>
 
               {/* FAU Filters */}
               <div>
-                <div className="text-sm font-medium text-foreground mb-2">Filter by Muscle Group:</div>
+                <div className="text-sm font-bold text-foreground mb-2 tracking-wide">Filter by Muscle Group:</div>
                 <div className="flex flex-wrap gap-2">
                   {ALL_FAUS.map((fau) => (
                     <button
                       key={fau}
                       onClick={() => handleFAUToggle(fau)}
-                      className={`px-3 py-1 text-xs rounded-full border transition-colors ${
+                      className={`px-3 py-1 text-xs border-2 transition-colors font-bold uppercase tracking-wide ${
                         selectedFAUs.includes(fau)
-                          ? 'bg-primary text-white border-primary'
+                          ? 'bg-primary text-primary-foreground border-primary'
                           : 'bg-muted text-foreground border-input hover:border-primary'
                       }`}
                     >
@@ -574,7 +544,7 @@ export default function ExerciseSearchModal({
             </div>
 
             {/* Results */}
-            <div className="flex-1 overflow-auto p-6">
+            <div className="flex-1 overflow-auto p-4 min-h-0">
               {error && (
                 <div className="bg-error-muted border border-error-border rounded-lg p-4 mb-4">
                   <div className="text-error">{error}</div>
@@ -599,11 +569,11 @@ export default function ExerciseSearchModal({
                   {exercises.map((exercise) => (
                     <div
                       key={exercise.id}
-                      className="border border-border rounded-lg p-4 hover:border-primary transition-colors"
+                      className="border-2 border-border p-4 hover:border-primary transition-all hover:shadow-[0_0_20px_rgba(var(--primary-rgb),0.2)] bg-card"
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <h3 className="font-medium text-foreground mb-2">{exercise.name}</h3>
+                          <h3 className="font-bold text-foreground mb-2 tracking-wide">{exercise.name}</h3>
 
                           {exercise.primaryFAUs.length > 0 && (
                             <div className="mb-2">
@@ -635,7 +605,7 @@ export default function ExerciseSearchModal({
 
                         <button
                           onClick={() => handleExerciseSelect(exercise)}
-                          className="ml-4 px-3 py-1 bg-primary text-white rounded hover:bg-primary-hover transition-colors flex items-center gap-1"
+                          className="ml-4 px-3 py-1 bg-primary text-primary-foreground hover:bg-primary-hover transition-colors flex items-center gap-1 font-bold uppercase tracking-wider text-xs"
                         >
                           <Plus size={16} />
                           Select
