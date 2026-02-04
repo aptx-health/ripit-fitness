@@ -6,6 +6,8 @@ import { useUserSettings } from '@/hooks/useUserSettings'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/radix/popover'
 import type { ExerciseDefinition } from './ExerciseSearchInterface'
 
+type Tab = 'sets' | 'notes'
+
 export type ExercisePrescription = {
   sets: Array<{
     setNumber: number
@@ -123,6 +125,7 @@ export function SetConfigurationInterface({
   const [customRepInput, setCustomRepInput] = useState<Record<number, string>>({})
   const [repValidationError, setRepValidationError] = useState<Record<number, string>>({})
   const [duplicatingSetId, setDuplicatingSetId] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<Tab>('sets')
 
   // Update parent whenever form state changes
   useEffect(() => {
@@ -234,24 +237,50 @@ export function SetConfigurationInterface({
   return (
     <div className="flex-1 overflow-y-auto min-h-0">
       {/* Exercise Details */}
-      <div className="px-4 sm:px-6 py-4 border-b-2 border-border bg-muted">
-        <div className="mt-2">
-          <h3 className="font-bold text-foreground text-lg tracking-wide">
-            {exercise.name}
-          </h3>
-          {exercise.primaryFAUs.length > 0 && (
-            <div className="mt-1">
-              <span className="text-sm text-muted-foreground">Primary: </span>
-              {exercise.primaryFAUs.map(fau => FAU_DISPLAY_NAMES[fau] || fau).join(', ')}
-            </div>
-          )}
+      <div className="px-4 sm:px-6 py-4 pb-0 bg-muted">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <h3 className="font-bold text-foreground text-lg tracking-wide uppercase">
+              {exercise.name}
+            </h3>
+          </div>
+
+          {/* Folder-style Tabs */}
+          <div className="flex gap-1 -mb-[2px] relative z-10">
+            <button
+              type="button"
+              onClick={() => setActiveTab('sets')}
+              className={`relative px-4 py-2 text-sm font-bold uppercase tracking-wider transition-all ${
+                activeTab === 'sets'
+                  ? 'text-primary border-2 border-b-0 border-primary bg-card shadow-[0_0_10px_rgba(var(--primary-rgb),0.3)]'
+                  : 'text-muted-foreground border-2 border-border bg-muted/50 hover:text-primary hover:shadow-[0_0_8px_rgba(var(--primary-rgb),0.2)]'
+              }`}
+            >
+              Sets
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('notes')}
+              className={`relative px-4 py-2 text-sm font-bold uppercase tracking-wider transition-all ${
+                activeTab === 'notes'
+                  ? 'text-primary border-2 border-b-0 border-primary bg-card shadow-[0_0_10px_rgba(var(--primary-rgb),0.3)]'
+                  : 'text-muted-foreground border-2 border-border bg-muted/50 hover:text-primary hover:shadow-[0_0_8px_rgba(var(--primary-rgb),0.2)]'
+              }`}
+            >
+              Notes
+              {exerciseNotes.trim() && (
+                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500"></span>
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Configuration Form */}
-      <div className="px-4 sm:px-6 py-4">
-        <div className="space-y-4">
-          {/* Exercise-level Intensity Type */}
+      {/* Tab Content */}
+      <div className="px-4 sm:px-6 py-4 bg-card border-t-2 border-border">
+        {activeTab === 'sets' ? (
+          <div className="space-y-4">
+            {/* Exercise-level Intensity Type */}
           <div>
             <label className="block text-base font-bold text-foreground mb-2 tracking-wide uppercase">
               Intensity Type (All Sets)
@@ -481,7 +510,9 @@ export function SetConfigurationInterface({
             </button>
           </div>
 
-          {/* Exercise Notes */}
+          </div>
+        ) : (
+          /* Notes Tab */
           <div>
             <label className="block text-base font-bold text-foreground mb-2 tracking-wide uppercase">
               Exercise Notes (Optional)
@@ -490,11 +521,11 @@ export function SetConfigurationInterface({
               value={exerciseNotes}
               onChange={(e) => setExerciseNotes(e.target.value)}
               placeholder="Add any notes for this exercise (e.g., form cues, modifications, etc.)"
-              rows={3}
+              rows={10}
               className="w-full px-3 py-2 border-2 border-input focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] text-sm bg-card text-foreground"
             />
           </div>
-        </div>
+        )}
       </div>
     </div>
   )
