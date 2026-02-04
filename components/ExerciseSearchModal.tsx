@@ -69,6 +69,29 @@ const REP_PRESETS = [
   { value: 'AMRAP', label: 'AMRAP', description: 'As Many Reps As Possible' }
 ]
 
+// RIR presets (0-5+)
+const RIR_PRESETS = [
+  { value: 0, label: '0', description: 'Max effort, failure reached. Use sparingly' },
+  { value: 1, label: '1', description: '1 rep left in the tank' },
+  { value: 2, label: '2', description: '2 reps left in the tank' },
+  { value: 3, label: '3', description: '3 reps left in the tank' },
+  { value: 4, label: '4', description: '4 reps left in the tank' },
+  { value: 5, label: '5+', description: 'Warmup / Deload sets' }
+]
+
+// RPE presets (6.0-10.0)
+const RPE_PRESETS = [
+  { value: 6.0, label: '6', description: 'Light effort, easy reps' },
+  { value: 6.5, label: '6.5', description: 'Light to moderate effort' },
+  { value: 7.0, label: '7', description: 'Moderate effort, could do several more' },
+  { value: 7.5, label: '7.5', description: 'Moderate to challenging' },
+  { value: 8.0, label: '8', description: 'Challenging, 2-3 reps left' },
+  { value: 8.5, label: '8.5', description: 'Very challenging, 1-2 reps left' },
+  { value: 9.0, label: '9', description: 'Very hard, 1 rep left' },
+  { value: 9.5, label: '9.5', description: 'Near maximal, failure on next rep' },
+  { value: 10, label: '10', description: 'Max effort, failure reached. Use sparingly' }
+]
+
 const FAU_DISPLAY_NAMES: Record<string, string> = {
   'chest': 'Chest',
   'mid-back': 'Mid Back',
@@ -589,17 +612,66 @@ export default function ExerciseSearchModal({
                               <label className="block text-sm font-bold text-foreground mb-1 tracking-wide">
                                 {exerciseIntensityType} Value (Optional)
                               </label>
-                              <input
-                                type="number"
-                                min={exerciseIntensityType === 'RIR' ? 0 : 1}
-                                max={exerciseIntensityType === 'RIR' ? 5 : 10}
-                                step={exerciseIntensityType === 'RPE' ? 0.5 : 1}
-                                value={set.intensityValue || ''}
-                                onChange={(e) => handleSetUpdate(index, 'intensityValue', e.target.value ? parseFloat(e.target.value) : undefined)}
-                                onFocus={(e) => e.target.select()}
-                                placeholder={exerciseIntensityType === 'RIR' ? '0-5' : '1-10'}
-                                className="w-full px-3 py-2 text-sm border-2 border-input focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-card text-foreground"
-                              />
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <button
+                                    type="button"
+                                    className="w-full px-3 py-2 text-sm border-2 border-input hover:border-primary focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-card text-foreground text-left"
+                                  >
+                                    {set.intensityValue !== undefined ? set.intensityValue : exerciseIntensityType === 'RIR' ? '0-5' : '6-10'}
+                                  </button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-80 p-3" align="start">
+                                  <div className="space-y-2">
+                                    <div className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2">
+                                      Select {exerciseIntensityType}
+                                    </div>
+                                    <div className={`grid gap-2 ${exerciseIntensityType === 'RIR' ? 'grid-cols-6' : 'grid-cols-5'}`}>
+                                      {exerciseIntensityType === 'RIR' ? (
+                                        RIR_PRESETS.map((preset) => (
+                                          <button
+                                            key={preset.value}
+                                            type="button"
+                                            onClick={() => handleSetUpdate(index, 'intensityValue', preset.value)}
+                                            className={`px-3 py-2 text-sm border-2 transition-colors font-bold ${
+                                              set.intensityValue === preset.value
+                                                ? 'bg-primary text-primary-foreground border-primary'
+                                                : 'bg-muted text-foreground border-input hover:border-primary'
+                                            }`}
+                                          >
+                                            {preset.label}
+                                          </button>
+                                        ))
+                                      ) : (
+                                        RPE_PRESETS.map((preset) => (
+                                          <button
+                                            key={preset.value}
+                                            type="button"
+                                            onClick={() => handleSetUpdate(index, 'intensityValue', preset.value)}
+                                            className={`px-3 py-2 text-sm border-2 transition-colors font-bold ${
+                                              set.intensityValue === preset.value
+                                                ? 'bg-primary text-primary-foreground border-primary'
+                                                : 'bg-muted text-foreground border-input hover:border-primary'
+                                            }`}
+                                          >
+                                            {preset.label}
+                                          </button>
+                                        ))
+                                      )}
+                                    </div>
+                                    {set.intensityValue !== undefined && (
+                                      <div className="px-2 py-2 bg-primary/10 border border-primary/30 rounded">
+                                        <div className="text-sm text-primary font-bold">
+                                          {exerciseIntensityType === 'RIR'
+                                            ? RIR_PRESETS.find(p => p.value === set.intensityValue)?.description
+                                            : RPE_PRESETS.find(p => p.value === set.intensityValue)?.description
+                                          }
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                </PopoverContent>
+                              </Popover>
                             </div>
                           )}
 
