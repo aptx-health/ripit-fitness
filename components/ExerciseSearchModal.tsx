@@ -623,8 +623,16 @@ export default function ExerciseSearchModal({
                                 </PopoverTrigger>
                                 <PopoverContent className="w-80 p-3" align="start">
                                   <div className="space-y-2">
-                                    <div className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2">
-                                      Select {exerciseIntensityType}
+                                    <div className="mb-3">
+                                      <div className="text-sm font-bold text-muted-foreground uppercase tracking-wide">
+                                        Select {exerciseIntensityType}
+                                      </div>
+                                      <div className="text-sm text-muted-foreground mt-1">
+                                        {exerciseIntensityType === 'RIR'
+                                          ? 'Reps in Reserve: How many more reps you could do'
+                                          : 'Rate of Perceived Exertion: How hard the set feels (1-10 scale)'
+                                        }
+                                      </div>
                                     </div>
                                     <div className={`grid gap-2 ${exerciseIntensityType === 'RIR' ? 'grid-cols-6' : 'grid-cols-5'}`}>
                                       {exerciseIntensityType === 'RIR' ? (
