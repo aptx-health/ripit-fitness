@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { X, Search, Plus, Trash } from 'lucide-react'
 import { useUserSettings } from '@/hooks/useUserSettings'
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/radix/popover'
 
 type ExerciseDefinition = {
   id: string
@@ -54,6 +55,18 @@ const ALL_FAUS = [
   'chest', 'mid-back', 'lower-back', 'front-delts', 'side-delts', 'rear-delts',
   'lats', 'traps', 'biceps', 'triceps', 'forearms',
   'quads', 'adductors', 'hamstrings', 'glutes', 'calves', 'abs', 'obliques'
+]
+
+// Common rep presets with descriptors
+const REP_PRESETS = [
+  { value: '1-3', label: '1-3', description: 'Max Effort / Strength' },
+  { value: '4-6', label: '4-6', description: 'Strength' },
+  { value: '6-8', label: '6-8', description: 'Strength / Hypertrophy' },
+  { value: '8-10', label: '8-10', description: 'Hypertrophy' },
+  { value: '10-12', label: '10-12', description: 'Hypertrophy' },
+  { value: '12-15', label: '12-15', description: 'Hypertrophy / Endurance' },
+  { value: '15-20', label: '15-20', description: 'Muscular Endurance' },
+  { value: 'AMRAP', label: 'AMRAP', description: 'As Many Reps As Possible' }
 ]
 
 const FAU_DISPLAY_NAMES: Record<string, string> = {
@@ -153,6 +166,8 @@ export default function ExerciseSearchModal({
     reps: string
     intensityValue?: number
   }>>(initialState.sets)
+  const [customRepInput, setCustomRepInput] = useState<Record<number, string>>({})
+  const [repValidationError, setRepValidationError] = useState<Record<number, string>>({})
 
   useEffect(() => {
     if (!editingExercise) return
@@ -249,6 +264,61 @@ export default function ExerciseSearchModal({
     setSelectedExercise(exercise)
   }, [])
 
+  const validateRepFormat = useCallback((value: string): string | null => {
+    if (!value.trim()) return 'Required'
+
+    // Valid formats:
+    // - Single number: "5", "10", "20"
+    // - Range: "8-12", "10-15"
+    // - Plus notation: "20+"
+    // - AMRAP
+    const validPatterns = [
+      /^\d+$/, // Single number
+      /^\d+-\d+$/, // Range
+      /^\d+\+$/, // Plus notation
+      /^AMRAP$/i // AMRAP (case insensitive)
+    ]
+
+    if (!validPatterns.some(pattern => pattern.test(value.trim()))) {
+      return 'Invalid format (use: 5, 8-12, or 20+)'
+    }
+
+    // Check for single number being 0
+    const singleNumberMatch = value.match(/^(\d+)$/)
+    if (singleNumberMatch) {
+      const num = parseInt(singleNumberMatch[1])
+      if (num === 0) {
+        return 'Reps must be greater than 0'
+      }
+    }
+
+    // Additional validation for ranges
+    const rangeMatch = value.match(/^(\d+)-(\d+)$/)
+    if (rangeMatch) {
+      const [, start, end] = rangeMatch
+      const startNum = parseInt(start)
+      const endNum = parseInt(end)
+
+      if (startNum === 0 || endNum === 0) {
+        return 'Reps must be greater than 0'
+      }
+      if (startNum >= endNum) {
+        return 'Range start must be less than end'
+      }
+    }
+
+    // Check for plus notation being 0+
+    const plusMatch = value.match(/^(\d+)\+$/)
+    if (plusMatch) {
+      const num = parseInt(plusMatch[1])
+      if (num === 0) {
+        return 'Reps must be greater than 0'
+      }
+    }
+
+    return null
+  }, [])
+
   const handleSetUpdate = useCallback((setIndex: number, field: 'reps' | 'intensityValue', value: string | number | undefined) => {
     setSets(prev => prev.map((set, index) => {
       if (index === setIndex) {
@@ -286,7 +356,21 @@ export default function ExerciseSearchModal({
 
   const handleConfirmExercise = useCallback(() => {
     if (!selectedExercise) return
-    
+
+    // Validate all rep inputs before submitting
+    const errors: Record<number, string> = {}
+    sets.forEach((set, index) => {
+      const error = validateRepFormat(set.reps)
+      if (error) {
+        errors[index] = error
+      }
+    })
+
+    if (Object.keys(errors).length > 0) {
+      setRepValidationError(errors)
+      return
+    }
+
     const prescription: ExercisePrescription = {
       sets: sets.map(set => ({
         setNumber: set.setNumber,
@@ -296,7 +380,7 @@ export default function ExerciseSearchModal({
       })),
       notes: exerciseNotes.trim() || undefined
     }
-    
+
     onExerciseSelect(selectedExercise, prescription)
 
     // Reset form
@@ -309,6 +393,8 @@ export default function ExerciseSearchModal({
     setSets([
       { setNumber: 1, reps: '8-12' }
     ])
+    setCustomRepInput({})
+    setRepValidationError({})
     onClose()
   }, [selectedExercise, sets, exerciseIntensityType, exerciseNotes, onExerciseSelect, onClose, settings])
 
@@ -330,6 +416,8 @@ export default function ExerciseSearchModal({
     setSets([
       { setNumber: 1, reps: '8-12' }
     ])
+    setCustomRepInput({})
+    setRepValidationError({})
     onClose()
   }, [onClose, settings])
 
@@ -414,13 +502,85 @@ export default function ExerciseSearchModal({
                           {/* Reps */}
                           <div className="flex-1">
                             <label className="block text-sm font-bold text-foreground mb-1 tracking-wide">Reps</label>
-                            <input
-                              type="text"
-                              value={set.reps}
-                              onChange={(e) => handleSetUpdate(index, 'reps', e.target.value)}
-                              placeholder="8-12"
-                              className="w-full px-3 py-2 text-sm border-2 border-input focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-card text-foreground"
-                            />
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <button
+                                  type="button"
+                                  className="w-full px-3 py-2 text-sm border-2 border-input hover:border-primary focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-card text-foreground text-left"
+                                >
+                                  {set.reps || '8-12'}
+                                </button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-80 p-3" align="start">
+                                <div className="space-y-2">
+                                  <div className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2">
+                                    Select Reps
+                                  </div>
+                                  <div className="grid grid-cols-4 gap-2">
+                                    {REP_PRESETS.map((preset) => (
+                                      <button
+                                        key={preset.value}
+                                        type="button"
+                                        onClick={() => {
+                                          handleSetUpdate(index, 'reps', preset.value)
+                                          setCustomRepInput({ ...customRepInput, [index]: '' })
+                                          setRepValidationError({ ...repValidationError, [index]: '' })
+                                        }}
+                                        className={`px-3 py-2 text-sm border-2 transition-colors font-bold ${
+                                          set.reps === preset.value
+                                            ? 'bg-primary text-primary-foreground border-primary'
+                                            : 'bg-muted text-foreground border-input hover:border-primary'
+                                        }`}
+                                      >
+                                        {preset.label}
+                                      </button>
+                                    ))}
+                                  </div>
+                                  {REP_PRESETS.find(p => p.value === set.reps) && (
+                                    <div className="px-2 py-2 bg-primary/10 border border-primary/30 rounded">
+                                      <div className="text-sm text-primary font-bold">
+                                        {REP_PRESETS.find(p => p.value === set.reps)?.description}
+                                      </div>
+                                    </div>
+                                  )}
+                                  <div className="pt-2 border-t-2 border-border">
+                                    <div className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2">
+                                      Custom
+                                    </div>
+                                    <input
+                                      type="text"
+                                      value={customRepInput[index] !== undefined ? customRepInput[index] : set.reps}
+                                      onChange={(e) => {
+                                        const value = e.target.value
+                                        setCustomRepInput({ ...customRepInput, [index]: value })
+                                        handleSetUpdate(index, 'reps', value)
+
+                                        // Validate on change
+                                        const error = validateRepFormat(value)
+                                        setRepValidationError({ ...repValidationError, [index]: error || '' })
+                                      }}
+                                      onBlur={(e) => {
+                                        // Final validation on blur
+                                        const error = validateRepFormat(e.target.value)
+                                        setRepValidationError({ ...repValidationError, [index]: error || '' })
+                                      }}
+                                      onFocus={(e) => e.target.select()}
+                                      placeholder="e.g., 5, 8-12, 20+"
+                                      className={`w-full px-3 py-2 text-sm border-2 focus:outline-none focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-card text-foreground ${
+                                        repValidationError[index]
+                                          ? 'border-error focus:border-error'
+                                          : 'border-input focus:border-primary'
+                                      }`}
+                                    />
+                                    {repValidationError[index] && (
+                                      <div className="mt-1 text-xs text-error font-medium">
+                                        {repValidationError[index]}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </PopoverContent>
+                            </Popover>
                           </div>
 
                           {/* Intensity Value */}
@@ -436,6 +596,7 @@ export default function ExerciseSearchModal({
                                 step={exerciseIntensityType === 'RPE' ? 0.5 : 1}
                                 value={set.intensityValue || ''}
                                 onChange={(e) => handleSetUpdate(index, 'intensityValue', e.target.value ? parseFloat(e.target.value) : undefined)}
+                                onFocus={(e) => e.target.select()}
                                 placeholder={exerciseIntensityType === 'RIR' ? '0-5' : '1-10'}
                                 className="w-full px-3 py-2 text-sm border-2 border-input focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-card text-foreground"
                               />
@@ -467,7 +628,7 @@ export default function ExerciseSearchModal({
                     className="w-full mt-3 px-6 py-3 bg-primary text-primary-foreground hover:bg-primary-hover transition-colors flex items-center justify-center gap-2 font-bold uppercase tracking-wider doom-button-3d"
                   >
                     <Plus size={18} />
-                    Add Set
+                    Add Set (Clones Last)
                   </button>
                 </div>
 
