@@ -284,22 +284,140 @@ describe('WorkoutSyncService', () => {
         createValidLoggedSet(3),
         createValidLoggedSet(4)
       ]
-      
+
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => ({ success: true })
       })
-      
+
       await syncService.syncCurrentState(testWorkoutId, currentSets)
-      
+
       // Should sync current sets, not queued sets
       const apiCall = mockFetch.mock.calls[0]
       const body = JSON.parse(apiCall[1].body)
       expect(body.loggedSets).toHaveLength(3)
       expect(body.loggedSets[0].setNumber).toBe(2)
-      
+
       // Queue should still have pending sets (manual sync doesn't clear queue)
       expect(syncService.getQueueStatus().pendingCount).toBe(1)
+    })
+  })
+
+  describe('Cross-Workout Contamination Prevention (Bug Fix)', () => {
+    it('should NOT accumulate pendingQueue across workouts', async () => {
+      // BUG SCENARIO: pendingQueue accumulates when user doesn't reach threshold
+      // User logs 2 sets in workout A (below threshold of 3)
+      // Navigates to workout B, logs 1 set
+      // BUG: pendingQueue now has [A1, A2, B1] and syncs all 3 to workout B!
+
+      const workoutAId = 'tak994h5asso3c3sa3kx0erl'
+      const workoutBId = 'yzi0e2g2s6wtchprasqw3y5x'
+
+      const workoutASets = [
+        { ...createValidLoggedSet(1), exerciseId: 'workout-a-ex-1' },
+        { ...createValidLoggedSet(2), exerciseId: 'workout-a-ex-1' }
+      ]
+
+      // User logs 2 sets in workout A (doesn't reach threshold of 3)
+      syncService.addSets(workoutASets, workoutAId, workoutASets)
+
+      // Check pending queue
+      expect(syncService.getQueueStatus().pendingCount).toBe(2)
+
+      // ✅ THE FIX: Clear state when navigating between workouts
+      syncService.clearAll()
+
+      // User navigates to workout B and logs 1 set (this reaches threshold)
+      const workoutBSets = [
+        { ...createValidLoggedSet(1), exerciseId: 'workout-b-ex-1' }
+      ]
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true })
+      })
+
+      syncService.addSets(workoutBSets, workoutBId, workoutBSets)
+
+      // Wait for background sync
+      await new Promise(resolve => setTimeout(resolve, 10))
+
+      // Without clearAll(): pendingQueue = 3, triggers sync
+      // With clearAll(): pendingQueue = 1, doesn't trigger sync
+      const status = syncService.getQueueStatus()
+
+      // THE BUG: Without clearAll(), this fails because pendingCount = 3
+      expect(status.pendingCount).toBe(1) // Should only have workout B's 1 set
+    })
+
+    it('should NOT contaminate workout B with workout A exercise IDs when using background sync', async () => {
+      // Simulate the production bug:
+      // User logs 3 sets in workout A (triggers background sync which uses allCurrentSets)
+      // Then navigates to workout B and logs more sets
+      // The bug: allCurrentSets accumulates [A, B] instead of just [B]
+
+      const workoutAId = 'tak994h5asso3c3sa3kx0erl' // Full Body 2
+      const workoutBId = 'yzi0e2g2s6wtchprasqw3y5x' // Full Body 3
+
+      const workoutASets = [
+        { ...createValidLoggedSet(1), exerciseId: 'iujd7dkjrq10ri3iaemx6w3u' }, // Dumbbell Shoulder Press
+        { ...createValidLoggedSet(2), exerciseId: 'iujd7dkjrq10ri3iaemx6w3u' },
+        { ...createValidLoggedSet(1), exerciseId: 'cqoylof66abe2xmvnwu13koi' }  // Overhead Triceps Extension
+      ]
+
+      // User logs 3 sets in workout A (reaches threshold, triggers background sync)
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true })
+      })
+
+      syncService.addSets(workoutASets, workoutAId, workoutASets)
+
+      // Wait for background sync to complete
+      await new Promise(resolve => setTimeout(resolve, 10))
+
+      // Verify workout A was synced with 3 sets
+      expect(mockFetch).toHaveBeenCalledTimes(1)
+      const firstCall = JSON.parse(mockFetch.mock.calls[0][1].body)
+      expect(firstCall.loggedSets).toHaveLength(3)
+
+      // ✅ THE FIX: Clear state when navigating between workouts
+      // Without this, allCurrentSets keeps workout A's sets in memory
+      syncService.clearAll()
+
+      // User navigates to workout B and logs 3 MORE sets (triggers another background sync)
+      const workoutBSets = [
+        { ...createValidLoggedSet(1), exerciseId: 'mmd0vc4l7d1wvaxbmkh5cfet' }, // Assisted Pull-up
+        { ...createValidLoggedSet(2), exerciseId: 'mmd0vc4l7d1wvaxbmkh5cfet' },
+        { ...createValidLoggedSet(3), exerciseId: 'wg85a1jamrfge3fxfdw69w1k' }  // Assisted Dip
+      ]
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true })
+      })
+
+      syncService.addSets(workoutBSets, workoutBId, workoutBSets)
+
+      // Wait for background sync to complete
+      await new Promise(resolve => setTimeout(resolve, 10))
+
+      // THE BUG: Without clearAll(), this would send 6 sets (A+B)
+      // THE FIX: With clearAll(), this sends only 3 sets (B)
+      expect(mockFetch).toHaveBeenCalledTimes(2)
+      const secondCall = JSON.parse(mockFetch.mock.calls[1][1].body)
+
+      // Should send ONLY workout B's 3 sets
+      expect(secondCall.loggedSets).toHaveLength(3)
+
+      // CRITICAL ASSERTIONS: Should NOT contain workout A's exercise IDs
+      const exerciseIds = secondCall.loggedSets.map((s: LoggedSet) => s.exerciseId)
+      expect(exerciseIds).not.toContain('iujd7dkjrq10ri3iaemx6w3u') // Workout A exercise
+      expect(exerciseIds).not.toContain('cqoylof66abe2xmvnwu13koi') // Workout A exercise
+
+      // Should ONLY contain workout B's exercise IDs
+      expect(exerciseIds).toContain('mmd0vc4l7d1wvaxbmkh5cfet')
+      expect(exerciseIds).toContain('wg85a1jamrfge3fxfdw69w1k')
     })
   })
 })
