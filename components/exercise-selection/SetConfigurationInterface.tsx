@@ -234,7 +234,7 @@ export function SetConfigurationInterface({
   return (
     <div className="flex-1 overflow-y-auto min-h-0">
       {/* Exercise Details */}
-      <div className="p-4 border-b-2 border-border bg-muted">
+      <div className="px-4 sm:px-6 py-4 border-b-2 border-border bg-muted">
         <div className="mt-2">
           <h3 className="font-bold text-foreground text-lg tracking-wide">
             {exercise.name}
@@ -249,7 +249,7 @@ export function SetConfigurationInterface({
       </div>
 
       {/* Configuration Form */}
-      <div className="p-4">
+      <div className="px-4 sm:px-6 py-4">
         <div className="space-y-4">
           {/* Exercise-level Intensity Type */}
           <div>

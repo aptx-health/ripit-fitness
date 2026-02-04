@@ -134,16 +134,22 @@ export default function ExerciseSearchModal({
   } : undefined
 
   return (
-    <div className="fixed inset-0 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center z-50 p-0 sm:p-4">
-      <div className="bg-card border-2 border-border w-full h-full sm:h-auto sm:max-w-3xl sm:max-h-[85vh] flex flex-col mx-auto doom-card">
+    <div
+      style={{ position: 'fixed', inset: 0, zIndex: 50 }}
+      className="backdrop-blur-md bg-background/80 flex items-center justify-center p-0 sm:p-4"
+    >
+      <div
+        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}
+        className="bg-card border-4 border-border w-full h-full sm:h-auto sm:w-[90vw] sm:max-w-3xl sm:max-h-[85vh] flex flex-col mx-auto doom-card"
+      >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b-2 border-border">
-          <h2 className="text-xl font-bold text-foreground tracking-wide uppercase">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 sm:py-5 border-b-2 border-border bg-primary text-primary-foreground">
+          <h2 className="text-xl font-bold tracking-wide uppercase">
             {editingExercise ? 'Edit Exercise' : selectedExercise ? 'Configure Exercise' : 'Add Exercise'}
           </h2>
           <button
             onClick={handleClose}
-            className="text-muted-foreground hover:text-foreground"
+            className="text-primary-foreground/80 hover:text-primary-foreground"
           >
             <X size={24} />
           </button>
@@ -163,7 +169,7 @@ export default function ExerciseSearchModal({
             />
 
             {/* Actions */}
-            <div className="p-4 border-t-2 border-border bg-muted">
+            <div className="px-4 sm:px-6 py-4 border-t-2 border-border bg-muted">
               <div className="flex gap-3 justify-end">
                 {!editingExercise && (
                   <button

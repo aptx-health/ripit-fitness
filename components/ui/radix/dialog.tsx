@@ -34,8 +34,8 @@ const DialogContent = React.forwardRef<
     <DialogOverlay />
     <DialogPrimitive.Content
       ref={ref}
-      style={{ position: 'fixed', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', zIndex: 71 }}
-      className={`bg-card border border-border rounded-xl shadow-xl overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 ${
+      style={{ position: 'fixed', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', zIndex: 71, boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}
+      className={`bg-card border border-border rounded-xl overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 ${
         fullScreenMobile
           ? 'w-full h-full sm:h-auto sm:w-[90vw] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]'
           : position === 'bottom'

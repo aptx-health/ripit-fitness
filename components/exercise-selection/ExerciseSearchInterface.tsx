@@ -134,7 +134,7 @@ export function ExerciseSearchInterface({
   return (
     <>
       {/* Search */}
-      <div className="p-4 border-b-2 border-border">
+      <div className="px-4 sm:px-6 py-4 border-b-2 border-border">
         <div className="relative mb-3">
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
           <input
@@ -247,7 +247,7 @@ export function ExerciseSearchInterface({
       </div>
 
       {/* Results */}
-      <div className="flex-1 overflow-auto p-4 min-h-0">
+      <div className="flex-1 overflow-auto px-4 sm:px-6 py-4 min-h-0">
         {error && (
           <div className="bg-error-muted border-2 border-error p-4 mb-4">
             <div className="text-error font-bold">{error}</div>

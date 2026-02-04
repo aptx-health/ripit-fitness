@@ -81,7 +81,7 @@ export function WizardDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent showClose={false} fullScreenMobile={true} className="w-full h-full sm:w-[90vw] sm:max-w-3xl sm:h-[95vh] rounded-none sm:rounded-none border-2 sm:border-2 border-border bg-card doom-card">
+      <DialogContent showClose={false} fullScreenMobile={true} className="w-full h-full sm:w-[90vw] sm:max-w-3xl sm:h-auto sm:max-h-[85vh] rounded-none sm:rounded-none border-4 sm:border-4 border-border bg-card doom-card">
         <DialogHeader className="border-b-2 border-border">
           <div className="flex items-center justify-between">
             <div className="flex-1">
