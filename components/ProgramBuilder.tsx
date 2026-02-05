@@ -8,6 +8,7 @@ import ExerciseSearchModal from './ExerciseSearchModal'
 import FAUVolumeVisualization from './FAUVolumeVisualization'
 import SortableExerciseList from './SortableExerciseList'
 import StrengthActivationModal from './StrengthActivationModal'
+import TransformWeekModal from './TransformWeekModal'
 
 type Week = {
   id: string
@@ -106,6 +107,11 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
   const [deletingWorkoutId, setDeletingWorkoutId] = useState<string | null>(null)
   const [deletingWeekId, setDeletingWeekId] = useState<string | null>(null)
   const [duplicatingWeekId, setDuplicatingWeekId] = useState<string | null>(null)
+
+  // Week transformation state
+  const [showTransformModal, setShowTransformModal] = useState(false)
+  const [transformWeekId, setTransformWeekId] = useState<string | null>(null)
+  const [transformWeekNumber, setTransformWeekNumber] = useState<number>(0)
 
   // Collapsed workouts state
   const [collapsedWorkouts, setCollapsedWorkouts] = useState<Set<string>>(new Set())
@@ -679,6 +685,28 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
     }
   }, [editMode])
 
+  const handleOpenTransformModal = useCallback((weekId: string, weekNumber: number) => {
+    setTransformWeekId(weekId)
+    setTransformWeekNumber(weekNumber)
+    setShowTransformModal(true)
+  }, [])
+
+  const handleTransformWeek = useCallback(async (updatedWeek: Week) => {
+    try {
+      // Update the week in state
+      if (editMode) {
+        setWeeksCache(prev => new Map(prev).set(updatedWeek.weekNumber, updatedWeek))
+      } else {
+        setWeeks(prev => prev.map(w => w.id === updatedWeek.id ? updatedWeek : w))
+      }
+
+      console.log('Week transformed successfully')
+    } catch (error) {
+      console.error('Error updating week after transform:', error)
+      throw error // Re-throw so modal can handle it
+    }
+  }, [editMode])
+
   const handleDuplicateWorkout = useCallback(async () => {
     if (!selectedWorkoutForAction || !targetWeekForDuplicate) return
 
@@ -1169,6 +1197,12 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
                                 {duplicatingWeekId === week.id ? 'Duplicating...' : 'Duplicate Week'}
                               </DropdownMenu.Item>
                               <DropdownMenu.Item
+                                onClick={() => handleOpenTransformModal(week.id, week.weekNumber)}
+                                className="px-4 py-2.5 text-sm text-foreground hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-50 cursor-pointer outline-none border-t border-border"
+                              >
+                                Transform Week
+                              </DropdownMenu.Item>
+                              <DropdownMenu.Item
                                 onClick={() => handleDeleteWeek(week.id, week.weekNumber)}
                                 disabled={deletingWeekId === week.id}
                                 className="px-4 py-2.5 text-sm text-error hover:bg-error hover:text-error-foreground transition-colors disabled:opacity-50 cursor-pointer outline-none border-t border-border"
@@ -1367,6 +1401,15 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
         onClose={closeExerciseModal}
         onExerciseSelect={handleExerciseSelect}
         editingExercise={editingExercise}
+      />
+
+      {/* Transform Week Modal */}
+      <TransformWeekModal
+        isOpen={showTransformModal}
+        onClose={() => setShowTransformModal(false)}
+        weekId={transformWeekId || ''}
+        weekNumber={transformWeekNumber}
+        onTransform={handleTransformWeek}
       />
 
       {/* Duplicate Workout Modal */}
