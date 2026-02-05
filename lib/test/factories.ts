@@ -223,7 +223,7 @@ export async function createTestWorkoutCompletion(
   prisma: PrismaClient,
   workoutId: string,
   userId: string,
-  status: 'draft' | 'completed' | 'abandoned' = 'draft'
+  status: 'draft' | 'completed' | 'abandoned' | 'skipped' = 'draft'
 ) {
   return await prisma.workoutCompletion.create({
     data: {
@@ -300,7 +300,7 @@ export async function createCompleteTestScenario(
   userId: string,
   options: {
     loggedSetCount?: number
-    status?: 'draft' | 'completed' | 'abandoned'
+    status?: 'draft' | 'completed' | 'abandoned' | 'skipped'
   } = {}
 ) {
   const { loggedSetCount = 3, status = 'draft' } = options
