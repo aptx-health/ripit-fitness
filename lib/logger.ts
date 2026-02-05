@@ -26,20 +26,29 @@ import pino from 'pino'
  * logger.error({ err }, 'Failed to fetch data')
  * ```
  */
+// Only use pino-pretty transport in local development
+// Vercel/production uses JSON output for log aggregation
+const shouldUsePretty =
+  process.env.NODE_ENV === 'development' &&
+  typeof window === 'undefined' &&
+  !process.env.VERCEL
+
 export const logger = pino({
   level: process.env.PINO_LOG_LEVEL || 'info',
 
-  // Use pino-pretty for human-readable logs in development
-  transport: process.env.NODE_ENV === 'development'
+  // Use pino-pretty for human-readable logs in local development only
+  ...(shouldUsePretty
     ? {
-        target: 'pino-pretty',
-        options: {
-          colorize: true,
-          translateTime: 'HH:MM:ss',
-          ignore: 'pid,hostname',
+        transport: {
+          target: 'pino-pretty',
+          options: {
+            colorize: true,
+            translateTime: 'HH:MM:ss',
+            ignore: 'pid,hostname',
+          },
         },
       }
-    : undefined,
+    : {}),
 
   // Format level as string instead of number
   formatters: {
