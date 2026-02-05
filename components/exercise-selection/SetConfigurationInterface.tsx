@@ -101,7 +101,7 @@ export function SetConfigurationInterface({
   const getDefaultIntensityType = (): 'RIR' | 'RPE' | 'NONE' => {
     if (initialConfig) return initialConfig.intensityType
 
-    if (!settings?.defaultIntensityRating || settings.defaultIntensityRating === 'none') {
+    if (!settings?.defaultIntensityRating) {
       return 'NONE'
     }
 
@@ -136,8 +136,6 @@ export function SetConfigurationInterface({
         ? 'RPE'
         : settings.defaultIntensityRating === 'rir'
         ? 'RIR'
-        : settings.defaultIntensityRating === 'none'
-        ? 'NONE'
         : 'NONE'
 
       setExerciseIntensityType(newIntensityType)
