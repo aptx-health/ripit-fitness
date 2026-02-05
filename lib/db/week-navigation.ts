@@ -64,7 +64,7 @@ export async function getStrengthWeekByNumber(
             name: true,
             dayNumber: true,
             completions: {
-              where: { userId },
+              where: { userId, isArchived: false },
               select: { id: true, status: true, completedAt: true },
               orderBy: { completedAt: 'desc' },
               take: 1

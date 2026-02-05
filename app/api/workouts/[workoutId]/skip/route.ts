@@ -36,11 +36,12 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
-    // Check if workout already has a completion record
+    // Check if workout already has a non-archived completion record
     const existingCompletion = await prisma.workoutCompletion.findFirst({
       where: {
         workoutId,
         userId: user.id,
+        isArchived: false,
       },
     })
 
