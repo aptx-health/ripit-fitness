@@ -84,7 +84,7 @@ export default function WorkoutPreviewModal({
           </DialogTitle>
         </DialogHeader>
 
-        <DialogBody className="space-y-4">
+        <DialogBody className="space-y-4 px-4 sm:px-6 py-4 sm:py-5">
           {exercises.map((exercise, index) => {
             const exerciseLoggedSets = completion?.loggedSets.filter(
               (ls) => ls.exerciseId === exercise.id
