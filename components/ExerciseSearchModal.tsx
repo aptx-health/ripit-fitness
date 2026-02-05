@@ -140,7 +140,7 @@ export default function ExerciseSearchModal({
     >
       <div
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}
-        className="bg-card border-4 border-border w-full h-full sm:h-auto sm:w-[90vw] sm:max-w-3xl sm:max-h-[85vh] flex flex-col mx-auto doom-card"
+        className="bg-card border-4 border-border w-full h-full sm:h-auto sm:w-[90vw] sm:max-w-3xl sm:max-h-[85vh] flex flex-col mx-auto doom-card pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]"
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 sm:px-6 py-4 sm:py-5 border-b-2 border-border bg-primary text-primary-foreground">
