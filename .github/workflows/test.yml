@@ -5,6 +5,9 @@ on:
     branches:
       - dev
       - main
+  push:
+    branches:
+      - fix/test-workflow-timeout
 
 jobs:
   test:
@@ -23,7 +26,9 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm ci --prefer-offline --no-audit --loglevel verbose
+        timeout-minutes: 5
 
       - name: Generate Prisma Client
         run: npx prisma generate
