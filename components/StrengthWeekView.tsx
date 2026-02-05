@@ -10,7 +10,7 @@ import ExerciseLoggingModal from '@/components/ExerciseLoggingModal'
 import { ProgramCompletionModal } from '@/components/ProgramCompletionModal'
 import { useWorkoutStorage } from '@/hooks/useWorkoutStorage'
 import WorkoutCard from '@/components/workout/WorkoutCard'
-import { clientLogger } from '@/lib/logger'
+import { clientLogger } from '@/lib/client-logger'
 
 type Workout = {
   id: string

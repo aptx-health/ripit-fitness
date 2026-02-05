@@ -57,28 +57,9 @@ export const logger = pino({
 })
 
 /**
- * Client-side logger for browser environments
- * Falls back to console methods since Pino requires Node.js
+ * For client-side logging in browser/client components, use:
+ * import { clientLogger } from '@/lib/client-logger'
+ *
+ * This file (lib/logger.ts) is for SERVER-SIDE ONLY.
+ * Do not import this in client components ('use client').
  */
-export const clientLogger = {
-  debug: (...args: unknown[]) => {
-    if (process.env.NEXT_PUBLIC_LOG_LEVEL === 'debug') {
-      console.debug('[DEBUG]', ...args)
-    }
-  },
-  info: (...args: unknown[]) => {
-    if (process.env.NEXT_PUBLIC_LOG_LEVEL !== 'silent') {
-      console.info('[INFO]', ...args)
-    }
-  },
-  warn: (...args: unknown[]) => {
-    if (process.env.NEXT_PUBLIC_LOG_LEVEL !== 'silent') {
-      console.warn('[WARN]', ...args)
-    }
-  },
-  error: (...args: unknown[]) => {
-    if (process.env.NEXT_PUBLIC_LOG_LEVEL !== 'silent') {
-      console.error('[ERROR]', ...args)
-    }
-  },
-}

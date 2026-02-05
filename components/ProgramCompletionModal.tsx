@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { X } from 'lucide-react'
-import { clientLogger } from '@/lib/logger'
+import { clientLogger } from '@/lib/client-logger'
 
 interface CompletionStats {
   programName: string

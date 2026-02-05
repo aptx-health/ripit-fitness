@@ -15,7 +15,7 @@ import WeekNavigator from '@/components/ui/WeekNavigator'
 import ActionsMenu from '@/components/ActionsMenu'
 import LogCardioModal from '@/components/LogCardioModal'
 import { ProgramCompletionModal } from '@/components/ProgramCompletionModal'
-import { clientLogger } from '@/lib/logger'
+import { clientLogger } from '@/lib/client-logger'
 
 type Session = {
   id: string

@@ -57,7 +57,7 @@ logger.error({ error, programId }, 'Failed to restart program')
 ### Client-Side (components, hooks)
 
 ```typescript
-import { clientLogger } from '@/lib/logger'
+import { clientLogger } from '@/lib/client-logger'
 
 // Debug logs (hidden by default, set NEXT_PUBLIC_LOG_LEVEL=debug to see)
 clientLogger.debug('[CompletionModal] Opening modal for program:', programId)
@@ -144,11 +144,11 @@ To migrate console.log/error calls in other files:
 
 1. Import the appropriate logger:
    ```typescript
-   // Server-side
+   // Server-side (API routes, server components)
    import { logger } from '@/lib/logger'
 
-   // Client-side
-   import { clientLogger } from '@/lib/logger'
+   // Client-side (client components, hooks)
+   import { clientLogger } from '@/lib/client-logger'
    ```
 
 2. Replace console calls:

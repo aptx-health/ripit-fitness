@@ -384,7 +384,7 @@ logger.error({ error, programId }, 'Failed to restart program')
 
 **Client-side (components):**
 ```typescript
-import { clientLogger } from '@/lib/logger'
+import { clientLogger } from '@/lib/client-logger'
 
 // Debug logs (set NEXT_PUBLIC_LOG_LEVEL=debug to see)
 clientLogger.debug('[Modal] Opening modal')
