@@ -104,6 +104,14 @@ export async function POST(
               include: {
                 prescribedSets: {
                   orderBy: { setNumber: 'asc' }
+                },
+                exerciseDefinition: {
+                  select: {
+                    id: true,
+                    name: true,
+                    primaryFAUs: true,
+                    secondaryFAUs: true
+                  }
                 }
               },
               orderBy: { order: 'asc' }
