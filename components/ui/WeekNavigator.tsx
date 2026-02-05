@@ -6,6 +6,7 @@ type Props = {
   baseUrl: string // '/training' or '/cardio'
   programName: string
   actions?: React.ReactNode
+  completionIndicator?: React.ReactNode
 }
 
 export default function WeekNavigator({
@@ -13,7 +14,8 @@ export default function WeekNavigator({
   totalWeeks,
   baseUrl,
   programName,
-  actions
+  actions,
+  completionIndicator
 }: Props) {
   const hasPrev = currentWeek > 1
   const hasNext = currentWeek < totalWeeks
@@ -83,6 +85,13 @@ export default function WeekNavigator({
           />
         </svg>
       </Link>
+
+      {/* Completion indicator badge */}
+      {completionIndicator && (
+        <div className="shrink-0">
+          {completionIndicator}
+        </div>
+      )}
 
       {/* Actions slot */}
       {actions && <div className="shrink-0">{actions}</div>}

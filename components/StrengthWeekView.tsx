@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { CheckCircle } from 'lucide-react'
 import WeekNavigator from '@/components/ui/WeekNavigator'
@@ -97,11 +97,12 @@ export default function StrengthWeekView({
   const [modalKey, setModalKey] = useState(0)
   const [showCompletionModal, setShowCompletionModal] = useState(false)
   const [isRestarting, setIsRestarting] = useState(false)
+  const [isProgramComplete, setIsProgramComplete] = useState(false)
 
   // For clearing localStorage when resetting workout
   const { clearStoredWorkout } = useWorkoutStorage(selectedWorkoutId || '')
 
-  const checkProgramCompletion = useCallback(async () => {
+  const checkProgramCompletion = useCallback(async (openModal = false) => {
     // Skip check if we're currently restarting
     if (isRestarting) return
 
@@ -110,7 +111,9 @@ export default function StrengthWeekView({
       if (!response.ok) return
 
       const { data } = await response.json()
-      if (data.isComplete && !isRestarting) {
+      setIsProgramComplete(data.isComplete)
+
+      if (data.isComplete && openModal && !isRestarting) {
         setShowCompletionModal(true)
       }
     } catch (error) {
@@ -118,10 +121,16 @@ export default function StrengthWeekView({
     }
   }, [programId, isRestarting])
 
+  // Check program completion status on mount
+  useEffect(() => {
+    checkProgramCompletion(false)
+  }, [checkProgramCompletion])
+
   const handleProgramRestart = useCallback(() => {
     // Set restarting flag to prevent completion checks
     setIsRestarting(true)
     setShowCompletionModal(false)
+    setIsProgramComplete(false)
 
     // Navigate to week 1 and force a full page refresh
     router.push('/training?week=1')
@@ -194,7 +203,7 @@ export default function StrengthWeekView({
     })
     if (!response.ok) throw new Error('Failed to complete workout')
     handleCloseModal()
-    await checkProgramCompletion()
+    await checkProgramCompletion(true)
   }
 
   const handleClearWorkout = async () => {
@@ -215,7 +224,7 @@ export default function StrengthWeekView({
       const response = await fetch(`/api/workouts/${workoutId}/skip`, { method: 'POST' })
       if (response.ok) {
         router.refresh()
-        await checkProgramCompletion()
+        await checkProgramCompletion(true)
       }
     } finally {
       setSkippingWorkout(null)
@@ -238,7 +247,7 @@ export default function StrengthWeekView({
       const response = await fetch(`/api/weeks/${week.id}/complete`, { method: 'POST' })
       if (response.ok) {
         router.refresh()
-        await checkProgramCompletion()
+        await checkProgramCompletion(true)
       }
     } finally {
       setCompletingWeek(false)
@@ -267,6 +276,18 @@ export default function StrengthWeekView({
           baseUrl="/training"
           programName={programName}
           actions={weekActions.length > 0 ? <ActionsMenu actions={weekActions} size="sm" /> : undefined}
+          completionIndicator={
+            isProgramComplete ? (
+              <button
+                onClick={() => setShowCompletionModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-success text-success-foreground border-2 border-success hover:bg-success-hover font-bold text-sm uppercase tracking-wider transition-all"
+                title="View completion stats and restart program"
+              >
+                <CheckCircle size={20} />
+                <span className="hidden sm:inline">Complete</span>
+              </button>
+            ) : undefined
+          }
         />
       </div>
 
