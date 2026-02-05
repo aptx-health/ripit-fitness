@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { MAX_WORKOUTS_PER_WEEK } from '@/lib/validation/workout-limits';
 
 export interface ValidationResult {
   valid: boolean;
@@ -85,6 +86,17 @@ async function validateStrengthProgram(
 
   if (exercisesWithoutSets.length > 0) {
     errors.push('All exercises must have at least one prescribed set');
+  }
+
+  // Validate workout count per week
+  const weeksExceedingLimit = program.weeks.filter(
+    (week) => week.workouts.length > MAX_WORKOUTS_PER_WEEK
+  );
+  if (weeksExceedingLimit.length > 0) {
+    const weekNumbers = weeksExceedingLimit.map((w) => w.weekNumber).join(', ');
+    errors.push(
+      `Week(s) ${weekNumbers} exceed the maximum of ${MAX_WORKOUTS_PER_WEEK} workouts per week`
+    );
   }
 
   return {
