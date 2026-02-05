@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { logger } from '@/lib/logger'
+import { validateWorkoutLimit } from '@/lib/validation/workout-limits'
 
 type CreateWorkoutRequest = {
   name?: string
@@ -41,6 +43,16 @@ export async function POST(
 
     if (week.program.userId !== user.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    }
+
+    // Validate workout limit
+    const validation = await validateWorkoutLimit(prisma, weekId)
+    if (!validation.valid) {
+      logger.warn(
+        { weekId, currentCount: validation.currentCount, userId: user.id },
+        'Workout limit exceeded on creation'
+      )
+      return NextResponse.json({ error: validation.error }, { status: 400 })
     }
 
     // Calculate day number if not provided

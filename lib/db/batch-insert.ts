@@ -1,5 +1,6 @@
 import { Prisma } from '@prisma/client'
 import { createId } from '@paralleldrive/cuid2'
+import { validateWorkoutLimit, validateBatchWorkoutLimit } from '@/lib/validation/workout-limits'
 
 /**
  * Type for week data structure used in batch inserts.
@@ -39,6 +40,12 @@ export async function batchInsertWeekContent(
 ): Promise<void> {
   if (!workouts || workouts.length === 0) {
     return
+  }
+
+  // Validate workout limit
+  const validation = await validateWorkoutLimit(tx, weekId, workouts.length)
+  if (!validation.valid) {
+    throw new Error(validation.error)
   }
 
   // Pre-generate all IDs to maintain foreign key relationships

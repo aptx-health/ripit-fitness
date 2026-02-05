@@ -1,6 +1,8 @@
 import { PrismaClient } from '@prisma/client'
 import { batchInsertStrengthWeek, batchInsertCardioWeek } from './batch-insert'
 
+const MAX_WORKOUTS_PER_WEEK = 10
+
 export interface ProgramCloneJob {
   communityProgramId: string
   programId: string
@@ -88,6 +90,17 @@ export async function cloneStrengthProgramData(
 
   for (let i = 0; i < programData.weeks.length; i++) {
     const week = programData.weeks[i]
+
+    // Validate workout count
+    if (week.workouts && week.workouts.length > MAX_WORKOUTS_PER_WEEK) {
+      const error = `Week ${i + 1} has ${week.workouts.length} workouts. Maximum ${MAX_WORKOUTS_PER_WEEK} workouts per week allowed.`
+      console.error(error)
+      await prisma.program.update({
+        where: { id: programId },
+        data: { copyStatus: 'failed' },
+      })
+      throw new Error(error)
+    }
 
     await prisma.program.update({
       where: { id: programId },
