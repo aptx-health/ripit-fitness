@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { CheckCircle } from 'lucide-react'
 import {
@@ -14,6 +14,8 @@ import {
 import WeekNavigator from '@/components/ui/WeekNavigator'
 import ActionsMenu from '@/components/ActionsMenu'
 import LogCardioModal from '@/components/LogCardioModal'
+import { ProgramCompletionModal } from '@/components/ProgramCompletionModal'
+import { clientLogger } from '@/lib/logger'
 
 type Session = {
   id: string
@@ -58,8 +60,59 @@ export default function CardioWeekView({
   const [skippingSession, setSkippingSession] = useState<string | null>(null)
   const [unskippingSession, setUnskippingSession] = useState<string | null>(null)
   const [completingWeek, setCompletingWeek] = useState(false)
+  const [showCompletionModal, setShowCompletionModal] = useState(false)
+  const [isProgramComplete, setIsProgramComplete] = useState(false)
+
+  const checkProgramCompletion = useCallback(async (openModal = false) => {
+    clientLogger.debug('[CardioWeekView] Checking program completion', { programId, openModal })
+    try {
+      const response = await fetch(`/api/cardio/programs/${programId}/completion-status`)
+
+      clientLogger.debug('[CardioWeekView] Completion status response', {
+        programId,
+        status: response.status,
+        ok: response.ok
+      })
+
+      if (!response.ok) {
+        clientLogger.debug('[CardioWeekView] Completion check failed - response not ok', { programId })
+        return
+      }
+
+      const { data } = await response.json()
+
+      clientLogger.debug('[CardioWeekView] Completion status data', {
+        programId,
+        data,
+        willOpenModal: data.isComplete && openModal
+      })
+
+      setIsProgramComplete(data.isComplete)
+
+      if (data.isComplete && openModal) {
+        clientLogger.info('[CardioWeekView] Program complete! Opening modal', { programId })
+        setShowCompletionModal(true)
+      }
+    } catch (error) {
+      clientLogger.error('[CardioWeekView] Error checking cardio program completion', { programId, error })
+    }
+  }, [programId])
+
+  // Check program completion status on mount
+  useEffect(() => {
+    clientLogger.debug('[CardioWeekView] Component mounted, checking completion', { programId })
+    checkProgramCompletion(false)
+  }, [checkProgramCompletion, programId])
+
+  const handleCloseLoggingModal = useCallback(async () => {
+    clientLogger.debug('[CardioWeekView] Closing logging modal, will check completion', { programId })
+    setLoggingSession(null)
+    router.refresh()
+    await checkProgramCompletion(true)
+  }, [router, checkProgramCompletion, programId])
 
   const handleSkipSession = async (sessionId: string) => {
+    clientLogger.debug('[CardioWeekView] Skipping session', { programId, sessionId })
     setSkippingSession(sessionId)
     try {
       const response = await fetch(`/api/cardio/sessions/${sessionId}/skip`, {
@@ -67,13 +120,15 @@ export default function CardioWeekView({
       })
 
       if (response.ok) {
+        clientLogger.debug('[CardioWeekView] Session skipped, refreshing and checking completion', { programId, sessionId })
         router.refresh()
+        await checkProgramCompletion(true)
       } else {
         const data = await response.json()
-        console.error('Failed to skip session:', data.error)
+        clientLogger.error('[CardioWeekView] Failed to skip session', { programId, sessionId, error: data.error })
       }
     } catch (error) {
-      console.error('Error skipping session:', error)
+      clientLogger.error('[CardioWeekView] Error skipping session', { programId, sessionId, error })
     } finally {
       setSkippingSession(null)
     }
@@ -100,6 +155,7 @@ export default function CardioWeekView({
   }
 
   const handleCompleteWeek = async () => {
+    clientLogger.debug('[CardioWeekView] Completing week', { programId, weekId: week.id })
     setCompletingWeek(true)
     try {
       const response = await fetch(`/api/cardio/weeks/${week.id}/complete`, {
@@ -107,13 +163,15 @@ export default function CardioWeekView({
       })
 
       if (response.ok) {
+        clientLogger.debug('[CardioWeekView] Week completed, refreshing and checking completion', { programId, weekId: week.id })
         router.refresh()
+        await checkProgramCompletion(true)
       } else {
         const data = await response.json()
-        console.error('Failed to complete week:', data.error)
+        clientLogger.error('[CardioWeekView] Failed to complete week', { programId, weekId: week.id, error: data.error })
       }
     } catch (error) {
-      console.error('Error completing week:', error)
+      clientLogger.error('[CardioWeekView] Error completing week', { programId, weekId: week.id, error })
     } finally {
       setCompletingWeek(false)
     }
@@ -151,6 +209,18 @@ export default function CardioWeekView({
             actions={
               weekActions.length > 0 ? (
                 <ActionsMenu actions={weekActions} size="sm" />
+              ) : undefined
+            }
+            completionIndicator={
+              isProgramComplete ? (
+                <button
+                  onClick={() => setShowCompletionModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-success text-success-foreground border-2 border-success hover:bg-success-hover font-bold text-sm uppercase tracking-wider transition-all"
+                  title="View completion stats"
+                >
+                  <CheckCircle size={20} />
+                  <span className="hidden sm:inline">Complete</span>
+                </button>
               ) : undefined
             }
           />
@@ -301,7 +371,7 @@ export default function CardioWeekView({
       {loggingSession && (
         <LogCardioModal
           isOpen={true}
-          onClose={() => setLoggingSession(null)}
+          onClose={handleCloseLoggingModal}
           prescribedSessionId={loggingSession.id}
           prescribedData={{
             name: loggingSession.name,
@@ -313,6 +383,14 @@ export default function CardioWeekView({
           }}
         />
       )}
+
+      {/* Program Completion Modal */}
+      <ProgramCompletionModal
+        open={showCompletionModal}
+        programId={programId}
+        programType="cardio"
+        onClose={() => setShowCompletionModal(false)}
+      />
     </>
   )
 }
