@@ -2,19 +2,7 @@ import { PrismaClient } from '@prisma/client'
 
 /**
  * Restart a program by archiving workout completions
- *
- * SCHEMA CHANGE REQUIRED:
- * - Add `isArchived: Boolean @default(false)` to WorkoutCompletion model
- * - Add `cycleNumber: Int @default(1)` to track restart cycles
- *
- * Current implementation will CASCADE DELETE logged sets, which conflicts
- * with the requirement to "preserve logged data for history" (issues #142, #108).
- *
- * Recommended approach:
- * 1. Add isArchived field to WorkoutCompletion
- * 2. Instead of DELETE, UPDATE to set isArchived=true
- * 3. Filter completion queries with `where: { isArchived: false }`
- * 4. Users can view historical data from previous cycles
+ * This preserves all logged sets for history while allowing the user to start fresh
  */
 export async function restartProgram(
   prisma: PrismaClient,
@@ -33,6 +21,26 @@ export async function restartProgram(
     throw new Error('Program not found')
   }
 
+  // Get current max cycle number for this program
+  const maxCycleCompletion = await prisma.workoutCompletion.findFirst({
+    where: {
+      workout: {
+        week: {
+          programId,
+        },
+      },
+      userId,
+    },
+    orderBy: {
+      cycleNumber: 'desc',
+    },
+    select: {
+      cycleNumber: true,
+    },
+  })
+
+  const currentCycle = maxCycleCompletion?.cycleNumber || 1
+
   // Get all workout IDs for this program
   const workoutIds = await prisma.workout.findMany({
     where: {
@@ -48,14 +56,18 @@ export async function restartProgram(
 
   const workoutIdList = workoutIds.map((w) => w.id)
 
-  // TEMPORARY: This will delete logged sets due to CASCADE
-  // After schema change, replace with UPDATE to set isArchived=true
-  const result = await prisma.workoutCompletion.deleteMany({
+  // Archive all non-archived completions by setting isArchived=true
+  // This preserves logged sets while removing them from current cycle queries
+  const result = await prisma.workoutCompletion.updateMany({
     where: {
       workoutId: {
         in: workoutIdList,
       },
       userId,
+      isArchived: false,
+    },
+    data: {
+      isArchived: true,
     },
   })
 

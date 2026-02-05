@@ -33,6 +33,7 @@ export async function getProgramCompletionStatus(
                   status: {
                     in: ['completed', 'skipped'],
                   },
+                  isArchived: false,
                 },
                 take: 1,
                 orderBy: {
@@ -108,6 +109,7 @@ export async function getProgramCompletionStats(
                   status: {
                     in: ['completed', 'skipped'],
                   },
+                  isArchived: false,
                 },
                 orderBy: {
                   completedAt: 'desc',

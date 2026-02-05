@@ -4,15 +4,15 @@ import { prisma } from '@/lib/db'
 import { getProgramCompletionStats } from '@/lib/db/program-completion'
 
 /**
- * GET /api/programs/[id]/completion-stats
+ * GET /api/programs/[programId]/completion-stats
  * Get detailed stats for program completion celebration
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ programId: string }> }
 ) {
   try {
-    const { id: programId } = await params
+    const { programId } = await params
 
     // Authenticate user
     const supabase = await createClient()
