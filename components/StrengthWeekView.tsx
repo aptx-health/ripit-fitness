@@ -10,6 +10,7 @@ import ExerciseLoggingModal from '@/components/ExerciseLoggingModal'
 import { ProgramCompletionModal } from '@/components/ProgramCompletionModal'
 import { useWorkoutStorage } from '@/hooks/useWorkoutStorage'
 import WorkoutCard from '@/components/workout/WorkoutCard'
+import { clientLogger } from '@/lib/logger'
 
 type Workout = {
   id: string
@@ -117,7 +118,7 @@ export default function StrengthWeekView({
         setShowCompletionModal(true)
       }
     } catch (error) {
-      console.error('Error checking program completion:', error)
+      clientLogger.error('Error checking program completion:', error)
     }
   }, [programId, isRestarting])
 
@@ -153,7 +154,7 @@ export default function StrengthWeekView({
       setWorkoutData(data)
       return data
     } catch (error) {
-      console.error('Error fetching workout:', error)
+      clientLogger.error('Error fetching workout:', error)
       return null
     } finally {
       setIsLoadingWorkout(false)

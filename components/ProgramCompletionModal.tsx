@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { X } from 'lucide-react'
+import { clientLogger } from '@/lib/logger'
 
 interface CompletionStats {
   programName: string
@@ -12,14 +13,20 @@ interface CompletionStats {
   totalWorkouts: number
   completedWorkouts: number
   skippedWorkouts: number
-  totalExercises: number
-  totalVolume: number
-  totalSets: number
+  // Strength program stats
+  totalExercises?: number
+  totalVolume?: number
+  totalSets?: number
+  // Cardio program stats
+  totalDuration?: number
+  totalDistance?: number
+  totalSessions?: number
 }
 
 interface ProgramCompletionModalProps {
   open: boolean
   programId: string
+  programType?: 'strength' | 'cardio'
   onClose: () => void
   onRestart?: () => void
 }
@@ -27,6 +34,7 @@ interface ProgramCompletionModalProps {
 export function ProgramCompletionModal({
   open,
   programId,
+  programType = 'strength',
   onClose,
   onRestart,
 }: ProgramCompletionModalProps) {
@@ -47,16 +55,20 @@ export function ProgramCompletionModal({
   useEffect(() => {
     if (!open || !programId) return
 
-    console.log('[CompletionModal] Opening modal for program:', programId)
+    clientLogger.debug('[CompletionModal] Opening modal for program:', programId)
     const abortController = new AbortController()
 
     const fetchStats = async () => {
       try {
         setLoading(true)
         setError(null)
-        console.log('[CompletionModal] Fetching stats...')
+        clientLogger.debug('[CompletionModal] Fetching stats...')
 
-        const response = await fetch(`/api/programs/${programId}/completion-stats`, {
+        const statsUrl = programType === 'cardio'
+          ? `/api/cardio/programs/${programId}/completion-stats`
+          : `/api/programs/${programId}/completion-stats`
+
+        const response = await fetch(statsUrl, {
           signal: abortController.signal
         })
 
@@ -68,22 +80,22 @@ export function ProgramCompletionModal({
 
         // Only update state if not aborted
         if (!abortController.signal.aborted) {
-          console.log('[CompletionModal] Stats loaded:', data)
+          clientLogger.debug('[CompletionModal] Stats loaded:', data)
           setStats(data)
         }
       } catch (err) {
         // Ignore abort errors
         if (err instanceof Error && err.name === 'AbortError') {
-          console.log('[CompletionModal] Stats fetch aborted')
+          clientLogger.debug('[CompletionModal] Stats fetch aborted')
           return
         }
-        console.error('[CompletionModal] Error fetching stats:', err)
+        clientLogger.error('[CompletionModal] Error fetching stats:', err)
         if (!abortController.signal.aborted) {
           setError('Failed to load completion stats')
         }
       } finally {
         if (!abortController.signal.aborted) {
-          console.log('[CompletionModal] Loading complete')
+          clientLogger.debug('[CompletionModal] Loading complete')
           setLoading(false)
         }
       }
@@ -105,7 +117,11 @@ export function ProgramCompletionModal({
       setRestarting(true)
       setError(null)
 
-      const response = await fetch(`/api/programs/${programId}/restart`, {
+      const restartUrl = programType === 'cardio'
+        ? `/api/cardio/programs/${programId}/restart`
+        : `/api/programs/${programId}/restart`
+
+      const response = await fetch(restartUrl, {
         method: 'POST',
       })
 
@@ -114,8 +130,8 @@ export function ProgramCompletionModal({
       }
 
       const result = await response.json()
-      console.log('Restart response:', result)
-      console.log(`Successfully archived ${result.archivedCompletions} workout completions`)
+      clientLogger.debug('Restart response:', result)
+      clientLogger.info(`Successfully archived ${result.archivedCompletions} workout completions`)
 
       // Let parent handle navigation/refresh, or fallback to default behavior
       if (onRestart) {
@@ -132,7 +148,7 @@ export function ProgramCompletionModal({
         onClose()
       }, 50)
     } catch (err) {
-      console.error('Error restarting program:', err)
+      clientLogger.error('Error restarting program:', err)
       setError('Failed to restart program')
       setRestarting(false)
     }
@@ -143,7 +159,9 @@ export function ProgramCompletionModal({
     if (restarting) return
 
     onClose()
-    router.push('/programs')
+    // Navigate to appropriate programs page
+    const programsPath = programType === 'cardio' ? '/cardio/programs' : '/programs'
+    router.push(programsPath)
   }
 
   const formatVolume = (volume: number | undefined | null) => {
@@ -158,7 +176,7 @@ export function ProgramCompletionModal({
 
   if (!open) return null
 
-  console.log('[CompletionModal] Render state:', { loading, restarting, hasStats: !!stats, hasError: !!error })
+  clientLogger.debug('[CompletionModal] Render state:', { loading, restarting, hasStats: !!stats, hasError: !!error })
 
   return (
     <div
@@ -220,7 +238,7 @@ export function ProgramCompletionModal({
                     {stats.totalWorkouts}
                   </div>
                   <div className="text-xs text-muted-foreground uppercase tracking-wide mt-1">
-                    Total Workouts
+                    Total {programType === 'cardio' ? 'Sessions' : 'Workouts'}
                   </div>
                 </div>
 
@@ -233,32 +251,60 @@ export function ProgramCompletionModal({
                   </div>
                 </div>
 
-                <div className="border-2 border-border bg-muted/30 p-4">
-                  <div className="text-3xl font-bold text-foreground">
-                    {stats.totalExercises}
-                  </div>
-                  <div className="text-xs text-muted-foreground uppercase tracking-wide mt-1">
-                    Exercises
-                  </div>
-                </div>
+                {programType === 'strength' && (
+                  <>
+                    <div className="border-2 border-border bg-muted/30 p-4">
+                      <div className="text-3xl font-bold text-foreground">
+                        {stats.totalExercises}
+                      </div>
+                      <div className="text-xs text-muted-foreground uppercase tracking-wide mt-1">
+                        Exercises
+                      </div>
+                    </div>
 
-                <div className="border-2 border-border bg-muted/30 p-4">
-                  <div className="text-3xl font-bold text-foreground">
-                    {formatVolume(stats.totalVolume)}
-                  </div>
-                  <div className="text-xs text-muted-foreground uppercase tracking-wide mt-1">
-                    Volume (lbs)
-                  </div>
-                </div>
+                    <div className="border-2 border-border bg-muted/30 p-4">
+                      <div className="text-3xl font-bold text-foreground">
+                        {formatVolume(stats.totalVolume)}
+                      </div>
+                      <div className="text-xs text-muted-foreground uppercase tracking-wide mt-1">
+                        Volume (lbs)
+                      </div>
+                    </div>
 
-                <div className="border-2 border-border bg-muted/30 p-4 col-span-2">
-                  <div className="text-3xl font-bold text-foreground">
-                    {stats.totalSets}
-                  </div>
-                  <div className="text-xs text-muted-foreground uppercase tracking-wide mt-1">
-                    Total Sets
-                  </div>
-                </div>
+                    <div className="border-2 border-border bg-muted/30 p-4 col-span-2">
+                      <div className="text-3xl font-bold text-foreground">
+                        {stats.totalSets}
+                      </div>
+                      <div className="text-xs text-muted-foreground uppercase tracking-wide mt-1">
+                        Total Sets
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {programType === 'cardio' && (
+                  <>
+                    <div className="border-2 border-border bg-muted/30 p-4">
+                      <div className="text-3xl font-bold text-foreground">
+                        {stats.totalDuration ? Math.round(stats.totalDuration / 60) : 0}
+                      </div>
+                      <div className="text-xs text-muted-foreground uppercase tracking-wide mt-1">
+                        Hours
+                      </div>
+                    </div>
+
+                    {stats.totalDistance && stats.totalDistance > 0 && (
+                      <div className="border-2 border-border bg-muted/30 p-4">
+                        <div className="text-3xl font-bold text-foreground">
+                          {stats.totalDistance.toFixed(1)}
+                        </div>
+                        <div className="text-xs text-muted-foreground uppercase tracking-wide mt-1">
+                          Miles
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
 
               {stats.skippedWorkouts > 0 && (
@@ -273,13 +319,15 @@ export function ProgramCompletionModal({
         {/* Footer */}
         <div className="px-4 sm:px-6 py-4 border-t-2 border-border bg-muted">
           <div className="flex flex-col gap-3">
-            <button
-              onClick={handleRestart}
-              disabled={loading || restarting}
-              className="w-full px-6 py-3 bg-success text-success-foreground hover:bg-success-hover font-bold uppercase tracking-wider doom-button-3d disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {restarting ? 'Restarting...' : 'Restart Program'}
-            </button>
+            {programType === 'strength' && onRestart && (
+              <button
+                onClick={handleRestart}
+                disabled={loading || restarting}
+                className="w-full px-6 py-3 bg-success text-success-foreground hover:bg-success-hover font-bold uppercase tracking-wider doom-button-3d disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {restarting ? 'Restarting...' : 'Restart Program'}
+              </button>
+            )}
             <button
               onClick={handleChooseNewProgram}
               disabled={restarting}

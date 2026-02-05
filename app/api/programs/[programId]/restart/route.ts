@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
 import { restartProgram } from '@/lib/db/program-restart'
+import { logger } from '@/lib/logger'
 
 /**
  * POST /api/programs/[programId]/restart
@@ -14,7 +15,7 @@ export async function POST(
 ) {
   try {
     const { programId } = await params
-    console.log(`[API /restart] Received restart request for program ${programId}`)
+    logger.debug({ programId }, 'Received restart request')
 
     // Authenticate user
     const supabase = await createClient()
@@ -24,11 +25,11 @@ export async function POST(
     } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      console.log('[API /restart] Unauthorized - no user found')
+      logger.debug('Unauthorized - no user found')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    console.log(`[API /restart] User authenticated: ${user.id}`)
+    logger.debug({ userId: user.id, programId }, 'User authenticated')
 
     // Verify program exists and user owns it
     const program = await prisma.program.findFirst({
@@ -39,16 +40,19 @@ export async function POST(
     })
 
     if (!program) {
-      console.log('[API /restart] Program not found or user does not own it')
+      logger.debug({ programId, userId: user.id }, 'Program not found or user does not own it')
       return NextResponse.json({ error: 'Program not found' }, { status: 404 })
     }
 
-    console.log(`[API /restart] Program verified: ${program.name}`)
+    logger.debug({ programId, programName: program.name }, 'Program verified')
 
     // Restart the program
     const result = await restartProgram(prisma, programId, user.id)
 
-    console.log(`[API /restart] Restart completed: ${result.archivedCompletions} completions archived`)
+    logger.info(
+      { programId, archivedCompletions: result.archivedCompletions },
+      'Program restarted successfully'
+    )
 
     return NextResponse.json({
       success: true,
@@ -56,7 +60,7 @@ export async function POST(
       archivedCompletions: result.archivedCompletions,
     })
   } catch (error) {
-    console.error('[API /restart] Error restarting program:', error)
+    logger.error({ error, programId: (await params).programId }, 'Error restarting program')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

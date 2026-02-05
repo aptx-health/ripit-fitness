@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db'
 import { getProgramCompletionStatus } from '@/lib/db/program-completion'
+import { logger } from '@/lib/logger'
 
 /**
  * GET /api/programs/[programId]/completion-status
@@ -30,7 +31,7 @@ export async function GET(
 
     return NextResponse.json({ data: status })
   } catch (error) {
-    console.error('Error checking program completion:', error)
+    logger.error({ error, programId: (await params).programId }, 'Error checking program completion')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
