@@ -108,6 +108,7 @@ export async function getCurrentStrengthWeek(
             WHERE wo."weekId" = w.id
               AND wc."userId" = ${userId}
               AND wc.status IN ('completed', 'skipped')
+              AND wc."isArchived" = false
           )
         ORDER BY w."weekNumber" ASC
         LIMIT 1
@@ -150,7 +151,7 @@ export async function getCurrentStrengthWeek(
             name: true,
             dayNumber: true,
             completions: {
-              where: { userId },
+              where: { userId, isArchived: false },
               select: { id: true, status: true, completedAt: true },
               orderBy: { completedAt: 'desc' },
               take: 1

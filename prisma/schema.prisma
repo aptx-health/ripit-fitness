@@ -134,6 +134,8 @@ model WorkoutCompletion {
   completedAt DateTime    @default(now())
   status      String
   notes       String?
+  isArchived  Boolean     @default(false)
+  cycleNumber Int         @default(1)
   exercises   Exercise[]
   loggedSets  LoggedSet[]
   workout     Workout     @relation(fields: [workoutId], references: [id], onDelete: Cascade)
@@ -141,6 +143,8 @@ model WorkoutCompletion {
   @@index([workoutId, userId])
   @@index([userId, completedAt])
   @@index([userId, status, completedAt])
+  @@index([userId, isArchived])
+  @@index([workoutId, userId, isArchived])
 }
 
 model LoggedSet {

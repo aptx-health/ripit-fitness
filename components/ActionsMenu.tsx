@@ -60,13 +60,13 @@ export default function ActionsMenu({
 
   // Size classes
   const sizeClasses = {
-    sm: 'h-8 w-8 text-sm',
+    sm: 'p-2 text-sm',
     md: 'h-9 w-9 text-base',
     lg: 'h-10 w-10 text-lg'
   }
 
   const iconSizes = {
-    sm: 16,
+    sm: 20,
     md: 20,
     lg: 24
   }

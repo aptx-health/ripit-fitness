@@ -37,11 +37,12 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
-    // Find existing completion
+    // Find existing non-archived completion
     const existingCompletion = await prisma.workoutCompletion.findFirst({
       where: {
         workoutId,
         userId: user.id,
+        isArchived: false,
       },
     })
 

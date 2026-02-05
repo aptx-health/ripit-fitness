@@ -351,16 +351,53 @@ import { Button } from '@/components/ui/button';
 All API routes must include comprehensive error handling:
 
 ```typescript
+import { logger } from '@/lib/logger'
+
 try {
   // Logic here
 } catch (error) {
-  console.error('Route error:', error);
+  logger.error({ error, context: 'route-name' }, 'Route error')
   return NextResponse.json(
     { error: 'Internal server error' },
     { status: 500 }
-  );
+  )
 }
 ```
+
+### Logging
+
+Use the centralized logging system instead of `console.log/error`:
+
+**Server-side (API routes, server components):**
+```typescript
+import { logger } from '@/lib/logger'
+
+// Debug logs (set PINO_LOG_LEVEL=debug to see)
+logger.debug({ userId, programId }, 'User authenticated')
+
+// Info logs (shown by default)
+logger.info({ archivedCompletions: 5 }, 'Program restarted')
+
+// Errors
+logger.error({ error, programId }, 'Failed to restart program')
+```
+
+**Client-side (components):**
+```typescript
+import { clientLogger } from '@/lib/client-logger'
+
+// Debug logs (set NEXT_PUBLIC_LOG_LEVEL=debug to see)
+clientLogger.debug('[Modal] Opening modal')
+
+// Errors
+clientLogger.error('Error:', error)
+```
+
+**Configuration:**
+- `PINO_LOG_LEVEL` - Server log level (trace|debug|info|warn|error|fatal|silent)
+- `NEXT_PUBLIC_LOG_LEVEL` - Client log level (debug|info|silent)
+
+See `/docs/LOGGING.md` for complete documentation.
 
 ### Avoid N+1 Queries
 
@@ -527,6 +564,7 @@ git commit -m "feat: add feature"
 
 ### Active Documentation
 - `/docs/DATABASE_MIGRATIONS.md` - **CRITICAL**: Database migration workflow with Prisma + Supabase CLI
+- `/docs/LOGGING.md` - Logging configuration and usage with Pino
 - `/docs/STYLING.md` - DOOM theme color system and styling guide
 - `/docs/features/CARDIO_DESIGN.md` - Cardio tracking system design
 - `/docs/features/EXERCISE_PERFORMANCE_TRACKING.md` - Exercise tracking features

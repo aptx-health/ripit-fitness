@@ -58,6 +58,7 @@ export async function POST(
           workoutId,
           userId: user.id,
           status: 'completed',
+          isArchived: false,
         },
       })
     ])
@@ -79,12 +80,13 @@ export async function POST(
 
     // Create or update completion and logged sets in a transaction
     const completion = await prisma.$transaction(async (tx) => {
-      // Check for existing draft completion
+      // Check for existing non-archived draft completion
       const existingDraft = await tx.workoutCompletion.findFirst({
         where: {
           workoutId,
           userId: user.id,
           status: 'draft',
+          isArchived: false,
         },
       })
 
