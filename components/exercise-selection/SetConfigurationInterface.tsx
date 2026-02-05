@@ -101,7 +101,9 @@ export function SetConfigurationInterface({
   const getDefaultIntensityType = (): 'RIR' | 'RPE' | 'NONE' => {
     if (initialConfig) return initialConfig.intensityType
 
-    if (!settings?.defaultIntensityRating) return 'NONE'
+    if (!settings?.defaultIntensityRating || settings.defaultIntensityRating === 'none') {
+      return 'NONE'
+    }
 
     return settings.defaultIntensityRating === 'rpe'
       ? 'RPE'
@@ -126,6 +128,21 @@ export function SetConfigurationInterface({
   const [repValidationError, setRepValidationError] = useState<Record<number, string>>({})
   const [duplicatingSetId, setDuplicatingSetId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<Tab>('sets')
+
+  // Update intensity type when settings load (only for new exercises, not when editing)
+  useEffect(() => {
+    if (!initialConfig && settings?.defaultIntensityRating) {
+      const newIntensityType = settings.defaultIntensityRating === 'rpe'
+        ? 'RPE'
+        : settings.defaultIntensityRating === 'rir'
+        ? 'RIR'
+        : settings.defaultIntensityRating === 'none'
+        ? 'NONE'
+        : 'NONE'
+
+      setExerciseIntensityType(newIntensityType)
+    }
+  }, [settings?.defaultIntensityRating, initialConfig])
 
   // Update parent whenever form state changes
   useEffect(() => {
@@ -237,8 +254,8 @@ export function SetConfigurationInterface({
   return (
     <div className="flex-1 overflow-y-auto min-h-0">
       {/* Exercise Details */}
-      <div className="px-4 sm:px-6 py-4 pb-0 bg-muted">
-        <div className="flex items-start justify-between gap-4">
+      <div className="py-4 pb-0 bg-muted">
+        <div className="px-4 sm:px-6 flex items-start justify-between gap-4">
           <div className="flex-1">
             <h3 className="font-bold text-foreground text-lg tracking-wide uppercase">
               {exercise.name}
