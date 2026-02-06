@@ -11,12 +11,16 @@ export type ExerciseDefinition = {
   secondaryFAUs: string[]
   equipment: string[]
   instructions?: string
+  isSystem?: boolean
+  createdBy?: string | null
 }
 
 interface ExerciseSearchInterfaceProps {
   onExerciseSelect: (exercise: ExerciseDefinition) => void
   initialQuery?: string
   preloadExercises?: boolean
+  onCreateExercise?: (searchQuery: string) => void
+  onEditExercise?: (exercise: ExerciseDefinition) => void
 }
 
 const ALL_FAUS = [
@@ -27,24 +31,24 @@ const ALL_FAUS = [
 
 const EQUIPMENT_TYPES = [
   'barbell',
-  'dumbbells',
+  'dumbbell',
   'cable',
   'machine',
   'bodyweight',
-  'resistance band',
+  'resistance_band',
   'kettlebell',
   'other'
 ]
 
 const EQUIPMENT_DISPLAY_NAMES: Record<string, string> = {
   'barbell': 'Barbell',
-  'dumbbells': 'Dumbbells',
+  'dumbbell': 'Dumbbell',
   'cable': 'Cable',
   'machine': 'Machine',
   'bodyweight': 'Bodyweight',
-  'resistance band': 'Resistance Band',
+  'resistance_band': 'Resistance Band',
   'kettlebell': 'Kettlebell',
-  'other': 'Other'
+  'other': 'Other (specialized equipment)'
 }
 
 const FAU_DISPLAY_NAMES: Record<string, string> = {
@@ -71,7 +75,9 @@ const FAU_DISPLAY_NAMES: Record<string, string> = {
 export function ExerciseSearchInterface({
   onExerciseSelect,
   initialQuery = '',
-  preloadExercises = false
+  preloadExercises = false,
+  onCreateExercise,
+  onEditExercise
 }: ExerciseSearchInterfaceProps) {
   const [searchQuery, setSearchQuery] = useState(initialQuery)
   const [selectedFAU, setSelectedFAU] = useState<string | null>(null)
@@ -132,9 +138,9 @@ export function ExerciseSearchInterface({
   }, [])
 
   return (
-    <>
+    <div className="flex flex-col flex-1 min-h-0">
       {/* Search */}
-      <div className="px-4 sm:px-6 py-4 border-b-2 border-border">
+      <div className="px-4 sm:px-6 py-4 border-b-2 border-border flex-shrink-0">
         <div className="relative mb-3">
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
           <input
@@ -315,18 +321,41 @@ export function ExerciseSearchInterface({
                     )}
                   </div>
 
-                  <button
-                    onClick={() => onExerciseSelect(exercise)}
-                    className="ml-4 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover font-bold uppercase tracking-wider text-sm border-2 border-primary-active shadow-[0_3px_0_var(--primary-active),0_5px_8px_rgba(0,0,0,0.4)] hover:shadow-[0_3px_0_var(--primary-active),0_0_20px_rgba(var(--primary-rgb),0.6)] active:translate-y-[3px] active:shadow-[0_0_0_var(--primary-active),0_2px_4px_rgba(0,0,0,0.4)] transition-all flex-shrink-0"
-                  >
-                    Select
-                  </button>
+                  <div className="flex gap-2 ml-4 flex-shrink-0">
+                    {onEditExercise && !exercise.isSystem && (
+                      <button
+                        onClick={() => onEditExercise(exercise)}
+                        className="px-3 py-2 bg-secondary text-secondary-foreground hover:bg-secondary-hover font-bold uppercase tracking-wider text-sm border-2 border-border transition-colors"
+                        title="Edit custom exercise"
+                      >
+                        Edit
+                      </button>
+                    )}
+                    <button
+                      onClick={() => onExerciseSelect(exercise)}
+                      className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover font-bold uppercase tracking-wider text-sm border-2 border-primary-active shadow-[0_3px_0_var(--primary-active),0_5px_8px_rgba(0,0,0,0.4)] hover:shadow-[0_3px_0_var(--primary-active),0_0_20px_rgba(var(--primary-rgb),0.6)] active:translate-y-[3px] active:shadow-[0_0_0_var(--primary-active),0_2px_4px_rgba(0,0,0,0.4)] transition-all"
+                    >
+                      Select
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
-    </>
+
+      {/* Fixed Footer - Create New Exercise */}
+      {onCreateExercise && (
+        <div className="border-t-2 border-border bg-muted/30 px-4 sm:px-6 py-3 flex-shrink-0">
+          <button
+            onClick={() => onCreateExercise(searchQuery)}
+            className="w-full px-4 py-2 bg-accent text-accent-foreground hover:bg-accent-hover font-bold uppercase tracking-wider text-sm border-2 border-accent transition-colors"
+          >
+            + Create New Exercise
+          </button>
+        </div>
+      )}
+    </div>
   )
 }

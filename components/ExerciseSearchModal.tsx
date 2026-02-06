@@ -5,6 +5,7 @@ import { X } from 'lucide-react'
 import { useUserSettings } from '@/hooks/useUserSettings'
 import { ExerciseSearchInterface, ExerciseDefinition } from '@/components/exercise-selection/ExerciseSearchInterface'
 import { SetConfigurationInterface, ExercisePrescription } from '@/components/exercise-selection/SetConfigurationInterface'
+import ExerciseDefinitionEditorModal from '@/components/features/exercise-definition/ExerciseDefinitionEditorModal'
 
 type EditingExercise = {
   id: string
@@ -41,6 +42,9 @@ export default function ExerciseSearchModal({
   const { settings } = useUserSettings()
   const [selectedExercise, setSelectedExercise] = useState<ExerciseDefinition | null>(null)
   const [prescription, setPrescription] = useState<ExercisePrescription | null>(null)
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [createInitialName, setCreateInitialName] = useState('')
+  const [editingExerciseId, setEditingExerciseId] = useState<string | null>(null)
 
   // Initialize state when editing
   useEffect(() => {
@@ -105,6 +109,24 @@ export default function ExerciseSearchModal({
     onClose()
   }, [onClose])
 
+  const handleCreateExercise = useCallback((searchQuery: string) => {
+    setCreateInitialName(searchQuery)
+    setEditingExerciseId(null)
+    setShowCreateModal(true)
+  }, [])
+
+  const handleEditExercise = useCallback((exercise: ExerciseDefinition) => {
+    setEditingExerciseId(exercise.id)
+    setCreateInitialName('')
+    setShowCreateModal(true)
+  }, [])
+
+  const handleCreateSuccess = useCallback((newExercise: ExerciseDefinition) => {
+    setShowCreateModal(false)
+    setEditingExerciseId(null)
+    setSelectedExercise(newExercise)
+  }, [])
+
   if (!isOpen) return null
 
   // Prepare initial config for editing
@@ -134,6 +156,7 @@ export default function ExerciseSearchModal({
   } : undefined
 
   return (
+    <>
     <div
       style={{ position: 'fixed', inset: 0, zIndex: 50 }}
       className="backdrop-blur-md bg-background/80 flex items-center justify-center p-0 sm:p-4"
@@ -200,10 +223,26 @@ export default function ExerciseSearchModal({
             <ExerciseSearchInterface
               onExerciseSelect={handleExerciseSelect}
               preloadExercises={false}
+              onCreateExercise={handleCreateExercise}
+              onEditExercise={handleEditExercise}
             />
           </>
         )}
       </div>
     </div>
+
+    {/* Exercise Definition Editor Modal */}
+    <ExerciseDefinitionEditorModal
+      isOpen={showCreateModal}
+      onClose={() => {
+        setShowCreateModal(false)
+        setEditingExerciseId(null)
+      }}
+      mode={editingExerciseId ? 'edit' : 'create'}
+      exerciseId={editingExerciseId || undefined}
+      initialName={createInitialName}
+      onSuccess={handleCreateSuccess}
+    />
+    </>
   )
 }

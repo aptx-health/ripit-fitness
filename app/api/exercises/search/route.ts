@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { EQUIPMENT_GROUPS } from '@/lib/constants/program-metadata'
 
 export async function GET(request: NextRequest) {
   try {
@@ -57,10 +58,24 @@ export async function GET(request: NextRequest) {
     }
 
     // Filter by equipment
+    // Special handling: "other" in search filter should match ALL specialized equipment types
     if (equipmentFilters.length > 0) {
+      const expandedEquipmentFilters = equipmentFilters.flatMap(filter => {
+        // Normalize "dumbbells" -> "dumbbell", "resistance band" -> "resistance_band"
+        const normalized = filter
+          .replace('dumbbells', 'dumbbell')
+          .replace('resistance band', 'resistance_band')
+
+        // If filtering by "other", expand to all specialized equipment
+        if (normalized === 'other') {
+          return [...EQUIPMENT_GROUPS.specialized]
+        }
+        return [normalized]
+      })
+
       whereConditions.push({
         equipment: {
-          hasSome: equipmentFilters
+          hasSome: expandedEquipmentFilters
         }
       })
     }

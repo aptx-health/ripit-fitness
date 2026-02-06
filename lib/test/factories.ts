@@ -41,10 +41,23 @@ export async function createTestUser(): Promise<TestUser> {
 
 export async function createTestExerciseDefinition(
   prisma: PrismaClient,
-  overrides: Partial<{ name: string; aliases: string[] }> = {}
+  overrides: Partial<{
+    name: string
+    aliases: string[]
+    equipment: string[]
+    primaryFAUs: string[]
+    secondaryFAUs: string[]
+    category: string
+    instructions: string
+    notes: string
+    isSystem: boolean
+    userId: string
+  }> = {}
 ): Promise<TestExerciseDefinition> {
   const name = overrides.name || 'Barbell Bench Press'
-  const normalizedName = name.toLowerCase().replace(/[^a-z0-9]/g, '')
+  const normalizedName = name.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, ' ')
+  const userId = overrides.userId
+  const isSystem = overrides.isSystem ?? !userId
 
   // Check if exercise definition already exists
   const existing = await prisma.exerciseDefinition.findUnique({
@@ -64,11 +77,16 @@ export async function createTestExerciseDefinition(
     data: {
       name,
       normalizedName,
-      aliases: overrides.aliases || ['bench press', 'bench'],
-      category: 'chest',
-      isSystem: true,
-      createdBy: null,
-      userId: '00000000-0000-0000-0000-000000000000' // System exercises use special UUID
+      aliases: overrides.aliases || [],
+      category: overrides.category || null,
+      equipment: overrides.equipment || ['barbell'],
+      primaryFAUs: overrides.primaryFAUs || ['chest', 'triceps'],
+      secondaryFAUs: overrides.secondaryFAUs || [],
+      instructions: overrides.instructions || null,
+      notes: overrides.notes || null,
+      isSystem,
+      createdBy: isSystem ? null : userId,
+      userId: userId || '00000000-0000-0000-0000-000000000000'
     }
   })
 
