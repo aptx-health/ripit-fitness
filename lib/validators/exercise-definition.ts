@@ -35,8 +35,8 @@ const VALID_EQUIPMENT = Object.keys(EQUIPMENT_LABELS);
 const MAX_NAME_LENGTH = 100;
 const MAX_ALIAS_LENGTH = 50;
 const MAX_ALIASES = 10;
-const MAX_INSTRUCTIONS_LENGTH = 2000;
-const MAX_NOTES_LENGTH = 1000;
+const MAX_INSTRUCTIONS_LENGTH = 400;
+const MAX_NOTES_LENGTH = 400;
 
 export function normalizeExerciseName(name: string): string {
   return name

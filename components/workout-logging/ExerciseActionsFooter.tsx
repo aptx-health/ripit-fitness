@@ -108,7 +108,7 @@ export default function ExerciseActionsFooter({
 
         {/* Actions Menu */}
         <ActionsMenu
-          variant="accent"
+          variant="default"
           size="md"
           className="h-full aspect-square"
           actions={actions}

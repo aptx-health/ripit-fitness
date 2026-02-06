@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, PenSquare } from 'lucide-react'
 
 interface Exercise {
   id: string
@@ -15,6 +15,8 @@ interface ExerciseNavigationProps {
   totalExercises: number
   onPrevious: () => void
   onNext: () => void
+  isSystemExercise?: boolean
+  onEditExercise?: () => void
 }
 
 export default function ExerciseNavigation({
@@ -23,6 +25,8 @@ export default function ExerciseNavigation({
   totalExercises,
   onPrevious,
   onNext,
+  isSystemExercise = true,
+  onEditExercise,
 }: ExerciseNavigationProps) {
   // Determine if this is part of a superset
   const isSuperset = currentExercise.exerciseGroup !== null
@@ -51,6 +55,16 @@ export default function ExerciseNavigation({
             </span>
           )}
           <h3 className="text-xl sm:text-2xl font-bold text-foreground uppercase tracking-wide">{currentExercise.name}</h3>
+          {!isSystemExercise && onEditExercise && (
+            <button
+              onClick={onEditExercise}
+              className="ml-2 p-2 bg-secondary text-secondary-foreground hover:bg-secondary-hover border-2 border-border transition-colors doom-focus-ring"
+              aria-label="Edit exercise definition"
+              title="Edit exercise"
+            >
+              <PenSquare size={20} />
+            </button>
+          )}
         </div>
       </div>
 

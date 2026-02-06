@@ -53,6 +53,17 @@ type FetchedWorkoutData = {
       exerciseGroup: string | null
       notes: string | null
       isOneOff?: boolean
+      exerciseDefinitionId: string
+      exerciseDefinition?: {
+        id: string
+        name: string
+        primaryFAUs: string[]
+        secondaryFAUs: string[]
+        equipment: string[]
+        instructions?: string
+        isSystem: boolean
+        createdBy: string | null
+      }
       prescribedSets: Array<{
         id: string
         setNumber: number

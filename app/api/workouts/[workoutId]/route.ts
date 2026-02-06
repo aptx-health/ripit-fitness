@@ -85,6 +85,18 @@ export async function GET(
         notes: true,
         isOneOff: true,
         exerciseDefinitionId: true,
+        exerciseDefinition: {
+          select: {
+            id: true,
+            name: true,
+            primaryFAUs: true,
+            secondaryFAUs: true,
+            equipment: true,
+            instructions: true,
+            isSystem: true,
+            createdBy: true,
+          },
+        },
         prescribedSets: {
           orderBy: { setNumber: 'asc' },
           select: {

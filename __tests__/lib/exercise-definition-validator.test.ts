@@ -154,12 +154,12 @@ describe('Exercise Definition Validation', () => {
         name: 'Bench Press',
         equipment: ['barbell'],
         primaryFAUs: ['chest'],
-        instructions: 'a'.repeat(2001),
+        instructions: 'a'.repeat(401),
       };
       const errors = validateExerciseDefinition(input, false);
       expect(errors).toContainEqual({
         field: 'instructions',
-        message: 'Instructions must be 2000 characters or less',
+        message: 'Instructions must be 400 characters or less',
       });
     });
 
@@ -168,12 +168,12 @@ describe('Exercise Definition Validation', () => {
         name: 'Bench Press',
         equipment: ['barbell'],
         primaryFAUs: ['chest'],
-        notes: 'a'.repeat(1001),
+        notes: 'a'.repeat(401),
       };
       const errors = validateExerciseDefinition(input, false);
       expect(errors).toContainEqual({
         field: 'notes',
-        message: 'Notes must be 1000 characters or less',
+        message: 'Notes must be 400 characters or less',
       });
     });
   });

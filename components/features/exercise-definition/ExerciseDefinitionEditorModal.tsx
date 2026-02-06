@@ -356,13 +356,13 @@ export default function ExerciseDefinitionEditorModal({
                   <label htmlFor="exercise-instructions" className="block text-sm font-semibold text-foreground uppercase tracking-wide">
                     Instructions
                   </label>
-                  <span className="text-xs text-muted-foreground">{formData.instructions.length} / 2000</span>
+                  <span className="text-xs text-muted-foreground">{formData.instructions.length} / 400</span>
                 </div>
                 <textarea
                   id="exercise-instructions"
                   value={formData.instructions}
                   onChange={(e) => setFormData({ ...formData, instructions: e.target.value })}
-                  maxLength={2000}
+                  maxLength={400}
                   rows={4}
                   className={`w-full px-3 py-2 border-2 rounded bg-background text-foreground ${
                     errors.instructions ? 'border-error' : 'border-border focus:border-primary'
@@ -378,13 +378,13 @@ export default function ExerciseDefinitionEditorModal({
                   <label htmlFor="exercise-notes" className="block text-sm font-semibold text-foreground uppercase tracking-wide">
                     Notes
                   </label>
-                  <span className="text-xs text-muted-foreground">{formData.notes.length} / 1000</span>
+                  <span className="text-xs text-muted-foreground">{formData.notes.length} / 400</span>
                 </div>
                 <textarea
                   id="exercise-notes"
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  maxLength={1000}
+                  maxLength={400}
                   rows={3}
                   className={`w-full px-3 py-2 border-2 rounded bg-background text-foreground ${
                     errors.notes ? 'border-error' : 'border-border focus:border-primary'
