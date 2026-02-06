@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Plus, Trash } from 'lucide-react'
+import { Plus, Trash, PenSquare } from 'lucide-react'
 import { useUserSettings } from '@/hooks/useUserSettings'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/radix/popover'
 import type { ExerciseDefinition } from './ExerciseSearchInterface'
@@ -33,6 +33,8 @@ interface SetConfigurationInterfaceProps {
   onConfigChange: (config: ExercisePrescription) => void
   showDuplicateButton?: boolean
   onDuplicateSet?: (setId: string) => Promise<void>
+  isSystemExercise?: boolean
+  onEditExercise?: () => void
 }
 
 const FAU_DISPLAY_NAMES: Record<string, string> = {
@@ -93,7 +95,9 @@ export function SetConfigurationInterface({
   initialConfig,
   onConfigChange,
   showDuplicateButton = false,
-  onDuplicateSet
+  onDuplicateSet,
+  isSystemExercise = true,
+  onEditExercise
 }: SetConfigurationInterfaceProps) {
   const { settings } = useUserSettings()
 
@@ -254,10 +258,20 @@ export function SetConfigurationInterface({
       {/* Exercise Details */}
       <div className="py-4 pb-0 bg-muted">
         <div className="px-4 sm:px-6 flex items-start justify-between gap-4">
-          <div className="flex-1">
+          <div className="flex-1 flex items-center gap-2">
             <h3 className="font-bold text-foreground text-lg tracking-wide uppercase">
               {exercise.name}
             </h3>
+            {!isSystemExercise && onEditExercise && (
+              <button
+                onClick={onEditExercise}
+                className="p-2 rounded-full bg-secondary text-secondary-foreground hover:bg-secondary-hover border-2 border-border transition-colors doom-focus-ring"
+                aria-label="Edit exercise definition"
+                title="Edit exercise"
+              >
+                <PenSquare size={16} />
+              </button>
+            )}
           </div>
 
           {/* Folder-style Tabs */}

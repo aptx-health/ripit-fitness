@@ -23,6 +23,8 @@ type EditingExercise = {
     name: string
     primaryFAUs: string[]
     secondaryFAUs: string[]
+    isSystem?: boolean
+    createdBy?: string | null
   }
 }
 
@@ -45,6 +47,7 @@ export default function ExerciseSearchModal({
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [createInitialName, setCreateInitialName] = useState('')
   const [editingExerciseId, setEditingExerciseId] = useState<string | null>(null)
+  const [editingExerciseDefinitionId, setEditingExerciseDefinitionId] = useState<string | null>(null)
 
   // Initialize state when editing
   useEffect(() => {
@@ -127,6 +130,13 @@ export default function ExerciseSearchModal({
     setSelectedExercise(newExercise)
   }, [])
 
+  const handleEditExerciseDefinition = useCallback(() => {
+    const exerciseToEdit = selectedExercise || editingExercise?.exerciseDefinition
+    if (exerciseToEdit) {
+      setEditingExerciseDefinitionId(exerciseToEdit.id)
+    }
+  }, [selectedExercise, editingExercise])
+
   if (!isOpen) return null
 
   // Prepare initial config for editing
@@ -189,6 +199,8 @@ export default function ExerciseSearchModal({
               }}
               initialConfig={initialConfig}
               onConfigChange={handleConfigChange}
+              isSystemExercise={(selectedExercise || editingExercise?.exerciseDefinition)?.isSystem ?? true}
+              onEditExercise={handleEditExerciseDefinition}
             />
 
             {/* Actions */}
@@ -231,7 +243,7 @@ export default function ExerciseSearchModal({
       </div>
     </div>
 
-    {/* Exercise Definition Editor Modal */}
+    {/* Exercise Definition Editor Modal - Create/Edit from Search */}
     <ExerciseDefinitionEditorModal
       isOpen={showCreateModal}
       onClose={() => {
@@ -242,6 +254,18 @@ export default function ExerciseSearchModal({
       exerciseId={editingExerciseId || undefined}
       initialName={createInitialName}
       onSuccess={handleCreateSuccess}
+    />
+
+    {/* Exercise Definition Editor Modal - Edit from Set Configuration */}
+    <ExerciseDefinitionEditorModal
+      isOpen={!!editingExerciseDefinitionId}
+      onClose={() => setEditingExerciseDefinitionId(null)}
+      mode="edit"
+      exerciseId={editingExerciseDefinitionId || undefined}
+      onSuccess={() => {
+        setEditingExerciseDefinitionId(null)
+        // Optionally refresh the selected exercise data here
+      }}
     />
     </>
   )

@@ -540,8 +540,6 @@ export default function ExerciseLoggingModal({
             totalExercises={exercises.length}
             onPrevious={handlePreviousExercise}
             onNext={handleNextExercise}
-            isSystemExercise={currentExercise.exerciseDefinition?.isSystem ?? true}
-            onEditExercise={handleEditExerciseDefinition}
           />
 
           {/* Content area with tabs - tabs handle their own scrolling */}
@@ -694,6 +692,8 @@ export default function ExerciseLoggingModal({
           onOpenChange={(open) => !open && setActiveWizard(null)}
           exercise={currentExercise}
           onComplete={handleWizardComplete}
+          isSystemExercise={currentExercise.exerciseDefinition?.isSystem ?? true}
+          onEditExercise={handleEditExerciseDefinition}
         />
       )}
 

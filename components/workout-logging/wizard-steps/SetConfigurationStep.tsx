@@ -21,6 +21,8 @@ interface SetConfigurationStepProps {
   }
   onConfigChange: (config: ExercisePrescription) => void
   onDuplicateSet?: (setId: string) => Promise<void>
+  isSystemExercise?: boolean
+  onEditExercise?: () => void
 }
 
 export function SetConfigurationStep({
@@ -28,6 +30,8 @@ export function SetConfigurationStep({
   initialConfig,
   onConfigChange,
   onDuplicateSet,
+  isSystemExercise,
+  onEditExercise,
 }: SetConfigurationStepProps) {
   return (
     <div className="flex flex-col h-full w-full">
@@ -37,6 +41,8 @@ export function SetConfigurationStep({
         onConfigChange={onConfigChange}
         showDuplicateButton={!!onDuplicateSet}
         onDuplicateSet={onDuplicateSet}
+        isSystemExercise={isSystemExercise}
+        onEditExercise={onEditExercise}
       />
     </div>
   )
