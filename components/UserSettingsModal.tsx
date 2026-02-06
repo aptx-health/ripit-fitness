@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Settings, Save, X } from 'lucide-react'
+import { Settings, Save, X, Dumbbell } from 'lucide-react'
 import * as Dialog from '@radix-ui/react-dialog'
+import Link from 'next/link'
 
 type UserSettings = {
   displayName: string | null
@@ -164,6 +165,21 @@ export default function UserSettingsModal({
               <p className="text-xs text-muted-foreground mt-1">
                 RPE = Rate of Perceived Exertion, RIR = Reps in Reserve
               </p>
+            </div>
+
+            {/* Admin Section */}
+            <div className="pt-4 border-t border-border">
+              <label className="block text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
+                Admin
+              </label>
+              <Link
+                href="/admin/exercises"
+                onClick={() => onOpenChange(false)}
+                className="w-full px-4 py-3 bg-muted text-foreground border-2 border-border hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2"
+              >
+                <Dumbbell size={18} />
+                Manage Exercise Definitions
+              </Link>
             </div>
 
             {/* Error Message */}
