@@ -39,6 +39,8 @@ interface EditExerciseWizardProps {
   onOpenChange: (open: boolean) => void
   exercise: Exercise
   onComplete: () => Promise<void>
+  isSystemExercise?: boolean
+  onEditExercise?: () => void
 }
 
 export function EditExerciseWizard({
@@ -46,6 +48,8 @@ export function EditExerciseWizard({
   onOpenChange,
   exercise,
   onComplete,
+  isSystemExercise,
+  onEditExercise,
 }: EditExerciseWizardProps) {
   const [currentStep, setCurrentStep] = useState(0)
   const [prescription, setPrescription] = useState<ExercisePrescription | null>(null)
@@ -195,6 +199,8 @@ export function EditExerciseWizard({
           exercise={exerciseDefinition}
           initialConfig={initialConfig}
           onConfigChange={handleConfigChange}
+          isSystemExercise={isSystemExercise}
+          onEditExercise={onEditExercise}
         />
       ),
       canGoBack: false,

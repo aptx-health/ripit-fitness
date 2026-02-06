@@ -11,12 +11,16 @@ export type ExerciseDefinition = {
   secondaryFAUs: string[]
   equipment: string[]
   instructions?: string
+  isSystem?: boolean
+  createdBy?: string | null
 }
 
 interface ExerciseSearchInterfaceProps {
   onExerciseSelect: (exercise: ExerciseDefinition) => void
   initialQuery?: string
   preloadExercises?: boolean
+  onCreateExercise?: (searchQuery: string) => void
+  onEditExercise?: (exercise: ExerciseDefinition) => void
 }
 
 const ALL_FAUS = [
@@ -27,24 +31,24 @@ const ALL_FAUS = [
 
 const EQUIPMENT_TYPES = [
   'barbell',
-  'dumbbells',
+  'dumbbell',
   'cable',
   'machine',
   'bodyweight',
-  'resistance band',
+  'resistance_band',
   'kettlebell',
   'other'
 ]
 
 const EQUIPMENT_DISPLAY_NAMES: Record<string, string> = {
   'barbell': 'Barbell',
-  'dumbbells': 'Dumbbells',
+  'dumbbell': 'Dumbbell',
   'cable': 'Cable',
   'machine': 'Machine',
   'bodyweight': 'Bodyweight',
-  'resistance band': 'Resistance Band',
+  'resistance_band': 'Resistance Band',
   'kettlebell': 'Kettlebell',
-  'other': 'Other'
+  'other': 'Other (specialized equipment)'
 }
 
 const FAU_DISPLAY_NAMES: Record<string, string> = {
@@ -71,7 +75,9 @@ const FAU_DISPLAY_NAMES: Record<string, string> = {
 export function ExerciseSearchInterface({
   onExerciseSelect,
   initialQuery = '',
-  preloadExercises = false
+  preloadExercises = false,
+  onCreateExercise,
+  onEditExercise
 }: ExerciseSearchInterfaceProps) {
   const [searchQuery, setSearchQuery] = useState(initialQuery)
   const [selectedFAU, setSelectedFAU] = useState<string | null>(null)
@@ -80,6 +86,8 @@ export function ExerciseSearchInterface({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [hasSearched, setHasSearched] = useState(preloadExercises)
+  const [fauPopoverOpen, setFauPopoverOpen] = useState(false)
+  const [equipmentPopoverOpen, setEquipmentPopoverOpen] = useState(false)
 
   const searchExercises = useCallback(async () => {
     setIsLoading(true)
@@ -125,16 +133,18 @@ export function ExerciseSearchInterface({
 
   const handleFAUSelect = useCallback((fau: string | null) => {
     setSelectedFAU(fau)
+    setFauPopoverOpen(false)
   }, [])
 
   const handleEquipmentSelect = useCallback((equipment: string | null) => {
     setSelectedEquipment(equipment)
+    setEquipmentPopoverOpen(false)
   }, [])
 
   return (
-    <>
+    <div className="flex flex-col flex-1 min-h-0">
       {/* Search */}
-      <div className="px-4 sm:px-6 py-4 border-b-2 border-border">
+      <div className="px-4 sm:px-6 py-4 border-b-2 border-border flex-shrink-0">
         <div className="relative mb-3">
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
           <input
@@ -150,7 +160,7 @@ export function ExerciseSearchInterface({
         {/* FAU Filter */}
         <div>
           <div className="text-sm font-bold text-foreground mb-2 tracking-wide">Filter by Muscle Group:</div>
-          <Popover>
+          <Popover open={fauPopoverOpen} onOpenChange={setFauPopoverOpen}>
             <PopoverTrigger asChild>
               <button
                 type="button"
@@ -159,37 +169,39 @@ export function ExerciseSearchInterface({
                 {selectedFAU ? FAU_DISPLAY_NAMES[selectedFAU] : 'All Muscle Groups'}
               </button>
             </PopoverTrigger>
-            <PopoverContent className="w-80 p-3" align="start">
+            <PopoverContent className="w-[500px] p-3" align="start">
               <div className="space-y-2">
                 <div className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-2">
                   Select Muscle Group
                 </div>
-                <div className="max-h-64 overflow-y-auto space-y-1">
-                  <button
-                    type="button"
-                    onClick={() => handleFAUSelect(null)}
-                    className={`w-full px-3 py-2 text-sm border-2 transition-colors font-bold text-left ${
-                      selectedFAU === null
-                        ? 'bg-primary text-primary-foreground border-primary'
-                        : 'bg-muted text-foreground border-input hover:border-primary'
-                    }`}
-                  >
-                    All Muscle Groups
-                  </button>
-                  {ALL_FAUS.map((fau) => (
+                <div className="max-h-64 overflow-y-auto">
+                  <div className="grid grid-cols-2 gap-1">
                     <button
-                      key={fau}
                       type="button"
-                      onClick={() => handleFAUSelect(fau)}
+                      onClick={() => handleFAUSelect(null)}
                       className={`w-full px-3 py-2 text-sm border-2 transition-colors font-bold text-left ${
-                        selectedFAU === fau
+                        selectedFAU === null
                           ? 'bg-primary text-primary-foreground border-primary'
                           : 'bg-muted text-foreground border-input hover:border-primary'
                       }`}
                     >
-                      {FAU_DISPLAY_NAMES[fau] || fau}
+                      All Muscle Groups
                     </button>
-                  ))}
+                    {ALL_FAUS.map((fau) => (
+                      <button
+                        key={fau}
+                        type="button"
+                        onClick={() => handleFAUSelect(fau)}
+                        className={`w-full px-3 py-2 text-sm border-2 transition-colors font-bold text-left ${
+                          selectedFAU === fau
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'bg-muted text-foreground border-input hover:border-primary'
+                        }`}
+                      >
+                        {FAU_DISPLAY_NAMES[fau] || fau}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </PopoverContent>
@@ -199,7 +211,7 @@ export function ExerciseSearchInterface({
         {/* Equipment Filter */}
         <div className="mt-3">
           <div className="text-sm font-bold text-foreground mb-2 tracking-wide">Filter by Equipment:</div>
-          <Popover>
+          <Popover open={equipmentPopoverOpen} onOpenChange={setEquipmentPopoverOpen}>
             <PopoverTrigger asChild>
               <button
                 type="button"
@@ -208,37 +220,39 @@ export function ExerciseSearchInterface({
                 {selectedEquipment ? EQUIPMENT_DISPLAY_NAMES[selectedEquipment] : 'All Equipment'}
               </button>
             </PopoverTrigger>
-            <PopoverContent className="w-80 p-3" align="start">
+            <PopoverContent className="w-[500px] p-3" align="start">
               <div className="space-y-2">
                 <div className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-2">
                   Select Equipment
                 </div>
-                <div className="max-h-64 overflow-y-auto space-y-1">
-                  <button
-                    type="button"
-                    onClick={() => handleEquipmentSelect(null)}
-                    className={`w-full px-3 py-2 text-sm border-2 transition-colors font-bold text-left ${
-                      selectedEquipment === null
-                        ? 'bg-primary text-primary-foreground border-primary'
-                        : 'bg-muted text-foreground border-input hover:border-primary'
-                    }`}
-                  >
-                    All Equipment
-                  </button>
-                  {EQUIPMENT_TYPES.map((equipment) => (
+                <div className="max-h-64 overflow-y-auto">
+                  <div className="grid grid-cols-2 gap-1">
                     <button
-                      key={equipment}
                       type="button"
-                      onClick={() => handleEquipmentSelect(equipment)}
+                      onClick={() => handleEquipmentSelect(null)}
                       className={`w-full px-3 py-2 text-sm border-2 transition-colors font-bold text-left ${
-                        selectedEquipment === equipment
+                        selectedEquipment === null
                           ? 'bg-primary text-primary-foreground border-primary'
                           : 'bg-muted text-foreground border-input hover:border-primary'
                       }`}
                     >
-                      {EQUIPMENT_DISPLAY_NAMES[equipment] || equipment}
+                      All Equipment
                     </button>
-                  ))}
+                    {EQUIPMENT_TYPES.map((equipment) => (
+                      <button
+                        key={equipment}
+                        type="button"
+                        onClick={() => handleEquipmentSelect(equipment)}
+                        className={`w-full px-3 py-2 text-sm border-2 transition-colors font-bold text-left ${
+                          selectedEquipment === equipment
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'bg-muted text-foreground border-input hover:border-primary'
+                        }`}
+                      >
+                        {EQUIPMENT_DISPLAY_NAMES[equipment] || equipment}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </PopoverContent>
@@ -307,26 +321,43 @@ export function ExerciseSearchInterface({
                         <span className="text-sm text-foreground">{exercise.equipment.join(', ')}</span>
                       </div>
                     )}
-
-                    {exercise.instructions && (
-                      <div className="text-sm text-muted-foreground mt-2">
-                        {exercise.instructions}
-                      </div>
-                    )}
                   </div>
 
-                  <button
-                    onClick={() => onExerciseSelect(exercise)}
-                    className="ml-4 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover font-bold uppercase tracking-wider text-sm border-2 border-primary-active shadow-[0_3px_0_var(--primary-active),0_5px_8px_rgba(0,0,0,0.4)] hover:shadow-[0_3px_0_var(--primary-active),0_0_20px_rgba(var(--primary-rgb),0.6)] active:translate-y-[3px] active:shadow-[0_0_0_var(--primary-active),0_2px_4px_rgba(0,0,0,0.4)] transition-all flex-shrink-0"
-                  >
-                    Select
-                  </button>
+                  <div className="flex gap-2 ml-4 flex-shrink-0">
+                    {onEditExercise && !exercise.isSystem && (
+                      <button
+                        onClick={() => onEditExercise(exercise)}
+                        className="px-3 py-2 bg-secondary text-secondary-foreground hover:bg-secondary-hover font-bold uppercase tracking-wider text-sm border-2 border-border transition-colors"
+                        title="Edit custom exercise"
+                      >
+                        Edit
+                      </button>
+                    )}
+                    <button
+                      onClick={() => onExerciseSelect(exercise)}
+                      className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover font-bold uppercase tracking-wider text-sm border-2 border-primary-active shadow-[0_3px_0_var(--primary-active),0_5px_8px_rgba(0,0,0,0.4)] hover:shadow-[0_3px_0_var(--primary-active),0_0_20px_rgba(var(--primary-rgb),0.6)] active:translate-y-[3px] active:shadow-[0_0_0_var(--primary-active),0_2px_4px_rgba(0,0,0,0.4)] transition-all"
+                    >
+                      Select
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
-    </>
+
+      {/* Fixed Footer - Create New Exercise */}
+      {onCreateExercise && (
+        <div className="border-t-2 border-border bg-muted/30 px-4 sm:px-6 py-3 flex-shrink-0">
+          <button
+            onClick={() => onCreateExercise(searchQuery)}
+            className="w-full px-4 py-2 bg-accent text-accent-foreground hover:bg-accent-hover font-bold uppercase tracking-wider text-sm border-2 border-accent transition-colors"
+          >
+            + Create New Exercise
+          </button>
+        </div>
+      )}
+    </div>
   )
 }

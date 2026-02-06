@@ -5,6 +5,8 @@ import { X } from 'lucide-react'
 import { useUserSettings } from '@/hooks/useUserSettings'
 import { ExerciseSearchInterface, ExerciseDefinition } from '@/components/exercise-selection/ExerciseSearchInterface'
 import { SetConfigurationInterface, ExercisePrescription } from '@/components/exercise-selection/SetConfigurationInterface'
+import ExerciseDefinitionEditorModal from '@/components/features/exercise-definition/ExerciseDefinitionEditorModal'
+import { Button } from '@/components/ui/Button'
 
 type EditingExercise = {
   id: string
@@ -22,6 +24,8 @@ type EditingExercise = {
     name: string
     primaryFAUs: string[]
     secondaryFAUs: string[]
+    isSystem?: boolean
+    createdBy?: string | null
   }
 }
 
@@ -41,6 +45,10 @@ export default function ExerciseSearchModal({
   const { settings } = useUserSettings()
   const [selectedExercise, setSelectedExercise] = useState<ExerciseDefinition | null>(null)
   const [prescription, setPrescription] = useState<ExercisePrescription | null>(null)
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [createInitialName, setCreateInitialName] = useState('')
+  const [editingExerciseId, setEditingExerciseId] = useState<string | null>(null)
+  const [editingExerciseDefinitionId, setEditingExerciseDefinitionId] = useState<string | null>(null)
 
   // Initialize state when editing
   useEffect(() => {
@@ -105,6 +113,31 @@ export default function ExerciseSearchModal({
     onClose()
   }, [onClose])
 
+  const handleCreateExercise = useCallback((searchQuery: string) => {
+    setCreateInitialName(searchQuery)
+    setEditingExerciseId(null)
+    setShowCreateModal(true)
+  }, [])
+
+  const handleEditExercise = useCallback((exercise: ExerciseDefinition) => {
+    setEditingExerciseId(exercise.id)
+    setCreateInitialName('')
+    setShowCreateModal(true)
+  }, [])
+
+  const handleCreateSuccess = useCallback((newExercise: ExerciseDefinition) => {
+    setShowCreateModal(false)
+    setEditingExerciseId(null)
+    setSelectedExercise(newExercise)
+  }, [])
+
+  const handleEditExerciseDefinition = useCallback(() => {
+    const exerciseToEdit = selectedExercise || editingExercise?.exerciseDefinition
+    if (exerciseToEdit) {
+      setEditingExerciseDefinitionId(exerciseToEdit.id)
+    }
+  }, [selectedExercise, editingExercise])
+
   if (!isOpen) return null
 
   // Prepare initial config for editing
@@ -134,6 +167,7 @@ export default function ExerciseSearchModal({
   } : undefined
 
   return (
+    <>
     <div
       style={{ position: 'fixed', inset: 0, zIndex: 50 }}
       className="backdrop-blur-md bg-background/80 flex items-center justify-center p-0 sm:p-4"
@@ -166,31 +200,24 @@ export default function ExerciseSearchModal({
               }}
               initialConfig={initialConfig}
               onConfigChange={handleConfigChange}
+              isSystemExercise={(selectedExercise || editingExercise?.exerciseDefinition)?.isSystem ?? true}
+              onEditExercise={handleEditExerciseDefinition}
             />
 
             {/* Actions */}
-            <div className="px-4 sm:px-6 py-4 border-t-2 border-border bg-muted">
+            <div className="px-4 sm:px-6 py-4 border-t-2 border-border bg-muted/30">
               <div className="flex gap-3 justify-end">
                 {!editingExercise && (
-                  <button
-                    onClick={handleBackToSearch}
-                    className="px-6 py-3 text-secondary-foreground bg-secondary border-2 border-secondary hover:bg-secondary-hover font-bold uppercase tracking-wider transition-all shadow-[0_3px_0_var(--secondary-active),0_5px_8px_rgba(0,0,0,0.4)] hover:shadow-[0_3px_0_var(--secondary-active),0_0_20px_rgba(0,0,0,0.6)] active:translate-y-[3px] active:shadow-[0_0_0_var(--secondary-active),0_2px_4px_rgba(0,0,0,0.4)]"
-                  >
+                  <Button variant="secondary" onClick={handleBackToSearch} doom>
                     Back
-                  </button>
+                  </Button>
                 )}
-                <button
-                  onClick={handleClose}
-                  className="px-6 py-3 text-secondary-foreground bg-secondary border-2 border-secondary hover:bg-secondary-hover font-bold uppercase tracking-wider transition-all shadow-[0_3px_0_var(--secondary-active),0_5px_8px_rgba(0,0,0,0.4)] hover:shadow-[0_3px_0_var(--secondary-active),0_0_20px_rgba(0,0,0,0.6)] active:translate-y-[3px] active:shadow-[0_0_0_var(--secondary-active),0_2px_4px_rgba(0,0,0,0.4)]"
-                >
+                <Button variant="secondary" onClick={handleClose} doom>
                   Cancel
-                </button>
-                <button
-                  onClick={handleConfirmExercise}
-                  className="px-6 py-3 bg-primary text-primary-foreground hover:bg-primary-hover font-bold uppercase tracking-wider doom-button-3d"
-                >
+                </Button>
+                <Button variant="primary" onClick={handleConfirmExercise} doom>
                   {editingExercise ? 'Update Exercise' : 'Add Exercise'}
-                </button>
+                </Button>
               </div>
             </div>
           </>
@@ -200,10 +227,38 @@ export default function ExerciseSearchModal({
             <ExerciseSearchInterface
               onExerciseSelect={handleExerciseSelect}
               preloadExercises={false}
+              onCreateExercise={handleCreateExercise}
+              onEditExercise={handleEditExercise}
             />
           </>
         )}
       </div>
     </div>
+
+    {/* Exercise Definition Editor Modal - Create/Edit from Search */}
+    <ExerciseDefinitionEditorModal
+      isOpen={showCreateModal}
+      onClose={() => {
+        setShowCreateModal(false)
+        setEditingExerciseId(null)
+      }}
+      mode={editingExerciseId ? 'edit' : 'create'}
+      exerciseId={editingExerciseId || undefined}
+      initialName={createInitialName}
+      onSuccess={handleCreateSuccess}
+    />
+
+    {/* Exercise Definition Editor Modal - Edit from Set Configuration */}
+    <ExerciseDefinitionEditorModal
+      isOpen={!!editingExerciseDefinitionId}
+      onClose={() => setEditingExerciseDefinitionId(null)}
+      mode="edit"
+      exerciseId={editingExerciseDefinitionId || undefined}
+      onSuccess={() => {
+        setEditingExerciseDefinitionId(null)
+        // Optionally refresh the selected exercise data here
+      }}
+    />
+    </>
   )
 }

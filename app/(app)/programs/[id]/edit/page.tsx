@@ -64,7 +64,9 @@ export default async function EditProgramPage({ params, searchParams }: Props) {
                   id: true,
                   name: true,
                   primaryFAUs: true,
-                  secondaryFAUs: true
+                  secondaryFAUs: true,
+                  isSystem: true,
+                  createdBy: true
                 }
               }
             },

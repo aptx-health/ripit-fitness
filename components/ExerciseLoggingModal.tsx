@@ -12,6 +12,7 @@ import { AddExerciseWizard } from './workout-logging/wizards/AddExerciseWizard'
 import { SwapExerciseWizard } from './workout-logging/wizards/SwapExerciseWizard'
 import { EditExerciseWizard } from './workout-logging/wizards/EditExerciseWizard'
 import { DeleteExerciseWizard } from './workout-logging/wizards/DeleteExerciseWizard'
+import ExerciseDefinitionEditorModal from './features/exercise-definition/ExerciseDefinitionEditorModal'
 import ExerciseLoggingHeader from './workout-logging/ExerciseLoggingHeader'
 import ExerciseNavigation from './workout-logging/ExerciseNavigation'
 import ExerciseDisplayTabs from './workout-logging/ExerciseDisplayTabs'
@@ -43,6 +44,17 @@ type Exercise = {
   notes: string | null
   isOneOff?: boolean // For one-off exercises added during logging
   prescribedSets: PrescribedSet[]
+  exerciseDefinitionId: string
+  exerciseDefinition?: {
+    id: string
+    name: string
+    primaryFAUs: string[]
+    secondaryFAUs: string[]
+    equipment: string[]
+    instructions?: string
+    isSystem: boolean
+    createdBy: string | null
+  }
 }
 
 // Import LoggedSet type from the hook to ensure consistency
@@ -109,6 +121,7 @@ export default function ExerciseLoggingModal({
   // Wizard state
   const [activeWizard, setActiveWizard] = useState<'add' | 'swap' | 'edit' | 'delete' | null>(null)
   const [navigateToLastExercise, setNavigateToLastExercise] = useState(false)
+  const [editingExerciseDefinitionId, setEditingExerciseDefinitionId] = useState<string | null>(null)
 
   // Enhanced persistence with localStorage backing
   const { loggedSets, setLoggedSets, isLoaded, clearStoredWorkout } = useWorkoutStorage(workoutId)
@@ -266,6 +279,13 @@ export default function ExerciseLoggingModal({
 
   const handleEditExercise = () => {
     setActiveWizard('edit')
+  }
+
+  const handleEditExerciseDefinition = () => {
+    const currentExercise = exercises[currentExerciseIndex]
+    if (currentExercise.exerciseDefinition && !currentExercise.exerciseDefinition.isSystem) {
+      setEditingExerciseDefinitionId(currentExercise.exerciseDefinition.id)
+    }
   }
 
   const handleExitWorkout = () => {
@@ -630,6 +650,20 @@ export default function ExerciseLoggingModal({
         </div>
       </div>
 
+      {/* Exercise Definition Editor Modal */}
+      <ExerciseDefinitionEditorModal
+        isOpen={!!editingExerciseDefinitionId}
+        onClose={() => setEditingExerciseDefinitionId(null)}
+        mode="edit"
+        exerciseId={editingExerciseDefinitionId || undefined}
+        onSuccess={() => {
+          setEditingExerciseDefinitionId(null)
+          if (onRefresh) {
+            onRefresh()
+          }
+        }}
+      />
+
       {/* Exercise Search Modal */}
       {/* Wizards */}
       {activeWizard === 'add' && (
@@ -658,6 +692,8 @@ export default function ExerciseLoggingModal({
           onOpenChange={(open) => !open && setActiveWizard(null)}
           exercise={currentExercise}
           onComplete={handleWizardComplete}
+          isSystemExercise={currentExercise.exerciseDefinition?.isSystem ?? true}
+          onEditExercise={handleEditExerciseDefinition}
         />
       )}
 

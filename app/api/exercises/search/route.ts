@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { EQUIPMENT_GROUPS, COMMON_EQUIPMENT, SPECIALIZED_EQUIPMENT } from '@/lib/constants/program-metadata'
 
 export async function GET(request: NextRequest) {
   try {
@@ -57,10 +58,28 @@ export async function GET(request: NextRequest) {
     }
 
     // Filter by equipment
+    // Special handling: "other" in search filter should match ALL non-common equipment types
     if (equipmentFilters.length > 0) {
+      const expandedEquipmentFilters = equipmentFilters.flatMap(filter => {
+        // Normalize "dumbbells" -> "dumbbell", "resistance band" -> "resistance_band"
+        const normalized = filter
+          .replace('dumbbells', 'dumbbell')
+          .replace('resistance band', 'resistance_band')
+
+        // If filtering by "other", expand to ALL equipment types that aren't in common
+        if (normalized === 'other') {
+          // Get all common equipment values
+          const commonEquipmentValues = Object.values(COMMON_EQUIPMENT)
+          // Get all specialized equipment values (anything not in common)
+          const allSpecializedEquipment = Object.values(SPECIALIZED_EQUIPMENT)
+          return allSpecializedEquipment
+        }
+        return [normalized]
+      })
+
       whereConditions.push({
         equipment: {
-          hasSome: equipmentFilters
+          hasSome: expandedEquipmentFilters
         }
       })
     }

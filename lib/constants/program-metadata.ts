@@ -88,6 +88,13 @@ export const SPECIALIZED_EQUIPMENT = {
   CAMPUS_BOARD: 'campus_board',
   SYSTEM_BOARD: 'system_board',
   CLIMBING_WALL: 'climbing_wall',
+  SAFETY_SQUAT_BAR: 'safety_squat_bar',
+  TRAP_BAR: 'trap_bar',
+  SWISS_BAR: 'swiss_bar',
+  CHAINS: 'chains',
+  BANDS: 'bands',
+  SLED: 'sled',
+  OTHER: 'other',
 } as const;
 
 export const EQUIPMENT_LABELS: Record<string, string> = {
@@ -115,6 +122,13 @@ export const EQUIPMENT_LABELS: Record<string, string> = {
   campus_board: 'Campus Board',
   system_board: 'System Board',
   climbing_wall: 'Climbing Wall',
+  safety_squat_bar: 'Safety Squat Bar',
+  trap_bar: 'Trap Bar',
+  swiss_bar: 'Swiss Bar',
+  chains: 'Chains',
+  bands: 'Bands',
+  sled: 'Sled',
+  other: 'Other',
 };
 
 export type ProgramGoal = (typeof PROGRAM_GOALS)[keyof typeof PROGRAM_GOALS];
@@ -134,3 +148,38 @@ export interface ProgramMetadata {
   targetDaysPerWeek: number | null;
   equipmentNeeded: string[];
 }
+
+export const EQUIPMENT_GROUPS = {
+  common: [
+    'barbell',
+    'dumbbell',
+    'kettlebell',
+    'cable',
+    'machine',
+    'bodyweight',
+    'resistance_band',
+  ],
+  specialized: [
+    'ez_bar',
+    'safety_squat_bar',
+    'trap_bar',
+    'swiss_bar',
+    'chains',
+    'bands',
+    'sled',
+    'dip_bars',
+    'incline_bench',
+    'decline_bench',
+    'preacher_bench',
+    'ab_wheel',
+    'parallel_bars',
+    'roman_chair',
+    'hangboard',
+    'campus_board',
+    'system_board',
+    'climbing_wall',
+    'foam_roller',
+    'weight_belt',
+    'other',
+  ],
+} as const;
