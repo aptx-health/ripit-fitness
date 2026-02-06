@@ -26,6 +26,7 @@ export interface ExerciseDefinitionEditorModalProps {
   exerciseId?: string;
   initialName?: string;
   onSuccess?: (exerciseDefinition: ExerciseDefinition) => void;
+  apiBasePath?: string;
 }
 
 export default function ExerciseDefinitionEditorModal({
@@ -35,6 +36,7 @@ export default function ExerciseDefinitionEditorModal({
   exerciseId,
   initialName = '',
   onSuccess,
+  apiBasePath = '/api/exercise-definitions',
 }: ExerciseDefinitionEditorModalProps) {
   const [formData, setFormData] = useState({
     name: initialName,
@@ -58,7 +60,7 @@ export default function ExerciseDefinitionEditorModal({
 
     if (mode === 'edit' && exerciseId) {
       setIsLoading(true);
-      fetch(`/api/exercise-definitions/${exerciseId}`)
+      fetch(`${apiBasePath}/${exerciseId}`)
         .then((res) => res.json())
         .then((data) => {
           if (data.success && data.data) {
@@ -96,7 +98,7 @@ export default function ExerciseDefinitionEditorModal({
       });
       setUsageCount(0);
     }
-  }, [isOpen, mode, exerciseId, initialName]);
+  }, [isOpen, mode, exerciseId, initialName, apiBasePath]);
 
   // Debounced duplicate check
   useEffect(() => {
@@ -131,8 +133,8 @@ export default function ExerciseDefinitionEditorModal({
     try {
       const endpoint =
         mode === 'create'
-          ? '/api/exercise-definitions'
-          : `/api/exercise-definitions/${exerciseId}`;
+          ? apiBasePath
+          : `${apiBasePath}/${exerciseId}`;
 
       const method = mode === 'create' ? 'POST' : 'PATCH';
 
@@ -177,7 +179,7 @@ export default function ExerciseDefinitionEditorModal({
     } finally {
       setIsSubmitting(false);
     }
-  }, [mode, exerciseId, formData, onSuccess, onClose]);
+  }, [mode, exerciseId, formData, onSuccess, onClose, apiBasePath]);
 
   const handleClose = useCallback(() => {
     setFormData({
