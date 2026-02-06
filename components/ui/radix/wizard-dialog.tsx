@@ -127,7 +127,7 @@ export function WizardDialog({
                 <button
                   onClick={handleNext}
                   disabled={isProcessing}
-                  className="px-6 py-3 bg-primary text-primary-foreground hover:bg-primary-hover font-bold uppercase tracking-wider doom-button-3d disabled:opacity-50 disabled:cursor-not-allowed disabled:active:translate-y-0"
+                  className="px-6 py-3 bg-primary text-primary-foreground border-2 border-primary hover:bg-primary-hover font-bold uppercase tracking-wider transition-all shadow-[0_3px_0_var(--primary-active),0_5px_8px_rgba(0,0,0,0.4)] hover:shadow-[0_3px_0_var(--primary-active),0_0_20px_rgba(0,0,0,0.6)] active:translate-y-[3px] active:shadow-[0_0_0_var(--primary-active),0_2px_4px_rgba(0,0,0,0.4)] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:translate-y-0"
                 >
                   {isProcessing ? 'Processing...' : step.nextLabel || 'Next'}
                 </button>

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { X } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import TagInput from '@/components/ui/TagInput';
 import EquipmentSelector from './EquipmentSelector';
@@ -208,7 +207,7 @@ export default function ExerciseDefinitionEditorModal({
 
   return (
     <div
-      style={{ position: 'fixed', inset: 0, zIndex: 80 }}
+      style={{ position: 'fixed', inset: 0, zIndex: 80, pointerEvents: 'auto' }}
       className="backdrop-blur-md bg-background/80 flex items-center justify-center p-0 sm:p-4 overflow-y-auto"
     >
       <div
@@ -216,17 +215,10 @@ export default function ExerciseDefinitionEditorModal({
         className="bg-card border-4 border-border w-full h-full sm:h-auto sm:max-h-[85vh] sm:w-[90vw] sm:max-w-4xl sm:my-8 flex flex-col doom-card"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-4 sm:py-5 border-b-2 border-border bg-primary text-primary-foreground">
+        <div className="px-4 sm:px-6 py-4 sm:py-5 border-b-2 border-border bg-primary text-primary-foreground">
           <h2 className="text-xl font-bold tracking-wide uppercase">
             {mode === 'create' ? 'Create New Exercise' : 'Edit Exercise'}
           </h2>
-          <button
-            onClick={handleClose}
-            className="hover:bg-primary-hover p-2 transition-colors"
-            aria-label="Close"
-          >
-            <X size={24} />
-          </button>
         </div>
 
         {/* Content */}
