@@ -6,6 +6,7 @@ import { useUserSettings } from '@/hooks/useUserSettings'
 import { ExerciseSearchInterface, ExerciseDefinition } from '@/components/exercise-selection/ExerciseSearchInterface'
 import { SetConfigurationInterface, ExercisePrescription } from '@/components/exercise-selection/SetConfigurationInterface'
 import ExerciseDefinitionEditorModal from '@/components/features/exercise-definition/ExerciseDefinitionEditorModal'
+import { Button } from '@/components/ui/Button'
 
 type EditingExercise = {
   id: string
@@ -204,28 +205,19 @@ export default function ExerciseSearchModal({
             />
 
             {/* Actions */}
-            <div className="px-4 sm:px-6 py-4 border-t-2 border-border bg-muted">
+            <div className="px-4 sm:px-6 py-4 border-t-2 border-border bg-muted/30">
               <div className="flex gap-3 justify-end">
                 {!editingExercise && (
-                  <button
-                    onClick={handleBackToSearch}
-                    className="px-6 py-3 text-secondary-foreground bg-secondary border-2 border-secondary hover:bg-secondary-hover font-bold uppercase tracking-wider transition-all shadow-[0_3px_0_var(--secondary-active),0_5px_8px_rgba(0,0,0,0.4)] hover:shadow-[0_3px_0_var(--secondary-active),0_0_20px_rgba(0,0,0,0.6)] active:translate-y-[3px] active:shadow-[0_0_0_var(--secondary-active),0_2px_4px_rgba(0,0,0,0.4)]"
-                  >
+                  <Button variant="secondary" onClick={handleBackToSearch} doom>
                     Back
-                  </button>
+                  </Button>
                 )}
-                <button
-                  onClick={handleClose}
-                  className="px-6 py-3 text-secondary-foreground bg-secondary border-2 border-secondary hover:bg-secondary-hover font-bold uppercase tracking-wider transition-all shadow-[0_3px_0_var(--secondary-active),0_5px_8px_rgba(0,0,0,0.4)] hover:shadow-[0_3px_0_var(--secondary-active),0_0_20px_rgba(0,0,0,0.6)] active:translate-y-[3px] active:shadow-[0_0_0_var(--secondary-active),0_2px_4px_rgba(0,0,0,0.4)]"
-                >
+                <Button variant="secondary" onClick={handleClose} doom>
                   Cancel
-                </button>
-                <button
-                  onClick={handleConfirmExercise}
-                  className="px-6 py-3 bg-primary text-primary-foreground hover:bg-primary-hover font-bold uppercase tracking-wider doom-button-3d"
-                >
+                </Button>
+                <Button variant="primary" onClick={handleConfirmExercise} doom>
                   {editingExercise ? 'Update Exercise' : 'Add Exercise'}
-                </button>
+                </Button>
               </div>
             </div>
           </>
