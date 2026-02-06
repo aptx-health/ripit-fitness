@@ -258,16 +258,9 @@ export function SetConfigurationInterface({
       {/* Exercise Details */}
       <div className="py-4 pb-0 bg-muted">
         <div className="px-4 sm:px-6">
-          {/* Exercise name - truncate on mobile */}
+          {/* Exercise name */}
           <h3 className="font-bold text-foreground text-lg tracking-wide uppercase">
-            {exercise.name.length > 15 ? (
-              <>
-                <span className="sm:hidden">{exercise.name.substring(0, 15)}...</span>
-                <span className="hidden sm:inline">{exercise.name}</span>
-              </>
-            ) : (
-              exercise.name
-            )}
+            {exercise.name}
           </h3>
 
           {/* Folder-style Tabs */}
