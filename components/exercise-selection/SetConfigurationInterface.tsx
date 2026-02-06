@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Plus, Trash, PenSquare } from 'lucide-react'
+import { Plus, Trash } from 'lucide-react'
 import { useUserSettings } from '@/hooks/useUserSettings'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/radix/popover'
 import type { ExerciseDefinition } from './ExerciseSearchInterface'
@@ -257,25 +257,21 @@ export function SetConfigurationInterface({
     <div className="flex-1 overflow-y-auto min-h-0">
       {/* Exercise Details */}
       <div className="py-4 pb-0 bg-muted">
-        <div className="px-4 sm:px-6 flex items-start justify-between gap-4">
-          <div className="flex-1 flex items-center gap-2">
-            <h3 className="font-bold text-foreground text-lg tracking-wide uppercase">
-              {exercise.name}
-            </h3>
-            {!isSystemExercise && onEditExercise && (
-              <button
-                onClick={onEditExercise}
-                className="p-2 rounded-full bg-secondary text-secondary-foreground hover:bg-secondary-hover border-2 border-border transition-colors doom-focus-ring"
-                aria-label="Edit exercise definition"
-                title="Edit exercise"
-              >
-                <PenSquare size={16} />
-              </button>
+        <div className="px-4 sm:px-6">
+          {/* Exercise name - truncate on mobile */}
+          <h3 className="font-bold text-foreground text-lg tracking-wide uppercase">
+            {exercise.name.length > 15 ? (
+              <>
+                <span className="sm:hidden">{exercise.name.substring(0, 15)}...</span>
+                <span className="hidden sm:inline">{exercise.name}</span>
+              </>
+            ) : (
+              exercise.name
             )}
-          </div>
+          </h3>
 
           {/* Folder-style Tabs */}
-          <div className="flex gap-1 -mb-[2px] relative z-10">
+          <div className="flex gap-1 mt-2 -mb-[2px] relative z-10">
             <button
               type="button"
               onClick={() => setActiveTab('sets')}
@@ -301,6 +297,16 @@ export function SetConfigurationInterface({
                 <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500"></span>
               )}
             </button>
+            {!isSystemExercise && onEditExercise && (
+              <button
+                type="button"
+                onClick={onEditExercise}
+                className="relative px-4 py-2 text-sm font-bold uppercase tracking-wider transition-all text-muted-foreground border-2 border-border bg-muted/50 hover:text-primary hover:shadow-[0_0_8px_rgba(var(--primary-rgb),0.2)]"
+                aria-label="Edit exercise definition"
+              >
+                Edit
+              </button>
+            )}
           </div>
         </div>
       </div>
