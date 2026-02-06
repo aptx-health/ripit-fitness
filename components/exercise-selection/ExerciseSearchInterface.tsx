@@ -321,12 +321,6 @@ export function ExerciseSearchInterface({
                         <span className="text-sm text-foreground">{exercise.equipment.join(', ')}</span>
                       </div>
                     )}
-
-                    {exercise.instructions && (
-                      <div className="text-sm text-muted-foreground mt-2">
-                        {exercise.instructions}
-                      </div>
-                    )}
                   </div>
 
                   <div className="flex gap-2 ml-4 flex-shrink-0">
