@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { PrismaClient } from '@prisma/client'
 import { getTestDatabase } from '@/lib/test/database'
 import { createTestUser, createTestExerciseDefinition } from '@/lib/test/factories'
-import { EQUIPMENT_GROUPS } from '@/lib/constants/program-metadata'
+import { EQUIPMENT_GROUPS, COMMON_EQUIPMENT, SPECIALIZED_EQUIPMENT } from '@/lib/constants/program-metadata'
 
 // ============================================================================
 // SIMULATION FUNCTION
@@ -63,7 +63,7 @@ async function simulateExerciseSearch(
   }
 
   // Filter by equipment
-  // Special handling: "other" in search filter should match ALL specialized equipment types
+  // Special handling: "other" in search filter should match ALL non-common equipment types
   if (equipmentFilters.length > 0) {
     const expandedEquipmentFilters = equipmentFilters.flatMap(filter => {
       // Normalize "dumbbells" -> "dumbbell", "resistance band" -> "resistance_band"
@@ -71,9 +71,11 @@ async function simulateExerciseSearch(
         .replace('dumbbells', 'dumbbell')
         .replace('resistance band', 'resistance_band')
 
-      // If filtering by "other", expand to all specialized equipment
+      // If filtering by "other", expand to ALL equipment types that aren't in common
       if (normalized === 'other') {
-        return [...EQUIPMENT_GROUPS.specialized]
+        // Get all specialized equipment values (anything not in common)
+        const allSpecializedEquipment = Object.values(SPECIALIZED_EQUIPMENT)
+        return allSpecializedEquipment
       }
       return [normalized]
     })
@@ -238,6 +240,17 @@ describe('Exercise Search API - Equipment Filtering', () => {
       equipment: ['sled'],
       primaryFAUs: ['quads']
     })
+    // Create exercises with climbing-specific equipment
+    await createTestExerciseDefinition(prisma, {
+      name: 'Campus Board Training',
+      equipment: ['campus_board'],
+      primaryFAUs: ['forearms']
+    })
+    await createTestExerciseDefinition(prisma, {
+      name: 'Climbing Wall Practice',
+      equipment: ['climbing_wall'],
+      primaryFAUs: ['lats']
+    })
     // Create an exercise with common equipment (should not be returned)
     await createTestExerciseDefinition(prisma, {
       name: 'Barbell Squat',
@@ -250,7 +263,7 @@ describe('Exercise Search API - Equipment Filtering', () => {
     })
 
     expect(result.success).toBe(true)
-    expect(result.exercises).toHaveLength(6)
+    expect(result.exercises).toHaveLength(8)
 
     const exerciseNames = result.exercises.map(e => e.name)
     expect(exerciseNames).toContain('Safety Squat Bar Squat')
@@ -259,6 +272,8 @@ describe('Exercise Search API - Equipment Filtering', () => {
     expect(exerciseNames).toContain('Chain Squats')
     expect(exerciseNames).toContain('Band Pull Aparts')
     expect(exerciseNames).toContain('Sled Push')
+    expect(exerciseNames).toContain('Campus Board Training')
+    expect(exerciseNames).toContain('Climbing Wall Practice')
     expect(exerciseNames).not.toContain('Barbell Squat')
   })
 
