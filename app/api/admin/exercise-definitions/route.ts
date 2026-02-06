@@ -3,6 +3,11 @@ import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { logger } from '@/lib/logger'
 import { COMMON_EQUIPMENT, SPECIALIZED_EQUIPMENT } from '@/lib/constants/program-metadata'
+import {
+  validateExerciseDefinition,
+  normalizeExerciseName,
+  type CreateExerciseDefinitionInput,
+} from '@/lib/validators/exercise-definition'
 
 /**
  * GET /api/admin/exercise-definitions
@@ -173,6 +178,108 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     logger.error({ error }, 'Error fetching admin exercise definitions')
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+/**
+ * POST /api/admin/exercise-definitions
+ * Create a new exercise definition (can create system exercises)
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const { user, error: authError } = await getCurrentUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // TODO: Add admin check when admin system is built
+    // const isAdmin = await checkUserIsAdmin(user.id)
+    // if (!isAdmin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+    const body = await request.json()
+    const input: CreateExerciseDefinitionInput = {
+      name: body.name,
+      equipment: body.equipment || [],
+      primaryFAUs: body.primaryFAUs || [],
+      secondaryFAUs: body.secondaryFAUs || [],
+      category: body.category,
+      aliases: body.aliases || [],
+      instructions: body.instructions,
+      notes: body.notes,
+    }
+
+    // Validate input
+    const validationErrors = validateExerciseDefinition(input, false)
+    if (validationErrors.length > 0) {
+      logger.debug({ validationErrors }, 'Admin validation failed')
+      return NextResponse.json(
+        { error: 'Validation failed', details: validationErrors },
+        { status: 422 }
+      )
+    }
+
+    // Check for duplicate name across all exercises
+    const normalizedName = normalizeExerciseName(input.name)
+    const duplicate = await prisma.exerciseDefinition.findFirst({
+      where: { normalizedName },
+      select: { id: true },
+    })
+
+    if (duplicate) {
+      logger.debug({ name: input.name, duplicateId: duplicate.id }, 'Duplicate exercise name')
+      return NextResponse.json(
+        { error: 'An exercise with this name already exists' },
+        { status: 409 }
+      )
+    }
+
+    // Create exercise definition as system exercise
+    const exerciseDefinition = await prisma.exerciseDefinition.create({
+      data: {
+        name: input.name,
+        normalizedName,
+        equipment: input.equipment,
+        primaryFAUs: input.primaryFAUs,
+        secondaryFAUs: input.secondaryFAUs || [],
+        category: input.category,
+        aliases: input.aliases || [],
+        instructions: input.instructions,
+        notes: input.notes,
+        isSystem: true, // Admin creates system exercises
+        createdBy: user.id,
+        userId: user.id, // Track who created it even for system exercises
+      },
+      select: {
+        id: true,
+        name: true,
+        normalizedName: true,
+        equipment: true,
+        primaryFAUs: true,
+        secondaryFAUs: true,
+        category: true,
+        aliases: true,
+        instructions: true,
+        notes: true,
+        isSystem: true,
+        createdBy: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    })
+
+    logger.info(
+      { exerciseId: exerciseDefinition.id, name: exerciseDefinition.name },
+      'Admin exercise definition created'
+    )
+
+    return NextResponse.json({
+      success: true,
+      data: exerciseDefinition,
+    })
+  } catch (error) {
+    logger.error({ error }, 'Error creating admin exercise definition')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { Search, ChevronDown, Check, X, Pencil, Trash2 } from 'lucide-react'
+import { Search, ChevronDown, Check, X, Pencil, Trash2, Plus } from 'lucide-react'
 import ExerciseDefinitionEditorModal from '@/components/features/exercise-definition/ExerciseDefinitionEditorModal'
 import DeleteExerciseDialog from './DeleteExerciseDialog'
 import { FAU_DISPLAY_NAMES } from '@/lib/fau-volume'
@@ -57,6 +57,7 @@ export default function ExerciseAdminTable() {
   const [currentPage, setCurrentPage] = useState(1)
 
   // Modal states
+  const [isCreating, setIsCreating] = useState(false)
   const [editingExercise, setEditingExercise] = useState<ExerciseDefinition | null>(null)
   const [deletingExercise, setDeletingExercise] = useState<ExerciseDefinition | null>(null)
 
@@ -140,6 +141,12 @@ export default function ExerciseAdminTable() {
     selectedEquipment.length > 0 ||
     systemFilter !== 'all'
 
+  // Handle create success
+  const handleCreateSuccess = () => {
+    setIsCreating(false)
+    fetchExercises()
+  }
+
   // Handle edit success
   const handleEditSuccess = () => {
     setEditingExercise(null)
@@ -168,19 +175,28 @@ export default function ExerciseAdminTable() {
     <div>
       {/* Search and Filters */}
       <div className="mb-6 space-y-4">
-        {/* Search Input */}
-        <div className="relative">
-          <Search
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
-            size={20}
-          />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search exercises..."
-            className="w-full pl-10 pr-4 py-3 border-2 border-border bg-background text-foreground focus:border-primary outline-none uppercase tracking-wider"
-          />
+        {/* Search Input + Create Button */}
+        <div className="flex gap-3">
+          <div className="relative flex-1">
+            <Search
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
+              size={20}
+            />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search exercises..."
+              className="w-full pl-10 pr-4 py-3 border-2 border-border bg-background text-foreground focus:border-primary outline-none uppercase tracking-wider"
+            />
+          </div>
+          <button
+            onClick={() => setIsCreating(true)}
+            className="px-4 py-3 bg-primary text-primary-foreground hover:bg-primary-hover transition-colors uppercase tracking-wider font-semibold doom-button-3d doom-focus-ring flex items-center gap-2"
+          >
+            <Plus size={20} />
+            <span className="hidden sm:inline">New Exercise</span>
+          </button>
         </div>
 
         {/* Filter Row */}
@@ -418,6 +434,15 @@ export default function ExerciseAdminTable() {
           </div>
         </div>
       )}
+
+      {/* Create Modal */}
+      <ExerciseDefinitionEditorModal
+        isOpen={isCreating}
+        onClose={() => setIsCreating(false)}
+        mode="create"
+        onSuccess={handleCreateSuccess}
+        apiBasePath="/api/admin/exercise-definitions"
+      />
 
       {/* Edit Modal */}
       {editingExercise && (
