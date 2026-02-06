@@ -11,7 +11,7 @@ import {
   DialogFooter,
 } from './dialog'
 import { Button } from '@/components/ui/Button'
-import { ChevronLeft, X } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 
 export interface WizardStep {
   id: string
@@ -96,41 +96,34 @@ export function WizardDialog({
 
         <DialogBody className="flex-1 min-h-0">{step.component}</DialogBody>
 
-        <DialogFooter className="border-t-2 border-border bg-muted">
+        <DialogFooter className="border-t-2 border-border bg-muted/30">
           <div className="flex items-center justify-between w-full">
             <div>
               {showBackButton && (
-                <button
-                  onClick={handleBack}
-                  disabled={isProcessing}
-                  className="px-6 py-3 text-secondary-foreground bg-secondary border-2 border-secondary hover:bg-secondary-hover font-bold uppercase tracking-wider transition-all shadow-[0_3px_0_var(--secondary-active),0_5px_8px_rgba(0,0,0,0.4)] hover:shadow-[0_3px_0_var(--secondary-active),0_0_20px_rgba(0,0,0,0.6)] active:translate-y-[3px] active:shadow-[0_0_0_var(--secondary-active),0_2px_4px_rgba(0,0,0,0.4)] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:translate-y-0"
-                >
+                <Button variant="secondary" onClick={handleBack} disabled={isProcessing} doom>
                   <ChevronLeft className="w-4 h-4 mr-1 inline" />
                   Back
-                </button>
+                </Button>
               )}
             </div>
 
             <div className="flex items-center gap-3">
               {!isLastStep && (
-                <button
-                  onClick={handleCancel}
-                  disabled={isProcessing}
-                  className="px-6 py-3 text-secondary-foreground bg-secondary border-2 border-secondary hover:bg-secondary-hover font-bold uppercase tracking-wider transition-all shadow-[0_3px_0_var(--secondary-active),0_5px_8px_rgba(0,0,0,0.4)] hover:shadow-[0_3px_0_var(--secondary-active),0_0_20px_rgba(0,0,0,0.6)] active:translate-y-[3px] active:shadow-[0_0_0_var(--secondary-active),0_2px_4px_rgba(0,0,0,0.4)] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:translate-y-0"
-                >
-                  <X className="w-4 h-4 mr-1 inline" />
+                <Button variant="secondary" onClick={handleCancel} disabled={isProcessing} doom>
                   Cancel
-                </button>
+                </Button>
               )}
 
               {showNextButton && (
-                <button
+                <Button
+                  variant="primary"
                   onClick={handleNext}
                   disabled={isProcessing}
-                  className="px-6 py-3 bg-primary text-primary-foreground border-2 border-primary hover:bg-primary-hover font-bold uppercase tracking-wider transition-all shadow-[0_3px_0_var(--primary-active),0_5px_8px_rgba(0,0,0,0.4)] hover:shadow-[0_3px_0_var(--primary-active),0_0_20px_rgba(0,0,0,0.6)] active:translate-y-[3px] active:shadow-[0_0_0_var(--primary-active),0_2px_4px_rgba(0,0,0,0.4)] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:translate-y-0"
+                  loading={isProcessing}
+                  doom
                 >
-                  {isProcessing ? 'Processing...' : step.nextLabel || 'Next'}
-                </button>
+                  {step.nextLabel || 'Next'}
+                </Button>
               )}
             </div>
           </div>
