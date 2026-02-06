@@ -34,6 +34,8 @@ type Exercise = {
     name: string
     primaryFAUs: string[]
     secondaryFAUs: string[]
+    isSystem?: boolean
+    createdBy?: string | null
   }
 }
 
