@@ -239,18 +239,18 @@ export default function ExerciseDefinitionEditorModal({
             <>
               {/* Usage Warning */}
               {mode === 'edit' && usageCount > 0 && (
-                <div className="bg-orange-900/20 border-2 border-orange-600 rounded p-4">
-                  <p className="text-sm text-orange-200 font-medium">
-                    ⚠️ This exercise is used in {usageCount} active workout
-                    {usageCount > 1 ? 's' : ''}. Changes will affect future sessions.
+                <div className="bg-warning-muted border-2 border-warning-border rounded p-4">
+                  <p className="text-sm text-warning-text font-medium">
+                    ⚠️ This exercise is used {usageCount} time
+                    {usageCount > 1 ? 's' : ''} in this program. Changes will affect future sessions.
                   </p>
                 </div>
               )}
 
               {/* Duplicate Warning */}
               {isDuplicateName && (
-                <div className="bg-red-900/20 border-2 border-red-600 rounded p-3">
-                  <p className="text-sm text-red-200 font-medium">
+                <div className="bg-error-muted border-2 border-error-border rounded p-3">
+                  <p className="text-sm text-error-text font-medium">
                     ⚠️ An exercise with this name already exists.
                   </p>
                 </div>
