@@ -79,41 +79,32 @@ export async function POST(
         const exerciseDefinitionId = exercise.exerciseDefinitionId
 
         await prisma.$transaction(async (tx) => {
-          // Find all weeks with weekNumber >= currentWeekNumber in the same program
-          const futureWeeks = await tx.week.findMany({
+          // Find all workout IDs for matching weeks and day number
+          const futureWorkouts = await tx.workout.findMany({
             where: {
-              programId,
-              weekNumber: {
-                gte: currentWeekNumber
-              }
-            },
-            include: {
-              workouts: {
-                where: {
-                  dayNumber
+              week: {
+                programId,
+                weekNumber: {
+                  gte: currentWeekNumber
                 }
-              }
+              },
+              dayNumber
+            },
+            select: { id: true }
+          })
+
+          const workoutIds = futureWorkouts.map(w => w.id)
+
+          // Bulk delete all matching exercises in one query
+          // Prisma cascade will handle prescribedSets and loggedSets
+          const deleteResult = await tx.exercise.deleteMany({
+            where: {
+              workoutId: { in: workoutIds },
+              exerciseDefinitionId
             }
           })
 
-          const workoutsToUpdate = futureWeeks.flatMap(week => week.workouts)
-
-          // Delete matching exercises from each workout
-          for (const targetWorkout of workoutsToUpdate) {
-            const exercisesToDelete = await tx.exercise.findMany({
-              where: {
-                workoutId: targetWorkout.id,
-                exerciseDefinitionId
-              }
-            })
-
-            for (const ex of exercisesToDelete) {
-              await tx.exercise.delete({
-                where: { id: ex.id }
-              })
-              deletedCount++
-            }
-          }
+          deletedCount = deleteResult.count
         })
       }
     }
