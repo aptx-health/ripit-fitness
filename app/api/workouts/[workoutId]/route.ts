@@ -168,10 +168,11 @@ export async function PATCH(
     // Verify workout exists and user owns it (through the program)
     const workout = await prisma.workout.findUnique({
       where: { id: workoutId },
-      include: {
+      select: {
+        id: true,
         week: {
-          include: {
-            program: true
+          select: {
+            program: { select: { userId: true } }
           }
         }
       }
@@ -221,19 +222,17 @@ export async function DELETE(
     }
 
     // Verify workout exists and user owns it (through the program)
+    // Only select fields needed: exercise IDs for bulk delete, userId for auth
     const workout = await prisma.workout.findUnique({
       where: { id: workoutId },
-      include: {
+      select: {
+        id: true,
         exercises: {
-          include: {
-            prescribedSets: true,
-            loggedSets: true
-          },
-          orderBy: { order: 'asc' }
+          select: { id: true }
         },
         week: {
-          include: {
-            program: true
+          select: {
+            program: { select: { userId: true } }
           }
         }
       }
@@ -249,14 +248,17 @@ export async function DELETE(
 
     // Delete workout and all related data in transaction
     await prisma.$transaction(async (tx) => {
-      // Delete all logged sets for exercises in this workout
-      for (const exercise of workout.exercises) {
+      // Collect exercise IDs for bulk deletion
+      const exerciseIds = workout.exercises.map(e => e.id)
+
+      // Bulk delete all logged sets and prescribed sets (avoids N+1)
+      if (exerciseIds.length > 0) {
         await tx.loggedSet.deleteMany({
-          where: { exerciseId: exercise.id }
+          where: { exerciseId: { in: exerciseIds } }
         })
 
         await tx.prescribedSet.deleteMany({
-          where: { exerciseId: exercise.id }
+          where: { exerciseId: { in: exerciseIds } }
         })
       }
 
