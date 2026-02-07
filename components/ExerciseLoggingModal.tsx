@@ -42,7 +42,7 @@ type Props = {
   exerciseCount: number
   workoutCompletionId?: string
   onComplete: (loggedSets: LoggedSet[]) => Promise<void>
-  onRefresh?: () => void
+  onRefresh?: () => Promise<void>
 }
 
 // Loading skeleton for exercise content
@@ -278,13 +278,13 @@ export default function ExerciseLoggingModal({
   }
 
   const handleWizardComplete = async () => {
-    // Trigger parent refresh
+    // Trigger parent refresh and wait for it
     if (onRefresh) {
-      onRefresh()
+      await onRefresh()
     }
 
-    // Wait for refresh to complete
-    await new Promise(resolve => setTimeout(resolve, 2500))
+    // Small delay to ensure React state has propagated
+    await new Promise(resolve => setTimeout(resolve, 100))
 
     // Refresh our progressive loading cache
     refreshExercises()

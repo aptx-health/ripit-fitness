@@ -100,6 +100,18 @@ export function useProgressiveExercises(
   const prefetchingRef = useRef<Set<string>>(new Set())
   const mountedRef = useRef(true)
 
+  // Sync totalExercises with exerciseCount prop (handles add/delete)
+  useEffect(() => {
+    if (exerciseCount !== totalExercises) {
+      setTotalExercises(exerciseCount)
+
+      // Adjust currentIndex if it's now out of bounds
+      if (currentIndex >= exerciseCount && exerciseCount > 0) {
+        setCurrentIndex(exerciseCount - 1)
+      }
+    }
+  }, [exerciseCount, totalExercises, currentIndex])
+
   // Fetch a single exercise by order (1-based)
   const fetchExercise = useCallback(async (order: number): Promise<Exercise | null> => {
     if (order < 1 || order > totalExercises) return null
