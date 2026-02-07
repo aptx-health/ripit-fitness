@@ -188,15 +188,17 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
     if (editMode) {
       if (newIndex >= weeksSummary.length) return
 
+      // Update index immediately for responsive UI
+      setCurrentWeekIndex(newIndex)
+
       const weekNumber = weeksSummary[newIndex]?.weekNumber
       if (weekNumber && !weeksCache.has(weekNumber)) {
         await fetchWeek(weekNumber)
       }
     } else {
       if (newIndex >= weeks.length) return
+      setCurrentWeekIndex(newIndex)
     }
-
-    setCurrentWeekIndex(newIndex)
   }, [editMode, weeksSummary, weeksCache, weeks, fetchWeek])
 
   // Workout action modals
@@ -1022,6 +1024,38 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
 
     return () => clearTimeout(timeoutId)
   }, [editMode, updateProgramDetails])
+
+  // Prefetch all weeks sequentially in background after initial load (edit mode only)
+  const prefetchStarted = useRef(false)
+  useEffect(() => {
+    if (!editMode || !programId || prefetchStarted.current) return
+    if (weeksSummary.length <= 1) return // Nothing to prefetch
+
+    prefetchStarted.current = true
+
+    const prefetchAllWeeks = async () => {
+      for (const weekSummary of weeksSummary) {
+        // Skip if already cached
+        if (weeksCache.has(weekSummary.weekNumber)) continue
+
+        try {
+          const response = await fetch(`/api/programs/${programId}/weeks/${weekSummary.weekNumber}`)
+          const data = await response.json()
+
+          if (data.success && data.week) {
+            setWeeksCache(prev => new Map(prev).set(weekSummary.weekNumber, data.week))
+          }
+        } catch (error) {
+          // Silently fail - user can still fetch on navigation
+          console.error(`Failed to prefetch week ${weekSummary.weekNumber}:`, error)
+        }
+      }
+    }
+
+    // Start prefetching after a short delay to not compete with initial render
+    const timeoutId = setTimeout(prefetchAllWeeks, 500)
+    return () => clearTimeout(timeoutId)
+  }, [editMode, programId, weeksSummary, weeksCache])
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

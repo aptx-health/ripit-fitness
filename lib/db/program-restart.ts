@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import { logger } from '@/lib/logger'
 
 /**
  * Restart a program by archiving workout completions
@@ -9,7 +10,7 @@ export async function restartProgram(
   programId: string,
   userId: string
 ): Promise<{ success: boolean; archivedCompletions: number }> {
-  console.log(`[restartProgram] Starting restart for program ${programId}, user ${userId}`)
+  logger.debug({ programId, userId }, 'Starting program restart')
 
   // Verify program ownership
   const program = await prisma.program.findFirst({
@@ -17,72 +18,55 @@ export async function restartProgram(
       id: programId,
       userId,
     },
+    select: {
+      id: true,
+      name: true,
+    },
   })
 
   if (!program) {
     throw new Error('Program not found')
   }
 
-  console.log(`[restartProgram] Program found: ${program.name}`)
+  logger.debug({ programName: program.name }, 'Program found')
 
-  // Get current max cycle number for this program
-  const maxCycleCompletion = await prisma.workoutCompletion.findFirst({
-    where: {
-      workout: {
+  // Run independent queries in parallel
+  const [maxCycleCompletion, workouts] = await Promise.all([
+    // Get current max cycle number for this program
+    prisma.workoutCompletion.findFirst({
+      where: {
+        workout: {
+          week: {
+            programId,
+          },
+        },
+        userId,
+      },
+      orderBy: {
+        cycleNumber: 'desc',
+      },
+      select: {
+        cycleNumber: true,
+      },
+    }),
+    // Get all workout IDs for this program
+    prisma.workout.findMany({
+      where: {
         week: {
           programId,
         },
+        userId,
       },
-      userId,
-    },
-    orderBy: {
-      cycleNumber: 'desc',
-    },
-    select: {
-      cycleNumber: true,
-    },
-  })
+      select: {
+        id: true,
+      },
+    }),
+  ])
 
   const currentCycle = maxCycleCompletion?.cycleNumber || 1
-  console.log(`[restartProgram] Current cycle: ${currentCycle}`)
+  const workoutIdList = workouts.map((w) => w.id)
 
-  // Get all workout IDs for this program
-  const workoutIds = await prisma.workout.findMany({
-    where: {
-      week: {
-        programId,
-      },
-      userId,
-    },
-    select: {
-      id: true,
-    },
-  })
-
-  const workoutIdList = workoutIds.map((w) => w.id)
-  console.log(`[restartProgram] Found ${workoutIdList.length} workouts:`, workoutIdList)
-
-  // Check how many completions exist before archiving
-  const existingCompletions = await prisma.workoutCompletion.findMany({
-    where: {
-      workoutId: {
-        in: workoutIdList,
-      },
-      userId,
-    },
-    select: {
-      id: true,
-      workoutId: true,
-      status: true,
-      isArchived: true,
-    },
-  })
-
-  console.log(`[restartProgram] Total completions: ${existingCompletions.length}`)
-  console.log(`[restartProgram] Completions detail:`, JSON.stringify(existingCompletions, null, 2))
-
-  const nonArchivedCount = existingCompletions.filter(c => !c.isArchived).length
-  console.log(`[restartProgram] Non-archived completions to archive: ${nonArchivedCount}`)
+  logger.debug({ currentCycle, workoutCount: workoutIdList.length }, 'Found workouts for program')
 
   // Archive all non-archived completions by setting isArchived=true
   // This preserves logged sets while removing them from current cycle queries
@@ -99,7 +83,7 @@ export async function restartProgram(
     },
   })
 
-  console.log(`[restartProgram] Successfully archived ${result.count} completions`)
+  logger.info({ archivedCompletions: result.count, programId }, 'Program restarted successfully')
 
   return {
     success: true,

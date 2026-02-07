@@ -2,6 +2,7 @@
 // Supports both real Supabase Auth and dev-only mock auth
 
 import { createClient as createSupabaseClient } from '@/lib/supabase/server'
+import { logger } from '@/lib/logger'
 
 export interface AuthUser {
   id: string
@@ -35,6 +36,10 @@ export async function getCurrentUser(): Promise<AuthResult> {
   // Real Supabase auth
   const supabase = await createSupabaseClient()
   const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error) {
+    logger.debug({ error: error.message }, 'Auth error')
+  }
 
   return {
     user: user as AuthUser | null,

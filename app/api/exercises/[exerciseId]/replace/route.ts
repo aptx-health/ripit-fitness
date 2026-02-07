@@ -151,78 +151,61 @@ export async function POST(
       const oldExerciseDefinitionId = exercise.exerciseDefinitionId
 
       await prisma.$transaction(async (tx) => {
-        // Find all weeks with weekNumber >= currentWeekNumber in the same program
-        const futureWeeks = await tx.week.findMany({
+        // Find all matching exercises in future weeks with a single query
+        const exercisesToUpdate = await tx.exercise.findMany({
           where: {
-            programId,
-            weekNumber: {
-              gte: currentWeekNumber
-            }
-          },
-          include: {
-            workouts: {
-              include: {
-                exercises: true
+            exerciseDefinitionId: oldExerciseDefinitionId,
+            workout: {
+              week: {
+                programId,
+                weekNumber: {
+                  gte: currentWeekNumber
+                }
               }
             }
+          },
+          select: { id: true }
+        })
+
+        const exerciseIds = exercisesToUpdate.map(e => e.id)
+
+        // Bulk update all matching exercises in one query
+        await tx.exercise.updateMany({
+          where: { id: { in: exerciseIds } },
+          data: {
+            exerciseDefinitionId: newExerciseDefinitionId,
+            name: newExerciseDefinition.name,
+            ...(notes !== undefined ? { notes } : {})
           }
         })
 
-        // Find all exercises with matching exerciseDefinitionId in those weeks
-        const exercisesToUpdate: string[] = []
-
-        for (const week of futureWeeks) {
-          for (const workout of week.workouts) {
-            for (const ex of workout.exercises) {
-              if (ex.exerciseDefinitionId === oldExerciseDefinitionId) {
-                exercisesToUpdate.push(ex.id)
-              }
-            }
-          }
-        }
-
-        // Update all matching exercises
-        for (const exerciseIdToUpdate of exercisesToUpdate) {
-          // Update exercise definition, name, and notes
-          await tx.exercise.update({
-            where: { id: exerciseIdToUpdate },
-            data: {
-              exerciseDefinitionId: newExerciseDefinitionId,
-              name: newExerciseDefinition.name,
-              notes: notes !== undefined ? notes : undefined // Update notes if provided
-            }
+        // If prescribed sets are provided, replace them in bulk
+        if (prescribedSets && prescribedSets.length > 0) {
+          // Bulk delete all old prescribed sets
+          await tx.prescribedSet.deleteMany({
+            where: { exerciseId: { in: exerciseIds } }
           })
 
-          // If prescribed sets are provided, replace them
-          if (prescribedSets && prescribedSets.length > 0) {
-            // Delete old prescribed sets
-            await tx.prescribedSet.deleteMany({
-              where: { exerciseId: exerciseIdToUpdate }
-            })
-
-            // Create new prescribed sets
-            await tx.prescribedSet.createMany({
-              data: prescribedSets.map(set => ({
+          // Bulk create new prescribed sets for all exercises
+          await tx.prescribedSet.createMany({
+            data: exerciseIds.flatMap(exerciseId =>
+              prescribedSets.map(set => ({
                 setNumber: set.setNumber,
                 reps: set.reps,
                 rpe: set.intensityType === 'RPE' ? set.intensityValue : null,
                 rir: set.intensityType === 'RIR' ? set.intensityValue : null,
-                exerciseId: exerciseIdToUpdate,
+                exerciseId,
                 userId: user.id
               }))
-            })
-          }
+            )
+          })
         }
 
-        updatedCount = exercisesToUpdate.length
+        updatedCount = exerciseIds.length
 
         // Fetch updated exercises for response
         updatedExercises = await tx.exercise.findMany({
-          where: {
-            id: {
-              in: exercisesToUpdate
-            }
-          },
+          where: { id: { in: exerciseIds } },
           include: {
             prescribedSets: {
               orderBy: { setNumber: 'asc' }

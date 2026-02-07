@@ -80,67 +80,126 @@ export async function applyVolumeAdjustment(
   userId: string
 ): Promise<{ addedCount: number; removedCount: number; skippedCount: number }> {
   const allExercises = week.workouts.flatMap(workout => workout.exercises)
+  const exerciseIds = allExercises.map(e => e.id)
 
   let addedCount = 0
   let removedCount = 0
   let skippedCount = 0
 
+  if (exerciseIds.length === 0) {
+    return { addedCount, removedCount, skippedCount }
+  }
+
+  // Pre-fetch all prescribed sets for all exercises in one query
+  const allSets = await tx.prescribedSet.findMany({
+    where: { exerciseId: { in: exerciseIds } },
+    orderBy: [{ exerciseId: 'asc' }, { setNumber: 'asc' }]
+  })
+
+  // Group sets by exercise ID
+  const setsByExercise = new Map<string, typeof allSets>()
+  for (const set of allSets) {
+    const existing = setsByExercise.get(set.exerciseId) || []
+    existing.push(set)
+    setsByExercise.set(set.exerciseId, existing)
+  }
+
   if (adjustment > 0) {
     // Add sets by cloning the first set
-    for (const exercise of allExercises) {
-      // Fetch fresh data from database (in case intensity was adjusted first)
-      const currentSets = await tx.prescribedSet.findMany({
-        where: { exerciseId: exercise.id },
-        orderBy: { setNumber: 'asc' }
-      })
+    const newSetsData: Array<{
+      exerciseId: string
+      setNumber: number
+      reps: string
+      weight: string | null
+      rpe: number | null
+      rir: number | null
+      userId: string
+    }> = []
 
+    // Track renumbering: setId -> newSetNumber
+    const renumberUpdates: Array<{ id: string; setNumber: number }> = []
+
+    for (const exercise of allExercises) {
+      const currentSets = setsByExercise.get(exercise.id) || []
       if (currentSets.length === 0) continue
 
       const firstSet = currentSets[0]
 
-      // Clone the first set (adjustment) times
-      const newSets = []
+      // Prepare new sets to create (will be inserted after first set)
       for (let i = 0; i < adjustment; i++) {
-        const newSet = await tx.prescribedSet.create({
-          data: {
-            exerciseId: exercise.id,
-            setNumber: 999 + i, // Temporary number
-            reps: firstSet.reps,
-            weight: firstSet.weight,
-            rpe: firstSet.rpe,
-            rir: firstSet.rir,
-            userId
-          }
+        newSetsData.push({
+          exerciseId: exercise.id,
+          setNumber: 1000 + i, // Temporary high number
+          reps: firstSet.reps,
+          weight: firstSet.weight,
+          rpe: firstSet.rpe,
+          rir: firstSet.rir,
+          userId
         })
-        newSets.push(newSet)
         addedCount++
       }
 
-      // Build desired order: [firstSet, ...newSets, ...rest of currentSets]
-      const desiredOrder = [
-        currentSets[0],
-        ...newSets,
-        ...currentSets.slice(1)
-      ]
-
-      // Renumber in desired order
-      for (let i = 0; i < desiredOrder.length; i++) {
-        await tx.prescribedSet.update({
-          where: { id: desiredOrder[i].id },
-          data: { setNumber: i + 1 }
+      // Plan renumbering: first set stays 1, new sets get 2..adjustment+1, rest shift
+      // First set: position 1 (will be updated even if already 1 for consistency)
+      renumberUpdates.push({ id: currentSets[0].id, setNumber: 1 })
+      // Remaining original sets shift by adjustment positions
+      for (let i = 1; i < currentSets.length; i++) {
+        renumberUpdates.push({
+          id: currentSets[i].id,
+          setNumber: i + adjustment + 1
         })
       }
+    }
+
+    // Bulk create all new sets
+    if (newSetsData.length > 0) {
+      await tx.prescribedSet.createMany({ data: newSetsData })
+
+      // Fetch newly created sets to get their IDs for renumbering
+      const newSets = await tx.prescribedSet.findMany({
+        where: {
+          exerciseId: { in: exerciseIds },
+          setNumber: { gte: 1000 }
+        },
+        orderBy: [{ exerciseId: 'asc' }, { setNumber: 'asc' }]
+      })
+
+      // Group new sets by exercise and add renumbering
+      const newSetsByExercise = new Map<string, typeof newSets>()
+      for (const set of newSets) {
+        const existing = newSetsByExercise.get(set.exerciseId) || []
+        existing.push(set)
+        newSetsByExercise.set(set.exerciseId, existing)
+      }
+
+      for (const [exerciseId, sets] of newSetsByExercise) {
+        for (let i = 0; i < sets.length; i++) {
+          renumberUpdates.push({ id: sets[i].id, setNumber: 2 + i })
+        }
+      }
+    }
+
+    // Batch renumber using raw SQL with CASE statement
+    if (renumberUpdates.length > 0) {
+      const caseWhen = renumberUpdates
+        .map(u => `WHEN '${u.id}' THEN ${u.setNumber}`)
+        .join(' ')
+      const ids = renumberUpdates.map(u => `'${u.id}'`).join(',')
+
+      await tx.$executeRawUnsafe(`
+        UPDATE "PrescribedSet"
+        SET "setNumber" = CASE id ${caseWhen} END
+        WHERE id IN (${ids})
+      `)
     }
   } else if (adjustment < 0) {
     // Remove sets from beginning (preserve harder sets at end)
     const removalCount = Math.abs(adjustment)
+    const setsToDeleteIds: string[] = []
+    const renumberUpdates: Array<{ id: string; setNumber: number }> = []
 
     for (const exercise of allExercises) {
-      // Fetch fresh data from database (in case intensity was adjusted first)
-      const sets = await tx.prescribedSet.findMany({
-        where: { exerciseId: exercise.id },
-        orderBy: { setNumber: 'asc' }
-      })
+      const sets = setsByExercise.get(exercise.id) || []
 
       // Skip exercises with only 1 set
       if (sets.length <= 1) {
@@ -151,27 +210,38 @@ export async function applyVolumeAdjustment(
       // Calculate how many sets to actually remove (don't go below 1)
       const actualRemoval = Math.min(removalCount, sets.length - 1)
 
-      // Delete first N sets
-      const setsToDelete = sets.slice(0, actualRemoval)
-      await tx.prescribedSet.deleteMany({
-        where: {
-          id: { in: setsToDelete.map(s => s.id) }
-        }
-      })
-      removedCount += actualRemoval
-
-      // Renumber remaining sets
-      const remainingSets = await tx.prescribedSet.findMany({
-        where: { exerciseId: exercise.id },
-        orderBy: { setNumber: 'asc' }
-      })
-
-      for (let i = 0; i < remainingSets.length; i++) {
-        await tx.prescribedSet.update({
-          where: { id: remainingSets[i].id },
-          data: { setNumber: i + 1 }
-        })
+      // Mark first N sets for deletion
+      for (let i = 0; i < actualRemoval; i++) {
+        setsToDeleteIds.push(sets[i].id)
+        removedCount++
       }
+
+      // Plan renumbering for remaining sets
+      const remainingSets = sets.slice(actualRemoval)
+      for (let i = 0; i < remainingSets.length; i++) {
+        renumberUpdates.push({ id: remainingSets[i].id, setNumber: i + 1 })
+      }
+    }
+
+    // Bulk delete
+    if (setsToDeleteIds.length > 0) {
+      await tx.prescribedSet.deleteMany({
+        where: { id: { in: setsToDeleteIds } }
+      })
+    }
+
+    // Batch renumber using raw SQL
+    if (renumberUpdates.length > 0) {
+      const caseWhen = renumberUpdates
+        .map(u => `WHEN '${u.id}' THEN ${u.setNumber}`)
+        .join(' ')
+      const ids = renumberUpdates.map(u => `'${u.id}'`).join(',')
+
+      await tx.$executeRawUnsafe(`
+        UPDATE "PrescribedSet"
+        SET "setNumber" = CASE id ${caseWhen} END
+        WHERE id IN (${ids})
+      `)
     }
   }
 

@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { X, Plus, Minus, Loader2 } from 'lucide-react'
+import { useState } from 'react'
+import { X, Plus, Minus } from 'lucide-react'
+import { LoadingFrog } from '@/components/ui/loading-frog'
 
 interface TransformWeekModalProps {
   isOpen: boolean
@@ -32,45 +33,6 @@ export default function TransformWeekModal({
   const [stats, setStats] = useState<TransformStats | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  // Progress animation state
-  const [exerciseNames, setExerciseNames] = useState<string[]>([])
-  const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0)
-  const [progress, setProgress] = useState(0)
-  const [remainingTime, setRemainingTime] = useState(45) // Start at 45 seconds
-  const [phase, setPhase] = useState<1 | 2 | 3>(1)
-
-  // Refs for cleanup
-  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null)
-  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null)
-  const exerciseIntervalRef = useRef<NodeJS.Timeout | null>(null)
-
-  // Fetch exercise names when modal opens
-  useEffect(() => {
-    if (isOpen && weekId) {
-      fetch(`/api/weeks/${weekId}/exercises`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.exerciseNames) {
-            setExerciseNames(data.exerciseNames)
-          }
-        })
-        .catch(err => {
-          console.error('Failed to fetch exercise names:', err)
-          // Fallback to generic names
-          setExerciseNames(['Exercise 1', 'Exercise 2', 'Exercise 3'])
-        })
-    }
-  }, [isOpen, weekId])
-
-  // Cleanup intervals on unmount or when submitting ends
-  useEffect(() => {
-    return () => {
-      if (progressIntervalRef.current) clearInterval(progressIntervalRef.current)
-      if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current)
-      if (exerciseIntervalRef.current) clearInterval(exerciseIntervalRef.current)
-    }
-  }, [])
-
   const handleSubmit = async () => {
     // Validation: at least one adjustment must be selected
     const hasIntensityAdjustment = intensityDirection !== 'NONE'
@@ -83,44 +45,6 @@ export default function TransformWeekModal({
 
     setIsSubmitting(true)
     setError(null)
-    setProgress(0)
-    setRemainingTime(45)
-    setPhase(1)
-    setCurrentExerciseIndex(0)
-
-    // Start progress animation (fills over 45 seconds)
-    const progressIncrement = 100 / 45 // ~2.22% per second
-    progressIntervalRef.current = setInterval(() => {
-      setProgress(prev => {
-        const next = prev + progressIncrement
-        return next >= 95 ? 95 : next // Cap at 95% until API returns
-      })
-    }, 1000)
-
-    // Start countdown timer
-    countdownIntervalRef.current = setInterval(() => {
-      setRemainingTime(prev => {
-        const next = prev - 1
-        if (next <= 0) {
-          if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current)
-          return 0
-        }
-
-        // Update phase based on remaining time
-        if (next > 30) setPhase(1)
-        else if (next > 15) setPhase(2)
-        else setPhase(3)
-
-        return next
-      })
-    }, 1000)
-
-    // Start exercise name cycling (every 2.5 seconds)
-    if (exerciseNames.length > 0) {
-      exerciseIntervalRef.current = setInterval(() => {
-        setCurrentExerciseIndex(prev => (prev + 1) % exerciseNames.length)
-      }, 2500)
-    }
 
     try {
       // Calculate intensity adjustment value
@@ -144,41 +68,22 @@ export default function TransformWeekModal({
 
       const data = await response.json()
 
-      // Clean up intervals
-      if (progressIntervalRef.current) clearInterval(progressIntervalRef.current)
-      if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current)
-      if (exerciseIntervalRef.current) clearInterval(exerciseIntervalRef.current)
-
-      // Snap progress to 100%
-      setProgress(100)
-      setRemainingTime(0)
-
       setStats(data.stats)
 
       // Call parent's onTransform to update state with the updated week
       await onTransform(data.week)
 
-      // Auto-close after 2 seconds showing stats
+      // Auto-close after 1.5 seconds showing stats
       setTimeout(() => {
         handleClose()
-      }, 2000)
+      }, 1500)
     } catch (err) {
-      // Clean up intervals on error
-      if (progressIntervalRef.current) clearInterval(progressIntervalRef.current)
-      if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current)
-      if (exerciseIntervalRef.current) clearInterval(exerciseIntervalRef.current)
-
       setError(err instanceof Error ? err.message : 'An error occurred')
       setIsSubmitting(false)
     }
   }
 
   const handleClose = () => {
-    // Clean up intervals
-    if (progressIntervalRef.current) clearInterval(progressIntervalRef.current)
-    if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current)
-    if (exerciseIntervalRef.current) clearInterval(exerciseIntervalRef.current)
-
     // Reset form state
     setIntensityDirection('NONE')
     setIntensityMagnitude(1)
@@ -186,12 +91,6 @@ export default function TransformWeekModal({
     setIsSubmitting(false)
     setStats(null)
     setError(null)
-
-    // Reset progress state
-    setProgress(0)
-    setRemainingTime(45)
-    setPhase(1)
-    setCurrentExerciseIndex(0)
 
     onClose()
   }
@@ -401,49 +300,13 @@ export default function TransformWeekModal({
           </div>
         )}
 
-        {/* Progress Display */}
+        {/* Loading Display */}
         {!stats && isSubmitting && (
-          <div className="p-6 border-t-2 border-border space-y-4">
-            {/* Countdown and Phase */}
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground uppercase tracking-wider font-semibold">
-                {remainingTime > 0 && phase === 1 && 'Phase 1: Analyzing exercises...'}
-                {remainingTime > 0 && phase === 2 && 'Phase 2: Applying transformations...'}
-                {remainingTime > 0 && phase === 3 && 'Phase 3: Finalizing changes...'}
-                {remainingTime === 0 && 'Taking longer than expected...'}
-              </span>
-              {remainingTime > 0 && (
-                <span className="text-foreground font-bold doom-heading">
-                  0:{remainingTime.toString().padStart(2, '0')}
-                </span>
-              )}
-            </div>
-
-            {/* Progress Bar */}
-            <div className="relative">
-              <div className="h-3 bg-muted border-2 border-border overflow-hidden">
-                <div
-                  className="h-full bg-primary transition-all duration-1000 ease-linear relative"
-                  style={{ width: `${progress}%` }}
-                >
-                  {/* Shimmer effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary-foreground/20 to-transparent animate-shimmer" />
-                </div>
-              </div>
-              <div className="absolute -top-1 -bottom-1 left-0 right-0 pointer-events-none border-2 border-border" />
-            </div>
-
-            {/* Current Exercise */}
-            {exerciseNames.length > 0 && (
-              <div className="text-center">
-                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-                  Processing
-                </p>
-                <p className="text-sm font-bold text-foreground doom-heading truncate">
-                  {exerciseNames[currentExerciseIndex]}
-                </p>
-              </div>
-            )}
+          <div className="p-6 border-t-2 border-border flex flex-col items-center gap-3">
+            <LoadingFrog size={48} speed={0.8} />
+            <span className="text-sm text-muted-foreground uppercase tracking-wider font-semibold">
+              Applying changes...
+            </span>
           </div>
         )}
       </div>

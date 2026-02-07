@@ -92,6 +92,57 @@ type FetchedWorkoutData = {
   exerciseHistory?: Record<string, unknown>
 }
 
+// Metadata for progressive loading modal
+type WorkoutMetadata = {
+  workout: {
+    id: string
+    name: string
+    dayNumber: number
+    programId: string
+  }
+  exerciseCount: number
+  completionId?: string
+  firstExercise?: {
+    id: string
+    name: string
+    order: number
+    exerciseGroup: string | null
+    notes: string | null
+    isOneOff?: boolean
+    exerciseDefinitionId: string
+    exerciseDefinition?: {
+      id: string
+      name: string
+      primaryFAUs: string[]
+      secondaryFAUs: string[]
+      equipment: string[]
+      instructions?: string
+      isSystem: boolean
+      createdBy: string | null
+    }
+    prescribedSets: Array<{
+      id: string
+      setNumber: number
+      reps: string
+      weight: string | null
+      rpe: number | null
+      rir: number | null
+    }>
+  } | null
+  firstExerciseHistory?: {
+    completedAt: Date
+    workoutName: string
+    sets: Array<{
+      setNumber: number
+      reps: number
+      weight: number
+      weightUnit: string
+      rpe: number | null
+      rir: number | null
+    }>
+  } | null
+}
+
 export default function StrengthWeekView({
   programId,
   programName,
@@ -105,6 +156,7 @@ export default function StrengthWeekView({
   const [modalMode, setModalMode] = useState<ModalMode>(null)
   const [selectedWorkoutId, setSelectedWorkoutId] = useState<string | null>(null)
   const [workoutData, setWorkoutData] = useState<FetchedWorkoutData | null>(null)
+  const [workoutMetadata, setWorkoutMetadata] = useState<WorkoutMetadata | null>(null)
   const [isLoadingWorkout, setIsLoadingWorkout] = useState(false)
   const [modalKey, setModalKey] = useState(0)
   const [showCompletionModal, setShowCompletionModal] = useState(false)
@@ -155,6 +207,7 @@ export default function StrengthWeekView({
     }, 200)
   }, [router])
 
+  // Fetch full workout data for preview modal
   const fetchWorkoutData = useCallback(async (workoutId: string, includeHistory: boolean) => {
     setIsLoadingWorkout(true)
     try {
@@ -172,30 +225,49 @@ export default function StrengthWeekView({
     }
   }, [])
 
+  // Fetch just metadata for logging modal (fast initial load)
+  const fetchWorkoutMetadata = useCallback(async (workoutId: string) => {
+    setIsLoadingWorkout(true)
+    try {
+      const response = await fetch(`/api/workouts/${workoutId}/metadata`)
+      if (!response.ok) throw new Error('Failed to fetch workout metadata')
+      const data: WorkoutMetadata = await response.json()
+      setWorkoutMetadata(data)
+      return data
+    } catch (error) {
+      clientLogger.error('Error fetching workout metadata:', error)
+      return null
+    } finally {
+      setIsLoadingWorkout(false)
+    }
+  }, [])
+
   const handleOpenPreview = async (workoutId: string) => {
     setSelectedWorkoutId(workoutId)
     const data = await fetchWorkoutData(workoutId, false)
     if (data) setModalMode('preview')
   }
 
+  // Opens logging modal with progressive loading (fast!)
   const handleOpenLogging = async (workoutId: string) => {
     setSelectedWorkoutId(workoutId)
-    const data = await fetchWorkoutData(workoutId, true)
-    if (data) setModalMode('logging')
+    const metadata = await fetchWorkoutMetadata(workoutId)
+    if (metadata) setModalMode('logging')
   }
 
   const handleCloseModal = () => {
     setModalMode(null)
     setSelectedWorkoutId(null)
     setWorkoutData(null)
+    setWorkoutMetadata(null)
     router.refresh()
   }
 
   const handleStartLoggingFromPreview = async () => {
     if (!selectedWorkoutId) return
-    // Fetch with history for logging modal
-    const data = await fetchWorkoutData(selectedWorkoutId, true)
-    if (data) setModalMode('logging')
+    // Fetch metadata for logging modal
+    const metadata = await fetchWorkoutMetadata(selectedWorkoutId)
+    if (metadata) setModalMode('logging')
   }
 
   const handleCompleteWorkout = async (loggedSets: Array<{
@@ -224,9 +296,14 @@ export default function StrengthWeekView({
     if (!response.ok) throw new Error('Failed to clear workout')
     clearStoredWorkout()
     setModalKey(prev => prev + 1)
-    // Refetch the workout data
-    const data = await fetchWorkoutData(selectedWorkoutId, modalMode === 'logging')
-    setWorkoutData(data)
+    // Refetch the workout data/metadata
+    if (modalMode === 'preview') {
+      const data = await fetchWorkoutData(selectedWorkoutId, false)
+      setWorkoutData(data)
+    } else if (modalMode === 'logging') {
+      const metadata = await fetchWorkoutMetadata(selectedWorkoutId)
+      setWorkoutMetadata(metadata)
+    }
     router.refresh()
   }
 
@@ -265,6 +342,15 @@ export default function StrengthWeekView({
       setCompletingWeek(false)
     }
   }
+
+  // Refresh handler for when exercises change in the modal
+  const handleRefreshMetadata = useCallback(async () => {
+    if (!selectedWorkoutId) return
+    const metadata = await fetchWorkoutMetadata(selectedWorkoutId)
+    if (metadata) {
+      setWorkoutMetadata(metadata)
+    }
+  }, [selectedWorkoutId, fetchWorkoutMetadata])
 
   const hasIncompleteWorkouts = week.workouts.some(w => w.completions.length === 0)
   const weekActions = hasIncompleteWorkouts
@@ -319,7 +405,7 @@ export default function StrengthWeekView({
         ))}
       </div>
 
-      {/* Preview Modal */}
+      {/* Preview Modal - uses full workout data */}
       {workoutData && modalMode === 'preview' && (
         <WorkoutPreviewModal
           isOpen={true}
@@ -332,19 +418,20 @@ export default function StrengthWeekView({
         />
       )}
 
-      {/* Logging Modal */}
-      {workoutData && modalMode === 'logging' && (
+      {/* Logging Modal - uses progressive loading */}
+      {workoutMetadata && modalMode === 'logging' && (
         <ExerciseLoggingModal
           key={modalKey}
           isOpen={true}
           onClose={handleCloseModal}
-          exercises={workoutData.workout.exercises}
-          workoutId={workoutData.workout.id}
-          workoutName={workoutData.workout.name}
-          workoutCompletionId={workoutData.workout.completions[0]?.id}
+          workoutId={workoutMetadata.workout.id}
+          workoutName={workoutMetadata.workout.name}
+          exerciseCount={workoutMetadata.exerciseCount}
+          workoutCompletionId={workoutMetadata.completionId}
+          initialExercise={workoutMetadata.firstExercise}
+          initialHistory={workoutMetadata.firstExerciseHistory}
           onComplete={handleCompleteWorkout}
-          onRefresh={() => fetchWorkoutData(selectedWorkoutId!, true).then(setWorkoutData)}
-          exerciseHistory={workoutData.exerciseHistory as Record<string, { completedAt: Date; workoutName: string; sets: Array<{ setNumber: number; reps: number; weight: number; weightUnit: string; rpe: number | null; rir: number | null }> } | null>}
+          onRefresh={handleRefreshMetadata}
         />
       )}
 

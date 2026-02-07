@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 import { useWorkoutStorage } from '@/hooks/useWorkoutStorage'
 import { useSyncState } from '@/hooks/useSyncState'
 import { useWorkoutSyncService } from '@/lib/sync/workoutSync'
+import { useProgressiveExercises, type Exercise, type ExerciseHistory } from '@/hooks/useProgressiveExercises'
 import SyncDetailsModal from './SyncDetailsModal'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import { AlertTriangle } from 'lucide-react'
@@ -27,78 +28,49 @@ import {
   DialogFooter,
 } from '@/components/ui/radix/dialog'
 
-type PrescribedSet = {
-  id: string
-  setNumber: number
-  reps: string // Changed from number to support ranges like "8-12"
-  weight: string | null
-  rpe: number | null
-  rir: number | null
-}
-
-type Exercise = {
-  id: string
-  name: string
-  order: number
-  exerciseGroup: string | null
-  notes: string | null
-  isOneOff?: boolean // For one-off exercises added during logging
-  prescribedSets: PrescribedSet[]
-  exerciseDefinitionId: string
-  exerciseDefinition?: {
-    id: string
-    name: string
-    primaryFAUs: string[]
-    secondaryFAUs: string[]
-    equipment: string[]
-    instructions?: string
-    isSystem: boolean
-    createdBy: string | null
-  }
-}
-
 // Import LoggedSet type from the hook to ensure consistency
 import { type LoggedSet } from '@/hooks/useWorkoutStorage'
 
-type ExerciseHistorySet = {
-  setNumber: number
-  reps: number
-  weight: number
-  weightUnit: string
-  rpe: number | null
-  rir: number | null
-}
-
-type ExerciseHistory = {
-  completedAt: Date
-  workoutName: string
-  sets: ExerciseHistorySet[]
-}
+// Re-export Exercise and ExerciseHistory types for external use
+export type { Exercise, ExerciseHistory }
 
 type Props = {
   isOpen: boolean
   onClose: () => void
-  exercises: Exercise[]
   workoutId: string
   workoutName: string
-  workoutCompletionId?: string // Completion ID for one-off exercises
+  exerciseCount: number
+  workoutCompletionId?: string
+  initialExercise?: Exercise | null
+  initialHistory?: ExerciseHistory | null
   onComplete: (loggedSets: LoggedSet[]) => Promise<void>
-  onRefresh?: () => void // Callback to refresh exercise data after add/swap
-  exerciseHistory?: Record<string, ExerciseHistory | null> // NEW: Exercise history map
+  onRefresh?: () => Promise<void>
+}
+
+// Loading skeleton for exercise content
+function ExerciseLoadingSkeleton() {
+  return (
+    <div className="flex flex-col items-center justify-center h-full py-12">
+      <LoadingFrog size={48} speed={0.8} />
+      <p className="mt-4 text-muted-foreground uppercase tracking-wider font-bold animate-pulse">
+        Loading exercise...
+      </p>
+    </div>
+  )
 }
 
 // Capitalized Function name because it's a React Component
 export default function ExerciseLoggingModal({
   isOpen,
   onClose,
-  exercises,
   workoutId,
+  exerciseCount,
   workoutCompletionId,
+  initialExercise,
+  initialHistory,
   onComplete,
   onRefresh,
-  exerciseHistory,
 }: Props) {
-  const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0)
   const [currentSet, setCurrentSet] = useState({
     reps: '',
     weight: '',
@@ -123,29 +95,43 @@ export default function ExerciseLoggingModal({
   const [navigateToLastExercise, setNavigateToLastExercise] = useState(false)
   const [editingExerciseDefinitionId, setEditingExerciseDefinitionId] = useState<string | null>(null)
 
+  // Progressive loading of exercises
+  const {
+    currentExercise,
+    currentExerciseState,
+    currentIndex,
+    totalExercises,
+    goToExercise,
+    goToNext,
+    goToPrevious,
+    loadedExercises,
+    currentExerciseHistory,
+    currentHistoryState,
+    hasHistoryForCurrentExercise,
+    refreshExercises,
+    allExercisesLoaded,
+  } = useProgressiveExercises(workoutId, exerciseCount, workoutCompletionId, {
+    initialExercise: initialExercise ?? undefined,
+    initialHistory: initialHistory ?? undefined,
+  })
+
   // Enhanced persistence with localStorage backing
   const { loggedSets, setLoggedSets, isLoaded, clearStoredWorkout } = useWorkoutStorage(workoutId)
 
-  // Validate and clean up localStorage on load to prevent cross-workout contamination
+  // Validate and clean up localStorage on load - defer until exercises are loaded
   useEffect(() => {
-    if (!isLoaded || exercises.length === 0 || loggedSets.length === 0) return
+    if (!isLoaded || !allExercisesLoaded || loggedSets.length === 0) return
 
-    const validExerciseIds = new Set(exercises.map(e => e.id))
+    const validExerciseIds = new Set(Array.from(loadedExercises.values()).map(e => e.id))
     const invalidSets = loggedSets.filter(set => !validExerciseIds.has(set.exerciseId))
 
-    // Only update if we found invalid sets (prevents infinite loop)
     if (invalidSets.length > 0) {
-      console.warn(`⚠️ Found ${invalidSets.length} sets with invalid exercise IDs in localStorage, cleaning up...`)
-      console.log('Invalid exercise IDs:', [...new Set(invalidSets.map(s => s.exerciseId))])
-
-      // Filter out invalid sets
+      console.warn(`Found ${invalidSets.length} sets with invalid exercise IDs in localStorage, cleaning up...`)
       const validSets = loggedSets.filter(set => validExerciseIds.has(set.exerciseId))
       setLoggedSets(validSets)
-
-      console.log(`✅ Cleaned localStorage: ${loggedSets.length} → ${validSets.length} sets`)
+      console.log(`Cleaned localStorage: ${loggedSets.length} -> ${validSets.length} sets`)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoaded, exercises.length, workoutId]) // Only run when workout changes or loads
+  }, [isLoaded, allExercisesLoaded, loadedExercises, loggedSets, setLoggedSets, workoutId])
 
   // Sync state management
   const {
@@ -170,7 +156,6 @@ export default function ExerciseLoggingModal({
       onSyncSuccess: (syncedCount) => {
         syncSuccess(syncedCount)
         setHasUnsavedChanges(false)
-        // If this was a deletion-only sync (0 sets), localStorage should reflect the deletions
         console.log('Sync successful - localStorage and server now in sync')
       },
       onSyncError: (error, willRetry) => {
@@ -180,13 +165,12 @@ export default function ExerciseLoggingModal({
       onRetryStart: startRetry,
     },
     {
-      syncThreshold: 3, // Sync every 3 sets
+      syncThreshold: 3,
       maxRetries: 3,
       baseDelay: 2000
     }
   )
 
-  const currentExercise = exercises[currentExerciseIndex]
   const currentPrescribedSets = currentExercise?.prescribedSets || []
   const currentExerciseLoggedSets = loggedSets.filter(
     (s) => s.exerciseId === currentExercise?.id
@@ -201,7 +185,7 @@ export default function ExerciseLoggingModal({
   const hasRir = currentPrescribedSets.some((s) => s.rir !== null)
 
   const handleLogSet = useCallback(() => {
-    if (!currentSet.reps || !currentSet.weight) return
+    if (!currentSet.reps || !currentSet.weight || !currentExercise) return
 
     const newLoggedSet: LoggedSet = {
       exerciseId: currentExercise.id,
@@ -237,32 +221,28 @@ export default function ExerciseLoggingModal({
       rpe: '',
       rir: '',
     })
-  }, [currentSet, currentExercise?.id, nextSetNumber, setLoggedSets, addSets, addPendingSets])
+  }, [currentSet, currentExercise, nextSetNumber, setLoggedSets, addSets, addPendingSets])
 
   const handleNextExercise = () => {
-    if (currentExerciseIndex < exercises.length - 1) {
-      setCurrentExerciseIndex(currentExerciseIndex + 1)
-      setCurrentSet({
-        reps: '',
-        weight: '',
-        weightUnit: 'lbs',
-        rpe: '',
-        rir: '',
-      })
-    }
+    goToNext()
+    setCurrentSet({
+      reps: '',
+      weight: '',
+      weightUnit: 'lbs',
+      rpe: '',
+      rir: '',
+    })
   }
 
   const handlePreviousExercise = () => {
-    if (currentExerciseIndex > 0) {
-      setCurrentExerciseIndex(currentExerciseIndex - 1)
-      setCurrentSet({
-        reps: '',
-        weight: '',
-        weightUnit: 'lbs',
-        rpe: '',
-        rir: '',
-      })
-    }
+    goToPrevious()
+    setCurrentSet({
+      reps: '',
+      weight: '',
+      weightUnit: 'lbs',
+      rpe: '',
+      rir: '',
+    })
   }
 
   const handleReplaceExercise = () => {
@@ -282,8 +262,7 @@ export default function ExerciseLoggingModal({
   }
 
   const handleEditExerciseDefinition = () => {
-    const currentExercise = exercises[currentExerciseIndex]
-    if (currentExercise.exerciseDefinition && !currentExercise.exerciseDefinition.isSystem) {
+    if (currentExercise?.exerciseDefinition && !currentExercise.exerciseDefinition.isSystem) {
       setEditingExerciseDefinitionId(currentExercise.exerciseDefinition.id)
     }
   }
@@ -293,14 +272,12 @@ export default function ExerciseLoggingModal({
   }
 
   const handleExitSaveAsDraft = () => {
-    // Keep logged sets in localStorage (already handled by useWorkoutStorage)
     console.log('Saving workout as draft...')
     setShowExitConfirm(false)
     onClose()
   }
 
   const handleExitDiscard = () => {
-    // Clear all logged sets from localStorage
     console.log('Discarding workout...')
     clearStoredWorkout()
     setShowExitConfirm(false)
@@ -308,13 +285,16 @@ export default function ExerciseLoggingModal({
   }
 
   const handleWizardComplete = async () => {
-    // Trigger refresh
+    // Trigger parent refresh and wait for it
     if (onRefresh) {
-      onRefresh()
+      await onRefresh()
     }
 
-    // Wait for refresh to complete
-    await new Promise(resolve => setTimeout(resolve, 2500))
+    // Small delay to ensure React state has propagated
+    await new Promise(resolve => setTimeout(resolve, 100))
+
+    // Refresh our progressive loading cache
+    refreshExercises()
 
     // If we added an exercise, navigate to it (it will be at the end)
     if (activeWizard === 'add') {
@@ -347,12 +327,13 @@ export default function ExerciseLoggingModal({
   }
 
   const handleDeleteSet = useCallback((setNumber: number) => {
+    if (!currentExercise) return
+
     const exerciseId = currentExercise.id
     const exerciseSets = loggedSets.filter(s => s.exerciseId === exerciseId)
 
     // Show confirmation for dangerous operations
     if (exerciseSets.length === 1) {
-      // Deleting the last set for this exercise
       setShowDeleteConfirm({
         show: true,
         exerciseId,
@@ -367,7 +348,7 @@ export default function ExerciseLoggingModal({
   }, [currentExercise?.id, loggedSets])
 
   const performDeleteSet = useCallback((exerciseId: string, setNumber: number) => {
-    console.log(`🗑️ Deleting set ${setNumber} for exercise ${exerciseId}`)
+    console.log(`Deleting set ${setNumber} for exercise ${exerciseId}`)
 
     const beforeCount = loggedSets.length
     setLoggedSets(prev =>
@@ -376,11 +357,9 @@ export default function ExerciseLoggingModal({
       )
     )
 
-    // Enhanced logging for safety
-    const afterCount = loggedSets.length - 1 // Will be one less after filter
-    console.log(`📊 Deletion impact: ${beforeCount} → ${afterCount} total sets`)
+    const afterCount = loggedSets.length - 1
+    console.log(`Deletion impact: ${beforeCount} -> ${afterCount} total sets`)
 
-    // Mark that we have unsaved changes (deletions)
     setHasUnsavedChanges(true)
 
     console.log('Set deleted locally - will sync with next batch or manual sync')
@@ -424,39 +403,30 @@ export default function ExerciseLoggingModal({
 
   // Handle exercise deletion - adjust index if current exercise was deleted
   useEffect(() => {
-    if (!isOpen || exercises.length === 0) {
-      // No exercises left - close modal
-      if (isOpen && exercises.length === 0) {
+    if (!isOpen || totalExercises === 0) {
+      if (isOpen && totalExercises === 0) {
         onClose()
       }
       return
     }
 
-    // Check if current exercise still exists
-    const currentExerciseStillExists = exercises.some(ex => ex.id === currentExercise?.id)
-
-    if (!currentExerciseStillExists) {
-      // Current exercise was deleted - navigate to previous or next
-      if (currentExerciseIndex > 0) {
-        // Go to previous exercise
-        setCurrentExerciseIndex(currentExerciseIndex - 1)
-      } else if (exercises.length > 0) {
-        // We were at index 0, stay at 0 (which is now a different exercise)
-        setCurrentExerciseIndex(0)
+    // If current exercise was deleted and no longer exists
+    if (currentExerciseState === 'loaded' && !currentExercise && totalExercises > 0) {
+      if (currentIndex > 0) {
+        goToExercise(currentIndex - 1)
+      } else {
+        goToExercise(0)
       }
-    } else if (currentExerciseIndex >= exercises.length) {
-      // Index out of bounds - go to last exercise
-      setCurrentExerciseIndex(exercises.length - 1)
     }
-  }, [exercises, isOpen, currentExerciseIndex, currentExercise?.id, onClose])
+  }, [isOpen, totalExercises, currentIndex, currentExercise, currentExerciseState, goToExercise, onClose])
 
   // Navigate to newly added exercise
   useEffect(() => {
-    if (navigateToLastExercise && exercises.length > 0) {
-      setCurrentExerciseIndex(exercises.length - 1)
+    if (navigateToLastExercise && totalExercises > 0) {
+      goToExercise(totalExercises - 1)
       setNavigateToLastExercise(false)
     }
-  }, [navigateToLastExercise, exercises.length])
+  }, [navigateToLastExercise, totalExercises, goToExercise])
 
   // Don't render until storage is loaded to prevent flash of empty state
   if (!isLoaded) {
@@ -476,32 +446,13 @@ export default function ExerciseLoggingModal({
   const hasLoggedAllPrescribed =
     currentExerciseLoggedSets.length >= currentPrescribedSets.length
   const totalLoggedSets = loggedSets.length
-  const totalPrescribedSets = exercises.reduce(
+  const totalPrescribedSets = Array.from(loadedExercises.values()).reduce(
     (sum, ex) => sum + ex.prescribedSets.length,
     0
   )
 
   // Early returns after all hooks
   if (!isOpen) return null
-
-  // Guard against invalid exercise index (can happen briefly after deletion)
-  if (!currentExercise) {
-    // If no exercises left, close modal
-    if (exercises.length === 0) {
-      onClose()
-      return null
-    }
-    // Otherwise, show loading while useEffect adjusts the index
-    if (typeof document === 'undefined') return null
-    return createPortal(
-      <div className="fixed inset-0 z-50 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center">
-        <div className="bg-card border-2 border-border p-8 shadow-xl doom-corners">
-          <div className="animate-pulse text-center uppercase tracking-wider font-bold">Loading...</div>
-        </div>
-      </div>,
-      document.body
-    )
-  }
 
   if (typeof document === 'undefined') return null
 
@@ -524,8 +475,8 @@ export default function ExerciseLoggingModal({
         <div className="bg-card w-full h-[100dvh] sm:h-[85vh] sm:max-h-[85vh] sm:max-w-2xl sm:border-2 sm:border-border sm:rounded-lg flex flex-col shadow-xl">
           {/* Header with Sync Status */}
           <ExerciseLoggingHeader
-            currentExerciseIndex={currentExerciseIndex}
-            totalExercises={exercises.length}
+            currentExerciseIndex={currentIndex}
+            totalExercises={totalExercises}
             totalLoggedSets={totalLoggedSets}
             totalPrescribedSets={totalPrescribedSets}
             syncStatus={syncState.status}
@@ -534,39 +485,64 @@ export default function ExerciseLoggingModal({
           />
 
           {/* Exercise Navigation */}
-          <ExerciseNavigation
-            currentExercise={currentExercise}
-            currentExerciseIndex={currentExerciseIndex}
-            totalExercises={exercises.length}
-            onPrevious={handlePreviousExercise}
-            onNext={handleNextExercise}
-          />
+          {currentExercise ? (
+            <ExerciseNavigation
+              currentExercise={currentExercise}
+              currentExerciseIndex={currentIndex}
+              totalExercises={totalExercises}
+              onPrevious={handlePreviousExercise}
+              onNext={handleNextExercise}
+            />
+          ) : (
+            <div className="px-4 py-3 border-b border-border">
+              <div className="h-8 bg-muted rounded animate-pulse" />
+            </div>
+          )}
 
           {/* Content area with tabs - tabs handle their own scrolling */}
           <div className="flex-1 overflow-hidden pb-2">
-            <ExerciseDisplayTabs
-              exercise={currentExercise}
-              prescribedSets={currentPrescribedSets}
-              loggedSets={currentExerciseLoggedSets}
-              exerciseHistory={exerciseHistory?.[currentExercise.id] || null}
-              onDeleteSet={handleDeleteSet}
-              loggingForm={
-                <SetLoggingForm
-                  prescribedSet={prescribedSet}
-                  nextSetNumber={nextSetNumber}
-                  hasLoggedAllPrescribed={hasLoggedAllPrescribed}
-                  hasRpe={hasRpe}
-                  hasRir={hasRir}
-                  currentSet={currentSet}
-                  onSetChange={setCurrentSet}
-                />
-              }
-            />
+            {currentExerciseState === 'loading' || currentExerciseState === 'pending' ? (
+              <ExerciseLoadingSkeleton />
+            ) : currentExerciseState === 'error' ? (
+              <div className="flex flex-col items-center justify-center h-full py-12">
+                <AlertTriangle size={48} className="text-error mb-4" />
+                <p className="text-error uppercase tracking-wider font-bold">
+                  Failed to load exercise
+                </p>
+                <button
+                  onClick={() => refreshExercises()}
+                  className="mt-4 px-4 py-2 bg-primary text-primary-foreground font-bold uppercase tracking-wider"
+                >
+                  Retry
+                </button>
+              </div>
+            ) : currentExercise ? (
+              <ExerciseDisplayTabs
+                exercise={currentExercise}
+                prescribedSets={currentPrescribedSets}
+                loggedSets={currentExerciseLoggedSets}
+                exerciseHistory={currentExerciseHistory}
+                historyState={currentHistoryState}
+                hasHistoryIndicator={hasHistoryForCurrentExercise}
+                onDeleteSet={handleDeleteSet}
+                loggingForm={
+                  <SetLoggingForm
+                    prescribedSet={prescribedSet}
+                    nextSetNumber={nextSetNumber}
+                    hasLoggedAllPrescribed={hasLoggedAllPrescribed}
+                    hasRpe={hasRpe}
+                    hasRir={hasRir}
+                    currentSet={currentSet}
+                    onSetChange={setCurrentSet}
+                  />
+                }
+              />
+            ) : null}
           </div>
 
           {/* Actions Footer */}
           <ExerciseActionsFooter
-            currentExerciseName={currentExercise.name}
+            currentExerciseName={currentExercise?.name || 'Exercise'}
             nextSetNumber={nextSetNumber}
             totalLoggedSets={totalLoggedSets}
             totalPrescribedSets={totalPrescribedSets}

@@ -18,17 +18,19 @@ export async function getProgramCompletionStatus(
   programId: string,
   userId: string
 ): Promise<ProgramCompletionStatus> {
-  // Get all workouts for the program
+  // Get all workouts for the program with minimal data
   const program = await prisma.program.findFirst({
     where: {
       id: programId,
       userId,
     },
-    include: {
+    select: {
+      id: true,
       weeks: {
-        include: {
+        select: {
           workouts: {
-            include: {
+            select: {
+              id: true,
               completions: {
                 where: {
                   status: {
@@ -39,6 +41,9 @@ export async function getProgramCompletionStatus(
                 take: 1,
                 orderBy: {
                   completedAt: 'desc',
+                },
+                select: {
+                  status: true,
                 },
               },
             },
@@ -100,11 +105,14 @@ export async function getProgramCompletionStats(
       id: programId,
       userId,
     },
-    include: {
+    select: {
+      id: true,
+      name: true,
       weeks: {
-        include: {
+        select: {
           workouts: {
-            include: {
+            select: {
+              id: true,
               completions: {
                 where: {
                   status: {
@@ -116,10 +124,20 @@ export async function getProgramCompletionStats(
                   completedAt: 'desc',
                 },
                 take: 1,
+                select: {
+                  status: true,
+                  completedAt: true,
+                },
               },
               exercises: {
-                include: {
-                  loggedSets: true,
+                select: {
+                  id: true,
+                  loggedSets: {
+                    select: {
+                      weight: true,
+                      reps: true,
+                    },
+                  },
                 },
               },
             },
@@ -202,17 +220,21 @@ export async function getCardioProgramCompletionStatus(
   cardioProgramId: string,
   userId: string
 ): Promise<ProgramCompletionStatus> {
-  // Get all sessions for the cardio program
+  // Get all sessions for the cardio program with minimal data
   const program = await prisma.cardioProgram.findFirst({
     where: {
       id: cardioProgramId,
       userId,
     },
-    include: {
+    select: {
+      id: true,
+      name: true,
       weeks: {
-        include: {
+        select: {
           sessions: {
-            include: {
+            select: {
+              id: true,
+              name: true,
               loggedSessions: {
                 where: {
                   status: {
@@ -222,6 +244,9 @@ export async function getCardioProgramCompletionStatus(
                 take: 1,
                 orderBy: {
                   completedAt: 'desc',
+                },
+                select: {
+                  status: true,
                 },
               },
             },
@@ -302,11 +327,14 @@ export async function getCardioProgramCompletionStats(
       id: cardioProgramId,
       userId,
     },
-    include: {
+    select: {
+      id: true,
+      name: true,
       weeks: {
-        include: {
+        select: {
           sessions: {
-            include: {
+            select: {
+              id: true,
               loggedSessions: {
                 where: {
                   status: {
@@ -317,6 +345,12 @@ export async function getCardioProgramCompletionStats(
                   completedAt: 'desc',
                 },
                 take: 1,
+                select: {
+                  status: true,
+                  completedAt: true,
+                  duration: true,
+                  distance: true,
+                },
               },
             },
           },

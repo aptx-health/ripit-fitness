@@ -31,7 +31,13 @@ export async function GET(
 
     return NextResponse.json({ data: status })
   } catch (error) {
-    logger.error({ error, programId: (await params).programId }, 'Error checking program completion')
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    const errorStack = error instanceof Error ? error.stack : undefined
+    logger.error({
+      error: errorMessage,
+      stack: errorStack,
+      programId: (await params).programId
+    }, 'Error checking program completion')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
