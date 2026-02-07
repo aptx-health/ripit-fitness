@@ -584,6 +584,7 @@ git commit -m "feat: add feature"
 - RLS policies must be created for all user-owned tables
 - No emojis in code or commits unless explicitly requested
 - Keep solutions simple - avoid over-engineering
+- **Git file paths with special characters**: Always wrap file paths containing brackets or other special characters in double quotes when using git commands to prevent shell glob expansion. Example: `git add "app/api/exercises/[exerciseId]/route.ts"` instead of `git add app/api/exercises/[exerciseId]/route.ts`
 - **Local development**: Uses Supabase CLI for local PostgreSQL + Auth stack (replaces raw psql). Run `overmind start` to launch all services, or `supabase start` individually. The `dev_personal` Doppler config points to local Supabase (postgres@127.0.0.1:54322)
 - **Prisma version**: Stay on v6.x (Supabase recommendation). Use `npx prisma@6.19.0` to avoid installing v7
 - **Prisma migrations**: If `migrate dev` fails with "permission denied to terminate process", use `db push` instead (Supabase pooler limitation)
