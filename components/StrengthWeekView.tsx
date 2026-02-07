@@ -102,6 +102,45 @@ type WorkoutMetadata = {
   }
   exerciseCount: number
   completionId?: string
+  firstExercise?: {
+    id: string
+    name: string
+    order: number
+    exerciseGroup: string | null
+    notes: string | null
+    isOneOff?: boolean
+    exerciseDefinitionId: string
+    exerciseDefinition?: {
+      id: string
+      name: string
+      primaryFAUs: string[]
+      secondaryFAUs: string[]
+      equipment: string[]
+      instructions?: string
+      isSystem: boolean
+      createdBy: string | null
+    }
+    prescribedSets: Array<{
+      id: string
+      setNumber: number
+      reps: string
+      weight: string | null
+      rpe: number | null
+      rir: number | null
+    }>
+  } | null
+  firstExerciseHistory?: {
+    completedAt: Date
+    workoutName: string
+    sets: Array<{
+      setNumber: number
+      reps: number
+      weight: number
+      weightUnit: string
+      rpe: number | null
+      rir: number | null
+    }>
+  } | null
 }
 
 export default function StrengthWeekView({
@@ -389,6 +428,8 @@ export default function StrengthWeekView({
           workoutName={workoutMetadata.workout.name}
           exerciseCount={workoutMetadata.exerciseCount}
           workoutCompletionId={workoutMetadata.completionId}
+          initialExercise={workoutMetadata.firstExercise}
+          initialHistory={workoutMetadata.firstExerciseHistory}
           onComplete={handleCompleteWorkout}
           onRefresh={handleRefreshMetadata}
         />

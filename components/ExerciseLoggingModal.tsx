@@ -41,6 +41,8 @@ type Props = {
   workoutName: string
   exerciseCount: number
   workoutCompletionId?: string
+  initialExercise?: Exercise | null
+  initialHistory?: ExerciseHistory | null
   onComplete: (loggedSets: LoggedSet[]) => Promise<void>
   onRefresh?: () => Promise<void>
 }
@@ -64,6 +66,8 @@ export default function ExerciseLoggingModal({
   workoutId,
   exerciseCount,
   workoutCompletionId,
+  initialExercise,
+  initialHistory,
   onComplete,
   onRefresh,
 }: Props) {
@@ -106,7 +110,10 @@ export default function ExerciseLoggingModal({
     hasHistoryForCurrentExercise,
     refreshExercises,
     allExercisesLoaded,
-  } = useProgressiveExercises(workoutId, exerciseCount, workoutCompletionId)
+  } = useProgressiveExercises(workoutId, exerciseCount, workoutCompletionId, {
+    initialExercise: initialExercise ?? undefined,
+    initialHistory: initialHistory ?? undefined,
+  })
 
   // Enhanced persistence with localStorage backing
   const { loggedSets, setLoggedSets, isLoaded, clearStoredWorkout } = useWorkoutStorage(workoutId)

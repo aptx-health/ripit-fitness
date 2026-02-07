@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { getLastExercisePerformance } from '@/lib/queries/exercise-history'
 import { logger } from '@/lib/logger'
 
 /**
  * GET /api/workouts/[workoutId]/metadata
- * Returns minimal workout data for fast modal opening
+ * Returns workout metadata + first exercise for fast modal opening
  */
 export async function GET(
   request: NextRequest,
@@ -53,17 +54,67 @@ export async function GET(
 
     const completionId = workout.completions[0]?.id
 
-    // Get total exercise count including one-offs if there's a completion
-    let exerciseCount = workout._count.exercises
+    // Build where conditions for exercises (program + one-offs)
+    const whereConditions: Array<{
+      workoutId?: string
+      workoutCompletionId?: string
+      isOneOff?: boolean
+    }> = [{ workoutId }]
     if (completionId) {
-      const oneOffCount = await prisma.exercise.count({
-        where: {
-          workoutCompletionId: completionId,
-          isOneOff: true,
-          userId: user.id,
+      whereConditions.push({ workoutCompletionId: completionId, isOneOff: true })
+    }
+
+    // Fetch first exercise with full data (same query we'd make separately)
+    const firstExercise = await prisma.exercise.findFirst({
+      where: { OR: whereConditions, userId: user.id },
+      orderBy: { order: 'asc' },
+      select: {
+        id: true,
+        name: true,
+        order: true,
+        exerciseGroup: true,
+        notes: true,
+        isOneOff: true,
+        exerciseDefinitionId: true,
+        exerciseDefinition: {
+          select: {
+            id: true,
+            name: true,
+            primaryFAUs: true,
+            secondaryFAUs: true,
+            equipment: true,
+            instructions: true,
+            isSystem: true,
+            createdBy: true,
+          },
         },
-      })
-      exerciseCount += oneOffCount
+        prescribedSets: {
+          orderBy: { setNumber: 'asc' },
+          select: {
+            id: true,
+            setNumber: true,
+            reps: true,
+            weight: true,
+            rpe: true,
+            rir: true,
+          },
+        },
+      },
+    })
+
+    // Count total exercises (including one-offs)
+    const exerciseCount = await prisma.exercise.count({
+      where: { OR: whereConditions, userId: user.id },
+    })
+
+    // Fetch history for first exercise in parallel with nothing (already done above)
+    let firstExerciseHistory = null
+    if (firstExercise) {
+      firstExerciseHistory = await getLastExercisePerformance(
+        firstExercise.exerciseDefinitionId,
+        user.id,
+        new Date()
+      )
     }
 
     return NextResponse.json({
@@ -75,6 +126,8 @@ export async function GET(
       },
       exerciseCount,
       completionId,
+      firstExercise,
+      firstExerciseHistory,
     })
   } catch (error) {
     logger.error({ error, context: 'workout-metadata' }, 'Error fetching workout metadata')

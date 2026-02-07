@@ -49,6 +49,11 @@ export type ExerciseHistory = {
 
 export type LoadState = 'pending' | 'loading' | 'loaded' | 'error'
 
+export interface UseProgressiveExercisesOptions {
+  initialExercise?: Exercise | null
+  initialHistory?: ExerciseHistory | null
+}
+
 export interface UseProgressiveExercisesResult {
   currentExercise: Exercise | null
   currentExerciseState: LoadState
@@ -58,10 +63,8 @@ export interface UseProgressiveExercisesResult {
   goToNext: () => void
   goToPrevious: () => void
   loadedExercises: Map<number, Exercise>
-  // History for current exercise
   currentExerciseHistory: ExerciseHistory | null
   currentHistoryState: LoadState
-  // Check if any exercise has history (for indicator dot)
   hasHistoryForCurrentExercise: boolean
   refreshExercises: () => void
   allExercisesLoaded: boolean
@@ -80,23 +83,48 @@ interface HistoryApiResponse {
 
 /**
  * Hook for progressively loading exercises for workout logging
- * Fetches exercises one at a time with their history, prioritizing the current exercise
+ * Accepts optional initial exercise + history to avoid extra round trips
  */
 export function useProgressiveExercises(
   workoutId: string,
   exerciseCount: number,
-  completionId?: string
+  completionId?: string,
+  options?: UseProgressiveExercisesOptions
 ): UseProgressiveExercisesResult {
+  const { initialExercise, initialHistory } = options || {}
+
+  // Initialize state with initial data if provided
   const [currentIndex, setCurrentIndex] = useState(0)
   const [totalExercises, setTotalExercises] = useState(exerciseCount)
-  const [loadedExercises, setLoadedExercises] = useState<Map<number, Exercise>>(new Map())
-  const [exerciseLoadStates, setExerciseLoadStates] = useState<Map<number, LoadState>>(new Map())
 
-  // Store history for ALL exercises, keyed by exercise ID
-  const [historyByExerciseId, setHistoryByExerciseId] = useState<Map<string, ExerciseHistory | null>>(new Map())
-  const [historyLoadStates, setHistoryLoadStates] = useState<Map<string, LoadState>>(new Map())
+  const [loadedExercises, setLoadedExercises] = useState<Map<number, Exercise>>(() => {
+    if (initialExercise) {
+      return new Map([[0, initialExercise]])
+    }
+    return new Map()
+  })
 
-  // Track what we're currently prefetching to avoid duplicates
+  const [exerciseLoadStates, setExerciseLoadStates] = useState<Map<number, LoadState>>(() => {
+    if (initialExercise) {
+      return new Map([[0, 'loaded']])
+    }
+    return new Map()
+  })
+
+  const [historyByExerciseId, setHistoryByExerciseId] = useState<Map<string, ExerciseHistory | null>>(() => {
+    if (initialExercise) {
+      return new Map([[initialExercise.id, initialHistory ?? null]])
+    }
+    return new Map()
+  })
+
+  const [historyLoadStates, setHistoryLoadStates] = useState<Map<string, LoadState>>(() => {
+    if (initialExercise) {
+      return new Map([[initialExercise.id, 'loaded']])
+    }
+    return new Map()
+  })
+
   const prefetchingRef = useRef<Set<string>>(new Set())
   const mountedRef = useRef(true)
 
@@ -105,14 +133,12 @@ export function useProgressiveExercises(
     if (exerciseCount !== totalExercises) {
       setTotalExercises(exerciseCount)
 
-      // Adjust currentIndex if it's now out of bounds
       if (currentIndex >= exerciseCount && exerciseCount > 0) {
         setCurrentIndex(exerciseCount - 1)
       }
     }
   }, [exerciseCount, totalExercises, currentIndex])
 
-  // Fetch a single exercise by order (1-based)
   const fetchExercise = useCallback(async (order: number): Promise<Exercise | null> => {
     if (order < 1 || order > totalExercises) return null
 
@@ -135,7 +161,6 @@ export function useProgressiveExercises(
     }
   }, [workoutId, completionId, totalExercises])
 
-  // Fetch history for an exercise
   const fetchHistory = useCallback(async (exerciseId: string): Promise<ExerciseHistory | null> => {
     try {
       const response = await fetch(`/api/exercises/${exerciseId}/history`)
@@ -149,18 +174,15 @@ export function useProgressiveExercises(
     }
   }, [])
 
-  // Load exercise and its history in sequence
   const loadExerciseWithHistory = useCallback(async (index: number) => {
     const order = index + 1
     const prefetchKey = `exercise-${index}`
 
-    // Skip if already loading or loaded
     if (prefetchingRef.current.has(prefetchKey)) return
     if (loadedExercises.has(index) && exerciseLoadStates.get(index) === 'loaded') {
-      // Exercise already loaded, but check if we need to load history
+      // Exercise already loaded, check if we need history
       const exercise = loadedExercises.get(index)
       if (exercise && !historyByExerciseId.has(exercise.id) && historyLoadStates.get(exercise.id) !== 'loading') {
-        // Load history for this exercise
         const historyKey = `history-${exercise.id}`
         if (!prefetchingRef.current.has(historyKey)) {
           prefetchingRef.current.add(historyKey)
@@ -181,7 +203,6 @@ export function useProgressiveExercises(
     prefetchingRef.current.add(prefetchKey)
     setExerciseLoadStates(prev => new Map(prev).set(index, 'loading'))
 
-    // Step 1: Load exercise (includes notes)
     const exercise = await fetchExercise(order)
 
     if (!mountedRef.current) {
@@ -193,7 +214,6 @@ export function useProgressiveExercises(
       setLoadedExercises(prev => new Map(prev).set(index, exercise))
       setExerciseLoadStates(prev => new Map(prev).set(index, 'loaded'))
 
-      // Step 2: Load history for this exercise
       const historyKey = `history-${exercise.id}`
       prefetchingRef.current.add(historyKey)
       setHistoryLoadStates(prev => new Map(prev).set(exercise.id, 'loading'))
@@ -212,9 +232,7 @@ export function useProgressiveExercises(
     prefetchingRef.current.delete(prefetchKey)
   }, [loadedExercises, exerciseLoadStates, historyByExerciseId, historyLoadStates, fetchExercise, fetchHistory])
 
-  // Prefetch next exercises sequentially (exercise + history, then next)
   const prefetchSequentially = useCallback(async (startIndex: number) => {
-    // Load current first, then prefetch next 3
     const indicesToLoad = [startIndex, startIndex + 1, startIndex + 2, startIndex + 3]
 
     for (const index of indicesToLoad) {
@@ -225,7 +243,6 @@ export function useProgressiveExercises(
     }
   }, [totalExercises, loadExerciseWithHistory])
 
-  // Initial load and prefetch on mount/index change
   useEffect(() => {
     mountedRef.current = true
     prefetchSequentially(currentIndex)
@@ -235,7 +252,6 @@ export function useProgressiveExercises(
     }
   }, [currentIndex, prefetchSequentially])
 
-  // Navigation functions
   const goToExercise = useCallback((index: number) => {
     if (index < 0 || index >= totalExercises) return
     setCurrentIndex(index)
@@ -253,7 +269,6 @@ export function useProgressiveExercises(
     }
   }, [currentIndex])
 
-  // Refresh all exercises (used after add/swap/delete)
   const refreshExercises = useCallback(() => {
     setLoadedExercises(new Map())
     setExerciseLoadStates(new Map())
@@ -261,15 +276,12 @@ export function useProgressiveExercises(
     setHistoryLoadStates(new Map())
     prefetchingRef.current.clear()
 
-    // Re-trigger loading
     prefetchSequentially(currentIndex)
   }, [currentIndex, prefetchSequentially])
 
-  // Compute current state
   const currentExercise = loadedExercises.get(currentIndex) || null
   const currentExerciseState = exerciseLoadStates.get(currentIndex) || 'pending'
 
-  // Get history for current exercise
   const currentExerciseHistory = currentExercise
     ? historyByExerciseId.get(currentExercise.id) ?? null
     : null
@@ -277,7 +289,6 @@ export function useProgressiveExercises(
     ? historyLoadStates.get(currentExercise.id) || 'pending'
     : 'pending'
 
-  // Check if current exercise has history (for indicator dot)
   const hasHistoryForCurrentExercise = currentExercise
     ? historyByExerciseId.has(currentExercise.id) && historyByExerciseId.get(currentExercise.id) !== null
     : false
