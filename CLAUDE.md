@@ -26,15 +26,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # ALWAYS use Doppler for environment variables
 doppler run -- [command]
 
-# Development server
+# Start all services (recommended)
+overmind start                                # Starts Supabase, PubSub emulator, worker, Next.js
+
+# Development server (if running services individually)
 doppler run -- npm run dev
+
+# Supabase local development
+supabase start                                # Start local Supabase stack
+supabase stop                                 # Stop local Supabase stack
+supabase status                               # Check status and connection details
+supabase status -o env                        # Export connection details as env vars
+supabase db pull                              # Pull schema from linked production project
 
 # Database operations
 doppler run -- npx prisma studio              # Database GUI
-doppler run -- npx prisma migrate dev         # Create migration (for features)
-doppler run -- npx prisma db push             # Prototype only (no migration files)
 doppler run -- npx prisma generate            # Generate Prisma client
-doppler run -- npx prisma migrate deploy      # Apply migrations (production)
+supabase db reset                             # Reset local DB (runs migrations + seeds)
 
 # Testing
 doppler run -- npm test
@@ -44,10 +52,54 @@ doppler run -- npm run lint
 
 ### Database Migration Strategy
 
-- **Prototyping**: `npx prisma db push` (experimenting, no migration files)
-- **Features**: `npx prisma migrate dev --name feature_name` (creates migration files)
-- **Production**: ONLY deploy via migration files, never `db push`
-- **Always commit migration files** with schema changes
+We use **Prisma + Supabase CLI** for schema management. See `/docs/DATABASE_MIGRATIONS.md` for complete workflow.
+
+**Quick Reference:**
+
+```bash
+# 1. Update prisma/schema.prisma with your changes
+
+# 2. Create new migration file
+supabase migration new describe_your_change
+
+# 3. Generate SQL diff
+doppler run -- npx prisma migrate diff \
+  --from-url "$DATABASE_URL" \
+  --to-schema-datamodel ./prisma/schema.prisma \
+  --script > supabase/migrations/[TIMESTAMP]_describe_your_change.sql
+
+# 4. Test locally
+supabase db reset
+
+# 5. Commit migration files
+git add prisma/schema.prisma supabase/migrations/[TIMESTAMP]_*.sql
+git commit -m "feat: describe your change"
+```
+
+**CRITICAL - Claude's Role in Migrations:**
+
+When the user asks Claude to make schema changes:
+
+1. ✅ **Claude CAN**:
+   - Update `prisma/schema.prisma`
+   - Create migration file with `supabase migration new`
+   - Generate SQL diff with `npx prisma migrate diff`
+   - Test locally with `supabase db reset`
+   - Commit migration files to git
+
+2. ❌ **Claude MUST NEVER**:
+   - Run `supabase db push` (pushes to production)
+   - Apply migrations directly to production
+   - Execute SQL in production environment
+   - Use `prisma migrate deploy` (production command)
+
+3. 🛑 **When Claude completes a migration**:
+   - Always end with: "Migration ready. **You must manually review and push to production** with `supabase db push`."
+   - Never proceed to production deployment automatically
+
+**Local Development**:
+- Prototyping: Edit schema → `supabase db reset` (no migration files needed for experiments)
+- Features: Follow the 5-step workflow above (creates versioned migration files)
 
 ## Project Structure
 
@@ -299,16 +351,53 @@ import { Button } from '@/components/ui/button';
 All API routes must include comprehensive error handling:
 
 ```typescript
+import { logger } from '@/lib/logger'
+
 try {
   // Logic here
 } catch (error) {
-  console.error('Route error:', error);
+  logger.error({ error, context: 'route-name' }, 'Route error')
   return NextResponse.json(
     { error: 'Internal server error' },
     { status: 500 }
-  );
+  )
 }
 ```
+
+### Logging
+
+Use the centralized logging system instead of `console.log/error`:
+
+**Server-side (API routes, server components):**
+```typescript
+import { logger } from '@/lib/logger'
+
+// Debug logs (set PINO_LOG_LEVEL=debug to see)
+logger.debug({ userId, programId }, 'User authenticated')
+
+// Info logs (shown by default)
+logger.info({ archivedCompletions: 5 }, 'Program restarted')
+
+// Errors
+logger.error({ error, programId }, 'Failed to restart program')
+```
+
+**Client-side (components):**
+```typescript
+import { clientLogger } from '@/lib/client-logger'
+
+// Debug logs (set NEXT_PUBLIC_LOG_LEVEL=debug to see)
+clientLogger.debug('[Modal] Opening modal')
+
+// Errors
+clientLogger.error('Error:', error)
+```
+
+**Configuration:**
+- `PINO_LOG_LEVEL` - Server log level (trace|debug|info|warn|error|fatal|silent)
+- `NEXT_PUBLIC_LOG_LEVEL` - Client log level (debug|info|silent)
+
+See `/docs/LOGGING.md` for complete documentation.
 
 ### Avoid N+1 Queries
 
@@ -474,12 +563,15 @@ git commit -m "feat: add feature"
 ## Reference Documents
 
 ### Active Documentation
+- `/docs/DATABASE_MIGRATIONS.md` - **CRITICAL**: Database migration workflow with Prisma + Supabase CLI
+- `/docs/LOGGING.md` - Logging configuration and usage with Pino
 - `/docs/STYLING.md` - DOOM theme color system and styling guide
 - `/docs/features/CARDIO_DESIGN.md` - Cardio tracking system design
 - `/docs/features/EXERCISE_PERFORMANCE_TRACKING.md` - Exercise tracking features
 - `/docs/features/PROGRAM_MANAGEMENT_IMPROVEMENTS.md` - Program management enhancements
 - `/docs/features/PERFORMANCE_ANALYSIS.md` - Performance analysis and optimizations
 - `/docs/gcp/` - GCP Pub/Sub setup, clone worker architecture, and operations guides
+- `/WORKTREE_SETUP.md` - Multi-worktree setup with isolated Supabase instances
 
 ### Reference Material
 - `/NEW_PROJECT_REFERENCE.md` - Next.js + Supabase best practices (reference only, contains multi-tenant patterns we're NOT using)
@@ -492,6 +584,8 @@ git commit -m "feat: add feature"
 - RLS policies must be created for all user-owned tables
 - No emojis in code or commits unless explicitly requested
 - Keep solutions simple - avoid over-engineering
+- **Git file paths with special characters**: Always wrap file paths containing brackets or other special characters in double quotes when using git commands to prevent shell glob expansion. Example: `git add "app/api/exercises/[exerciseId]/route.ts"` instead of `git add app/api/exercises/[exerciseId]/route.ts`
+- **Local development**: Uses Supabase CLI for local PostgreSQL + Auth stack (replaces raw psql). Run `overmind start` to launch all services, or `supabase start` individually. The `dev_personal` Doppler config points to local Supabase (postgres@127.0.0.1:54322)
 - **Prisma version**: Stay on v6.x (Supabase recommendation). Use `npx prisma@6.19.0` to avoid installing v7
 - **Prisma migrations**: If `migrate dev` fails with "permission denied to terminate process", use `db push` instead (Supabase pooler limitation)
 - For local testing, use the doppler config `dev_test`. Example: `doppler run --config dev_test -- npm run test` This will ensure that the proper Testcontainer with the test database is utilized.

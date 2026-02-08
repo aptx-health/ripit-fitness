@@ -1166,6 +1166,144 @@
   --accent-rgb: 251, 191, 36;
 }
 
+/* CATPPUCCIN Theme - Light Mode (Latte) */
+[data-theme="catppuccin"] {
+  /* Base colors - Latte warm light */
+  --background: #eff1f5;  /* Latte Base */
+  --foreground: #4c4f69;  /* Latte Text */
+
+  /* Surface colors */
+  --card: #e6e9ef;        /* Latte Mantle */
+  --card-foreground: #4c4f69;
+  --muted: #ccd0da;       /* Latte Surface 0 */
+  --muted-foreground: #5c5f77;  /* Latte Subtext 1 - stronger contrast */
+
+  /* Border colors */
+  --border: #acb0be;      /* Latte Surface 2 */
+  --input: #bcc0cc;       /* Latte Surface 1 */
+
+  /* Primary (Latte Red) */
+  --primary: #d20f39;     /* Latte Red */
+  --primary-foreground: #eff1f5;
+  --primary-hover: #e64553;     /* Latte Maroon */
+  --primary-active: #b50d2f;
+  --primary-muted: #f5e0e4;
+  --primary-muted-dark: #d20f39;
+  --primary-rgb: 210, 15, 57;
+
+  /* Secondary (Latte Mauve) */
+  --secondary: #8839ef;   /* Latte Mauve */
+  --secondary-foreground: #eff1f5;
+  --secondary-hover: #9a4ff0;
+  --secondary-active: #7629e0;
+  --secondary-muted: #ece5f9;
+
+  /* Success (Latte Green) */
+  --success: #40a02b;     /* Latte Green */
+  --success-foreground: #eff1f5;
+  --success-hover: #4ab534;
+  --success-muted: #e5f2e2;
+  --success-text: #40a02b;
+  --success-border: #40a02b;
+  --success-rgb: 64, 160, 43;
+
+  /* Warning (Latte Peach) */
+  --warning: #fe640b;     /* Latte Peach */
+  --warning-foreground: #eff1f5;
+  --warning-hover: #df8e1d;     /* Latte Yellow */
+  --warning-muted: #fef0e2;
+  --warning-text: #fe640b;
+  --warning-border: #fe640b;
+  --warning-rgb: 254, 100, 11;
+
+  /* Error (Latte Maroon) */
+  --error: #e64553;       /* Latte Maroon */
+  --error-foreground: #eff1f5;
+  --error-hover: #d20f39;
+  --error-muted: #f9e5e7;
+  --error-text: #e64553;
+  --error-border: #e64553;
+  --error-rgb: 230, 69, 83;
+
+  /* Accent (Latte Teal) */
+  --accent: #179299;      /* Latte Teal */
+  --accent-foreground: #eff1f5;
+  --accent-hover: #04a5e5;      /* Latte Sky */
+  --accent-active: #209fb5;     /* Latte Sapphire */
+  --accent-muted: #e2f3f4;
+  --accent-text: #179299;
+  --accent-rgb: 23, 146, 153;
+}
+
+/* CATPPUCCIN Theme - Dark Mode (Mocha) */
+[data-theme="catppuccin"][data-mode="dark"] {
+  /* Base colors - Mocha deep dark */
+  --background: #1e1e2e;  /* Mocha Base */
+  --foreground: #cdd6f4;  /* Mocha Text */
+
+  /* Surface colors */
+  --card: #313244;        /* Mocha Surface 0 */
+  --card-foreground: #cdd6f4;
+  --muted: #45475a;       /* Mocha Surface 1 */
+  --muted-foreground: #a6adc8;  /* Mocha Subtext 0 - better contrast */
+
+  /* Border colors */
+  --border: #585b70;      /* Mocha Surface 2 */
+  --input: #45475a;       /* Mocha Surface 1 */
+
+  /* Primary (Mocha Red) */
+  --primary: #f38ba8;     /* Mocha Red */
+  --primary-foreground: #1e1e2e;
+  --primary-hover: #eba0ac;     /* Mocha Maroon */
+  --primary-active: #f38ba8;
+  --primary-muted: #3e2a33;
+  --primary-muted-dark: #f38ba8;
+  --primary-rgb: 243, 139, 168;
+
+  /* Secondary (Mocha Mauve) */
+  --secondary: #cba6f7;   /* Mocha Mauve */
+  --secondary-foreground: #1e1e2e;
+  --secondary-hover: #b4befe;   /* Mocha Lavender */
+  --secondary-active: #cba6f7;
+  --secondary-muted: #332e44;
+
+  /* Success (Mocha Green) */
+  --success: #a6e3a1;     /* Mocha Green */
+  --success-foreground: #1e1e2e;
+  --success-hover: #94e2d5;     /* Mocha Teal */
+  --success-muted: #2a3a2a;
+  --success-text: #a6e3a1;
+  --success-border: #a6e3a1;
+  --success-rgb: 166, 227, 161;
+
+  /* Warning (Mocha Peach) */
+  --warning: #fab387;     /* Mocha Peach */
+  --warning-foreground: #1e1e2e;
+  --warning-hover: #f9e2af;     /* Mocha Yellow */
+  --warning-muted: #3a3226;
+  --warning-text: #fab387;
+  --warning-border: #fab387;
+  --warning-rgb: 250, 179, 135;
+
+  /* Error (Mocha Maroon) */
+  --error: #eba0ac;       /* Mocha Maroon */
+  --error-foreground: #1e1e2e;
+  --error-hover: #f38ba8;       /* Mocha Red */
+  --error-muted: #3a2a2e;
+  --error-text: #eba0ac;
+  --error-border: #eba0ac;
+  --error-rgb: 235, 160, 172;
+
+  /* Accent (Mocha Teal) */
+  --accent: #94e2d5;      /* Mocha Teal */
+  --accent-foreground: #1e1e2e;
+  --accent-hover: #89dceb;      /* Mocha Sky */
+  --accent-active: #74c7ec;     /* Mocha Sapphire */
+  --accent-muted: #2a3a38;
+  --accent-text: #94e2d5;
+  --accent-rgb: 148, 226, 213;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -1579,4 +1717,29 @@ body {
 /* Cards get subtle golden borders on hover */
 [data-theme="ripit"] .bg-card:hover {
   border-color: rgba(251, 191, 36, 0.3); /* golden tint */
+}
+
+/* Disable hover effect for BragStrip stats - preserve original border colors */
+.brag-strip-no-hover .border-border:hover {
+  border-color: var(--border) !important;
+}
+.brag-strip-no-hover .border-primary:hover {
+  border-color: var(--primary) !important;
+}
+.brag-strip-no-hover .border-accent:hover {
+  border-color: var(--accent) !important;
+}
+
+/* Shimmer animation for progress bars */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
 }

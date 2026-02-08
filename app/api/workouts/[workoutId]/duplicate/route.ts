@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { logger } from '@/lib/logger'
+import { validateWorkoutLimit } from '@/lib/validation/workout-limits'
 
 export async function POST(
   request: NextRequest,
@@ -81,6 +83,16 @@ export async function POST(
 
     if (targetWeek.program.userId !== user.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    }
+
+    // Validate workout limit
+    const validation = await validateWorkoutLimit(prisma, targetWeekId)
+    if (!validation.valid) {
+      logger.warn(
+        { workoutId, targetWeekId, currentCount: validation.currentCount, userId: user.id },
+        'Workout limit exceeded on duplication'
+      )
+      return NextResponse.json({ error: validation.error }, { status: 400 })
     }
 
     // Calculate the next dayNumber for the target week

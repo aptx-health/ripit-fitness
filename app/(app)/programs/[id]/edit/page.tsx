@@ -4,12 +4,14 @@ import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import ProgramBuilder from '@/components/ProgramBuilder'
 
-export default async function EditProgramPage({
-  params,
-}: {
+type Props = {
   params: Promise<{ id: string }>
-}) {
+  searchParams: Promise<{ week?: string }>
+}
+
+export default async function EditProgramPage({ params, searchParams }: Props) {
   const { id } = await params
+  const { week: weekParam } = await searchParams
 
   const { user } = await getCurrentUser()
 
@@ -17,35 +19,21 @@ export default async function EditProgramPage({
     redirect('/login')
   }
 
-  // Fetch the program with all its data
+  // Parse requested week (default to 1)
+  const requestedWeek = weekParam ? parseInt(weekParam, 10) : 1
+  const validWeekNumber = !isNaN(requestedWeek) && requestedWeek > 0 ? requestedWeek : 1
+
+  // Fetch program metadata and week summary (lightweight query)
   const program = await prisma.program.findUnique({
-    where: { 
+    where: {
       id,
-      userId: user.id // Ensure user owns this program
+      userId: user.id
     },
     include: {
       weeks: {
-        include: {
-          workouts: {
-            include: {
-              exercises: {
-                include: {
-                  prescribedSets: {
-                    orderBy: { setNumber: 'asc' }
-                  },
-                  exerciseDefinition: {
-                    select: {
-                      id: true,
-                      name: true,
-                      primaryFAUs: true,
-                      secondaryFAUs: true
-                    }
-                  }
-                }
-              }
-            },
-            orderBy: { dayNumber: 'asc' }
-          }
+        select: {
+          id: true,
+          weekNumber: true
         },
         orderBy: { weekNumber: 'asc' }
       }
@@ -55,6 +43,40 @@ export default async function EditProgramPage({
   if (!program) {
     redirect('/programs')
   }
+
+  // Fetch only the current week's full data
+  const currentWeek = await prisma.week.findFirst({
+    where: {
+      programId: id,
+      weekNumber: validWeekNumber,
+      userId: user.id
+    },
+    include: {
+      workouts: {
+        include: {
+          exercises: {
+            include: {
+              prescribedSets: {
+                orderBy: { setNumber: 'asc' }
+              },
+              exerciseDefinition: {
+                select: {
+                  id: true,
+                  name: true,
+                  primaryFAUs: true,
+                  secondaryFAUs: true,
+                  isSystem: true,
+                  createdBy: true
+                }
+              }
+            },
+            orderBy: { order: 'asc' }
+          }
+        },
+        orderBy: { dayNumber: 'asc' }
+      }
+    }
+  })
 
   return (
     <div className="min-h-screen bg-background doom-page-enter">
@@ -86,7 +108,14 @@ export default async function EditProgramPage({
 
         <ProgramBuilder
           editMode={true}
-          existingProgram={program}
+          existingProgram={{
+            id: program.id,
+            name: program.name,
+            description: program.description,
+            isActive: program.isActive,
+            weeksSummary: program.weeks,
+            initialWeek: currentWeek
+          }}
         />
       </div>
     </div>

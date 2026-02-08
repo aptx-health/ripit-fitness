@@ -58,6 +58,7 @@ export type CurrentCardioWeekData = {
       }>
     }>
   }
+  totalWeeks: number
 }
 
 /**
@@ -107,6 +108,7 @@ export async function getCurrentStrengthWeek(
             WHERE wo."weekId" = w.id
               AND wc."userId" = ${userId}
               AND wc.status IN ('completed', 'skipped')
+              AND wc."isArchived" = false
           )
         ORDER BY w."weekNumber" ASC
         LIMIT 1
@@ -149,7 +151,7 @@ export async function getCurrentStrengthWeek(
             name: true,
             dayNumber: true,
             completions: {
-              where: { userId },
+              where: { userId, isArchived: false },
               select: { id: true, status: true, completedAt: true },
               orderBy: { completedAt: 'desc' },
               take: 1
@@ -198,11 +200,13 @@ export async function getCurrentCardioWeek(
     const result = await prisma.$queryRaw<Array<{
       programId: string
       programName: string
+      totalWeeks: bigint
       weekId: string
       weekNumber: number
     }>>`
       WITH active_program AS (
-        SELECT cp.id, cp.name
+        SELECT cp.id, cp.name,
+          (SELECT COUNT(*) FROM "CardioWeek" WHERE "cardioProgramId" = cp.id) as total_weeks
         FROM "CardioProgram" cp
         WHERE cp."userId" = ${userId}
           AND cp."isActive" = true
@@ -238,6 +242,7 @@ export async function getCurrentCardioWeek(
       SELECT
         ap.id as "programId",
         ap.name as "programName",
+        ap.total_weeks as "totalWeeks",
         COALESCE(iw.id, lw.id) as "weekId",
         COALESCE(iw."weekNumber", lw."weekNumber") as "weekNumber"
       FROM active_program ap
@@ -250,7 +255,7 @@ export async function getCurrentCardioWeek(
       return null
     }
 
-    const { programId, programName, weekId } = result[0]
+    const { programId, programName, totalWeeks, weekId } = result[0]
 
     // Step 2: Fetch the week with session details using Prisma
     const week = await prisma.cardioWeek.findUnique({
@@ -272,7 +277,7 @@ export async function getCurrentCardioWeek(
             intervalStructure: true,
             notes: true,
             loggedSessions: {
-              where: { userId, status: 'completed' },
+              where: { userId },
               select: { id: true, status: true, completedAt: true },
               orderBy: { completedAt: 'desc' },
               take: 1
@@ -289,7 +294,8 @@ export async function getCurrentCardioWeek(
 
     return {
       program: { id: programId, name: programName },
-      week
+      week,
+      totalWeeks: Number(totalWeeks)
     }
   } catch (error) {
     console.error('[getCurrentCardioWeek] Error fetching current week:', error)

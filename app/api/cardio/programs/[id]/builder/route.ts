@@ -49,6 +49,23 @@ export async function PUT(
       )
     }
 
+    // Validate all sessions upfront before any database operations
+    for (const week of body.weeks) {
+      if (Array.isArray(week.sessions)) {
+        for (const session of week.sessions) {
+          if (!session.name || !session.targetDuration) {
+            throw new Error(`Session on day ${session.dayNumber} missing required fields`)
+          }
+          if (session.equipment && !isValidEquipment(session.equipment)) {
+            throw new Error(`Invalid equipment: ${session.equipment}`)
+          }
+          if (session.intensityZone && !isValidIntensityZone(session.intensityZone)) {
+            throw new Error(`Invalid intensity zone: ${session.intensityZone}`)
+          }
+        }
+      }
+    }
+
     // Use transaction to update entire program structure
     await prisma.$transaction(async (tx) => {
       // Delete all existing weeks and sessions (cascade will handle sessions)
@@ -56,50 +73,62 @@ export async function PUT(
         where: { cardioProgramId: programId }
       })
 
-      // Create new weeks and sessions
-      for (const week of body.weeks) {
-        const createdWeek = await tx.cardioWeek.create({
-          data: {
-            cardioProgramId: programId,
-            weekNumber: week.weekNumber,
-            userId: user.id
-          }
-        })
+      // Create all weeks in parallel
+      const createdWeeks = await Promise.all(
+        body.weeks.map((week: { weekNumber: number }) =>
+          tx.cardioWeek.create({
+            data: {
+              cardioProgramId: programId,
+              weekNumber: week.weekNumber,
+              userId: user.id
+            }
+          })
+        )
+      )
 
-        // Create sessions for this week
+      // Build all sessions data for bulk insert
+      const allSessionsData: {
+        weekId: string
+        dayNumber: number
+        name: string
+        description: string | null
+        targetDuration: number
+        intensityZone: string | null
+        equipment: string | null
+        targetHRRange: string | null
+        targetPowerRange: string | null
+        intervalStructure: string | null
+        notes: string | null
+        userId: string
+      }[] = []
+
+      for (let i = 0; i < body.weeks.length; i++) {
+        const week = body.weeks[i]
+        const createdWeek = createdWeeks[i]
+
         if (Array.isArray(week.sessions)) {
           for (const session of week.sessions) {
-            // Validate session data
-            if (!session.name || !session.targetDuration) {
-              throw new Error(`Session on day ${session.dayNumber} missing required fields`)
-            }
-
-            if (session.equipment && !isValidEquipment(session.equipment)) {
-              throw new Error(`Invalid equipment: ${session.equipment}`)
-            }
-
-            if (session.intensityZone && !isValidIntensityZone(session.intensityZone)) {
-              throw new Error(`Invalid intensity zone: ${session.intensityZone}`)
-            }
-
-            await tx.prescribedCardioSession.create({
-              data: {
-                weekId: createdWeek.id,
-                dayNumber: session.dayNumber,
-                name: session.name.trim(),
-                description: session.description?.trim() || null,
-                targetDuration: session.targetDuration,
-                intensityZone: session.intensityZone || null,
-                equipment: session.equipment || null,
-                targetHRRange: session.targetHRRange?.trim() || null,
-                targetPowerRange: session.targetPowerRange?.trim() || null,
-                intervalStructure: session.intervalStructure?.trim() || null,
-                notes: session.notes?.trim() || null,
-                userId: user.id
-              }
+            allSessionsData.push({
+              weekId: createdWeek.id,
+              dayNumber: session.dayNumber,
+              name: session.name.trim(),
+              description: session.description?.trim() || null,
+              targetDuration: session.targetDuration,
+              intensityZone: session.intensityZone || null,
+              equipment: session.equipment || null,
+              targetHRRange: session.targetHRRange?.trim() || null,
+              targetPowerRange: session.targetPowerRange?.trim() || null,
+              intervalStructure: session.intervalStructure?.trim() || null,
+              notes: session.notes?.trim() || null,
+              userId: user.id
             })
           }
         }
+      }
+
+      // Bulk create all sessions in one operation
+      if (allSessionsData.length > 0) {
+        await tx.prescribedCardioSession.createMany({ data: allSessionsData })
       }
     })
 

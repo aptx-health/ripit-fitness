@@ -36,6 +36,9 @@ yarn-error.log*
 .env*.test
 !.env.example
 
+# doppler
+.doppler.yaml
+
 # vercel
 .vercel
 

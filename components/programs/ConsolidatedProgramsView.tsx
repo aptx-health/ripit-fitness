@@ -16,6 +16,7 @@ import {
 } from './CardioActions'
 import ArchivedProgramsSection from './ArchivedProgramsSection'
 import { useToast } from '@/components/ToastProvider'
+import StrengthActivationModal from '../StrengthActivationModal'
 
 type StrengthProgram = {
   id: string
@@ -66,6 +67,11 @@ export default function ConsolidatedProgramsView({
   const [deletedPrograms, setDeletedPrograms] = useState<Set<string>>(new Set())
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const completedClonesRef = useRef<Set<string>>(new Set())
+
+  // Activation modal state
+  const [showActivationModal, setShowActivationModal] = useState(false)
+  const [activationProgramId, setActivationProgramId] = useState<string | null>(null)
+  const [existingActiveProgram, setExistingActiveProgram] = useState<{ id: string; name: string } | null>(null)
 
   // Sync state from URL on initial load or direct navigation (e.g., shared links)
   useEffect(() => {
@@ -185,13 +191,36 @@ export default function ConsolidatedProgramsView({
             delete updated[programId]
             return updated
           })
-          toast.success('Program added!', `${data.name} has been added to your programs.`)
 
-          // Clean up URL and stop polling
-          cleanupCloningState()
+          // Determine if this is a strength program
+          const isStrengthProgram = strengthPrograms.some(p => p.id === programId)
 
-          // Refresh to get latest data - completedClones check will prevent re-polling
-          router.refresh()
+          if (isStrengthProgram) {
+            // For strength programs, show activation modal
+            // First check for existing active programs
+            const activeProgram = strengthPrograms.find(p => p.isActive && p.id !== programId)
+            if (activeProgram) {
+              setExistingActiveProgram({ id: activeProgram.id, name: activeProgram.name })
+            }
+
+            setActivationProgramId(programId)
+            setShowActivationModal(true)
+
+            // Clean up URL and stop polling
+            cleanupCloningState()
+
+            // Refresh to get latest data
+            router.refresh()
+          } else {
+            // For cardio programs, just show toast (existing behavior)
+            toast.success('Program added!', `${data.name} has been added to your programs.`)
+
+            // Clean up URL and stop polling
+            cleanupCloningState()
+
+            // Refresh to get latest data - completedClones check will prevent re-polling
+            router.refresh()
+          }
         }
         return false
       }
@@ -473,6 +502,19 @@ export default function ConsolidatedProgramsView({
           )}
         </div>
       </div>
+
+      {/* Activation Modal */}
+      {showActivationModal && activationProgramId && (
+        <StrengthActivationModal
+          programId={activationProgramId}
+          existingActiveProgram={existingActiveProgram}
+          onClose={() => {
+            setShowActivationModal(false)
+            setActivationProgramId(null)
+            setExistingActiveProgram(null)
+          }}
+        />
+      )}
     </div>
   )
 }

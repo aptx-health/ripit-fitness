@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import * as Dialog from '@radix-ui/react-dialog'
-import { X, Upload, CheckCircle2, AlertCircle } from 'lucide-react'
-import { LoadingFrog } from '@/components/ui/loading-frog'
+import { X, Upload, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
+import ProgramMetadataForm from './ProgramMetadataForm'
+import { ProgramMetadata } from '@/lib/constants/program-metadata'
 
 type PublishProgramDialogProps = {
   open: boolean
@@ -22,9 +23,16 @@ type ValidationResult = {
     exerciseCount: number
   }
   displayName?: string
+  metadata?: ProgramMetadata
 }
 
-type PublishState = 'validating' | 'invalid' | 'ready' | 'publishing' | 'success'
+type PublishState =
+  | 'validating'
+  | 'invalid'
+  | 'needs_metadata'
+  | 'ready'
+  | 'publishing'
+  | 'success'
 
 export default function PublishProgramDialog({
   open,
@@ -36,6 +44,14 @@ export default function PublishProgramDialog({
   const [state, setState] = useState<PublishState>('validating')
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [metadata, setMetadata] = useState<ProgramMetadata>({
+    goals: [],
+    level: null,
+    durationWeeks: null,
+    durationDisplay: '',
+    targetDaysPerWeek: null,
+    equipmentNeeded: [],
+  })
 
   // Reset state when dialog opens
   useEffect(() => {
@@ -45,6 +61,7 @@ export default function PublishProgramDialog({
       setError(null)
       validateProgram()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, programId])
 
   const validateProgram = async () => {
@@ -58,11 +75,67 @@ export default function PublishProgramDialog({
 
       const result: ValidationResult = await response.json()
       setValidationResult(result)
-      setState(result.valid ? 'ready' : 'invalid')
+
+      if (!result.valid) {
+        setState('invalid')
+        return
+      }
+
+      // Check if metadata is missing (level or goals)
+      const needsMetadata =
+        !result.metadata?.level || !result.metadata?.goals?.length
+
+      if (needsMetadata) {
+        // Load detected equipment
+        const equipmentRes = await fetch(
+          `/api/programs/${programId}/detect-equipment`
+        )
+        const { equipment } = await equipmentRes.json()
+
+        setMetadata({
+          goals: result.metadata?.goals || [],
+          level: result.metadata?.level || null,
+          targetDaysPerWeek: result.metadata?.targetDaysPerWeek || null,
+          durationDisplay:
+            result.metadata?.durationDisplay ||
+            `${result.stats?.weekCount || 0} weeks`,
+          durationWeeks: result.metadata?.durationWeeks || null,
+          equipmentNeeded: equipment || [],
+        })
+
+        setState('needs_metadata')
+      } else {
+        setState('ready')
+      }
     } catch (err) {
       console.error('Error validating program:', err)
       setError(err instanceof Error ? err.message : 'Failed to validate program')
       setState('invalid')
+    }
+  }
+
+  const handleSaveMetadata = async () => {
+    try {
+      const response = await fetch(`/api/programs/${programId}/metadata`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          goals: metadata.goals,
+          level: metadata.level,
+          durationWeeks: validationResult?.stats?.weekCount || null,
+          durationDisplay: metadata.durationDisplay || null,
+          targetDaysPerWeek: metadata.targetDaysPerWeek,
+          equipmentNeeded: metadata.equipmentNeeded,
+        }),
+      })
+
+      if (!response.ok) throw new Error('Failed to save metadata')
+
+      // Re-validate and proceed
+      setState('validating')
+      await validateProgram()
+    } catch (err) {
+      setError('Failed to save program metadata')
     }
   }
 
@@ -99,16 +172,31 @@ export default function PublishProgramDialog({
   return (
     <Dialog.Root open={open} onOpenChange={handleClose}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 backdrop-blur-md bg-black/40 dark:bg-black/60 z-50 animate-in fade-in" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card border border-border rounded-lg shadow-xl z-50 w-full max-w-md p-6 animate-in fade-in zoom-in-95 max-h-[90vh] overflow-y-auto">
+        <Dialog.Overlay
+          className="backdrop-blur-md bg-black/40 dark:bg-black/60"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 50
+          }}
+        />
+        <Dialog.Content
+          className="bg-card border-2 border-border shadow-xl w-full sm:max-w-2xl doom-corners flex flex-col h-[100dvh] sm:h-auto sm:max-h-[94vh] top-0 sm:top-[3vh]"
+          style={{
+            position: 'fixed',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 51
+          }}
+        >
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <Dialog.Title className="text-xl font-bold text-foreground">
+          <div className="flex items-center justify-between p-6 pb-4 border-b-2 border-border flex-shrink-0">
+            <Dialog.Title className="text-xl font-bold text-foreground uppercase tracking-wider">
               Publish to Community
             </Dialog.Title>
             <Dialog.Close asChild>
               <button
-                className="h-8 w-8 flex items-center justify-center rounded hover:bg-muted transition-colors"
+                className="h-8 w-8 flex items-center justify-center hover:bg-muted transition-colors doom-focus-ring"
                 aria-label="Close"
               >
                 <X size={18} />
@@ -117,10 +205,11 @@ export default function PublishProgramDialog({
           </div>
 
           {/* Content based on state */}
+          <div className="overflow-y-auto p-6">
           {state === 'validating' && (
             <div className="text-center py-8">
               <div className="flex justify-center mb-4">
-                <LoadingFrog size={64} speed={0.6} />
+                <Loader2 className="w-12 h-12 animate-spin text-primary" />
               </div>
               <p className="text-sm text-muted-foreground">Validating program...</p>
             </div>
@@ -129,7 +218,7 @@ export default function PublishProgramDialog({
           {state === 'publishing' && (
             <div className="text-center py-8">
               <div className="flex justify-center mb-4">
-                <LoadingFrog size={64} speed={0.6} />
+                <Loader2 className="w-12 h-12 animate-spin text-primary" />
               </div>
               <p className="text-sm text-muted-foreground">Publishing to community...</p>
             </div>
@@ -137,10 +226,10 @@ export default function PublishProgramDialog({
 
           {state === 'invalid' && (
             <>
-              <div className="flex items-center gap-3 mb-4 p-4 bg-error/10 border border-error rounded-lg">
+              <div className="flex items-center gap-3 mb-4 p-4 bg-error/10 border-2 border-error">
                 <AlertCircle className="w-5 h-5 text-error flex-shrink-0" />
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-error mb-1">Cannot Publish Program</p>
+                  <p className="text-sm font-bold text-error mb-1 uppercase tracking-wider">Cannot Publish Program</p>
                   <p className="text-xs text-error/80">
                     Your program needs the following to be published:
                   </p>
@@ -159,17 +248,58 @@ export default function PublishProgramDialog({
               )}
 
               {error && (
-                <div className="mb-4 p-3 bg-error/10 border border-error rounded-lg">
-                  <p className="text-sm text-error">{error}</p>
+                <div className="mb-4 p-3 bg-error/10 border-2 border-error">
+                  <p className="text-sm text-error font-medium">{error}</p>
                 </div>
               )}
 
               <div className="flex justify-end">
                 <button
                   onClick={handleClose}
-                  className="px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors"
+                  className="px-4 py-2 border-2 border-border text-foreground hover:border-primary hover:text-primary transition-colors uppercase tracking-wider font-semibold text-sm doom-focus-ring"
                 >
                   Close
+                </button>
+              </div>
+            </>
+          )}
+
+          {state === 'needs_metadata' && (
+            <>
+              <div className="mb-6">
+                <h3 className="font-bold text-foreground mb-2 uppercase tracking-wide">
+                  Add Program Details
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Help others discover your program by adding some key information.
+                </p>
+              </div>
+
+              <ProgramMetadataForm
+                metadata={metadata}
+                onChange={setMetadata}
+                weekCount={validationResult?.stats?.weekCount}
+              />
+
+              {error && (
+                <div className="mt-4 p-3 bg-error/10 border-2 border-error">
+                  <p className="text-sm text-error font-medium">{error}</p>
+                </div>
+              )}
+
+              <div className="flex gap-3 justify-end mt-6">
+                <button
+                  onClick={handleClose}
+                  className="px-4 py-2 border-2 border-border text-foreground hover:border-primary hover:text-primary transition-colors uppercase tracking-wider font-semibold text-sm doom-focus-ring"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveMetadata}
+                  disabled={!metadata.level || metadata.goals.length === 0}
+                  className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover transition-colors uppercase tracking-wider font-semibold text-sm doom-button-3d doom-focus-ring disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Continue
                 </button>
               </div>
             </>
@@ -179,7 +309,7 @@ export default function PublishProgramDialog({
             <>
               {/* Program Summary */}
               <div className="mb-6">
-                <h3 className="font-semibold text-foreground mb-2">{programName}</h3>
+                <h3 className="font-bold text-foreground mb-2 uppercase tracking-wide">{programName}</h3>
                 {validationResult.stats && (
                   <div className="flex gap-4 text-sm text-muted-foreground">
                     <span>{validationResult.stats.weekCount} weeks</span>
@@ -192,9 +322,9 @@ export default function PublishProgramDialog({
               </div>
 
               {/* Display Name Info */}
-              <div className="mb-6 p-4 bg-muted rounded-lg">
+              <div className="mb-6 p-4 bg-muted border-2 border-border">
                 <p className="text-sm text-foreground mb-1">
-                  <span className="font-medium">Published as:</span>{' '}
+                  <span className="font-semibold uppercase tracking-wider text-xs">Published as:</span>{' '}
                   {validationResult.displayName || 'Anonymous User'}
                 </p>
                 {!validationResult.displayName && (
@@ -205,16 +335,16 @@ export default function PublishProgramDialog({
               </div>
 
               {/* Important Note */}
-              <div className="mb-6 p-4 bg-primary/10 border border-primary/30 rounded-lg">
+              <div className="mb-6 p-4 bg-primary/10 border-2 border-primary/30">
                 <p className="text-xs text-foreground/80">
-                  <span className="font-medium">Note:</span> Once published, programs are immutable and
+                  <span className="font-semibold uppercase tracking-wider">Note:</span> Once published, programs are immutable and
                   shared publicly. You can unpublish later, but cannot edit published programs.
                 </p>
               </div>
 
               {error && (
-                <div className="mb-4 p-3 bg-error/10 border border-error rounded-lg">
-                  <p className="text-sm text-error">{error}</p>
+                <div className="mb-4 p-3 bg-error/10 border-2 border-error">
+                  <p className="text-sm text-error font-medium">{error}</p>
                 </div>
               )}
 
@@ -222,16 +352,16 @@ export default function PublishProgramDialog({
               <div className="flex gap-3 justify-end">
                 <button
                   onClick={handleClose}
-                  className="px-4 py-2 border border-border text-foreground rounded-lg hover:bg-muted transition-colors"
+                  className="px-4 py-2 border-2 border-border text-foreground hover:border-primary hover:text-primary transition-colors uppercase tracking-wider font-semibold text-sm doom-focus-ring"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handlePublish}
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover transition-colors flex items-center gap-2"
+                  className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover transition-colors flex items-center gap-2 uppercase tracking-wider font-semibold text-sm doom-button-3d doom-focus-ring"
                 >
                   <Upload className="w-4 h-4" />
-                  Publish to Community
+                  Publish
                 </button>
               </div>
             </>
@@ -240,10 +370,10 @@ export default function PublishProgramDialog({
           {state === 'success' && (
             <>
               <div className="text-center py-8">
-                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-success/20 mx-auto mb-4">
+                <div className="flex items-center justify-center w-16 h-16 bg-success/20 border-2 border-success mx-auto mb-4">
                   <CheckCircle2 className="w-8 h-8 text-success" />
                 </div>
-                <h3 className="text-lg font-bold text-foreground mb-2">Program Published!</h3>
+                <h3 className="text-lg font-bold text-foreground mb-2 uppercase tracking-wider">Program Published!</h3>
                 <p className="text-sm text-muted-foreground mb-6">
                   "{programName}" is now available in the community library.
                 </p>
@@ -251,13 +381,13 @@ export default function PublishProgramDialog({
                 <div className="flex flex-col sm:flex-row gap-3">
                   <button
                     onClick={handleClose}
-                    className="flex-1 px-4 py-2 border border-border text-foreground rounded-lg hover:bg-muted transition-colors"
+                    className="flex-1 px-4 py-2 border-2 border-border text-foreground hover:border-primary hover:text-primary transition-colors uppercase tracking-wider font-semibold text-sm doom-focus-ring"
                   >
                     Close
                   </button>
                   <button
                     onClick={() => router.push('/community')}
-                    className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover transition-colors"
+                    className="flex-1 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover transition-colors uppercase tracking-wider font-semibold text-sm doom-button-3d doom-focus-ring"
                   >
                     View in Community
                   </button>
@@ -265,6 +395,7 @@ export default function PublishProgramDialog({
               </div>
             </>
           )}
+          </div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

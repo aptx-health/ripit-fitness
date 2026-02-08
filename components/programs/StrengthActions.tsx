@@ -25,12 +25,14 @@ export function StrengthPrimaryActions({
 
   return (
     <>
-      <Link
-        href={isActive ? '/training' : `/programs/${programId}`}
-        className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider md:inline-block w-full md:w-auto text-center"
-      >
-        {isActive ? 'OPEN PROGRAM' : 'VIEW PROGRAM'}
-      </Link>
+      {isActive && (
+        <Link
+          href="/training"
+          className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider md:inline-block w-full md:w-auto text-center"
+        >
+          OPEN PROGRAM
+        </Link>
+      )}
       {isCloning ? (
         <div
           className="px-4 py-2 border border-muted-foreground/30 text-muted-foreground/50 bg-background doom-button-3d font-semibold uppercase tracking-wider md:inline-block w-full md:w-auto text-center cursor-not-allowed opacity-60"

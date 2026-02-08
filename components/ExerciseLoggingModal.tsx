@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { useWorkoutStorage } from '@/hooks/useWorkoutStorage'
 import { useSyncState } from '@/hooks/useSyncState'
 import { useWorkoutSyncService } from '@/lib/sync/workoutSync'
+import { useProgressiveExercises, type Exercise, type ExerciseHistory } from '@/hooks/useProgressiveExercises'
 import SyncDetailsModal from './SyncDetailsModal'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import { AlertTriangle } from 'lucide-react'
@@ -11,6 +13,7 @@ import { AddExerciseWizard } from './workout-logging/wizards/AddExerciseWizard'
 import { SwapExerciseWizard } from './workout-logging/wizards/SwapExerciseWizard'
 import { EditExerciseWizard } from './workout-logging/wizards/EditExerciseWizard'
 import { DeleteExerciseWizard } from './workout-logging/wizards/DeleteExerciseWizard'
+import ExerciseDefinitionEditorModal from './features/exercise-definition/ExerciseDefinitionEditorModal'
 import ExerciseLoggingHeader from './workout-logging/ExerciseLoggingHeader'
 import ExerciseNavigation from './workout-logging/ExerciseNavigation'
 import ExerciseDisplayTabs from './workout-logging/ExerciseDisplayTabs'
@@ -25,67 +28,49 @@ import {
   DialogFooter,
 } from '@/components/ui/radix/dialog'
 
-type PrescribedSet = {
-  id: string
-  setNumber: number
-  reps: string // Changed from number to support ranges like "8-12"
-  weight: string | null
-  rpe: number | null
-  rir: number | null
-}
-
-type Exercise = {
-  id: string
-  name: string
-  order: number
-  exerciseGroup: string | null
-  notes: string | null
-  isOneOff?: boolean // For one-off exercises added during logging
-  prescribedSets: PrescribedSet[]
-}
-
 // Import LoggedSet type from the hook to ensure consistency
 import { type LoggedSet } from '@/hooks/useWorkoutStorage'
 
-type ExerciseHistorySet = {
-  setNumber: number
-  reps: number
-  weight: number
-  weightUnit: string
-  rpe: number | null
-  rir: number | null
-}
-
-type ExerciseHistory = {
-  completedAt: Date
-  workoutName: string
-  sets: ExerciseHistorySet[]
-}
+// Re-export Exercise and ExerciseHistory types for external use
+export type { Exercise, ExerciseHistory }
 
 type Props = {
   isOpen: boolean
   onClose: () => void
-  exercises: Exercise[]
   workoutId: string
   workoutName: string
-  workoutCompletionId?: string // Completion ID for one-off exercises
+  exerciseCount: number
+  workoutCompletionId?: string
+  initialExercise?: Exercise | null
+  initialHistory?: ExerciseHistory | null
   onComplete: (loggedSets: LoggedSet[]) => Promise<void>
-  onRefresh?: () => void // Callback to refresh exercise data after add/swap
-  exerciseHistory?: Record<string, ExerciseHistory | null> // NEW: Exercise history map
+  onRefresh?: () => Promise<void>
+}
+
+// Loading skeleton for exercise content
+function ExerciseLoadingSkeleton() {
+  return (
+    <div className="flex flex-col items-center justify-center h-full py-12">
+      <LoadingFrog size={48} speed={0.8} />
+      <p className="mt-4 text-muted-foreground uppercase tracking-wider font-bold animate-pulse">
+        Loading exercise...
+      </p>
+    </div>
+  )
 }
 
 // Capitalized Function name because it's a React Component
 export default function ExerciseLoggingModal({
   isOpen,
   onClose,
-  exercises,
   workoutId,
+  exerciseCount,
   workoutCompletionId,
+  initialExercise,
+  initialHistory,
   onComplete,
   onRefresh,
-  exerciseHistory,
 }: Props) {
-  const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0)
   const [currentSet, setCurrentSet] = useState({
     reps: '',
     weight: '',
@@ -108,9 +93,45 @@ export default function ExerciseLoggingModal({
   // Wizard state
   const [activeWizard, setActiveWizard] = useState<'add' | 'swap' | 'edit' | 'delete' | null>(null)
   const [navigateToLastExercise, setNavigateToLastExercise] = useState(false)
+  const [editingExerciseDefinitionId, setEditingExerciseDefinitionId] = useState<string | null>(null)
+
+  // Progressive loading of exercises
+  const {
+    currentExercise,
+    currentExerciseState,
+    currentIndex,
+    totalExercises,
+    goToExercise,
+    goToNext,
+    goToPrevious,
+    loadedExercises,
+    currentExerciseHistory,
+    currentHistoryState,
+    hasHistoryForCurrentExercise,
+    refreshExercises,
+    allExercisesLoaded,
+  } = useProgressiveExercises(workoutId, exerciseCount, workoutCompletionId, {
+    initialExercise: initialExercise ?? undefined,
+    initialHistory: initialHistory ?? undefined,
+  })
 
   // Enhanced persistence with localStorage backing
   const { loggedSets, setLoggedSets, isLoaded, clearStoredWorkout } = useWorkoutStorage(workoutId)
+
+  // Validate and clean up localStorage on load - defer until exercises are loaded
+  useEffect(() => {
+    if (!isLoaded || !allExercisesLoaded || loggedSets.length === 0) return
+
+    const validExerciseIds = new Set(Array.from(loadedExercises.values()).map(e => e.id))
+    const invalidSets = loggedSets.filter(set => !validExerciseIds.has(set.exerciseId))
+
+    if (invalidSets.length > 0) {
+      console.warn(`Found ${invalidSets.length} sets with invalid exercise IDs in localStorage, cleaning up...`)
+      const validSets = loggedSets.filter(set => validExerciseIds.has(set.exerciseId))
+      setLoggedSets(validSets)
+      console.log(`Cleaned localStorage: ${loggedSets.length} -> ${validSets.length} sets`)
+    }
+  }, [isLoaded, allExercisesLoaded, loadedExercises, loggedSets, setLoggedSets, workoutId])
 
   // Sync state management
   const {
@@ -135,7 +156,6 @@ export default function ExerciseLoggingModal({
       onSyncSuccess: (syncedCount) => {
         syncSuccess(syncedCount)
         setHasUnsavedChanges(false)
-        // If this was a deletion-only sync (0 sets), localStorage should reflect the deletions
         console.log('Sync successful - localStorage and server now in sync')
       },
       onSyncError: (error, willRetry) => {
@@ -145,13 +165,12 @@ export default function ExerciseLoggingModal({
       onRetryStart: startRetry,
     },
     {
-      syncThreshold: 3, // Sync every 3 sets
+      syncThreshold: 3,
       maxRetries: 3,
       baseDelay: 2000
     }
   )
 
-  const currentExercise = exercises[currentExerciseIndex]
   const currentPrescribedSets = currentExercise?.prescribedSets || []
   const currentExerciseLoggedSets = loggedSets.filter(
     (s) => s.exerciseId === currentExercise?.id
@@ -166,7 +185,7 @@ export default function ExerciseLoggingModal({
   const hasRir = currentPrescribedSets.some((s) => s.rir !== null)
 
   const handleLogSet = useCallback(() => {
-    if (!currentSet.reps || !currentSet.weight) return
+    if (!currentSet.reps || !currentSet.weight || !currentExercise) return
 
     const newLoggedSet: LoggedSet = {
       exerciseId: currentExercise.id,
@@ -202,32 +221,28 @@ export default function ExerciseLoggingModal({
       rpe: '',
       rir: '',
     })
-  }, [currentSet, currentExercise?.id, nextSetNumber, setLoggedSets, addSets, addPendingSets])
+  }, [currentSet, currentExercise, nextSetNumber, setLoggedSets, addSets, addPendingSets])
 
   const handleNextExercise = () => {
-    if (currentExerciseIndex < exercises.length - 1) {
-      setCurrentExerciseIndex(currentExerciseIndex + 1)
-      setCurrentSet({
-        reps: '',
-        weight: '',
-        weightUnit: 'lbs',
-        rpe: '',
-        rir: '',
-      })
-    }
+    goToNext()
+    setCurrentSet({
+      reps: '',
+      weight: '',
+      weightUnit: 'lbs',
+      rpe: '',
+      rir: '',
+    })
   }
 
   const handlePreviousExercise = () => {
-    if (currentExerciseIndex > 0) {
-      setCurrentExerciseIndex(currentExerciseIndex - 1)
-      setCurrentSet({
-        reps: '',
-        weight: '',
-        weightUnit: 'lbs',
-        rpe: '',
-        rir: '',
-      })
-    }
+    goToPrevious()
+    setCurrentSet({
+      reps: '',
+      weight: '',
+      weightUnit: 'lbs',
+      rpe: '',
+      rir: '',
+    })
   }
 
   const handleReplaceExercise = () => {
@@ -246,19 +261,29 @@ export default function ExerciseLoggingModal({
     setActiveWizard('edit')
   }
 
+  const handleEditExerciseDefinition = () => {
+    if (currentExercise?.exerciseDefinition && !currentExercise.exerciseDefinition.isSystem) {
+      setEditingExerciseDefinitionId(currentExercise.exerciseDefinition.id)
+    }
+  }
+
   const handleExitWorkout = () => {
     setShowExitConfirm(true)
   }
 
-  const handleExitSaveAsDraft = () => {
-    // Keep logged sets in localStorage (already handled by useWorkoutStorage)
+  const handleExitSaveAsDraft = async () => {
     console.log('Saving workout as draft...')
     setShowExitConfirm(false)
+
+    // Sync current state to server to create/update draft record
+    if (loggedSets.length > 0) {
+      await syncCurrentState(loggedSets)
+    }
+
     onClose()
   }
 
   const handleExitDiscard = () => {
-    // Clear all logged sets from localStorage
     console.log('Discarding workout...')
     clearStoredWorkout()
     setShowExitConfirm(false)
@@ -266,13 +291,16 @@ export default function ExerciseLoggingModal({
   }
 
   const handleWizardComplete = async () => {
-    // Trigger refresh
+    // Trigger parent refresh and wait for it
     if (onRefresh) {
-      onRefresh()
+      await onRefresh()
     }
 
-    // Wait for refresh to complete
-    await new Promise(resolve => setTimeout(resolve, 2500))
+    // Small delay to ensure React state has propagated
+    await new Promise(resolve => setTimeout(resolve, 100))
+
+    // Refresh our progressive loading cache
+    refreshExercises()
 
     // If we added an exercise, navigate to it (it will be at the end)
     if (activeWizard === 'add') {
@@ -305,12 +333,13 @@ export default function ExerciseLoggingModal({
   }
 
   const handleDeleteSet = useCallback((setNumber: number) => {
+    if (!currentExercise) return
+
     const exerciseId = currentExercise.id
     const exerciseSets = loggedSets.filter(s => s.exerciseId === exerciseId)
 
     // Show confirmation for dangerous operations
     if (exerciseSets.length === 1) {
-      // Deleting the last set for this exercise
       setShowDeleteConfirm({
         show: true,
         exerciseId,
@@ -325,7 +354,7 @@ export default function ExerciseLoggingModal({
   }, [currentExercise?.id, loggedSets])
 
   const performDeleteSet = useCallback((exerciseId: string, setNumber: number) => {
-    console.log(`🗑️ Deleting set ${setNumber} for exercise ${exerciseId}`)
+    console.log(`Deleting set ${setNumber} for exercise ${exerciseId}`)
 
     const beforeCount = loggedSets.length
     setLoggedSets(prev =>
@@ -334,11 +363,9 @@ export default function ExerciseLoggingModal({
       )
     )
 
-    // Enhanced logging for safety
-    const afterCount = loggedSets.length - 1 // Will be one less after filter
-    console.log(`📊 Deletion impact: ${beforeCount} → ${afterCount} total sets`)
+    const afterCount = loggedSets.length - 1
+    console.log(`Deletion impact: ${beforeCount} -> ${afterCount} total sets`)
 
-    // Mark that we have unsaved changes (deletions)
     setHasUnsavedChanges(true)
 
     console.log('Set deleted locally - will sync with next batch or manual sync')
@@ -382,83 +409,58 @@ export default function ExerciseLoggingModal({
 
   // Handle exercise deletion - adjust index if current exercise was deleted
   useEffect(() => {
-    if (!isOpen || exercises.length === 0) {
-      // No exercises left - close modal
-      if (isOpen && exercises.length === 0) {
+    if (!isOpen || totalExercises === 0) {
+      if (isOpen && totalExercises === 0) {
         onClose()
       }
       return
     }
 
-    // Check if current exercise still exists
-    const currentExerciseStillExists = exercises.some(ex => ex.id === currentExercise?.id)
-
-    if (!currentExerciseStillExists) {
-      // Current exercise was deleted - navigate to previous or next
-      if (currentExerciseIndex > 0) {
-        // Go to previous exercise
-        setCurrentExerciseIndex(currentExerciseIndex - 1)
-      } else if (exercises.length > 0) {
-        // We were at index 0, stay at 0 (which is now a different exercise)
-        setCurrentExerciseIndex(0)
+    // If current exercise was deleted and no longer exists
+    if (currentExerciseState === 'loaded' && !currentExercise && totalExercises > 0) {
+      if (currentIndex > 0) {
+        goToExercise(currentIndex - 1)
+      } else {
+        goToExercise(0)
       }
-    } else if (currentExerciseIndex >= exercises.length) {
-      // Index out of bounds - go to last exercise
-      setCurrentExerciseIndex(exercises.length - 1)
     }
-  }, [exercises, isOpen, currentExerciseIndex, currentExercise?.id, onClose])
+  }, [isOpen, totalExercises, currentIndex, currentExercise, currentExerciseState, goToExercise, onClose])
 
   // Navigate to newly added exercise
   useEffect(() => {
-    if (navigateToLastExercise && exercises.length > 0) {
-      setCurrentExerciseIndex(exercises.length - 1)
+    if (navigateToLastExercise && totalExercises > 0) {
+      goToExercise(totalExercises - 1)
       setNavigateToLastExercise(false)
     }
-  }, [navigateToLastExercise, exercises.length])
+  }, [navigateToLastExercise, totalExercises, goToExercise])
 
   // Don't render until storage is loaded to prevent flash of empty state
   if (!isLoaded) {
-    return isOpen ? (
+    if (!isOpen) return null
+    if (typeof document === 'undefined') return null
+    return createPortal(
       <div className="fixed inset-0 z-50 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center">
-        <div className="bg-card border border-border rounded-2xl p-8 shadow-xl">
-          <div className="animate-pulse text-center">Loading workout...</div>
+        <div className="bg-card border-2 border-border p-8 shadow-xl doom-corners">
+          <div className="animate-pulse text-center uppercase tracking-wider font-bold">Loading workout...</div>
         </div>
-      </div>
-    ) : null
+      </div>,
+      document.body
+    )
   }
 
   const canLogSet = currentSet.reps && currentSet.weight
   const hasLoggedAllPrescribed =
     currentExerciseLoggedSets.length >= currentPrescribedSets.length
   const totalLoggedSets = loggedSets.length
-  const totalPrescribedSets = exercises.reduce(
-    (sum, ex) => sum + ex.prescribedSets.length,
-    0
-  )
 
   // Early returns after all hooks
   if (!isOpen) return null
 
-  // Guard against invalid exercise index (can happen briefly after deletion)
-  if (!currentExercise) {
-    // If no exercises left, close modal
-    if (exercises.length === 0) {
-      onClose()
-      return null
-    }
-    // Otherwise, show loading while useEffect adjusts the index
-    return (
-      <div className="fixed inset-0 z-50 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center">
-        <div className="bg-card border border-border rounded-2xl p-8 shadow-xl">
-          <div className="animate-pulse text-center">Loading...</div>
-        </div>
-      </div>
-    )
-  }
+  if (typeof document === 'undefined') return null
 
-  return (
+  return createPortal(
     <>
-      <div className="fixed inset-0 z-50 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-end sm:items-center justify-center">
+      <div className="fixed inset-0 z-50 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center">
         {/* Sync Details Modal */}
         <SyncDetailsModal
           isOpen={showSyncDetails}
@@ -472,55 +474,76 @@ export default function ExerciseLoggingModal({
         />
 
         {/* Modal - Full screen on mobile, centered on desktop */}
-        <div className="bg-card border border-border sm:rounded-2xl w-full h-full sm:h-[85vh] sm:max-h-[85vh] sm:max-w-2xl flex flex-col shadow-xl">
+        <div className="bg-card w-full h-[100dvh] sm:h-[85vh] sm:max-h-[85vh] sm:max-w-2xl sm:border-2 sm:border-border sm:rounded-lg flex flex-col shadow-xl">
           {/* Header with Sync Status */}
           <ExerciseLoggingHeader
-            currentExerciseIndex={currentExerciseIndex}
-            totalExercises={exercises.length}
-            totalLoggedSets={totalLoggedSets}
-            totalPrescribedSets={totalPrescribedSets}
+            currentExerciseIndex={currentIndex}
+            totalExercises={totalExercises}
             syncStatus={syncState.status}
             pendingSetsCount={syncState.pendingSets}
             onSyncClick={() => setShowSyncDetails(true)}
           />
 
           {/* Exercise Navigation */}
-          <ExerciseNavigation
-            currentExercise={currentExercise}
-            currentExerciseIndex={currentExerciseIndex}
-            totalExercises={exercises.length}
-            onPrevious={handlePreviousExercise}
-            onNext={handleNextExercise}
-          />
+          {currentExercise ? (
+            <ExerciseNavigation
+              currentExercise={currentExercise}
+              currentExerciseIndex={currentIndex}
+              totalExercises={totalExercises}
+              onPrevious={handlePreviousExercise}
+              onNext={handleNextExercise}
+            />
+          ) : (
+            <div className="px-4 py-3 border-b border-border">
+              <div className="h-8 bg-muted rounded animate-pulse" />
+            </div>
+          )}
 
           {/* Content area with tabs - tabs handle their own scrolling */}
           <div className="flex-1 overflow-hidden pb-2">
-            <ExerciseDisplayTabs
-              exercise={currentExercise}
-              prescribedSets={currentPrescribedSets}
-              loggedSets={currentExerciseLoggedSets}
-              exerciseHistory={exerciseHistory?.[currentExercise.id] || null}
-              onDeleteSet={handleDeleteSet}
-              loggingForm={
-                <SetLoggingForm
-                  prescribedSet={prescribedSet}
-                  nextSetNumber={nextSetNumber}
-                  hasLoggedAllPrescribed={hasLoggedAllPrescribed}
-                  hasRpe={hasRpe}
-                  hasRir={hasRir}
-                  currentSet={currentSet}
-                  onSetChange={setCurrentSet}
-                />
-              }
-            />
+            {currentExerciseState === 'loading' || currentExerciseState === 'pending' ? (
+              <ExerciseLoadingSkeleton />
+            ) : currentExerciseState === 'error' ? (
+              <div className="flex flex-col items-center justify-center h-full py-12">
+                <AlertTriangle size={48} className="text-error mb-4" />
+                <p className="text-error uppercase tracking-wider font-bold">
+                  Failed to load exercise
+                </p>
+                <button
+                  onClick={() => refreshExercises()}
+                  className="mt-4 px-4 py-2 bg-primary text-primary-foreground font-bold uppercase tracking-wider"
+                >
+                  Retry
+                </button>
+              </div>
+            ) : currentExercise ? (
+              <ExerciseDisplayTabs
+                exercise={currentExercise}
+                prescribedSets={currentPrescribedSets}
+                loggedSets={currentExerciseLoggedSets}
+                exerciseHistory={currentExerciseHistory}
+                historyState={currentHistoryState}
+                hasHistoryIndicator={hasHistoryForCurrentExercise}
+                onDeleteSet={handleDeleteSet}
+                loggingForm={
+                  <SetLoggingForm
+                    prescribedSet={prescribedSet}
+                    hasLoggedAllPrescribed={hasLoggedAllPrescribed}
+                    hasRpe={hasRpe}
+                    hasRir={hasRir}
+                    currentSet={currentSet}
+                    onSetChange={setCurrentSet}
+                  />
+                }
+              />
+            ) : null}
           </div>
 
           {/* Actions Footer */}
           <ExerciseActionsFooter
-            currentExerciseName={currentExercise.name}
+            currentExerciseName={currentExercise?.name || 'Exercise'}
             nextSetNumber={nextSetNumber}
             totalLoggedSets={totalLoggedSets}
-            totalPrescribedSets={totalPrescribedSets}
             canLogSet={!!canLogSet}
             hasLoggedAllPrescribed={hasLoggedAllPrescribed}
             isSubmitting={isSubmitting}
@@ -536,20 +559,20 @@ export default function ExerciseLoggingModal({
           {/* Workout completion confirmation modal */}
           {isConfirming && (
             <div className="fixed inset-0 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center z-60">
-              <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 text-center min-w-[300px] shadow-xl">
+              <div className="bg-card border-2 border-border p-6 sm:p-8 text-center min-w-[300px] shadow-xl doom-corners">
                 {!isSubmitting ? (
                   <>
-                    <p className="text-lg sm:text-xl mb-6 text-foreground font-semibold">Complete this workout?</p>
+                    <p className="text-lg sm:text-xl mb-6 text-foreground font-bold uppercase tracking-wider">Complete this workout?</p>
                     <div className="flex justify-center gap-3">
                       <button
                         onClick={() => setIsConfirming(false)}
-                        className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-muted text-foreground rounded-xl hover:bg-secondary transition-colors font-medium"
+                        className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-muted text-foreground hover:bg-secondary transition-colors font-bold uppercase tracking-wider border-2 border-border hover:border-primary doom-focus-ring"
                       >
                         Cancel
                       </button>
                       <button
                         onClick={handleCompleteWorkout}
-                        className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-success text-white rounded-xl hover:bg-success/90 transition-colors font-medium"
+                        className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-success text-white hover:bg-success/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
                       >
                         Confirm
                       </button>
@@ -560,7 +583,7 @@ export default function ExerciseLoggingModal({
                     <div className="mb-3 flex justify-center">
                       <LoadingFrog size={64} speed={0.8} />
                     </div>
-                    <p className="text-foreground">Completing workout...</p>
+                    <p className="text-foreground uppercase tracking-wider font-bold">Completing workout...</p>
                   </>
                 )}
               </div>
@@ -570,26 +593,26 @@ export default function ExerciseLoggingModal({
           {/* Deletion confirmation modal */}
           {showDeleteConfirm.show && (
             <div className="fixed inset-0 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center z-60">
-              <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 text-center max-w-sm shadow-xl">
+              <div className="bg-card border-2 border-error p-6 sm:p-8 text-center max-w-sm shadow-xl doom-corners">
                 <div className="text-warning mb-4">
                   <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 15.5c-.77.833.192 2.5 1.732 2.5z" />
                   </svg>
                 </div>
-                <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2">Delete Last Set?</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2 uppercase tracking-wider">Delete Last Set?</h3>
                 <p className="text-sm sm:text-base text-muted-foreground mb-6">
                   This will remove the only remaining set for this exercise. Are you sure?
                 </p>
                 <div className="flex justify-center gap-3">
                   <button
                     onClick={() => setShowDeleteConfirm({ show: false })}
-                    className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-muted text-foreground rounded-xl hover:bg-secondary transition-colors font-medium"
+                    className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-muted text-foreground hover:bg-secondary transition-colors font-bold uppercase tracking-wider border-2 border-border hover:border-primary doom-focus-ring"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleConfirmDelete}
-                    className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-error text-white rounded-xl hover:bg-error/90 transition-colors font-medium"
+                    className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-error text-white hover:bg-error/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
                   >
                     Delete Set
                   </button>
@@ -600,6 +623,20 @@ export default function ExerciseLoggingModal({
 
         </div>
       </div>
+
+      {/* Exercise Definition Editor Modal */}
+      <ExerciseDefinitionEditorModal
+        isOpen={!!editingExerciseDefinitionId}
+        onClose={() => setEditingExerciseDefinitionId(null)}
+        mode="edit"
+        exerciseId={editingExerciseDefinitionId || undefined}
+        onSuccess={() => {
+          setEditingExerciseDefinitionId(null)
+          if (onRefresh) {
+            onRefresh()
+          }
+        }}
+      />
 
       {/* Exercise Search Modal */}
       {/* Wizards */}
@@ -629,6 +666,8 @@ export default function ExerciseLoggingModal({
           onOpenChange={(open) => !open && setActiveWizard(null)}
           exercise={currentExercise}
           onComplete={handleWizardComplete}
+          isSystemExercise={currentExercise.exerciseDefinition?.isSystem ?? true}
+          onEditExercise={handleEditExerciseDefinition}
         />
       )}
 
@@ -645,11 +684,11 @@ export default function ExerciseLoggingModal({
       {/* Exit workout confirmation dialog */}
       {showExitConfirm && (
         <div className="fixed inset-0 backdrop-blur-md bg-background/80 flex items-center justify-center z-[60] p-4">
-          <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 text-center max-w-sm w-full shadow-xl">
+          <div className="bg-card border-2 border-warning p-6 sm:p-8 text-center max-w-sm w-full shadow-xl doom-corners">
             <div className="text-warning mb-4 flex justify-center">
               <AlertTriangle size={56} strokeWidth={2} />
             </div>
-            <h3 className="text-xl sm:text-2xl font-semibold text-foreground mb-2">
+            <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2 uppercase tracking-wider">
               {totalLoggedSets > 0 ? 'Exit Workout?' : 'Confirm Exit'}
             </h3>
             <p className="text-base sm:text-lg text-muted-foreground mb-6">
@@ -661,19 +700,19 @@ export default function ExerciseLoggingModal({
               <div className="flex flex-col gap-3">
                 <button
                   onClick={handleExitSaveAsDraft}
-                  className="w-full px-4 py-3 text-base sm:text-lg bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-colors font-medium"
+                  className="w-full px-4 py-3 text-base sm:text-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
                 >
                   Save as Draft
                 </button>
                 <button
                   onClick={handleExitDiscard}
-                  className="w-full px-4 py-3 text-base sm:text-lg bg-error text-error-foreground rounded-xl hover:bg-error/90 transition-colors font-medium"
+                  className="w-full px-4 py-3 text-base sm:text-lg bg-error text-error-foreground hover:bg-error/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
                 >
                   Discard All
                 </button>
                 <button
                   onClick={() => setShowExitConfirm(false)}
-                  className="w-full px-4 py-3 text-base sm:text-lg bg-muted text-foreground rounded-xl hover:bg-secondary transition-colors font-medium"
+                  className="w-full px-4 py-3 text-base sm:text-lg bg-muted text-foreground hover:bg-secondary transition-colors font-bold uppercase tracking-wider border-2 border-border hover:border-primary doom-focus-ring"
                 >
                   Cancel
                 </button>
@@ -682,13 +721,13 @@ export default function ExerciseLoggingModal({
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowExitConfirm(false)}
-                  className="flex-1 px-4 py-3 text-base sm:text-lg bg-muted text-foreground rounded-xl hover:bg-secondary transition-colors font-medium"
+                  className="flex-1 px-4 py-3 text-base sm:text-lg bg-muted text-foreground hover:bg-secondary transition-colors font-bold uppercase tracking-wider border-2 border-border hover:border-primary doom-focus-ring"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleExitDiscard}
-                  className="flex-1 px-4 py-3 text-base sm:text-lg bg-error text-error-foreground rounded-xl hover:bg-error/90 transition-colors font-medium"
+                  className="flex-1 px-4 py-3 text-base sm:text-lg bg-error text-error-foreground hover:bg-error/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
                 >
                   Exit
                 </button>
@@ -697,6 +736,7 @@ export default function ExerciseLoggingModal({
           </div>
         </div>
       )}
-    </>
+    </>,
+    document.body
   )
 }

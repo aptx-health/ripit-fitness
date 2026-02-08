@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Dumbbell, Activity } from 'lucide-react'
 import UnpublishProgramDialog from './UnpublishProgramDialog'
+import { GOAL_LABELS, LEVEL_LABELS, EQUIPMENT_LABELS } from '@/lib/constants/program-metadata'
 
 type CommunityProgram = {
   id: string
@@ -16,6 +17,12 @@ type CommunityProgram = {
   weekCount: number
   workoutCount: number
   exerciseCount: number
+  goals: string[]
+  level: string | null
+  durationDisplay: string | null
+  targetDaysPerWeek: number | null
+  equipmentNeeded: string[]
+  focusAreas: string[]
 }
 
 type CommunityProgramCardProps = {
@@ -77,11 +84,11 @@ export default function CommunityProgramCard({
 
   return (
     <>
-      <div className="p-4 sm:p-6 bg-card border border-border rounded-xl hover:border-primary transition-colors">
+      <div className="p-4 sm:p-6 bg-card border-2 border-border hover:border-primary transition-colors doom-corners doom-noise">
         {/* Header */}
         <div className="flex justify-between items-start gap-3 mb-3">
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg sm:text-xl font-bold text-foreground break-words">
+            <h3 className="text-lg sm:text-xl font-bold text-foreground break-words uppercase tracking-wide">
               {program.name}
             </h3>
             <p className="text-sm sm:text-base text-muted-foreground mt-1">
@@ -93,14 +100,14 @@ export default function CommunityProgramCard({
           <div className="flex flex-col gap-2 flex-shrink-0">
             {/* Author badge */}
             {isAuthor && (
-              <span className="px-2 py-1 bg-accent/20 text-accent text-xs font-medium rounded whitespace-nowrap">
+              <span className="px-2 py-1 bg-accent/20 text-accent text-xs font-bold uppercase tracking-wider whitespace-nowrap border border-accent">
                 YOUR PROGRAM
               </span>
             )}
 
             {/* Type badge */}
             <span
-              className="px-2 py-1 bg-primary text-primary-foreground text-xs font-bold rounded inline-flex items-center gap-1 whitespace-nowrap"
+              className="px-2 py-1 bg-primary text-primary-foreground text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1 whitespace-nowrap"
               aria-label={`${program.programType} program`}
             >
               {program.programType === 'strength' ? (
@@ -108,7 +115,7 @@ export default function CommunityProgramCard({
               ) : (
                 <Activity size={12} />
               )}
-              <span className="capitalize">{program.programType}</span>
+              <span>{program.programType}</span>
             </span>
           </div>
         </div>
@@ -118,11 +125,61 @@ export default function CommunityProgramCard({
           {program.description}
         </p>
 
+        {/* Metadata Badges */}
+        {(program.level || program.goals.length > 0) && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {/* Level Badge */}
+            {program.level && (
+              <span className="px-2 py-1 bg-accent/20 text-accent text-xs font-bold uppercase tracking-wider border border-accent">
+                {LEVEL_LABELS[program.level]}
+              </span>
+            )}
+
+            {/* Goal Badges (show first 3) */}
+            {program.goals.slice(0, 3).map((goal) => (
+              <span
+                key={goal}
+                className="px-2 py-1 bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider border border-primary/30"
+              >
+                {GOAL_LABELS[goal]}
+              </span>
+            ))}
+
+            {program.goals.length > 3 && (
+              <span className="px-2 py-1 bg-muted text-muted-foreground text-xs font-bold uppercase tracking-wider">
+                +{program.goals.length - 3} more
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Equipment */}
+        {program.equipmentNeeded.length > 0 && (
+          <div className="text-xs text-muted-foreground mb-3">
+            <span className="font-semibold uppercase tracking-wider">Equipment: </span>
+            {program.equipmentNeeded.slice(0, 4).map((eq, idx) => (
+              <span key={eq}>
+                {EQUIPMENT_LABELS[eq] || eq}
+                {idx < Math.min(program.equipmentNeeded.length - 1, 3) && ', '}
+              </span>
+            ))}
+            {program.equipmentNeeded.length > 4 && (
+              <span> +{program.equipmentNeeded.length - 4} more</span>
+            )}
+          </div>
+        )}
+
         {/* Metadata */}
         <div className="flex flex-wrap gap-x-3 sm:gap-x-4 gap-y-1 text-sm sm:text-base text-muted-foreground mb-3">
-          <span>{program.weekCount} weeks</span>
+          <span>{program.durationDisplay || `${program.weekCount} weeks`}</span>
           <span className="hidden sm:inline">•</span>
-          <span>{program.workoutCount} workouts</span>
+          <span>{program.workoutCount} {program.programType === 'cardio' ? 'sessions' : 'workouts'}</span>
+          {program.targetDaysPerWeek && (
+            <>
+              <span className="hidden sm:inline">•</span>
+              <span>{program.targetDaysPerWeek}x/week</span>
+            </>
+          )}
         </div>
 
         {/* Published date */}
@@ -132,8 +189,8 @@ export default function CommunityProgramCard({
 
         {/* Error message */}
         {error && (
-          <div className="mb-4 p-3 bg-error/10 border border-error rounded-lg">
-            <p className="text-sm text-error">{error}</p>
+          <div className="mb-4 p-3 bg-error/10 border-2 border-error">
+            <p className="text-sm text-error font-medium">{error}</p>
           </div>
         )}
 
@@ -143,16 +200,16 @@ export default function CommunityProgramCard({
             <button
               onClick={handleAddProgram}
               disabled={isAdding}
-              className="flex-1 px-4 py-2.5 sm:py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+              className="flex-1 px-4 py-2.5 sm:py-3 bg-primary text-primary-foreground hover:bg-primary-hover transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base uppercase tracking-wider doom-button-3d doom-focus-ring"
             >
-              {isAdding ? 'Adding...' : 'Add to My Programs'}
+              {isAdding ? 'ADDING...' : 'ADD TO MY PROGRAMS'}
             </button>
           ) : (
             <button
               onClick={() => setShowUnpublishDialog(true)}
-              className="flex-1 px-4 py-2.5 sm:py-3 border border-error text-error rounded-lg hover:bg-error/10 transition-colors font-medium text-sm sm:text-base"
+              className="flex-1 px-4 py-2.5 sm:py-3 border-2 border-error text-error hover:bg-error/10 transition-colors font-semibold text-sm sm:text-base uppercase tracking-wider doom-focus-ring"
             >
-              Unpublish
+              UNPUBLISH
             </button>
           )}
         </div>

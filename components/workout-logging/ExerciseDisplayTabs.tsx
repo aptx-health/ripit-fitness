@@ -2,7 +2,9 @@
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/radix/tabs'
 import SetList from './SetList'
+import { LoadingFrog } from '@/components/ui/loading-frog'
 import type { LoggedSet } from '@/hooks/useWorkoutStorage'
+import type { LoadState } from '@/hooks/useProgressiveExercises'
 
 interface PrescribedSet {
   id: string
@@ -45,6 +47,8 @@ interface ExerciseDisplayTabsProps {
   prescribedSets: PrescribedSet[]
   loggedSets: LoggedSet[]
   exerciseHistory: ExerciseHistory | null
+  historyState?: LoadState
+  hasHistoryIndicator?: boolean // Pre-computed indicator for dot (updates reactively)
   onDeleteSet: (setNumber: number) => void
   loggingForm: React.ReactNode
 }
@@ -70,11 +74,25 @@ const FAU_DISPLAY_NAMES: Record<string, string> = {
   obliques: 'Obliques',
 }
 
+// Loading skeleton for history tab
+function HistoryLoadingSkeleton() {
+  return (
+    <div className="flex flex-col items-center justify-center h-full py-12">
+      <LoadingFrog size={48} speed={0.8} />
+      <p className="mt-4 text-muted-foreground uppercase tracking-wider font-bold animate-pulse">
+        Loading history...
+      </p>
+    </div>
+  )
+}
+
 export default function ExerciseDisplayTabs({
   exercise,
   prescribedSets,
   loggedSets,
   exerciseHistory,
+  historyState = 'loaded',
+  hasHistoryIndicator = false,
   onDeleteSet,
   loggingForm,
 }: ExerciseDisplayTabsProps) {
@@ -84,7 +102,6 @@ export default function ExerciseDisplayTabs({
     exercise.exerciseDefinition?.primaryFAUs?.length ||
     exercise.exerciseDefinition?.secondaryFAUs?.length ||
     exercise.exerciseDefinition?.equipment?.length)
-  const hasHistory = !!exerciseHistory
 
   return (
     <Tabs defaultValue="log-sets" className="w-full h-full flex flex-col">
@@ -92,7 +109,7 @@ export default function ExerciseDisplayTabs({
         <TabsTrigger value="log-sets">
           <span>Log Sets</span>
           {loggedCount > 0 && (
-            <span className="ml-2 text-xs sm:text-sm px-2 py-0.5 rounded-full bg-success/20 text-success font-semibold">
+            <span className="ml-2 text-xs sm:text-sm px-2 py-0.5 rounded-full bg-accent/20 text-accent-foreground font-semibold">
               {loggedCount}/{totalCount}
             </span>
           )}
@@ -105,7 +122,7 @@ export default function ExerciseDisplayTabs({
         </TabsTrigger>
         <TabsTrigger value="history" className="relative">
           <span>History</span>
-          {hasHistory && (
+          {hasHistoryIndicator && (
             <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500"></span>
           )}
         </TabsTrigger>
@@ -198,7 +215,13 @@ export default function ExerciseDisplayTabs({
       </TabsContent>
 
       <TabsContent value="history" className="flex-1 overflow-y-auto px-4">
-        {exerciseHistory ? (
+        {historyState === 'loading' || historyState === 'pending' ? (
+          <HistoryLoadingSkeleton />
+        ) : historyState === 'error' ? (
+          <div className="flex flex-col items-center justify-center h-full py-12">
+            <p className="text-base sm:text-lg text-error">Failed to load history</p>
+          </div>
+        ) : exerciseHistory ? (
           <div className="space-y-6">
             <div>
               <h4 className="text-base sm:text-lg font-semibold text-foreground mb-2">Last Performed</h4>

@@ -14,7 +14,6 @@ interface PrescribedSet {
 
 interface SetLoggingFormProps {
   prescribedSet: PrescribedSet | undefined
-  nextSetNumber: number
   hasLoggedAllPrescribed: boolean
   hasRpe: boolean
   hasRir: boolean
@@ -36,7 +35,6 @@ interface SetLoggingFormProps {
 
 export default function SetLoggingForm({
   prescribedSet,
-  nextSetNumber,
   hasLoggedAllPrescribed,
   hasRpe,
   hasRir,
@@ -57,9 +55,9 @@ export default function SetLoggingForm({
 
   if (hasLoggedAllPrescribed) {
     return (
-      <div className="bg-success-muted border border-success-border rounded-xl p-4 text-center flex-shrink-0">
-        <div className="text-success-text font-semibold mb-2">
-          ✓ All prescribed sets logged!
+      <div className="bg-success-muted border-2 border-success-border p-4 text-center flex-shrink-0">
+        <div className="text-success-text font-bold mb-2 uppercase tracking-wider">
+          All prescribed sets logged!
         </div>
         <p className="text-sm text-success-text">
           Continue to next exercise or complete workout
@@ -70,20 +68,11 @@ export default function SetLoggingForm({
 
   return (
     <div className="flex-shrink-0">
-      <h4 className="text-base sm:text-lg font-semibold text-foreground mb-3">
-        Log Set {nextSetNumber}
-        {prescribedSet && (
-          <span className="text-sm sm:text-base text-muted-foreground font-normal ml-2">
-            (Target: {prescribedSet.reps} reps @ {prescribedSet.weight || '—'})
-          </span>
-        )}
-      </h4>
-
       <div className="space-y-3">
         {/* Reps and Weight - Side by side */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
+            <label className="block text-sm font-semibold text-foreground mb-1 uppercase tracking-wider">
               Reps *
             </label>
             <input
@@ -94,12 +83,12 @@ export default function SetLoggingForm({
                 onSetChange({ ...currentSet, reps: e.target.value })
               }
               placeholder={prescribedSet?.reps.toString() || '0'}
-              className="w-full px-4 py-3 text-lg border border-input rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-muted text-foreground"
+              className="w-full px-4 py-3 text-lg border-2 border-input focus:ring-2 focus:ring-primary focus:border-primary bg-muted text-foreground"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
+            <label className="block text-sm font-semibold text-foreground mb-1 uppercase tracking-wider">
               Weight * ({currentSet.weightUnit})
             </label>
             <input
@@ -111,7 +100,7 @@ export default function SetLoggingForm({
                 onSetChange({ ...currentSet, weight: e.target.value })
               }
               placeholder={prescribedSet?.weight?.replace(/[^0-9.]/g, '') || '0'}
-              className="w-full px-4 py-3 text-lg border border-input rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-muted text-foreground"
+              className="w-full px-4 py-3 text-lg border-2 border-input focus:ring-2 focus:ring-primary focus:border-primary bg-muted text-foreground"
             />
           </div>
         </div>
@@ -121,7 +110,7 @@ export default function SetLoggingForm({
           <div className="grid grid-cols-2 gap-3">
             {hasRir && (
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
+                <label className="block text-sm font-semibold text-foreground mb-1 uppercase tracking-wider">
                   RIR (optional)
                 </label>
                 <input
@@ -134,14 +123,14 @@ export default function SetLoggingForm({
                     onSetChange({ ...currentSet, rir: e.target.value })
                   }
                   placeholder={prescribedSet?.rir?.toString() || '—'}
-                  className="w-full px-4 py-3 text-lg border border-input rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-muted text-foreground"
+                  className="w-full px-4 py-3 text-lg border-2 border-input focus:ring-2 focus:ring-primary focus:border-primary bg-muted text-foreground"
                 />
               </div>
             )}
 
             {hasRpe && (
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
+                <label className="block text-sm font-semibold text-foreground mb-1 uppercase tracking-wider">
                   RPE (optional)
                 </label>
                 <input
@@ -154,7 +143,7 @@ export default function SetLoggingForm({
                     onSetChange({ ...currentSet, rpe: e.target.value })
                   }
                   placeholder={prescribedSet?.rpe?.toString() || '—'}
-                  className="w-full px-4 py-3 text-lg border border-input rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-muted text-foreground"
+                  className="w-full px-4 py-3 text-lg border-2 border-input focus:ring-2 focus:ring-primary focus:border-primary bg-muted text-foreground"
                 />
               </div>
             )}

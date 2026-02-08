@@ -11,7 +11,7 @@ import {
   DialogFooter,
 } from './dialog'
 import { Button } from '@/components/ui/Button'
-import { ChevronLeft, X } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 
 export interface WizardStep {
   id: string
@@ -81,57 +81,48 @@ export function WizardDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent showClose={false} fullScreenMobile={true} className="w-full h-full sm:w-[90vw] sm:max-w-3xl sm:h-[95vh] rounded-none sm:rounded-xl">
-        <DialogHeader>
+      <DialogContent showClose={false} fullScreenMobile={true} className="w-full h-full sm:w-[90vw] sm:max-w-3xl sm:h-auto sm:max-h-[85vh] rounded-none sm:rounded-none border-4 sm:border-4 border-border bg-card doom-card">
+        <DialogHeader className="border-b-2 border-border">
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <DialogTitle>{step.title}</DialogTitle>
-              {step.description && <DialogDescription>{step.description}</DialogDescription>}
+              <DialogTitle className="text-xl font-bold text-foreground tracking-wide uppercase">{step.title}</DialogTitle>
+              {step.description && <DialogDescription className="font-bold text-muted-foreground mt-1 uppercase tracking-wide">{step.description}</DialogDescription>}
             </div>
-            <div className="text-sm sm:text-base text-primary-foreground opacity-75 ml-4">
-              Step {currentStep + 1} of {steps.length}
+            <div className="text-sm sm:text-base text-foreground font-bold tracking-wider ml-4 px-3 py-1 border-2 border-border bg-muted">
+              {currentStep + 1}/{steps.length}
             </div>
           </div>
         </DialogHeader>
 
         <DialogBody className="flex-1 min-h-0">{step.component}</DialogBody>
 
-        <DialogFooter>
+        <DialogFooter className="border-t-2 border-border bg-muted/30">
           <div className="flex items-center justify-between w-full">
             <div>
               {showBackButton && (
-                <Button
-                  onClick={handleBack}
-                  variant="ghost"
-                  disabled={isProcessing}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  <ChevronLeft className="w-4 h-4 mr-1" />
+                <Button variant="secondary" onClick={handleBack} disabled={isProcessing} doom>
+                  <ChevronLeft className="w-4 h-4 mr-1 inline" />
                   Back
                 </Button>
               )}
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               {!isLastStep && (
-                <Button
-                  onClick={handleCancel}
-                  variant="ghost"
-                  disabled={isProcessing}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  <X className="w-4 h-4 mr-1" />
+                <Button variant="secondary" onClick={handleCancel} disabled={isProcessing} doom>
                   Cancel
                 </Button>
               )}
 
               {showNextButton && (
                 <Button
+                  variant="primary"
                   onClick={handleNext}
                   disabled={isProcessing}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                  loading={isProcessing}
+                  doom
                 >
-                  {isProcessing ? 'Processing...' : step.nextLabel || 'Next'}
+                  {step.nextLabel || 'Next'}
                 </Button>
               )}
             </div>

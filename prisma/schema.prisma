@@ -9,19 +9,26 @@ datasource db {
 }
 
 model Program {
-  id            String    @id @default(cuid())
-  name          String
-  description   String?
-  userId        String
-  isActive      Boolean   @default(false)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  isUserCreated Boolean   @default(false)
-  programType   String    @default("strength")
-  isArchived    Boolean   @default(false)
-  archivedAt    DateTime?
-  copyStatus    String?   @default("ready")
-  weeks         Week[]
+  id                String    @id @default(cuid())
+  name              String
+  description       String?
+  userId            String
+  isActive          Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  isUserCreated     Boolean   @default(false)
+  programType       String    @default("strength")
+  isArchived        Boolean   @default(false)
+  archivedAt        DateTime?
+  copyStatus        String?   @default("ready")
+  goals             String[]  @default([])
+  level             String?
+  durationWeeks     Int?
+  durationDisplay   String?
+  targetDaysPerWeek Int?
+  equipmentNeeded   String[]  @default([])
+  focusAreas        String[]  @default([])
+  weeks             Week[]
 
   @@index([userId, isActive])
   @@index([userId])
@@ -69,6 +76,7 @@ model ExerciseDefinition {
   updatedAt      DateTime   @updatedAt
   equipment      String[]   @default([])
   instructions   String?
+  notes          String?
   primaryFAUs    String[]   @default([])
   secondaryFAUs  String[]   @default([])
   userId         String
@@ -127,6 +135,8 @@ model WorkoutCompletion {
   completedAt DateTime    @default(now())
   status      String
   notes       String?
+  isArchived  Boolean     @default(false)
+  cycleNumber Int         @default(1)
   exercises   Exercise[]
   loggedSets  LoggedSet[]
   workout     Workout     @relation(fields: [workoutId], references: [id], onDelete: Cascade)
@@ -134,6 +144,8 @@ model WorkoutCompletion {
   @@index([workoutId, userId])
   @@index([userId, completedAt])
   @@index([userId, status, completedAt])
+  @@index([userId, isArchived])
+  @@index([workoutId, userId, isArchived])
 }
 
 model LoggedSet {
@@ -158,18 +170,25 @@ model LoggedSet {
 }
 
 model CardioProgram {
-  id            String       @id @default(cuid())
-  name          String
-  description   String?
-  userId        String
-  isActive      Boolean      @default(false)
-  isArchived    Boolean      @default(false)
-  archivedAt    DateTime?
-  isUserCreated Boolean      @default(false)
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  copyStatus    String?      @default("ready")
-  weeks         CardioWeek[]
+  id                String       @id @default(cuid())
+  name              String
+  description       String?
+  userId            String
+  isActive          Boolean      @default(false)
+  isArchived        Boolean      @default(false)
+  archivedAt        DateTime?
+  isUserCreated     Boolean      @default(false)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  copyStatus        String?      @default("ready")
+  goals             String[]     @default([])
+  level             String?
+  durationWeeks     Int?
+  durationDisplay   String?
+  targetDaysPerWeek Int?
+  equipmentNeeded   String[]     @default([])
+  focusAreas        String[]     @default([])
+  weeks             CardioWeek[]
 
   @@index([userId, isActive])
   @@index([userId, isArchived])
@@ -281,9 +300,55 @@ model CommunityProgram {
   weekCount         Int
   workoutCount      Int
   exerciseCount     Int
+  goals             String[] @default([])
+  level             String?
+  durationWeeks     Int?
+  durationDisplay   String?
+  targetDaysPerWeek Int?
+  equipmentNeeded   String[] @default([])
+  focusAreas        String[] @default([])
 
   @@index([programType])
   @@index([publishedAt(sort: Desc)])
   @@index([authorUserId])
   @@index([originalProgramId])
+  @@index([level])
+  @@index([goals], type: Gin)
+  @@index([equipmentNeeded], type: Gin)
+  @@index([programType, publishedAt(sort: Desc)])
+}
+
+model ExercisePerformanceLog {
+  id                   String   @id @default(cuid())
+  userId               String
+  completedAt          DateTime
+  type                 String
+
+  // Exercise reference
+  exerciseDefinitionId String?
+  equipment            String?
+  exerciseName         String
+
+  // Strength metrics
+  totalSets            Int?
+  totalReps            Int?
+  totalVolumeLbs       Float?
+  maxWeightLbs         Float?
+  estimated1RMLbs      Float?
+  avgRPE               Float?
+
+  // Cardio metrics
+  distance             Float?
+  distanceUnit         String?
+  duration             Int?
+  avgPaceSeconds       Int?
+
+  // Reference back to source
+  workoutCompletionId  String?
+  cardioSessionId      String?
+
+  @@index([userId, completedAt])
+  @@index([userId, exerciseDefinitionId, completedAt])
+  @@index([userId, equipment, completedAt])
+  @@index([userId, type, completedAt])
 }

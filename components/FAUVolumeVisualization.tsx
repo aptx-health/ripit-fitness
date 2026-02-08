@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { calculateWeekFAUVolume, getSortedFAUVolumes, FAU_DISPLAY_NAMES } from '@/lib/fau-volume'
 
 type Week = {
@@ -22,16 +21,15 @@ type Week = {
 }
 
 type FAUVolumeVisualizationProps = {
-  weeks: Week[]
+  week: Week | null
 }
 
-export default function FAUVolumeVisualization({ weeks }: FAUVolumeVisualizationProps) {
-  const [selectedWeekIndex, setSelectedWeekIndex] = useState(0)
+export default function FAUVolumeVisualization({ week }: FAUVolumeVisualizationProps) {
   const [includeSecondary, setIncludeSecondary] = useState(false)
   const [secondaryWeight, setSecondaryWeight] = useState(0.5)
 
-  // If no weeks, show empty state
-  if (weeks.length === 0) {
+  // If no week, show empty state
+  if (!week) {
     return (
       <div className="bg-card rounded-lg p-6">
         <h3 className="font-semibold text-foreground mb-4">Muscle Group Balance</h3>
@@ -42,48 +40,18 @@ export default function FAUVolumeVisualization({ weeks }: FAUVolumeVisualization
     )
   }
 
-  const currentWeek = weeks[selectedWeekIndex]
-  const volume = calculateWeekFAUVolume(currentWeek, { includeSecondary, secondaryWeight })
+  const volume = calculateWeekFAUVolume(week, { includeSecondary, secondaryWeight })
   const sortedVolumes = getSortedFAUVolumes(volume)
   const maxVolume = sortedVolumes.length > 0 ? sortedVolumes[0].volume : 0
 
-  const canGoPrev = selectedWeekIndex > 0
-  const canGoNext = selectedWeekIndex < weeks.length - 1
-
   return (
     <div className="bg-card rounded-lg p-6">
-      <h3 className="font-semibold text-foreground mb-4">Muscle Group Balance</h3>
-
-      {/* Week Navigation */}
-      <div className="flex items-center justify-between mb-4 pb-4 border-b border-border">
-        <button
-          onClick={() => setSelectedWeekIndex(selectedWeekIndex - 1)}
-          disabled={!canGoPrev}
-          className={`p-1 rounded ${
-            canGoPrev
-              ? 'hover:bg-muted text-foreground'
-              : 'text-muted-foreground opacity-50 cursor-not-allowed'
-          }`}
-          aria-label="Previous week"
-        >
-          <ChevronLeft size={20} />
-        </button>
-
-        <span className="font-medium text-foreground">Week {currentWeek.weekNumber}</span>
-
-        <button
-          onClick={() => setSelectedWeekIndex(selectedWeekIndex + 1)}
-          disabled={!canGoNext}
-          className={`p-1 rounded ${
-            canGoNext
-              ? 'hover:bg-muted text-foreground'
-              : 'text-muted-foreground opacity-50 cursor-not-allowed'
-          }`}
-          aria-label="Next week"
-        >
-          <ChevronRight size={20} />
-        </button>
-      </div>
+      <h3 className="font-semibold text-foreground mb-4">
+        Muscle Group Balance
+        <span className="text-sm font-normal text-muted-foreground ml-2">
+          Week {week.weekNumber}
+        </span>
+      </h3>
 
       {/* Secondary Volume Controls */}
       <div className="mb-4 pb-4 border-b border-border space-y-3">

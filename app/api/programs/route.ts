@@ -39,19 +39,15 @@ export async function POST(request: NextRequest) {
         userId: user.id,
         isActive: false, // User can activate it later
       },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        isActive: true,
+        createdAt: true,
+        copyStatus: true,
         weeks: {
-          include: {
-            workouts: {
-              include: {
-                exercises: {
-                  include: {
-                    prescribedSets: true
-                  }
-                }
-              }
-            }
-          },
+          select: { id: true, weekNumber: true },
           orderBy: { weekNumber: 'asc' }
         }
       }
@@ -84,28 +80,20 @@ export async function GET(request: NextRequest) {
     const userCreatedOnly = searchParams.get('userCreated') === 'true'
 
     // Fetch user's programs (exclude archived)
+    // Returns minimal data for listing - use /api/programs/[id] for full details
     const programs = await prisma.program.findMany({
       where: {
         userId: user.id,
         isArchived: false,
         ...(userCreatedOnly && { isUserCreated: true })
       },
-      include: {
-        weeks: {
-          include: {
-            workouts: {
-              include: {
-                exercises: {
-                  include: {
-                    prescribedSets: true,
-                    exerciseDefinition: true
-                  }
-                }
-              }
-            }
-          },
-          orderBy: { weekNumber: 'asc' }
-        }
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        isActive: true,
+        createdAt: true,
+        copyStatus: true,
       },
       orderBy: [
         { isActive: 'desc' },

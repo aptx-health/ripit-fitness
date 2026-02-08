@@ -227,6 +227,17 @@ export function isValidEquipment(value: string): value is CardioEquipment {
 }
 
 /**
+ * Normalize equipment value to valid CardioEquipment
+ * Falls back to 'other' for invalid/legacy values
+ * @param value - Equipment value from database
+ * @returns Valid CardioEquipment
+ */
+export function normalizeEquipment(value: string | null | undefined): CardioEquipment {
+  if (!value) return 'other'
+  return isValidEquipment(value) ? value : 'other'
+}
+
+/**
  * Check if value is valid IntensityZone
  * @param value - Value to check
  * @returns True if valid intensity zone

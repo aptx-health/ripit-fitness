@@ -2,10 +2,13 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronDown, ChevronRight } from 'lucide-react'
+import { ChevronDown, ChevronRight, MoreVertical } from 'lucide-react'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import ExerciseSearchModal from './ExerciseSearchModal'
 import FAUVolumeVisualization from './FAUVolumeVisualization'
+import SortableExerciseList from './SortableExerciseList'
+import StrengthActivationModal from './StrengthActivationModal'
+import TransformWeekModal from './TransformWeekModal'
 
 type Week = {
   id: string
@@ -31,6 +34,8 @@ type Exercise = {
     name: string
     primaryFAUs: string[]
     secondaryFAUs: string[]
+    isSystem?: boolean
+    createdBy?: string | null
   }
 }
 
@@ -43,40 +48,20 @@ type PrescribedSet = {
   rir?: number | null
 }
 
+type WeekSummary = {
+  id: string
+  weekNumber: number
+}
+
 type ExistingProgram = {
   id: string
   name: string
   description: string | null
   isActive: boolean
-  weeks: Array<{
-    id: string
-    weekNumber: number
-    workouts: Array<{
-      id: string
-      name: string
-      dayNumber: number
-      exercises: Array<{
-        id: string
-        name: string
-        order: number
-        notes: string | null
-        prescribedSets: Array<{
-          id: string
-          setNumber: number
-          reps: string
-          weight: string | null
-          rpe: number | null
-          rir: number | null
-        }>
-        exerciseDefinition: {
-          id: string
-          name: string
-          primaryFAUs: string[]
-          secondaryFAUs: string[]
-        }
-      }>
-    }>
-  }>
+  // Lightweight summary of all weeks (for navigation)
+  weeksSummary: WeekSummary[]
+  // Initial week's full data (for lazy loading)
+  initialWeek: Week | null
 }
 
 type ProgramBuilderProps = {
@@ -87,13 +72,28 @@ type ProgramBuilderProps = {
 export default function ProgramBuilder({ editMode = false, existingProgram }: ProgramBuilderProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [isLoadingWeek, setIsLoadingWeek] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  
+
   // Program form state
   const [programName, setProgramName] = useState(editMode && existingProgram ? existingProgram.name : '')
   const [programDescription, setProgramDescription] = useState(editMode && existingProgram ? existingProgram.description || '' : '')
   const [programId, setProgramId] = useState<string | null>(editMode && existingProgram ? existingProgram.id : null)
-  const [weeks, setWeeks] = useState<Week[]>(editMode && existingProgram ? existingProgram.weeks : [])
+
+  // Week management for edit mode (lazy loading)
+  const [weeksSummary, setWeeksSummary] = useState<WeekSummary[]>(
+    editMode && existingProgram ? existingProgram.weeksSummary : []
+  )
+  const [weeksCache, setWeeksCache] = useState<Map<number, Week>>(() => {
+    const cache = new Map<number, Week>()
+    if (editMode && existingProgram?.initialWeek) {
+      cache.set(existingProgram.initialWeek.weekNumber, existingProgram.initialWeek)
+    }
+    return cache
+  })
+
+  // For create mode, we still use the simple weeks array
+  const [weeks, setWeeks] = useState<Week[]>([])
   
   // Exercise modal state
   const [showExerciseModal, setShowExerciseModal] = useState(false)
@@ -108,9 +108,98 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
   const [deletingExerciseId, setDeletingExerciseId] = useState<string | null>(null)
   const [deletingWorkoutId, setDeletingWorkoutId] = useState<string | null>(null)
   const [deletingWeekId, setDeletingWeekId] = useState<string | null>(null)
+  const [duplicatingWeekId, setDuplicatingWeekId] = useState<string | null>(null)
+
+  // Week transformation state
+  const [showTransformModal, setShowTransformModal] = useState(false)
+  const [transformWeekId, setTransformWeekId] = useState<string | null>(null)
+  const [transformWeekNumber, setTransformWeekNumber] = useState<number>(0)
 
   // Collapsed workouts state
   const [collapsedWorkouts, setCollapsedWorkouts] = useState<Set<string>>(new Set())
+
+  // Week pagination state
+  const [currentWeekIndex, setCurrentWeekIndex] = useState(() => {
+    if (editMode && existingProgram?.initialWeek) {
+      // Find the index of the initial week
+      const idx = existingProgram.weeksSummary.findIndex(
+        w => w.weekNumber === existingProgram.initialWeek?.weekNumber
+      )
+      return idx >= 0 ? idx : 0
+    }
+    return 0
+  })
+
+  // Activation modal state
+  const [showActivationModal, setShowActivationModal] = useState(false)
+  const [existingActiveProgram, setExistingActiveProgram] = useState<{ id: string; name: string } | null>(null)
+
+  // Get current week data (from cache in edit mode, from weeks array in create mode)
+  const getCurrentWeekData = useCallback((): Week | null => {
+    if (editMode) {
+      const weekNumber = weeksSummary[currentWeekIndex]?.weekNumber
+      return weekNumber ? weeksCache.get(weekNumber) || null : null
+    }
+    return weeks[currentWeekIndex] || null
+  }, [editMode, weeksSummary, currentWeekIndex, weeksCache, weeks])
+
+  // Fetch week data from API
+  const fetchWeek = useCallback(async (weekNumber: number): Promise<Week | null> => {
+    if (!programId) return null
+
+    try {
+      setIsLoadingWeek(true)
+      const response = await fetch(`/api/programs/${programId}/weeks/${weekNumber}`)
+      const data = await response.json()
+
+      if (data.success && data.week) {
+        setWeeksCache(prev => new Map(prev).set(weekNumber, data.week))
+        return data.week
+      }
+      return null
+    } catch (error) {
+      console.error('Error fetching week:', error)
+      setError('Failed to load week data')
+      return null
+    } finally {
+      setIsLoadingWeek(false)
+    }
+  }, [programId])
+
+  // Helper to update week data in the appropriate state
+  const updateWeekData = useCallback((updater: (week: Week) => Week) => {
+    if (editMode) {
+      setWeeksCache(prev => {
+        const newCache = new Map(prev)
+        for (const [weekNum, week] of newCache) {
+          newCache.set(weekNum, updater(week))
+        }
+        return newCache
+      })
+    } else {
+      setWeeks(prev => prev.map(updater))
+    }
+  }, [editMode])
+
+  // Navigate to a week (fetch if not cached)
+  const navigateToWeek = useCallback(async (newIndex: number) => {
+    if (newIndex < 0) return
+
+    if (editMode) {
+      if (newIndex >= weeksSummary.length) return
+
+      // Update index immediately for responsive UI
+      setCurrentWeekIndex(newIndex)
+
+      const weekNumber = weeksSummary[newIndex]?.weekNumber
+      if (weekNumber && !weeksCache.has(weekNumber)) {
+        await fetchWeek(weekNumber)
+      }
+    } else {
+      if (newIndex >= weeks.length) return
+      setCurrentWeekIndex(newIndex)
+    }
+  }, [editMode, weeksSummary, weeksCache, weeks, fetchWeek])
 
   // Workout action modals
   const [showDuplicateWorkoutModal, setShowDuplicateWorkoutModal] = useState(false)
@@ -166,7 +255,11 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
     setError(null)
 
     try {
-      const nextWeekNumber = weeks.length > 0 ? Math.max(...weeks.map(w => w.weekNumber)) + 1 : 1
+      // Calculate next week number based on mode
+      const existingWeeks = editMode ? weeksSummary : weeks
+      const nextWeekNumber = existingWeeks.length > 0
+        ? Math.max(...existingWeeks.map(w => w.weekNumber)) + 1
+        : 1
 
       const response = await fetch(`/api/programs/${programId}/weeks`, {
         method: 'POST',
@@ -185,8 +278,24 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
       }
 
       const { week } = await response.json()
-      setWeeks(prev => [...prev, week].sort((a, b) => a.weekNumber - b.weekNumber))
-      
+
+      if (editMode) {
+        // Update summary and cache
+        setWeeksSummary(prev => {
+          const updated = [...prev, { id: week.id, weekNumber: week.weekNumber }]
+            .sort((a, b) => a.weekNumber - b.weekNumber)
+          setCurrentWeekIndex(updated.length - 1)
+          return updated
+        })
+        setWeeksCache(prev => new Map(prev).set(week.weekNumber, week))
+      } else {
+        setWeeks(prev => {
+          const updated = [...prev, week].sort((a, b) => a.weekNumber - b.weekNumber)
+          setCurrentWeekIndex(updated.length - 1)
+          return updated
+        })
+      }
+
       console.log('Week added successfully:', week)
     } catch (error) {
       console.error('Error adding week:', error)
@@ -194,7 +303,7 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
     } finally {
       setIsLoading(false)
     }
-  }, [programId, weeks])
+  }, [programId, editMode, weeksSummary, weeks])
 
   const addWorkout = useCallback(async (weekId: string, sourceWorkoutId?: string) => {
     setIsLoading(true)
@@ -217,14 +326,30 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
       }
 
       const { workout } = await response.json()
-      
-      // Update the weeks state
-      setWeeks(prev => prev.map(week => 
-        week.id === weekId 
-          ? { ...week, workouts: [...week.workouts, workout].sort((a, b) => a.dayNumber - b.dayNumber) }
-          : week
-      ))
-      
+
+      // Update the appropriate state based on mode
+      if (editMode) {
+        setWeeksCache(prev => {
+          const newCache = new Map(prev)
+          for (const [weekNum, week] of newCache) {
+            if (week.id === weekId) {
+              newCache.set(weekNum, {
+                ...week,
+                workouts: [...week.workouts, workout].sort((a, b) => a.dayNumber - b.dayNumber)
+              })
+              break
+            }
+          }
+          return newCache
+        })
+      } else {
+        setWeeks(prev => prev.map(week =>
+          week.id === weekId
+            ? { ...week, workouts: [...week.workouts, workout].sort((a, b) => a.dayNumber - b.dayNumber) }
+            : week
+        ))
+      }
+
       console.log('Workout added successfully:', workout)
     } catch (error) {
       console.error('Error adding workout:', error)
@@ -232,13 +357,16 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [editMode])
 
-  const handleComplete = useCallback(() => {
+  const handleComplete = useCallback(async () => {
     // Validate all workouts have at least 1 exercise
     const emptyWorkouts: string[] = []
 
-    weeks.forEach(week => {
+    // Get weeks to validate based on mode
+    const weeksToValidate = editMode ? Array.from(weeksCache.values()) : weeks
+
+    weeksToValidate.forEach(week => {
       week.workouts.forEach(workout => {
         if (workout.exercises.length === 0) {
           emptyWorkouts.push(`Week ${week.weekNumber} - ${workout.name}`)
@@ -254,10 +382,33 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
       return
     }
 
-    if (programId) {
-      router.push(`/programs/${programId}`)
+    // If in edit mode, just redirect to training page
+    if (editMode) {
+      router.push('/training')
+      return
     }
-  }, [programId, router, weeks])
+
+    // For new programs, show activation modal
+    if (!programId) return
+
+    // Check for existing active program
+    try {
+      const response = await fetch('/api/programs')
+      const data = await response.json()
+
+      if (data.success && data.programs) {
+        const activeProgram = data.programs.find((p: any) => p.isActive && p.id !== programId)
+        if (activeProgram) {
+          setExistingActiveProgram({ id: activeProgram.id, name: activeProgram.name })
+        }
+      }
+    } catch (error) {
+      console.error('Error checking for active programs:', error)
+      // Continue anyway and show the modal
+    }
+
+    setShowActivationModal(true)
+  }, [router, editMode, weeksCache, weeks, programId])
 
   const handleAddExercise = useCallback((workoutId: string) => {
     setSelectedWorkoutId(workoutId)
@@ -270,6 +421,51 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
     setEditingExercise(exercise)
     setShowExerciseModal(true)
   }, [])
+
+  const handleReorderExercises = useCallback(async (workoutId: string, reorderedExercises: Exercise[]) => {
+    // Store original state for rollback
+    const originalCache = editMode ? new Map(weeksCache) : null
+    const originalWeeks = !editMode ? [...weeks] : null
+
+    // Optimistic update
+    updateWeekData(week => ({
+      ...week,
+      workouts: week.workouts.map(workout =>
+        workout.id === workoutId
+          ? { ...workout, exercises: reorderedExercises }
+          : workout
+      )
+    }))
+
+    try {
+      const response = await fetch(`/api/workouts/${workoutId}/exercises/reorder`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          exercises: reorderedExercises.map(e => ({
+            exerciseId: e.id,
+            order: e.order
+          }))
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to reorder exercises')
+      }
+
+      console.log('Exercises reordered successfully')
+    } catch (error) {
+      console.error('Error reordering exercises:', error)
+      setError(error instanceof Error ? error.message : 'Failed to reorder exercises')
+
+      // Rollback on failure
+      if (editMode && originalCache) {
+        setWeeksCache(originalCache)
+      } else if (!editMode && originalWeeks) {
+        setWeeks(originalWeeks)
+      }
+    }
+  }, [editMode, weeksCache, weeks, updateWeekData])
 
   const handleStartWorkoutEdit = useCallback((workoutId: string, currentName: string) => {
     setEditingWorkoutId(workoutId)
@@ -307,20 +503,20 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
       }
 
       const { workout: updatedWorkout } = await response.json()
-      
+
       // Update the weeks state
-      setWeeks(prev => prev.map(week => ({
+      updateWeekData(week => ({
         ...week,
-        workouts: week.workouts.map(workout => 
-          workout.id === workoutId 
+        workouts: week.workouts.map(workout =>
+          workout.id === workoutId
             ? { ...workout, name: updatedWorkout.name }
             : workout
         )
-      })))
-      
+      }))
+
       setEditingWorkoutId(null)
       setEditingWorkoutName('')
-      
+
       console.log('Workout name updated successfully:', updatedWorkout)
     } catch (error) {
       console.error('Error updating workout name:', error)
@@ -328,7 +524,7 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
     } finally {
       setIsLoading(false)
     }
-  }, [editingWorkoutName])
+  }, [editingWorkoutName, updateWeekData])
 
   const handleDeleteExercise = useCallback(async (exerciseId: string, exerciseName: string) => {
     if (!confirm(`Are you sure you want to delete "${exerciseName}"? This cannot be undone.`)) {
@@ -349,14 +545,14 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
       }
       
       // Remove exercise from weeks state
-      setWeeks(prev => prev.map(week => ({
+      updateWeekData(week => ({
         ...week,
         workouts: week.workouts.map(workout => ({
           ...workout,
           exercises: workout.exercises.filter(exercise => exercise.id !== exerciseId)
         }))
-      })))
-      
+      }))
+
       console.log('Exercise deleted successfully')
     } catch (error) {
       console.error('Error deleting exercise:', error)
@@ -364,7 +560,7 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
     } finally {
       setDeletingExerciseId(null)
     }
-  }, [])
+  }, [updateWeekData])
 
   const handleDeleteWorkout = useCallback(async (workoutId: string, workoutName: string) => {
     if (!confirm(`Are you sure you want to delete "${workoutName}" and all its exercises? This cannot be undone.`)) {
@@ -385,11 +581,11 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
       }
       
       // Remove workout from weeks state
-      setWeeks(prev => prev.map(week => ({
+      updateWeekData(week => ({
         ...week,
         workouts: week.workouts.filter(workout => workout.id !== workoutId)
-      })))
-      
+      }))
+
       console.log('Workout deleted successfully')
     } catch (error) {
       console.error('Error deleting workout:', error)
@@ -397,7 +593,7 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
     } finally {
       setDeletingWorkoutId(null)
     }
-  }, [])
+  }, [updateWeekData])
 
   const handleDeleteWeek = useCallback(async (weekId: string, weekNumber: number) => {
     if (!confirm(`Are you sure you want to delete Week ${weekNumber} and all its workouts? This cannot be undone.`)) {
@@ -418,8 +614,30 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
         throw new Error(error.error || 'Failed to delete week')
       }
 
-      // Remove week from state
-      setWeeks(prev => prev.filter(w => w.id !== weekId))
+      // Remove week from state and adjust pagination
+      if (editMode) {
+        setWeeksSummary(prev => {
+          const updated = prev.filter(w => w.id !== weekId)
+          if (currentWeekIndex >= updated.length && updated.length > 0) {
+            setCurrentWeekIndex(updated.length - 1)
+          }
+          return updated
+        })
+        // Also remove from cache
+        setWeeksCache(prev => {
+          const newCache = new Map(prev)
+          newCache.delete(weekNumber)
+          return newCache
+        })
+      } else {
+        setWeeks(prev => {
+          const updated = prev.filter(w => w.id !== weekId)
+          if (currentWeekIndex >= updated.length && updated.length > 0) {
+            setCurrentWeekIndex(updated.length - 1)
+          }
+          return updated
+        })
+      }
 
       console.log('Week deleted successfully')
     } catch (error) {
@@ -428,10 +646,10 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
     } finally {
       setDeletingWeekId(null)
     }
-  }, [])
+  }, [editMode, currentWeekIndex])
 
   const handleDuplicateWeek = useCallback(async (weekId: string) => {
-    setIsLoading(true)
+    setDuplicatingWeekId(weekId)
     setError(null)
 
     try {
@@ -446,17 +664,52 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
 
       const { week: newWeek } = await response.json()
 
-      // Add duplicated week to state
-      setWeeks(prev => [...prev, newWeek])
+      // Add duplicated week to state and navigate to it
+      if (editMode) {
+        setWeeksSummary(prev => {
+          const updated = [...prev, { id: newWeek.id, weekNumber: newWeek.weekNumber }]
+          setCurrentWeekIndex(updated.length - 1)
+          return updated
+        })
+        setWeeksCache(prev => new Map(prev).set(newWeek.weekNumber, newWeek))
+      } else {
+        setWeeks(prev => {
+          const updated = [...prev, newWeek]
+          setCurrentWeekIndex(updated.length - 1)
+          return updated
+        })
+      }
 
       console.log('Week duplicated successfully')
     } catch (error) {
       console.error('Error duplicating week:', error)
       setError(error instanceof Error ? error.message : 'Failed to duplicate week')
     } finally {
-      setIsLoading(false)
+      setDuplicatingWeekId(null)
     }
+  }, [editMode])
+
+  const handleOpenTransformModal = useCallback((weekId: string, weekNumber: number) => {
+    setTransformWeekId(weekId)
+    setTransformWeekNumber(weekNumber)
+    setShowTransformModal(true)
   }, [])
+
+  const handleTransformWeek = useCallback(async (updatedWeek: Week) => {
+    try {
+      // Update the week in state
+      if (editMode) {
+        setWeeksCache(prev => new Map(prev).set(updatedWeek.weekNumber, updatedWeek))
+      } else {
+        setWeeks(prev => prev.map(w => w.id === updatedWeek.id ? updatedWeek : w))
+      }
+
+      console.log('Week transformed successfully')
+    } catch (error) {
+      console.error('Error updating week after transform:', error)
+      throw error // Re-throw so modal can handle it
+    }
+  }, [editMode])
 
   const handleDuplicateWorkout = useCallback(async () => {
     if (!selectedWorkoutForAction || !targetWeekForDuplicate) return
@@ -479,11 +732,27 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
       const { workout: newWorkout } = await response.json()
 
       // Add duplicated workout to the target week
-      setWeeks(prev => prev.map(week =>
-        week.id === targetWeekForDuplicate
-          ? { ...week, workouts: [...week.workouts, newWorkout] }
-          : week
-      ))
+      if (editMode) {
+        setWeeksCache(prev => {
+          const newCache = new Map(prev)
+          for (const [weekNum, week] of newCache) {
+            if (week.id === targetWeekForDuplicate) {
+              newCache.set(weekNum, {
+                ...week,
+                workouts: [...week.workouts, newWorkout].sort((a, b) => a.dayNumber - b.dayNumber)
+              })
+              break
+            }
+          }
+          return newCache
+        })
+      } else {
+        setWeeks(prev => prev.map(week =>
+          week.id === targetWeekForDuplicate
+            ? { ...week, workouts: [...week.workouts, newWorkout].sort((a, b) => a.dayNumber - b.dayNumber) }
+            : week
+        ))
+      }
 
       console.log('Workout duplicated successfully')
       setShowDuplicateWorkoutModal(false)
@@ -495,7 +764,7 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
     } finally {
       setIsLoading(false)
     }
-  }, [selectedWorkoutForAction, targetWeekForDuplicate])
+  }, [selectedWorkoutForAction, targetWeekForDuplicate, editMode])
 
   const handleSwapWorkout = useCallback(async () => {
     if (!selectedWorkoutForAction || !targetWeekForSwap) return
@@ -518,12 +787,29 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
       const { workout: updatedWorkout } = await response.json()
 
       // Move workout to target week
-      setWeeks(prev => prev.map(week => ({
-        ...week,
-        workouts: week.id === targetWeekForSwap
-          ? [...week.workouts.filter(w => w.id !== selectedWorkoutForAction.id), updatedWorkout]
-          : week.workouts.filter(w => w.id !== selectedWorkoutForAction.id)
-      })))
+      if (editMode) {
+        setWeeksCache(prev => {
+          const newCache = new Map(prev)
+          for (const [weekNum, week] of newCache) {
+            const isTargetWeek = week.id === targetWeekForSwap
+            const filteredWorkouts = week.workouts.filter(w => w.id !== selectedWorkoutForAction.id)
+            newCache.set(weekNum, {
+              ...week,
+              workouts: isTargetWeek
+                ? [...filteredWorkouts, updatedWorkout].sort((a, b) => a.dayNumber - b.dayNumber)
+                : filteredWorkouts
+            })
+          }
+          return newCache
+        })
+      } else {
+        setWeeks(prev => prev.map(week => ({
+          ...week,
+          workouts: week.id === targetWeekForSwap
+            ? [...week.workouts.filter(w => w.id !== selectedWorkoutForAction.id), updatedWorkout].sort((a, b) => a.dayNumber - b.dayNumber)
+            : week.workouts.filter(w => w.id !== selectedWorkoutForAction.id)
+        })))
+      }
 
       console.log('Workout swapped successfully')
       setShowSwapWorkoutModal(false)
@@ -535,7 +821,7 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
     } finally {
       setIsLoading(false)
     }
-  }, [selectedWorkoutForAction, targetWeekForSwap])
+  }, [selectedWorkoutForAction, targetWeekForSwap, editMode])
 
   const handleDuplicateProgram = useCallback(async () => {
     if (!programId) return
@@ -609,28 +895,43 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
           }),
         })
 
+        const data = await response.json()
+
         if (!response.ok) {
-          const error = await response.json()
-          throw new Error(error.error || 'Failed to update exercise')
+          throw new Error(data.error || 'Failed to update exercise')
         }
 
-        const { exercise: updatedExercise } = await response.json()
-        
+        const updatedExercise = data.exercises?.[0]
+
+        if (!updatedExercise) {
+          throw new Error('No updated exercise returned from server')
+        }
+
         // Update the weeks state to include the updated exercise
-        setWeeks(prev => prev.map(week => ({
+        // Map the API response to match our Exercise type (exerciseDefinition.name -> name)
+        const mappedExercise: Exercise = {
+          id: updatedExercise.id,
+          name: updatedExercise.exerciseDefinition?.name || editingExercise.name,
+          order: updatedExercise.order ?? editingExercise.order,
+          notes: updatedExercise.notes,
+          prescribedSets: updatedExercise.prescribedSets,
+          exerciseDefinition: updatedExercise.exerciseDefinition || editingExercise.exerciseDefinition
+        }
+
+        updateWeekData(week => ({
           ...week,
-          workouts: week.workouts.map(workout => 
-            workout.id === selectedWorkoutId 
-              ? { 
-                  ...workout, 
-                  exercises: workout.exercises.map(ex => 
-                    ex.id === editingExercise.id ? updatedExercise : ex
+          workouts: week.workouts.map(workout =>
+            workout.id === selectedWorkoutId
+              ? {
+                  ...workout,
+                  exercises: workout.exercises.map(ex =>
+                    ex.id === editingExercise.id ? mappedExercise : ex
                   )
                 }
               : workout
           )
-        })))
-        
+        }))
+
         console.log('Exercise updated successfully:', updatedExercise)
       } else {
         // Add new exercise
@@ -658,17 +959,17 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
         }
 
         const { exercise: newExercise } = await response.json()
-        
+
         // Update the weeks state to include the new exercise
-        setWeeks(prev => prev.map(week => ({
+        updateWeekData(week => ({
           ...week,
-          workouts: week.workouts.map(workout => 
-            workout.id === selectedWorkoutId 
+          workouts: week.workouts.map(workout =>
+            workout.id === selectedWorkoutId
               ? { ...workout, exercises: [...workout.exercises, newExercise] }
               : workout
           )
-        })))
-        
+        }))
+
         console.log('Exercise added successfully:', newExercise)
       }
     } catch (error) {
@@ -679,7 +980,7 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
       setSelectedWorkoutId(null)
       setEditingExercise(null)
     }
-  }, [selectedWorkoutId, editingExercise])
+  }, [selectedWorkoutId, editingExercise, updateWeekData])
 
   const closeExerciseModal = useCallback(() => {
     setShowExerciseModal(false)
@@ -723,6 +1024,38 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
 
     return () => clearTimeout(timeoutId)
   }, [editMode, updateProgramDetails])
+
+  // Prefetch all weeks sequentially in background after initial load (edit mode only)
+  const prefetchStarted = useRef(false)
+  useEffect(() => {
+    if (!editMode || !programId || prefetchStarted.current) return
+    if (weeksSummary.length <= 1) return // Nothing to prefetch
+
+    prefetchStarted.current = true
+
+    const prefetchAllWeeks = async () => {
+      for (const weekSummary of weeksSummary) {
+        // Skip if already cached
+        if (weeksCache.has(weekSummary.weekNumber)) continue
+
+        try {
+          const response = await fetch(`/api/programs/${programId}/weeks/${weekSummary.weekNumber}`)
+          const data = await response.json()
+
+          if (data.success && data.week) {
+            setWeeksCache(prev => new Map(prev).set(weekSummary.weekNumber, data.week))
+          }
+        } catch (error) {
+          // Silently fail - user can still fetch on navigation
+          console.error(`Failed to prefetch week ${weekSummary.weekNumber}:`, error)
+        }
+      }
+    }
+
+    // Start prefetching after a short delay to not compete with initial render
+    const timeoutId = setTimeout(prefetchAllWeeks, 500)
+    return () => clearTimeout(timeoutId)
+  }, [editMode, programId, weeksSummary, weeksCache])
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -803,11 +1136,20 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
         )}
 
         {/* Weeks Management */}
-        {(programId || editMode) && (
-          <div className="bg-card p-6 doom-noise doom-card">
+        {(programId || editMode) && (() => {
+          // Get the appropriate weeks list based on mode
+          const weeksList = editMode ? weeksSummary : weeks
+          const totalWeeks = weeksList.length
+          const currentWeekNumber = weeksList[currentWeekIndex]?.weekNumber
+          const currentWeekData = editMode
+            ? (currentWeekNumber ? weeksCache.get(currentWeekNumber) : null)
+            : weeks[currentWeekIndex]
+
+          return (
+          <div className="bg-card p-3 sm:p-6 doom-noise doom-card">
             <h2 className="text-xl font-semibold text-foreground mb-4 doom-heading">TRAINING WEEKS</h2>
 
-            {weeks.length === 0 ? (
+            {totalWeeks === 0 ? (
               <div className="text-center py-8">
                 <p className="text-muted-foreground mb-4">No weeks created yet</p>
                 <button
@@ -820,8 +1162,49 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
               </div>
             ) : (
               <div className="space-y-6 overflow-visible">
-                {weeks.map((week) => (
-                  <div key={week.id} className="border border-border p-4 doom-noise doom-corners !overflow-visible">
+                {/* Week Navigation */}
+                <div className="flex items-center justify-between gap-4 mb-4">
+                  <button
+                    onClick={() => navigateToWeek(currentWeekIndex - 1)}
+                    disabled={currentWeekIndex === 0 || isLoadingWeek}
+                    className={`p-2 border shrink-0 ${
+                      currentWeekIndex > 0 && !isLoadingWeek
+                        ? 'border-border text-foreground hover:bg-muted doom-focus-ring'
+                        : 'border-border/50 text-muted-foreground cursor-not-allowed opacity-50'
+                    }`}
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+
+                  <div className="flex-1 text-center">
+                    <h3 className="text-lg font-bold text-foreground doom-heading">
+                      WEEK {currentWeekIndex + 1} OF {totalWeeks}
+                      {isLoadingWeek && <span className="ml-2 text-muted-foreground text-sm">Loading...</span>}
+                    </h3>
+                  </div>
+
+                  <button
+                    onClick={() => navigateToWeek(currentWeekIndex + 1)}
+                    disabled={currentWeekIndex >= totalWeeks - 1 || isLoadingWeek}
+                    className={`p-2 border shrink-0 ${
+                      currentWeekIndex < totalWeeks - 1 && !isLoadingWeek
+                        ? 'border-border text-foreground hover:bg-muted doom-focus-ring'
+                        : 'border-border/50 text-muted-foreground cursor-not-allowed opacity-50'
+                    }`}
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Current Week Content */}
+                {currentWeekData && (() => {
+                  const week = currentWeekData
+                  return (
+                  <div key={week.id} className="border border-border p-2 sm:p-4 doom-noise doom-corners !overflow-visible">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <h3 className="font-medium text-foreground doom-heading">WEEK {week.weekNumber}</h3>
@@ -830,10 +1213,10 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
                         <DropdownMenu.Root>
                           <DropdownMenu.Trigger asChild>
                             <button
-                              disabled={isLoading || deletingWeekId === week.id}
-                              className="px-3 py-1 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded border border-border transition-colors disabled:opacity-50 uppercase tracking-wide"
+                              disabled={isLoading || deletingWeekId === week.id || duplicatingWeekId === week.id}
+                              className="px-3 py-1 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted border border-border transition-colors disabled:opacity-50 uppercase tracking-wide"
                             >
-                              Options
+                              {duplicatingWeekId === week.id ? 'Duplicating...' : 'Options'}
                             </button>
                           </DropdownMenu.Trigger>
 
@@ -844,10 +1227,16 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
                             >
                               <DropdownMenu.Item
                                 onClick={() => handleDuplicateWeek(week.id)}
-                                disabled={isLoading}
+                                disabled={duplicatingWeekId === week.id}
                                 className="px-4 py-2.5 text-sm text-foreground hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-50 cursor-pointer outline-none"
                               >
-                                Duplicate Week
+                                {duplicatingWeekId === week.id ? 'Duplicating...' : 'Duplicate Week'}
+                              </DropdownMenu.Item>
+                              <DropdownMenu.Item
+                                onClick={() => handleOpenTransformModal(week.id, week.weekNumber)}
+                                className="px-4 py-2.5 text-sm text-foreground hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-50 cursor-pointer outline-none border-t border-border"
+                              >
+                                Transform Week
                               </DropdownMenu.Item>
                               <DropdownMenu.Item
                                 onClick={() => handleDeleteWeek(week.id, week.weekNumber)}
@@ -877,7 +1266,7 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
                         {week.workouts.map((workout) => {
                           const isCollapsed = collapsedWorkouts.has(workout.id)
                           return (
-                            <div key={workout.id} className="bg-muted p-3 doom-card relative !overflow-visible">
+                            <div key={workout.id} className="bg-muted p-2 sm:p-3 doom-card relative !overflow-visible">
                               <div className="flex items-center justify-between mb-2">
                                 {editingWorkoutId === workout.id ? (
                                 <div className="flex items-center gap-2 flex-1">
@@ -918,8 +1307,8 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
                                     {isCollapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
                                   </button>
                                   <span className="font-medium text-foreground doom-heading">{workout.name}</span>
-                                  <span className="text-xs text-muted-foreground">
-                                    ({workout.exercises.length} exercise{workout.exercises.length !== 1 ? 's' : ''})
+                                  <span className="text-sm text-muted-foreground">
+                                    ({workout.exercises.length} exercise{workout.exercises.length !== 1 ? 's' : ''}, {workout.exercises.reduce((sum, ex) => sum + ex.prescribedSets.length, 0)} sets)
                                   </span>
 
                                   {/* Workout Menu */}
@@ -927,9 +1316,10 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
                                     <DropdownMenu.Trigger asChild>
                                       <button
                                         disabled={isLoading || deletingWorkoutId === workout.id}
-                                        className="px-2 py-0.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded border border-border transition-colors disabled:opacity-50 uppercase tracking-wide"
+                                        className="p-1.5 sm:px-2 sm:py-0.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted border border-border transition-colors disabled:opacity-50 uppercase tracking-wide"
                                       >
-                                        Options
+                                        <MoreVertical size={14} className="sm:hidden" />
+                                        <span className="hidden sm:inline">Options</span>
                                       </button>
                                     </DropdownMenu.Trigger>
 
@@ -976,54 +1366,30 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
                                   </DropdownMenu.Root>
                                 </div>
                               )}
-                              <div className="flex gap-1">
-                                <button
-                                  onClick={() => handleAddExercise(workout.id)}
-                                  disabled={isLoading || deletingWorkoutId === workout.id}
-                                  className="px-2 py-1 bg-success text-success-foreground text-xs rounded hover:bg-success-hover disabled:opacity-50"
-                                >
-                                  Add Exercise
-                                </button>
-                              </div>
                             </div>
                             
                             {!isCollapsed && (
                               <>
                                 {workout.exercises.length === 0 ? (
-                                  <div className="text-muted-foreground text-xs">No exercises yet</div>
+                                  <div className="text-muted-foreground text-xs mb-2">No exercises yet</div>
                                 ) : (
-                                  <div className="space-y-2">
-                                    {workout.exercises.map((exercise) => (
-                                      <div key={exercise.id} className="flex items-center justify-between bg-muted rounded p-2">
-                                        <div className="flex-1">
-                                          <span className="font-medium text-sm text-foreground">{exercise.name}</span>
-                                          <span className="text-muted-foreground text-sm ml-2">
-                                            ({exercise.prescribedSets.length} set{exercise.prescribedSets.length !== 1 ? 's' : ''})
-                                          </span>
-                                          {exercise.notes && (
-                                            <div className="text-xs text-muted-foreground mt-1">{exercise.notes}</div>
-                                          )}
-                                        </div>
-                                        <div className="flex gap-1">
-                                          <button
-                                            onClick={() => handleEditExercise(exercise, workout.id)}
-                                            disabled={isLoading || deletingExerciseId === exercise.id}
-                                            className="px-2 py-1 bg-secondary text-secondary-foreground text-xs rounded hover:bg-secondary-hover disabled:opacity-50"
-                                          >
-                                            Edit
-                                          </button>
-                                          <button
-                                            onClick={() => handleDeleteExercise(exercise.id, exercise.name)}
-                                            disabled={deletingExerciseId === exercise.id}
-                                            className="px-2 py-1 bg-error text-error-foreground text-xs rounded hover:bg-error-hover disabled:opacity-50"
-                                          >
-                                            {deletingExerciseId === exercise.id ? 'Deleting...' : 'Delete'}
-                                          </button>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
+                                  <SortableExerciseList
+                                    exercises={workout.exercises}
+                                    workoutId={workout.id}
+                                    onReorder={handleReorderExercises}
+                                    onEditExercise={(exercise) => handleEditExercise(exercise, workout.id)}
+                                    onDeleteExercise={handleDeleteExercise}
+                                    deletingExerciseId={deletingExerciseId}
+                                    isLoading={isLoading}
+                                  />
                                 )}
+                                <button
+                                  onClick={() => handleAddExercise(workout.id)}
+                                  disabled={isLoading || deletingWorkoutId === workout.id}
+                                  className="w-full py-1.5 bg-success/80 hover:bg-success text-success-foreground text-xs font-semibold uppercase tracking-wide disabled:opacity-50 transition-colors"
+                                >
+                                  + Add Exercise
+                                </button>
                               </>
                             )}
                           </div>
@@ -1032,19 +1398,20 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
                       </div>
                     )}
                   </div>
-                ))}
+                  )
+                })()}
 
                 <button
                   onClick={() => addWeek()}
                   disabled={isLoading}
                   className="px-4 py-2 bg-success text-success-foreground hover:bg-success-hover disabled:opacity-50 doom-button-3d font-semibold uppercase tracking-wider"
                 >
-                  ADD WEEK {weeks.length + 1}
+                  ADD WEEK {totalWeeks + 1}
                 </button>
               </div>
             )}
 
-            {(programId || editMode) && weeks.length > 0 && (
+            {(programId || editMode) && totalWeeks > 0 && (
               <div className="mt-6 pt-6 border-t">
                 <button
                   onClick={handleComplete}
@@ -1055,12 +1422,13 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
               </div>
             )}
           </div>
-        )}
+          )
+        })()}
       </div>
 
       {/* Sidebar - FAU Visualization */}
       <div className="lg:col-span-1">
-        <FAUVolumeVisualization weeks={weeks} />
+        <FAUVolumeVisualization week={getCurrentWeekData()} />
       </div>
 
       {/* Exercise Search Modal */}
@@ -1069,6 +1437,15 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
         onClose={closeExerciseModal}
         onExerciseSelect={handleExerciseSelect}
         editingExercise={editingExercise}
+      />
+
+      {/* Transform Week Modal */}
+      <TransformWeekModal
+        isOpen={showTransformModal}
+        onClose={() => setShowTransformModal(false)}
+        weekId={transformWeekId || ''}
+        weekNumber={transformWeekNumber}
+        onTransform={handleTransformWeek}
       />
 
       {/* Duplicate Workout Modal */}
@@ -1087,7 +1464,7 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
               className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-muted text-foreground mb-4"
             >
               <option value="">Select a week...</option>
-              {weeks.map(week => (
+              {(editMode ? weeksSummary : weeks).map(week => (
                 <option key={week.id} value={week.id}>
                   Week {week.weekNumber}
                 </option>
@@ -1132,7 +1509,7 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
               className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-muted text-foreground mb-4"
             >
               <option value="">Select a week...</option>
-              {weeks.map(week => (
+              {(editMode ? weeksSummary : weeks).map(week => (
                 <option key={week.id} value={week.id}>
                   Week {week.weekNumber}
                 </option>
@@ -1159,6 +1536,15 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
             </div>
           </div>
         </div>
+      )}
+
+      {/* Activation Modal */}
+      {showActivationModal && programId && (
+        <StrengthActivationModal
+          programId={programId}
+          existingActiveProgram={existingActiveProgram}
+          onClose={() => setShowActivationModal(false)}
+        />
       )}
     </div>
   )

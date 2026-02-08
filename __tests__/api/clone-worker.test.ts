@@ -160,6 +160,15 @@ describe('Program Cloning via Pub/Sub + Worker', () => {
         }
       }
 
+      // Add required metadata
+      await prisma.program.update({
+        where: { id: originalProgram.id },
+        data: {
+          level: 'intermediate',
+          goals: ['strength'],
+        },
+      });
+
       const publishResult = await publishProgramToCommunity(
         prisma,
         originalProgram.id,
@@ -260,6 +269,15 @@ describe('Program Cloning via Pub/Sub + Worker', () => {
           }
         }
       }
+
+      // Add required metadata
+      await prisma.program.update({
+        where: { id: originalProgram.id },
+        data: {
+          level: 'intermediate',
+          goals: ['strength'],
+        },
+      });
 
       const publishResult = await publishProgramToCommunity(
         prisma,
@@ -443,6 +461,15 @@ describe('Program Cloning via Pub/Sub + Worker', () => {
         }
       }
 
+      // Add required metadata
+      await prisma.program.update({
+        where: { id: originalProgram.id },
+        data: {
+          level: 'intermediate',
+          goals: ['strength'],
+        },
+      });
+
       const publishResult = await publishProgramToCommunity(
         prisma,
         originalProgram.id,
@@ -514,6 +541,15 @@ describe('Program Cloning via Pub/Sub + Worker', () => {
           }
         }
       }
+
+      // Add required metadata
+      await prisma.program.update({
+        where: { id: originalProgram.id },
+        data: {
+          level: 'intermediate',
+          goals: ['strength'],
+        },
+      });
 
       const publishResult = await publishProgramToCommunity(
         prisma,

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 
@@ -27,14 +26,10 @@ export default function ArchivedProgramsSection({
   const [isLoading, setIsLoading] = useState(false)
   const [unarchivingId, setUnarchivingId] = useState<string | null>(null)
 
-  const basePath = programType === 'strength' ? '/programs' : '/cardio/programs'
   const apiPath =
     programType === 'strength'
       ? '/api/programs'
       : '/api/cardio/programs'
-
-  // Only strength programs can be unarchived currently
-  const canUnarchive = programType === 'strength'
 
   // Fetch archived programs when expanded
   useEffect(() => {
@@ -129,10 +124,7 @@ export default function ArchivedProgramsSection({
                       <div className="h-3 bg-muted animate-pulse rounded w-32" />
                     </div>
                     <div className="ml-4 flex gap-2">
-                      <div className="h-7 w-12 bg-muted animate-pulse rounded" />
-                      {canUnarchive && (
-                        <div className="h-7 w-20 bg-muted animate-pulse rounded" />
-                      )}
+                      <div className="h-7 w-20 bg-muted animate-pulse rounded" />
                     </div>
                   </div>
                 </div>
@@ -169,25 +161,17 @@ export default function ArchivedProgramsSection({
                       )}
                     </div>
                     <div className="ml-4 flex gap-2">
-                      <Link
-                        href={`${basePath}/${program.id}`}
-                        className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground font-medium"
+                      <button
+                        onClick={() =>
+                          handleUnarchive(program.id, program.name)
+                        }
+                        disabled={unarchivingId === program.id}
+                        className="px-3 py-1.5 text-sm bg-primary-muted text-primary hover:bg-primary hover:text-primary-foreground font-medium transition-colors disabled:opacity-50"
                       >
-                        View
-                      </Link>
-                      {canUnarchive && (
-                        <button
-                          onClick={() =>
-                            handleUnarchive(program.id, program.name)
-                          }
-                          disabled={unarchivingId === program.id}
-                          className="px-3 py-1.5 text-sm bg-primary-muted text-primary hover:bg-primary hover:text-primary-foreground font-medium transition-colors disabled:opacity-50"
-                        >
-                          {unarchivingId === program.id
-                            ? 'Unarchiving...'
-                            : 'Unarchive'}
-                        </button>
-                      )}
+                        {unarchivingId === program.id
+                          ? 'Unarchiving...'
+                          : 'Unarchive'}
+                      </button>
                     </div>
                   </div>
                 </div>

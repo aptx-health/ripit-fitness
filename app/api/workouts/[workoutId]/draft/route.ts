@@ -93,12 +93,13 @@ export async function POST(
       )
     }
 
-    // Check if workout is already completed
+    // Check if workout is already completed (non-archived)
     const existingCompletion = await prisma.workoutCompletion.findFirst({
       where: {
         workoutId,
         userId: user.id,
         status: 'completed',
+        isArchived: false,
       },
     })
 
@@ -111,12 +112,13 @@ export async function POST(
 
     // Find or create draft completion
     const result = await prisma.$transaction(async (tx) => {
-      // Look for existing draft and get current set count for safety logging
+      // Look for existing non-archived draft and get current set count for safety logging
       const existingDraft = await tx.workoutCompletion.findFirst({
         where: {
           workoutId,
           userId: user.id,
           status: 'draft',
+          isArchived: false,
         },
         include: {
           loggedSets: true
@@ -232,12 +234,13 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
-    // Find draft completion with logged sets
+    // Find non-archived draft completion with logged sets
     const draftCompletion = await prisma.workoutCompletion.findFirst({
       where: {
         workoutId,
         userId: user.id,
         status: 'draft',
+        isArchived: false,
       },
       include: {
         loggedSets: {

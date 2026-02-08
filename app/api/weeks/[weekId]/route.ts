@@ -26,7 +26,8 @@ export async function DELETE(
               include: {
                 prescribedSets: true,
                 loggedSets: true
-              }
+              },
+              orderBy: { order: 'asc' }
             }
           }
         },
@@ -42,42 +43,48 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
-    // Delete week and all related data in transaction
-    await prisma.$transaction(async (tx) => {
-      // Delete all data for each workout in the week
-      for (const workout of week.workouts) {
-        // Delete logged sets for all exercises in this workout
-        for (const exercise of workout.exercises) {
+    // Collect IDs for batch deletion
+    const workoutIds = week.workouts.map(w => w.id)
+    const exerciseIds = week.workouts.flatMap(w => w.exercises.map(e => e.id))
+
+    // Delete week and all related data in transaction with extended timeout
+    await prisma.$transaction(
+      async (tx) => {
+        // Batch delete all logged sets for exercises in this week
+        if (exerciseIds.length > 0) {
           await tx.loggedSet.deleteMany({
-            where: { exerciseId: exercise.id }
+            where: { exerciseId: { in: exerciseIds } }
           })
 
           await tx.prescribedSet.deleteMany({
-            where: { exerciseId: exercise.id }
+            where: { exerciseId: { in: exerciseIds } }
           })
         }
 
-        // Delete all exercises in this workout
-        await tx.exercise.deleteMany({
-          where: { workoutId: workout.id }
-        })
+        // Batch delete all exercises in this week's workouts
+        if (workoutIds.length > 0) {
+          await tx.exercise.deleteMany({
+            where: { workoutId: { in: workoutIds } }
+          })
 
-        // Delete any workout completions
-        await tx.workoutCompletion.deleteMany({
-          where: { workoutId: workout.id }
-        })
+          await tx.workoutCompletion.deleteMany({
+            where: { workoutId: { in: workoutIds } }
+          })
 
-        // Delete the workout
-        await tx.workout.delete({
-          where: { id: workout.id }
+          await tx.workout.deleteMany({
+            where: { id: { in: workoutIds } }
+          })
+        }
+
+        // Delete the week itself
+        await tx.week.delete({
+          where: { id: weekId }
         })
+      },
+      {
+        timeout: 30000 // 30 second timeout for large weeks
       }
-
-      // Delete the week itself
-      await tx.week.delete({
-        where: { id: weekId }
-      })
-    })
+    )
 
     return NextResponse.json({
       success: true,

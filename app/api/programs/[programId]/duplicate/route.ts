@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { batchInsertWeek } from '@/lib/db/batch-insert'
 
 /**
  * Generates a unique program name by appending " (Copy)" or " (Copy N)"
@@ -83,116 +84,75 @@ export async function POST(
     // Generate unique copy name
     const newProgramName = generateCopyName(originalProgram.name, existingNames)
 
-    // Deep copy the entire program structure in a transaction
-    const duplicatedProgram = await prisma.$transaction(async (tx) => {
-      // Create the new program
-      const newProgram = await tx.program.create({
-        data: {
-          name: newProgramName,
-          description: originalProgram.description,
-          userId: user.id,
-          isActive: false, // Duplicated programs start as inactive
-          isArchived: false,
-          programType: originalProgram.programType,
-          isUserCreated: true, // Mark as user-created since it's a duplicate
+    // Create the new program shell first (outside transaction)
+    const newProgram = await prisma.program.create({
+      data: {
+        name: newProgramName,
+        description: originalProgram.description,
+        userId: user.id,
+        isActive: false,
+        isArchived: false,
+        programType: originalProgram.programType,
+        isUserCreated: true,
+      }
+    })
+
+    try {
+      // Process each week in its own transaction with 30s timeout
+      for (const week of originalProgram.weeks) {
+        await prisma.$transaction(async (tx) => {
+          await batchInsertWeek(tx, week, newProgram.id, user.id)
+        }, { timeout: 30000 })
+      }
+
+      // Fetch the complete duplicated program to return
+      const completeDuplicatedProgram = await prisma.program.findUnique({
+        where: { id: newProgram.id },
+        include: {
+          weeks: {
+            include: {
+              workouts: {
+                include: {
+                  exercises: {
+                    include: {
+                      prescribedSets: {
+                        orderBy: { setNumber: 'asc' }
+                      },
+                      exerciseDefinition: {
+                        select: {
+                          id: true,
+                          name: true,
+                          primaryFAUs: true,
+                          secondaryFAUs: true,
+                          equipment: true,
+                        }
+                      }
+                    },
+                    orderBy: { order: 'asc' }
+                  }
+                },
+                orderBy: { dayNumber: 'asc' }
+              }
+            },
+            orderBy: { weekNumber: 'asc' }
+          }
         }
       })
 
-      // Duplicate all weeks and their nested content
-      for (const week of originalProgram.weeks) {
-        const newWeek = await tx.week.create({
-          data: {
-            weekNumber: week.weekNumber,
-            programId: newProgram.id,
-            userId: user.id,
-          }
-        })
-
-        // Duplicate all workouts in this week
-        for (const workout of week.workouts) {
-          const newWorkout = await tx.workout.create({
-            data: {
-              name: workout.name,
-              dayNumber: workout.dayNumber,
-              weekId: newWeek.id,
-              userId: user.id,
-            }
-          })
-
-          // Duplicate all exercises in this workout
-          for (const exercise of workout.exercises) {
-            const newExercise = await tx.exercise.create({
-              data: {
-                name: exercise.name,
-                exerciseDefinitionId: exercise.exerciseDefinitionId,
-                order: exercise.order,
-                exerciseGroup: exercise.exerciseGroup,
-                workoutId: newWorkout.id,
-                userId: user.id,
-                notes: exercise.notes,
-              }
-            })
-
-            // Duplicate all prescribed sets for this exercise
-            if (exercise.prescribedSets.length > 0) {
-              await tx.prescribedSet.createMany({
-                data: exercise.prescribedSets.map(set => ({
-                  setNumber: set.setNumber,
-                  reps: set.reps,
-                  weight: set.weight,
-                  rpe: set.rpe,
-                  rir: set.rir,
-                  exerciseId: newExercise.id,
-                  userId: user.id,
-                }))
-              })
-            }
-          }
-        }
-      }
-
-      // Return the new program with basic info
-      return newProgram
-    })
-
-    // Fetch the complete duplicated program to return
-    const completeDuplicatedProgram = await prisma.program.findUnique({
-      where: { id: duplicatedProgram.id },
-      include: {
-        weeks: {
-          include: {
-            workouts: {
-              include: {
-                exercises: {
-                  include: {
-                    prescribedSets: {
-                      orderBy: { setNumber: 'asc' }
-                    },
-                    exerciseDefinition: {
-                      select: {
-                        id: true,
-                        name: true,
-                        primaryFAUs: true,
-                        secondaryFAUs: true,
-                        equipment: true,
-                      }
-                    }
-                  },
-                  orderBy: { order: 'asc' }
-                }
-              },
-              orderBy: { dayNumber: 'asc' }
-            }
-          },
-          orderBy: { weekNumber: 'asc' }
-        }
-      }
-    })
-
-    return NextResponse.json({
-      success: true,
-      program: completeDuplicatedProgram
-    })
+      return NextResponse.json({
+        success: true,
+        program: completeDuplicatedProgram
+      })
+    } catch (error) {
+      // Cleanup: delete the partially created program on failure
+      console.error('Error during duplication, cleaning up:', error)
+      await prisma.program.delete({
+        where: { id: newProgram.id }
+      }).catch(cleanupError => {
+        console.error('Failed to cleanup program:', cleanupError)
+      })
+      throw error
+    }
   } catch (error) {
     console.error('Error duplicating program:', error)
     return NextResponse.json(

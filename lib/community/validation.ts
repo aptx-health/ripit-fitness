@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { MAX_WORKOUTS_PER_WEEK } from '@/lib/validation/workout-limits';
 
 export interface ValidationResult {
   valid: boolean;
@@ -85,6 +86,17 @@ async function validateStrengthProgram(
 
   if (exercisesWithoutSets.length > 0) {
     errors.push('All exercises must have at least one prescribed set');
+  }
+
+  // Validate workout count per week
+  const weeksExceedingLimit = program.weeks.filter(
+    (week) => week.workouts.length > MAX_WORKOUTS_PER_WEEK
+  );
+  if (weeksExceedingLimit.length > 0) {
+    const weekNumbers = weeksExceedingLimit.map((w) => w.weekNumber).join(', ');
+    errors.push(
+      `Week(s) ${weekNumbers} exceed the maximum of ${MAX_WORKOUTS_PER_WEEK} workouts per week`
+    );
   }
 
   return {
@@ -211,4 +223,34 @@ export async function isProgramPublished(
   });
 
   return existingCommunityProgram !== null;
+}
+
+/**
+ * Validates program metadata (level, goals, etc.)
+ * This should only be called when actually publishing, not during initial validation
+ */
+export function validateProgramMetadata(program: any): ValidationResult {
+  const errors: string[] = [];
+
+  if (!program.level || program.level.trim() === '') {
+    errors.push(
+      'Program must have a fitness level (Beginner, Intermediate, or Advanced)'
+    );
+  }
+
+  if (!program.goals || program.goals.length === 0) {
+    errors.push('Program must have at least one training goal');
+  }
+
+  if (
+    program.targetDaysPerWeek &&
+    (program.targetDaysPerWeek < 1 || program.targetDaysPerWeek > 7)
+  ) {
+    errors.push('Target days per week must be between 1 and 7');
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
 }

@@ -1,8 +1,21 @@
 'use client'
 
-import { useState } from 'react'
-import { EQUIPMENT_LABELS, INTENSITY_ZONE_LABELS, type CardioEquipment, type IntensityZone } from '@/lib/cardio'
-import LogCardioModal from './LogCardioModal'
+import { useState, useCallback, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { CheckCircle } from 'lucide-react'
+import {
+  EQUIPMENT_LABELS,
+  INTENSITY_ZONE_LABELS,
+  normalizeEquipment,
+  isValidIntensityZone,
+  type CardioEquipment,
+  type IntensityZone
+} from '@/lib/cardio'
+import WeekNavigator from '@/components/ui/WeekNavigator'
+import ActionsMenu from '@/components/ActionsMenu'
+import LogCardioModal from '@/components/LogCardioModal'
+import { ProgramCompletionModal } from '@/components/ProgramCompletionModal'
+import { clientLogger } from '@/lib/client-logger'
 
 type Session = {
   id: string
@@ -30,175 +43,354 @@ type Week = {
 }
 
 type Props = {
-  week: Week
   programId: string
+  programName: string
+  week: Week
+  totalWeeks: number
 }
 
-export default function CardioWeekView({ week, programId }: Props) {
-  const [isExpanded, setIsExpanded] = useState(true)
+export default function CardioWeekView({
+  programId,
+  programName,
+  week,
+  totalWeeks
+}: Props) {
+  const router = useRouter()
   const [loggingSession, setLoggingSession] = useState<Session | null>(null)
+  const [skippingSession, setSkippingSession] = useState<string | null>(null)
+  const [unskippingSession, setUnskippingSession] = useState<string | null>(null)
+  const [completingWeek, setCompletingWeek] = useState(false)
+  const [showCompletionModal, setShowCompletionModal] = useState(false)
+  const [isProgramComplete, setIsProgramComplete] = useState(false)
 
-  const completedCount = week.sessions.filter(s =>
-    s.loggedSessions.length > 0 && s.loggedSessions[0].status === 'completed'
-  ).length
+  const checkProgramCompletion = useCallback(async (openModal = false) => {
+    clientLogger.debug('[CardioWeekView] Checking program completion', { programId, openModal })
+    try {
+      const response = await fetch(`/api/cardio/programs/${programId}/completion-status`)
+
+      clientLogger.debug('[CardioWeekView] Completion status response', {
+        programId,
+        status: response.status,
+        ok: response.ok
+      })
+
+      if (!response.ok) {
+        clientLogger.debug('[CardioWeekView] Completion check failed - response not ok', { programId })
+        return
+      }
+
+      const { data } = await response.json()
+
+      clientLogger.debug('[CardioWeekView] Completion status data', {
+        programId,
+        data,
+        willOpenModal: data.isComplete && openModal
+      })
+
+      setIsProgramComplete(data.isComplete)
+
+      if (data.isComplete && openModal) {
+        clientLogger.info('[CardioWeekView] Program complete! Opening modal', { programId })
+        setShowCompletionModal(true)
+      }
+    } catch (error) {
+      clientLogger.error('[CardioWeekView] Error checking cardio program completion', { programId, error })
+    }
+  }, [programId])
+
+  // Check program completion status on mount
+  useEffect(() => {
+    clientLogger.debug('[CardioWeekView] Component mounted, checking completion', { programId })
+    checkProgramCompletion(false)
+  }, [checkProgramCompletion, programId])
+
+  const handleCloseLoggingModal = useCallback(async () => {
+    clientLogger.debug('[CardioWeekView] Closing logging modal, will check completion', { programId })
+    setLoggingSession(null)
+    router.refresh()
+    await checkProgramCompletion(true)
+  }, [router, checkProgramCompletion, programId])
+
+  const handleSkipSession = async (sessionId: string) => {
+    clientLogger.debug('[CardioWeekView] Skipping session', { programId, sessionId })
+    setSkippingSession(sessionId)
+    try {
+      const response = await fetch(`/api/cardio/sessions/${sessionId}/skip`, {
+        method: 'POST'
+      })
+
+      if (response.ok) {
+        clientLogger.debug('[CardioWeekView] Session skipped, refreshing and checking completion', { programId, sessionId })
+        router.refresh()
+        await checkProgramCompletion(true)
+      } else {
+        const data = await response.json()
+        clientLogger.error('[CardioWeekView] Failed to skip session', { programId, sessionId, error: data.error })
+      }
+    } catch (error) {
+      clientLogger.error('[CardioWeekView] Error skipping session', { programId, sessionId, error })
+    } finally {
+      setSkippingSession(null)
+    }
+  }
+
+  const handleUnskipSession = async (sessionId: string) => {
+    setUnskippingSession(sessionId)
+    try {
+      const response = await fetch(`/api/cardio/sessions/${sessionId}/clear`, {
+        method: 'POST'
+      })
+
+      if (response.ok) {
+        router.refresh()
+      } else {
+        const data = await response.json()
+        console.error('Failed to unskip session:', data.error)
+      }
+    } catch (error) {
+      console.error('Error unskipping session:', error)
+    } finally {
+      setUnskippingSession(null)
+    }
+  }
+
+  const handleCompleteWeek = async () => {
+    clientLogger.debug('[CardioWeekView] Completing week', { programId, weekId: week.id })
+    setCompletingWeek(true)
+    try {
+      const response = await fetch(`/api/cardio/weeks/${week.id}/complete`, {
+        method: 'POST'
+      })
+
+      if (response.ok) {
+        clientLogger.debug('[CardioWeekView] Week completed, refreshing and checking completion', { programId, weekId: week.id })
+        router.refresh()
+        await checkProgramCompletion(true)
+      } else {
+        const data = await response.json()
+        clientLogger.error('[CardioWeekView] Failed to complete week', { programId, weekId: week.id, error: data.error })
+      }
+    } catch (error) {
+      clientLogger.error('[CardioWeekView] Error completing week', { programId, weekId: week.id, error })
+    } finally {
+      setCompletingWeek(false)
+    }
+  }
+
+  // Check if there are any incomplete sessions
+  const hasIncompleteSessions = week.sessions.some(
+    session => session.loggedSessions.length === 0
+  )
+
+  const weekActions = hasIncompleteSessions
+    ? [
+        {
+          label: 'Complete Week',
+          icon: CheckCircle,
+          onClick: handleCompleteWeek,
+          requiresConfirmation: true,
+          confirmationMessage:
+            'This will mark all remaining sessions as skipped. Are you sure?',
+          variant: 'warning' as const,
+          disabled: completingWeek
+        }
+      ]
+    : []
 
   return (
     <>
-      <div className="bg-card border border-border doom-noise doom-card">
-        {/* Week Header */}
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full p-4 text-left hover:bg-muted/50 transition flex justify-between items-center"
-        >
-          <div className="flex items-center gap-4">
-            <svg
-              className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-            <div>
-              <h2 className="text-2xl font-bold text-foreground doom-heading">
-                WEEK {week.weekNumber}
-              </h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                {completedCount}/{week.sessions.length} sessions completed
-              </p>
-            </div>
-          </div>
-
-          {/* Progress indicator */}
-          <div className="flex items-center gap-2">
-            <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
-              <div
-                className="h-full bg-success transition-all"
-                style={{ width: `${(completedCount / week.sessions.length) * 100}%` }}
-              />
-            </div>
-            <span className="text-sm text-muted-foreground">
-              {Math.round((completedCount / week.sessions.length) * 100)}%
-            </span>
-          </div>
-        </button>
-
-        {/* Week Content */}
-        {isExpanded && (
-          <div className="border-t border-border p-4 space-y-3">
-            {week.sessions.map((session) => {
-              const latestLog = session.loggedSessions[0]
-              const isCompleted = latestLog && latestLog.status === 'completed'
-
-              return (
-                <div
-                  key={session.id}
-                  className={`border p-4 transition ${
-                    isCompleted
-                      ? 'border-success-border bg-success-muted/50 doom-workout-completed'
-                      : 'border-border bg-muted'
-                  }`}
+      <div className="bg-card border-y sm:border border-border doom-noise doom-card p-4 sm:p-6">
+        <div className="mb-4 sm:mb-6">
+          <WeekNavigator
+            currentWeek={week.weekNumber}
+            totalWeeks={totalWeeks}
+            baseUrl="/cardio"
+            programName={programName}
+            actions={
+              weekActions.length > 0 ? (
+                <ActionsMenu actions={weekActions} size="sm" />
+              ) : undefined
+            }
+            completionIndicator={
+              isProgramComplete ? (
+                <button
+                  onClick={() => setShowCompletionModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-success text-success-foreground border-2 border-success hover:bg-success-hover font-bold text-sm uppercase tracking-wider transition-all"
+                  title="View completion stats"
                 >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-lg font-bold text-foreground doom-heading">
-                          DAY {session.dayNumber}: {session.name}
-                        </h3>
-                        {isCompleted && (
-                          <span className="doom-badge doom-badge-completed">
-                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                            COMPLETED
-                          </span>
-                        )}
-                      </div>
+                  <CheckCircle size={20} />
+                  <span className="hidden sm:inline">Complete</span>
+                </button>
+              ) : undefined
+            }
+          />
+        </div>
 
-                      {/* Session Details */}
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                        <div>
-                          <span className="text-xs font-semibold text-muted-foreground doom-label">DURATION</span>
-                          <p className="text-foreground doom-stat">{session.targetDuration} min</p>
-                        </div>
-                        {session.intensityZone && (
-                          <div>
-                            <span className="text-xs font-semibold text-muted-foreground doom-label">ZONE</span>
-                            <p className="text-foreground">{INTENSITY_ZONE_LABELS[session.intensityZone as IntensityZone]}</p>
-                          </div>
-                        )}
-                        {session.equipment && (
-                          <div>
-                            <span className="text-xs font-semibold text-muted-foreground doom-label">EQUIPMENT</span>
-                            <p className="text-foreground">{EQUIPMENT_LABELS[session.equipment as CardioEquipment]}</p>
-                          </div>
-                        )}
-                        {session.targetHRRange && (
-                          <div>
-                            <span className="text-xs font-semibold text-muted-foreground doom-label">TARGET HR</span>
-                            <p className="text-foreground">{session.targetHRRange} bpm</p>
-                          </div>
-                        )}
-                      </div>
+        <div className="space-y-3">
+          {week.sessions.map(session => {
+            const latestLog = session.loggedSessions[0]
+            const isCompleted = latestLog && latestLog.status === 'completed'
+            const isSkipped = latestLog && latestLog.status === 'skipped'
+            const isSkipping = skippingSession === session.id
+            const isUnskipping = unskippingSession === session.id
 
-                      {/* Optional Details */}
-                      {(session.targetPowerRange || session.intervalStructure || session.notes) && (
-                        <div className="mt-3 space-y-1 text-sm">
-                          {session.targetPowerRange && (
-                            <p className="text-muted-foreground">
-                              <span className="font-semibold">Target Power:</span> {session.targetPowerRange}
-                            </p>
-                          )}
-                          {session.intervalStructure && (
-                            <p className="text-muted-foreground">
-                              <span className="font-semibold">Intervals:</span> <span className="font-mono">{session.intervalStructure}</span>
-                            </p>
-                          )}
-                          {session.notes && (
-                            <p className="text-muted-foreground">
-                              <span className="font-semibold">Notes:</span> {session.notes}
-                            </p>
-                          )}
-                        </div>
+            return (
+              <div
+                key={session.id}
+                className={`border p-4 transition ${
+                  isCompleted
+                    ? 'border-success-border bg-success-muted/50 doom-workout-completed'
+                    : isSkipped
+                      ? 'border-muted-foreground/50 bg-muted/50'
+                      : 'border-border bg-muted'
+                }`}
+              >
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+                  <div className="flex-1">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                      <h3 className="text-lg font-bold text-foreground doom-heading">
+                        DAY {session.dayNumber}: {session.name}
+                      </h3>
+                      {isCompleted && (
+                        <span className="doom-badge doom-badge-completed">
+                          <svg
+                            className="w-3 h-3"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                          COMPLETED
+                        </span>
                       )}
-
-                      {/* Latest Log Info */}
-                      {latestLog && (
-                        <p className="text-xs text-muted-foreground mt-2">
-                          Last logged: {new Date(latestLog.completedAt).toLocaleDateString()}
-                        </p>
+                      {isSkipped && (
+                        <span className="doom-badge bg-muted-foreground/30 text-foreground/70">
+                          <svg
+                            className="w-3 h-3"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M13 5l7 7-7 7M5 5l7 7-7 7"
+                            />
+                          </svg>
+                          SKIPPED
+                        </span>
                       )}
                     </div>
 
-                    {/* Actions */}
-                    <button
-                      onClick={() => setLoggingSession(session)}
-                      className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider text-sm"
-                    >
-                      {isCompleted ? 'LOG AGAIN' : 'LOG WORKOUT'}
-                    </button>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <span className="text-xs font-semibold text-muted-foreground doom-label">
+                          DURATION
+                        </span>
+                        <p className="text-foreground doom-stat">
+                          {session.targetDuration} min
+                        </p>
+                      </div>
+                      {session.intensityZone && (
+                        <div>
+                          <span className="text-xs font-semibold text-muted-foreground doom-label">
+                            ZONE
+                          </span>
+                          <p className="text-foreground">
+                            {
+                              INTENSITY_ZONE_LABELS[
+                                session.intensityZone as IntensityZone
+                              ]
+                            }
+                          </p>
+                        </div>
+                      )}
+                      {session.equipment && (
+                        <div>
+                          <span className="text-xs font-semibold text-muted-foreground doom-label">
+                            EQUIPMENT
+                          </span>
+                          <p className="text-foreground">
+                            {EQUIPMENT_LABELS[normalizeEquipment(session.equipment)]}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {latestLog && (
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Last logged:{' '}
+                        {new Date(latestLog.completedAt).toLocaleDateString()}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex flex-row items-center gap-2">
+                    {/* Primary action button */}
+                    {isSkipped ? (
+                      <button
+                        onClick={() => handleUnskipSession(session.id)}
+                        disabled={isUnskipping}
+                        className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider text-sm disabled:opacity-50"
+                      >
+                        {isUnskipping ? 'RESTORING...' : 'UNSKIP'}
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setLoggingSession(session)}
+                        className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider text-sm"
+                      >
+                        {isCompleted ? 'LOG AGAIN' : 'LOG SESSION'}
+                      </button>
+                    )}
+
+                    {/* Skip button - only show if no logged status */}
+                    {!latestLog && (
+                      <button
+                        onClick={() => handleSkipSession(session.id)}
+                        disabled={isSkipping}
+                        className="px-3 py-2 border-2 border-border text-foreground bg-transparent hover:bg-muted hover:border-primary active:bg-muted/80 doom-focus-ring text-sm font-semibold uppercase tracking-wider disabled:opacity-50 transition-colors"
+                      >
+                        {isSkipping ? 'SKIPPING...' : 'SKIP'}
+                      </button>
+                    )}
                   </div>
                 </div>
-              )
-            })}
-          </div>
-        )}
+              </div>
+            )
+          })}
+        </div>
       </div>
 
       {/* Log Modal */}
       {loggingSession && (
         <LogCardioModal
           isOpen={true}
-          onClose={() => setLoggingSession(null)}
+          onClose={handleCloseLoggingModal}
           prescribedSessionId={loggingSession.id}
           prescribedData={{
             name: loggingSession.name,
-            equipment: (loggingSession.equipment as CardioEquipment) || 'other',
+            equipment: normalizeEquipment(loggingSession.equipment),
             targetDuration: loggingSession.targetDuration,
-            intensityZone: (loggingSession.intensityZone as IntensityZone) || undefined
+            intensityZone: loggingSession.intensityZone && isValidIntensityZone(loggingSession.intensityZone)
+              ? loggingSession.intensityZone
+              : undefined
           }}
         />
       )}
+
+      {/* Program Completion Modal */}
+      <ProgramCompletionModal
+        open={showCompletionModal}
+        programId={programId}
+        programType="cardio"
+        onClose={() => setShowCompletionModal(false)}
+      />
     </>
   )
 }

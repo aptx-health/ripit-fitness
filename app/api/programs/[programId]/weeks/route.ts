@@ -68,7 +68,8 @@ export async function POST(
               exercises: {
                 include: {
                   prescribedSets: true
-                }
+                },
+                orderBy: { order: 'asc' }
               }
             }
           }
@@ -251,7 +252,8 @@ export async function POST(
               include: {
                 prescribedSets: true,
                 exerciseDefinition: true
-              }
+              },
+              orderBy: { order: 'asc' }
             }
           },
           orderBy: { dayNumber: 'asc' }

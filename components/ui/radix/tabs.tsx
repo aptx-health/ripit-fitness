@@ -11,7 +11,7 @@ const TabsList = React.forwardRef<
 >(({ className = '', ...props }, ref) => (
   <TabsPrimitive.List
     ref={ref}
-    className={`inline-flex h-12 sm:h-14 items-center justify-start w-full bg-muted px-4 py-1.5 text-foreground border-b border-border overflow-x-auto ${className}`}
+    className={`inline-flex h-12 sm:h-14 items-center justify-start w-full bg-muted px-4 py-1.5 text-foreground border-b-2 border-border overflow-x-auto ${className}`}
     {...props}
   />
 ))
@@ -23,7 +23,7 @@ const TabsTrigger = React.forwardRef<
 >(({ className = '', ...props }, ref) => (
   <TabsPrimitive.Trigger
     ref={ref}
-    className={`inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-lg px-4 sm:px-5 py-2.5 sm:py-3 text-base sm:text-lg font-semibold ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md text-muted-foreground hover:text-foreground ${className}`}
+    className={`inline-flex items-center justify-center gap-1 whitespace-nowrap px-4 sm:px-5 py-2.5 sm:py-3 text-base sm:text-lg font-bold uppercase tracking-wider ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:doom-button-3d text-muted-foreground hover:text-foreground ${className}`}
     {...props}
   />
 ))
