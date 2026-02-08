@@ -169,6 +169,120 @@ describe('Draft API - Critical Deletion Tests', () => {
     })
   })
 
+  describe('Draft visibility in week view', () => {
+    it('should create draft completion visible in week view query', async () => {
+      // Arrange: Create workout without any completion
+      const scenario = await createCompleteTestScenario(prisma, userId, {
+        loggedSetCount: 0,
+        status: 'draft'
+      })
+
+      const { workout, exercise } = scenario
+
+      // Delete the auto-created completion to simulate fresh workout
+      await prisma.workoutCompletion.deleteMany({
+        where: { workoutId: workout.id }
+      })
+
+      // Verify no completion exists
+      let completions = await prisma.workoutCompletion.findMany({
+        where: { workoutId: workout.id }
+      })
+      expect(completions).toHaveLength(0)
+
+      // Act: Save draft (simulating "Save as Draft" flow)
+      const draftSets = [
+        {
+          exerciseId: exercise.id,
+          setNumber: 1,
+          reps: 10,
+          weight: 135,
+          weightUnit: 'lbs',
+          rpe: 7,
+          rir: 3
+        }
+      ]
+
+      const response = await simulateDraftAPI(prisma, workout.id, userId, draftSets)
+      expect(response.success).toBe(true)
+
+      // Assert: Draft completion should be visible in week view query
+      // This simulates how StrengthWeekView fetches workout data
+      const workoutWithCompletion = await prisma.workout.findUnique({
+        where: { id: workout.id },
+        include: {
+          completions: {
+            where: { userId },
+            orderBy: { completedAt: 'desc' },
+            take: 1
+          }
+        }
+      })
+
+      expect(workoutWithCompletion?.completions).toHaveLength(1)
+      expect(workoutWithCompletion?.completions[0].status).toBe('draft')
+    })
+
+    it('should show updated draft timestamp after re-saving', async () => {
+      // Arrange: Create existing draft
+      const scenario = await createCompleteTestScenario(prisma, userId, {
+        loggedSetCount: 2,
+        status: 'draft'
+      })
+
+      const { workout, exercise } = scenario
+
+      // Get original timestamp
+      const originalCompletion = await prisma.workoutCompletion.findFirst({
+        where: { workoutId: workout.id, status: 'draft' }
+      })
+      const originalTimestamp = originalCompletion?.completedAt
+
+      // Wait a moment to ensure timestamp difference
+      await new Promise(resolve => setTimeout(resolve, 10))
+
+      // Act: Re-save draft with additional sets
+      const updatedSets = [
+        {
+          exerciseId: exercise.id,
+          setNumber: 1,
+          reps: 10,
+          weight: 135,
+          weightUnit: 'lbs',
+          rpe: 7,
+          rir: 3
+        },
+        {
+          exerciseId: exercise.id,
+          setNumber: 2,
+          reps: 8,
+          weight: 145,
+          weightUnit: 'lbs',
+          rpe: 8,
+          rir: 2
+        },
+        {
+          exerciseId: exercise.id,
+          setNumber: 3,
+          reps: 6,
+          weight: 155,
+          weightUnit: 'lbs',
+          rpe: 9,
+          rir: 1
+        }
+      ]
+
+      await simulateDraftAPI(prisma, workout.id, userId, updatedSets)
+
+      // Assert: Timestamp should be updated
+      const updatedCompletion = await prisma.workoutCompletion.findFirst({
+        where: { workoutId: workout.id, status: 'draft' }
+      })
+
+      expect(updatedCompletion?.completedAt.getTime()).toBeGreaterThan(originalTimestamp!.getTime())
+    })
+  })
+
   describe('Input validation', () => {
     it('should reject invalid set data structure', async () => {
       const scenario = await createCompleteTestScenario(prisma, userId)
