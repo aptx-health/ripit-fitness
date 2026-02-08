@@ -271,9 +271,15 @@ export default function ExerciseLoggingModal({
     setShowExitConfirm(true)
   }
 
-  const handleExitSaveAsDraft = () => {
+  const handleExitSaveAsDraft = async () => {
     console.log('Saving workout as draft...')
     setShowExitConfirm(false)
+
+    // Sync current state to server to create/update draft record
+    if (loggedSets.length > 0) {
+      await syncCurrentState(loggedSets)
+    }
+
     onClose()
   }
 
