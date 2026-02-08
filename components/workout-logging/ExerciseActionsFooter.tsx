@@ -7,7 +7,6 @@ interface ExerciseActionsFooterProps {
   currentExerciseName: string
   nextSetNumber: number
   totalLoggedSets: number
-  totalPrescribedSets: number
   canLogSet: boolean
   hasLoggedAllPrescribed: boolean
   isSubmitting: boolean
@@ -24,7 +23,6 @@ export default function ExerciseActionsFooter({
   currentExerciseName,
   nextSetNumber,
   totalLoggedSets,
-  totalPrescribedSets,
   canLogSet,
   hasLoggedAllPrescribed,
   isSubmitting,
@@ -96,14 +94,7 @@ export default function ExerciseActionsFooter({
             onCompleteWorkout();
           }}
         >
-          {isSubmitting ? (
-            'SAVING...'
-          ) : (
-            <div className="flex flex-col items-center justify-center leading-tight">
-              <span className="text-sm">COMPLETE</span>
-              <span className="text-xs opacity-80">{totalLoggedSets}/{totalPrescribedSets}</span>
-            </div>
-          )}
+          {isSubmitting ? 'SAVING...' : 'COMPLETE'}
         </button>
 
         {/* Actions Menu */}

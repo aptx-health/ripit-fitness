@@ -446,10 +446,6 @@ export default function ExerciseLoggingModal({
   const hasLoggedAllPrescribed =
     currentExerciseLoggedSets.length >= currentPrescribedSets.length
   const totalLoggedSets = loggedSets.length
-  const totalPrescribedSets = Array.from(loadedExercises.values()).reduce(
-    (sum, ex) => sum + ex.prescribedSets.length,
-    0
-  )
 
   // Early returns after all hooks
   if (!isOpen) return null
@@ -477,8 +473,6 @@ export default function ExerciseLoggingModal({
           <ExerciseLoggingHeader
             currentExerciseIndex={currentIndex}
             totalExercises={totalExercises}
-            totalLoggedSets={totalLoggedSets}
-            totalPrescribedSets={totalPrescribedSets}
             syncStatus={syncState.status}
             pendingSetsCount={syncState.pendingSets}
             onSyncClick={() => setShowSyncDetails(true)}
@@ -545,7 +539,6 @@ export default function ExerciseLoggingModal({
             currentExerciseName={currentExercise?.name || 'Exercise'}
             nextSetNumber={nextSetNumber}
             totalLoggedSets={totalLoggedSets}
-            totalPrescribedSets={totalPrescribedSets}
             canLogSet={!!canLogSet}
             hasLoggedAllPrescribed={hasLoggedAllPrescribed}
             isSubmitting={isSubmitting}
