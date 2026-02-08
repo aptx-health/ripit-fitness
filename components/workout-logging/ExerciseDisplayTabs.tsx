@@ -109,7 +109,7 @@ export default function ExerciseDisplayTabs({
         <TabsTrigger value="log-sets">
           <span>Log Sets</span>
           {loggedCount > 0 && (
-            <span className="ml-2 text-xs sm:text-sm px-2 py-0.5 rounded-full bg-success/20 text-success font-semibold">
+            <span className="ml-2 text-xs sm:text-sm px-2 py-0.5 rounded-full bg-accent/20 text-accent-foreground font-semibold">
               {loggedCount}/{totalCount}
             </span>
           )}
