@@ -522,7 +522,6 @@ export default function ExerciseLoggingModal({
                 loggingForm={
                   <SetLoggingForm
                     prescribedSet={prescribedSet}
-                    nextSetNumber={nextSetNumber}
                     hasLoggedAllPrescribed={hasLoggedAllPrescribed}
                     hasRpe={hasRpe}
                     hasRir={hasRir}

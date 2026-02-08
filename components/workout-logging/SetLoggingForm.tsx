@@ -14,7 +14,6 @@ interface PrescribedSet {
 
 interface SetLoggingFormProps {
   prescribedSet: PrescribedSet | undefined
-  nextSetNumber: number
   hasLoggedAllPrescribed: boolean
   hasRpe: boolean
   hasRir: boolean
@@ -36,7 +35,6 @@ interface SetLoggingFormProps {
 
 export default function SetLoggingForm({
   prescribedSet,
-  nextSetNumber,
   hasLoggedAllPrescribed,
   hasRpe,
   hasRir,
@@ -70,15 +68,6 @@ export default function SetLoggingForm({
 
   return (
     <div className="flex-shrink-0">
-      <h4 className="text-base sm:text-lg font-bold text-foreground mb-3 uppercase tracking-wider">
-        Log Set {nextSetNumber}
-        {prescribedSet && (
-          <span className="text-sm sm:text-base text-muted-foreground font-normal ml-2 normal-case tracking-normal">
-            (Target: {prescribedSet.reps} reps @ {prescribedSet.weight || '—'})
-          </span>
-        )}
-      </h4>
-
       <div className="space-y-3">
         {/* Reps and Weight - Side by side */}
         <div className="grid grid-cols-2 gap-3">

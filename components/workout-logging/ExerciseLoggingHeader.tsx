@@ -24,7 +24,7 @@ export default function ExerciseLoggingHeader({
       style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.75rem)' }}
     >
       <div className="flex items-center justify-between gap-2">
-        <div className="text-sm text-primary-foreground opacity-90 uppercase tracking-wider font-medium">
+        <div className="text-base text-primary-foreground opacity-90 uppercase tracking-wider font-medium">
           Exercise {currentExerciseIndex + 1} of {totalExercises}
         </div>
 
