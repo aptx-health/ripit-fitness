@@ -102,6 +102,7 @@ type WorkoutMetadata = {
   }
   exerciseCount: number
   completionId?: string
+  completionStatus?: string
   firstExercise?: {
     id: string
     name: string
@@ -252,7 +253,17 @@ export default function StrengthWeekView({
   const handleOpenLogging = async (workoutId: string) => {
     setSelectedWorkoutId(workoutId)
     const metadata = await fetchWorkoutMetadata(workoutId)
-    if (metadata) setModalMode('logging')
+    if (!metadata) return
+
+    // Safety check: If workout is already completed, open preview instead
+    if (metadata.completionStatus === 'completed') {
+      clientLogger.info('Workout already completed, opening preview instead')
+      const data = await fetchWorkoutData(workoutId, false)
+      if (data) setModalMode('preview')
+      return
+    }
+
+    setModalMode('logging')
   }
 
   const handleCloseModal = () => {
@@ -267,7 +278,15 @@ export default function StrengthWeekView({
     if (!selectedWorkoutId) return
     // Fetch metadata for logging modal
     const metadata = await fetchWorkoutMetadata(selectedWorkoutId)
-    if (metadata) setModalMode('logging')
+    if (!metadata) return
+
+    // Safety check: If workout is already completed, stay in preview
+    if (metadata.completionStatus === 'completed') {
+      clientLogger.info('Workout already completed, cannot start logging')
+      return
+    }
+
+    setModalMode('logging')
   }
 
   const handleCompleteWorkout = async (loggedSets: Array<{

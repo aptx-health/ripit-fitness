@@ -93,25 +93,23 @@ export async function POST(
       )
     }
 
-    // Check if workout is already completed (non-archived)
-    const existingCompletion = await prisma.workoutCompletion.findFirst({
-      where: {
-        workoutId,
-        userId: user.id,
-        status: 'completed',
-        isArchived: false,
-      },
-    })
-
-    if (existingCompletion) {
-      return NextResponse.json(
-        { error: 'Workout already completed. Cannot save draft.' },
-        { status: 400 }
-      )
-    }
-
-    // Find or create draft completion
+    // Find or create draft completion (all checks inside transaction for consistency)
     const result = await prisma.$transaction(async (tx) => {
+      // Check if workout is already completed (non-archived) - INSIDE transaction for consistency
+      const existingCompletion = await tx.workoutCompletion.findFirst({
+        where: {
+          workoutId,
+          userId: user.id,
+          status: 'completed',
+          isArchived: false,
+        },
+      })
+
+      if (existingCompletion) {
+        console.error(`Draft API: Attempted to save draft for already-completed workout ${workoutId}`)
+        throw new Error('WORKOUT_ALREADY_COMPLETED')
+      }
+
       // Look for existing non-archived draft and get current set count for safety logging
       const existingDraft = await tx.workoutCompletion.findFirst({
         where: {
@@ -192,6 +190,14 @@ export async function POST(
       },
     })
   } catch (error) {
+    // Handle specific error for already-completed workout
+    if (error instanceof Error && error.message === 'WORKOUT_ALREADY_COMPLETED') {
+      return NextResponse.json(
+        { error: 'Workout already completed. Cannot save draft.' },
+        { status: 400 }
+      )
+    }
+
     console.error('Error saving workout draft:', error)
     return NextResponse.json(
       { error: 'Internal server error' },

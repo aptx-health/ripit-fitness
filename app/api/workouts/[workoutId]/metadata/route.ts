@@ -33,10 +33,10 @@ export async function GET(
           },
         },
         completions: {
-          where: { userId: user.id },
+          where: { userId: user.id, isArchived: false },
           orderBy: { completedAt: 'desc' },
           take: 1,
-          select: { id: true },
+          select: { id: true, status: true },
         },
         _count: {
           select: { exercises: true },
@@ -53,6 +53,7 @@ export async function GET(
     }
 
     const completionId = workout.completions[0]?.id
+    const completionStatus = workout.completions[0]?.status
 
     // Build where conditions for exercises (program + one-offs)
     const whereConditions: Array<{
@@ -126,6 +127,7 @@ export async function GET(
       },
       exerciseCount,
       completionId,
+      completionStatus,
       firstExercise,
       firstExerciseHistory,
     })
