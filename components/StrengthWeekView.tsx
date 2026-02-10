@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { CheckCircle } from 'lucide-react'
 import WeekNavigator from '@/components/ui/WeekNavigator'
@@ -151,6 +151,8 @@ export default function StrengthWeekView({
   totalWeeks
 }: Props) {
   const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+  const [updatingWorkoutId, setUpdatingWorkoutId] = useState<string | null>(null)
   const [skippingWorkout, setSkippingWorkout] = useState<string | null>(null)
   const [unskippingWorkout, setUnskippingWorkout] = useState<string | null>(null)
   const [completingWeek, setCompletingWeek] = useState(false)
@@ -190,6 +192,13 @@ export default function StrengthWeekView({
   useEffect(() => {
     checkProgramCompletion(false)
   }, [checkProgramCompletion])
+
+  // Clear updating workout ID when transition completes
+  useEffect(() => {
+    if (!isPending && updatingWorkoutId) {
+      setUpdatingWorkoutId(null)
+    }
+  }, [isPending, updatingWorkoutId])
 
   const handleProgramRestart = useCallback(() => {
     // Set restarting flag to prevent completion checks
@@ -266,12 +275,22 @@ export default function StrengthWeekView({
     setModalMode('logging')
   }
 
-  const handleCloseModal = () => {
+  const handleCloseModal = (workoutUpdated = false) => {
+    const workoutId = selectedWorkoutId
     setModalMode(null)
     setSelectedWorkoutId(null)
     setWorkoutData(null)
     setWorkoutMetadata(null)
-    router.refresh()
+
+    if (workoutUpdated && workoutId) {
+      // Track which workout is updating and use transition to show loading until refresh completes
+      setUpdatingWorkoutId(workoutId)
+      startTransition(() => {
+        router.refresh()
+      })
+    } else {
+      router.refresh()
+    }
   }
 
   const handleStartLoggingFromPreview = async () => {
@@ -305,7 +324,7 @@ export default function StrengthWeekView({
       body: JSON.stringify({ loggedSets }),
     })
     if (!response.ok) throw new Error('Failed to complete workout')
-    handleCloseModal()
+    handleCloseModal(true) // Pass true to indicate workout was updated
     await checkProgramCompletion(true)
   }
 
@@ -415,7 +434,7 @@ export default function StrengthWeekView({
             workout={workout}
             isSkipping={skippingWorkout === workout.id}
             isUnskipping={unskippingWorkout === workout.id}
-            isLoading={isLoadingWorkout && selectedWorkoutId === workout.id}
+            isLoading={(isLoadingWorkout && selectedWorkoutId === workout.id) || (isPending && updatingWorkoutId === workout.id)}
             onSkip={handleSkipWorkout}
             onUnskip={handleUnskipWorkout}
             onView={handleOpenPreview}
