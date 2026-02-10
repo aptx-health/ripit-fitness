@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { CheckCircle } from 'lucide-react'
 import WeekNavigator from '@/components/ui/WeekNavigator'
@@ -102,6 +102,7 @@ type WorkoutMetadata = {
   }
   exerciseCount: number
   completionId?: string
+  completionStatus?: string
   firstExercise?: {
     id: string
     name: string
@@ -150,6 +151,8 @@ export default function StrengthWeekView({
   totalWeeks
 }: Props) {
   const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+  const [updatingWorkoutId, setUpdatingWorkoutId] = useState<string | null>(null)
   const [skippingWorkout, setSkippingWorkout] = useState<string | null>(null)
   const [unskippingWorkout, setUnskippingWorkout] = useState<string | null>(null)
   const [completingWeek, setCompletingWeek] = useState(false)
@@ -189,6 +192,13 @@ export default function StrengthWeekView({
   useEffect(() => {
     checkProgramCompletion(false)
   }, [checkProgramCompletion])
+
+  // Clear updating workout ID when transition completes
+  useEffect(() => {
+    if (!isPending && updatingWorkoutId) {
+      setUpdatingWorkoutId(null)
+    }
+  }, [isPending, updatingWorkoutId])
 
   const handleProgramRestart = useCallback(() => {
     // Set restarting flag to prevent completion checks
@@ -252,22 +262,50 @@ export default function StrengthWeekView({
   const handleOpenLogging = async (workoutId: string) => {
     setSelectedWorkoutId(workoutId)
     const metadata = await fetchWorkoutMetadata(workoutId)
-    if (metadata) setModalMode('logging')
+    if (!metadata) return
+
+    // Safety check: If workout is already completed, open preview instead
+    if (metadata.completionStatus === 'completed') {
+      clientLogger.info('Workout already completed, opening preview instead')
+      const data = await fetchWorkoutData(workoutId, false)
+      if (data) setModalMode('preview')
+      return
+    }
+
+    setModalMode('logging')
   }
 
-  const handleCloseModal = () => {
+  const handleCloseModal = (workoutUpdated = false) => {
+    const workoutId = selectedWorkoutId
     setModalMode(null)
     setSelectedWorkoutId(null)
     setWorkoutData(null)
     setWorkoutMetadata(null)
-    router.refresh()
+
+    if (workoutUpdated && workoutId) {
+      // Track which workout is updating and use transition to show loading until refresh completes
+      setUpdatingWorkoutId(workoutId)
+      startTransition(() => {
+        router.refresh()
+      })
+    } else {
+      router.refresh()
+    }
   }
 
   const handleStartLoggingFromPreview = async () => {
     if (!selectedWorkoutId) return
     // Fetch metadata for logging modal
     const metadata = await fetchWorkoutMetadata(selectedWorkoutId)
-    if (metadata) setModalMode('logging')
+    if (!metadata) return
+
+    // Safety check: If workout is already completed, stay in preview
+    if (metadata.completionStatus === 'completed') {
+      clientLogger.info('Workout already completed, cannot start logging')
+      return
+    }
+
+    setModalMode('logging')
   }
 
   const handleCompleteWorkout = async (loggedSets: Array<{
@@ -286,7 +324,7 @@ export default function StrengthWeekView({
       body: JSON.stringify({ loggedSets }),
     })
     if (!response.ok) throw new Error('Failed to complete workout')
-    handleCloseModal()
+    handleCloseModal(true) // Pass true to indicate workout was updated
     await checkProgramCompletion(true)
   }
 
@@ -396,7 +434,7 @@ export default function StrengthWeekView({
             workout={workout}
             isSkipping={skippingWorkout === workout.id}
             isUnskipping={unskippingWorkout === workout.id}
-            isLoading={isLoadingWorkout && selectedWorkoutId === workout.id}
+            isLoading={(isLoadingWorkout && selectedWorkoutId === workout.id) || (isPending && updatingWorkoutId === workout.id)}
             onSkip={handleSkipWorkout}
             onUnskip={handleUnskipWorkout}
             onView={handleOpenPreview}

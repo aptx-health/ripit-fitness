@@ -36,7 +36,7 @@ export type { Exercise, ExerciseHistory }
 
 type Props = {
   isOpen: boolean
-  onClose: () => void
+  onClose: (workoutUpdated?: boolean) => void
   workoutId: string
   workoutName: string
   exerciseCount: number
@@ -280,7 +280,7 @@ export default function ExerciseLoggingModal({
       await syncCurrentState(loggedSets)
     }
 
-    onClose()
+    onClose(true) // Pass true to indicate workout was updated
   }
 
   const handleExitDiscard = () => {
