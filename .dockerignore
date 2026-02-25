@@ -1,0 +1,41 @@
+node_modules
+.next
+.git
+.gitignore
+.dockerignore
+.env
+.env*.local
+.env*.test
+.doppler.yaml
+.vercel
+.DS_Store
+
+# Tests
+__tests__
+coverage
+vitest.config.*
+
+# Docs
+docs
+*.md
+!README.md
+
+# Cloud functions (separate image)
+cloud-functions
+
+# Dev tooling
+.github
+.vscode
+.eslintrc*
+eslint.config.*
+pino-pretty
+
+# Supabase local dev
+supabase
+
+# Worktrees
+fitcsv-wt*
+
+# Misc
+*.pem
+npm-debug.log*
