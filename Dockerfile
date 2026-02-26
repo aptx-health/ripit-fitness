@@ -12,6 +12,12 @@ RUN npx prisma generate
 FROM node:20-alpine AS builder
 WORKDIR /app
 
+# NEXT_PUBLIC_ vars must be present at build time (inlined by Next.js)
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+ARG NEXT_PUBLIC_APP_URL
+ARG NEXT_PUBLIC_LOG_LEVEL
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
