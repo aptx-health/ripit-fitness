@@ -287,17 +287,69 @@ Mock authentication is designed for **local development only** and should never 
 - ❌ Production deployments
 - ❌ Validating auth edge cases
 
-## Deployment
+## Docker
 
-Vercel deployment is configured via Doppler integration:
+### Building the Image
 
-1. Connect Doppler to Vercel in Doppler dashboard
-2. Link Doppler configs to Vercel environments:
-   - `dev` → Vercel Preview
-   - `production` → Vercel Production
-3. Push to git - Vercel auto-deploys
+The app is packaged as a multi-stage Docker image. `NEXT_PUBLIC_` environment variables must be provided at **build time** because Next.js inlines them into the client bundle.
 
-All secrets sync automatically from Doppler to Vercel.
+```bash
+docker build \
+  --build-arg NEXT_PUBLIC_SUPABASE_URL="http://127.0.0.1:54321" \
+  --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key" \
+  --build-arg NEXT_PUBLIC_APP_URL="http://localhost:3000" \
+  -t rippit .
+```
+
+### Running Locally
+
+Runtime-only variables (database, auth config) are passed via `-e` flags:
+
+```bash
+docker run -p 3000:3000 \
+  -e DATABASE_URL="postgresql://postgres:postgres@host.docker.internal:54322/postgres" \
+  -e DIRECT_URL="postgresql://postgres:postgres@host.docker.internal:54322/postgres" \
+  -e USE_MOCK_AUTH=true \
+  -e MOCK_USER_ID=dev-user-local \
+  rippit
+```
+
+> **Tip:** Use `host.docker.internal` to reach services on your host machine (e.g. local Supabase on port 54322).
+
+Verify it's running:
+
+```bash
+curl http://localhost:3000/api/health
+# {"status":"ok","db":"connected","timestamp":"..."}
+```
+
+### Running with Local Supabase
+
+If you use `supabase start` for local development:
+
+```bash
+# Get your local Supabase credentials
+supabase status
+
+# Build with local Supabase URL + anon key from status output
+docker build \
+  --build-arg NEXT_PUBLIC_SUPABASE_URL="http://host.docker.internal:54321" \
+  --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY="<anon-key-from-status>" \
+  -t rippit .
+
+# Run with local DB connection
+docker run -p 3000:3000 \
+  -e DATABASE_URL="postgresql://postgres:postgres@host.docker.internal:54322/postgres" \
+  -e DIRECT_URL="postgresql://postgres:postgres@host.docker.internal:54322/postgres" \
+  rippit
+```
+
+### CI/CD
+
+Pushes to `main` automatically build and push to GitHub Container Registry via GitHub Actions:
+
+- `ghcr.io/aptx-health/rippit:sha-<commit>` (immutable)
+- `ghcr.io/aptx-health/rippit:latest`
 
 ## Troubleshooting
 
@@ -404,7 +456,7 @@ Interested in contributing? Check out [CONTRIBUTING.md](CONTRIBUTING.md) for gui
 - **Doppler** - Secrets management
 - **Tailwind CSS** - Styling
 - **TypeScript** - Type safety
-- **Vercel** - Deployment
+- **Docker + k3s** - Containerized deployment
 
 ## License
 

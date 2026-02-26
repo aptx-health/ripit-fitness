@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   // Externalize server-only packages to prevent bundling in client/edge
   serverExternalPackages: [
     'pino',
