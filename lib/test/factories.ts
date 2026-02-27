@@ -33,8 +33,8 @@ export type TestExerciseDefinition = {
 }
 
 export async function createTestUser(): Promise<TestUser> {
-  // Create mock Supabase user ID for testing
-  // In real app, this comes from Supabase auth
+  // Create mock user ID for testing
+  // In real app, this comes from BetterAuth
   const userId = 'test-user-' + Math.random().toString(36).substring(2, 15)
   return { id: userId }
 }
