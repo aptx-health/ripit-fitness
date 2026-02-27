@@ -16,17 +16,28 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Fetch or create user settings using upsert to avoid race conditions
-    const settings = await prisma.userSettings.upsert({
-      where: { userId: user.id },
-      update: {},
-      create: {
-        userId: user.id,
-        displayName: null,
-        defaultWeightUnit: 'lbs',
-        defaultIntensityRating: 'rpe'
+    // Fetch or create user settings — retry on race condition (P2002)
+    let settings
+    try {
+      settings = await prisma.userSettings.upsert({
+        where: { userId: user.id },
+        update: {},
+        create: {
+          userId: user.id,
+          displayName: null,
+          defaultWeightUnit: 'lbs',
+          defaultIntensityRating: 'rpe'
+        }
+      })
+    } catch (upsertError: unknown) {
+      if (upsertError && typeof upsertError === 'object' && 'code' in upsertError && upsertError.code === 'P2002') {
+        settings = await prisma.userSettings.findUniqueOrThrow({
+          where: { userId: user.id }
+        })
+      } else {
+        throw upsertError
       }
-    })
+    }
 
     return NextResponse.json({
       success: true,
