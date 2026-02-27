@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
+import { signIn } from '@/lib/auth-client'
 import { Button } from '@/components/ui/Button'
 
 export default function LoginPage() {
@@ -19,20 +19,18 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const supabase = createClient()
-      const { error } = await supabase.auth.signInWithPassword({
+      const result = await signIn.email({
         email,
         password,
       })
 
-      if (error) {
-        setError(error.message)
+      if (result.error) {
+        setError(result.error.message || 'Invalid email or password')
         setLoading(false)
         return
       }
 
-      router.push('/')
-      router.refresh()
+      window.location.href = '/'
     } catch {
       setError('An unexpected error occurred')
       setLoading(false)

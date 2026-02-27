@@ -1,7 +1,8 @@
 // Auth wrapper for server-side authentication
-// Supports both real Supabase Auth and dev-only mock auth
+// Supports both real BetterAuth and dev-only mock auth
 
-import { createClient as createSupabaseClient } from '@/lib/supabase/server'
+import { auth } from '@/lib/auth'
+import { headers } from 'next/headers'
 import { logger } from '@/lib/logger'
 
 export interface AuthUser {
@@ -17,7 +18,7 @@ export interface AuthResult {
 /**
  * Get the currently authenticated user
  *
- * In production: Uses Supabase Auth
+ * In production: Uses BetterAuth session API
  * In development with USE_MOCK_AUTH=true: Returns a mock user for local testing
  */
 export async function getCurrentUser(): Promise<AuthResult> {
@@ -33,16 +34,27 @@ export async function getCurrentUser(): Promise<AuthResult> {
     }
   }
 
-  // Real Supabase auth
-  const supabase = await createSupabaseClient()
-  const { data: { user }, error } = await supabase.auth.getUser()
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    })
 
-  if (error) {
-    logger.debug({ error: error.message }, 'Auth error')
-  }
+    if (!session) {
+      return { user: null, error: null }
+    }
 
-  return {
-    user: user as AuthUser | null,
-    error: error as Error | null,
+    return {
+      user: {
+        id: session.user.id,
+        email: session.user.email,
+      },
+      error: null,
+    }
+  } catch (error) {
+    logger.debug({ error }, 'Auth error getting session')
+    return {
+      user: null,
+      error: error as Error,
+    }
   }
 }

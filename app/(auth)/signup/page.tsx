@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
+import { signUp } from '@/lib/auth-client'
 import { Button } from '@/components/ui/Button'
 
 export default function SignupPage() {
@@ -33,23 +33,20 @@ export default function SignupPage() {
     setLoading(true)
 
     try {
-      const supabase = createClient()
-      const { error } = await supabase.auth.signUp({
+      const { error } = await signUp.email({
         email,
         password,
-        options: {
-          emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/auth/callback`,
-        },
+        name: email.split('@')[0],
       })
 
       if (error) {
-        setError(error.message)
+        setError(error.message || 'Could not create account')
         setLoading(false)
         return
       }
 
-      // Success - redirect to login
-      router.push('/login?message=Check your email to confirm your account')
+      // BetterAuth signs in immediately after signup
+      window.location.href = '/'
     } catch {
       setError('An unexpected error occurred')
       setLoading(false)
