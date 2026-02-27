@@ -4,6 +4,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 
 const SESSION_COOKIE = 'better-auth.session_token'
+const SECURE_SESSION_COOKIE = '__Secure-better-auth.session_token'
 
 export async function updateSession(request: NextRequest) {
   const response = NextResponse.next({ request })
@@ -13,7 +14,8 @@ export async function updateSession(request: NextRequest) {
     return response
   }
 
-  const hasSession = request.cookies.has(SESSION_COOKIE)
+  // BetterAuth prefixes cookie with __Secure- on HTTPS
+  const hasSession = request.cookies.has(SESSION_COOKIE) || request.cookies.has(SECURE_SESSION_COOKIE)
   const { pathname } = request.nextUrl
 
   // Unauthenticated user trying to access protected routes
