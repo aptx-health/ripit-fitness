@@ -1,18 +1,17 @@
+import { auth } from '@/lib/auth'
 import { NextRequest, NextResponse } from 'next/server'
 
 const SESSION_COOKIE = 'better-auth.session_token'
 
 export async function POST(request: NextRequest) {
-  // Call BetterAuth's sign-out endpoint internally
-  const baseUrl = process.env.BETTER_AUTH_URL || request.nextUrl.origin
-  await fetch(`${baseUrl}/api/auth/sign-out`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      cookie: request.headers.get('cookie') || '',
-    },
-    body: JSON.stringify({}),
-  })
+  // Invalidate session server-side (pass original request headers for CSRF check)
+  try {
+    await auth.api.signOut({
+      headers: request.headers,
+    })
+  } catch {
+    // Session may already be expired — continue to clear cookie
+  }
 
   // Redirect to login and clear the session cookie
   const origin = request.nextUrl.origin
