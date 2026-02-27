@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { restartProgram } from '@/lib/db/program-restart'
 import { logger } from '@/lib/logger'
@@ -18,11 +18,7 @@ export async function POST(
     logger.debug({ programId }, 'Received restart request')
 
     // Authenticate user
-    const supabase = await createClient()
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
+    const { user, error: authError } = await getCurrentUser()
 
     if (authError || !user) {
       logger.debug('Unauthorized - no user found')
