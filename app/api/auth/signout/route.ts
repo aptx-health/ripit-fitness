@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
 
   // Redirect to login and clear the session cookie (both HTTP and HTTPS variants)
   const origin = request.nextUrl.origin
-  const response = NextResponse.redirect(new URL('/login', origin))
+  const response = NextResponse.redirect(new URL('/login', origin), 303)
   response.cookies.set(SESSION_COOKIE, '', { maxAge: 0, path: '/' })
   response.cookies.set(SECURE_SESSION_COOKIE, '', { maxAge: 0, path: '/', secure: true })
 
