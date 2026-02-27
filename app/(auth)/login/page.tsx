@@ -19,19 +19,18 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const { error } = await signIn.email({
+      const result = await signIn.email({
         email,
         password,
       })
 
-      if (error) {
-        setError(error.message || 'Invalid email or password')
+      if (result.error) {
+        setError(result.error.message || 'Invalid email or password')
         setLoading(false)
         return
       }
 
-      router.push('/')
-      router.refresh()
+      window.location.href = '/'
     } catch {
       setError('An unexpected error occurred')
       setLoading(false)

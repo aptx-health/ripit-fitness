@@ -46,8 +46,7 @@ export default function SignupPage() {
       }
 
       // BetterAuth signs in immediately after signup
-      router.push('/')
-      router.refresh()
+      window.location.href = '/'
     } catch {
       setError('An unexpected error occurred')
       setLoading(false)
