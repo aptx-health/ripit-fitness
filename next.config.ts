@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
     'sonic-boom',
     'pino-std-serializers',
     'pino-abstract-transport',
+    'better-auth',
+    'pg',
   ],
   // Empty Turbopack config to silence webpack config warning
   // Turbopack automatically handles Node.js module exclusions in browser builds
