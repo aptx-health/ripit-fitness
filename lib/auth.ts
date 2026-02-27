@@ -5,8 +5,9 @@ import { Pool } from "pg"
 const trustedOrigins = [
   process.env.BETTER_AUTH_URL,
   process.env.NEXT_PUBLIC_APP_URL,
-  // Vercel preview deploys use dynamic subdomains
+  // Vercel sets VERCEL_URL (deployment-specific) and VERCEL_BRANCH_URL (branch alias)
   ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
+  ...(process.env.VERCEL_BRANCH_URL ? [`https://${process.env.VERCEL_BRANCH_URL}`] : []),
 ].filter(Boolean) as string[]
 
 export const auth = betterAuth({
