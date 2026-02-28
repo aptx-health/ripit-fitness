@@ -192,11 +192,9 @@ Update test helpers and factories that reference Supabase auth. Tests use Testco
 
 RLS was enabled via the Supabase dashboard, not in tracked migration files. The only migration referencing RLS (`20240107000000_optimize_rls_policies.sql`) created policies using `auth.uid()` — a Supabase-specific function that won't exist on self-hosted PG. That migration file has been deleted. No further action needed: RLS simply won't be enabled on the self-hosted database.
 
-### C2: Clean Prisma schema for self-hosted PG
+### C2: ~~Clean Prisma schema for self-hosted PG~~ — DONE
 
-- Remove `directUrl` from datasource (no Supabase pooler needed)
-- Verify all extensions (`uuid-ossp`) are available on self-hosted PG, or switch to `gen_random_uuid()`
-- Remove any Supabase-specific comments or references
+Removed `directUrl` from both Prisma schemas (app + clone worker), cleaned up `DIRECT_URL` references from test harness, `.env.example`, and worktree Doppler script. No `uuid-ossp` dependency — all IDs use `cuid()`.
 
 ### C3: Create clean migration baseline
 

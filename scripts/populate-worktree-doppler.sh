@@ -56,7 +56,6 @@ echo -e "${GREEN}✓ Shared secrets copied${NC}"
 echo -e "\n${YELLOW}Setting Supabase connection URLs for worktree $WORKTREE_NUM...${NC}"
 
 doppler secrets set DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:$DB_PORT/postgres" --config "$DOPPLER_CONFIG"
-doppler secrets set DIRECT_URL="postgresql://postgres:postgres@127.0.0.1:$DB_PORT/postgres" --config "$DOPPLER_CONFIG"
 doppler secrets set NEXT_PUBLIC_SUPABASE_URL="http://127.0.0.1:$API_PORT" --config "$DOPPLER_CONFIG"
 
 echo -e "${GREEN}✓ Supabase URLs configured${NC}"
