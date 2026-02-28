@@ -6,16 +6,13 @@ export class TestDatabase {
   private container?: StartedPostgreSqlContainer
   private prisma?: PrismaClient
   private originalDatabaseUrl?: string
-  private originalDirectUrl?: string
 
   async start() {
     console.log('🐘 Starting PostgreSQL test container...')
     
     // Store original environment variables to restore later
     this.originalDatabaseUrl = process.env.DATABASE_URL
-    this.originalDirectUrl = process.env.DIRECT_URL
-
-    // Start PostgreSQL 15 container (matching Supabase version)
+    // Start PostgreSQL 15 container
     this.container = await new PostgreSqlContainer('postgres:15')
       .withDatabase('ripit_test')
       .withUsername('test_user')
@@ -27,9 +24,8 @@ export class TestDatabase {
     const connectionString = this.container.getConnectionUri()
     console.log('📡 Container started, connection string:', connectionString)
 
-    // Set environment variables for Prisma (both DATABASE_URL and DIRECT_URL to same container)
+    // Set environment variable for Prisma
     process.env.DATABASE_URL = connectionString
-    process.env.DIRECT_URL = connectionString
 
     try {
       // Safety check: Verify we're connecting to localhost/testcontainer before allowing destructive operations
@@ -51,7 +47,6 @@ export class TestDatabase {
         env: {
           ...process.env,
           DATABASE_URL: connectionString,
-          DIRECT_URL: connectionString,
           // Bypass Prisma safety check for Testcontainers (isolated Docker database, not production)
           PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION: 'Testcontainer database reset for automated testing'
         }
@@ -110,12 +105,6 @@ export class TestDatabase {
       delete process.env.DATABASE_URL
     }
     
-    if (this.originalDirectUrl) {
-      process.env.DIRECT_URL = this.originalDirectUrl
-    } else {
-      delete process.env.DIRECT_URL
-    }
-
     console.log('✅ Test database cleanup completed')
   }
 
