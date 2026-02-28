@@ -196,9 +196,9 @@ RLS was enabled via the Supabase dashboard, not in tracked migration files. The 
 
 Removed `directUrl` from both Prisma schemas (app + clone worker), cleaned up `DIRECT_URL` references from test harness, `.env.example`, and worktree Doppler script. No `uuid-ossp` dependency — all IDs use `cuid()`.
 
-### C3: Create clean migration baseline
+### C3: ~~Create clean migration baseline~~ — DONE
 
-After removing RLS and Supabase-specific elements, create a baseline migration that represents the clean schema. This becomes the starting point for the self-hosted database.
+Pulled production schema via `supabase db pull`, then cleaned the baseline SQL of all Supabase-specific elements: RLS policies, `ENABLE ROW LEVEL SECURITY`, `OWNER TO`, role grants (`anon`, `authenticated`, `service_role`, `prisma`, `powersync_role`), Supabase extensions (`pg_graphql`, `supabase_vault`, etc.), publications, and `ALTER DEFAULT PRIVILEGES`. Old incremental migrations archived to `supabase/migrations_backup/`.
 
 ---
 
