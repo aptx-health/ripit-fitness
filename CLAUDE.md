@@ -545,6 +545,31 @@ Migrating from Supabase-hosted infrastructure to self-hosted k8s stack. See `/do
 -
 For local testing, use the doppler config `dev_test`. Example: `doppler run --config dev_test -- npm run test` This will ensure that the proper Testcontainer with the test database is utilized.
 
+## GitHub Discussions
+
+Use GH Discussions (not Issues) for architectural decisions and design questions. The `gh` CLI has no native discussion support, so use the GraphQL API:
+
+```bash
+# Create a discussion (category "Ideas" for architecture decisions)
+gh api graphql -f query='
+mutation {
+  createDiscussion(input: {
+    repositoryId: "R_kgDOQjYwOQ",
+    categoryId: "DIC_kwDOQjYwOc4C3fsH",
+    title: "Your title",
+    body: "Your markdown body"
+  }) {
+    discussion { url }
+  }
+}'
+```
+
+**Category IDs:**
+- `DIC_kwDOQjYwOc4C3fsE` — Announcements
+- `DIC_kwDOQjYwOc4C3fsF` — General
+- `DIC_kwDOQjYwOc4C3fsH` — Ideas (use for architecture decisions)
+- `DIC_kwDOQjYwOc4C3fsG` — Q&A
+
 ## Agent Messaging
 
 You are connected to a shared message bus for coordinating with other AI agents.
