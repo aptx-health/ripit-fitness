@@ -192,15 +192,13 @@ Update test helpers and factories that reference Supabase auth. Tests use Testco
 
 RLS was enabled via the Supabase dashboard, not in tracked migration files. The only migration referencing RLS (`20240107000000_optimize_rls_policies.sql`) created policies using `auth.uid()` — a Supabase-specific function that won't exist on self-hosted PG. That migration file has been deleted. No further action needed: RLS simply won't be enabled on the self-hosted database.
 
-### C2: Clean Prisma schema for self-hosted PG
+### C2: ~~Clean Prisma schema for self-hosted PG~~ — DONE
 
-- Remove `directUrl` from datasource (no Supabase pooler needed)
-- Verify all extensions (`uuid-ossp`) are available on self-hosted PG, or switch to `gen_random_uuid()`
-- Remove any Supabase-specific comments or references
+Removed `directUrl` from both Prisma schemas (app + clone worker), cleaned up `DIRECT_URL` references from test harness, `.env.example`, and worktree Doppler script. No `uuid-ossp` dependency — all IDs use `cuid()`.
 
-### C3: Create clean migration baseline
+### C3: ~~Create clean migration baseline~~ — DONE
 
-After removing RLS and Supabase-specific elements, create a baseline migration that represents the clean schema. This becomes the starting point for the self-hosted database.
+Pulled production schema via `supabase db pull`, then cleaned the baseline SQL of all Supabase-specific elements: RLS policies, `ENABLE ROW LEVEL SECURITY`, `OWNER TO`, role grants (`anon`, `authenticated`, `service_role`, `prisma`, `powersync_role`), Supabase extensions (`pg_graphql`, `supabase_vault`, etc.), publications, and `ALTER DEFAULT PRIVILEGES`. Old incremental migrations archived to `supabase/migrations_backup/`.
 
 ---
 
@@ -208,39 +206,28 @@ After removing RLS and Supabase-specific elements, create a baseline migration t
 
 **Deploy after Redis is available in the cluster. Can prepare code earlier.**
 
-### D1: Redirect worker CI/CD to GHCR
+### D1: Redirect worker CI/CD to GHCR -- DONE
 
-Update `.github/workflows/deploy-clone-worker.yml`:
-- Keep the Docker build step
-- Push to `ghcr.io/<org>/rippit-clone-worker:sha-<commit>` instead of GCP Artifact Registry
-- Remove GCP Cloud Run deployment steps
-- Remove GCP service account authentication
+Updated `.github/workflows/deploy-clone-worker.yml` to push to `ghcr.io/aptx-health/clone-program`. Removed GCP auth and Cloud Run deployment.
 
-The worker image will be pulled by k8s instead of deployed to Cloud Run.
+### D2: Replace Pub/Sub with Redis queue -- DONE
 
-### D2: Replace Pub/Sub with Redis queue
+- Replaced `@google-cloud/pubsub` with `bullmq` + `ioredis` in both app and worker
+- Created `lib/queue/clone-jobs.ts` (BullMQ publisher)
+- Rewrote `cloud-functions/clone-program/src/index.ts` (BullMQ Worker + health server)
+- Cloning logic (`cloning.ts`, `batch-insert.ts`) unchanged
 
-**Option: BullMQ** (most popular Node.js Redis queue, used with the Redis already deployed for sessions)
+### D3: Update local development -- DONE
 
-Changes in the worker (`cloud-functions/clone-program/`):
-- Replace `@google-cloud/pubsub` with `bullmq`
-- Replace Eventarc HTTP handler with BullMQ worker pattern
-- Keep existing cloning logic (`cloning.ts`, `batch-insert.ts`) unchanged
+- Replaced `scripts/start-pubsub-emulator.sh` with `scripts/start-redis.sh`
+- Updated `Procfile` to use Redis instead of Pub/Sub emulator
+- `REDIS_URL=redis://localhost:6379` needed in Doppler `dev_personal` config
 
-Changes in the app (`lib/gcp/pubsub.ts`):
-- Replace Pub/Sub publish with BullMQ queue add
-- Rename/move to `lib/queue/clone-jobs.ts`
+### D4: Update clone worker tests -- DONE
 
-### D3: Update local development
-
-- Remove Pub/Sub emulator from `Procfile` and `scripts/start-pubsub-emulator.sh`
-- Add Redis to local dev (Docker container or use existing Supabase Redis if available)
-- Update Overmind/Procfile to start worker with Redis connection
-- Update test helpers (`lib/test/pubsub.ts`) to use BullMQ test utilities
-
-### D4: Update clone worker tests
-
-Update `__tests__/api/clone-worker.test.ts` to use Redis (via Testcontainers redis image) instead of Pub/Sub emulator.
+- Created `lib/test/redis-container.ts` (Testcontainers Redis)
+- Rewrote `__tests__/api/clone-worker.test.ts` to use BullMQ Queue/Worker/QueueEvents
+- Deleted `lib/test/pubsub-emulator.ts`, `lib/test/pubsub.ts`, old Pub/Sub test files
 
 ---
 
@@ -257,7 +244,7 @@ Update `__tests__/api/clone-worker.test.ts` to use Redis (via Testcontainers red
 
 **No changes to test infrastructure needed** except:
 - Update `createTestUser()` factory for BetterAuth (B8)
-- Update Pub/Sub test helpers for Redis/BullMQ (D4)
+- ~~Update Pub/Sub test helpers for Redis/BullMQ (D4)~~ DONE
 
 ### Infra Repo (Deploy Tests)
 
