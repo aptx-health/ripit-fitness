@@ -11,12 +11,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Tech Stack
 
 - **Next.js 15** (App Router, TypeScript, React 19)
-- **Supabase** (PostgreSQL + Auth)
+- **PostgreSQL 15** (self-hosted, local Docker container for dev)
 - **Prisma** (ORM)
 - **Doppler** (secrets management)
 - **Tailwind CSS** (styling)
 - **Vercel** (deployment)
-- **GCP** (Pub/Sub + Cloud Run for background jobs)
+- **BullMQ + Redis** (background job queue for clone worker)
 
 ## Development Commands
 
@@ -27,22 +27,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 doppler run -- [command]
 
 # Start all services (recommended)
-overmind start                                # Starts Supabase, PubSub emulator, worker, Next.js
+overmind start                                # Starts PostgreSQL, Redis, worker, Next.js
 
 # Development server (if running services individually)
 doppler run -- npm run dev
 
-# Supabase local development
-supabase start                                # Start local Supabase stack
-supabase stop                                 # Stop local Supabase stack
-supabase status                               # Check status and connection details
-supabase status -o env                        # Export connection details as env vars
-supabase db pull                              # Pull schema from linked production project
-
 # Database operations
 doppler run -- npx prisma studio              # Database GUI
 doppler run -- npx prisma generate            # Generate Prisma client
-supabase db reset                             # Reset local DB (runs migrations + seeds)
+doppler run -- npx prisma db push             # Apply schema to local DB (no migration files)
 
 # Testing
 doppler run -- npm test
@@ -52,27 +45,21 @@ doppler run -- npm run lint
 
 ### Database Migration Strategy
 
-We use **Prisma + Supabase CLI** for schema management. See `/docs/DATABASE_MIGRATIONS.md` for complete workflow.
+We use **Prisma** for schema management. `prisma db push` applies schema changes locally; production migrations are handled via the infra repo.
 
 **Quick Reference:**
 
 ```bash
 # 1. Update prisma/schema.prisma with your changes
 
-# 2. Create new migration file
-supabase migration new describe_your_change
+# 2. Apply to local DB
+doppler run -- npx prisma db push
 
-# 3. Generate SQL diff
-doppler run -- npx prisma migrate diff \
-  --from-url "$DATABASE_URL" \
-  --to-schema-datamodel ./prisma/schema.prisma \
-  --script > supabase/migrations/[TIMESTAMP]_describe_your_change.sql
+# 3. Generate Prisma Client (if needed)
+doppler run -- npx prisma generate
 
-# 4. Test locally
-supabase db reset
-
-# 5. Commit migration files
-git add prisma/schema.prisma supabase/migrations/[TIMESTAMP]_*.sql
+# 4. Commit schema changes
+git add prisma/schema.prisma
 git commit -m "feat: describe your change"
 ```
 
@@ -82,24 +69,20 @@ When the user asks Claude to make schema changes:
 
 1. ✅ **Claude CAN**:
    - Update `prisma/schema.prisma`
-   - Create migration file with `supabase migration new`
-   - Generate SQL diff with `npx prisma migrate diff`
-   - Test locally with `supabase db reset`
-   - Commit migration files to git
+   - Apply locally with `prisma db push`
+   - Commit schema changes to git
 
 2. ❌ **Claude MUST NEVER**:
-   - Run `supabase db push` (pushes to production)
    - Apply migrations directly to production
    - Execute SQL in production environment
    - Use `prisma migrate deploy` (production command)
 
 3. 🛑 **When Claude completes a migration**:
-   - Always end with: "Migration ready. **You must manually review and push to production** with `supabase db push`."
+   - Always end with: "Schema updated locally. **Production migration is handled via the infra repo.**"
    - Never proceed to production deployment automatically
 
 **Local Development**:
-- Prototyping: Edit schema → `supabase db reset` (no migration files needed for experiments)
-- Features: Follow the 5-step workflow above (creates versioned migration files)
+- Edit schema → `doppler run -- npx prisma db push` (applies directly, no migration files)
 
 ## Project Structure
 
@@ -115,7 +98,7 @@ When the user asks Claude to make schema changes:
   /db                   # Database client and utilities
   /csv                  # CSV parsing and validation
   /auth                 # Auth utilities (if needed)
-  /gcp                  # GCP Pub/Sub client
+  /queue                # BullMQ job queue (clone jobs)
 
 /components             # React components
   /ui                   # Reusable UI components
@@ -128,13 +111,13 @@ When the user asks Claude to make schema changes:
 /docs                   # Project documentation
   ARCHITECTURE.md       # Architecture decisions and design
   CSV_SPEC.md          # CSV format specification
-  /gcp                  # GCP setup guides and architecture docs
+  /archive/gcp          # Archived GCP documentation
 
 /__tests__              # Integration tests
   /api                  # API route tests
 
-/cloud-functions        # GCP Cloud Run workers
-  /clone-program        # Background program cloning service
+/cloud-functions        # Background workers
+  /clone-program        # BullMQ-based program cloning worker
 
 /types                  # Shared TypeScript types
 /hooks                  # React hooks
@@ -167,41 +150,31 @@ Program
 
 ### Authentication & Security
 
-- **Supabase Auth** (email/password)
-- **Row Level Security (RLS)** enforces data isolation at database level
+- **BetterAuth** (email/password, self-hosted)
 - No multi-tenancy - simple user-to-data relationship
-- RLS policies ensure users can only access their own programs/workouts
+- Auth enforced at the API layer (middleware + route handlers)
 
-Example RLS policy:
-```sql
-CREATE POLICY "users_own_programs" ON programs
-  FOR ALL USING (auth.uid() = user_id);
-```
-
-### Background Jobs & GCP Integration
+### Background Jobs (BullMQ + Redis)
 
 **Problem**: Community program cloning with 9+ weeks and 200+ exercises exceeds Vercel's serverless execution limits (90s max).
 
-**Solution**: GCP Pub/Sub + Cloud Run worker architecture for reliable background processing.
+**Solution**: BullMQ queue backed by Redis, processed by a dedicated worker container.
 
 #### Architecture
 
 ```
 Next.js API (Vercel)
   └─> Create shell program (copyStatus='cloning')
-  └─> Publish job to Pub/Sub topic
+  └─> Enqueue job to BullMQ queue via Redis
   └─> Return immediately to user
 
-Pub/Sub Topic (program-clone-jobs)
-  └─> Delivers message to Cloud Run worker
-  └─> Automatic retries on failure
-
-Cloud Run Worker (clone-program service)
-  └─> Receives Eventarc POST request
+BullMQ Worker (clone-program container)
+  └─> Polls Redis queue for jobs
   └─> Fetches programData from CommunityProgram table
   └─> Processes one week per transaction (progressive loading)
   └─> Updates copyStatus per week (cloning_week_1_of_9, etc.)
   └─> Marks program as 'ready' when complete
+  └─> Automatic retries (3 attempts, exponential backoff)
 
 Frontend (polling via /api/programs/[id]/copy-status)
   └─> Polls every 2 seconds while copyStatus = 'cloning'
@@ -212,32 +185,29 @@ Frontend (polling via /api/programs/[id]/copy-status)
 
 #### Key Components
 
-**Publisher** (`lib/gcp/pubsub.ts`):
-- Next.js publishes jobs to Pub/Sub
-- Sends only `communityProgramId` (not full programData) to minimize message size
-- Emulator support for local testing
+**Publisher** (`lib/queue/clone-jobs.ts`):
+- Enqueues clone jobs to BullMQ `program-clone-jobs` queue
+- Lazy singleton Redis connection from `REDIS_URL`
+- Job options: 3 attempts, exponential backoff
 
 **Worker** (`cloud-functions/clone-program/`):
-- Express app receives Eventarc POST requests
-- Processes one week per 30s transaction (resilient to failures)
-- Idempotency: detects complete/partial clones on retry
-- Marks as `failed` if partial weeks detected (corrupted state)
+- BullMQ Worker with concurrency 1
+- Health server on port 8080 (`/healthz` liveness, `/readyz` readiness)
+- Graceful shutdown on SIGTERM/SIGINT
+- Marks `copyStatus: 'failed'` only on final retry failure
 
 **Deployment** (`.github/workflows/deploy-clone-worker.yml`):
 - Triggers on changes to `cloud-functions/clone-program/**` or `prisma/schema.prisma`
-- Builds Docker image, pushes to Artifact Registry (us-central1)
-- Deploys to Cloud Run with 540s timeout, 1GB memory
-- Uses dedicated `clone-worker` service account (zero GCP permissions, only Supabase access)
+- Builds Docker image, pushes to GHCR (`ghcr.io/aptx-health/clone-program`)
+- Deployed to k8s via Helm chart + ArgoCD (managed in infra repo)
 
 #### Testing
 
 Integration tests in `__tests__/api/clone-worker.test.ts`:
-- **Testcontainers**: PostgreSQL 15 + Pub/Sub emulator (messagebird image)
+- **Testcontainers**: PostgreSQL 15 + Redis 7
 - Tests strength/cardio cloning, progressive loading, idempotency
-- Shared subscription with programId filtering for concurrent execution
-- Run with: `doppler run --config dev_test -- npm test`
-
-See `/docs/gcp/` for detailed setup, architecture decisions, and emergency operations.
+- Uses BullMQ Queue/Worker/QueueEvents for job processing
+- Run with: `doppler run --config dev_test -- npm test clone-worker`
 
 ## CSV Import Strategy
 
@@ -296,20 +266,19 @@ export async function GET(
 
 ```typescript
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { getCurrentUser } from '@/lib/auth/server';
 import { prisma } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
     // Get authenticated user
-    const supabase = await createClient();
-    const { data: { user }, error } = await supabase.auth.getUser();
+    const { user, error } = await getCurrentUser();
 
     if (error || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Fetch data (RLS will enforce user isolation)
+    // Fetch data scoped to user
     const programs = await prisma.program.findMany({
       where: { userId: user.id },
       include: { weeks: true }
@@ -340,7 +309,7 @@ import type { Program, Week } from '@prisma/client';
 
 // 3. Internal utilities
 import { prisma } from '@/lib/db';
-import { createClient } from '@/lib/supabase/server';
+import { getCurrentUser } from '@/lib/auth/server';
 
 // 4. Components
 import { Button } from '@/components/ui/button';
@@ -519,73 +488,84 @@ main (production)         ← Protected, auto-deploy to Vercel
 
 ```bash
 # 1. Update schema.prisma
-# 2. Create migration
-doppler run -- npx prisma migrate dev --name add_feature
+# 2. Apply to local DB
+doppler run -- npx prisma db push
 
-# 3. Generate Prisma Client
+# 3. Generate Prisma Client (if needed)
 doppler run -- npx prisma generate
 
 # 4. Test changes
 doppler run -- npm run dev
 
-# 5. Commit schema + migration files
-git add prisma/
-git commit -m "feat: add feature"
+# 5. Commit schema changes
+git add prisma/schema.prisma
+git commit -m "feat: describe your change"
 ```
 
 ## Current Development Phase
 
-**Phase 1: POC (In Progress)**
-- [ ] Next.js + Supabase + Doppler setup
-- [ ] Supabase Auth (email/password)
-- [ ] Prisma schema + migrations + RLS policies
-- [ ] Seed one hardcoded program
-- [ ] Basic UI: Program → Week → Workout → Exercise
-- [ ] Log sets (reps + weight)
-- [ ] Mark workout complete
-- [ ] Deploy to Vercel
-
-**Future Phases**:
-- Phase 2: CSV Import
-- Phase 3: Polish (UI/UX improvements, week navigation)
-- Phase 4: Advanced features (cardio, export, templates)
+Migrating from Supabase-hosted infrastructure to self-hosted k8s stack. See `/docs/APP-REPO-MIGRATION-PLAN.md` for details.
 
 ## Key Decisions
 
 - **No multi-tenancy**: One user per account (simpler auth, faster queries)
-- **Supabase Auth + RLS**: Security enforced at database level
+- **BetterAuth**: Self-hosted auth, no external auth dependencies
 - **Flatten CSV to DB**: Better querying, no runtime parsing
 - **Infer metadata**: Standard CSV format, user-friendly
 - **Store prescribed + logged**: Enables plan vs actual comparison
 - **Flexible weight field**: Supports "135lbs", "65%", "RPE 8"
-- **GCP Pub/Sub for background jobs**: Move large program cloning off Vercel serverless to Cloud Run (540s timeout, per-week transactions, progressive loading)
+- **BullMQ + Redis for background jobs**: Move large program cloning off Vercel serverless to a dedicated worker container (per-week transactions, progressive loading, automatic retries)
 
 ## Reference Documents
 
 ### Active Documentation
-- `/docs/DATABASE_MIGRATIONS.md` - **CRITICAL**: Database migration workflow with Prisma + Supabase CLI
+- `/docs/DATABASE_MIGRATIONS.md` - Database migration workflow with Prisma
 - `/docs/LOGGING.md` - Logging configuration and usage with Pino
 - `/docs/STYLING.md` - DOOM theme color system and styling guide
 - `/docs/features/CARDIO_DESIGN.md` - Cardio tracking system design
 - `/docs/features/EXERCISE_PERFORMANCE_TRACKING.md` - Exercise tracking features
 - `/docs/features/PROGRAM_MANAGEMENT_IMPROVEMENTS.md` - Program management enhancements
 - `/docs/features/PERFORMANCE_ANALYSIS.md` - Performance analysis and optimizations
-- `/docs/gcp/` - GCP Pub/Sub setup, clone worker architecture, and operations guides
-- `/WORKTREE_SETUP.md` - Multi-worktree setup with isolated Supabase instances
+- `/docs/archive/gcp/` - Archived GCP Pub/Sub documentation (historical reference)
+- `/WORKTREE_SETUP.md` - Multi-worktree setup
 
 ### Reference Material
-- `/NEW_PROJECT_REFERENCE.md` - Next.js + Supabase best practices (reference only, contains multi-tenant patterns we're NOT using)
+- `/NEW_PROJECT_REFERENCE.md` - Next.js best practices (reference only, may be outdated)
 - `/docs/archive/` - Historical design discussions and planning documents (may be outdated)
 
 ## Important Notes
 
 - Use `fd` instead of `find` for file searching
 - Always use Doppler for environment variables (`doppler run -- [command]`)
-- RLS policies must be created for all user-owned tables
 - No emojis in code or commits unless explicitly requested
 - Keep solutions simple - avoid over-engineering
 - **Git file paths with special characters**: Always wrap file paths containing brackets or other special characters in double quotes when using git commands to prevent shell glob expansion. Example: `git add "app/api/exercises/[exerciseId]/route.ts"` instead of `git add app/api/exercises/[exerciseId]/route.ts`
-- **Local development**: Uses Supabase CLI for local PostgreSQL + Auth stack (replaces raw psql). Run `overmind start` to launch all services, or `supabase start` individually. The `dev_personal` Doppler config points to local Supabase (postgres@127.0.0.1:54322)
-- **Prisma version**: Stay on v6.x (Supabase recommendation). Use `npx prisma@6.19.0` to avoid installing v7
-- **Prisma migrations**: If `migrate dev` fails with "permission denied to terminate process", use `db push` instead (Supabase pooler limitation)
-- For local testing, use the doppler config `dev_test`. Example: `doppler run --config dev_test -- npm run test` This will ensure that the proper Testcontainer with the test database is utilized.
+- **Local development**: Run `overmind start` to launch PostgreSQL (Docker, port 5433), Redis, worker, and Next.js. The `dev_personal` Doppler config points to local PostgreSQL (`postgres@localhost:5433/ripit`)
+- **Prisma version**: Stay on v6.x. Use `npx prisma@6.19.0` to avoid installing v7
+-
+For local testing, use the doppler config `dev_test`. Example: `doppler run --config dev_test -- npm run test` This will ensure that the proper Testcontainer with the test database is utilized.
+
+## Agent Messaging
+
+You are connected to a shared message bus for coordinating with other AI agents.
+
+Need to prefix agent message commands like publish with the identity like an env var.
+
+**First thing you must do when starting a session:**
+1. Run `agent-whoami` to claim your identity. Remember the name it gives you.
+2. Run `agent-topics` to see recently active projects and channels.
+3. Run `agent-check` to read any unread messages.
+
+**Publishing messages:**
+When you make changes that affect other repos (schema changes, API changes, dependency updates, breaking changes), notify other agents:
+```
+AGENT_NAME=<your-identity> agent-pub <project/channel> "<message>"
+```
+
+**Checking messages:**
+- `agent-check` - all unread messages
+- `agent-check myproject` - unread under myproject/*
+- `agent-check myproject/backend` - exact topic
+
+**Acknowledging messages:**
+- `agent-ack <id>` or `agent-ack all [topic-prefix]`

@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { publishProgramCloneJob } from '@/lib/gcp/pubsub';
+import { publishProgramCloneJob } from '@/lib/queue/clone-jobs';
 
 export interface CloneResult {
   success: boolean;
