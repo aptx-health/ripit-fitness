@@ -392,11 +392,11 @@ describe('Community Programs API', () => {
   });
 
   describe('Cloning Community Programs', () => {
-    // Disabled: cloning logic moved to Cloud Run worker via Pub/Sub (lib/gcp/pubsub.ts).
+    // Disabled: cloning logic moved to background worker via BullMQ (lib/queue/clone-jobs.ts).
     // cloneStrengthProgramData / cloneCardioProgramData no longer run in-process;
-    // the shell program is created with copyStatus='cloning' and a Pub/Sub message is
+    // the shell program is created with copyStatus='cloning' and a BullMQ job is
     // published for the worker to materialise weeks/workouts/exercises/prescribedSets.
-    // These tests will be rewritten as integration tests against the worker — see issue #111.
+    // See __tests__/api/clone-worker.test.ts for integration tests.
     it.skip('should clone a community program to user collection', async () => {
       // Arrange: Create and publish a program
       const originalProgram = await createTestProgram(prisma, userId, {

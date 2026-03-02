@@ -1,11 +1,9 @@
-import express from 'express'
+import { Worker, Job } from 'bullmq'
+import http from 'http'
 import { PrismaClient } from '@prisma/client'
-import { PubSub, Subscription } from '@google-cloud/pubsub'
-import { OAuth2Client } from 'google-auth-library'
 import { ProgramCloneJob, cloneStrengthProgramData, cloneCardioProgramData } from './cloning'
 
-const app = express()
-app.use(express.json({ limit: '1mb' }))
+const QUEUE_NAME = 'program-clone-jobs'
 
 const prisma = new PrismaClient({
   datasources: {
@@ -13,215 +11,139 @@ const prisma = new PrismaClient({
   },
 })
 
+const redisUrl = process.env.REDIS_URL
+if (!redisUrl) {
+  console.error('REDIS_URL is not set')
+  process.exit(1)
+}
+
+function parseRedisUrl(url: string) {
+  const parsed = new URL(url)
+  return {
+    host: parsed.hostname,
+    port: parseInt(parsed.port || '6379', 10),
+    password: parsed.password || undefined,
+    maxRetriesPerRequest: null as null,
+  }
+}
+
+const connectionOpts = parseRedisUrl(redisUrl)
+
 /**
- * Eventarc delivers Pub/Sub messages as HTTP POST to /
- * Message format: { message: { data: base64EncodedJSON } }
+ * Process a program clone job from the BullMQ queue.
  */
-app.post('/', async (req, res) => {
-  const message = req.body.message
+async function processCloneJob(job: Job<ProgramCloneJob>): Promise<void> {
+  const { communityProgramId, programId, userId, programType } = job.data
 
-  if (!message || !message.data) {
-    console.error('Bad request: missing message or message.data')
-    res.status(400).send('Bad Request: missing message')
-    return
+  if (!communityProgramId || !programId || !userId || !programType) {
+    throw new Error(`Invalid job payload: missing required fields`)
   }
 
-  let job: ProgramCloneJob
-  try {
-    const data = Buffer.from(message.data, 'base64').toString()
-    job = JSON.parse(data)
-  } catch (parseError) {
-    console.error('Failed to parse message:', parseError)
-    res.status(400).send('Bad Request: invalid message payload')
-    return
+  console.log(`Processing clone job: communityProgramId=${communityProgramId} programId=${programId} type=${programType}`)
+
+  const communityProgram = await prisma.communityProgram.findUnique({
+    where: { id: communityProgramId },
+    select: { programData: true },
+  })
+
+  if (!communityProgram || !communityProgram.programData) {
+    throw new Error(`Community program not found or has no data: ${communityProgramId}`)
   }
 
-  if (!job.communityProgramId || !job.programId || !job.userId || !job.programType) {
-    console.error('Invalid job payload:', job)
-    res.status(400).send('Bad Request: missing required job fields')
-    return
+  const programData = communityProgram.programData as any
+
+  if (programType === 'cardio') {
+    await cloneCardioProgramData(prisma, programId, programData, userId)
+  } else {
+    await cloneStrengthProgramData(prisma, programId, programData, userId)
   }
 
-  console.log(`Processing clone job: communityProgramId=${job.communityProgramId} programId=${job.programId} type=${job.programType}`)
+  console.log(`Clone job completed: programId=${programId}`)
+}
 
-  try {
-    // Fetch programData from CommunityProgram table
-    const communityProgram = await prisma.communityProgram.findUnique({
-      where: { id: job.communityProgramId },
-      select: { programData: true },
-    })
+const worker = new Worker(QUEUE_NAME, processCloneJob, {
+  connection: connectionOpts,
+  concurrency: 1,
+})
 
-    if (!communityProgram || !communityProgram.programData) {
-      console.error(`Community program not found or has no data: ${job.communityProgramId}`)
-      res.status(400).send('Bad Request: invalid community program')
-      return
-    }
+let workerReady = false
 
-    const programData = communityProgram.programData as any
+worker.on('ready', () => {
+  workerReady = true
+  console.log('Worker connected to Redis')
+})
 
-    if (job.programType === 'cardio') {
-      await cloneCardioProgramData(prisma, job.programId, programData, job.userId)
-    } else {
-      await cloneStrengthProgramData(prisma, job.programId, programData, job.userId)
-    }
+worker.on('completed', (job) => {
+  console.log(`Job ${job.id} completed for program ${job.data.programId}`)
+})
 
-    console.log(`Clone job completed: programId=${job.programId}`)
-    res.status(200).send('OK')
-  } catch (error) {
-    console.error(`Clone job failed for programId=${job.programId}:`, error)
+worker.on('failed', async (job, error) => {
+  if (!job) return
 
-    // Mark the shell program as failed so the frontend can report it
+  console.error(`Job ${job.id} failed (attempt ${job.attemptsMade}/${job.opts.attempts}):`, error.message)
+
+  // Only mark as failed when all retries are exhausted
+  if (job.attemptsMade >= (job.opts.attempts ?? 1)) {
+    console.error(`All retries exhausted for program ${job.data.programId}, marking as failed`)
     try {
-      if (job.programType === 'cardio') {
+      if (job.data.programType === 'cardio') {
         await prisma.cardioProgram.update({
-          where: { id: job.programId },
+          where: { id: job.data.programId },
           data: { copyStatus: 'failed' },
         })
       } else {
         await prisma.program.update({
-          where: { id: job.programId },
+          where: { id: job.data.programId },
           data: { copyStatus: 'failed' },
         })
       }
     } catch (statusError) {
       console.error('Failed to update copyStatus to failed:', statusError)
     }
-
-    // Return 500 so Pub/Sub retries the message
-    res.status(500).send('Error processing clone job')
   }
 })
 
-// Health check for Cloud Run
-app.get('/', (req, res) => {
-  res.status(200).send('OK')
+worker.on('error', (error) => {
+  console.error('Worker error:', error.message)
+  workerReady = false
+})
+
+// Health server for k8s probes
+const healthServer = http.createServer((req, res) => {
+  if (req.url === '/healthz') {
+    res.writeHead(200)
+    res.end('OK')
+    return
+  }
+
+  if (req.url === '/readyz') {
+    if (workerReady) {
+      res.writeHead(200)
+      res.end('OK')
+    } else {
+      res.writeHead(503)
+      res.end('Worker not ready')
+    }
+    return
+  }
+
+  res.writeHead(404)
+  res.end('Not Found')
 })
 
 const port = process.env.PORT || 8080
-app.listen(port, () => {
-  console.log(`Clone worker listening on port ${port}`)
-
-  // In local dev mode with emulator, also subscribe to Pub/Sub
-  if (process.env.PUBSUB_EMULATOR_HOST) {
-    console.log('🔧 Local dev mode detected - subscribing to Pub/Sub emulator')
-    startLocalSubscriber()
-  }
+healthServer.listen(port, () => {
+  console.log(`Clone worker started, health server on port ${port}`)
 })
 
-/**
- * Local dev mode: Subscribe to Pub/Sub emulator and process messages
- * In production, Eventarc delivers messages via HTTP POST instead
- */
-async function startLocalSubscriber() {
-  // Suppress ADC warning
-  const authClient = new OAuth2Client()
-  authClient.setCredentials({ access_token: 'emulator' })
-
-  const pubsub = new PubSub({
-    projectId: process.env.PUBSUB_PROJECT_ID || 'test-project',
-    authClient: authClient as any, // Type workaround for emulator mode
-  })
-
-  // Wait for subscription to be created by emulator startup script
-  console.log('⏳ Waiting for subscription to be ready...')
-
-  // Retry loop: check if subscription exists before attempting to use it
-  for (let i = 0; i < 30; i++) {
-    try {
-      const subscription = pubsub.subscription('program-clone-jobs-sub')
-      const [exists] = await subscription.exists()
-
-      if (exists) {
-        console.log('✅ Subscription found')
-
-        // Now that we've confirmed it exists, set up the message handler
-        setupMessageHandler(subscription)
-        return
-      }
-    } catch (error) {
-      // Ignore errors during startup, emulator may not be ready yet
-      if (i % 5 === 0) {
-        console.log(`   Still waiting... (attempt ${i + 1}/30)`)
-      }
-    }
-
-    if (i === 29) {
-      console.error('❌ Subscription not found after 30 seconds')
-      console.error('   Make sure the emulator process has fully started')
-      console.error('   Check that start-pubsub-emulator.sh is running')
-      return
-    }
-
-    await new Promise(resolve => setTimeout(resolve, 1000))
-  }
+// Graceful shutdown
+async function shutdown() {
+  console.log('Shutting down clone worker...')
+  await worker.close()
+  healthServer.close()
+  await prisma.$disconnect()
+  process.exit(0)
 }
 
-/**
- * Set up message handler for the subscription
- * Separated to ensure subscription exists before attaching handlers
- */
-function setupMessageHandler(subscription: Subscription) {
-  // Handle subscription errors (connection issues, etc.)
-  subscription.on('error', (error: Error) => {
-    console.error('❌ Subscription error:', error)
-    console.error('   The subscription may have been deleted or the emulator stopped')
-  })
-
-  subscription.on('message', async (message) => {
-    try {
-      const data = message.data.toString()
-      const job: ProgramCloneJob = JSON.parse(data)
-
-      console.log(`📨 Received message from emulator: programId=${job.programId}`)
-
-      // Fetch programData from CommunityProgram table
-      const communityProgram = await prisma.communityProgram.findUnique({
-        where: { id: job.communityProgramId },
-        select: { programData: true },
-      })
-
-      if (!communityProgram || !communityProgram.programData) {
-        console.error(`Community program not found: ${job.communityProgramId}`)
-        message.nack()
-        return
-      }
-
-      const programData = communityProgram.programData as any
-
-      if (job.programType === 'cardio') {
-        await cloneCardioProgramData(prisma, job.programId, programData, job.userId)
-      } else {
-        await cloneStrengthProgramData(prisma, job.programId, programData, job.userId)
-      }
-
-      console.log(`✅ Clone job completed: programId=${job.programId}`)
-      message.ack()
-    } catch (error) {
-      console.error('❌ Error processing message:', error)
-
-      // Mark as failed
-      try {
-        const data = message.data.toString()
-        const job: ProgramCloneJob = JSON.parse(data)
-
-        if (job.programType === 'cardio') {
-          await prisma.cardioProgram.update({
-            where: { id: job.programId },
-            data: { copyStatus: 'failed' },
-          })
-        } else {
-          await prisma.program.update({
-            where: { id: job.programId },
-            data: { copyStatus: 'failed' },
-          })
-        }
-      } catch (statusError) {
-        console.error('Failed to update copyStatus:', statusError)
-      }
-
-      message.nack()
-    }
-  })
-
-  console.log('✅ Subscribed to program-clone-jobs-sub on emulator')
-}
+process.on('SIGTERM', shutdown)
+process.on('SIGINT', shutdown)

@@ -4,10 +4,9 @@
 
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { PrismaClient } from '@prisma/client';
-import { PubSub } from '@google-cloud/pubsub';
-import { OAuth2Client } from 'google-auth-library';
+import { Queue, Worker, QueueEvents, Job } from 'bullmq';
 import { getTestDatabase } from '@/lib/test/database';
-import { startPubSubEmulator, stopPubSubEmulator } from '@/lib/test/pubsub-emulator';
+import { startRedisContainer, stopRedisContainer } from '@/lib/test/redis-container';
 import {
   createTestUser,
   createTestProgram,
@@ -15,7 +14,7 @@ import {
 } from '@/lib/test/factories';
 import { publishProgramToCommunity } from '@/lib/community/publishing';
 import { cloneCommunityProgram } from '@/lib/community/cloning';
-import { ProgramCloneJob } from '@/lib/gcp/pubsub';
+import { ProgramCloneJob } from '@/lib/queue/clone-jobs';
 
 // Import cloning functions from worker
 import {
@@ -23,47 +22,77 @@ import {
   cloneCardioProgramData,
 } from '../../cloud-functions/clone-program/src/cloning';
 
-describe('Program Cloning via Pub/Sub + Worker', () => {
+const QUEUE_NAME = 'program-clone-jobs';
+
+describe('Program Cloning via BullMQ Worker', () => {
   let prisma: PrismaClient;
-  let pubsub: PubSub;
-  let subscription: any;
+  let queue: Queue;
+  let queueEvents: QueueEvents;
+  let testWorker: Worker;
   let userId: string;
   let otherUserId: string;
 
+  function getConnection() {
+    const parsed = new URL(process.env.REDIS_URL!);
+    return {
+      host: parsed.hostname,
+      port: parseInt(parsed.port || '6379', 10),
+      password: parsed.password || undefined,
+      maxRetriesPerRequest: null as null,
+    };
+  }
+
   beforeAll(async () => {
-    // Start both database and Pub/Sub emulator
-    await startPubSubEmulator();
+    // Start Redis container
+    await startRedisContainer();
 
-    // Set up Pub/Sub client
-    const authClient = new OAuth2Client();
-    authClient.setCredentials({ access_token: 'emulator-test' });
+    // Create queue for enqueuing jobs
+    queue = new Queue(QUEUE_NAME, { connection: getConnection() });
 
-    pubsub = new PubSub({
-      projectId: process.env.PUBSUB_PROJECT_ID || 'test-project',
-      authClient,
-    });
+    // Create QueueEvents for awaiting job completion
+    queueEvents = new QueueEvents(QUEUE_NAME, { connection: getConnection() });
 
-    // Create topic and subscription BEFORE any tests run
-    const topicName = 'program-clone-jobs';
-    const subscriptionName = 'program-clone-jobs-sub';
+    // Start a temporary worker that processes jobs using the real cloning logic
+    testWorker = new Worker(
+      QUEUE_NAME,
+      async (job: Job<ProgramCloneJob>) => {
+        const { communityProgramId, programId, userId: jobUserId, programType } = job.data;
 
-    try {
-      const [topic] = await pubsub.createTopic(topicName);
-      [subscription] = await topic.createSubscription(subscriptionName);
-      console.log('✅ Created Pub/Sub topic and subscription');
-    } catch (error) {
-      console.warn('Topic/subscription may already exist:', error);
-    }
+        const communityProgram = await prisma.communityProgram.findUnique({
+          where: { id: communityProgramId },
+          select: { programData: true },
+        });
+
+        if (!communityProgram || !communityProgram.programData) {
+          throw new Error('Community program not found');
+        }
+
+        const programData = communityProgram.programData as any;
+
+        if (programType === 'cardio') {
+          await cloneCardioProgramData(prisma as any, programId, programData, jobUserId);
+        } else {
+          await cloneStrengthProgramData(prisma as any, programId, programData, jobUserId);
+        }
+      },
+      { connection: getConnection(), concurrency: 1 }
+    );
   }, 60000);
 
   afterAll(async () => {
-    await stopPubSubEmulator();
+    await testWorker.close();
+    await queueEvents.close();
+    await queue.close();
+    await stopRedisContainer();
   }, 10000);
 
   beforeEach(async () => {
     const testDb = await getTestDatabase();
     prisma = testDb.getPrismaClient();
     await testDb.reset();
+
+    // Drain any leftover jobs from previous tests
+    await queue.drain();
 
     const user = await createTestUser();
     userId = user.id;
@@ -73,72 +102,16 @@ describe('Program Cloning via Pub/Sub + Worker', () => {
   });
 
   /**
-   * Helper: Process the next Pub/Sub message for a specific programId
-   * Filters out messages from other tests that may be in the queue
+   * Helper: Enqueue a clone job and wait for completion.
    */
-  async function processNextCloneJob(expectedProgramId: string, timeoutMs: number = 5000): Promise<void> {
-    return new Promise((resolve, reject) => {
-      let messageHandler: ((message: any) => Promise<void>) | null = null;
-
-      const timeout = setTimeout(() => {
-        if (messageHandler) {
-          subscription.removeListener('message', messageHandler);
-        }
-        reject(new Error(`No message received for program ${expectedProgramId} within timeout`));
-      }, timeoutMs);
-
-      messageHandler = async (message: any) => {
-        try {
-          // Parse the job from message data
-          const data = message.data.toString();
-          const job: ProgramCloneJob = JSON.parse(data);
-
-          // Check if this is the message we're looking for
-          if (job.programId !== expectedProgramId) {
-            console.log(`⏭️  Skipping message for different program: ${job.programId}`);
-            message.ack(); // Ack it so it doesn't get redelivered
-            return; // Don't remove handler, keep listening
-          }
-
-          // This is our message!
-          clearTimeout(timeout);
-          subscription.removeListener('message', messageHandler!);
-
-          console.log('📨 Processing clone job:', job);
-
-          // Fetch programData from database (same as worker does)
-          const communityProgram = await prisma.communityProgram.findUnique({
-            where: { id: job.communityProgramId },
-            select: { programData: true },
-          });
-
-          if (!communityProgram || !communityProgram.programData) {
-            throw new Error('Community program not found');
-          }
-
-          const programData = communityProgram.programData as any;
-
-          // Call the appropriate cloning function
-          if (job.programType === 'cardio') {
-            await cloneCardioProgramData(prisma as any, job.programId, programData, job.userId);
-          } else {
-            await cloneStrengthProgramData(prisma as any, job.programId, programData, job.userId);
-          }
-
-          message.ack();
-          console.log('✅ Clone job processed successfully');
-          resolve();
-        } catch (error) {
-          console.error('❌ Error processing clone job:', error);
-          clearTimeout(timeout);
-          subscription.removeListener('message', messageHandler!);
-          message.nack();
-          reject(error);
-        }
-      };
-
-      subscription.on('message', messageHandler);
+  async function enqueueAndWaitForCloneJob(job: ProgramCloneJob, timeoutMs: number = 15000): Promise<void> {
+    const bullJob = await queue.add('clone', job, {
+      attempts: 1,
+      removeOnComplete: true,
     });
+
+    const result = await bullJob.waitUntilFinished(queueEvents, timeoutMs);
+    return result;
   }
 
   describe('Strength Program Cloning', () => {
@@ -177,7 +150,7 @@ describe('Program Cloning via Pub/Sub + Worker', () => {
       );
       expect(publishResult.success).toBe(true);
 
-      // Act: Clone the program (publishes Pub/Sub message)
+      // Act: Clone the program (publishes to BullMQ queue)
       const cloneResult = await cloneCommunityProgram(
         prisma,
         publishResult.communityProgramId!,
@@ -195,8 +168,26 @@ describe('Program Cloning via Pub/Sub + Worker', () => {
       expect(shellProgram!.copyStatus).toBe('cloning');
       expect(shellProgram!.userId).toBe(otherUserId);
 
-      // Process the Pub/Sub message (simulates worker)
-      await processNextCloneJob(cloneResult.programId!);
+      // Wait for the BullMQ worker to process the job
+      // The cloneCommunityProgram already enqueued via publishProgramCloneJob
+      // but our test worker is running, so we just need to wait for completion
+      await new Promise((resolve) => {
+        const checkInterval = setInterval(async () => {
+          const program = await prisma.program.findUnique({
+            where: { id: cloneResult.programId },
+          });
+          if (program && program.copyStatus !== 'cloning' && !program.copyStatus?.startsWith('cloning_week')) {
+            clearInterval(checkInterval);
+            resolve(undefined);
+          }
+        }, 200);
+
+        // Safety timeout
+        setTimeout(() => {
+          clearInterval(checkInterval);
+          resolve(undefined);
+        }, 15000);
+      });
 
       // Assert: Verify cloned program is complete
       const clonedProgram = await prisma.program.findUnique({
@@ -292,10 +283,25 @@ describe('Program Cloning via Pub/Sub + Worker', () => {
         otherUserId
       );
 
-      // Act: Process the job
-      await processNextCloneJob(cloneResult.programId!);
+      // Wait for processing to complete
+      await new Promise((resolve) => {
+        const checkInterval = setInterval(async () => {
+          const program = await prisma.program.findUnique({
+            where: { id: cloneResult.programId },
+          });
+          if (program && program.copyStatus === 'ready') {
+            clearInterval(checkInterval);
+            resolve(undefined);
+          }
+        }, 200);
 
-      // Assert: Verify final status is 'ready' (not 'cloning_week_3_of_3')
+        setTimeout(() => {
+          clearInterval(checkInterval);
+          resolve(undefined);
+        }, 15000);
+      });
+
+      // Assert: Verify final status is 'ready'
       const finalProgram = await prisma.program.findUnique({
         where: { id: cloneResult.programId },
       });
@@ -409,8 +415,23 @@ describe('Program Cloning via Pub/Sub + Worker', () => {
 
       expect(cloneResult.success).toBe(true);
 
-      // Process the Pub/Sub message
-      await processNextCloneJob(cloneResult.programId!);
+      // Wait for processing to complete
+      await new Promise((resolve) => {
+        const checkInterval = setInterval(async () => {
+          const program = await prisma.cardioProgram.findUnique({
+            where: { id: cloneResult.programId },
+          });
+          if (program && program.copyStatus === 'ready') {
+            clearInterval(checkInterval);
+            resolve(undefined);
+          }
+        }, 200);
+
+        setTimeout(() => {
+          clearInterval(checkInterval);
+          resolve(undefined);
+        }, 15000);
+      });
 
       // Assert: Verify cloned cardio program
       const clonedCardioProgram = await prisma.cardioProgram.findUnique({
@@ -483,8 +504,23 @@ describe('Program Cloning via Pub/Sub + Worker', () => {
         otherUserId
       );
 
-      // First processing - should succeed
-      await processNextCloneJob(cloneResult.programId!);
+      // Wait for first processing
+      await new Promise((resolve) => {
+        const checkInterval = setInterval(async () => {
+          const program = await prisma.program.findUnique({
+            where: { id: cloneResult.programId },
+          });
+          if (program && program.copyStatus === 'ready') {
+            clearInterval(checkInterval);
+            resolve(undefined);
+          }
+        }, 200);
+
+        setTimeout(() => {
+          clearInterval(checkInterval);
+          resolve(undefined);
+        }, 15000);
+      });
 
       // Verify it's marked ready
       const programAfterFirstClone = await prisma.program.findUnique({
@@ -500,7 +536,7 @@ describe('Program Cloning via Pub/Sub + Worker', () => {
         data: { copyStatus: 'cloning' },
       });
 
-      // Fetch programData for retry (community program still exists from earlier)
+      // Fetch programData for retry
       const communityProgram = await prisma.communityProgram.findUnique({
         where: { id: publishResult.communityProgramId },
         select: { programData: true },
@@ -508,7 +544,7 @@ describe('Program Cloning via Pub/Sub + Worker', () => {
 
       expect(communityProgram).toBeTruthy();
 
-      // Call cloning function directly (simulates worker retry without Pub/Sub)
+      // Call cloning function directly (simulates worker retry)
       await cloneStrengthProgramData(
         prisma as any,
         cloneResult.programId!,
