@@ -3,6 +3,7 @@ name: Build & Push Clone Worker
 on:
   push:
     branches:
+      - dev
       - main
     paths:
       - 'cloud-functions/clone-program/**'
@@ -15,6 +16,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+    environment: ${{ github.ref_name == 'main' && 'production' || github.ref_name == 'dev' && 'staging' || '' }}
 
     env:
       IMAGE_NAME: ghcr.io/aptx-health/clone-program
@@ -34,14 +36,24 @@ jobs:
           mkdir -p cloud-functions/clone-program/prisma
           cp prisma/schema.prisma cloud-functions/clone-program/prisma/schema.prisma
 
+      - name: Determine image tags
+        id: tags
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            echo "tag=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.ref_name }}" = "dev" ]; then
+            echo "tag=staging" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::Unexpected branch ${{ github.ref_name }}"
+            exit 1
+          fi
+
       - name: Build Docker image
         run: |
           docker build \
-            -t "$IMAGE_NAME:${{ github.sha }}" \
-            -t "$IMAGE_NAME:latest" \
+            -t "$IMAGE_NAME:${{ steps.tags.outputs.tag }}" \
             ./cloud-functions/clone-program
 
       - name: Push Docker image to GHCR
         run: |
-          docker push "$IMAGE_NAME:${{ github.sha }}"
-          docker push "$IMAGE_NAME:latest"
+          docker push "$IMAGE_NAME:${{ steps.tags.outputs.tag }}"
