@@ -16,7 +16,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
+    environment: ${{ github.ref_name == 'main' && 'production' || github.ref_name == 'dev' && 'staging' || '' }}
 
     env:
       IMAGE_NAME: ghcr.io/aptx-health/clone-program

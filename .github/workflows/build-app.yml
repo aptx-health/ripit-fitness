@@ -16,7 +16,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
+    environment: ${{ github.ref_name == 'main' && 'production' || github.ref_name == 'dev' && 'staging' || '' }}
 
     steps:
       - uses: actions/checkout@v4
