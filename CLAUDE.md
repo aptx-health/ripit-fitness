@@ -15,7 +15,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Prisma** (ORM)
 - **Doppler** (secrets management)
 - **Tailwind CSS** (styling)
-- **Vercel** (deployment)
+- **Self-hosted k8s** (deployment via ArgoCD, GHCR images)
 - **BullMQ + Redis** (background job queue for clone worker)
 
 ## Development Commands
@@ -479,10 +479,38 @@ Helper functions in `/lib/test/factories.ts`:
 
 ### Git Workflow
 ```
-main (production)         ← Protected, auto-deploy to Vercel
-└── dev                  ← Development branch
-    └── feature/[name]   ← Feature branches
+main (production)         ← Protected, builds + deploys to production
+└── dev                  ← Development branch, builds + deploys to staging
+    └── feature/[name]   ← Feature branches (PR to dev triggers tests)
 ```
+
+### CI/CD & Deployments
+
+**GitHub Actions Workflows:**
+- `test.yml` — Runs typecheck + tests on PRs to `dev` and `main`
+- `build-app.yml` — Builds app Docker image on merge to `dev` or `main`
+- `deploy-clone-worker.yml` — Builds clone worker image on merge to `dev` or `main` (path-filtered)
+
+**Staging** (merge to `dev`):
+- Images tagged as `:staging` (overwritten each merge)
+- `ghcr.io/aptx-health/ripit-fitness:staging`
+- `ghcr.io/aptx-health/clone-program:staging`
+- Helm values use `imagePullPolicy: Always` — pods pick up new images on rollout
+- URL: `https://staging.bookfriends.site`
+
+**Production** (merge to `main`):
+- Images tagged as `:sha-<commit-sha>` (pinned, never overwritten)
+- `ghcr.io/aptx-health/ripit-fitness:sha-<sha>`
+- `ghcr.io/aptx-health/clone-program:<sha>`
+- SHA manually updated in infra repo helm values
+- URL: `https://strong.bookfriends.site`
+
+**GitHub Environments:**
+- `staging` — branch-restricted to `dev`, holds staging-specific vars (`NEXT_PUBLIC_APP_URL`)
+- `production` — holds production-specific vars
+- Environment vars override repo-level secrets with the same name
+
+**Infrastructure:** ArgoCD (GitOps, auto-sync) manages k8s deployments. Secrets flow via Doppler → External Secrets Operator.
 
 ### Prisma Development Flow
 
@@ -504,7 +532,7 @@ git commit -m "feat: describe your change"
 
 ## Current Development Phase
 
-Migrating from Supabase-hosted infrastructure to self-hosted k8s stack. See `/docs/APP-REPO-MIGRATION-PLAN.md` for details.
+Self-hosted k8s infrastructure is operational (staging + production). PostgreSQL with PgBouncer, Redis, and ArgoCD GitOps deployments are live. CI builds images on merge to `dev` (staging) and `main` (production).
 
 ## Key Decisions
 
