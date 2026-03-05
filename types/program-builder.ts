@@ -1,6 +1,8 @@
 export type Week = {
   id: string
   weekNumber: number
+  name?: string | null
+  description?: string | null
   workouts: Workout[]
 }
 
@@ -39,6 +41,8 @@ export type PrescribedSet = {
 export type WeekSummary = {
   id: string
   weekNumber: number
+  name?: string | null
+  description?: string | null
 }
 
 export type ExistingProgram = {
