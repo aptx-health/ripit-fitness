@@ -99,8 +99,11 @@ export default function FAUSelector({
             <div className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2">
               {variant === 'primary' ? 'Select primary muscle group' : 'Select secondary muscle groups (optional)'}
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 max-h-64 overflow-y-auto">
-              {allFAUs.map((fau) => renderFAUButton(fau))}
+            <div className="relative">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 max-h-64 overflow-y-auto pb-4">
+                {allFAUs.map((fau) => renderFAUButton(fau))}
+              </div>
+              <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-popover to-transparent" />
             </div>
           </div>
         </PopoverContent>
