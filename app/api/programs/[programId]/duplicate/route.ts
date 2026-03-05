@@ -2,27 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { batchInsertWeek } from '@/lib/db/batch-insert'
-
-/**
- * Generates a unique program name by appending " (Copy)" or " (Copy N)"
- */
-function generateCopyName(originalName: string, existingNames: string[]): string {
-  const baseName = originalName.replace(/\s*\(Copy\s*\d*\)$/, '').trim()
-
-  // Try "Program Name (Copy)" first
-  let candidateName = `${baseName} (Copy)`
-  if (!existingNames.includes(candidateName)) {
-    return candidateName
-  }
-
-  // Find the highest copy number
-  let copyNumber = 2
-  while (existingNames.includes(`${baseName} (Copy ${copyNumber})`)) {
-    copyNumber++
-  }
-
-  return `${baseName} (Copy ${copyNumber})`
-}
+import { generateCopyName } from '@/lib/copy-name'
 
 export async function POST(
   request: NextRequest,
