@@ -94,7 +94,7 @@ When the user asks Claude to make schema changes:
     /programs           # Program management
     /workouts           # Workout logging
 
-/lib                    # Business logic (max 200 lines per file)
+/lib                    # Business logic (max 500 lines per file)
   /db                   # Database client and utilities
   /csv                  # CSV parsing and validation
   /auth                 # Auth utilities (if needed)
@@ -296,7 +296,7 @@ export async function GET(request: NextRequest) {
 
 ### File Size Limit
 
-**Max 200 lines per file**. If exceeded, split into multiple files following Single Responsibility Principle.
+**Max 500 lines per file**. Enforced by Husky + lint-staged pre-commit hook. If exceeded, split into multiple files following Single Responsibility Principle.
 
 ### Import Organization
 
