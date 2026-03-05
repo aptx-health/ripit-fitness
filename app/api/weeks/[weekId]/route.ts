@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { logger } from '@/lib/logger'
 
 export async function DELETE(
   request: NextRequest,
@@ -47,8 +48,8 @@ export async function DELETE(
     const workoutIds = week.workouts.map(w => w.id)
     const exerciseIds = week.workouts.flatMap(w => w.exercises.map(e => e.id))
 
-    // Delete week and all related data in transaction with extended timeout
-    await prisma.$transaction(
+    // Delete week and renumber remaining weeks in transaction
+    const renumberedWeeks = await prisma.$transaction(
       async (tx) => {
         // Batch delete all logged sets for exercises in this week
         if (exerciseIds.length > 0) {
@@ -80,6 +81,29 @@ export async function DELETE(
         await tx.week.delete({
           where: { id: weekId }
         })
+
+        // Renumber remaining weeks sequentially to close gaps
+        const remainingWeeks = await tx.week.findMany({
+          where: { programId: week.programId },
+          orderBy: { weekNumber: 'asc' },
+          select: { id: true, weekNumber: true },
+        })
+
+        for (let i = 0; i < remainingWeeks.length; i++) {
+          const expectedNumber = i + 1
+          if (remainingWeeks[i].weekNumber !== expectedNumber) {
+            await tx.week.update({
+              where: { id: remainingWeeks[i].id },
+              data: { weekNumber: expectedNumber },
+            })
+          }
+        }
+
+        // Return the renumbered weeks
+        return remainingWeeks.map((w, i) => ({
+          id: w.id,
+          weekNumber: i + 1,
+        }))
       },
       {
         timeout: 30000 // 30 second timeout for large weeks
@@ -88,10 +112,11 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: 'Week deleted successfully'
+      message: 'Week deleted successfully',
+      renumberedWeeks,
     })
   } catch (error) {
-    console.error('Error deleting week:', error)
+    logger.error({ error, context: 'week-delete' }, 'Error deleting week')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

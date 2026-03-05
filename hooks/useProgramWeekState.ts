@@ -174,30 +174,48 @@ export function useProgramWeekState({
         throw new Error(error.error || 'Failed to delete week')
       }
 
+      const { renumberedWeeks } = await response.json()
+
       if (editMode) {
-        setWeeksSummary(prev => {
-          const updated = prev.filter(w => w.id !== weekId)
+        // Rebuild weeksSummary from renumbered data
+        setWeeksSummary(() => {
+          const updated = (renumberedWeeks as Array<{ id: string; weekNumber: number }>)
+            .sort((a: { weekNumber: number }, b: { weekNumber: number }) => a.weekNumber - b.weekNumber)
           if (currentWeekIndex >= updated.length && updated.length > 0) {
             setCurrentWeekIndex(updated.length - 1)
           }
           return updated
         })
+        // Rebuild cache with new week numbers
         setWeeksCache(prev => {
-          const newCache = new Map(prev)
-          newCache.delete(weekNumber)
+          const newCache = new Map<number, Week>()
+          for (const rw of renumberedWeeks as Array<{ id: string; weekNumber: number }>) {
+            // Find cached week by id (may be under old weekNumber key)
+            for (const [, cachedWeek] of prev) {
+              if (cachedWeek.id === rw.id) {
+                newCache.set(rw.weekNumber, { ...cachedWeek, weekNumber: rw.weekNumber })
+                break
+              }
+            }
+          }
           return newCache
         })
       } else {
         setWeeks(prev => {
-          const updated = prev.filter(w => w.id !== weekId)
+          const updated = prev
+            .filter(w => w.id !== weekId)
+            .map(w => {
+              const renumbered = (renumberedWeeks as Array<{ id: string; weekNumber: number }>)
+                .find((rw: { id: string }) => rw.id === w.id)
+              return renumbered ? { ...w, weekNumber: renumbered.weekNumber } : w
+            })
+            .sort((a, b) => a.weekNumber - b.weekNumber)
           if (currentWeekIndex >= updated.length && updated.length > 0) {
             setCurrentWeekIndex(updated.length - 1)
           }
           return updated
         })
       }
-
-      console.log('Week deleted successfully')
     } catch (error) {
       console.error('Error deleting week:', error)
       setError(error instanceof Error ? error.message : 'Failed to delete week')

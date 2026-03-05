@@ -3,6 +3,7 @@ import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { logger } from '@/lib/logger'
 import { validateWorkoutLimit } from '@/lib/validation/workout-limits'
+import { generateCopyName } from '@/lib/copy-name'
 
 export async function POST(
   request: NextRequest,
@@ -99,12 +100,20 @@ export async function POST(
     const maxDayNumber = targetWeek.workouts[0]?.dayNumber || 0
     const newDayNumber = maxDayNumber + 1
 
+    // Get existing workout names in the target week for unique naming
+    const existingWorkouts = await prisma.workout.findMany({
+      where: { weekId: targetWeekId },
+      select: { name: true },
+    })
+    const existingNames = existingWorkouts.map(w => w.name)
+    const newName = generateCopyName(originalWorkout.name, existingNames)
+
     // Deep copy the workout and all nested content in a transaction
     const duplicatedWorkout = await prisma.$transaction(async (tx) => {
       // Create the new workout
       const newWorkout = await tx.workout.create({
         data: {
-          name: originalWorkout.name,
+          name: newName,
           dayNumber: newDayNumber,
           weekId: targetWeekId,
           userId: user.id,
