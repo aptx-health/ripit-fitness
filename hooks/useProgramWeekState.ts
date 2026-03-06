@@ -43,6 +43,11 @@ export function useProgramWeekState({
   const [deletingWeekId, setDeletingWeekId] = useState<string | null>(null)
   const [duplicatingWeekId, setDuplicatingWeekId] = useState<string | null>(null)
 
+  // Week name editing state
+  const [editingWeekNameId, setEditingWeekNameId] = useState<string | null>(null)
+  const [editingWeekName, setEditingWeekName] = useState('')
+  const [editingWeekDescription, setEditingWeekDescription] = useState('')
+
   // Week transformation state
   const [showTransformModal, setShowTransformModal] = useState(false)
   const [transformWeekId, setTransformWeekId] = useState<string | null>(null)
@@ -282,6 +287,68 @@ export function useProgramWeekState({
     }
   }, [editMode])
 
+  const handleStartWeekNameEdit = useCallback((weekId: string, currentName?: string | null, currentDescription?: string | null) => {
+    setEditingWeekNameId(weekId)
+    setEditingWeekName(currentName || '')
+    setEditingWeekDescription(currentDescription || '')
+  }, [])
+
+  const handleCancelWeekNameEdit = useCallback(() => {
+    setEditingWeekNameId(null)
+    setEditingWeekName('')
+    setEditingWeekDescription('')
+  }, [])
+
+  const handleSaveWeekName = useCallback(async (weekId: string) => {
+    setError(null)
+
+    try {
+      const response = await fetch(`/api/weeks/${weekId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editingWeekName,
+          description: editingWeekDescription,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to update week name')
+      }
+
+      const { week: updatedWeek } = await response.json()
+
+      // Update the week in cache/state
+      if (editMode) {
+        setWeeksCache(prev => {
+          const newCache = new Map(prev)
+          for (const [weekNum, week] of newCache) {
+            if (week.id === weekId) {
+              newCache.set(weekNum, { ...week, name: updatedWeek.name, description: updatedWeek.description })
+              break
+            }
+          }
+          return newCache
+        })
+        setWeeksSummary(prev =>
+          prev.map(w => w.id === weekId ? { ...w, name: updatedWeek.name, description: updatedWeek.description } : w)
+        )
+      } else {
+        setWeeks(prev => prev.map(w =>
+          w.id === weekId ? { ...w, name: updatedWeek.name, description: updatedWeek.description } : w
+        ))
+      }
+
+      setEditingWeekNameId(null)
+      setEditingWeekName('')
+      setEditingWeekDescription('')
+    } catch (error) {
+      console.error('Error updating week name:', error)
+      setError(error instanceof Error ? error.message : 'Failed to update week name')
+    }
+  }, [editMode, editingWeekName, editingWeekDescription, setError])
+
   const toggleWorkoutCollapse = useCallback((workoutId: string) => {
     setCollapsedWorkouts(prev => {
       const newSet = new Set(prev)
@@ -350,5 +417,13 @@ export function useProgramWeekState({
     handleOpenTransformModal,
     handleTransformWeek,
     toggleWorkoutCollapse,
+    editingWeekNameId,
+    editingWeekName,
+    setEditingWeekName,
+    editingWeekDescription,
+    setEditingWeekDescription,
+    handleStartWeekNameEdit,
+    handleCancelWeekNameEdit,
+    handleSaveWeekName,
   }
 }

@@ -3,6 +3,71 @@ import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { logger } from '@/lib/logger'
 
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ weekId: string }> }
+) {
+  try {
+    const { weekId } = await params
+
+    const { user, error } = await getCurrentUser()
+    if (error || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const { name, description } = body
+
+    // Verify week exists and user owns it
+    const week = await prisma.week.findUnique({
+      where: { id: weekId },
+      select: {
+        id: true,
+        program: { select: { userId: true } },
+      },
+    })
+
+    if (!week) {
+      return NextResponse.json({ error: 'Week not found' }, { status: 404 })
+    }
+
+    if (week.program.userId !== user.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    }
+
+    // Validate lengths
+    if (name !== undefined && name.trim().length > 100) {
+      return NextResponse.json({ error: 'Week name must be 100 characters or less' }, { status: 400 })
+    }
+    if (description !== undefined && description.trim().length > 400) {
+      return NextResponse.json({ error: 'Week description must be 400 characters or less' }, { status: 400 })
+    }
+
+    // Build update data — empty string clears the field
+    const data: { name?: string | null; description?: string | null } = {}
+    if (name !== undefined) {
+      data.name = name.trim() || null
+    }
+    if (description !== undefined) {
+      data.description = description.trim() || null
+    }
+
+    const updatedWeek = await prisma.week.update({
+      where: { id: weekId },
+      data,
+      select: { id: true, name: true, description: true },
+    })
+
+    return NextResponse.json({ success: true, week: updatedWeek })
+  } catch (error) {
+    logger.error({ error, context: 'week-patch' }, 'Error updating week')
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ weekId: string }> }

@@ -1,0 +1,142 @@
+name: Migration Check
+
+on:
+  pull_request:
+    branches:
+      - dev
+      - main
+
+jobs:
+  check-migrations:
+    name: Check Migrations
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+      issues: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect migration changes
+        id: detect
+        run: |
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          TARGET_BRANCH="${{ github.base_ref }}"
+
+          # Check if schema changed
+          SCHEMA_CHANGED="false"
+          if git diff --name-only "$BASE_SHA" "$HEAD_SHA" | grep -q "^prisma/schema.prisma$"; then
+            SCHEMA_CHANGED="true"
+          fi
+
+          # Find new/changed migration files
+          MIGRATION_FILES=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" | grep "^prisma/migrations/.*\.sql$" || true)
+          HAS_MIGRATIONS="false"
+          if [ -n "$MIGRATION_FILES" ]; then
+            HAS_MIGRATIONS="true"
+          fi
+
+          # Check for destructive operations in migration files
+          HAS_DESTRUCTIVE="false"
+          DESTRUCTIVE_DETAILS=""
+          if [ -n "$MIGRATION_FILES" ]; then
+            for file in $MIGRATION_FILES; do
+              if [ -f "$file" ]; then
+                MATCHES=$(grep -inE "DROP TABLE|DROP COLUMN|TRUNCATE|ALTER TABLE.*DROP" "$file" || true)
+                if [ -n "$MATCHES" ]; then
+                  HAS_DESTRUCTIVE="true"
+                  DESTRUCTIVE_DETAILS="${DESTRUCTIVE_DETAILS}**${file}:**\n\`\`\`sql\n${MATCHES}\n\`\`\`\n\n"
+                fi
+              fi
+            done
+          fi
+
+          echo "schema_changed=$SCHEMA_CHANGED" >> "$GITHUB_OUTPUT"
+          echo "has_migrations=$HAS_MIGRATIONS" >> "$GITHUB_OUTPUT"
+          echo "has_destructive=$HAS_DESTRUCTIVE" >> "$GITHUB_OUTPUT"
+          echo "target_branch=$TARGET_BRANCH" >> "$GITHUB_OUTPUT"
+
+          # Save multi-line values to files
+          echo "$MIGRATION_FILES" > /tmp/migration_files.txt
+          printf "%b" "$DESTRUCTIVE_DETAILS" > /tmp/destructive_details.txt
+
+      - name: Build PR comment
+        if: steps.detect.outputs.has_migrations == 'true' || (steps.detect.outputs.schema_changed == 'true' && steps.detect.outputs.has_migrations == 'false')
+        id: comment
+        run: |
+          COMMENT=""
+
+          # Schema drift warning
+          if [ "${{ steps.detect.outputs.schema_changed }}" = "true" ] && [ "${{ steps.detect.outputs.has_migrations }}" = "false" ]; then
+            COMMENT="${COMMENT}### :warning: Schema Change Without Migration\n\n"
+            COMMENT="${COMMENT}\`prisma/schema.prisma\` was modified but no new migration file was added.\n"
+            COMMENT="${COMMENT}If this is a deployable change, generate a migration:\n"
+            COMMENT="${COMMENT}\`\`\`bash\n"
+            COMMENT="${COMMENT}doppler run -- npx prisma migrate diff --from-schema-datamodel <old-schema> --to-schema-datamodel prisma/schema.prisma --script\n"
+            COMMENT="${COMMENT}\`\`\`\n\n"
+          fi
+
+          # Migration summary
+          if [ "${{ steps.detect.outputs.has_migrations }}" = "true" ]; then
+            COMMENT="${COMMENT}### Database Migrations\n\n"
+            COMMENT="${COMMENT}This PR includes the following migration files:\n\n"
+            while IFS= read -r file; do
+              if [ -n "$file" ]; then
+                COMMENT="${COMMENT}- \`${file}\`\n"
+              fi
+            done < /tmp/migration_files.txt
+            COMMENT="${COMMENT}\n"
+          fi
+
+          # Destructive warning
+          if [ "${{ steps.detect.outputs.has_destructive }}" = "true" ]; then
+            if [ "${{ steps.detect.outputs.target_branch }}" = "main" ]; then
+              COMMENT="${COMMENT}### :rotating_light: DESTRUCTIVE MIGRATION DETECTED (Production)\n\n"
+              COMMENT="${COMMENT}This PR targets \`main\` and contains destructive database operations.\n"
+              COMMENT="${COMMENT}**This check will fail until the \`destructive-migration-approved\` label is added.**\n\n"
+            else
+              COMMENT="${COMMENT}### :warning: Destructive Migration Detected (Staging)\n\n"
+              COMMENT="${COMMENT}This PR contains destructive database operations. Review carefully.\n\n"
+            fi
+            COMMENT="${COMMENT}$(cat /tmp/destructive_details.txt)\n"
+          fi
+
+          printf "%b" "$COMMENT" > /tmp/pr_comment.md
+
+      - name: Post PR comment
+        if: steps.detect.outputs.has_migrations == 'true' || (steps.detect.outputs.schema_changed == 'true' && steps.detect.outputs.has_migrations == 'false')
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: migration-check
+          path: /tmp/pr_comment.md
+
+      - name: Add has-migrations label
+        if: steps.detect.outputs.has_migrations == 'true'
+        run: gh pr edit "${{ github.event.pull_request.number }}" --add-label "has-migrations"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Add destructive-migration label
+        if: steps.detect.outputs.has_destructive == 'true'
+        run: gh pr edit "${{ github.event.pull_request.number }}" --add-label "destructive-migration"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Block destructive migrations to production
+        if: steps.detect.outputs.has_destructive == 'true' && steps.detect.outputs.target_branch == 'main'
+        run: |
+          # Check if the approval label exists
+          LABELS=$(gh pr view "${{ github.event.pull_request.number }}" --json labels --jq '.labels[].name')
+          if echo "$LABELS" | grep -q "destructive-migration-approved"; then
+            echo "Destructive migration approved via label. Proceeding."
+          else
+            echo "::error::Destructive migration detected targeting production. Add the 'destructive-migration-approved' label and re-run this check to proceed."
+            exit 1
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
