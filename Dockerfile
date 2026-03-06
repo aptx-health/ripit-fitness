@@ -42,6 +42,12 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Prisma migrations support (for k8s init container)
+COPY --from=builder /app/prisma ./prisma
+RUN npm install prisma@6.19.0 --save-exact --no-audit --no-fund
+COPY scripts/prisma-migrate.sh ./scripts/prisma-migrate.sh
+RUN chmod +x ./scripts/prisma-migrate.sh
+
 USER nextjs
 EXPOSE 3000
 

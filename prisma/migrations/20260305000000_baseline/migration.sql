@@ -1,6 +1,3 @@
-warn The configuration property `package.json#prisma` is deprecated and will be removed in Prisma 7. Please migrate to a Prisma config file (e.g., `prisma.config.ts`).
-For more information, see: https://pris.ly/prisma-config
-
 -- CreateTable
 CREATE TABLE "Program" (
     "id" TEXT NOT NULL,
@@ -60,6 +57,7 @@ CREATE TABLE "ExerciseDefinition" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "equipment" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "instructions" TEXT,
+    "notes" TEXT,
     "primaryFAUs" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "secondaryFAUs" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "userId" TEXT NOT NULL,
@@ -105,6 +103,8 @@ CREATE TABLE "WorkoutCompletion" (
     "completedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "status" TEXT NOT NULL,
     "notes" TEXT,
+    "isArchived" BOOLEAN NOT NULL DEFAULT false,
+    "cycleNumber" INTEGER NOT NULL DEFAULT 1,
 
     CONSTRAINT "WorkoutCompletion_pkey" PRIMARY KEY ("id")
 );
@@ -260,6 +260,31 @@ CREATE TABLE "CommunityProgram" (
     CONSTRAINT "community_programs_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "ExercisePerformanceLog" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "completedAt" TIMESTAMP(3) NOT NULL,
+    "type" TEXT NOT NULL,
+    "exerciseDefinitionId" TEXT,
+    "equipment" TEXT,
+    "exerciseName" TEXT NOT NULL,
+    "totalSets" INTEGER,
+    "totalReps" INTEGER,
+    "totalVolumeLbs" DOUBLE PRECISION,
+    "maxWeightLbs" DOUBLE PRECISION,
+    "estimated1RMLbs" DOUBLE PRECISION,
+    "avgRPE" DOUBLE PRECISION,
+    "distance" DOUBLE PRECISION,
+    "distanceUnit" TEXT,
+    "duration" INTEGER,
+    "avgPaceSeconds" INTEGER,
+    "workoutCompletionId" TEXT,
+    "cardioSessionId" TEXT,
+
+    CONSTRAINT "ExercisePerformanceLog_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE INDEX "Program_userId_isActive_idx" ON "Program"("userId", "isActive");
 
@@ -337,6 +362,12 @@ CREATE INDEX "WorkoutCompletion_userId_completedAt_idx" ON "WorkoutCompletion"("
 
 -- CreateIndex
 CREATE INDEX "WorkoutCompletion_userId_status_completedAt_idx" ON "WorkoutCompletion"("userId", "status", "completedAt");
+
+-- CreateIndex
+CREATE INDEX "WorkoutCompletion_userId_isArchived_idx" ON "WorkoutCompletion"("userId", "isArchived");
+
+-- CreateIndex
+CREATE INDEX "WorkoutCompletion_workoutId_userId_isArchived_idx" ON "WorkoutCompletion"("workoutId", "userId", "isArchived");
 
 -- CreateIndex
 CREATE INDEX "LoggedSet_exerciseId_idx" ON "LoggedSet"("exerciseId");
@@ -424,6 +455,18 @@ CREATE INDEX "CommunityProgram_equipmentNeeded_idx" ON "CommunityProgram" USING 
 
 -- CreateIndex
 CREATE INDEX "CommunityProgram_programType_publishedAt_idx" ON "CommunityProgram"("programType", "publishedAt" DESC);
+
+-- CreateIndex
+CREATE INDEX "ExercisePerformanceLog_userId_completedAt_idx" ON "ExercisePerformanceLog"("userId", "completedAt");
+
+-- CreateIndex
+CREATE INDEX "ExercisePerformanceLog_userId_exerciseDefinitionId_complete_idx" ON "ExercisePerformanceLog"("userId", "exerciseDefinitionId", "completedAt");
+
+-- CreateIndex
+CREATE INDEX "ExercisePerformanceLog_userId_equipment_completedAt_idx" ON "ExercisePerformanceLog"("userId", "equipment", "completedAt");
+
+-- CreateIndex
+CREATE INDEX "ExercisePerformanceLog_userId_type_completedAt_idx" ON "ExercisePerformanceLog"("userId", "type", "completedAt");
 
 -- AddForeignKey
 ALTER TABLE "Week" ADD CONSTRAINT "Week_programId_fkey" FOREIGN KEY ("programId") REFERENCES "Program"("id") ON DELETE CASCADE ON UPDATE CASCADE;
