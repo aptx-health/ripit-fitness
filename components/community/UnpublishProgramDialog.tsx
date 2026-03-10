@@ -76,7 +76,7 @@ export default function UnpublishProgramDialog({
 
           {/* Description */}
           <AlertDialog.Description className="text-sm text-muted-foreground mb-6">
-            This will remove <span className="font-medium text-foreground">"{programName}"</span> from
+            This will remove <span className="font-medium text-foreground">&quot;{programName}&quot;</span> from
             the community library. Users who have already added it will keep their copies, but no new
             users can add it.
           </AlertDialog.Description>

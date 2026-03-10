@@ -58,7 +58,7 @@ export function EditExerciseWizard({
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [_errorMessage, setErrorMessage] = useState<string | null>(null)
 
   // Convert exercise data to ExerciseDefinition format
   const exerciseDefinition: ExerciseDefinition = {
@@ -150,7 +150,7 @@ export function EditExerciseWizard({
           throw new Error(error.error || 'Failed to update exercise')
         }
 
-        const data = await response.json()
+        const _data = await response.json()
 
         // Ensure minimum loading time
         const elapsedTime = Date.now() - startTime

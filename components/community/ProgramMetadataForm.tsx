@@ -233,7 +233,7 @@ export default function ProgramMetadataForm({
           className="w-full px-3 py-2 border-2 border-border bg-input text-foreground text-sm focus:ring-2 focus:ring-primary focus:border-primary doom-focus-ring"
         />
         <p className="text-xs text-muted-foreground mt-1 normal-case">
-          Override the default duration text (e.g., "8-12 weeks", "Until competition")
+          Override the default duration text (e.g., &quot;8-12 weeks&quot;, &quot;Until competition&quot;)
         </p>
       </div>
     </div>

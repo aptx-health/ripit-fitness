@@ -37,27 +37,6 @@ interface SetConfigurationInterfaceProps {
   onEditExercise?: () => void
 }
 
-const FAU_DISPLAY_NAMES: Record<string, string> = {
-  'chest': 'Chest',
-  'mid-back': 'Mid Back',
-  'lower-back': 'Lower Back',
-  'front-delts': 'Front Delts',
-  'side-delts': 'Side Delts',
-  'rear-delts': 'Rear Delts',
-  'lats': 'Lats',
-  'traps': 'Traps',
-  'biceps': 'Biceps',
-  'triceps': 'Triceps',
-  'forearms': 'Forearms',
-  'quads': 'Quads',
-  'adductors': 'Adductors',
-  'hamstrings': 'Hamstrings',
-  'glutes': 'Glutes',
-  'calves': 'Calves',
-  'abs': 'Abs',
-  'obliques': 'Obliques'
-}
-
 const REP_PRESETS = [
   { value: '1-3', label: '1-3', description: 'Max Effort / Strength' },
   { value: '4-6', label: '4-6', description: 'Strength' },

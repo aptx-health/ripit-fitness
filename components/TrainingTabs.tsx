@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Star } from 'lucide-react'
+import Link from 'next/link'
 import * as Tabs from '@radix-ui/react-tabs'
 import StrengthWeekView from '@/components/StrengthWeekView'
 import WorkoutHistoryList from '@/components/WorkoutHistoryList'
@@ -96,12 +97,12 @@ function NoActiveProgram() {
       <p className="text-muted-foreground mb-6">
         Go to Programs and activate one <Star size={14} className="inline text-accent" /> to see it here.
       </p>
-      <a
+      <Link
         href="/programs"
         className="inline-block px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
       >
         VIEW PROGRAMS
-      </a>
+      </Link>
     </div>
   )
 }

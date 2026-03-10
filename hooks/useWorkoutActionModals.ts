@@ -12,7 +12,7 @@ type UseWorkoutActionModalsParams = {
 
 export function useWorkoutActionModals({
   editMode,
-  weeksSummary,
+  weeksSummary: _weeksSummary,
   setWeeksCache,
   setWeeks,
   setIsLoading,

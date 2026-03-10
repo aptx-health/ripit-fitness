@@ -18,7 +18,7 @@ type UseProgramActionsParams = {
 
 export function useProgramActions({
   editMode,
-  existingProgramId,
+  existingProgramId: _existingProgramId,
   existingProgramName,
   existingProgramDescription,
   weeksCache,

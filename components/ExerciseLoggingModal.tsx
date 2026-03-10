@@ -19,14 +19,6 @@ import ExerciseNavigation from './workout-logging/ExerciseNavigation'
 import ExerciseDisplayTabs from './workout-logging/ExerciseDisplayTabs'
 import SetLoggingForm from './workout-logging/SetLoggingForm'
 import ExerciseActionsFooter from './workout-logging/ExerciseActionsFooter'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/radix/dialog'
 
 // Import LoggedSet type from the hook to ensure consistency
 import { type LoggedSet } from '@/hooks/useWorkoutStorage'

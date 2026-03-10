@@ -36,7 +36,7 @@ export function SwapExerciseWizard({
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [_errorMessage, setErrorMessage] = useState<string | null>(null)
 
   // Reset wizard state when opened
   useEffect(() => {
@@ -93,7 +93,7 @@ export function SwapExerciseWizard({
           throw new Error(error.error || 'Failed to replace exercise')
         }
 
-        const data = await response.json()
+        const _data = await response.json()
 
         // Ensure minimum loading time
         const elapsedTime = Date.now() - startTime

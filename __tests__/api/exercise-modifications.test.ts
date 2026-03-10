@@ -3,7 +3,6 @@ import { PrismaClient } from '@prisma/client'
 import { getTestDatabase } from '@/lib/test/database'
 import {
   createTestUser,
-  createTestProgram,
   createTestExerciseDefinition,
   createTestWorkoutCompletion,
   createMultiWeekProgram
@@ -323,7 +322,7 @@ async function simulateReplaceExercise(
     // Just update this single exercise
     const updated = await prisma.$transaction(async (tx) => {
       // Update exercise
-      const updatedExercise = await tx.exercise.update({
+      const _updatedExercise = await tx.exercise.update({
         where: { id: exerciseId },
         data: {
           exerciseDefinitionId: newExerciseDefinitionId,
@@ -788,7 +787,7 @@ describe('Exercise Modifications API', () => {
     describe('One-off mode', () => {
       it('should add one-off exercise to existing draft completion', async () => {
         // Arrange: Create program with workout completion
-        const { program, workouts } = await createMultiWeekProgram(prisma, userId, {
+        const { program: _program, workouts } = await createMultiWeekProgram(prisma, userId, {
           weekCount: 2
         })
         const workout = workouts[0]
@@ -1142,7 +1141,7 @@ describe('Exercise Modifications API', () => {
 
       it('should replace and update prescribed sets', async () => {
         // Arrange
-        const { workouts, exercises } = await createMultiWeekProgram(prisma, userId, {
+        const { exercises } = await createMultiWeekProgram(prisma, userId, {
           weekCount: 1
         })
         const exercise = exercises[0]
@@ -1387,7 +1386,7 @@ describe('Exercise Modifications API', () => {
         })
 
         // Act
-        const response = await simulateReplaceExercise(prisma, week2Exercise.id, userId, {
+        const _response = await simulateReplaceExercise(prisma, week2Exercise.id, userId, {
           newExerciseDefinitionId: newExerciseDef.id,
           applyToFuture: true
         })
@@ -1576,7 +1575,7 @@ describe('Exercise Modifications API', () => {
 
       it('should delete when exercise appears multiple times in same workout (supersets)', async () => {
         // Arrange: Create workout with same exercise twice (superset scenario)
-        const { weeks, workouts } = await createMultiWeekProgram(
+        const { weeks: _weeks, workouts } = await createMultiWeekProgram(
           prisma,
           userId,
           { weekCount: 2, workoutsPerWeek: 1 }

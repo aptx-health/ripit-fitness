@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable @typescript-eslint/no-require-imports */
 
 /**
  * Validation script for exercise-library-seed.sql
@@ -18,7 +19,7 @@ function validateSQL(filePath) {
   console.log('🔍 Validating exercise-library-seed.sql...\n');
 
   const content = fs.readFileSync(filePath, 'utf8');
-  const lines = content.split('\n');
+  const _lines = content.split('\n');
 
   let errors = [];
   let warnings = [];
@@ -33,7 +34,7 @@ function validateSQL(filePath) {
 
   console.log(`📊 Found ${exercises.length} exercises\n`);
 
-  exercises.forEach((exerciseBlock, idx) => {
+  exercises.forEach((exerciseBlock, _idx) => {
     const lines = exerciseBlock.split('\n');
 
     // Extract exercise name from comment

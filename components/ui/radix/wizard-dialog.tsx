@@ -40,7 +40,7 @@ export function WizardDialog({
   steps,
   currentStep,
   onStepChange,
-  title,
+  title: _title,
 }: WizardDialogProps) {
   const [isProcessing, setIsProcessing] = React.useState(false)
 

@@ -12,7 +12,7 @@ type StrengthActivationModalProps = {
 export default function StrengthActivationModal({
   programId,
   existingActiveProgram,
-  onClose
+  onClose: _onClose
 }: StrengthActivationModalProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)

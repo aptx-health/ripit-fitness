@@ -328,7 +328,7 @@ export default function StrengthWeekView({
     await checkProgramCompletion(true)
   }
 
-  const handleClearWorkout = async () => {
+  const _handleClearWorkout = async () => {
     if (!selectedWorkoutId) return
     const response = await fetch(`/api/workouts/${selectedWorkoutId}/clear`, { method: 'POST' })
     if (!response.ok) throw new Error('Failed to clear workout')

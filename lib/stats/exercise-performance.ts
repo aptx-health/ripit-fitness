@@ -79,7 +79,7 @@ export async function recordStrengthPerformance(
   }
 
   // Process each exercise
-  for (const [exerciseId, sets] of exerciseMap.entries()) {
+  for (const [_exerciseId, sets] of exerciseMap.entries()) {
     if (sets.length === 0) continue
 
     const exercise = sets[0].exercise

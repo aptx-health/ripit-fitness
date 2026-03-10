@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Search, ChevronDown, Check, X, Pencil, Trash2, Plus } from 'lucide-react'
 import ExerciseDefinitionEditorModal from '@/components/features/exercise-definition/ExerciseDefinitionEditorModal'
 import DeleteExerciseDialog from './DeleteExerciseDialog'

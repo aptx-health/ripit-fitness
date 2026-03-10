@@ -42,7 +42,7 @@ export default function ExerciseSearchModal({
   onExerciseSelect,
   editingExercise
 }: ExerciseSearchModalProps) {
-  const { settings } = useUserSettings()
+  const { settings: _settings } = useUserSettings()
   const [selectedExercise, setSelectedExercise] = useState<ExerciseDefinition | null>(null)
   const [prescription, setPrescription] = useState<ExercisePrescription | null>(null)
   const [showCreateModal, setShowCreateModal] = useState(false)

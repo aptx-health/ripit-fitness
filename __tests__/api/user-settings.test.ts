@@ -32,7 +32,7 @@ describe('User Settings API', () => {
 
     it('should return existing settings if they exist', async () => {
       // Arrange: Create user settings
-      const existingSettings = await prisma.userSettings.create({
+      const _existingSettings = await prisma.userSettings.create({
         data: {
           userId,
           displayName: 'Test User',
@@ -213,7 +213,7 @@ async function simulateGetSettings(
       success: true,
       settings
     }
-  } catch (error) {
+  } catch (_error) {
     return { success: false, error: 'Internal server error' }
   }
 }
@@ -272,7 +272,7 @@ async function simulateUpdateSettings(
       success: true,
       settings
     }
-  } catch (error) {
+  } catch (_error) {
     return { success: false, error: 'Internal server error' }
   }
 }

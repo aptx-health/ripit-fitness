@@ -8,7 +8,7 @@ interface ScopeSelectionStepProps {
 
 export function ScopeSelectionStep({
   actionType,
-  exerciseName,
+  exerciseName: _exerciseName,
   onSelect,
 }: ScopeSelectionStepProps) {
   return (

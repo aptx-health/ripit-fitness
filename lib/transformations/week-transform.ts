@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma } from '@prisma/client'
+import { Prisma } from '@prisma/client'
 
 type WeekWithWorkouts = Prisma.WeekGetPayload<{
   include: {
@@ -172,7 +172,7 @@ export async function applyVolumeAdjustment(
         newSetsByExercise.set(set.exerciseId, existing)
       }
 
-      for (const [exerciseId, sets] of newSetsByExercise) {
+      for (const [_exerciseId, sets] of newSetsByExercise) {
         for (let i = 0; i < sets.length; i++) {
           renumberUpdates.push({ id: sets[i].id, setNumber: 2 + i })
         }

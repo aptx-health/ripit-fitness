@@ -722,14 +722,14 @@ async function simulateDeleteCommunityProgram(
     });
 
     return { success: true };
-  } catch (error) {
+  } catch (_error) {
     return { success: false, error: 'Internal server error' };
   }
 }
 
 async function simulateBrowseCommunityPrograms(
   prisma: PrismaClient,
-  userId: string
+  _userId: string
 ) {
   try {
     // Fetch all community programs ordered by published date
@@ -752,7 +752,7 @@ async function simulateBrowseCommunityPrograms(
       success: true,
       programs: communityPrograms,
     };
-  } catch (error) {
+  } catch (_error) {
     return { success: false, error: 'Internal server error' };
   }
 }

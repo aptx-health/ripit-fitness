@@ -371,7 +371,7 @@ export default function CardioProgramBuilder({ editMode = false, existingProgram
               <div className="p-4 space-y-3">
                 {week.sessions.length === 0 ? (
                   <p className="text-muted-foreground text-center py-8">
-                    No sessions yet. Click "Add Session" to get started.
+                    No sessions yet. Click &quot;Add Session&quot; to get started.
                   </p>
                 ) : (
                   week.sessions.map((session) => (
@@ -471,7 +471,7 @@ export default function CardioProgramBuilder({ editMode = false, existingProgram
 // Session Card Component
 function SessionCard({
   session,
-  weekNumber,
+  weekNumber: _weekNumber,
   onUpdate,
   onRemove,
   isEditing,

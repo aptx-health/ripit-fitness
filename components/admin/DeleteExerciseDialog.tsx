@@ -104,7 +104,7 @@ export default function DeleteExerciseDialog({
             <div className="text-sm text-muted-foreground mb-4">
               <p className="mb-2">
                 This will permanently delete{' '}
-                <span className="font-medium text-foreground">"{exerciseName}"</span>.
+                <span className="font-medium text-foreground">&quot;{exerciseName}&quot;</span>.
               </p>
 
               {isSystem && (

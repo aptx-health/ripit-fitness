@@ -104,7 +104,7 @@ describe('Program Cloning via BullMQ Worker', () => {
   /**
    * Helper: Enqueue a clone job and wait for completion.
    */
-  async function enqueueAndWaitForCloneJob(job: ProgramCloneJob, timeoutMs: number = 15000): Promise<void> {
+  async function _enqueueAndWaitForCloneJob(job: ProgramCloneJob, timeoutMs: number = 15000): Promise<void> {
     const bullJob = await queue.add('clone', job, {
       attempts: 1,
       removeOnComplete: true,

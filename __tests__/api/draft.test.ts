@@ -185,7 +185,7 @@ describe('Draft API - Critical Deletion Tests', () => {
       })
 
       // Verify no completion exists
-      let completions = await prisma.workoutCompletion.findMany({
+      const completions = await prisma.workoutCompletion.findMany({
         where: { workoutId: workout.id }
       })
       expect(completions).toHaveLength(0)

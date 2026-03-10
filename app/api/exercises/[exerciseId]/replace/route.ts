@@ -91,7 +91,7 @@ export async function POST(
       // Just update this single exercise
       const updated = await prisma.$transaction(async (tx) => {
         // Update exercise
-        const updatedExercise = await tx.exercise.update({
+        const _updatedExercise = await tx.exercise.update({
           where: { id: exerciseId },
           data: {
             exerciseDefinitionId: newExerciseDefinitionId,

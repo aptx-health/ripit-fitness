@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
-import { EQUIPMENT_GROUPS, COMMON_EQUIPMENT, SPECIALIZED_EQUIPMENT } from '@/lib/constants/program-metadata'
+import { COMMON_EQUIPMENT, SPECIALIZED_EQUIPMENT } from '@/lib/constants/program-metadata'
 
 export async function GET(request: NextRequest) {
   try {
@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
         // If filtering by "other", expand to ALL equipment types that aren't in common
         if (normalized === 'other') {
           // Get all common equipment values
-          const commonEquipmentValues = Object.values(COMMON_EQUIPMENT)
+          const _commonEquipmentValues = Object.values(COMMON_EQUIPMENT)
           // Get all specialized equipment values (anything not in common)
           const allSpecializedEquipment = Object.values(SPECIALIZED_EQUIPMENT)
           return allSpecializedEquipment

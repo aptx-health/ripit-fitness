@@ -134,7 +134,7 @@ export default function PublishProgramDialog({
       // Re-validate and proceed
       setState('validating')
       await validateProgram()
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to save program metadata')
     }
   }
@@ -329,7 +329,7 @@ export default function PublishProgramDialog({
                 </p>
                 {!validationResult.displayName && (
                   <p className="text-xs text-muted-foreground mt-2">
-                    You haven't set a display name. You can set one in your user settings.
+                    You haven&apos;t set a display name. You can set one in your user settings.
                   </p>
                 )}
               </div>
@@ -375,7 +375,7 @@ export default function PublishProgramDialog({
                 </div>
                 <h3 className="text-lg font-bold text-foreground mb-2 uppercase tracking-wider">Program Published!</h3>
                 <p className="text-sm text-muted-foreground mb-6">
-                  "{programName}" is now available in the community library.
+                  &quot;{programName}&quot; is now available in the community library.
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-3">

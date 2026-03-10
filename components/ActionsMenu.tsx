@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { MoreVertical, AlertTriangle } from 'lucide-react'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'

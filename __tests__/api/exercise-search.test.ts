@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { PrismaClient } from '@prisma/client'
 import { getTestDatabase } from '@/lib/test/database'
 import { createTestUser, createTestExerciseDefinition } from '@/lib/test/factories'
-import { EQUIPMENT_GROUPS, COMMON_EQUIPMENT, SPECIALIZED_EQUIPMENT } from '@/lib/constants/program-metadata'
+import { SPECIALIZED_EQUIPMENT } from '@/lib/constants/program-metadata'
 
 // ============================================================================
 // SIMULATION FUNCTION

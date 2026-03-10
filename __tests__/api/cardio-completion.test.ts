@@ -419,7 +419,7 @@ describe('Cardio Program Completion Detection', () => {
       const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000)
 
       // Complete first session 3 days ago
-      const session1 = await prisma.loggedCardioSession.create({
+      const _session1 = await prisma.loggedCardioSession.create({
         data: {
           prescribedSessionId: sessions[0].id,
           userId,
@@ -432,7 +432,7 @@ describe('Cardio Program Completion Detection', () => {
       })
 
       // Complete second session now
-      const session2 = await prisma.loggedCardioSession.create({
+      const _session2 = await prisma.loggedCardioSession.create({
         data: {
           prescribedSessionId: sessions[1].id,
           userId,

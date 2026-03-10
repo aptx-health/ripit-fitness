@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { logger } from '@/lib/logger'
-import { COMMON_EQUIPMENT, SPECIALIZED_EQUIPMENT } from '@/lib/constants/program-metadata'
+import { SPECIALIZED_EQUIPMENT } from '@/lib/constants/program-metadata'
 import {
   validateExerciseDefinition,
   normalizeExerciseName,

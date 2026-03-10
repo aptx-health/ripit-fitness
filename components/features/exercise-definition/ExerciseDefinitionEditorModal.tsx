@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/Button';
-import TagInput from '@/components/ui/TagInput';
 import EquipmentSelector from './EquipmentSelector';
 import FAUSelector from './FAUSelector';
 import { clientLogger } from '@/lib/client-logger';

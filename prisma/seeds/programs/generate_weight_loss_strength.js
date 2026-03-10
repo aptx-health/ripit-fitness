@@ -56,19 +56,19 @@ function generateWeek(weekNum, phase) {
   const prefix = `wl-w${weekNum}`;
 
   // Adjust RPE and sets based on phase
-  let baseRPE, setsMultiplier;
+  let baseRPE, _setsMultiplier;
   if (isDeload) {
     baseRPE = 5;
-    setsMultiplier = 0.6;
+    _setsMultiplier = 0.6;
   } else if (phase === 'foundation') {
     baseRPE = 7;
-    setsMultiplier = 1.0;
+    _setsMultiplier = 1.0;
   } else if (phase === 'intensification') {
     baseRPE = 8;
-    setsMultiplier = 0.9;
+    _setsMultiplier = 0.9;
   } else {
     baseRPE = 9;
-    setsMultiplier = 0.8;
+    _setsMultiplier = 0.8;
   }
 
   const workouts = [];

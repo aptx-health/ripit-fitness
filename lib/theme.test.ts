@@ -3,7 +3,6 @@ import {
   getThemePreference,
   saveThemePreference,
   applyTheme,
-  DEFAULT_THEME,
   type ThemePreference,
 } from './theme';
 

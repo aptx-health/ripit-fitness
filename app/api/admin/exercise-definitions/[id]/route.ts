@@ -4,7 +4,6 @@ import { prisma } from '@/lib/db'
 import { logger } from '@/lib/logger'
 import {
   validateExerciseDefinition,
-  checkDuplicateExercise,
   normalizeExerciseName,
   type UpdateExerciseDefinitionInput,
 } from '@/lib/validators/exercise-definition'

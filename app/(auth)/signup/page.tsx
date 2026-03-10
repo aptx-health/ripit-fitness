@@ -7,7 +7,7 @@ import { signUp } from '@/lib/auth-client'
 import { Button } from '@/components/ui/Button'
 
 export default function SignupPage() {
-  const router = useRouter()
+  const _router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')

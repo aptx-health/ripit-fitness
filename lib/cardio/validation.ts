@@ -19,7 +19,7 @@ const MIN_POWER = 0
 const MAX_POWER = 10000 // watts
 const MIN_DISTANCE = 0.01
 const MAX_DISTANCE = 1000 // miles/km
-const MIN_ELEVATION = -1000 // feet/meters (death valley)
+const _MIN_ELEVATION = -1000 // feet/meters (death valley)
 const MAX_ELEVATION = 50000 // feet/meters
 
 // ============================================

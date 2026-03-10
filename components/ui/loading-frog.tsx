@@ -48,7 +48,7 @@ export function LoadingFrog({ size = 64, speed = 1 }: LoadingFrogProps) {
         backgroundSize: `${size * 5}px ${size}px`,
         backgroundRepeat: 'no-repeat',
         animation: `frog-squat ${speed}s steps(5) infinite`,
-        // @ts-ignore - CSS custom property
+        // @ts-expect-error - CSS custom property
         '--frog-end-position': `${endPosition}px`,
       }}
     />

@@ -6,7 +6,7 @@ import { prisma } from '@/lib/db'
  * GET /api/stats/brag-strip
  * Returns screenshot-friendly stats for sharing on social media
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Get authenticated user
     const { user, error } = await getCurrentUser()

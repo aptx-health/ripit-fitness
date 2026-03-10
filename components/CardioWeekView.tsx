@@ -8,7 +8,6 @@ import {
   INTENSITY_ZONE_LABELS,
   normalizeEquipment,
   isValidIntensityZone,
-  type CardioEquipment,
   type IntensityZone
 } from '@/lib/cardio'
 import WeekNavigator from '@/components/ui/WeekNavigator'
