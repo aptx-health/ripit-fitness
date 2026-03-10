@@ -36,12 +36,14 @@ model Program {
 }
 
 model Week {
-  id         String    @id @default(cuid())
-  weekNumber Int
-  programId  String
-  userId     String
-  program    Program   @relation(fields: [programId], references: [id], onDelete: Cascade)
-  workouts   Workout[]
+  id          String    @id @default(cuid())
+  weekNumber  Int
+  name        String?
+  description String?
+  programId   String
+  userId      String
+  program     Program   @relation(fields: [programId], references: [id], onDelete: Cascade)
+  workouts    Workout[]
 
   @@unique([programId, weekNumber])
   @@index([programId])
