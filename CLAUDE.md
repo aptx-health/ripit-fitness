@@ -496,14 +496,14 @@ main (production)         ← Protected, builds + deploys to production
 - `ghcr.io/aptx-health/ripit-fitness:staging`
 - `ghcr.io/aptx-health/clone-program:staging`
 - Helm values use `imagePullPolicy: Always` — pods pick up new images on rollout
-- URL: `https://staging.bookfriends.site`
+- URL: `https://staging.ripit.fit`
 
 **Production** (merge to `main`):
 - Images tagged as `:sha-<commit-sha>` (pinned, never overwritten)
 - `ghcr.io/aptx-health/ripit-fitness:sha-<sha>`
 - `ghcr.io/aptx-health/clone-program:<sha>`
 - SHA manually updated in infra repo helm values
-- URL: `https://strong.bookfriends.site`
+- URL: `https://ripit.fit`
 
 **GitHub Environments:**
 - `staging` — branch-restricted to `dev`, holds staging-specific vars (`NEXT_PUBLIC_APP_URL`)
