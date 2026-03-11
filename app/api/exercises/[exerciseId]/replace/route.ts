@@ -1,3 +1,4 @@
+import type { Exercise } from '@prisma/client'
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
@@ -85,7 +86,7 @@ export async function POST(
 
     // Execute replacement
     let updatedCount = 0
-    let updatedExercises: any[] = []
+    let updatedExercises: Exercise[] = []
 
     if (!applyToFuture || !exercise.workout) {
       // Just update this single exercise

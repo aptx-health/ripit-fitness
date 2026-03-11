@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@prisma/client';
+import type { Prisma, PrismaClient } from '@prisma/client';
 import { calculateProgramStats, validateProgramMetadata } from './validation';
 
 export interface PublishResult {
@@ -91,7 +91,7 @@ async function publishStrengthProgram(
       authorUserId: userId,
       displayName: displayName,
       originalProgramId: programId,
-      programData: program as any,
+      programData: program as unknown as Prisma.JsonObject,
       weekCount: stats.weekCount,
       workoutCount: stats.workoutCount,
       exerciseCount: stats.exerciseCount,
@@ -164,7 +164,7 @@ async function publishCardioProgram(
       authorUserId: userId,
       displayName: displayName,
       originalProgramId: programId,
-      programData: program as any,
+      programData: program as unknown as Prisma.JsonObject,
       weekCount: stats.weekCount,
       workoutCount: stats.workoutCount,
       exerciseCount: stats.exerciseCount,
@@ -199,9 +199,10 @@ export async function publishProgramToCommunity(
       return await publishCardioProgram(prisma, programId, userId);
     }
     return await publishStrengthProgram(prisma, programId, userId);
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Handle unique constraint violation (duplicate publication)
-    if (error.code === 'P2002' || error.message?.includes('unique constraint')) {
+    const prismaError = error as { code?: string; message?: string };
+    if (prismaError.code === 'P2002' || prismaError.message?.includes('unique constraint')) {
       return {
         success: false,
         error: 'This program has already been published to the community',

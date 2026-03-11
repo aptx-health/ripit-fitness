@@ -115,7 +115,7 @@ export default function SetDefinitionModal({
     })))
   }
 
-  const handleSetUpdate = (index: number, field: string, value: any) => {
+  const handleSetUpdate = (index: number, field: string, value: string | number | undefined) => {
     const updated = [...sets]
     updated[index] = { ...updated[index], [field]: value }
     setSets(updated)

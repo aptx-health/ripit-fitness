@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     const includeArchived = searchParams.get('includeArchived') === 'true'
 
     // Build where clause
-    const where: any = {
+    const where: Record<string, unknown> = {
       userId: user.id
     }
 

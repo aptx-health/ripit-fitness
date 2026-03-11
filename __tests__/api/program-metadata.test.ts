@@ -29,7 +29,7 @@ describe('Program Metadata', () => {
       })
 
       // Program without metadata
-      const result = validateProgramMetadata(fullProgram)
+      const result = validateProgramMetadata(fullProgram!)
       expect(result.valid).toBe(false)
       expect(result.errors).toContain(
         'Program must have a fitness level (Beginner, Intermediate, or Advanced)'

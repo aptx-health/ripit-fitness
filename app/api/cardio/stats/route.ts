@@ -27,7 +27,8 @@ export async function GET(request: NextRequest) {
     const dateTo = searchParams.get('dateTo')
 
     // Build where clause
-    const where: any = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const where: Record<string, any> = {
       userId: user.id,
       status: 'completed' // Only count completed sessions
     }

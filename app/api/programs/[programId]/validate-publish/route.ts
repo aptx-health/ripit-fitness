@@ -49,6 +49,7 @@ export async function GET(
     }
 
     // Get program stats
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let program: any
     if (programType === 'strength') {
       program = await prisma.program.findUnique({

@@ -146,7 +146,7 @@ export function useProgramActions({
       const data = await response.json()
 
       if (data.success && data.programs) {
-        const activeProgram = data.programs.find((p: any) => p.isActive && p.id !== programId)
+        const activeProgram = data.programs.find((p: { isActive: boolean; id: string }) => p.isActive && p.id !== programId)
         if (activeProgram) {
           setExistingActiveProgram({ id: activeProgram.id, name: activeProgram.name })
         }

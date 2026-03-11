@@ -53,8 +53,7 @@ export default function WorkoutHistoryList({ count }: Props) {
     } else {
       setIsLoading(false)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [count])
+  }, [count, fetchWorkoutHistory])
 
   const fetchWorkoutHistory = async () => {
     setIsLoading(true)

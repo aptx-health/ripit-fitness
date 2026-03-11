@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
-import type { CardioEquipment } from '@/lib/cardio'
+import type { CardioEquipment, CardioMetric } from '@/lib/cardio'
 import { getMetricsForEquipment, isValidEquipment } from '@/lib/cardio'
 import { prisma } from '@/lib/db'
 
@@ -47,7 +47,7 @@ export async function GET(
     // Get metrics (custom or default)
     const metrics = getMetricsForEquipment(
       equipment as CardioEquipment,
-      preferences?.customMetrics as any
+      preferences?.customMetrics as CardioMetric[] | undefined
     )
 
     return NextResponse.json({

@@ -42,10 +42,10 @@ describe('Theme System', () => {
     localStorageMock.clear();
 
     // Mock global objects
-    global.localStorage = localStorageMock as any;
+    global.localStorage = localStorageMock as unknown as Storage;
     global.window = {
       matchMedia: vi.fn(() => matchMediaMock(true)),
-    } as any;
+    } as unknown as Window & typeof globalThis;
   });
 
   describe('getThemePreference', () => {
@@ -141,7 +141,7 @@ describe('Theme System', () => {
       // Mock light mode system preference
       global.window = {
         matchMedia: vi.fn(() => matchMediaMock(false)),
-      } as any;
+      } as unknown as Window & typeof globalThis;
 
       const preference = getThemePreference();
 
@@ -199,7 +199,7 @@ describe('Theme System', () => {
             remove: vi.fn(),
           },
         },
-      } as any;
+      } as unknown as Document;
     });
 
     it('applies data attributes to document root', () => {

@@ -289,6 +289,7 @@ describe('Community Programs API', () => {
       expect(communityProgram!.exerciseCount).toBe(8);
 
       // Verify programData JSON contains the full structure
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const programData = communityProgram!.programData as any;
       expect(programData.weeks).toBeDefined();
       expect(programData.weeks.length).toBe(2);

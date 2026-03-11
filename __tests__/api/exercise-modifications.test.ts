@@ -83,6 +83,7 @@ async function simulateAddExercise(
   const maxOrder = Math.max(0, ...workout.exercises.map(e => e.order))
   const nextOrder = maxOrder + 1
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let addedExercise: any
   let addedToCount = 0
 
@@ -316,6 +317,7 @@ async function simulateReplaceExercise(
 
   // Execute replacement
   let updatedCount = 0
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let updatedExercises: any[] = []
 
   if (!applyToFuture || !exercise.workout) {
@@ -624,6 +626,7 @@ async function simulateEditExercise(
   }
 
   let updatedCount = 0
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let updatedExercises: any[] = []
 
   if (!applyToFuture || !exercise.workout) {
@@ -645,6 +648,7 @@ async function simulateEditExercise(
       // Create new prescribed sets
       if (prescribedSets && prescribedSets.length > 0) {
         await tx.prescribedSet.createMany({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           data: prescribedSets.map((set: any) => ({
             setNumber: set.setNumber,
             reps: set.reps,
@@ -725,7 +729,8 @@ async function simulateEditExercise(
         // Create new prescribed sets
         if (prescribedSets && prescribedSets.length > 0) {
           await tx.prescribedSet.createMany({
-            data: prescribedSets.map((set: any) => ({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          data: prescribedSets.map((set: any) => ({
               setNumber: set.setNumber,
               reps: set.reps,
               rpe: set.rpe || null,

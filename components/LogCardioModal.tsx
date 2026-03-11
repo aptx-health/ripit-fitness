@@ -64,8 +64,7 @@ export default function LogCardioModal({
     if (formState.equipment) {
       loadMetricsForEquipment(formState.equipment)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formState.equipment])
+  }, [formState.equipment, loadMetricsForEquipment])
 
   const loadMetricsForEquipment = async (equipment: CardioEquipment) => {
     try {

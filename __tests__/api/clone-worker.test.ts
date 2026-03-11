@@ -67,11 +67,14 @@ describe('Program Cloning via BullMQ Worker', () => {
           throw new Error('Community program not found');
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const programData = communityProgram.programData as any;
 
         if (programType === 'cardio') {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           await cloneCardioProgramData(prisma as any, programId, programData, jobUserId);
         } else {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           await cloneStrengthProgramData(prisma as any, programId, programData, jobUserId);
         }
       },
@@ -546,8 +549,10 @@ describe('Program Cloning via BullMQ Worker', () => {
 
       // Call cloning function directly (simulates worker retry)
       await cloneStrengthProgramData(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         prisma as any,
         cloneResult.programId!,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         communityProgram!.programData as any,
         otherUserId
       );
@@ -622,11 +627,14 @@ describe('Program Cloning via BullMQ Worker', () => {
       });
 
       // This should detect partial clone and mark as failed
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let error: any = null;
       try {
         await cloneStrengthProgramData(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           prisma as any,
           shellProgram.id,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           communityProgram!.programData as any,
           otherUserId
         );

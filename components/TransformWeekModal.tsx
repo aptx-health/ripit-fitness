@@ -3,13 +3,14 @@
 import { Minus, Plus, X } from 'lucide-react'
 import { useState } from 'react'
 import { LoadingFrog } from '@/components/ui/loading-frog'
+import type { Week } from '@/types/program-builder'
 
 interface TransformWeekModalProps {
   isOpen: boolean
   onClose: () => void
   weekId: string
   weekNumber: number
-  onTransform: (updatedWeek: any) => Promise<void>
+  onTransform: (updatedWeek: Week) => Promise<void>
 }
 
 interface TransformStats {

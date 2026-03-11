@@ -148,7 +148,7 @@ describe('User Settings API', () => {
     it('should validate weight unit', async () => {
       // Act: Try to update with invalid weight unit
       const response = await simulateUpdateSettings(prisma, userId, {
-        defaultWeightUnit: 'invalid' as any
+        defaultWeightUnit: 'invalid' as string
       })
 
       // Assert: Validation error
@@ -159,7 +159,7 @@ describe('User Settings API', () => {
     it('should validate intensity rating', async () => {
       // Act: Try to update with invalid intensity rating
       const response = await simulateUpdateSettings(prisma, userId, {
-        defaultIntensityRating: 'invalid' as any
+        defaultIntensityRating: 'invalid' as string
       })
 
       // Assert: Validation error

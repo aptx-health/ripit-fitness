@@ -1,9 +1,9 @@
-import type { PrismaClient } from '@prisma/client'
+import type { Prisma, PrismaClient } from '@prisma/client'
 
 export const MAX_WORKOUTS_PER_WEEK = 10
 
 export async function validateWorkoutLimit(
-  prisma: PrismaClient | any, // TransactionClient
+  prisma: PrismaClient | Prisma.TransactionClient,
   weekId: string,
   additionalWorkouts: number = 1
 ): Promise<{ valid: boolean; currentCount: number; error?: string }> {

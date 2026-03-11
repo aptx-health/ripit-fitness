@@ -268,7 +268,7 @@ export default function CardioProgramBuilder({ editMode = false, existingProgram
         const programsData = await programsResponse.json()
 
         if (programsData.success) {
-          const activeProgram = programsData.programs.find((p: any) => p.isActive && p.id !== currentProgramId)
+          const activeProgram = programsData.programs.find((p: { isActive: boolean; id: string }) => p.isActive && p.id !== currentProgramId)
           if (activeProgram) {
             setExistingActiveProgram({ id: activeProgram.id, name: activeProgram.name })
           }
