@@ -1,2 +1,2 @@
-npx biome check --staged --fix --unsafe
+npx biome check --staged --fix
 npx lint-staged

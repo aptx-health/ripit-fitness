@@ -74,7 +74,7 @@ export async function POST(
     // Generate workout name if not provided
     const calculatedName = name || `Day ${calculatedDayNumber}`
 
-    let newWorkout
+    let newWorkout: Awaited<ReturnType<typeof prisma.workout.create>> | undefined
 
     if (sourceWorkoutId) {
       // Duplicate existing workout

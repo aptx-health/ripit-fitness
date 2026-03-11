@@ -305,9 +305,9 @@ export default function ExerciseDefinitionEditorModal({
 
               {/* Equipment */}
               <div>
-                <label className="block text-sm font-semibold text-foreground uppercase tracking-wide mb-2">
+                <span className="block text-sm font-semibold text-foreground uppercase tracking-wide mb-2">
                   Equipment *
-                </label>
+                </span>
                 <EquipmentSelector
                   value={formData.equipment}
                   onChange={(equipment) => setFormData({ ...formData, equipment })}
@@ -317,9 +317,9 @@ export default function ExerciseDefinitionEditorModal({
 
               {/* Primary FAUs */}
               <div>
-                <label className="block text-sm font-semibold text-foreground uppercase tracking-wide mb-2">
+                <span className="block text-sm font-semibold text-foreground uppercase tracking-wide mb-2">
                   Primary Muscle Groups *
-                </label>
+                </span>
                 <FAUSelector
                   value={formData.primaryFAUs}
                   onChange={(primaryFAUs) => setFormData({ ...formData, primaryFAUs })}
@@ -330,9 +330,9 @@ export default function ExerciseDefinitionEditorModal({
 
               {/* Secondary FAUs */}
               <div>
-                <label className="block text-sm font-semibold text-foreground uppercase tracking-wide mb-2">
+                <span className="block text-sm font-semibold text-foreground uppercase tracking-wide mb-2">
                   Secondary Muscle Groups
-                </label>
+                </span>
                 <FAUSelector
                   value={formData.secondaryFAUs}
                   onChange={(secondaryFAUs) => setFormData({ ...formData, secondaryFAUs })}

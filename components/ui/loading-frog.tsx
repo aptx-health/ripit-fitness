@@ -11,8 +11,9 @@ export function LoadingFrog({ size = 64, speed = 1 }: LoadingFrogProps) {
   const [mode, setMode] = useState<'light' | 'dark'>('dark');
   const endPosition = -(size * 5);
 
+  // Read theme mode from DOM — see #196
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
-    // Read the current mode from the document root
     const currentMode = document.documentElement.dataset.mode as 'light' | 'dark' || 'dark';
     setMode(currentMode);
 
@@ -33,6 +34,7 @@ export function LoadingFrog({ size = 64, speed = 1 }: LoadingFrogProps) {
 
     return () => observer.disconnect();
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const spriteUrl = mode === 'light'
     ? '/green-frog-squat-1-light.png'

@@ -56,7 +56,7 @@ export async function POST(
       )
     }
 
-    let newWeek
+    let newWeek: Awaited<ReturnType<typeof prisma.week.create>> | undefined
 
     if (sourceWeekId) {
       // Duplicate existing week

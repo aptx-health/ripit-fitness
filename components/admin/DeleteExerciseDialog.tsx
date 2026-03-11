@@ -152,14 +152,14 @@ export default function DeleteExerciseDialog({
           {/* Actions */}
           <div className="flex gap-3 justify-end">
             <AlertDialog.Cancel asChild>
-              <button
+              <button type="button"
                 disabled={isDeleting}
                 className="px-4 py-2 border-2 border-border text-foreground hover:border-primary hover:text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider font-semibold text-sm doom-focus-ring"
               >
                 Cancel
               </button>
             </AlertDialog.Cancel>
-            <button
+            <button type="button"
               onClick={handleDelete}
               disabled={isDeleting || !canDelete}
               className="px-4 py-2 bg-error text-error-foreground hover:bg-error-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider font-semibold text-sm doom-button-3d doom-focus-ring"

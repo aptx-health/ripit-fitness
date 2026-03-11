@@ -190,7 +190,7 @@ export default function ExerciseAdminTable() {
               className="w-full pl-10 pr-4 py-3 border-2 border-border bg-background text-foreground focus:border-primary outline-none uppercase tracking-wider"
             />
           </div>
-          <button
+          <button type="button"
             onClick={() => setIsCreating(true)}
             className="px-4 py-3 bg-primary text-primary-foreground hover:bg-primary-hover transition-colors uppercase tracking-wider font-semibold doom-button-3d doom-focus-ring flex items-center gap-2"
           >
@@ -204,7 +204,7 @@ export default function ExerciseAdminTable() {
           {/* FAU Filter */}
           <Popover>
             <PopoverTrigger asChild>
-              <button className="px-4 py-2 border-2 border-border text-foreground hover:border-primary transition-colors uppercase tracking-wider font-semibold doom-focus-ring flex items-center gap-2 text-sm">
+              <button type="button" className="px-4 py-2 border-2 border-border text-foreground hover:border-primary transition-colors uppercase tracking-wider font-semibold doom-focus-ring flex items-center gap-2 text-sm">
                 Muscles: {selectedFAUs.length > 0 ? `${selectedFAUs.length}` : 'All'}
                 <ChevronDown size={16} />
               </button>
@@ -212,7 +212,7 @@ export default function ExerciseAdminTable() {
             <PopoverContent className="w-64 p-2" align="start">
               <div className="space-y-1 max-h-64 overflow-y-auto">
                 {Object.entries(FAU_DISPLAY_NAMES).map(([key, label]) => (
-                  <button
+                  <button type="button"
                     key={key}
                     onClick={() => handleFAUToggle(key)}
                     className="w-full px-3 py-2 text-left text-sm hover:bg-primary/10 transition-colors doom-focus-ring flex items-center justify-between font-medium"
@@ -228,7 +228,7 @@ export default function ExerciseAdminTable() {
           {/* Equipment Filter */}
           <Popover>
             <PopoverTrigger asChild>
-              <button className="px-4 py-2 border-2 border-border text-foreground hover:border-primary transition-colors uppercase tracking-wider font-semibold doom-focus-ring flex items-center gap-2 text-sm">
+              <button type="button" className="px-4 py-2 border-2 border-border text-foreground hover:border-primary transition-colors uppercase tracking-wider font-semibold doom-focus-ring flex items-center gap-2 text-sm">
                 Equipment: {selectedEquipment.length > 0 ? `${selectedEquipment.length}` : 'All'}
                 <ChevronDown size={16} />
               </button>
@@ -236,7 +236,7 @@ export default function ExerciseAdminTable() {
             <PopoverContent className="w-64 p-2" align="start">
               <div className="space-y-1 max-h-64 overflow-y-auto">
                 {Object.entries(EQUIPMENT_LABELS).map(([key, label]) => (
-                  <button
+                  <button type="button"
                     key={key}
                     onClick={() => handleEquipmentToggle(key)}
                     className="w-full px-3 py-2 text-left text-sm hover:bg-primary/10 transition-colors doom-focus-ring flex items-center justify-between font-medium"
@@ -253,7 +253,7 @@ export default function ExerciseAdminTable() {
 
           {/* System/User Toggle */}
           <div className="flex border-2 border-border">
-            <button
+            <button type="button"
               onClick={() => handleSystemFilterChange('all')}
               className={`px-3 py-2 text-sm font-semibold uppercase tracking-wider transition-colors ${
                 systemFilter === 'all'
@@ -263,7 +263,7 @@ export default function ExerciseAdminTable() {
             >
               All
             </button>
-            <button
+            <button type="button"
               onClick={() => handleSystemFilterChange('system')}
               className={`px-3 py-2 text-sm font-semibold uppercase tracking-wider transition-colors border-l-2 border-border ${
                 systemFilter === 'system'
@@ -273,7 +273,7 @@ export default function ExerciseAdminTable() {
             >
               System
             </button>
-            <button
+            <button type="button"
               onClick={() => handleSystemFilterChange('user')}
               className={`px-3 py-2 text-sm font-semibold uppercase tracking-wider transition-colors border-l-2 border-border ${
                 systemFilter === 'user'
@@ -287,7 +287,7 @@ export default function ExerciseAdminTable() {
 
           {/* Clear Filters */}
           {hasActiveFilters && (
-            <button
+            <button type="button"
               onClick={clearFilters}
               className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors uppercase tracking-wider flex items-center gap-1 doom-focus-ring"
             >
@@ -385,14 +385,14 @@ export default function ExerciseAdminTable() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex gap-2 justify-end">
-                      <button
+                      <button type="button"
                         onClick={() => setEditingExercise(exercise)}
                         className="p-2 border-2 border-border text-foreground hover:border-primary hover:text-primary transition-colors doom-focus-ring"
                         title="Edit"
                       >
                         <Pencil size={16} />
                       </button>
-                      <button
+                      <button type="button"
                         onClick={() => setDeletingExercise(exercise)}
                         className="p-2 border-2 border-border text-foreground hover:border-error hover:text-error transition-colors doom-focus-ring"
                         title="Delete"
@@ -412,7 +412,7 @@ export default function ExerciseAdminTable() {
       {pagination && pagination.totalPages > 1 && (
         <div className="mt-6">
           <div className="flex items-center justify-center gap-2 flex-wrap">
-            <button
+            <button type="button"
               onClick={() => setCurrentPage((prev) => prev - 1)}
               disabled={!pagination.hasPrevPage}
               className="px-4 py-2 border-2 border-border text-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:border-primary hover:text-primary transition-colors uppercase tracking-wider font-semibold doom-focus-ring"
@@ -424,7 +424,7 @@ export default function ExerciseAdminTable() {
               Page {pagination.page} of {pagination.totalPages}
             </span>
 
-            <button
+            <button type="button"
               onClick={() => setCurrentPage((prev) => prev + 1)}
               disabled={!pagination.hasNextPage}
               className="px-4 py-2 border-2 border-border text-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:border-primary hover:text-primary transition-colors uppercase tracking-wider font-semibold doom-focus-ring"

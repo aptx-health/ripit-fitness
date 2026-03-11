@@ -330,7 +330,7 @@ export default function ConsolidatedProgramsView({
 
           {/* Tabs */}
           <div className="flex gap-8 border-b border-border">
-            <button
+            <button type="button"
               onClick={() => handleTabChange('strength')}
               className={`pb-3 font-bold text-lg uppercase tracking-wider transition-colors ${
                 isStrengthTab
@@ -340,7 +340,7 @@ export default function ConsolidatedProgramsView({
             >
               STRENGTH
             </button>
-            <button
+            <button type="button"
               onClick={() => handleTabChange('cardio')}
               className={`pb-3 font-bold text-lg uppercase tracking-wider transition-colors ${
                 !isStrengthTab

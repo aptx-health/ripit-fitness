@@ -25,7 +25,7 @@ export function ScopeSelectionStep({
       </p>
 
       <div className="space-y-4">
-        <button
+        <button type="button"
           onClick={() => onSelect(false)}
           className="w-full p-5 border-2 border-border hover:border-primary hover:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] transition-all text-left bg-card"
         >
@@ -37,7 +37,7 @@ export function ScopeSelectionStep({
           </div>
         </button>
 
-        <button
+        <button type="button"
           onClick={() => onSelect(true)}
           className="w-full p-5 border-2 border-border hover:border-primary hover:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] transition-all text-left bg-card"
         >

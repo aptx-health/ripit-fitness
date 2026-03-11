@@ -298,10 +298,11 @@ export default function CardioProgramBuilder({ editMode = false, existingProgram
         </h2>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-semibold text-foreground mb-2 doom-label">
+            <label htmlFor="cardio-program-name" className="block text-sm font-semibold text-foreground mb-2 doom-label">
               PROGRAM NAME *
             </label>
             <input
+              id="cardio-program-name"
               type="text"
               value={programName}
               onChange={(e) => setProgramName(e.target.value)}
@@ -310,10 +311,11 @@ export default function CardioProgramBuilder({ editMode = false, existingProgram
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-foreground mb-2 doom-label">
+            <label htmlFor="cardio-program-description" className="block text-sm font-semibold text-foreground mb-2 doom-label">
               DESCRIPTION
             </label>
             <textarea
+              id="cardio-program-description"
               value={programDescription}
               onChange={(e) => setProgramDescription(e.target.value)}
               placeholder="Focus on building aerobic base..."
@@ -330,16 +332,16 @@ export default function CardioProgramBuilder({ editMode = false, existingProgram
           <div key={week.weekNumber} className="bg-card border border-border doom-noise doom-card">
             {/* Week Header */}
             <div className="p-4 border-b border-border flex justify-between items-center">
-              <button
+              <button type="button"
                 onClick={() => toggleWeek(week.weekNumber)}
                 className="flex items-center gap-2 text-foreground hover:text-primary transition"
               >
                 {expandedWeeks.has(week.weekNumber) ? (
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 ) : (
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 )}
@@ -351,13 +353,13 @@ export default function CardioProgramBuilder({ editMode = false, existingProgram
                 </span>
               </button>
               <div className="flex gap-2">
-                <button
+                <button type="button"
                   onClick={() => handleAddSession(week.weekNumber)}
                   className="px-3 py-1 bg-primary text-primary-foreground hover:bg-primary-hover text-sm doom-button-3d uppercase tracking-wider"
                 >
                   ADD SESSION
                 </button>
-                <button
+                <button type="button"
                   onClick={() => handleRemoveWeek(week.weekNumber)}
                   className="px-3 py-1 bg-error text-error-foreground hover:bg-error-hover text-sm doom-button-3d uppercase tracking-wider"
                 >
@@ -394,7 +396,7 @@ export default function CardioProgramBuilder({ editMode = false, existingProgram
       </div>
 
       {/* Add Week Button */}
-      <button
+      <button type="button"
         onClick={handleAddWeek}
         className="w-full px-4 py-3 border-2 border-dashed border-primary text-primary hover:bg-primary-muted transition font-semibold uppercase tracking-wider"
       >
@@ -410,13 +412,13 @@ export default function CardioProgramBuilder({ editMode = false, existingProgram
 
       {/* Actions */}
       <div className="flex gap-3">
-        <button
+        <button type="button"
           onClick={() => router.push('/cardio/programs')}
           className="flex-1 px-4 py-3 border-2 border-border text-foreground hover:bg-muted doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
         >
           CANCEL
         </button>
-        <button
+        <button type="button"
           onClick={handleSave}
           disabled={isLoading}
           className="flex-1 px-4 py-3 bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
@@ -446,14 +448,14 @@ export default function CardioProgramBuilder({ editMode = false, existingProgram
             )}
 
             <div className="flex gap-3">
-              <button
+              <button type="button"
                 onClick={handleSkipActivation}
                 disabled={isLoading}
                 className="flex-1 px-4 py-3 border-2 border-border text-foreground hover:bg-muted disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
               >
                 NO, KEEP INACTIVE
               </button>
-              <button
+              <button type="button"
                 onClick={handleActivateProgram}
                 disabled={isLoading}
                 className="flex-1 px-4 py-3 bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
@@ -503,13 +505,13 @@ function SessionCard({
             </div>
           </div>
           <div className="flex gap-2">
-            <button
+            <button type="button"
               onClick={onEdit}
               className="px-3 py-1 bg-secondary text-secondary-foreground hover:bg-secondary-hover text-sm doom-button-3d uppercase"
             >
               EDIT
             </button>
-            <button
+            <button type="button"
               onClick={onRemove}
               className="px-3 py-1 bg-error text-error-foreground hover:bg-error-hover text-sm doom-button-3d uppercase"
             >
@@ -530,8 +532,9 @@ function SessionCard({
       <div className="grid grid-cols-2 gap-4">
         {/* Name */}
         <div className="col-span-2">
-          <label className="block text-sm font-semibold text-foreground mb-2 doom-label">NAME *</label>
+          <label htmlFor="session-name" className="block text-sm font-semibold text-foreground mb-2 doom-label">NAME *</label>
           <input
+            id="session-name"
             type="text"
             value={session.name}
             onChange={(e) => onUpdate({ name: e.target.value })}
@@ -541,8 +544,9 @@ function SessionCard({
 
         {/* Duration */}
         <div>
-          <label className="block text-sm font-semibold text-foreground mb-2 doom-label">DURATION (min) *</label>
+          <label htmlFor="session-duration" className="block text-sm font-semibold text-foreground mb-2 doom-label">DURATION (min) *</label>
           <input
+            id="session-duration"
             type="number"
             value={session.targetDuration}
             onChange={(e) => onUpdate({ targetDuration: parseInt(e.target.value, 10) || 0 })}
@@ -553,8 +557,9 @@ function SessionCard({
 
         {/* Intensity Zone */}
         <div>
-          <label className="block text-sm font-semibold text-foreground mb-2 doom-label">INTENSITY ZONE</label>
+          <label htmlFor="session-intensity-zone" className="block text-sm font-semibold text-foreground mb-2 doom-label">INTENSITY ZONE</label>
           <select
+            id="session-intensity-zone"
             value={session.intensityZone || ''}
             onChange={(e) => onUpdate({ intensityZone: (e.target.value as IntensityZone) || undefined })}
             className="doom-input w-full"
@@ -568,8 +573,9 @@ function SessionCard({
 
         {/* Equipment */}
         <div>
-          <label className="block text-sm font-semibold text-foreground mb-2 doom-label">EQUIPMENT</label>
+          <label htmlFor="session-equipment" className="block text-sm font-semibold text-foreground mb-2 doom-label">EQUIPMENT</label>
           <select
+            id="session-equipment"
             value={session.equipment || ''}
             onChange={(e) => onUpdate({ equipment: (e.target.value as CardioEquipment) || undefined })}
             className="doom-input w-full"
@@ -583,8 +589,9 @@ function SessionCard({
 
         {/* Target HR Range */}
         <div>
-          <label className="block text-sm font-semibold text-foreground mb-2 doom-label">TARGET HR RANGE</label>
+          <label htmlFor="session-target-hr" className="block text-sm font-semibold text-foreground mb-2 doom-label">TARGET HR RANGE</label>
           <input
+            id="session-target-hr"
             type="text"
             value={session.targetHRRange || ''}
             onChange={(e) => onUpdate({ targetHRRange: e.target.value || undefined })}
@@ -595,8 +602,9 @@ function SessionCard({
 
         {/* Target Power Range */}
         <div>
-          <label className="block text-sm font-semibold text-foreground mb-2 doom-label">TARGET POWER RANGE</label>
+          <label htmlFor="session-target-power" className="block text-sm font-semibold text-foreground mb-2 doom-label">TARGET POWER RANGE</label>
           <input
+            id="session-target-power"
             type="text"
             value={session.targetPowerRange || ''}
             onChange={(e) => onUpdate({ targetPowerRange: e.target.value || undefined })}
@@ -607,8 +615,9 @@ function SessionCard({
 
         {/* Interval Structure */}
         <div>
-          <label className="block text-sm font-semibold text-foreground mb-2 doom-label">INTERVAL STRUCTURE</label>
+          <label htmlFor="session-interval-structure" className="block text-sm font-semibold text-foreground mb-2 doom-label">INTERVAL STRUCTURE</label>
           <input
+            id="session-interval-structure"
             type="text"
             value={session.intervalStructure || ''}
             onChange={(e) => onUpdate({ intervalStructure: e.target.value || undefined })}
@@ -619,8 +628,9 @@ function SessionCard({
 
         {/* Notes */}
         <div className="col-span-2">
-          <label className="block text-sm font-semibold text-foreground mb-2 doom-label">NOTES</label>
+          <label htmlFor="session-notes" className="block text-sm font-semibold text-foreground mb-2 doom-label">NOTES</label>
           <textarea
+            id="session-notes"
             value={session.notes || ''}
             onChange={(e) => onUpdate({ notes: e.target.value || undefined })}
             placeholder="Optional notes..."
@@ -631,7 +641,7 @@ function SessionCard({
       </div>
 
       <div className="flex gap-2">
-        <button
+        <button type="button"
           onClick={onCancelEdit}
           className="flex-1 px-3 py-2 border-2 border-border text-foreground hover:bg-card doom-button-3d uppercase"
         >

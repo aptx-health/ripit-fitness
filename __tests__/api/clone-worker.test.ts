@@ -66,7 +66,6 @@ describe('Program Cloning via BullMQ Worker', () => {
         if (!communityProgram || !communityProgram.programData) {
           throw new Error('Community program not found');
         }
-
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const programData = communityProgram.programData as any;
 

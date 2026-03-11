@@ -111,7 +111,7 @@ export default function CardioProgramsList({ programs }: Props) {
                 <span>{activeProgram.weeks.reduce((sum, w) => sum + w.sessions.length, 0)} sessions</span>
               </div>
             </div>
-            <button
+            <button type="button"
               onClick={() => handleArchive(activeProgram.id, activeProgram.name)}
               disabled={archivingId === activeProgram.id}
               className="text-muted-foreground hover:text-foreground font-medium disabled:opacity-50"
@@ -156,7 +156,7 @@ export default function CardioProgramsList({ programs }: Props) {
                   <span>{program.weeks.reduce((sum, w) => sum + w.sessions.length, 0)} sessions</span>
                 </div>
               </div>
-              <button
+              <button type="button"
                 onClick={() => handleArchive(program.id, program.name)}
                 disabled={archivingId === program.id}
                 className="text-muted-foreground hover:text-foreground font-medium disabled:opacity-50"
@@ -166,7 +166,7 @@ export default function CardioProgramsList({ programs }: Props) {
               </button>
             </div>
             <div className="mt-4 space-x-2">
-              <button
+              <button type="button"
                 onClick={() => handleSetActive(program.id)}
                 disabled={activatingId === program.id}
                 className="inline-block px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d font-semibold uppercase tracking-wider text-sm disabled:opacity-50"

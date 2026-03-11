@@ -47,7 +47,7 @@ export default function SyncStatusIcon({ status, pendingCount = 0, onClick }: Pr
   const config = configs[status]
 
   return (
-    <button
+    <button type="button"
       onClick={onClick}
       title={config.title}
       className={`w-8 h-8 rounded-full

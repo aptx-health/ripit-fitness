@@ -414,7 +414,7 @@ export default function StrengthWeekView({
           actions={weekActions.length > 0 ? <ActionsMenu actions={weekActions} size="sm" /> : undefined}
           completionIndicator={
             isProgramComplete ? (
-              <button
+              <button type="button"
                 onClick={() => setShowCompletionModal(true)}
                 className="flex items-center gap-2 px-4 py-2 bg-success text-success-foreground border-2 border-success hover:bg-success-hover font-bold text-sm uppercase tracking-wider transition-all"
                 title="View completion stats and restart program"

@@ -202,14 +202,14 @@ export default function WorkoutPreviewModal({
         </DialogBody>
 
         <DialogFooter className="gap-3 border-t-2">
-          <button
+          <button type="button"
             onClick={onClose}
             className="px-5 py-3 border-2 border-border text-foreground hover:bg-muted doom-focus-ring font-bold uppercase tracking-wider text-sm sm:text-base"
           >
             Close
           </button>
           {!isCompleted && (
-            <button
+            <button type="button"
               onClick={onStartLogging}
               className="px-5 py-3 bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d doom-focus-ring font-bold uppercase tracking-wider text-sm sm:text-base"
             >

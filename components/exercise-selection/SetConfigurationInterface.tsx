@@ -289,10 +289,11 @@ export function SetConfigurationInterface({
           <div className="space-y-4">
             {/* Exercise-level Intensity Type */}
           <div>
-            <label className="block text-base font-bold text-foreground mb-2 tracking-wide uppercase">
+            <label htmlFor="exercise-intensity-type" className="block text-base font-bold text-foreground mb-2 tracking-wide uppercase">
               Intensity Type (All Sets)
             </label>
             <select
+              id="exercise-intensity-type"
               value={exerciseIntensityType}
               onChange={(e) => setExerciseIntensityType(e.target.value as 'RIR' | 'RPE' | 'NONE')}
               className="w-full px-3 py-2 border-2 border-input focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-muted text-foreground doom-input"
@@ -316,7 +317,7 @@ export function SetConfigurationInterface({
 
                     {/* Reps */}
                     <div className="flex-1">
-                      <label className="block text-base font-bold text-foreground mb-1 tracking-wide uppercase">Reps</label>
+                      <span className="block text-base font-bold text-foreground mb-1 tracking-wide uppercase">Reps</span>
                       <Popover>
                         <PopoverTrigger asChild>
                           <button
@@ -399,9 +400,9 @@ export function SetConfigurationInterface({
                     {/* Intensity Value */}
                     {exerciseIntensityType !== 'NONE' && (
                       <div className="flex-1">
-                        <label className="block text-base font-bold text-foreground mb-1 tracking-wide uppercase">
+                        <span className="block text-base font-bold text-foreground mb-1 tracking-wide uppercase">
                           {exerciseIntensityType} Value
-                        </label>
+                        </span>
                         <Popover>
                           <PopoverTrigger asChild>
                             <button
@@ -521,10 +522,11 @@ export function SetConfigurationInterface({
         ) : (
           /* Notes Tab */
           <div>
-            <label className="block text-base font-bold text-foreground mb-2 tracking-wide uppercase">
+            <label htmlFor="exercise-notes-config" className="block text-base font-bold text-foreground mb-2 tracking-wide uppercase">
               Exercise Notes (Optional)
             </label>
             <textarea
+              id="exercise-notes-config"
               value={exerciseNotes}
               onChange={(e) => setExerciseNotes(e.target.value)}
               placeholder="Add any notes for this exercise (e.g., form cues, modifications, etc.)"

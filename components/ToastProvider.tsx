@@ -77,7 +77,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 )}
               </div>
               <Toast.Close asChild>
-                <button
+                <button type="button"
                   className="flex-shrink-0 hover:opacity-80 transition-opacity"
                   aria-label="Close"
                   onMouseDown={(e) => {

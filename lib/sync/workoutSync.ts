@@ -386,7 +386,7 @@ export class WorkoutSyncService {
    * Clear all retry timeouts
    */
   private clearRetryTimeouts = (): void => {
-    this.retryTimeouts.forEach(timeout => clearTimeout(timeout))
+    this.retryTimeouts.forEach((timeout) => { clearTimeout(timeout) })
     this.retryTimeouts.clear()
   }
 }

@@ -50,7 +50,8 @@ export default function ExerciseSearchModal({
   const [editingExerciseId, setEditingExerciseId] = useState<string | null>(null)
   const [editingExerciseDefinitionId, setEditingExerciseDefinitionId] = useState<string | null>(null)
 
-  // Initialize state when editing
+  // Initialize state when editing — see #196
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!editingExercise) {
       setSelectedExercise(null)
@@ -75,6 +76,7 @@ export default function ExerciseSearchModal({
 
     // Don't set prescription here - SetConfigurationInterface will handle it via initialConfig
   }, [editingExercise])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleExerciseSelect = useCallback((exercise: ExerciseDefinition) => {
     setSelectedExercise(exercise)
@@ -181,7 +183,7 @@ export default function ExerciseSearchModal({
           <h2 className="text-xl font-bold tracking-wide uppercase">
             {editingExercise ? 'Edit Exercise' : selectedExercise ? 'Configure Exercise' : 'Add Exercise'}
           </h2>
-          <button
+          <button type="button"
             onClick={handleClose}
             className="text-primary-foreground/80 hover:text-primary-foreground"
           >

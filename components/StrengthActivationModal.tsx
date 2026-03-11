@@ -75,14 +75,14 @@ export default function StrengthActivationModal({
         )}
 
         <div className="flex gap-3">
-          <button
+          <button type="button"
             onClick={handleSkipActivation}
             disabled={isLoading}
             className="flex-1 px-4 py-3 border-2 border-border text-foreground hover:bg-muted disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
           >
             NO, KEEP INACTIVE
           </button>
-          <button
+          <button type="button"
             onClick={handleActivateProgram}
             disabled={isLoading}
             className="flex-1 px-4 py-3 bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"

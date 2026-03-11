@@ -195,7 +195,7 @@ export default function PublishProgramDialog({
               Publish to Community
             </Dialog.Title>
             <Dialog.Close asChild>
-              <button
+              <button type="button"
                 className="h-8 w-8 flex items-center justify-center hover:bg-muted transition-colors doom-focus-ring"
                 aria-label="Close"
               >
@@ -254,7 +254,7 @@ export default function PublishProgramDialog({
               )}
 
               <div className="flex justify-end">
-                <button
+                <button type="button"
                   onClick={handleClose}
                   className="px-4 py-2 border-2 border-border text-foreground hover:border-primary hover:text-primary transition-colors uppercase tracking-wider font-semibold text-sm doom-focus-ring"
                 >
@@ -288,13 +288,13 @@ export default function PublishProgramDialog({
               )}
 
               <div className="flex gap-3 justify-end mt-6">
-                <button
+                <button type="button"
                   onClick={handleClose}
                   className="px-4 py-2 border-2 border-border text-foreground hover:border-primary hover:text-primary transition-colors uppercase tracking-wider font-semibold text-sm doom-focus-ring"
                 >
                   Cancel
                 </button>
-                <button
+                <button type="button"
                   onClick={handleSaveMetadata}
                   disabled={!metadata.level || metadata.goals.length === 0}
                   className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover transition-colors uppercase tracking-wider font-semibold text-sm doom-button-3d doom-focus-ring disabled:opacity-50 disabled:cursor-not-allowed"
@@ -350,13 +350,13 @@ export default function PublishProgramDialog({
 
               {/* Actions */}
               <div className="flex gap-3 justify-end">
-                <button
+                <button type="button"
                   onClick={handleClose}
                   className="px-4 py-2 border-2 border-border text-foreground hover:border-primary hover:text-primary transition-colors uppercase tracking-wider font-semibold text-sm doom-focus-ring"
                 >
                   Cancel
                 </button>
-                <button
+                <button type="button"
                   onClick={handlePublish}
                   className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover transition-colors flex items-center gap-2 uppercase tracking-wider font-semibold text-sm doom-button-3d doom-focus-ring"
                 >
@@ -378,13 +378,13 @@ export default function PublishProgramDialog({
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <button
+                  <button type="button"
                     onClick={handleClose}
                     className="flex-1 px-4 py-2 border-2 border-border text-foreground hover:border-primary hover:text-primary transition-colors uppercase tracking-wider font-semibold text-sm doom-focus-ring"
                   >
                     Close
                   </button>
-                  <button
+                  <button type="button"
                     onClick={() => router.push('/community')}
                     className="flex-1 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover transition-colors uppercase tracking-wider font-semibold text-sm doom-button-3d doom-focus-ring"
                   >

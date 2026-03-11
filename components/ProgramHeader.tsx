@@ -52,7 +52,7 @@ export function ProgramHeader({
             <div className="sm:hidden">
               <DropdownMenu.Root>
                 <DropdownMenu.Trigger asChild>
-                  <button
+                  <button type="button"
                     className="h-9 w-9 flex items-center justify-center cursor-pointer border-2 border-border bg-input transition-all hover:border-primary hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
                     aria-label="Program actions"
                   >

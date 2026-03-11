@@ -137,7 +137,7 @@ export function StrengthUtilityActions({
       <>
         {!isActive && (
           <>
-            <button
+            <button type="button"
               onClick={handleDuplicate}
               disabled={duplicating}
               className="p-2 text-muted-foreground hover:text-accent hover:bg-muted rounded transition-colors disabled:opacity-50"
@@ -146,7 +146,7 @@ export function StrengthUtilityActions({
             >
               <Copy className="w-5 h-5" />
             </button>
-            <button
+            <button type="button"
               onClick={handleSetActive}
               disabled={activating}
               className="p-2 text-muted-foreground hover:text-accent hover:bg-muted rounded transition-colors disabled:opacity-50"
@@ -157,7 +157,7 @@ export function StrengthUtilityActions({
             </button>
           </>
         )}
-        <button
+        <button type="button"
           onClick={() => setShowPublishDialog(true)}
           className="p-2 text-muted-foreground hover:text-primary hover:bg-muted rounded transition-colors"
           title="Publish to Community"
@@ -165,7 +165,7 @@ export function StrengthUtilityActions({
         >
           <Upload className="w-5 h-5" />
         </button>
-        <button
+        <button type="button"
           onClick={handleArchive}
           disabled={archiving}
           className="p-2 text-muted-foreground hover:text-error hover:bg-muted rounded transition-colors disabled:opacity-50"
@@ -188,14 +188,14 @@ export function StrengthUtilityActions({
     <>
       {!isActive && (
         <>
-          <button
+          <button type="button"
             onClick={handleDuplicate}
             disabled={duplicating}
             className="px-3 py-1.5 text-sm text-muted-foreground hover:text-accent hover:bg-muted transition-colors font-medium disabled:opacity-50"
           >
             {duplicating ? 'Duplicating...' : 'Duplicate'}
           </button>
-          <button
+          <button type="button"
             onClick={handleSetActive}
             disabled={activating}
             className="px-3 py-1.5 text-sm text-muted-foreground hover:text-accent hover:bg-muted transition-colors font-medium disabled:opacity-50"
@@ -204,13 +204,13 @@ export function StrengthUtilityActions({
           </button>
         </>
       )}
-      <button
+      <button type="button"
         onClick={() => setShowPublishDialog(true)}
         className="px-3 py-1.5 text-sm text-muted-foreground hover:text-primary hover:bg-muted transition-colors font-medium"
       >
         Publish to Community
       </button>
-      <button
+      <button type="button"
         onClick={handleArchive}
         disabled={archiving}
         className="px-3 py-1.5 text-sm text-muted-foreground hover:text-error hover:bg-muted transition-colors font-medium disabled:opacity-50"

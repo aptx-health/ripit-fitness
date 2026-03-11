@@ -65,7 +65,7 @@ export default function SortableExerciseItem({
       }`}
     >
       <div className="flex items-center gap-2 flex-1">
-        <button
+        <button type="button"
           {...attributes}
           {...listeners}
           className="p-1 text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing touch-none"
@@ -81,7 +81,7 @@ export default function SortableExerciseItem({
         </div>
       </div>
       <div className="flex gap-2">
-        <button
+        <button type="button"
           onClick={onEdit}
           disabled={isLoading || isDeleting}
           className="p-2 sm:px-3 sm:py-1.5 bg-secondary text-secondary-foreground text-sm hover:bg-secondary-hover disabled:opacity-50 font-semibold uppercase"
@@ -89,7 +89,7 @@ export default function SortableExerciseItem({
           <Pencil size={16} className="sm:hidden" />
           <span className="hidden sm:inline">Edit</span>
         </button>
-        <button
+        <button type="button"
           onClick={onDelete}
           disabled={isDeleting}
           className="p-2 sm:px-3 sm:py-1.5 bg-error text-error-foreground text-sm hover:bg-error-hover disabled:opacity-50 font-semibold uppercase"

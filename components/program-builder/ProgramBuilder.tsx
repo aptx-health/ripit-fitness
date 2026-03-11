@@ -110,7 +110,7 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
             {totalWeeks === 0 ? (
               <div className="text-center py-8">
                 <p className="text-muted-foreground mb-4">No weeks created yet</p>
-                <button
+                <button type="button"
                   onClick={() => weekState.addWeek()}
                   disabled={isLoading}
                   className="px-4 py-2 bg-success text-success-foreground hover:bg-success-hover disabled:opacity-50 doom-button-3d font-semibold uppercase tracking-wider"
@@ -172,7 +172,7 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
                   />
                 )}
 
-                <button
+                <button type="button"
                   onClick={() => weekState.addWeek()}
                   disabled={isLoading}
                   className="px-4 py-2 bg-success text-success-foreground hover:bg-success-hover disabled:opacity-50 doom-button-3d font-semibold uppercase tracking-wider"
@@ -184,7 +184,7 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
 
             {totalWeeks > 0 && (
               <div className="mt-6 pt-6 border-t">
-                <button
+                <button type="button"
                   onClick={programActions.handleComplete}
                   className="px-6 py-2 bg-success text-success-foreground hover:bg-success-hover doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
                 >

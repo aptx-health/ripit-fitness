@@ -128,7 +128,8 @@ export function useProgressiveExercises(
   const prefetchingRef = useRef<Set<string>>(new Set())
   const mountedRef = useRef(true)
 
-  // Sync totalExercises with exerciseCount prop (handles add/delete)
+  // Sync totalExercises with exerciseCount prop (handles add/delete) — see #196
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (exerciseCount !== totalExercises) {
       setTotalExercises(exerciseCount)
@@ -138,6 +139,7 @@ export function useProgressiveExercises(
       }
     }
   }, [exerciseCount, totalExercises, currentIndex])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const fetchExercise = useCallback(async (order: number): Promise<Exercise | null> => {
     if (order < 1 || order > totalExercises) return null
@@ -243,6 +245,8 @@ export function useProgressiveExercises(
     }
   }, [totalExercises, loadExerciseWithHistory])
 
+  // Prefetch exercises on navigation — see #196
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     mountedRef.current = true
     prefetchSequentially(currentIndex)
@@ -251,6 +255,7 @@ export function useProgressiveExercises(
       mountedRef.current = false
     }
   }, [currentIndex, prefetchSequentially])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const goToExercise = useCallback((index: number) => {
     if (index < 0 || index >= totalExercises) return

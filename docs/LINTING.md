@@ -25,7 +25,7 @@ git commit
   v
 .husky/pre-commit
   |
-  |--> biome check --staged --fix --unsafe   (~200ms)
+  |--> biome check --staged --fix   (~200ms)
   |     - Removes unused imports
   |     - Fixes const vs let
   |     - Organizes imports

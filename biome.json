@@ -15,11 +15,19 @@
         "noUnusedImports": "error",
         "noUnusedVariables": "warn",
         "noUnusedFunctionParameters": "warn",
-        "useExhaustiveDependencies": "warn"
+        "useExhaustiveDependencies": "warn",
+        "noInvalidUseBeforeDeclaration": "warn"
       },
       "suspicious": {
         "noExplicitAny": "warn",
-        "noConsole": "off"
+        "noConsole": "off",
+        "noArrayIndexKey": "off"
+      },
+      "security": {
+        "noDangerouslySetInnerHtml": "off"
+      },
+      "a11y": {
+        "useSemanticElements": "off"
       },
       "style": {
         "useConst": "error",
@@ -41,6 +49,15 @@
       "trailingCommas": "all"
     }
   },
+  "css": {
+    "parser": {
+      "cssModules": true,
+      "tailwindDirectives": true
+    },
+    "linter": {
+      "enabled": false
+    }
+  },
   "files": {
     "includes": [
       "**",
@@ -50,7 +67,8 @@
       "!**/node_modules",
       "!**/fitcsv-wt2",
       "!**/.claude",
-      "!**/cloud-functions/**/node_modules"
+      "!**/cloud-functions/**/node_modules",
+      "!**/cloud-functions/**/dist"
     ]
   }
 }

@@ -126,7 +126,7 @@ function validateSQL(filePath) {
 
   // Verify all FAUs are represented
   const fauCoverage = {};
-  VALID_FAUS.forEach(fau => fauCoverage[fau] = 0);
+  for (const fau of VALID_FAUS) { fauCoverage[fau] = 0; }
 
   // Count FAU occurrences in exercises
   exercises.forEach(exercise => {
@@ -147,14 +147,14 @@ function validateSQL(filePath) {
   // Report errors
   if (errors.length > 0) {
     console.log(`❌ ERRORS (${errors.length}):\n`);
-    errors.forEach(err => console.log(`   ${err}`));
+    for (const err of errors) { console.log(`   ${err}`); }
     console.log('');
   }
 
   // Report warnings
   if (warnings.length > 0) {
     console.log(`⚠️  WARNINGS (${warnings.length}):\n`);
-    warnings.forEach(warn => console.log(`   ${warn}`));
+    for (const warn of warnings) { console.log(`   ${warn}`); }
     console.log('');
   }
 

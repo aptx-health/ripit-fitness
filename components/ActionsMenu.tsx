@@ -96,7 +96,7 @@ export default function ActionsMenu({
     <>
       <DropdownMenu.Root>
         <DropdownMenu.Trigger asChild>
-          <button
+          <button type="button"
             disabled={disabled}
             className={`${label ? 'py-3 px-4' : sizeClasses[size]} flex items-center justify-center gap-2 cursor-pointer border-2 border-border transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed ${variantClasses[variant]} ${className.includes('w-full') ? 'w-full' : label ? 'w-auto' : ''} ${className.includes('h-full') ? 'h-full' : ''}`}
             aria-label={label || 'Actions menu'}
@@ -152,13 +152,13 @@ export default function ActionsMenu({
               {confirmingAction.confirmationMessage || 'Are you sure you want to proceed?'}
             </p>
             <div className="flex gap-3">
-              <button
+              <button type="button"
                 onClick={handleCancelConfirmation}
                 className="flex-1 px-4 py-2 bg-muted text-foreground hover:bg-secondary transition-colors font-semibold uppercase tracking-wide border border-border"
               >
                 Cancel
               </button>
-              <button
+              <button type="button"
                 onClick={handleConfirmAction}
                 className={`flex-1 px-4 py-2 transition-colors font-semibold uppercase tracking-wide doom-button-3d ${
                   confirmingAction.variant === 'danger'

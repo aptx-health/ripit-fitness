@@ -41,13 +41,13 @@ export default function MoveWorkoutModal({
           ))}
         </select>
         <div className="flex gap-3 justify-end">
-          <button
+          <button type="button"
             onClick={onClose}
             className="px-4 py-2 text-foreground bg-card border border-input rounded-lg hover:bg-muted"
           >
             Cancel
           </button>
-          <button
+          <button type="button"
             onClick={onMove}
             disabled={!targetWeek || isLoading}
             className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover disabled:opacity-50"

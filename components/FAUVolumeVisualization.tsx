@@ -67,10 +67,11 @@ export default function FAUVolumeVisualization({ week }: FAUVolumeVisualizationP
 
         {includeSecondary && (
           <div className="pl-6 space-y-2">
-            <label className="text-xs text-muted-foreground">
+            <label htmlFor="secondary-weight" className="text-xs text-muted-foreground">
               Secondary Weight: {secondaryWeight.toFixed(1)}
             </label>
             <input
+              id="secondary-weight"
               type="range"
               min="0.1"
               max="1.0"

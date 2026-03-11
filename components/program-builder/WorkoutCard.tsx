@@ -64,14 +64,14 @@ export default function WorkoutCard({
                 }
               }}
             />
-            <button
+            <button type="button"
               onClick={() => onSaveName(workout.id)}
               disabled={isLoading}
               className="px-2 py-1 bg-primary text-primary-foreground text-xs rounded hover:bg-primary-hover disabled:opacity-50"
             >
               Save
             </button>
-            <button
+            <button type="button"
               onClick={onCancelEdit}
               className="px-2 py-1 bg-secondary text-secondary-foreground text-xs rounded hover:bg-secondary-hover"
             >
@@ -80,7 +80,7 @@ export default function WorkoutCard({
           </div>
         ) : (
           <div className="flex items-center gap-2 flex-1">
-            <button
+            <button type="button"
               onClick={() => onToggleCollapse(workout.id)}
               className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
             >
@@ -93,7 +93,7 @@ export default function WorkoutCard({
 
             <DropdownMenu.Root>
               <DropdownMenu.Trigger asChild>
-                <button
+                <button type="button"
                   disabled={isLoading || deletingWorkoutId === workout.id}
                   className="p-1.5 sm:px-2 sm:py-0.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted border border-border transition-colors disabled:opacity-50 uppercase tracking-wide"
                 >
@@ -156,7 +156,7 @@ export default function WorkoutCard({
               isLoading={isLoading}
             />
           )}
-          <button
+          <button type="button"
             onClick={() => onAddExercise(workout.id)}
             disabled={isLoading || deletingWorkoutId === workout.id}
             className="w-full py-1.5 bg-success/80 hover:bg-success text-success-foreground text-xs font-semibold uppercase tracking-wide disabled:opacity-50 transition-colors"

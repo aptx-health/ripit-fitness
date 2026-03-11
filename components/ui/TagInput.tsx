@@ -67,7 +67,9 @@ export default function TagInput({
   return (
     <div className="space-y-2">
       <div
+        role="group"
         onClick={focusInput}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') focusInput() }}
         className={`
           min-h-[42px] px-3 py-2 border-2 rounded
           bg-background text-foreground

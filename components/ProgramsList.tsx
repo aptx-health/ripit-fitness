@@ -84,7 +84,7 @@ export default function ProgramsList({ programs }: Props) {
                 <p className="text-muted-foreground mt-1">{activeProgram.description}</p>
               )}
             </div>
-            <button
+            <button type="button"
               onClick={() => handleArchive(activeProgram.id, activeProgram.name)}
               disabled={archivingId === activeProgram.id}
               className="text-muted-foreground hover:text-foreground font-medium disabled:opacity-50"
@@ -125,7 +125,7 @@ export default function ProgramsList({ programs }: Props) {
                   <p className="text-muted-foreground mt-1">{program.description}</p>
                 )}
               </div>
-              <button
+              <button type="button"
                 onClick={() => handleArchive(program.id, program.name)}
                 disabled={archivingId === program.id}
                 className="text-muted-foreground hover:text-foreground font-medium disabled:opacity-50"
@@ -147,7 +147,7 @@ export default function ProgramsList({ programs }: Props) {
               >
                 Edit
               </Link>
-              <button
+              <button type="button"
                 onClick={() => handleSetActive(program.id)}
                 disabled={activatingId === program.id}
                 className="px-4 py-2 text-muted-foreground hover:text-foreground font-medium disabled:opacity-50"

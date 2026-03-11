@@ -17,7 +17,7 @@ export async function GET(_request: NextRequest) {
     }
 
     // Fetch or create user settings — retry on race condition (P2002)
-    let settings
+    let settings: Awaited<ReturnType<typeof prisma.userSettings.upsert>> | undefined
     try {
       settings = await prisma.userSettings.upsert({
         where: { userId: user.id },

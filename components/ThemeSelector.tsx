@@ -17,7 +17,8 @@ export function ThemeSelector() {
   const [preference, setPreference] = useState<ThemePreference | null>(null);
   const [mounted, setMounted] = useState(false);
 
-  // Hydration-safe: Only render after mounting
+  // Hydration-safe: Only render after mounting — see #196
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     const currentPreference = getThemePreference();
     setPreference(currentPreference);
@@ -26,6 +27,7 @@ export function ThemeSelector() {
     // Don't apply theme on mount - it's already applied by SSR script
     // Only apply when user changes it
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleThemeChange = (themeName: ThemeName) => {
     if (!preference) return;
@@ -68,7 +70,7 @@ export function ThemeSelector() {
       {/* Theme Palette Button with Dropdown */}
       <DropdownMenu.Root>
         <DropdownMenu.Trigger asChild>
-          <button
+          <button type="button"
             className="h-9 w-9 flex items-center justify-center cursor-pointer border-2 bg-input transition-all hover:border-primary hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
             style={{
               borderColor: 'var(--border)',
@@ -104,7 +106,7 @@ export function ThemeSelector() {
       </DropdownMenu.Root>
 
       {/* Mode Toggle Button */}
-      <button
+      <button type="button"
         onClick={handleModeToggle}
         className="h-9 w-9 flex items-center justify-center cursor-pointer border-2 bg-input transition-all hover:border-primary hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
         style={{
