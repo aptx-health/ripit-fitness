@@ -3,7 +3,7 @@
 import { ArrowLeft, Check, ChevronDown, X } from 'lucide-react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   Popover,
   PopoverContent,
@@ -55,16 +55,6 @@ export default function CommunityProgramsView({
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null)
   const [selectedGoals, setSelectedGoals] = useState<string[]>([])
   const [currentPage, setCurrentPage] = useState(1)
-
-  // Sync state from URL on mount — see #196
-  /* eslint-disable react-hooks/set-state-in-effect */
-  useEffect(() => {
-    const type = searchParams.get('type')
-    if (type === 'strength' || type === 'cardio' || type === 'all') {
-      setSelectedType(type)
-    }
-  }, [searchParams])
-  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Filter programs by type, level, and goals
   const filteredPrograms = useMemo(() => {
