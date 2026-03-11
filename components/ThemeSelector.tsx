@@ -2,61 +2,28 @@
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { Moon, Palette, Sun } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useThemePreference } from '@/hooks/useThemePreference';
 import {
-  applyTheme,
-  getThemePreference,
-  saveThemePreference,
   THEME_LABELS,
   THEMES,
   type ThemeName,
-  type ThemePreference,
 } from '@/lib/theme';
 
 export function ThemeSelector() {
-  const [preference, setPreference] = useState<ThemePreference | null>(null);
-  const [mounted, setMounted] = useState(false);
-
-  // Hydration-safe: Only render after mounting — see #196
-  /* eslint-disable react-hooks/set-state-in-effect */
-  useEffect(() => {
-    const currentPreference = getThemePreference();
-    setPreference(currentPreference);
-    setMounted(true);
-
-    // Don't apply theme on mount - it's already applied by SSR script
-    // Only apply when user changes it
-  }, []);
-  /* eslint-enable react-hooks/set-state-in-effect */
+  const { preference, updateTheme } = useThemePreference();
 
   const handleThemeChange = (themeName: ThemeName) => {
     if (!preference) return;
-
-    const newPreference: ThemePreference = {
-      ...preference,
-      themeName,
-    };
-
-    setPreference(newPreference);
-    saveThemePreference(newPreference);
-    applyTheme(newPreference);
+    updateTheme({ ...preference, themeName });
   };
 
   const handleModeToggle = () => {
     if (!preference) return;
-
-    const newPreference: ThemePreference = {
-      ...preference,
-      mode: preference.mode === 'dark' ? 'light' : 'dark',
-    };
-
-    setPreference(newPreference);
-    saveThemePreference(newPreference);
-    applyTheme(newPreference);
+    updateTheme({ ...preference, mode: preference.mode === 'dark' ? 'light' : 'dark' });
   };
 
   // Show placeholder until mounted to prevent hydration mismatch
-  if (!mounted || !preference) {
+  if (!preference) {
     return (
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 bg-muted rounded animate-pulse" />
