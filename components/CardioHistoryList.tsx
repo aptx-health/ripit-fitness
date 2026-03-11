@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { EQUIPMENT_LABELS, INTENSITY_ZONE_LABELS, type CardioEquipment, type IntensityZone } from '@/lib/cardio'
 import type { LoggedCardioSession } from '@prisma/client'
+import { useEffect, useState } from 'react'
+import { type CardioEquipment, EQUIPMENT_LABELS, INTENSITY_ZONE_LABELS, type IntensityZone } from '@/lib/cardio'
 
 type Props = {
   count: number

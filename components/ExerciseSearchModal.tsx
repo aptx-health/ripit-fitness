@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
 import { X } from 'lucide-react'
-import { useUserSettings } from '@/hooks/useUserSettings'
-import { ExerciseSearchInterface, ExerciseDefinition } from '@/components/exercise-selection/ExerciseSearchInterface'
-import { SetConfigurationInterface, ExercisePrescription } from '@/components/exercise-selection/SetConfigurationInterface'
+import { useCallback, useEffect, useState } from 'react'
+import { type ExerciseDefinition, ExerciseSearchInterface } from '@/components/exercise-selection/ExerciseSearchInterface'
+import { type ExercisePrescription, SetConfigurationInterface } from '@/components/exercise-selection/SetConfigurationInterface'
 import ExerciseDefinitionEditorModal from '@/components/features/exercise-definition/ExerciseDefinitionEditorModal'
 import { Button } from '@/components/ui/Button'
+import { useUserSettings } from '@/hooks/useUserSettings'
 
 type EditingExercise = {
   id: string
@@ -60,11 +60,11 @@ export default function ExerciseSearchModal({
 
     // Determine intensity type from prescribed sets
     const firstSet = editingExercise.prescribedSets[0]
-    let intensityType: 'RIR' | 'RPE' | 'NONE' = 'NONE'
+    let _intensityType: 'RIR' | 'RPE' | 'NONE' = 'NONE'
     if (firstSet?.rpe !== null && firstSet?.rpe !== undefined) {
-      intensityType = 'RPE'
+      _intensityType = 'RPE'
     } else if (firstSet?.rir !== null && firstSet?.rir !== undefined) {
-      intensityType = 'RIR'
+      _intensityType = 'RIR'
     }
 
     setSelectedExercise({
@@ -223,14 +223,12 @@ export default function ExerciseSearchModal({
           </>
         ) : (
           /* Exercise Search Interface */
-          <>
-            <ExerciseSearchInterface
+          <ExerciseSearchInterface
               onExerciseSelect={handleExerciseSelect}
               preloadExercises={false}
               onCreateExercise={handleCreateExercise}
               onEditExercise={handleEditExercise}
             />
-          </>
         )}
       </div>
     </div>

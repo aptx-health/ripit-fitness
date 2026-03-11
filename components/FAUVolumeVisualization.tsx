@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { calculateWeekFAUVolume, getSortedFAUVolumes, FAU_DISPLAY_NAMES } from '@/lib/fau-volume'
+import { calculateWeekFAUVolume, FAU_DISPLAY_NAMES, getSortedFAUVolumes } from '@/lib/fau-volume'
 
 type Week = {
   id: string

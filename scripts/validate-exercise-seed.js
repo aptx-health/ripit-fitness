@@ -6,8 +6,8 @@
  * Checks for common issues before running in database
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const VALID_FAUS = [
   'chest', 'mid-back', 'lower-back', 'traps', 'front-delts', 'mid-delts',
@@ -21,8 +21,8 @@ function validateSQL(filePath) {
   const content = fs.readFileSync(filePath, 'utf8');
   const _lines = content.split('\n');
 
-  let errors = [];
-  let warnings = [];
+  const errors = [];
+  const warnings = [];
 
   // Track unique values
   const ids = new Set();

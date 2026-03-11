@@ -1,8 +1,8 @@
 'use client'
 
-import { createContext, useContext, useState, ReactNode } from 'react'
 import * as Toast from '@radix-ui/react-toast'
-import { CheckCircle2, AlertCircle, X } from 'lucide-react'
+import { AlertCircle, CheckCircle2, X } from 'lucide-react'
+import { createContext, type ReactNode, useContext, useState } from 'react'
 
 type ToastType = 'success' | 'error'
 

@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 
 type Exercise = {
   name: string
@@ -53,6 +53,7 @@ export default function WorkoutHistoryList({ count }: Props) {
     } else {
       setIsLoading(false)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [count])
 
   const fetchWorkoutHistory = async () => {

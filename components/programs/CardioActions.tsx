@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { Archive, Star, Upload } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Star, Archive, Upload } from 'lucide-react'
+import { useState } from 'react'
 import PublishProgramDialog from '@/components/community/PublishProgramDialog'
 
 type CardioActionsProps = {

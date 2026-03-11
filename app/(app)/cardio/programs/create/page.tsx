@@ -1,6 +1,6 @@
-import { getCurrentUser } from '@/lib/auth/server'
 import { redirect } from 'next/navigation'
 import CardioProgramBuilder from '@/components/CardioProgramBuilder'
+import { getCurrentUser } from '@/lib/auth/server'
 
 export default async function CreateCardioProgramPage() {
   // Get authenticated user

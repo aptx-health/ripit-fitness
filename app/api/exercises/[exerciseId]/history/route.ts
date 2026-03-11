@@ -1,15 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
-import { getLastExercisePerformance } from '@/lib/queries/exercise-history'
 import { logger } from '@/lib/logger'
+import { getLastExercisePerformance } from '@/lib/queries/exercise-history'
 
 /**
  * GET /api/exercises/[exerciseId]/history
  * Returns the last performance history for an exercise
  */
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ exerciseId: string }> }
 ) {
   try {

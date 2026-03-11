@@ -1,7 +1,7 @@
-import { Worker, Job } from 'bullmq'
-import http from 'http'
+import http from 'node:http'
 import { PrismaClient } from '@prisma/client'
-import { ProgramCloneJob, cloneStrengthProgramData, cloneCardioProgramData } from './cloning'
+import { type Job, Worker } from 'bullmq'
+import { cloneCardioProgramData, cloneStrengthProgramData, type ProgramCloneJob } from './cloning'
 
 const QUEUE_NAME = 'program-clone-jobs'
 

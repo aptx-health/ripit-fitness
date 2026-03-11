@@ -2,12 +2,12 @@
 
 import {
   Dialog,
+  DialogBody,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
-  DialogBody,
-  DialogFooter,
 } from '@/components/ui/radix/dialog'
 
 type PrescribedSet = {

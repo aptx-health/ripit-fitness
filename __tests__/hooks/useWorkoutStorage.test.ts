@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { renderHook, act } from '@testing-library/react'
-import { useWorkoutStorage, LoggedSet } from '@/hooks/useWorkoutStorage'
+import { act, renderHook } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { type LoggedSet, useWorkoutStorage } from '@/hooks/useWorkoutStorage'
 
 // Mock localStorage
 const localStorageMock = {

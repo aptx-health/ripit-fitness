@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { PrismaClient } from '@prisma/client'
+import type { PrismaClient } from '@prisma/client'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { getTestDatabase } from '@/lib/test/database'
-import { createTestUser, createMultiWeekProgram } from '@/lib/test/factories'
+import { createMultiWeekProgram, createTestUser } from '@/lib/test/factories'
 
 /**
  * Simulation function for week deletion with renumbering

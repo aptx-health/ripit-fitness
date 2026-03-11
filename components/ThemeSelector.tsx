@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Palette, Sun, Moon } from 'lucide-react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import { Moon, Palette, Sun } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import {
+  applyTheme,
   getThemePreference,
   saveThemePreference,
-  applyTheme,
   THEME_LABELS,
   THEMES,
   type ThemeName,

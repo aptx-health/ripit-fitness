@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
-import { prisma } from '@/lib/db'
 import { isValidEquipment, isValidIntensityZone } from '@/lib/cardio'
+import { prisma } from '@/lib/db'
 
 /**
  * PUT /api/cardio/programs/[id]/builder

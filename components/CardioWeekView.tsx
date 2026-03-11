@@ -1,19 +1,19 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { CheckCircle } from 'lucide-react'
-import {
-  EQUIPMENT_LABELS,
-  INTENSITY_ZONE_LABELS,
-  normalizeEquipment,
-  isValidIntensityZone,
-  type IntensityZone
-} from '@/lib/cardio'
-import WeekNavigator from '@/components/ui/WeekNavigator'
+import { useRouter } from 'next/navigation'
+import { useCallback, useEffect, useState } from 'react'
 import ActionsMenu from '@/components/ActionsMenu'
 import LogCardioModal from '@/components/LogCardioModal'
 import { ProgramCompletionModal } from '@/components/ProgramCompletionModal'
+import WeekNavigator from '@/components/ui/WeekNavigator'
+import {
+  EQUIPMENT_LABELS,
+  INTENSITY_ZONE_LABELS,
+  type IntensityZone, 
+  isValidIntensityZone,
+  normalizeEquipment
+} from '@/lib/cardio'
 import { clientLogger } from '@/lib/client-logger'
 
 type Session = {

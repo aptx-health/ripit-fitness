@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef, KeyboardEvent } from 'react';
 import { X } from 'lucide-react';
+import { type KeyboardEvent, useRef, useState } from 'react';
 
 export interface TagInputProps {
   value: string[];

@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '@prisma/client';
 import { publishProgramCloneJob } from '@/lib/queue/clone-jobs';
 
 export interface CloneResult {

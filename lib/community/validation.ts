@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '@prisma/client';
 import { MAX_WORKOUTS_PER_WEEK } from '@/lib/validation/workout-limits';
 
 export interface ValidationResult {

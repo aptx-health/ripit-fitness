@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { ChevronDown, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ChevronDown, ChevronRight } from 'lucide-react'
+import { useState } from 'react'
 
 type Program = {
   id: string

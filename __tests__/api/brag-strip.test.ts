@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { PrismaClient } from '@prisma/client'
+import type { PrismaClient } from '@prisma/client'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { recordCardioPerformance, recordStrengthPerformance } from '@/lib/stats/exercise-performance'
 import { getTestDatabase } from '@/lib/test/database'
 import { createTestUser } from '@/lib/test/factories'
-import { recordStrengthPerformance, recordCardioPerformance } from '@/lib/stats/exercise-performance'
 
 describe('Brag Strip Stats', () => {
   let prisma: PrismaClient

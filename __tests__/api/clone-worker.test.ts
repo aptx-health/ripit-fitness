@@ -2,24 +2,24 @@
  * @vitest-environment node
  */
 
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
-import { PrismaClient } from '@prisma/client';
-import { Queue, Worker, QueueEvents, Job } from 'bullmq';
-import { getTestDatabase } from '@/lib/test/database';
-import { startRedisContainer, stopRedisContainer } from '@/lib/test/redis-container';
-import {
-  createTestUser,
-  createTestProgram,
-  createTestPrescribedSets,
-} from '@/lib/test/factories';
-import { publishProgramToCommunity } from '@/lib/community/publishing';
+import type { PrismaClient } from '@prisma/client';
+import { type Job, Queue, QueueEvents, Worker } from 'bullmq';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { cloneCommunityProgram } from '@/lib/community/cloning';
-import { ProgramCloneJob } from '@/lib/queue/clone-jobs';
+import { publishProgramToCommunity } from '@/lib/community/publishing';
+import type { ProgramCloneJob } from '@/lib/queue/clone-jobs';
+import { getTestDatabase } from '@/lib/test/database';
+import {
+  createTestPrescribedSets,
+  createTestProgram,
+  createTestUser,
+} from '@/lib/test/factories';
+import { startRedisContainer, stopRedisContainer } from '@/lib/test/redis-container';
 
 // Import cloning functions from worker
 import {
-  cloneStrengthProgramData,
   cloneCardioProgramData,
+  cloneStrengthProgramData,
 } from '../../cloud-functions/clone-program/src/cloning';
 
 const QUEUE_NAME = 'program-clone-jobs';

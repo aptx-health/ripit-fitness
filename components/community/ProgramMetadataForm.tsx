@@ -1,22 +1,22 @@
 'use client';
 
+import { Check, ChevronDown, X } from 'lucide-react';
 import { useState } from 'react';
-import { ChevronDown, Check, X } from 'lucide-react';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/radix/popover';
 import {
-  PROGRAM_GOALS,
-  GOAL_LABELS,
-  FITNESS_LEVELS,
-  LEVEL_LABELS,
-  LEVEL_DESCRIPTIONS,
   COMMON_EQUIPMENT,
-  SPECIALIZED_EQUIPMENT,
   EQUIPMENT_LABELS,
-  ProgramMetadata,
+  FITNESS_LEVELS,
+  GOAL_LABELS,
+  LEVEL_DESCRIPTIONS,
+  LEVEL_LABELS,
+  PROGRAM_GOALS,
+  type ProgramMetadata,
+  SPECIALIZED_EQUIPMENT,
 } from '@/lib/constants/program-metadata';
 
 type ProgramMetadataFormProps = {
@@ -207,7 +207,7 @@ export default function ProgramMetadataForm({
           onChange={(e) =>
             onChange({
               ...metadata,
-              targetDaysPerWeek: e.target.value ? parseInt(e.target.value) : null,
+              targetDaysPerWeek: e.target.value ? parseInt(e.target.value, 10) : null,
             })
           }
           placeholder="e.g., 4"

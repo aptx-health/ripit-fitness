@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/Button';
+import { clientLogger } from '@/lib/client-logger';
 import EquipmentSelector from './EquipmentSelector';
 import FAUSelector from './FAUSelector';
-import { clientLogger } from '@/lib/client-logger';
 
 export interface ExerciseDefinition {
   id: string;
@@ -264,7 +264,6 @@ export default function ExerciseDefinitionEditorModal({
                     errors.name || isDuplicateName ? 'border-error' : 'border-border focus:border-primary'
                   }`}
                   placeholder="e.g., Bench Press"
-                  autoFocus
                 />
                 {errors.name && <p className="text-sm text-error font-medium mt-1">{errors.name}</p>}
                 <div className="flex justify-between mt-1">

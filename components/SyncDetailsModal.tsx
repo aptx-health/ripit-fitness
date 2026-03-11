@@ -1,6 +1,6 @@
 'use client'
 
-import { type SyncState } from '@/hooks/useSyncState'
+import type { SyncState } from '@/hooks/useSyncState'
 
 type Props = {
   isOpen: boolean

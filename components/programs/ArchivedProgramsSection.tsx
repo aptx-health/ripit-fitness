@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { ChevronDown, ChevronRight } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 type ArchivedProgram = {
   id: string
@@ -36,7 +36,8 @@ export default function ArchivedProgramsSection({
     if (isExpanded && programs.length === 0) {
       fetchArchivedPrograms()
     }
-  }, [isExpanded])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isExpanded, programs.length])
 
   const fetchArchivedPrograms = async () => {
     setIsLoading(true)

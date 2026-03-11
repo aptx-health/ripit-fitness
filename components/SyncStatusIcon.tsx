@@ -1,6 +1,6 @@
 'use client'
 
-import { type SyncStatus } from '@/hooks/useSyncState'
+import type { SyncStatus } from '@/hooks/useSyncState'
 
 type Props = {
   status: SyncStatus

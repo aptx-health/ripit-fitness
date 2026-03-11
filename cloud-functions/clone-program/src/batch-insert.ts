@@ -1,5 +1,5 @@
-import { Prisma, PrismaClient } from '@prisma/client'
 import { createId } from '@paralleldrive/cuid2'
+import { Prisma, type PrismaClient } from '@prisma/client'
 
 interface WeekData {
   weekNumber: number

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 
@@ -26,8 +26,8 @@ export async function GET(request: NextRequest) {
 
     // Parse query parameters
     const { searchParams } = new URL(request.url)
-    const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 200)
-    const offset = parseInt(searchParams.get('offset') || '0')
+    const limit = Math.min(parseInt(searchParams.get('limit') || '50', 10), 200)
+    const offset = parseInt(searchParams.get('offset') || '0', 10)
     const equipment = searchParams.get('equipment')
     const dateFrom = searchParams.get('dateFrom')
     const dateTo = searchParams.get('dateTo')

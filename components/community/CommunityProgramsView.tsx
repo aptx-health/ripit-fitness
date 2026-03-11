@@ -1,21 +1,21 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { ArrowLeft, Check, ChevronDown, X } from 'lucide-react'
 import Link from 'next/link'
-import { ArrowLeft, X, ChevronDown, Check } from 'lucide-react'
-import CommunityProgramCard from './CommunityProgramCard'
-import {
-  FITNESS_LEVELS,
-  LEVEL_LABELS,
-  PROGRAM_GOALS,
-  GOAL_LABELS,
-} from '@/lib/constants/program-metadata'
+import { useSearchParams } from 'next/navigation'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/radix/popover'
+import {
+  FITNESS_LEVELS,
+  GOAL_LABELS,
+  LEVEL_LABELS,
+  PROGRAM_GOALS,
+} from '@/lib/constants/program-metadata'
+import CommunityProgramCard from './CommunityProgramCard'
 
 type CommunityProgram = {
   id: string

@@ -1,6 +1,6 @@
-import { getCurrentUser } from '@/lib/auth/server'
 import { redirect } from 'next/navigation'
 import Header from '@/components/Header'
+import { getCurrentUser } from '@/lib/auth/server'
 
 export default async function AppLayout({
   children,

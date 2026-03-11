@@ -1,7 +1,7 @@
-import { getCurrentUser } from '@/lib/auth/server'
-import { prisma } from '@/lib/db'
 import { redirect } from 'next/navigation'
 import CardioProgramBuilder from '@/components/CardioProgramBuilder'
+import { getCurrentUser } from '@/lib/auth/server'
+import { prisma } from '@/lib/db'
 
 export default async function EditCardioProgramPage({
   params

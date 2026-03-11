@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/radix/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/radix/popover';
 import { FAU_DISPLAY_NAMES } from '@/lib/fau-volume';
 
 export interface FAUSelectorProps {

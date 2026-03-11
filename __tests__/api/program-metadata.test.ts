@@ -1,10 +1,10 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { PrismaClient } from '@prisma/client'
-import { getTestDatabase } from '@/lib/test/database'
-import { createTestUser, createTestProgram } from '@/lib/test/factories'
-import { validateProgramMetadata } from '@/lib/community/validation'
+import type { PrismaClient } from '@prisma/client'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { detectEquipmentNeeded } from '@/lib/community/equipment-detection'
 import { publishProgramToCommunity } from '@/lib/community/publishing'
+import { validateProgramMetadata } from '@/lib/community/validation'
+import { getTestDatabase } from '@/lib/test/database'
+import { createTestProgram, createTestUser } from '@/lib/test/factories'
 
 describe('Program Metadata', () => {
   let prisma: PrismaClient

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { LoggedSet } from '@/hooks/useWorkoutStorage'
 
 export type SyncBatch = {
@@ -211,7 +211,7 @@ export class WorkoutSyncService {
 
       if (willRetry) {
         // Schedule retry with exponential backoff
-        const delay = this.options.baseDelay * Math.pow(2, retryCount)
+        const delay = this.options.baseDelay * 2 ** retryCount
         console.log(`Scheduling manual retry ${retryCount + 2} in ${delay}ms`)
 
         const timeout = setTimeout(() => {
@@ -286,7 +286,7 @@ export class WorkoutSyncService {
 
       if (willRetry) {
         // Schedule retry with exponential backoff
-        const delay = this.options.baseDelay * Math.pow(2, retryCount)
+        const delay = this.options.baseDelay * 2 ** retryCount
         console.log(`Scheduling retry ${retryCount + 2} in ${delay}ms`)
 
         const timeout = setTimeout(() => {
@@ -414,7 +414,7 @@ export function useWorkoutSyncService(
   useEffect(() => {
     console.log('🔄 WorkoutId changed, clearing sync service state')
     syncService.clearAll()
-  }, [syncService, workoutId])
+  }, [syncService])
 
   // Cleanup on unmount
   useEffect(() => {

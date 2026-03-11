@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
-import { prisma } from '@/lib/db'
 import { COMMON_EQUIPMENT, SPECIALIZED_EQUIPMENT } from '@/lib/constants/program-metadata'
+import { prisma } from '@/lib/db'
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     const query = searchParams.get('query') || ''
     const fauFilters = searchParams.get('faus')?.split(',').filter(Boolean) || []
     const equipmentFilters = searchParams.get('equipment')?.split(',').filter(Boolean) || []
-    const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100) // Max 100 results
+    const limit = Math.min(parseInt(searchParams.get('limit') || '50', 10), 100) // Max 100 results
 
     // Build where conditions
     const whereConditions: Record<string, unknown>[] = []

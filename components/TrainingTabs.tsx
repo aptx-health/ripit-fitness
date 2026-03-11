@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import * as Tabs from '@radix-ui/react-tabs'
 import { Star } from 'lucide-react'
 import Link from 'next/link'
-import * as Tabs from '@radix-ui/react-tabs'
+import { useState } from 'react'
 import StrengthWeekView from '@/components/StrengthWeekView'
 import WorkoutHistoryList from '@/components/WorkoutHistoryList'
 

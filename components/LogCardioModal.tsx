@@ -1,25 +1,25 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { LoadingFrog } from '@/components/ui/loading-frog'
 import {
+  type CardioEquipment,
+  type CardioMetric,
+  type CardioSessionFormState, 
   EQUIPMENT_LABELS,
-  INTENSITY_ZONE_LABELS,
-  METRIC_LABELS,
-  METRIC_UNITS,
+  formStateToRequest,
+  getAllMetrics,
   getMetricsForEquipment,
   getPrimaryMetrics,
   getSecondaryMetrics,
-  getAllMetrics,
-  type CardioEquipment,
-  type IntensityZone,
-  type CardioMetric,
   INITIAL_CARDIO_FORM_STATE,
-  validateCardioSessionForm,
-  formStateToRequest,
-  type CardioSessionFormState
+  INTENSITY_ZONE_LABELS,
+  type IntensityZone,
+  METRIC_LABELS,
+  METRIC_UNITS,
+  validateCardioSessionForm
 } from '@/lib/cardio'
-import { LoadingFrog } from '@/components/ui/loading-frog'
 
 type Props = {
   isOpen: boolean
@@ -64,6 +64,7 @@ export default function LogCardioModal({
     if (formState.equipment) {
       loadMetricsForEquipment(formState.equipment)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formState.equipment])
 
   const loadMetricsForEquipment = async (equipment: CardioEquipment) => {

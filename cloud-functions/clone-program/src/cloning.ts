@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client'
-import { batchInsertStrengthWeek, batchInsertCardioWeek } from './batch-insert'
+import type { PrismaClient } from '@prisma/client'
+import { batchInsertCardioWeek, batchInsertStrengthWeek } from './batch-insert'
 
 const MAX_WORKOUTS_PER_WEEK = 10
 

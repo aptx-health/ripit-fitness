@@ -1,4 +1,4 @@
-import type { WeekSummary, Week } from '@/types/program-builder'
+import type { Week, WeekSummary } from '@/types/program-builder'
 
 type DuplicateWorkoutModalProps = {
   workoutName: string

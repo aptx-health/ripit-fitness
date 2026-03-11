@@ -1,15 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import Image from 'next/image'
 import { Settings } from 'lucide-react'
+import Image from 'next/image'
+import { useEffect, useState } from 'react'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
 } from '@/components/ui/radix/select'
-import { CardioDistanceCategory, CARDIO_CATEGORY_LABELS } from '@/lib/cardio/distance-categories'
+import { CARDIO_CATEGORY_LABELS, type CardioDistanceCategory } from '@/lib/cardio/distance-categories'
 
 type BragStripStats = {
   workoutsThisWeek: number

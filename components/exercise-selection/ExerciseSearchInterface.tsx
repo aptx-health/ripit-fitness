@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { Search, Filter } from 'lucide-react'
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/radix/popover'
+import { Filter, Search } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/radix/popover'
 
 export type ExerciseDefinition = {
   id: string

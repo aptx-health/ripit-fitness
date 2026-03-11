@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
 import { Plus, Trash } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/radix/popover'
 import { useUserSettings } from '@/hooks/useUserSettings'
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/radix/popover'
 import type { ExerciseDefinition } from './ExerciseSearchInterface'
 
 type Tab = 'sets' | 'notes'
@@ -155,7 +155,7 @@ export function SetConfigurationInterface({
 
     const singleNumberMatch = value.match(/^(\d+)$/)
     if (singleNumberMatch) {
-      const num = parseInt(singleNumberMatch[1])
+      const num = parseInt(singleNumberMatch[1], 10)
       if (num === 0) {
         return 'Reps must be greater than 0'
       }
@@ -164,8 +164,8 @@ export function SetConfigurationInterface({
     const rangeMatch = value.match(/^(\d+)-(\d+)$/)
     if (rangeMatch) {
       const [, start, end] = rangeMatch
-      const startNum = parseInt(start)
-      const endNum = parseInt(end)
+      const startNum = parseInt(start, 10)
+      const endNum = parseInt(end, 10)
 
       if (startNum === 0 || endNum === 0) {
         return 'Reps must be greater than 0'
@@ -177,7 +177,7 @@ export function SetConfigurationInterface({
 
     const plusMatch = value.match(/^(\d+)\+$/)
     if (plusMatch) {
-      const num = parseInt(plusMatch[1])
+      const num = parseInt(plusMatch[1], 10)
       if (num === 0) {
         return 'Reps must be greater than 0'
       }

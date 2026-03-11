@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import type { Week, Exercise } from '@/types/program-builder'
+import { useState } from 'react'
+import type { Exercise, Week } from '@/types/program-builder'
 import WorkoutCard from './WorkoutCard'
 
 type WeekCardProps = {
@@ -100,7 +100,6 @@ export default function WeekCard({
                   maxLength={100}
                   placeholder="Week name (e.g. Deload)"
                   className="px-2 py-1 text-sm bg-background border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
-                  autoFocus
                 />
               </div>
               <textarea

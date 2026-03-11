@@ -1,5 +1,5 @@
-import { beforeAll, afterAll } from 'vitest'
-import { getTestDatabase, cleanupTestDatabase } from './database'
+import { afterAll, beforeAll } from 'vitest'
+import { cleanupTestDatabase, getTestDatabase } from './database'
 
 // Global setup - start test database once for all test suites
 beforeAll(async () => {
@@ -7,7 +7,7 @@ beforeAll(async () => {
   
   // Ensure Docker is available
   try {
-    const { execSync } = await import('child_process')
+    const { execSync } = await import('node:child_process')
     execSync('docker --version', { stdio: 'pipe' })
     console.log('✅ Docker is available')
   } catch {

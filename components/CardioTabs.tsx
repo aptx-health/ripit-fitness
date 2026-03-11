@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
-import { Star } from 'lucide-react'
 import * as Tabs from '@radix-ui/react-tabs'
-import CardioWeekView from '@/components/CardioWeekView'
+import { Star } from 'lucide-react'
+import { useState } from 'react'
 import CardioHistoryList from '@/components/CardioHistoryList'
+import CardioWeekView from '@/components/CardioWeekView'
 
 type WeekData = {
   program: {

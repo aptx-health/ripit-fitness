@@ -1,15 +1,15 @@
 'use client'
 
-import { useState, useCallback, useEffect, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
 import { CheckCircle } from 'lucide-react'
-import WeekNavigator from '@/components/ui/WeekNavigator'
+import { useRouter } from 'next/navigation'
+import { useCallback, useEffect, useState, useTransition } from 'react'
 import ActionsMenu from '@/components/ActionsMenu'
-import WorkoutPreviewModal from '@/components/WorkoutPreviewModal'
 import ExerciseLoggingModal from '@/components/ExerciseLoggingModal'
 import { ProgramCompletionModal } from '@/components/ProgramCompletionModal'
-import { useWorkoutStorage } from '@/hooks/useWorkoutStorage'
+import WeekNavigator from '@/components/ui/WeekNavigator'
+import WorkoutPreviewModal from '@/components/WorkoutPreviewModal'
 import WorkoutCard from '@/components/workout/WorkoutCard'
+import { useWorkoutStorage } from '@/hooks/useWorkoutStorage'
 import { clientLogger } from '@/lib/client-logger'
 
 type Workout = {

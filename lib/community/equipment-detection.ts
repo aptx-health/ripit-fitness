@@ -1,8 +1,8 @@
-import { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '@prisma/client';
 import {
   COMMON_EQUIPMENT,
-  SPECIALIZED_EQUIPMENT,
   type Equipment,
+  SPECIALIZED_EQUIPMENT,
 } from '@/lib/constants/program-metadata';
 
 const EQUIPMENT_NORMALIZATION_MAP: Record<string, string> = {

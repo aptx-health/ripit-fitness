@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { getCardioProgramCompletionStats } from '@/lib/db/program-completion'
@@ -9,7 +9,7 @@ import { logger } from '@/lib/logger'
  * Get detailed completion statistics for celebration modal
  */
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {

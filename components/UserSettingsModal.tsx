@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Settings, Save, X, Dumbbell } from 'lucide-react'
 import * as Dialog from '@radix-ui/react-dialog'
+import { Dumbbell, Save, Settings, X } from 'lucide-react'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 
 type UserSettings = {
   displayName: string | null

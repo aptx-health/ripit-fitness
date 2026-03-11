@@ -1,12 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/server';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import {
-  validateExerciseDefinition,
   checkDuplicateExercise,
   normalizeExerciseName,
   type UpdateExerciseDefinitionInput,
+  validateExerciseDefinition,
 } from '@/lib/validators/exercise-definition';
 
 /**
@@ -14,7 +14,7 @@ import {
  * Fetch exercise definition with canEdit flag and usage count
  */
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {

@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { X } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
 
 interface CompletionStats {
@@ -107,7 +107,7 @@ export function ProgramCompletionModal({
     return () => {
       abortController.abort()
     }
-  }, [open, programId])
+  }, [open, programId, programType])
 
   const handleRestart = async () => {
     // Prevent double-clicks

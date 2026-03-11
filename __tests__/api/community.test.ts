@@ -1,21 +1,21 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { PrismaClient } from '@prisma/client';
-import { getTestDatabase } from '@/lib/test/database';
-import {
-  createTestUser,
-  createTestProgram,
-  createTestPrescribedSets,
-} from '@/lib/test/factories';
-import {
-  validateProgramForPublishing,
-  isProgramPublished,
-  calculateProgramStats,
-} from '@/lib/community/validation';
+import type { PrismaClient } from '@prisma/client';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { cloneCommunityProgram } from '@/lib/community/cloning';
 import {
   getUserDisplayName,
   publishProgramToCommunity,
 } from '@/lib/community/publishing';
-import { cloneCommunityProgram } from '@/lib/community/cloning';
+import {
+  calculateProgramStats,
+  isProgramPublished,
+  validateProgramForPublishing,
+} from '@/lib/community/validation';
+import { getTestDatabase } from '@/lib/test/database';
+import {
+  createTestPrescribedSets,
+  createTestProgram,
+  createTestUser,
+} from '@/lib/test/factories';
 
 /**
  * Helper to wait for background cloning to complete

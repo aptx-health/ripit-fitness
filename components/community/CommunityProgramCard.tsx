@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { Activity, Dumbbell } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { Dumbbell, Activity } from 'lucide-react'
+import { useState } from 'react'
+import { EQUIPMENT_LABELS, GOAL_LABELS, LEVEL_LABELS } from '@/lib/constants/program-metadata'
 import UnpublishProgramDialog from './UnpublishProgramDialog'
-import { GOAL_LABELS, LEVEL_LABELS, EQUIPMENT_LABELS } from '@/lib/constants/program-metadata'
 
 type CommunityProgram = {
   id: string

@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import {
+  type CardioEquipment,
   EQUIPMENT_LABELS,
   INTENSITY_ZONE_LABELS,
-  type CardioEquipment,
   type IntensityZone
 } from '@/lib/cardio'
 
@@ -545,7 +545,7 @@ function SessionCard({
           <input
             type="number"
             value={session.targetDuration}
-            onChange={(e) => onUpdate({ targetDuration: parseInt(e.target.value) || 0 })}
+            onChange={(e) => onUpdate({ targetDuration: parseInt(e.target.value, 10) || 0 })}
             min="1"
             className="doom-input w-full"
           />

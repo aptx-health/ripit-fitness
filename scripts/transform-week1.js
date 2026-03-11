@@ -69,7 +69,7 @@ function parseRPE(rpeStr) {
   const match = rpeStr.match(/(\d+)(?:-(\d+))?/);
   if (!match) return null;
   // Return upper bound if range, otherwise the single value
-  return match[2] ? parseInt(match[2]) : parseInt(match[1]);
+  return match[2] ? parseInt(match[2], 10) : parseInt(match[1], 10);
 }
 
 // Build notes field
@@ -91,7 +91,7 @@ for (const row of week1Data) {
   const workoutName = row.workout;
   const exercise = cleanExerciseName(row.exercise);
   const exerciseGroup = extractExerciseGroup(row.exercise);
-  const workingSets = parseInt(row.workingSets);
+  const workingSets = parseInt(row.workingSets, 10);
   const earlyRPE = parseRPE(row.earlyRPE);
   const lastRPE = parseRPE(row.lastRPE);
   const notes = buildNotes(row.rest, row.technique, row.notes);

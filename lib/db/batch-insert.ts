@@ -1,5 +1,5 @@
-import { Prisma } from '@prisma/client'
 import { createId } from '@paralleldrive/cuid2'
+import { Prisma } from '@prisma/client'
 import { validateWorkoutLimit } from '@/lib/validation/workout-limits'
 
 /**

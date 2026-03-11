@@ -1,27 +1,25 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { createPortal } from 'react-dom'
-import { useWorkoutStorage } from '@/hooks/useWorkoutStorage'
-import { useSyncState } from '@/hooks/useSyncState'
-import { useWorkoutSyncService } from '@/lib/sync/workoutSync'
-import { useProgressiveExercises, type Exercise, type ExerciseHistory } from '@/hooks/useProgressiveExercises'
-import SyncDetailsModal from './SyncDetailsModal'
-import { LoadingFrog } from '@/components/ui/loading-frog'
 import { AlertTriangle } from 'lucide-react'
-import { AddExerciseWizard } from './workout-logging/wizards/AddExerciseWizard'
-import { SwapExerciseWizard } from './workout-logging/wizards/SwapExerciseWizard'
-import { EditExerciseWizard } from './workout-logging/wizards/EditExerciseWizard'
-import { DeleteExerciseWizard } from './workout-logging/wizards/DeleteExerciseWizard'
+import { useCallback, useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { LoadingFrog } from '@/components/ui/loading-frog'
+import { type Exercise, type ExerciseHistory, useProgressiveExercises } from '@/hooks/useProgressiveExercises'
+import { useSyncState } from '@/hooks/useSyncState'
+// Import LoggedSet type from the hook to ensure consistency
+import { type LoggedSet, useWorkoutStorage } from '@/hooks/useWorkoutStorage'
+import { useWorkoutSyncService } from '@/lib/sync/workoutSync'
 import ExerciseDefinitionEditorModal from './features/exercise-definition/ExerciseDefinitionEditorModal'
+import SyncDetailsModal from './SyncDetailsModal'
+import ExerciseActionsFooter from './workout-logging/ExerciseActionsFooter'
+import ExerciseDisplayTabs from './workout-logging/ExerciseDisplayTabs'
 import ExerciseLoggingHeader from './workout-logging/ExerciseLoggingHeader'
 import ExerciseNavigation from './workout-logging/ExerciseNavigation'
-import ExerciseDisplayTabs from './workout-logging/ExerciseDisplayTabs'
 import SetLoggingForm from './workout-logging/SetLoggingForm'
-import ExerciseActionsFooter from './workout-logging/ExerciseActionsFooter'
-
-// Import LoggedSet type from the hook to ensure consistency
-import { type LoggedSet } from '@/hooks/useWorkoutStorage'
+import { AddExerciseWizard } from './workout-logging/wizards/AddExerciseWizard'
+import { DeleteExerciseWizard } from './workout-logging/wizards/DeleteExerciseWizard'
+import { EditExerciseWizard } from './workout-logging/wizards/EditExerciseWizard'
+import { SwapExerciseWizard } from './workout-logging/wizards/SwapExerciseWizard'
 
 // Re-export Exercise and ExerciseHistory types for external use
 export type { Exercise, ExerciseHistory }
@@ -123,7 +121,7 @@ export default function ExerciseLoggingModal({
       setLoggedSets(validSets)
       console.log(`Cleaned localStorage: ${loggedSets.length} -> ${validSets.length} sets`)
     }
-  }, [isLoaded, allExercisesLoaded, loadedExercises, loggedSets, setLoggedSets, workoutId])
+  }, [isLoaded, allExercisesLoaded, loadedExercises, loggedSets, setLoggedSets])
 
   // Sync state management
   const {
@@ -343,7 +341,8 @@ export default function ExerciseLoggingModal({
 
     // Direct deletion for safe operations
     performDeleteSet(exerciseId, setNumber)
-  }, [currentExercise?.id, loggedSets])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentExercise?.id, loggedSets, currentExercise])
 
   const performDeleteSet = useCallback((exerciseId: string, setNumber: number) => {
     console.log(`Deleting set ${setNumber} for exercise ${exerciseId}`)

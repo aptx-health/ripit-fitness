@@ -1,16 +1,16 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { Search, ChevronDown, Check, X, Pencil, Trash2, Plus } from 'lucide-react'
+import { Check, ChevronDown, Pencil, Plus, Search, Trash2, X } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
 import ExerciseDefinitionEditorModal from '@/components/features/exercise-definition/ExerciseDefinitionEditorModal'
-import DeleteExerciseDialog from './DeleteExerciseDialog'
-import { FAU_DISPLAY_NAMES } from '@/lib/fau-volume'
-import { EQUIPMENT_LABELS } from '@/lib/constants/program-metadata'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/radix/popover'
+import { EQUIPMENT_LABELS } from '@/lib/constants/program-metadata'
+import { FAU_DISPLAY_NAMES } from '@/lib/fau-volume'
+import DeleteExerciseDialog from './DeleteExerciseDialog'
 
 type ExerciseDefinition = {
   id: string

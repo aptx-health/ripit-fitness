@@ -1,7 +1,7 @@
 'use client'
 
+import { LogOut, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react'
 import ActionsMenu, { type ActionItem } from '../ActionsMenu'
-import { Plus, RefreshCw, Pencil, Trash2, LogOut } from 'lucide-react'
 
 interface ExerciseActionsFooterProps {
   currentExerciseName: string

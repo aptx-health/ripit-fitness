@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { recordStrengthPerformance, recordCardioPerformance } from '../lib/stats/exercise-performance'
+import { recordCardioPerformance, recordStrengthPerformance } from '../lib/stats/exercise-performance'
 
 const prisma = new PrismaClient()
 

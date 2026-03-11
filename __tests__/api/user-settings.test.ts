@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { PrismaClient } from '@prisma/client'
+import type { PrismaClient } from '@prisma/client'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { getTestDatabase } from '@/lib/test/database'
 import { createTestUser } from '@/lib/test/factories'
 

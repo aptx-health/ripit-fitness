@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
-import { WizardDialog, WizardStep } from '@/components/ui/radix/wizard-dialog'
-import { ScopeSelectionStep } from '../wizard-steps/ScopeSelectionStep'
+import { useCallback, useEffect, useState } from 'react'
+import { WizardDialog, type WizardStep } from '@/components/ui/radix/wizard-dialog'
 import { LoadingSuccessStep } from '../wizard-steps/LoadingSuccessStep'
+import { ScopeSelectionStep } from '../wizard-steps/ScopeSelectionStep'
 
 interface DeleteExerciseWizardProps {
   open: boolean

@@ -1,17 +1,17 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
-import { WizardDialog, WizardStep } from '@/components/ui/radix/wizard-dialog'
+import { useCallback, useEffect, useState } from 'react'
+import { WizardDialog, type WizardStep } from '@/components/ui/radix/wizard-dialog'
 import {
+  type ExerciseDefinition,
   ExerciseSearchStep,
-  ExerciseDefinition,
 } from '../wizard-steps/ExerciseSearchStep'
-import {
-  SetConfigurationStep,
-  ExercisePrescription,
-} from '../wizard-steps/SetConfigurationStep'
-import { ScopeSelectionStep } from '../wizard-steps/ScopeSelectionStep'
 import { LoadingSuccessStep } from '../wizard-steps/LoadingSuccessStep'
+import { ScopeSelectionStep } from '../wizard-steps/ScopeSelectionStep'
+import {
+  type ExercisePrescription,
+  SetConfigurationStep,
+} from '../wizard-steps/SetConfigurationStep'
 
 interface AddExerciseWizardProps {
   open: boolean

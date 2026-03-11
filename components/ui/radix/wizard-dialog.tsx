@@ -1,17 +1,17 @@
 'use client'
 
+import { ChevronLeft } from 'lucide-react'
 import * as React from 'react'
+import { Button } from '@/components/ui/Button'
 import {
   Dialog,
+  DialogBody,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
-  DialogBody,
-  DialogFooter,
 } from './dialog'
-import { Button } from '@/components/ui/Button'
-import { ChevronLeft } from 'lucide-react'
 
 export interface WizardStep {
   id: string

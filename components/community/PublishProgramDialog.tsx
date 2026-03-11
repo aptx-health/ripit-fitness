@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import * as Dialog from '@radix-ui/react-dialog'
-import { X, Upload, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Loader2, Upload, X } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import type { ProgramMetadata } from '@/lib/constants/program-metadata'
 import ProgramMetadataForm from './ProgramMetadataForm'
-import { ProgramMetadata } from '@/lib/constants/program-metadata'
 
 type PublishProgramDialogProps = {
   open: boolean
@@ -62,7 +62,7 @@ export default function PublishProgramDialog({
       validateProgram()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, programId])
+  }, [open])
 
   const validateProgram = async () => {
     try {
@@ -368,8 +368,7 @@ export default function PublishProgramDialog({
           )}
 
           {state === 'success' && (
-            <>
-              <div className="text-center py-8">
+            <div className="text-center py-8">
                 <div className="flex items-center justify-center w-16 h-16 bg-success/20 border-2 border-success mx-auto mb-4">
                   <CheckCircle2 className="w-8 h-8 text-success" />
                 </div>
@@ -393,7 +392,6 @@ export default function PublishProgramDialog({
                   </button>
                 </div>
               </div>
-            </>
           )}
           </div>
         </Dialog.Content>

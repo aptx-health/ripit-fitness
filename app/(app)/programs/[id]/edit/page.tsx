@@ -1,8 +1,8 @@
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import ProgramBuilder from '@/components/ProgramBuilder'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
-import ProgramBuilder from '@/components/ProgramBuilder'
 
 type Props = {
   params: Promise<{ id: string }>
@@ -21,7 +21,7 @@ export default async function EditProgramPage({ params, searchParams }: Props) {
 
   // Parse requested week (default to 1)
   const requestedWeek = weekParam ? parseInt(weekParam, 10) : 1
-  const validWeekNumber = !isNaN(requestedWeek) && requestedWeek > 0 ? requestedWeek : 1
+  const validWeekNumber = !Number.isNaN(requestedWeek) && requestedWeek > 0 ? requestedWeek : 1
 
   // Fetch program metadata and week summary (lightweight query)
   const program = await prisma.program.findUnique({

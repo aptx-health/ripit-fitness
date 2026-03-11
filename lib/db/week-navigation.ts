@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db'
-import type { CurrentStrengthWeekData, CurrentCardioWeekData } from './current-week'
+import type { CurrentCardioWeekData, CurrentStrengthWeekData } from './current-week'
 
 /**
  * Fetches a specific week of the active strength program by week number.

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/server';
 import { prisma } from '@/lib/db';
 
@@ -9,7 +9,7 @@ import { prisma } from '@/lib/db';
  * Used for polling during background cloning process
  */
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ programId: string }> }
 ) {
   try {

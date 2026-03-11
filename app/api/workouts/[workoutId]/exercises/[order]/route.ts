@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { logger } from '@/lib/logger'
@@ -15,7 +15,7 @@ export async function GET(
     const { workoutId, order: orderStr } = await params
     const orderNum = parseInt(orderStr, 10)
 
-    if (isNaN(orderNum) || orderNum < 1) {
+    if (Number.isNaN(orderNum) || orderNum < 1) {
       return NextResponse.json({ error: 'Invalid order parameter' }, { status: 400 })
     }
 

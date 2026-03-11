@@ -1,7 +1,7 @@
-import { ChevronDown, ChevronRight, MoreVertical } from 'lucide-react'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
+import { ChevronDown, ChevronRight, MoreVertical } from 'lucide-react'
+import type { Exercise, Workout } from '@/types/program-builder'
 import SortableExerciseList from '../SortableExerciseList'
-import type { Workout, Exercise } from '@/types/program-builder'
 
 type WorkoutCardProps = {
   workout: Workout
@@ -56,7 +56,6 @@ export default function WorkoutCard({
               value={editingWorkoutName}
               onChange={(e) => onSetEditingName(e.target.value)}
               className="px-2 py-1 border border-input rounded text-sm flex-1 bg-muted text-foreground"
-              autoFocus
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   onSaveName(workout.id)

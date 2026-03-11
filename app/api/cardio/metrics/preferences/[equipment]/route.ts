@@ -1,14 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
-import { prisma } from '@/lib/db'
 import { isValidEquipment } from '@/lib/cardio'
+import { prisma } from '@/lib/db'
 
 /**
  * DELETE /api/cardio/metrics/preferences/[equipment]
  * Reset user's metric preferences to defaults for equipment
  */
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ equipment: string }> }
 ) {
   try {

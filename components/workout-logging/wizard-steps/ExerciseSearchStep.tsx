@@ -1,6 +1,6 @@
 'use client'
 
-import { ExerciseSearchInterface, ExerciseDefinition } from '@/components/exercise-selection/ExerciseSearchInterface'
+import { type ExerciseDefinition, ExerciseSearchInterface } from '@/components/exercise-selection/ExerciseSearchInterface'
 
 // Re-export ExerciseDefinition for other components that import it from here
 export type { ExerciseDefinition }
