@@ -2,12 +2,12 @@
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { Moon, Palette, Sun } from 'lucide-react';
+import { useThemePreference } from '@/hooks/useThemePreference';
 import {
   THEME_LABELS,
   THEMES,
   type ThemeName,
 } from '@/lib/theme';
-import { useThemePreference } from '@/hooks/useThemePreference';
 
 export function ThemeSelector() {
   const { preference, updateTheme } = useThemePreference();
