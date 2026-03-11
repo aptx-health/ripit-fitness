@@ -1,15 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
-import { prisma } from '@/lib/db'
+import type { CardioEquipment, CardioMetric } from '@/lib/cardio'
 import { getMetricsForEquipment, isValidEquipment } from '@/lib/cardio'
-import type { CardioEquipment } from '@/lib/cardio'
+import { prisma } from '@/lib/db'
 
 /**
  * GET /api/cardio/metrics/[equipment]
  * Get metric profile for equipment (custom preferences or defaults)
  */
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ equipment: string }> }
 ) {
   try {
@@ -47,7 +47,7 @@ export async function GET(
     // Get metrics (custom or default)
     const metrics = getMetricsForEquipment(
       equipment as CardioEquipment,
-      preferences?.customMetrics as any
+      preferences?.customMetrics as CardioMetric[] | undefined
     )
 
     return NextResponse.json({

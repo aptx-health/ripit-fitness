@@ -1,7 +1,7 @@
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { getCurrentUser } from '@/lib/auth/server'
+import { redirect } from 'next/navigation'
 import ProgramBuilder from '@/components/ProgramBuilder'
+import { getCurrentUser } from '@/lib/auth/server'
 
 export default async function NewProgramPage() {
   const { user } = await getCurrentUser()

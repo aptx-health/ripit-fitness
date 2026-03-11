@@ -60,7 +60,7 @@ export default function WorkoutCard({
             </h3>
             {isCompleted && (
               <span className="doom-badge doom-badge-completed">
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                <svg aria-hidden="true" className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     fillRule="evenodd"
                     d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -71,7 +71,7 @@ export default function WorkoutCard({
             )}
             {isDraft && (
               <span className="doom-badge doom-badge-accent">
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg aria-hidden="true" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -84,7 +84,7 @@ export default function WorkoutCard({
             )}
             {isSkipped && (
               <span className="doom-badge bg-muted-foreground/30 text-foreground/70">
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg aria-hidden="true" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -116,7 +116,7 @@ export default function WorkoutCard({
         <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
           {/* Primary action button */}
           {isSkipped ? (
-            <button
+            <button type="button"
               onClick={() => onUnskip(workout.id)}
               disabled={isUnskipping}
               className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider text-sm disabled:opacity-50"
@@ -124,7 +124,7 @@ export default function WorkoutCard({
               {isUnskipping ? 'RESTORING...' : 'UNSKIP'}
             </button>
           ) : (
-            <button
+            <button type="button"
               onClick={() => isCompleted ? onView(workout.id) : onLog(workout.id)}
               disabled={isLoading}
               className={`px-4 py-2 ${
@@ -141,7 +141,7 @@ export default function WorkoutCard({
           {!isCompleted && (
             <div className="flex items-center gap-2">
               {/* View button - show for non-completed workouts */}
-              <button
+              <button type="button"
                 onClick={() => onView(workout.id)}
                 disabled={isLoading}
                 className="px-3 py-2 border-2 border-border text-foreground bg-transparent hover:bg-muted hover:border-primary active:bg-muted/80 doom-focus-ring text-sm font-semibold uppercase tracking-wider disabled:opacity-50 transition-colors"
@@ -151,7 +151,7 @@ export default function WorkoutCard({
 
               {/* Skip button - only show if no completion status */}
               {!latestCompletion && (
-                <button
+                <button type="button"
                   onClick={() => onSkip(workout.id)}
                   disabled={isSkipping}
                   className="px-3 py-2 border-2 border-border text-foreground bg-transparent hover:bg-muted hover:border-primary active:bg-muted/80 doom-focus-ring text-sm font-semibold uppercase tracking-wider disabled:opacity-50 transition-colors"

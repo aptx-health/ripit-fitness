@@ -1,9 +1,9 @@
+import { redirect } from 'next/navigation'
+import TrainingTabs from '@/components/TrainingTabs'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { getCurrentStrengthWeek } from '@/lib/db/current-week'
 import { getStrengthWeekByNumber } from '@/lib/db/week-navigation'
-import { redirect } from 'next/navigation'
-import TrainingTabs from '@/components/TrainingTabs'
 
 // Cache page for 30 seconds to improve navigation performance
 export const revalidate = 30
@@ -23,7 +23,7 @@ export default async function TrainingPage({ searchParams }: Props) {
 
   // Parse week param
   const requestedWeek = weekParam ? parseInt(weekParam, 10) : null
-  const validWeekParam = requestedWeek && !isNaN(requestedWeek) && requestedWeek > 0
+  const validWeekParam = requestedWeek && !Number.isNaN(requestedWeek) && requestedWeek > 0
 
   // Fetch week data and workout history count in parallel
   // If week param provided, fetch specific week; otherwise fetch current week

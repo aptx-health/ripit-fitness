@@ -1,16 +1,16 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { PrismaClient } from '@prisma/client'
+import type { PrismaClient } from '@prisma/client'
+import { beforeEach, describe, expect, it } from 'vitest'
+import {
+  getProgramCompletionStats,
+  getProgramCompletionStatus,
+} from '@/lib/db/program-completion'
 import { getTestDatabase } from '@/lib/test/database'
 import {
-  createTestUser,
-  createTestProgram,
   createMultiWeekProgram,
+  createTestProgram,
+  createTestUser,
   createTestWorkoutCompletion,
 } from '@/lib/test/factories'
-import {
-  getProgramCompletionStatus,
-  getProgramCompletionStats,
-} from '@/lib/db/program-completion'
 
 describe('Program Completion Detection', () => {
   let prisma: PrismaClient

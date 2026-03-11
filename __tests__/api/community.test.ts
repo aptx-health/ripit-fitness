@@ -1,21 +1,21 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { PrismaClient } from '@prisma/client';
-import { getTestDatabase } from '@/lib/test/database';
-import {
-  createTestUser,
-  createTestProgram,
-  createTestPrescribedSets,
-} from '@/lib/test/factories';
-import {
-  validateProgramForPublishing,
-  isProgramPublished,
-  calculateProgramStats,
-} from '@/lib/community/validation';
+import type { PrismaClient } from '@prisma/client';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { cloneCommunityProgram } from '@/lib/community/cloning';
 import {
   getUserDisplayName,
   publishProgramToCommunity,
 } from '@/lib/community/publishing';
-import { cloneCommunityProgram } from '@/lib/community/cloning';
+import {
+  calculateProgramStats,
+  isProgramPublished,
+  validateProgramForPublishing,
+} from '@/lib/community/validation';
+import { getTestDatabase } from '@/lib/test/database';
+import {
+  createTestPrescribedSets,
+  createTestProgram,
+  createTestUser,
+} from '@/lib/test/factories';
 
 /**
  * Helper to wait for background cloning to complete
@@ -289,6 +289,7 @@ describe('Community Programs API', () => {
       expect(communityProgram!.exerciseCount).toBe(8);
 
       // Verify programData JSON contains the full structure
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const programData = communityProgram!.programData as any;
       expect(programData.weeks).toBeDefined();
       expect(programData.weeks.length).toBe(2);
@@ -722,14 +723,14 @@ async function simulateDeleteCommunityProgram(
     });
 
     return { success: true };
-  } catch (error) {
+  } catch (_error) {
     return { success: false, error: 'Internal server error' };
   }
 }
 
 async function simulateBrowseCommunityPrograms(
   prisma: PrismaClient,
-  userId: string
+  _userId: string
 ) {
   try {
     // Fetch all community programs ordered by published date
@@ -752,7 +753,7 @@ async function simulateBrowseCommunityPrograms(
       success: true,
       programs: communityPrograms,
     };
-  } catch (error) {
+  } catch (_error) {
     return { success: false, error: 'Internal server error' };
   }
 }

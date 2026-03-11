@@ -1,15 +1,15 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { PrismaClient } from '@prisma/client'
+import type { PrismaClient } from '@prisma/client'
+import { beforeEach, describe, expect, it } from 'vitest'
+import {
+  getCardioProgramCompletionStats,
+  getCardioProgramCompletionStatus,
+} from '@/lib/db/program-completion'
 import { getTestDatabase } from '@/lib/test/database'
 import {
-  createTestUser,
   createTestCardioProgram,
   createTestLoggedCardioSession,
+  createTestUser,
 } from '@/lib/test/factories'
-import {
-  getCardioProgramCompletionStatus,
-  getCardioProgramCompletionStats,
-} from '@/lib/db/program-completion'
 
 describe('Cardio Program Completion Detection', () => {
   let prisma: PrismaClient
@@ -419,7 +419,7 @@ describe('Cardio Program Completion Detection', () => {
       const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000)
 
       // Complete first session 3 days ago
-      const session1 = await prisma.loggedCardioSession.create({
+      const _session1 = await prisma.loggedCardioSession.create({
         data: {
           prescribedSessionId: sessions[0].id,
           userId,
@@ -432,7 +432,7 @@ describe('Cardio Program Completion Detection', () => {
       })
 
       // Complete second session now
-      const session2 = await prisma.loggedCardioSession.create({
+      const _session2 = await prisma.loggedCardioSession.create({
         data: {
           prescribedSessionId: sessions[1].id,
           userId,

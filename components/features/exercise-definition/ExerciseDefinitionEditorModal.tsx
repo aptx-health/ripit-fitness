@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/Button';
-import TagInput from '@/components/ui/TagInput';
+import { clientLogger } from '@/lib/client-logger';
 import EquipmentSelector from './EquipmentSelector';
 import FAUSelector from './FAUSelector';
-import { clientLogger } from '@/lib/client-logger';
 
 export interface ExerciseDefinition {
   id: string;
@@ -265,7 +264,6 @@ export default function ExerciseDefinitionEditorModal({
                     errors.name || isDuplicateName ? 'border-error' : 'border-border focus:border-primary'
                   }`}
                   placeholder="e.g., Bench Press"
-                  autoFocus
                 />
                 {errors.name && <p className="text-sm text-error font-medium mt-1">{errors.name}</p>}
                 <div className="flex justify-between mt-1">
@@ -307,9 +305,9 @@ export default function ExerciseDefinitionEditorModal({
 
               {/* Equipment */}
               <div>
-                <label className="block text-sm font-semibold text-foreground uppercase tracking-wide mb-2">
+                <span className="block text-sm font-semibold text-foreground uppercase tracking-wide mb-2">
                   Equipment *
-                </label>
+                </span>
                 <EquipmentSelector
                   value={formData.equipment}
                   onChange={(equipment) => setFormData({ ...formData, equipment })}
@@ -319,9 +317,9 @@ export default function ExerciseDefinitionEditorModal({
 
               {/* Primary FAUs */}
               <div>
-                <label className="block text-sm font-semibold text-foreground uppercase tracking-wide mb-2">
+                <span className="block text-sm font-semibold text-foreground uppercase tracking-wide mb-2">
                   Primary Muscle Groups *
-                </label>
+                </span>
                 <FAUSelector
                   value={formData.primaryFAUs}
                   onChange={(primaryFAUs) => setFormData({ ...formData, primaryFAUs })}
@@ -332,9 +330,9 @@ export default function ExerciseDefinitionEditorModal({
 
               {/* Secondary FAUs */}
               <div>
-                <label className="block text-sm font-semibold text-foreground uppercase tracking-wide mb-2">
+                <span className="block text-sm font-semibold text-foreground uppercase tracking-wide mb-2">
                   Secondary Muscle Groups
-                </label>
+                </span>
                 <FAUSelector
                   value={formData.secondaryFAUs}
                   onChange={(secondaryFAUs) => setFormData({ ...formData, secondaryFAUs })}

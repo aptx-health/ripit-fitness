@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
 import { Plus, Trash } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/radix/popover'
 import { useUserSettings } from '@/hooks/useUserSettings'
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/radix/popover'
 import type { ExerciseDefinition } from './ExerciseSearchInterface'
 
 type Tab = 'sets' | 'notes'
@@ -35,27 +35,6 @@ interface SetConfigurationInterfaceProps {
   onDuplicateSet?: (setId: string) => Promise<void>
   isSystemExercise?: boolean
   onEditExercise?: () => void
-}
-
-const FAU_DISPLAY_NAMES: Record<string, string> = {
-  'chest': 'Chest',
-  'mid-back': 'Mid Back',
-  'lower-back': 'Lower Back',
-  'front-delts': 'Front Delts',
-  'side-delts': 'Side Delts',
-  'rear-delts': 'Rear Delts',
-  'lats': 'Lats',
-  'traps': 'Traps',
-  'biceps': 'Biceps',
-  'triceps': 'Triceps',
-  'forearms': 'Forearms',
-  'quads': 'Quads',
-  'adductors': 'Adductors',
-  'hamstrings': 'Hamstrings',
-  'glutes': 'Glutes',
-  'calves': 'Calves',
-  'abs': 'Abs',
-  'obliques': 'Obliques'
 }
 
 const REP_PRESETS = [
@@ -176,7 +155,7 @@ export function SetConfigurationInterface({
 
     const singleNumberMatch = value.match(/^(\d+)$/)
     if (singleNumberMatch) {
-      const num = parseInt(singleNumberMatch[1])
+      const num = parseInt(singleNumberMatch[1], 10)
       if (num === 0) {
         return 'Reps must be greater than 0'
       }
@@ -185,8 +164,8 @@ export function SetConfigurationInterface({
     const rangeMatch = value.match(/^(\d+)-(\d+)$/)
     if (rangeMatch) {
       const [, start, end] = rangeMatch
-      const startNum = parseInt(start)
-      const endNum = parseInt(end)
+      const startNum = parseInt(start, 10)
+      const endNum = parseInt(end, 10)
 
       if (startNum === 0 || endNum === 0) {
         return 'Reps must be greater than 0'
@@ -198,7 +177,7 @@ export function SetConfigurationInterface({
 
     const plusMatch = value.match(/^(\d+)\+$/)
     if (plusMatch) {
-      const num = parseInt(plusMatch[1])
+      const num = parseInt(plusMatch[1], 10)
       if (num === 0) {
         return 'Reps must be greater than 0'
       }
@@ -310,10 +289,11 @@ export function SetConfigurationInterface({
           <div className="space-y-4">
             {/* Exercise-level Intensity Type */}
           <div>
-            <label className="block text-base font-bold text-foreground mb-2 tracking-wide uppercase">
+            <label htmlFor="exercise-intensity-type" className="block text-base font-bold text-foreground mb-2 tracking-wide uppercase">
               Intensity Type (All Sets)
             </label>
             <select
+              id="exercise-intensity-type"
               value={exerciseIntensityType}
               onChange={(e) => setExerciseIntensityType(e.target.value as 'RIR' | 'RPE' | 'NONE')}
               className="w-full px-3 py-2 border-2 border-input focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-muted text-foreground doom-input"
@@ -337,7 +317,7 @@ export function SetConfigurationInterface({
 
                     {/* Reps */}
                     <div className="flex-1">
-                      <label className="block text-base font-bold text-foreground mb-1 tracking-wide uppercase">Reps</label>
+                      <span className="block text-base font-bold text-foreground mb-1 tracking-wide uppercase">Reps</span>
                       <Popover>
                         <PopoverTrigger asChild>
                           <button
@@ -420,9 +400,9 @@ export function SetConfigurationInterface({
                     {/* Intensity Value */}
                     {exerciseIntensityType !== 'NONE' && (
                       <div className="flex-1">
-                        <label className="block text-base font-bold text-foreground mb-1 tracking-wide uppercase">
+                        <span className="block text-base font-bold text-foreground mb-1 tracking-wide uppercase">
                           {exerciseIntensityType} Value
-                        </label>
+                        </span>
                         <Popover>
                           <PopoverTrigger asChild>
                             <button
@@ -542,10 +522,11 @@ export function SetConfigurationInterface({
         ) : (
           /* Notes Tab */
           <div>
-            <label className="block text-base font-bold text-foreground mb-2 tracking-wide uppercase">
+            <label htmlFor="exercise-notes-config" className="block text-base font-bold text-foreground mb-2 tracking-wide uppercase">
               Exercise Notes (Optional)
             </label>
             <textarea
+              id="exercise-notes-config"
               value={exerciseNotes}
               onChange={(e) => setExerciseNotes(e.target.value)}
               placeholder="Add any notes for this exercise (e.g., form cues, modifications, etc.)"

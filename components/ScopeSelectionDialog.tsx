@@ -38,7 +38,7 @@ export default function ScopeSelectionDialog({
             {actionType === 'delete' && `Delete "${exerciseName}"`}
             {actionType === 'edit' && `Edit "${exerciseName}"`}
           </h2>
-          <button
+          <button type="button"
             onClick={onClose}
             className="text-muted-foreground hover:text-foreground"
           >
@@ -56,7 +56,7 @@ export default function ScopeSelectionDialog({
           </p>
 
           <div className="space-y-3">
-            <button
+            <button type="button"
               onClick={() => handleSelect(false)}
               disabled={isLoading}
               className="w-full p-4 border-2 border-border rounded-lg hover:border-primary hover:bg-primary-muted transition-colors text-left disabled:opacity-50 disabled:cursor-not-allowed"
@@ -69,7 +69,7 @@ export default function ScopeSelectionDialog({
               </div>
             </button>
 
-            <button
+            <button type="button"
               onClick={() => handleSelect(true)}
               disabled={isLoading}
               className="w-full p-4 border-2 border-border rounded-lg hover:border-primary hover:bg-primary-muted transition-colors text-left disabled:opacity-50 disabled:cursor-not-allowed"

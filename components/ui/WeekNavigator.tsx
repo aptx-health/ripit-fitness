@@ -34,7 +34,7 @@ export default function WeekNavigator({
         tabIndex={hasPrev ? 0 : -1}
         onClick={e => !hasPrev && e.preventDefault()}
       >
-        <svg
+        <svg aria-hidden="true"
           className="w-5 h-5"
           fill="none"
           viewBox="0 0 24 24"
@@ -71,7 +71,7 @@ export default function WeekNavigator({
         tabIndex={hasNext ? 0 : -1}
         onClick={e => !hasNext && e.preventDefault()}
       >
-        <svg
+        <svg aria-hidden="true"
           className="w-5 h-5"
           fill="none"
           viewBox="0 0 24 24"

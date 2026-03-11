@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
-import { prisma } from '@/lib/db'
 import type { LogCardioSessionRequest } from '@/lib/cardio/types'
 import { isValidEquipment, isValidIntensityZone } from '@/lib/cardio/validation'
+import { prisma } from '@/lib/db'
 import { recordCardioPerformance } from '@/lib/stats/exercise-performance'
 
 /**

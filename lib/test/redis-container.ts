@@ -1,4 +1,4 @@
-import { GenericContainer, StartedTestContainer, Wait } from 'testcontainers'
+import { GenericContainer, type StartedTestContainer, Wait } from 'testcontainers'
 
 let container: StartedTestContainer | null = null
 

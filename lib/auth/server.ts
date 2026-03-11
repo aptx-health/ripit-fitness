@@ -1,8 +1,8 @@
 // Auth wrapper for server-side authentication
 // Supports both real BetterAuth and dev-only mock auth
 
-import { auth } from '@/lib/auth'
 import { headers } from 'next/headers'
+import { auth } from '@/lib/auth'
 import { logger } from '@/lib/logger'
 
 export interface AuthUser {

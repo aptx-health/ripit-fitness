@@ -1,14 +1,14 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
-import { WizardDialog, WizardStep } from '@/components/ui/radix/wizard-dialog'
-import {
-  SetConfigurationStep,
-  ExercisePrescription,
-} from '../wizard-steps/SetConfigurationStep'
-import { ScopeSelectionStep } from '../wizard-steps/ScopeSelectionStep'
-import { LoadingSuccessStep } from '../wizard-steps/LoadingSuccessStep'
+import { useCallback, useEffect, useState } from 'react'
+import { WizardDialog, type WizardStep } from '@/components/ui/radix/wizard-dialog'
 import type { ExerciseDefinition } from '../wizard-steps/ExerciseSearchStep'
+import { LoadingSuccessStep } from '../wizard-steps/LoadingSuccessStep'
+import { ScopeSelectionStep } from '../wizard-steps/ScopeSelectionStep'
+import {
+  type ExercisePrescription,
+  SetConfigurationStep,
+} from '../wizard-steps/SetConfigurationStep'
 
 interface PrescribedSet {
   id: string
@@ -58,7 +58,7 @@ export function EditExerciseWizard({
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [_errorMessage, setErrorMessage] = useState<string | null>(null)
 
   // Convert exercise data to ExerciseDefinition format
   const exerciseDefinition: ExerciseDefinition = {
@@ -150,7 +150,7 @@ export function EditExerciseWizard({
           throw new Error(error.error || 'Failed to update exercise')
         }
 
-        const data = await response.json()
+        const _data = await response.json()
 
         // Ensure minimum loading time
         const elapsedTime = Date.now() - startTime

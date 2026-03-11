@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
 import { X } from 'lucide-react'
-import { useUserSettings } from '@/hooks/useUserSettings'
-import { ExerciseSearchInterface, ExerciseDefinition } from '@/components/exercise-selection/ExerciseSearchInterface'
-import { SetConfigurationInterface, ExercisePrescription } from '@/components/exercise-selection/SetConfigurationInterface'
+import { useCallback, useEffect, useState } from 'react'
+import { type ExerciseDefinition, ExerciseSearchInterface } from '@/components/exercise-selection/ExerciseSearchInterface'
+import { type ExercisePrescription, SetConfigurationInterface } from '@/components/exercise-selection/SetConfigurationInterface'
 import ExerciseDefinitionEditorModal from '@/components/features/exercise-definition/ExerciseDefinitionEditorModal'
 import { Button } from '@/components/ui/Button'
+import { useUserSettings } from '@/hooks/useUserSettings'
 
 type EditingExercise = {
   id: string
@@ -42,7 +42,7 @@ export default function ExerciseSearchModal({
   onExerciseSelect,
   editingExercise
 }: ExerciseSearchModalProps) {
-  const { settings } = useUserSettings()
+  const { settings: _settings } = useUserSettings()
   const [selectedExercise, setSelectedExercise] = useState<ExerciseDefinition | null>(null)
   const [prescription, setPrescription] = useState<ExercisePrescription | null>(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
@@ -50,7 +50,8 @@ export default function ExerciseSearchModal({
   const [editingExerciseId, setEditingExerciseId] = useState<string | null>(null)
   const [editingExerciseDefinitionId, setEditingExerciseDefinitionId] = useState<string | null>(null)
 
-  // Initialize state when editing
+  // Initialize state when editing — see #196
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!editingExercise) {
       setSelectedExercise(null)
@@ -60,11 +61,11 @@ export default function ExerciseSearchModal({
 
     // Determine intensity type from prescribed sets
     const firstSet = editingExercise.prescribedSets[0]
-    let intensityType: 'RIR' | 'RPE' | 'NONE' = 'NONE'
+    let _intensityType: 'RIR' | 'RPE' | 'NONE' = 'NONE'
     if (firstSet?.rpe !== null && firstSet?.rpe !== undefined) {
-      intensityType = 'RPE'
+      _intensityType = 'RPE'
     } else if (firstSet?.rir !== null && firstSet?.rir !== undefined) {
-      intensityType = 'RIR'
+      _intensityType = 'RIR'
     }
 
     setSelectedExercise({
@@ -75,6 +76,7 @@ export default function ExerciseSearchModal({
 
     // Don't set prescription here - SetConfigurationInterface will handle it via initialConfig
   }, [editingExercise])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleExerciseSelect = useCallback((exercise: ExerciseDefinition) => {
     setSelectedExercise(exercise)
@@ -181,7 +183,7 @@ export default function ExerciseSearchModal({
           <h2 className="text-xl font-bold tracking-wide uppercase">
             {editingExercise ? 'Edit Exercise' : selectedExercise ? 'Configure Exercise' : 'Add Exercise'}
           </h2>
-          <button
+          <button type="button"
             onClick={handleClose}
             className="text-primary-foreground/80 hover:text-primary-foreground"
           >
@@ -223,14 +225,12 @@ export default function ExerciseSearchModal({
           </>
         ) : (
           /* Exercise Search Interface */
-          <>
-            <ExerciseSearchInterface
+          <ExerciseSearchInterface
               onExerciseSelect={handleExerciseSelect}
               preloadExercises={false}
               onCreateExercise={handleCreateExercise}
               onEditExercise={handleEditExercise}
             />
-          </>
         )}
       </div>
     </div>

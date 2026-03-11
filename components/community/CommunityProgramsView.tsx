@@ -1,21 +1,21 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { ArrowLeft, Check, ChevronDown, X } from 'lucide-react'
 import Link from 'next/link'
-import { ArrowLeft, X, ChevronDown, Check } from 'lucide-react'
-import CommunityProgramCard from './CommunityProgramCard'
-import {
-  FITNESS_LEVELS,
-  LEVEL_LABELS,
-  PROGRAM_GOALS,
-  GOAL_LABELS,
-} from '@/lib/constants/program-metadata'
+import { useSearchParams } from 'next/navigation'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/radix/popover'
+import {
+  FITNESS_LEVELS,
+  GOAL_LABELS,
+  LEVEL_LABELS,
+  PROGRAM_GOALS,
+} from '@/lib/constants/program-metadata'
+import CommunityProgramCard from './CommunityProgramCard'
 
 type CommunityProgram = {
   id: string
@@ -56,13 +56,15 @@ export default function CommunityProgramsView({
   const [selectedGoals, setSelectedGoals] = useState<string[]>([])
   const [currentPage, setCurrentPage] = useState(1)
 
-  // Sync state from URL on mount
+  // Sync state from URL on mount — see #196
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     const type = searchParams.get('type')
     if (type === 'strength' || type === 'cardio' || type === 'all') {
       setSelectedType(type)
     }
   }, [searchParams])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Filter programs by type, level, and goals
   const filteredPrograms = useMemo(() => {
@@ -159,7 +161,7 @@ export default function CommunityProgramsView({
         {/* Filter Buttons */}
         <div className="sticky top-0 bg-background z-10 pb-4 sm:pb-6">
           <div className="flex flex-wrap gap-2">
-            <button
+            <button type="button"
               onClick={() => handleTypeChange('all')}
               className={`px-4 py-2 font-semibold transition-colors text-sm sm:text-base uppercase tracking-wider doom-focus-ring ${
                 selectedType === 'all'
@@ -169,7 +171,7 @@ export default function CommunityProgramsView({
             >
               All ({communityPrograms.length})
             </button>
-            <button
+            <button type="button"
               onClick={() => handleTypeChange('strength')}
               className={`px-4 py-2 font-semibold transition-colors text-sm sm:text-base uppercase tracking-wider doom-focus-ring ${
                 selectedType === 'strength'
@@ -179,7 +181,7 @@ export default function CommunityProgramsView({
             >
               Strength ({communityPrograms.filter((p) => p.programType === 'strength').length})
             </button>
-            <button
+            <button type="button"
               onClick={() => handleTypeChange('cardio')}
               className={`px-4 py-2 font-semibold transition-colors text-sm sm:text-base uppercase tracking-wider doom-focus-ring ${
                 selectedType === 'cardio'
@@ -196,14 +198,14 @@ export default function CommunityProgramsView({
             {/* Level Filter Popover */}
             <Popover>
               <PopoverTrigger asChild>
-                <button className="px-4 py-2 border-2 border-border text-foreground hover:border-primary transition-colors uppercase tracking-wider font-semibold doom-focus-ring flex items-center gap-2 text-sm">
+                <button type="button" className="px-4 py-2 border-2 border-border text-foreground hover:border-primary transition-colors uppercase tracking-wider font-semibold doom-focus-ring flex items-center gap-2 text-sm">
                   Level: {selectedLevel ? LEVEL_LABELS[selectedLevel] : 'All'}
                   <ChevronDown size={16} />
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-56 p-2" align="start">
                 <div className="space-y-1">
-                  <button
+                  <button type="button"
                     onClick={() => handleLevelChange(null)}
                     className="w-full px-3 py-2 text-left text-sm hover:bg-primary/10 transition-colors doom-focus-ring flex items-center justify-between uppercase tracking-wider font-medium"
                   >
@@ -211,7 +213,7 @@ export default function CommunityProgramsView({
                     {selectedLevel === null && <Check size={16} className="text-primary" />}
                   </button>
                   {Object.values(FITNESS_LEVELS).map((level) => (
-                    <button
+                    <button type="button"
                       key={level}
                       onClick={() => handleLevelChange(level)}
                       className="w-full px-3 py-2 text-left text-sm hover:bg-primary/10 transition-colors doom-focus-ring flex items-center justify-between uppercase tracking-wider font-medium"
@@ -227,7 +229,7 @@ export default function CommunityProgramsView({
             {/* Goals Filter Popover */}
             <Popover>
               <PopoverTrigger asChild>
-                <button className="px-4 py-2 border-2 border-border text-foreground hover:border-primary transition-colors uppercase tracking-wider font-semibold doom-focus-ring flex items-center gap-2 text-sm">
+                <button type="button" className="px-4 py-2 border-2 border-border text-foreground hover:border-primary transition-colors uppercase tracking-wider font-semibold doom-focus-ring flex items-center gap-2 text-sm">
                   Goals: {selectedGoals.length > 0 ? `${selectedGoals.length} selected` : 'Any'}
                   <ChevronDown size={16} />
                 </button>
@@ -235,7 +237,7 @@ export default function CommunityProgramsView({
               <PopoverContent className="w-64 p-2" align="start">
                 <div className="space-y-1 max-h-64 overflow-y-auto">
                   {Object.values(PROGRAM_GOALS).map((goal) => (
-                    <button
+                    <button type="button"
                       key={goal}
                       onClick={() => handleGoalToggle(goal)}
                       className="w-full px-3 py-2 text-left text-sm hover:bg-primary/10 transition-colors doom-focus-ring flex items-center justify-between uppercase tracking-wider font-medium"
@@ -250,7 +252,7 @@ export default function CommunityProgramsView({
 
             {/* Clear Filters Button */}
             {hasActiveFilters && (
-              <button
+              <button type="button"
                 onClick={clearFilters}
                 className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors uppercase tracking-wider flex items-center gap-1 doom-focus-ring"
               >
@@ -283,7 +285,7 @@ export default function CommunityProgramsView({
                 : `No ${selectedType} programs have been published yet.`}
             </p>
             {selectedType !== 'all' && (
-              <button
+              <button type="button"
                 onClick={() => handleTypeChange('all')}
                 className="px-4 py-2 border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors uppercase tracking-wider font-semibold doom-focus-ring"
               >
@@ -307,7 +309,7 @@ export default function CommunityProgramsView({
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex items-center justify-center gap-2 flex-wrap">
-                <button
+                <button type="button"
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
                   className="px-3 sm:px-4 py-2 border-2 border-border text-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:border-primary hover:text-primary transition-colors text-sm sm:text-base uppercase tracking-wider font-semibold doom-focus-ring"
@@ -342,7 +344,7 @@ export default function CommunityProgramsView({
                     }
 
                     return (
-                      <button
+                      <button type="button"
                         key={page}
                         onClick={() => handlePageChange(page)}
                         className={`px-3 sm:px-4 py-2 transition-colors text-sm sm:text-base font-semibold doom-focus-ring ${
@@ -357,7 +359,7 @@ export default function CommunityProgramsView({
                   })}
                 </div>
 
-                <button
+                <button type="button"
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
                   className="px-3 sm:px-4 py-2 border-2 border-border text-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:border-primary hover:text-primary transition-colors text-sm sm:text-base uppercase tracking-wider font-semibold doom-focus-ring"

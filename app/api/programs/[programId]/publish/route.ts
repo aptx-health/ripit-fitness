@@ -1,15 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/server';
-import { prisma } from '@/lib/db';
+import { publishProgramToCommunity } from '@/lib/community/publishing';
 import {
+  isProgramPublished,
   validateProgramForPublishing,
   validateProgramMetadata,
-  isProgramPublished,
 } from '@/lib/community/validation';
-import { publishProgramToCommunity } from '@/lib/community/publishing';
+import { prisma } from '@/lib/db';
 
 export async function POST(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ programId: string }> }
 ) {
   try {

@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
-import { prisma } from '@/lib/db'
-import { validateProgramForPublishing, calculateProgramStats } from '@/lib/community/validation'
 import { getUserDisplayName } from '@/lib/community/publishing'
+import { calculateProgramStats, validateProgramForPublishing } from '@/lib/community/validation'
+import { prisma } from '@/lib/db'
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ programId: string }> }
 ) {
   try {
@@ -49,6 +49,7 @@ export async function GET(
     }
 
     // Get program stats
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let program: any
     if (programType === 'strength') {
       program = await prisma.program.findUnique({

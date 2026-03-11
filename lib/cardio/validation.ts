@@ -4,8 +4,8 @@
  * Validation functions for cardio session forms and data.
  */
 
-import type { CardioSessionFormState, ValidationResult, LogCardioSessionRequest } from './types'
 import type { CardioEquipment, IntensityZone } from './equipment-profiles'
+import type { CardioSessionFormState, LogCardioSessionRequest, ValidationResult } from './types'
 
 // ============================================
 // VALIDATION CONSTANTS
@@ -19,7 +19,7 @@ const MIN_POWER = 0
 const MAX_POWER = 10000 // watts
 const MIN_DISTANCE = 0.01
 const MAX_DISTANCE = 1000 // miles/km
-const MIN_ELEVATION = -1000 // feet/meters (death valley)
+const _MIN_ELEVATION = -1000 // feet/meters (death valley)
 const MAX_ELEVATION = 50000 // feet/meters
 
 // ============================================
@@ -49,7 +49,7 @@ export function validateCardioSessionForm(
     errors.duration = 'Duration is required'
   } else {
     const duration = parseFloat(formState.duration)
-    if (isNaN(duration) || duration < MIN_DURATION) {
+    if (Number.isNaN(duration) || duration < MIN_DURATION) {
       errors.duration = `Duration must be at least ${MIN_DURATION} minute`
     } else if (duration > MAX_DURATION) {
       errors.duration = `Duration cannot exceed ${MAX_DURATION} minutes (24 hours)`
@@ -58,96 +58,96 @@ export function validateCardioSessionForm(
 
   // Optional fields - validate only if provided
   if (formState.avgHR && formState.avgHR.trim() !== '') {
-    const avgHR = parseInt(formState.avgHR)
-    if (isNaN(avgHR) || avgHR < MIN_HR || avgHR > MAX_HR) {
+    const avgHR = parseInt(formState.avgHR, 10)
+    if (Number.isNaN(avgHR) || avgHR < MIN_HR || avgHR > MAX_HR) {
       errors.avgHR = `Average HR must be between ${MIN_HR}-${MAX_HR} bpm`
     }
   }
 
   if (formState.peakHR && formState.peakHR.trim() !== '') {
-    const peakHR = parseInt(formState.peakHR)
-    if (isNaN(peakHR) || peakHR < MIN_HR || peakHR > MAX_HR) {
+    const peakHR = parseInt(formState.peakHR, 10)
+    if (Number.isNaN(peakHR) || peakHR < MIN_HR || peakHR > MAX_HR) {
       errors.peakHR = `Peak HR must be between ${MIN_HR}-${MAX_HR} bpm`
     }
   }
 
   // Validate peak HR >= avg HR if both provided
   if (formState.avgHR && formState.peakHR) {
-    const avgHR = parseInt(formState.avgHR)
-    const peakHR = parseInt(formState.peakHR)
-    if (!isNaN(avgHR) && !isNaN(peakHR) && peakHR < avgHR) {
+    const avgHR = parseInt(formState.avgHR, 10)
+    const peakHR = parseInt(formState.peakHR, 10)
+    if (!Number.isNaN(avgHR) && !Number.isNaN(peakHR) && peakHR < avgHR) {
       errors.peakHR = 'Peak HR cannot be less than average HR'
     }
   }
 
   if (formState.avgPower && formState.avgPower.trim() !== '') {
-    const avgPower = parseInt(formState.avgPower)
-    if (isNaN(avgPower) || avgPower < MIN_POWER || avgPower > MAX_POWER) {
+    const avgPower = parseInt(formState.avgPower, 10)
+    if (Number.isNaN(avgPower) || avgPower < MIN_POWER || avgPower > MAX_POWER) {
       errors.avgPower = `Average power must be between ${MIN_POWER}-${MAX_POWER}W`
     }
   }
 
   if (formState.peakPower && formState.peakPower.trim() !== '') {
-    const peakPower = parseInt(formState.peakPower)
-    if (isNaN(peakPower) || peakPower < MIN_POWER || peakPower > MAX_POWER) {
+    const peakPower = parseInt(formState.peakPower, 10)
+    if (Number.isNaN(peakPower) || peakPower < MIN_POWER || peakPower > MAX_POWER) {
       errors.peakPower = `Peak power must be between ${MIN_POWER}-${MAX_POWER}W`
     }
   }
 
   // Validate peak power >= avg power if both provided
   if (formState.avgPower && formState.peakPower) {
-    const avgPower = parseInt(formState.avgPower)
-    const peakPower = parseInt(formState.peakPower)
-    if (!isNaN(avgPower) && !isNaN(peakPower) && peakPower < avgPower) {
+    const avgPower = parseInt(formState.avgPower, 10)
+    const peakPower = parseInt(formState.peakPower, 10)
+    if (!Number.isNaN(avgPower) && !Number.isNaN(peakPower) && peakPower < avgPower) {
       errors.peakPower = 'Peak power cannot be less than average power'
     }
   }
 
   if (formState.distance && formState.distance.trim() !== '') {
     const distance = parseFloat(formState.distance)
-    if (isNaN(distance) || distance < MIN_DISTANCE || distance > MAX_DISTANCE) {
+    if (Number.isNaN(distance) || distance < MIN_DISTANCE || distance > MAX_DISTANCE) {
       errors.distance = `Distance must be between ${MIN_DISTANCE}-${MAX_DISTANCE}`
     }
   }
 
   if (formState.elevationGain && formState.elevationGain.trim() !== '') {
-    const elevationGain = parseInt(formState.elevationGain)
-    if (isNaN(elevationGain) || elevationGain < 0 || elevationGain > MAX_ELEVATION) {
+    const elevationGain = parseInt(formState.elevationGain, 10)
+    if (Number.isNaN(elevationGain) || elevationGain < 0 || elevationGain > MAX_ELEVATION) {
       errors.elevationGain = `Elevation gain must be between 0-${MAX_ELEVATION}`
     }
   }
 
   if (formState.elevationLoss && formState.elevationLoss.trim() !== '') {
-    const elevationLoss = parseInt(formState.elevationLoss)
-    if (isNaN(elevationLoss) || elevationLoss < 0 || elevationLoss > MAX_ELEVATION) {
+    const elevationLoss = parseInt(formState.elevationLoss, 10)
+    if (Number.isNaN(elevationLoss) || elevationLoss < 0 || elevationLoss > MAX_ELEVATION) {
       errors.elevationLoss = `Elevation loss must be between 0-${MAX_ELEVATION}`
     }
   }
 
   if (formState.cadence && formState.cadence.trim() !== '') {
-    const cadence = parseInt(formState.cadence)
-    if (isNaN(cadence) || cadence < 0 || cadence > 500) {
+    const cadence = parseInt(formState.cadence, 10)
+    if (Number.isNaN(cadence) || cadence < 0 || cadence > 500) {
       errors.cadence = 'Cadence must be between 0-500'
     }
   }
 
   if (formState.strokeRate && formState.strokeRate.trim() !== '') {
-    const strokeRate = parseInt(formState.strokeRate)
-    if (isNaN(strokeRate) || strokeRate < 0 || strokeRate > 200) {
+    const strokeRate = parseInt(formState.strokeRate, 10)
+    if (Number.isNaN(strokeRate) || strokeRate < 0 || strokeRate > 200) {
       errors.strokeRate = 'Stroke rate must be between 0-200 spm'
     }
   }
 
   if (formState.strokeCount && formState.strokeCount.trim() !== '') {
-    const strokeCount = parseInt(formState.strokeCount)
-    if (isNaN(strokeCount) || strokeCount < 0) {
+    const strokeCount = parseInt(formState.strokeCount, 10)
+    if (Number.isNaN(strokeCount) || strokeCount < 0) {
       errors.strokeCount = 'Stroke count must be a positive number'
     }
   }
 
   if (formState.calories && formState.calories.trim() !== '') {
-    const calories = parseInt(formState.calories)
-    if (isNaN(calories) || calories < 0 || calories > 10000) {
+    const calories = parseInt(formState.calories, 10)
+    if (Number.isNaN(calories) || calories < 0 || calories > 10000) {
       errors.calories = 'Calories must be between 0-10000'
     }
   }
@@ -181,21 +181,21 @@ export function formStateToRequest(
   return {
     name: formState.name.trim(),
     equipment: formState.equipment!,
-    duration: parseInt(formState.duration),
+    duration: parseInt(formState.duration, 10),
 
     // Optional metrics - only include if provided
-    ...(formState.avgHR && { avgHR: parseInt(formState.avgHR) }),
-    ...(formState.peakHR && { peakHR: parseInt(formState.peakHR) }),
-    ...(formState.avgPower && { avgPower: parseInt(formState.avgPower) }),
-    ...(formState.peakPower && { peakPower: parseInt(formState.peakPower) }),
+    ...(formState.avgHR && { avgHR: parseInt(formState.avgHR, 10) }),
+    ...(formState.peakHR && { peakHR: parseInt(formState.peakHR, 10) }),
+    ...(formState.avgPower && { avgPower: parseInt(formState.avgPower, 10) }),
+    ...(formState.peakPower && { peakPower: parseInt(formState.peakPower, 10) }),
     ...(formState.distance && { distance: parseFloat(formState.distance) }),
-    ...(formState.elevationGain && { elevationGain: parseInt(formState.elevationGain) }),
-    ...(formState.elevationLoss && { elevationLoss: parseInt(formState.elevationLoss) }),
+    ...(formState.elevationGain && { elevationGain: parseInt(formState.elevationGain, 10) }),
+    ...(formState.elevationLoss && { elevationLoss: parseInt(formState.elevationLoss, 10) }),
     ...(formState.avgPace && { avgPace: formState.avgPace.trim() }),
-    ...(formState.cadence && { cadence: parseInt(formState.cadence) }),
-    ...(formState.strokeRate && { strokeRate: parseInt(formState.strokeRate) }),
-    ...(formState.strokeCount && { strokeCount: parseInt(formState.strokeCount) }),
-    ...(formState.calories && { calories: parseInt(formState.calories) }),
+    ...(formState.cadence && { cadence: parseInt(formState.cadence, 10) }),
+    ...(formState.strokeRate && { strokeRate: parseInt(formState.strokeRate, 10) }),
+    ...(formState.strokeCount && { strokeCount: parseInt(formState.strokeCount, 10) }),
+    ...(formState.calories && { calories: parseInt(formState.calories, 10) }),
 
     // Context
     ...(formState.intensityZone && { intensityZone: formState.intensityZone }),
@@ -267,8 +267,8 @@ export function sanitizeString(value: string): string {
  * @returns Parsed number or default
  */
 export function safeParseInt(value: string, defaultValue: number = 0): number {
-  const parsed = parseInt(value)
-  return isNaN(parsed) ? defaultValue : parsed
+  const parsed = parseInt(value, 10)
+  return Number.isNaN(parsed) ? defaultValue : parsed
 }
 
 /**
@@ -279,5 +279,5 @@ export function safeParseInt(value: string, defaultValue: number = 0): number {
  */
 export function safeParseFloat(value: string, defaultValue: number = 0): number {
   const parsed = parseFloat(value)
-  return isNaN(parsed) ? defaultValue : parsed
+  return Number.isNaN(parsed) ? defaultValue : parsed
 }

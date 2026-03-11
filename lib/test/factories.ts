@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import type { PrismaClient } from '@prisma/client'
 
 export type TestUser = {
   id: string
@@ -35,7 +35,7 @@ export type TestExerciseDefinition = {
 export async function createTestUser(): Promise<TestUser> {
   // Create mock user ID for testing
   // In real app, this comes from BetterAuth
-  const userId = 'test-user-' + Math.random().toString(36).substring(2, 15)
+  const userId = `test-user-${Math.random().toString(36).substring(2, 15)}`
   return { id: userId }
 }
 

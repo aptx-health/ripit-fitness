@@ -1,7 +1,7 @@
 'use client'
 
+import { LogOut, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react'
 import ActionsMenu, { type ActionItem } from '../ActionsMenu'
-import { Plus, RefreshCw, Pencil, Trash2, LogOut } from 'lucide-react'
 
 interface ExerciseActionsFooterProps {
   currentExerciseName: string
@@ -76,7 +76,7 @@ export default function ExerciseActionsFooter({
     <div className="border-t-2 border-border px-4 py-3 bg-muted flex-shrink-0">
       <div className="grid grid-cols-[53%_34%_10%] sm:grid-cols-[55%_35%_10%] gap-3">
         {/* Log Set Button */}
-        <button
+        <button type="button"
           onClick={onLogSet}
           disabled={!canLogSet || hasLoggedAllPrescribed}
           className="py-3 bg-accent text-accent-foreground font-bold uppercase tracking-wider transition-all hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed doom-button-3d doom-focus-ring"
@@ -85,7 +85,7 @@ export default function ExerciseActionsFooter({
         </button>
 
         {/* Complete Workout Button */}
-        <button
+        <button type="button"
           disabled={isSubmitting || totalLoggedSets === 0}
           className="py-3 bg-success text-success-foreground font-bold uppercase tracking-wider transition-all hover:bg-success/90 disabled:opacity-50 disabled:cursor-not-allowed doom-button-3d doom-focus-ring"
           onMouseDown={(e) => {

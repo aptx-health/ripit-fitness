@@ -1,6 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server'
+import type { Exercise } from '@prisma/client'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+
+interface PrescribedSetInput {
+  setNumber: number
+  reps: string
+  weight?: string | null
+  rpe?: number | null
+  rir?: number | null
+}
 
 export async function PATCH(
   request: NextRequest,
@@ -52,7 +61,7 @@ export async function PATCH(
     }
 
     let updatedCount = 0
-    let updatedExercises: any[] = []
+    let updatedExercises: Exercise[] = []
 
     if (!applyToFuture || !exercise.workout) {
       // Update only this exercise
@@ -73,7 +82,7 @@ export async function PATCH(
         // Create new prescribed sets
         if (prescribedSets && prescribedSets.length > 0) {
           await tx.prescribedSet.createMany({
-            data: prescribedSets.map((set: any) => ({
+            data: prescribedSets.map((set: PrescribedSetInput) => ({
               setNumber: set.setNumber,
               reps: set.reps,
               weight: set.weight || null,
@@ -164,7 +173,7 @@ export async function PATCH(
           // Create new prescribed sets
           if (prescribedSets && prescribedSets.length > 0) {
             await tx.prescribedSet.createMany({
-              data: prescribedSets.map((set: any) => ({
+              data: prescribedSets.map((set: PrescribedSetInput) => ({
                 setNumber: set.setNumber,
                 reps: set.reps,
                 weight: set.weight || null,
@@ -220,7 +229,7 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ exerciseId: string }> }
 ) {
   try {

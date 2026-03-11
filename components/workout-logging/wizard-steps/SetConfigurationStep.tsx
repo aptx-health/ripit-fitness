@@ -1,6 +1,6 @@
 'use client'
 
-import { SetConfigurationInterface, ExercisePrescription } from '@/components/exercise-selection/SetConfigurationInterface'
+import { type ExercisePrescription, SetConfigurationInterface } from '@/components/exercise-selection/SetConfigurationInterface'
 import type { ExerciseDefinition } from './ExerciseSearchStep'
 
 // Re-export ExercisePrescription for other components that import it from here

@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { PrismaClient } from '@prisma/client'
+import type { PrismaClient } from '@prisma/client'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { getTestDatabase } from '@/lib/test/database'
 import { createTestUser } from '@/lib/test/factories'
 
@@ -32,7 +32,7 @@ describe('User Settings API', () => {
 
     it('should return existing settings if they exist', async () => {
       // Arrange: Create user settings
-      const existingSettings = await prisma.userSettings.create({
+      const _existingSettings = await prisma.userSettings.create({
         data: {
           userId,
           displayName: 'Test User',
@@ -148,7 +148,7 @@ describe('User Settings API', () => {
     it('should validate weight unit', async () => {
       // Act: Try to update with invalid weight unit
       const response = await simulateUpdateSettings(prisma, userId, {
-        defaultWeightUnit: 'invalid' as any
+        defaultWeightUnit: 'invalid' as string
       })
 
       // Assert: Validation error
@@ -159,7 +159,7 @@ describe('User Settings API', () => {
     it('should validate intensity rating', async () => {
       // Act: Try to update with invalid intensity rating
       const response = await simulateUpdateSettings(prisma, userId, {
-        defaultIntensityRating: 'invalid' as any
+        defaultIntensityRating: 'invalid' as string
       })
 
       // Assert: Validation error
@@ -213,7 +213,7 @@ async function simulateGetSettings(
       success: true,
       settings
     }
-  } catch (error) {
+  } catch (_error) {
     return { success: false, error: 'Internal server error' }
   }
 }
@@ -272,7 +272,7 @@ async function simulateUpdateSettings(
       success: true,
       settings
     }
-  } catch (error) {
+  } catch (_error) {
     return { success: false, error: 'Internal server error' }
   }
 }

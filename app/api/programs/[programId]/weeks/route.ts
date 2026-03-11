@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 
@@ -56,7 +56,7 @@ export async function POST(
       )
     }
 
-    let newWeek
+    let newWeek: Awaited<ReturnType<typeof prisma.week.create>> | undefined
 
     if (sourceWeekId) {
       // Duplicate existing week
@@ -169,7 +169,7 @@ export async function POST(
         }
 
         // Create all workouts at once
-        const workoutsData = workoutsToCreate.map(({ id, ...data }) => data)
+        const workoutsData = workoutsToCreate.map(({ id: _id, ...data }) => data)
         await tx.workout.createMany({ data: workoutsData })
 
         // Get created workouts to map IDs
@@ -179,7 +179,7 @@ export async function POST(
         })
 
         // Create exercises with real workout IDs
-        const exercisesData = exercisesToCreate.map(({ id: tempId, workoutId: tempWorkoutId, ...data }) => {
+        const exercisesData = exercisesToCreate.map(({ id: _tempId, workoutId: tempWorkoutId, ...data }) => {
           const tempWorkout = workoutsToCreate.find(w => w.id === tempWorkoutId)
           const realWorkout = createdWorkouts.find(w => w.dayNumber === tempWorkout?.dayNumber)
           if (!realWorkout?.id) {

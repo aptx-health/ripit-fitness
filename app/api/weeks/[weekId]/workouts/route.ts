@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { logger } from '@/lib/logger'
@@ -74,7 +74,7 @@ export async function POST(
     // Generate workout name if not provided
     const calculatedName = name || `Day ${calculatedDayNumber}`
 
-    let newWorkout
+    let newWorkout: Awaited<ReturnType<typeof prisma.workout.create>> | undefined
 
     if (sourceWorkoutId) {
       // Duplicate existing workout

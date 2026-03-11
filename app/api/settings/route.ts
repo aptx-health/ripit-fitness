@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 
@@ -8,7 +8,7 @@ type UpdateSettingsRequest = {
   defaultIntensityRating?: 'rpe' | 'rir'
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const { user, error } = await getCurrentUser()
 
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch or create user settings — retry on race condition (P2002)
-    let settings
+    let settings: Awaited<ReturnType<typeof prisma.userSettings.upsert>> | undefined
     try {
       settings = await prisma.userSettings.upsert({
         where: { userId: user.id },

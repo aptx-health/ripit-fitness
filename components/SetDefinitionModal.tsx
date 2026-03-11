@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 interface SetDefinitionModalProps {
   isOpen: boolean
@@ -43,7 +43,8 @@ export default function SetDefinitionModal({
     { setNumber: 3, reps: '8-12', intensityType: 'NONE' }
   ])
 
-  // Initialize form when modal opens
+  // Initialize form when modal opens — see #196
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (isOpen) {
       if (initialSets && initialSets.length > 0) {
@@ -83,6 +84,7 @@ export default function SetDefinitionModal({
       }
     }
   }, [isOpen, initialSets, initialNotes])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleSetCountChange = (count: number) => {
     const validCount = Math.max(1, Math.min(20, count))
@@ -115,7 +117,7 @@ export default function SetDefinitionModal({
     })))
   }
 
-  const handleSetUpdate = (index: number, field: string, value: any) => {
+  const handleSetUpdate = (index: number, field: string, value: string | number | undefined) => {
     const updated = [...sets]
     updated[index] = { ...updated[index], [field]: value }
     setSets(updated)
@@ -141,7 +143,7 @@ export default function SetDefinitionModal({
           <h2 className="text-xl font-semibold text-foreground">
             {mode === 'edit' ? `Edit Exercise: ${exerciseName}` : `Define Sets for "${exerciseName}"`}
           </h2>
-          <button
+          <button type="button"
             onClick={onClose}
             className="text-muted-foreground hover:text-foreground"
           >
@@ -153,10 +155,11 @@ export default function SetDefinitionModal({
         <div className="flex-1 overflow-y-auto p-6">
           {/* Notes Section */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-foreground mb-2">
+            <label htmlFor="exercise-notes-field" className="block text-sm font-medium text-foreground mb-2">
               Exercise Notes
             </label>
             <textarea
+              id="exercise-notes-field"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Add notes for this exercise (e.g., form cues, tempo, rest time)..."
@@ -168,24 +171,26 @@ export default function SetDefinitionModal({
           {/* Set Count & Intensity Type Grid */}
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
+              <label htmlFor="set-count" className="block text-sm font-medium text-foreground mb-2">
                 Number of Sets
               </label>
               <input
+                id="set-count"
                 type="number"
                 min="1"
                 max="20"
                 value={setCount}
-                onChange={(e) => handleSetCountChange(parseInt(e.target.value) || 1)}
+                onChange={(e) => handleSetCountChange(parseInt(e.target.value, 10) || 1)}
                 className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-muted text-foreground"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
+              <label htmlFor="intensity-type" className="block text-sm font-medium text-foreground mb-2">
                 Intensity Type
               </label>
               <select
+                id="intensity-type"
                 value={exerciseIntensityType}
                 onChange={(e) => handleIntensityTypeChange(e.target.value as 'RIR' | 'RPE' | 'NONE')}
                 className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-muted text-foreground"
@@ -209,8 +214,9 @@ export default function SetDefinitionModal({
                   </div>
 
                   <div className="flex-1">
-                    <label className="block text-xs text-muted-foreground mb-1">Reps</label>
+                    <label htmlFor={`set-${set.setNumber}-reps`} className="block text-xs text-muted-foreground mb-1">Reps</label>
                     <input
+                      id={`set-${set.setNumber}-reps`}
                       type="text"
                       value={set.reps}
                       onChange={(e) => handleSetUpdate(index, 'reps', e.target.value)}
@@ -221,10 +227,11 @@ export default function SetDefinitionModal({
 
                   {exerciseIntensityType !== 'NONE' && (
                     <div className="flex-1">
-                      <label className="block text-xs text-muted-foreground mb-1">
+                      <label htmlFor={`set-${set.setNumber}-intensity`} className="block text-xs text-muted-foreground mb-1">
                         {exerciseIntensityType} Value
                       </label>
                       <input
+                        id={`set-${set.setNumber}-intensity`}
                         type="number"
                         min={exerciseIntensityType === 'RIR' ? 0 : 1}
                         max={exerciseIntensityType === 'RIR' ? 5 : 10}
@@ -244,13 +251,13 @@ export default function SetDefinitionModal({
 
         {/* Action Buttons */}
         <div className="flex gap-3 p-6 border-t border-border">
-          <button
+          <button type="button"
             onClick={onClose}
             className="flex-1 px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors text-foreground"
           >
             Cancel
           </button>
-          <button
+          <button type="button"
             onClick={handleSubmit}
             className="flex-1 px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg transition-colors"
           >

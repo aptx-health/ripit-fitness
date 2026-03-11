@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { recordStrengthPerformance, recordCardioPerformance } from '../lib/stats/exercise-performance'
+import { recordCardioPerformance, recordStrengthPerformance } from '../lib/stats/exercise-performance'
 
 const prisma = new PrismaClient()
 
@@ -8,7 +8,7 @@ async function main() {
 
   // 1. Find or create test user
   const testEmail = 'dev@local.com'
-  let user = await prisma.$queryRaw<Array<{ id: string }>>`
+  const user = await prisma.$queryRaw<Array<{ id: string }>>`
     SELECT id FROM auth.users WHERE email = ${testEmail} LIMIT 1
   `
 
@@ -179,7 +179,7 @@ async function main() {
   console.log(`Creating ${adjustedDates.length} workout completions...`)
 
   let completedCount = 0
-  for (const { date, label } of adjustedDates) {
+  for (const { date, label: _label } of adjustedDates) {
     const completedAt = date
 
     // Create workout completion

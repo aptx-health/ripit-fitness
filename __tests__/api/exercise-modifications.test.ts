@@ -1,12 +1,11 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { PrismaClient } from '@prisma/client'
+import type { PrismaClient } from '@prisma/client'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { getTestDatabase } from '@/lib/test/database'
 import {
-  createTestUser,
-  createTestProgram,
+  createMultiWeekProgram, 
   createTestExerciseDefinition,
-  createTestWorkoutCompletion,
-  createMultiWeekProgram
+  createTestUser,
+  createTestWorkoutCompletion
 } from '@/lib/test/factories'
 
 // ============================================================================
@@ -83,7 +82,7 @@ async function simulateAddExercise(
   // Calculate next order number for current workout
   const maxOrder = Math.max(0, ...workout.exercises.map(e => e.order))
   const nextOrder = maxOrder + 1
-
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let addedExercise: any
   let addedToCount = 0
 
@@ -317,13 +316,14 @@ async function simulateReplaceExercise(
 
   // Execute replacement
   let updatedCount = 0
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let updatedExercises: any[] = []
 
   if (!applyToFuture || !exercise.workout) {
     // Just update this single exercise
     const updated = await prisma.$transaction(async (tx) => {
       // Update exercise
-      const updatedExercise = await tx.exercise.update({
+      const _updatedExercise = await tx.exercise.update({
         where: { id: exerciseId },
         data: {
           exerciseDefinitionId: newExerciseDefinitionId,
@@ -625,6 +625,7 @@ async function simulateEditExercise(
   }
 
   let updatedCount = 0
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let updatedExercises: any[] = []
 
   if (!applyToFuture || !exercise.workout) {
@@ -646,6 +647,7 @@ async function simulateEditExercise(
       // Create new prescribed sets
       if (prescribedSets && prescribedSets.length > 0) {
         await tx.prescribedSet.createMany({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           data: prescribedSets.map((set: any) => ({
             setNumber: set.setNumber,
             reps: set.reps,
@@ -726,7 +728,8 @@ async function simulateEditExercise(
         // Create new prescribed sets
         if (prescribedSets && prescribedSets.length > 0) {
           await tx.prescribedSet.createMany({
-            data: prescribedSets.map((set: any) => ({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          data: prescribedSets.map((set: any) => ({
               setNumber: set.setNumber,
               reps: set.reps,
               rpe: set.rpe || null,
@@ -788,7 +791,7 @@ describe('Exercise Modifications API', () => {
     describe('One-off mode', () => {
       it('should add one-off exercise to existing draft completion', async () => {
         // Arrange: Create program with workout completion
-        const { program, workouts } = await createMultiWeekProgram(prisma, userId, {
+        const { program: _program, workouts } = await createMultiWeekProgram(prisma, userId, {
           weekCount: 2
         })
         const workout = workouts[0]
@@ -1142,7 +1145,7 @@ describe('Exercise Modifications API', () => {
 
       it('should replace and update prescribed sets', async () => {
         // Arrange
-        const { workouts, exercises } = await createMultiWeekProgram(prisma, userId, {
+        const { exercises } = await createMultiWeekProgram(prisma, userId, {
           weekCount: 1
         })
         const exercise = exercises[0]
@@ -1387,7 +1390,7 @@ describe('Exercise Modifications API', () => {
         })
 
         // Act
-        const response = await simulateReplaceExercise(prisma, week2Exercise.id, userId, {
+        const _response = await simulateReplaceExercise(prisma, week2Exercise.id, userId, {
           newExerciseDefinitionId: newExerciseDef.id,
           applyToFuture: true
         })
@@ -1576,7 +1579,7 @@ describe('Exercise Modifications API', () => {
 
       it('should delete when exercise appears multiple times in same workout (supersets)', async () => {
         // Arrange: Create workout with same exercise twice (superset scenario)
-        const { weeks, workouts } = await createMultiWeekProgram(
+        const { weeks: _weeks, workouts } = await createMultiWeekProgram(
           prisma,
           userId,
           { weekCount: 2, workoutsPerWeek: 1 }

@@ -1,35 +1,25 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { createPortal } from 'react-dom'
-import { useWorkoutStorage } from '@/hooks/useWorkoutStorage'
-import { useSyncState } from '@/hooks/useSyncState'
-import { useWorkoutSyncService } from '@/lib/sync/workoutSync'
-import { useProgressiveExercises, type Exercise, type ExerciseHistory } from '@/hooks/useProgressiveExercises'
-import SyncDetailsModal from './SyncDetailsModal'
-import { LoadingFrog } from '@/components/ui/loading-frog'
 import { AlertTriangle } from 'lucide-react'
-import { AddExerciseWizard } from './workout-logging/wizards/AddExerciseWizard'
-import { SwapExerciseWizard } from './workout-logging/wizards/SwapExerciseWizard'
-import { EditExerciseWizard } from './workout-logging/wizards/EditExerciseWizard'
-import { DeleteExerciseWizard } from './workout-logging/wizards/DeleteExerciseWizard'
+import { useCallback, useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { LoadingFrog } from '@/components/ui/loading-frog'
+import { type Exercise, type ExerciseHistory, useProgressiveExercises } from '@/hooks/useProgressiveExercises'
+import { useSyncState } from '@/hooks/useSyncState'
+// Import LoggedSet type from the hook to ensure consistency
+import { type LoggedSet, useWorkoutStorage } from '@/hooks/useWorkoutStorage'
+import { useWorkoutSyncService } from '@/lib/sync/workoutSync'
 import ExerciseDefinitionEditorModal from './features/exercise-definition/ExerciseDefinitionEditorModal'
+import SyncDetailsModal from './SyncDetailsModal'
+import ExerciseActionsFooter from './workout-logging/ExerciseActionsFooter'
+import ExerciseDisplayTabs from './workout-logging/ExerciseDisplayTabs'
 import ExerciseLoggingHeader from './workout-logging/ExerciseLoggingHeader'
 import ExerciseNavigation from './workout-logging/ExerciseNavigation'
-import ExerciseDisplayTabs from './workout-logging/ExerciseDisplayTabs'
 import SetLoggingForm from './workout-logging/SetLoggingForm'
-import ExerciseActionsFooter from './workout-logging/ExerciseActionsFooter'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/radix/dialog'
-
-// Import LoggedSet type from the hook to ensure consistency
-import { type LoggedSet } from '@/hooks/useWorkoutStorage'
+import { AddExerciseWizard } from './workout-logging/wizards/AddExerciseWizard'
+import { DeleteExerciseWizard } from './workout-logging/wizards/DeleteExerciseWizard'
+import { EditExerciseWizard } from './workout-logging/wizards/EditExerciseWizard'
+import { SwapExerciseWizard } from './workout-logging/wizards/SwapExerciseWizard'
 
 // Re-export Exercise and ExerciseHistory types for external use
 export type { Exercise, ExerciseHistory }
@@ -131,7 +121,7 @@ export default function ExerciseLoggingModal({
       setLoggedSets(validSets)
       console.log(`Cleaned localStorage: ${loggedSets.length} -> ${validSets.length} sets`)
     }
-  }, [isLoaded, allExercisesLoaded, loadedExercises, loggedSets, setLoggedSets, workoutId])
+  }, [isLoaded, allExercisesLoaded, loadedExercises, loggedSets, setLoggedSets])
 
   // Sync state management
   const {
@@ -351,7 +341,8 @@ export default function ExerciseLoggingModal({
 
     // Direct deletion for safe operations
     performDeleteSet(exerciseId, setNumber)
-  }, [currentExercise?.id, loggedSets])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentExercise?.id, loggedSets, currentExercise])
 
   const performDeleteSet = useCallback((exerciseId: string, setNumber: number) => {
     console.log(`Deleting set ${setNumber} for exercise ${exerciseId}`)
@@ -509,7 +500,7 @@ export default function ExerciseLoggingModal({
                 <p className="text-error uppercase tracking-wider font-bold">
                   Failed to load exercise
                 </p>
-                <button
+                <button type="button"
                   onClick={() => refreshExercises()}
                   className="mt-4 px-4 py-2 bg-primary text-primary-foreground font-bold uppercase tracking-wider"
                 >
@@ -564,13 +555,13 @@ export default function ExerciseLoggingModal({
                   <>
                     <p className="text-lg sm:text-xl mb-6 text-foreground font-bold uppercase tracking-wider">Complete this workout?</p>
                     <div className="flex justify-center gap-3">
-                      <button
+                      <button type="button"
                         onClick={() => setIsConfirming(false)}
                         className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-muted text-foreground hover:bg-secondary transition-colors font-bold uppercase tracking-wider border-2 border-border hover:border-primary doom-focus-ring"
                       >
                         Cancel
                       </button>
-                      <button
+                      <button type="button"
                         onClick={handleCompleteWorkout}
                         className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-success text-white hover:bg-success/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
                       >
@@ -595,7 +586,7 @@ export default function ExerciseLoggingModal({
             <div className="fixed inset-0 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center z-60">
               <div className="bg-card border-2 border-error p-6 sm:p-8 text-center max-w-sm shadow-xl doom-corners">
                 <div className="text-warning mb-4">
-                  <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg aria-hidden="true" className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 15.5c-.77.833.192 2.5 1.732 2.5z" />
                   </svg>
                 </div>
@@ -604,13 +595,13 @@ export default function ExerciseLoggingModal({
                   This will remove the only remaining set for this exercise. Are you sure?
                 </p>
                 <div className="flex justify-center gap-3">
-                  <button
+                  <button type="button"
                     onClick={() => setShowDeleteConfirm({ show: false })}
                     className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-muted text-foreground hover:bg-secondary transition-colors font-bold uppercase tracking-wider border-2 border-border hover:border-primary doom-focus-ring"
                   >
                     Cancel
                   </button>
-                  <button
+                  <button type="button"
                     onClick={handleConfirmDelete}
                     className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-error text-white hover:bg-error/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
                   >
@@ -698,19 +689,19 @@ export default function ExerciseLoggingModal({
             </p>
             {totalLoggedSets > 0 ? (
               <div className="flex flex-col gap-3">
-                <button
+                <button type="button"
                   onClick={handleExitSaveAsDraft}
                   className="w-full px-4 py-3 text-base sm:text-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
                 >
                   Save as Draft
                 </button>
-                <button
+                <button type="button"
                   onClick={handleExitDiscard}
                   className="w-full px-4 py-3 text-base sm:text-lg bg-error text-error-foreground hover:bg-error/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
                 >
                   Discard All
                 </button>
-                <button
+                <button type="button"
                   onClick={() => setShowExitConfirm(false)}
                   className="w-full px-4 py-3 text-base sm:text-lg bg-muted text-foreground hover:bg-secondary transition-colors font-bold uppercase tracking-wider border-2 border-border hover:border-primary doom-focus-ring"
                 >
@@ -719,13 +710,13 @@ export default function ExerciseLoggingModal({
               </div>
             ) : (
               <div className="flex gap-3">
-                <button
+                <button type="button"
                   onClick={() => setShowExitConfirm(false)}
                   className="flex-1 px-4 py-3 text-base sm:text-lg bg-muted text-foreground hover:bg-secondary transition-colors font-bold uppercase tracking-wider border-2 border-border hover:border-primary doom-focus-ring"
                 >
                   Cancel
                 </button>
-                <button
+                <button type="button"
                   onClick={handleExitDiscard}
                   className="flex-1 px-4 py-3 text-base sm:text-lg bg-error text-error-foreground hover:bg-error/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
                 >

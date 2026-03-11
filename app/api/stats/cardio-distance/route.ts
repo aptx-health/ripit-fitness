@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
+import { type CardioDistanceCategory, getEquipmentForCategory } from '@/lib/cardio/distance-categories'
 import { prisma } from '@/lib/db'
-import { getEquipmentForCategory, CardioDistanceCategory } from '@/lib/cardio/distance-categories'
 
 export async function GET(request: NextRequest) {
   try {

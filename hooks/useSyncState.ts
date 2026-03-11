@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 export type SyncStatus = 'synced' | 'syncing' | 'error' | 'offline'
 
@@ -166,7 +166,7 @@ export function useSyncState() {
 
     // Generic fallback
     return syncState.lastError.length > 50 
-      ? syncState.lastError.substring(0, 50) + '...'
+      ? `${syncState.lastError.substring(0, 50)}...`
       : syncState.lastError
   }, [syncState.lastError])
 

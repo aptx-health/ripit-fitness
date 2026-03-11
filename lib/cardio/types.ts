@@ -5,8 +5,8 @@
  * Extends Prisma-generated types with additional UI/API types.
  */
 
-import type { CardioProgram, CardioWeek, PrescribedCardioSession, LoggedCardioSession, UserCardioMetricPreferences } from '@prisma/client'
-import type { CardioEquipment, IntensityZone, CardioMetric } from './equipment-profiles'
+import type { CardioProgram, CardioWeek, LoggedCardioSession, PrescribedCardioSession, UserCardioMetricPreferences } from '@prisma/client'
+import type { CardioEquipment, CardioMetric, IntensityZone } from './equipment-profiles'
 
 // ============================================
 // PRISMA TYPE EXTENSIONS

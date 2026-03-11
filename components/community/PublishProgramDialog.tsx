@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import * as Dialog from '@radix-ui/react-dialog'
-import { X, Upload, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Loader2, Upload, X } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import type { ProgramMetadata } from '@/lib/constants/program-metadata'
 import ProgramMetadataForm from './ProgramMetadataForm'
-import { ProgramMetadata } from '@/lib/constants/program-metadata'
 
 type PublishProgramDialogProps = {
   open: boolean
@@ -62,7 +62,7 @@ export default function PublishProgramDialog({
       validateProgram()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, programId])
+  }, [open])
 
   const validateProgram = async () => {
     try {
@@ -134,7 +134,7 @@ export default function PublishProgramDialog({
       // Re-validate and proceed
       setState('validating')
       await validateProgram()
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to save program metadata')
     }
   }
@@ -195,7 +195,7 @@ export default function PublishProgramDialog({
               Publish to Community
             </Dialog.Title>
             <Dialog.Close asChild>
-              <button
+              <button type="button"
                 className="h-8 w-8 flex items-center justify-center hover:bg-muted transition-colors doom-focus-ring"
                 aria-label="Close"
               >
@@ -254,7 +254,7 @@ export default function PublishProgramDialog({
               )}
 
               <div className="flex justify-end">
-                <button
+                <button type="button"
                   onClick={handleClose}
                   className="px-4 py-2 border-2 border-border text-foreground hover:border-primary hover:text-primary transition-colors uppercase tracking-wider font-semibold text-sm doom-focus-ring"
                 >
@@ -288,13 +288,13 @@ export default function PublishProgramDialog({
               )}
 
               <div className="flex gap-3 justify-end mt-6">
-                <button
+                <button type="button"
                   onClick={handleClose}
                   className="px-4 py-2 border-2 border-border text-foreground hover:border-primary hover:text-primary transition-colors uppercase tracking-wider font-semibold text-sm doom-focus-ring"
                 >
                   Cancel
                 </button>
-                <button
+                <button type="button"
                   onClick={handleSaveMetadata}
                   disabled={!metadata.level || metadata.goals.length === 0}
                   className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover transition-colors uppercase tracking-wider font-semibold text-sm doom-button-3d doom-focus-ring disabled:opacity-50 disabled:cursor-not-allowed"
@@ -329,7 +329,7 @@ export default function PublishProgramDialog({
                 </p>
                 {!validationResult.displayName && (
                   <p className="text-xs text-muted-foreground mt-2">
-                    You haven't set a display name. You can set one in your user settings.
+                    You haven&apos;t set a display name. You can set one in your user settings.
                   </p>
                 )}
               </div>
@@ -350,13 +350,13 @@ export default function PublishProgramDialog({
 
               {/* Actions */}
               <div className="flex gap-3 justify-end">
-                <button
+                <button type="button"
                   onClick={handleClose}
                   className="px-4 py-2 border-2 border-border text-foreground hover:border-primary hover:text-primary transition-colors uppercase tracking-wider font-semibold text-sm doom-focus-ring"
                 >
                   Cancel
                 </button>
-                <button
+                <button type="button"
                   onClick={handlePublish}
                   className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover transition-colors flex items-center gap-2 uppercase tracking-wider font-semibold text-sm doom-button-3d doom-focus-ring"
                 >
@@ -368,24 +368,23 @@ export default function PublishProgramDialog({
           )}
 
           {state === 'success' && (
-            <>
-              <div className="text-center py-8">
+            <div className="text-center py-8">
                 <div className="flex items-center justify-center w-16 h-16 bg-success/20 border-2 border-success mx-auto mb-4">
                   <CheckCircle2 className="w-8 h-8 text-success" />
                 </div>
                 <h3 className="text-lg font-bold text-foreground mb-2 uppercase tracking-wider">Program Published!</h3>
                 <p className="text-sm text-muted-foreground mb-6">
-                  "{programName}" is now available in the community library.
+                  &quot;{programName}&quot; is now available in the community library.
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <button
+                  <button type="button"
                     onClick={handleClose}
                     className="flex-1 px-4 py-2 border-2 border-border text-foreground hover:border-primary hover:text-primary transition-colors uppercase tracking-wider font-semibold text-sm doom-focus-ring"
                   >
                     Close
                   </button>
-                  <button
+                  <button type="button"
                     onClick={() => router.push('/community')}
                     className="flex-1 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover transition-colors uppercase tracking-wider font-semibold text-sm doom-button-3d doom-focus-ring"
                   >
@@ -393,7 +392,6 @@ export default function PublishProgramDialog({
                   </button>
                 </div>
               </div>
-            </>
           )}
           </div>
         </Dialog.Content>

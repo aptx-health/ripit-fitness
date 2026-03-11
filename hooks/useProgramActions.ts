@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useCallback, useEffect, useState } from 'react'
 import type { Week } from '@/types/program-builder'
 
 type UseProgramActionsParams = {
@@ -18,7 +18,7 @@ type UseProgramActionsParams = {
 
 export function useProgramActions({
   editMode,
-  existingProgramId,
+  existingProgramId: _existingProgramId,
   existingProgramName,
   existingProgramDescription,
   weeksCache,
@@ -146,7 +146,7 @@ export function useProgramActions({
       const data = await response.json()
 
       if (data.success && data.programs) {
-        const activeProgram = data.programs.find((p: any) => p.isActive && p.id !== programId)
+        const activeProgram = data.programs.find((p: { isActive: boolean; id: string }) => p.isActive && p.id !== programId)
         if (activeProgram) {
           setExistingActiveProgram({ id: activeProgram.id, name: activeProgram.name })
         }
