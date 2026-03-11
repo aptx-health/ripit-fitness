@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { WorkoutSyncService } from '@/lib/sync/workoutSync'
-import type { SyncCallbacks } from '@/lib/sync/workoutSync'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { LoggedSet } from '@/hooks/useWorkoutStorage'
+import type { SyncCallbacks } from '@/lib/sync/workoutSync'
+import { WorkoutSyncService } from '@/lib/sync/workoutSync'
 
 // Mock fetch for testing API calls
 const mockFetch = vi.fn()

@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
-import { usePathname } from 'next/navigation'
 import { Settings } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { useState } from 'react'
 import { ThemeSelector } from '@/components/ThemeSelector'
 import UserSettingsModal from '@/components/UserSettingsModal'
 import { useUserSettings } from '@/hooks/useUserSettings'
@@ -82,7 +82,7 @@ export default function Header({ userEmail }: Props) {
             {/* Right: Desktop Menu (hidden on mobile) */}
             <div className="hidden md:flex items-center space-x-4">
               <ThemeSelector />
-              <button
+              <button type="button"
                 onClick={() => setIsSettingsOpen(true)}
                 className="h-9 w-9 flex items-center justify-center border-2 border-border bg-input hover:border-primary hover:bg-primary/10 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
                 aria-label="User settings"
@@ -91,8 +91,7 @@ export default function Header({ userEmail }: Props) {
               </button>
               <span className="text-sm text-muted-foreground">{userEmail}</span>
               <form action="/api/auth/signout" method="POST">
-                <button
-                  type="submit"
+                <button type="submit"
                   className="text-sm text-muted-foreground hover:text-foreground doom-link"
                 >
                   Sign Out
@@ -101,12 +100,12 @@ export default function Header({ userEmail }: Props) {
             </div>
 
             {/* Right: Mobile Hamburger (shown on mobile) */}
-            <button
+            <button type="button"
               onClick={() => setIsMenuOpen(true)}
               className="md:hidden p-2 text-foreground hover:text-primary transition-colors doom-focus-ring"
               aria-label="Menu"
             >
-              <svg
+              <svg aria-hidden="true"
                 className="w-6 h-6"
                 fill="none"
                 stroke="currentColor"
@@ -128,7 +127,11 @@ export default function Header({ userEmail }: Props) {
       {isMenuOpen && (
         <div
           className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 md:hidden"
+          role="button"
+          tabIndex={0}
           onClick={() => setIsMenuOpen(false)}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setIsMenuOpen(false) }}
+          aria-label="Close menu"
         />
       )}
 
@@ -170,7 +173,7 @@ export default function Header({ userEmail }: Props) {
           </div>
 
           {/* User Settings */}
-          <button
+          <button type="button"
             onClick={() => {
               setIsMenuOpen(false)
               setIsSettingsOpen(true)
@@ -183,8 +186,7 @@ export default function Header({ userEmail }: Props) {
 
           {/* Sign Out Button */}
           <form action="/api/auth/signout" method="POST">
-            <button
-              type="submit"
+            <button type="submit"
               className="w-full px-4 py-3 bg-danger text-danger-foreground hover:bg-danger-hover doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider text-sm"
             >
               SIGN OUT

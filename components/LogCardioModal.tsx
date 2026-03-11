@@ -1,25 +1,25 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { LoadingFrog } from '@/components/ui/loading-frog'
 import {
+  type CardioEquipment,
+  type CardioMetric,
+  type CardioSessionFormState, 
   EQUIPMENT_LABELS,
-  INTENSITY_ZONE_LABELS,
-  METRIC_LABELS,
-  METRIC_UNITS,
+  formStateToRequest,
+  getAllMetrics,
   getMetricsForEquipment,
   getPrimaryMetrics,
   getSecondaryMetrics,
-  getAllMetrics,
-  type CardioEquipment,
-  type IntensityZone,
-  type CardioMetric,
   INITIAL_CARDIO_FORM_STATE,
-  validateCardioSessionForm,
-  formStateToRequest,
-  type CardioSessionFormState
+  INTENSITY_ZONE_LABELS,
+  type IntensityZone,
+  METRIC_LABELS,
+  METRIC_UNITS,
+  validateCardioSessionForm
 } from '@/lib/cardio'
-import { LoadingFrog } from '@/components/ui/loading-frog'
 
 type Props = {
   isOpen: boolean
@@ -191,12 +191,12 @@ export default function LogCardioModal({
             <h2 className="text-2xl font-bold text-primary-foreground doom-heading">
               {prescribedData ? 'LOG WORKOUT' : 'LOG CARDIO SESSION'}
             </h2>
-            <button
+            <button type="button"
               onClick={onClose}
               className="text-primary-foreground hover:text-foreground transition"
               aria-label="Close"
             >
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg aria-hidden="true" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -207,10 +207,11 @@ export default function LogCardioModal({
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Equipment Selection */}
           <div>
-            <label className="block text-sm font-semibold text-foreground mb-2 doom-label">
+            <label htmlFor="cardio-equipment" className="block text-sm font-semibold text-foreground mb-2 doom-label">
               EQUIPMENT *
             </label>
             <select
+              id="cardio-equipment"
               value={formState.equipment || ''}
               onChange={(e) => setFormState(prev => ({ ...prev, equipment: e.target.value as CardioEquipment }))}
               className="doom-input w-full"
@@ -230,10 +231,11 @@ export default function LogCardioModal({
 
           {/* Name */}
           <div>
-            <label className="block text-sm font-semibold text-foreground mb-2 doom-label">
+            <label htmlFor="cardio-session-name" className="block text-sm font-semibold text-foreground mb-2 doom-label">
               SESSION NAME *
             </label>
             <input
+              id="cardio-session-name"
               type="text"
               value={formState.name}
               onChange={(e) => setFormState(prev => ({ ...prev, name: e.target.value }))}
@@ -250,12 +252,11 @@ export default function LogCardioModal({
             <>
               {/* Modify Fields Button */}
               <div className="flex justify-end">
-                <button
-                  type="button"
+                <button type="button"
                   onClick={() => setShowMetricSelector(!showMetricSelector)}
                   className="text-sm text-accent hover:text-accent-hover doom-link flex items-center gap-2"
                 >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
@@ -291,15 +292,13 @@ export default function LogCardioModal({
                     ))}
                   </div>
                   <div className="flex gap-2">
-                    <button
-                      type="button"
+                    <button type="button"
                       onClick={handleResetToDefaults}
                       className="px-3 py-2 bg-secondary text-secondary-foreground hover:bg-secondary-hover doom-button-3d text-sm uppercase tracking-wider"
                     >
                       RESET TO DEFAULTS
                     </button>
-                    <button
-                      type="button"
+                    <button type="button"
                       onClick={handleSavePreferences}
                       className="px-3 py-2 bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d text-sm uppercase tracking-wider"
                     >
@@ -355,10 +354,11 @@ export default function LogCardioModal({
 
                 {/* Intensity Zone */}
                 <div>
-                  <label className="block text-sm font-semibold text-foreground mb-2 doom-label">
+                  <label htmlFor="cardio-intensity-zone" className="block text-sm font-semibold text-foreground mb-2 doom-label">
                     INTENSITY ZONE
                   </label>
                   <select
+                    id="cardio-intensity-zone"
                     value={formState.intensityZone || ''}
                     onChange={(e) => setFormState(prev => ({ ...prev, intensityZone: e.target.value as IntensityZone || null }))}
                     className="doom-input w-full"
@@ -375,10 +375,11 @@ export default function LogCardioModal({
                 {/* Interval Structure */}
                 {activeMetrics.includes('intervalStructure') && (
                   <div>
-                    <label className="block text-sm font-semibold text-foreground mb-2 doom-label">
+                    <label htmlFor="cardio-interval-structure" className="block text-sm font-semibold text-foreground mb-2 doom-label">
                       INTERVAL STRUCTURE
                     </label>
                     <input
+                      id="cardio-interval-structure"
                       type="text"
                       value={formState.intervalStructure}
                       onChange={(e) => setFormState(prev => ({ ...prev, intervalStructure: e.target.value }))}
@@ -391,10 +392,11 @@ export default function LogCardioModal({
                 {/* Notes */}
                 {activeMetrics.includes('notes') && (
                   <div>
-                    <label className="block text-sm font-semibold text-foreground mb-2 doom-label">
+                    <label htmlFor="cardio-notes" className="block text-sm font-semibold text-foreground mb-2 doom-label">
                       NOTES
                     </label>
                     <textarea
+                      id="cardio-notes"
                       value={formState.notes}
                       onChange={(e) => setFormState(prev => ({ ...prev, notes: e.target.value }))}
                       placeholder="Weather, how you felt, etc."
@@ -416,15 +418,13 @@ export default function LogCardioModal({
 
           {/* Actions */}
           <div className="flex gap-3 pt-4 border-t border-border">
-            <button
-              type="button"
+            <button type="button"
               onClick={onClose}
               className="flex-1 px-4 py-3 border-2 border-border text-foreground hover:bg-muted doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
             >
               CANCEL
             </button>
-            <button
-              type="submit"
+            <button type="submit"
               disabled={isLoading || !formState.equipment}
               className="flex-1 px-4 py-3 bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
             >
@@ -484,10 +484,11 @@ function MetricInput({
 
   return (
     <div>
-      <label className="block text-sm font-semibold text-foreground mb-2 doom-label">
+      <label htmlFor={`metric-${metric}`} className="block text-sm font-semibold text-foreground mb-2 doom-label">
         {label} {isRequired && '*'} {unit && `(${unit})`}
       </label>
       <input
+        id={`metric-${metric}`}
         type={getInputType()}
         value={value}
         onChange={(e) => onChange(e.target.value)}

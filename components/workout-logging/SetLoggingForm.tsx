@@ -72,10 +72,11 @@ export default function SetLoggingForm({
         {/* Reps and Weight - Side by side */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm font-semibold text-foreground mb-1 uppercase tracking-wider">
+            <label htmlFor="log-reps" className="block text-sm font-semibold text-foreground mb-1 uppercase tracking-wider">
               Reps *
             </label>
             <input
+              id="log-reps"
               type="number"
               inputMode="numeric"
               value={currentSet.reps}
@@ -88,10 +89,11 @@ export default function SetLoggingForm({
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-foreground mb-1 uppercase tracking-wider">
+            <label htmlFor="log-weight" className="block text-sm font-semibold text-foreground mb-1 uppercase tracking-wider">
               Weight * ({currentSet.weightUnit})
             </label>
             <input
+              id="log-weight"
               type="number"
               inputMode="decimal"
               step="0.5"
@@ -110,10 +112,11 @@ export default function SetLoggingForm({
           <div className="grid grid-cols-2 gap-3">
             {hasRir && (
               <div>
-                <label className="block text-sm font-semibold text-foreground mb-1 uppercase tracking-wider">
+                <label htmlFor="log-rir" className="block text-sm font-semibold text-foreground mb-1 uppercase tracking-wider">
                   RIR (optional)
                 </label>
                 <input
+                  id="log-rir"
                   type="number"
                   inputMode="numeric"
                   min="0"
@@ -130,10 +133,11 @@ export default function SetLoggingForm({
 
             {hasRpe && (
               <div>
-                <label className="block text-sm font-semibold text-foreground mb-1 uppercase tracking-wider">
+                <label htmlFor="log-rpe" className="block text-sm font-semibold text-foreground mb-1 uppercase tracking-wider">
                   RPE (optional)
                 </label>
                 <input
+                  id="log-rpe"
                   type="number"
                   inputMode="numeric"
                   min="1"

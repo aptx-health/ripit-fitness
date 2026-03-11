@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
-import { WizardDialog, WizardStep } from '@/components/ui/radix/wizard-dialog'
-import { ScopeSelectionStep } from '../wizard-steps/ScopeSelectionStep'
+import { useCallback, useEffect, useState } from 'react'
+import { WizardDialog, type WizardStep } from '@/components/ui/radix/wizard-dialog'
 import { LoadingSuccessStep } from '../wizard-steps/LoadingSuccessStep'
+import { ScopeSelectionStep } from '../wizard-steps/ScopeSelectionStep'
 
 interface DeleteExerciseWizardProps {
   open: boolean
@@ -26,7 +26,7 @@ export function DeleteExerciseWizard({
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [_errorMessage, setErrorMessage] = useState<string | null>(null)
 
   // Reset wizard state when opened
   useEffect(() => {
@@ -65,7 +65,7 @@ export function DeleteExerciseWizard({
           throw new Error(error.error || 'Failed to delete exercise')
         }
 
-        const data = await response.json()
+        const _data = await response.json()
 
         // Ensure minimum loading time
         const elapsedTime = Date.now() - startTime

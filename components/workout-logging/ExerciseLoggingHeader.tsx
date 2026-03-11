@@ -1,7 +1,7 @@
 'use client'
 
+import type { SyncStatus } from '@/hooks/useSyncState'
 import SyncStatusIcon from '../SyncStatusIcon'
-import { type SyncStatus } from '@/hooks/useSyncState'
 
 interface ExerciseLoggingHeaderProps {
   currentExerciseIndex: number

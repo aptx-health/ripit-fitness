@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { Activity, Dumbbell } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { Dumbbell, Activity } from 'lucide-react'
+import { useState } from 'react'
+import { EQUIPMENT_LABELS, GOAL_LABELS, LEVEL_LABELS } from '@/lib/constants/program-metadata'
 import UnpublishProgramDialog from './UnpublishProgramDialog'
-import { GOAL_LABELS, LEVEL_LABELS, EQUIPMENT_LABELS } from '@/lib/constants/program-metadata'
 
 type CommunityProgram = {
   id: string
@@ -108,7 +108,7 @@ export default function CommunityProgramCard({
             {/* Type badge */}
             <span
               className="px-2 py-1 bg-primary text-primary-foreground text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1 whitespace-nowrap"
-              aria-label={`${program.programType} program`}
+              title={`${program.programType} program`}
             >
               {program.programType === 'strength' ? (
                 <Dumbbell size={12} />
@@ -197,7 +197,7 @@ export default function CommunityProgramCard({
         {/* Actions */}
         <div className="flex gap-2">
           {!isAuthor ? (
-            <button
+            <button type="button"
               onClick={handleAddProgram}
               disabled={isAdding}
               className="flex-1 px-4 py-2.5 sm:py-3 bg-primary text-primary-foreground hover:bg-primary-hover transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base uppercase tracking-wider doom-button-3d doom-focus-ring"
@@ -205,7 +205,7 @@ export default function CommunityProgramCard({
               {isAdding ? 'ADDING...' : 'ADD TO MY PROGRAMS'}
             </button>
           ) : (
-            <button
+            <button type="button"
               onClick={() => setShowUnpublishDialog(true)}
               className="flex-1 px-4 py-2.5 sm:py-3 border-2 border-error text-error hover:bg-error/10 transition-colors font-semibold text-sm sm:text-base uppercase tracking-wider doom-focus-ring"
             >

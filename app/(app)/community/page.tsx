@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
+import CommunityProgramsView from '@/components/community/CommunityProgramsView'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
-import CommunityProgramsView from '@/components/community/CommunityProgramsView'
 
 // Don't cache this page - community programs should be fresh
 export const revalidate = 0

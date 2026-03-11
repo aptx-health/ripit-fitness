@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
+import { generateCopyName } from '@/lib/copy-name'
 import { prisma } from '@/lib/db'
 import { logger } from '@/lib/logger'
 import { validateWorkoutLimit } from '@/lib/validation/workout-limits'
-import { generateCopyName } from '@/lib/copy-name'
 
 export async function POST(
   request: NextRequest,

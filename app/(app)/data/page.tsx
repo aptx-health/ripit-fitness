@@ -1,8 +1,8 @@
-import { Metadata } from 'next'
-import { getCurrentUser } from '@/lib/auth/server'
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { prisma } from '@/lib/db'
 import BragStrip from '@/components/features/BragStrip'
+import { getCurrentUser } from '@/lib/auth/server'
+import { prisma } from '@/lib/db'
 
 export const metadata: Metadata = {
   title: 'Your Stats | Ripit Fitness',

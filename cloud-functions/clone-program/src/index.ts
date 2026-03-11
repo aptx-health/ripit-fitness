@@ -1,7 +1,7 @@
-import { Worker, Job } from 'bullmq'
-import http from 'http'
+import http from 'node:http'
 import { PrismaClient } from '@prisma/client'
-import { ProgramCloneJob, cloneStrengthProgramData, cloneCardioProgramData } from './cloning'
+import { type Job, Worker } from 'bullmq'
+import { cloneCardioProgramData, cloneStrengthProgramData, type ProgramCloneJob } from './cloning'
 
 const QUEUE_NAME = 'program-clone-jobs'
 
@@ -50,12 +50,13 @@ async function processCloneJob(job: Job<ProgramCloneJob>): Promise<void> {
     throw new Error(`Community program not found or has no data: ${communityProgramId}`)
   }
 
-  const programData = communityProgram.programData as any
+  // programData is stored as JSON - cast to the expected structure
+  const programData = communityProgram.programData as { weeks: unknown[] }
 
   if (programType === 'cardio') {
-    await cloneCardioProgramData(prisma, programId, programData, userId)
+    await cloneCardioProgramData(prisma, programId, programData as Parameters<typeof cloneCardioProgramData>[2], userId)
   } else {
-    await cloneStrengthProgramData(prisma, programId, programData, userId)
+    await cloneStrengthProgramData(prisma, programId, programData as Parameters<typeof cloneStrengthProgramData>[2], userId)
   }
 
   console.log(`Clone job completed: programId=${programId}`)

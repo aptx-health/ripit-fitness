@@ -30,7 +30,7 @@ export default function ExerciseNavigation({
 
   return (
     <div className="border-b-2 border-border px-4 py-3 flex items-center justify-between bg-muted flex-shrink-0">
-      <button
+      <button type="button"
         onClick={onPrevious}
         disabled={currentExerciseIndex === 0}
         className={`p-3 transition-all doom-focus-ring ${
@@ -54,7 +54,7 @@ export default function ExerciseNavigation({
         </div>
       </div>
 
-      <button
+      <button type="button"
         onClick={onNext}
         disabled={currentExerciseIndex === totalExercises - 1}
         className={`p-3 transition-all doom-focus-ring ${

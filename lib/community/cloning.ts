@@ -1,10 +1,18 @@
-import { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '@prisma/client';
 import { publishProgramCloneJob } from '@/lib/queue/clone-jobs';
 
 export interface CloneResult {
   success: boolean;
   programId?: string;
   error?: string;
+}
+
+interface CommunityProgramData {
+  id: string;
+  name: string;
+  description: string | null;
+  programType: string;
+  programData: unknown;
 }
 
 /**
@@ -66,7 +74,7 @@ async function generateUniqueProgramName(
  */
 async function cloneStrengthProgram(
   prisma: PrismaClient,
-  communityProgram: any,
+  communityProgram: CommunityProgramData,
   userId: string
 ): Promise<CloneResult> {
   // Generate unique name upfront
@@ -109,7 +117,7 @@ async function cloneStrengthProgram(
  */
 async function cloneCardioProgram(
   prisma: PrismaClient,
-  communityProgram: any,
+  communityProgram: CommunityProgramData,
   userId: string
 ): Promise<CloneResult> {
   // Generate unique name upfront
@@ -174,7 +182,7 @@ export async function cloneCommunityProgram(
       };
     }
 
-    const programData = communityProgram.programData as any;
+    const programData = communityProgram.programData as Record<string, unknown>;
 
     if (!programData || !programData.weeks) {
       return {

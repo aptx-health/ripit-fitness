@@ -2,24 +2,24 @@
  * @vitest-environment node
  */
 
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
-import { PrismaClient } from '@prisma/client';
-import { Queue, Worker, QueueEvents, Job } from 'bullmq';
-import { getTestDatabase } from '@/lib/test/database';
-import { startRedisContainer, stopRedisContainer } from '@/lib/test/redis-container';
-import {
-  createTestUser,
-  createTestProgram,
-  createTestPrescribedSets,
-} from '@/lib/test/factories';
-import { publishProgramToCommunity } from '@/lib/community/publishing';
+import type { PrismaClient } from '@prisma/client';
+import { type Job, Queue, QueueEvents, Worker } from 'bullmq';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { cloneCommunityProgram } from '@/lib/community/cloning';
-import { ProgramCloneJob } from '@/lib/queue/clone-jobs';
+import { publishProgramToCommunity } from '@/lib/community/publishing';
+import type { ProgramCloneJob } from '@/lib/queue/clone-jobs';
+import { getTestDatabase } from '@/lib/test/database';
+import {
+  createTestPrescribedSets,
+  createTestProgram,
+  createTestUser,
+} from '@/lib/test/factories';
+import { startRedisContainer, stopRedisContainer } from '@/lib/test/redis-container';
 
 // Import cloning functions from worker
 import {
-  cloneStrengthProgramData,
   cloneCardioProgramData,
+  cloneStrengthProgramData,
 } from '../../cloud-functions/clone-program/src/cloning';
 
 const QUEUE_NAME = 'program-clone-jobs';
@@ -66,12 +66,14 @@ describe('Program Cloning via BullMQ Worker', () => {
         if (!communityProgram || !communityProgram.programData) {
           throw new Error('Community program not found');
         }
-
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const programData = communityProgram.programData as any;
 
         if (programType === 'cardio') {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           await cloneCardioProgramData(prisma as any, programId, programData, jobUserId);
         } else {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           await cloneStrengthProgramData(prisma as any, programId, programData, jobUserId);
         }
       },
@@ -104,7 +106,7 @@ describe('Program Cloning via BullMQ Worker', () => {
   /**
    * Helper: Enqueue a clone job and wait for completion.
    */
-  async function enqueueAndWaitForCloneJob(job: ProgramCloneJob, timeoutMs: number = 15000): Promise<void> {
+  async function _enqueueAndWaitForCloneJob(job: ProgramCloneJob, timeoutMs: number = 15000): Promise<void> {
     const bullJob = await queue.add('clone', job, {
       attempts: 1,
       removeOnComplete: true,
@@ -546,8 +548,10 @@ describe('Program Cloning via BullMQ Worker', () => {
 
       // Call cloning function directly (simulates worker retry)
       await cloneStrengthProgramData(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         prisma as any,
         cloneResult.programId!,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         communityProgram!.programData as any,
         otherUserId
       );
@@ -622,11 +626,14 @@ describe('Program Cloning via BullMQ Worker', () => {
       });
 
       // This should detect partial clone and mark as failed
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let error: any = null;
       try {
         await cloneStrengthProgramData(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           prisma as any,
           shellProgram.id,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           communityProgram!.programData as any,
           otherUserId
         );

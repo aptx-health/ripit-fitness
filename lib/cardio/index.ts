@@ -4,63 +4,63 @@
  * Centralized exports for all cardio-related utilities, types, and constants.
  */
 
-// Equipment profiles and metadata
-export {
-  EQUIPMENT_PROFILES,
-  EQUIPMENT_LABELS,
-  INTENSITY_ZONE_LABELS,
-  METRIC_LABELS,
-  METRIC_UNITS,
-  getMetricsForEquipment,
-  getPrimaryMetrics,
-  getSecondaryMetrics,
-  getAllMetrics,
-  isMetricRelevantForEquipment
-} from './equipment-profiles'
 
 // Types
 export type {
   CardioEquipment,
-  IntensityZone,
   CardioMetric,
-  EquipmentProfile
+  EquipmentProfile, 
+  IntensityZone
+} from './equipment-profiles'
+// Equipment profiles and metadata
+export {
+  EQUIPMENT_LABELS,
+  EQUIPMENT_PROFILES,
+  getAllMetrics,
+  getMetricsForEquipment,
+  getPrimaryMetrics,
+  getSecondaryMetrics,
+  INTENSITY_ZONE_LABELS,
+  isMetricRelevantForEquipment, 
+  METRIC_LABELS,
+  METRIC_UNITS
 } from './equipment-profiles'
 
 export type {
-  CardioMath,
-  CardioWeekWithSessions,
-  CardioMathWithWeeks,
-  PrescribedCardioSessionWithLogs,
-  CardioWeekWithSessionsAndLogs,
-  LogCardioSessionRequest,
-  LogCardioSessionResponse,
-  SaveMetricPreferencesRequest,
-  MetricPreferencesResponse,
-  GetMetricsResponse,
-  CreateCardioProgramRequest,
-  CardioProgramResponse,
-  CardioSessionFormState,
-  ValidationResult,
-  CardioSessionStatus,
-  MetricValue,
-  GroupedCardioSessions,
-  CardioStats,
   CardioHistoryFilters,
+  CardioHistorySort, 
   CardioHistorySortField,
   CardioHistorySortOrder,
-  CardioHistorySort
+  CardioMath,
+  CardioMathWithWeeks,
+  CardioProgramResponse,
+  CardioSessionFormState,
+  CardioSessionStatus,
+  CardioStats,
+  CardioWeekWithSessions,
+  CardioWeekWithSessionsAndLogs,
+  CreateCardioProgramRequest,
+  GetMetricsResponse,
+  GroupedCardioSessions,
+  LogCardioSessionRequest,
+  LogCardioSessionResponse,
+  MetricPreferencesResponse,
+  MetricValue,
+  PrescribedCardioSessionWithLogs,
+  SaveMetricPreferencesRequest,
+  ValidationResult
 } from './types'
 
 export { INITIAL_CARDIO_FORM_STATE } from './types'
 
 // Validation utilities
 export {
-  validateCardioSessionForm,
   formStateToRequest,
   isValidEquipment,
   isValidIntensityZone,
   normalizeEquipment,
-  sanitizeString,
+  safeParseFloat, 
   safeParseInt,
-  safeParseFloat
+  sanitizeString,
+  validateCardioSessionForm
 } from './validation'

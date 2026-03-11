@@ -1,15 +1,16 @@
 'use client'
 
+import { Minus, Plus, X } from 'lucide-react'
 import { useState } from 'react'
-import { X, Plus, Minus } from 'lucide-react'
 import { LoadingFrog } from '@/components/ui/loading-frog'
+import type { Week } from '@/types/program-builder'
 
 interface TransformWeekModalProps {
   isOpen: boolean
   onClose: () => void
   weekId: string
   weekNumber: number
-  onTransform: (updatedWeek: any) => Promise<void>
+  onTransform: (updatedWeek: Week) => Promise<void>
 }
 
 interface TransformStats {
@@ -114,7 +115,7 @@ export default function TransformWeekModal({
             <h2 className="text-xl font-bold text-foreground doom-heading uppercase tracking-wider">
               TRANSFORM WEEK {weekNumber}
             </h2>
-            <button
+            <button type="button"
               onClick={handleClose}
               disabled={isSubmitting}
               className="text-muted-foreground hover:text-foreground disabled:opacity-50 doom-focus-ring"
@@ -169,7 +170,7 @@ export default function TransformWeekModal({
 
             {/* Intensity Direction Selection */}
             <div className="flex gap-2">
-              <button
+              <button type="button"
                 onClick={() => setIntensityDirection('NONE')}
                 disabled={isSubmitting || stats !== null}
                 className={`flex-1 px-3 py-2 text-xs font-semibold uppercase tracking-wider border-2 transition-colors doom-focus-ring ${
@@ -180,7 +181,7 @@ export default function TransformWeekModal({
               >
                 None
               </button>
-              <button
+              <button type="button"
                 onClick={() => setIntensityDirection('MORE')}
                 disabled={isSubmitting || stats !== null}
                 className={`flex-1 px-3 py-2 text-xs font-semibold uppercase tracking-wider border-2 transition-colors doom-focus-ring ${
@@ -191,7 +192,7 @@ export default function TransformWeekModal({
               >
                 More
               </button>
-              <button
+              <button type="button"
                 onClick={() => setIntensityDirection('LESS')}
                 disabled={isSubmitting || stats !== null}
                 className={`flex-1 px-3 py-2 text-xs font-semibold uppercase tracking-wider border-2 transition-colors doom-focus-ring ${
@@ -207,7 +208,7 @@ export default function TransformWeekModal({
             {/* Intensity Magnitude Stepper */}
             {intensityDirection !== 'NONE' && (
               <div className="flex items-center gap-3">
-                <button
+                <button type="button"
                   onClick={decrementMagnitude}
                   disabled={isSubmitting || stats !== null || intensityMagnitude <= 1}
                   className="p-2 bg-muted border-2 border-border hover:bg-muted/80 disabled:opacity-50 doom-button-3d doom-focus-ring"
@@ -222,7 +223,7 @@ export default function TransformWeekModal({
                     Intensity adjustment
                   </div>
                 </div>
-                <button
+                <button type="button"
                   onClick={incrementMagnitude}
                   disabled={isSubmitting || stats !== null || intensityMagnitude >= 5}
                   className="p-2 bg-muted border-2 border-border hover:bg-muted/80 disabled:opacity-50 doom-button-3d doom-focus-ring"
@@ -241,7 +242,7 @@ export default function TransformWeekModal({
             <h3 className="text-sm font-bold text-foreground doom-heading uppercase tracking-wider">Adjust Volume</h3>
 
             <div className="flex gap-3">
-              <button
+              <button type="button"
                 onClick={() => setVolumeAdjustment(volumeAdjustment === -1 ? 0 : -1)}
                 disabled={isSubmitting || stats !== null}
                 className={`flex-1 px-4 py-3 border-2 transition-colors doom-focus-ring ${
@@ -256,7 +257,7 @@ export default function TransformWeekModal({
                 </div>
               </button>
 
-              <button
+              <button type="button"
                 onClick={() => setVolumeAdjustment(volumeAdjustment === 1 ? 0 : 1)}
                 disabled={isSubmitting || stats !== null}
                 className={`flex-1 px-4 py-3 border-2 transition-colors doom-focus-ring ${
@@ -283,14 +284,14 @@ export default function TransformWeekModal({
         {/* Action Buttons / Progress Display */}
         {!stats && !isSubmitting && (
           <div className="flex gap-3 p-6 border-t-2 border-border">
-            <button
+            <button type="button"
               onClick={handleClose}
               disabled={isSubmitting}
               className="flex-1 px-4 py-2 border-2 border-border hover:bg-muted transition-colors text-foreground disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
             >
               Cancel
             </button>
-            <button
+            <button type="button"
               onClick={handleSubmit}
               disabled={isSubmitting}
               className="flex-1 px-4 py-2 bg-primary hover:bg-primary-hover text-primary-foreground transition-colors disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"

@@ -63,7 +63,7 @@ export default function ProgramDetailsForm({
         </div>
 
         {!editMode && !programId && (
-          <button
+          <button type="button"
             onClick={createProgram}
             disabled={isLoading || !programName.trim()}
             className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
@@ -76,7 +76,7 @@ export default function ProgramDetailsForm({
             <div className="text-sm text-muted-foreground">
               Program changes are saved automatically
             </div>
-            <button
+            <button type="button"
               onClick={handleDuplicateProgram}
               disabled={isLoading}
               className="px-4 py-2 bg-secondary text-secondary-foreground hover:bg-secondary-hover disabled:opacity-50 doom-button-3d font-semibold uppercase tracking-wider"

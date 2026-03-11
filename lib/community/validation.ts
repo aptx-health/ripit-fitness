@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '@prisma/client';
 import { MAX_WORKOUTS_PER_WEEK } from '@/lib/validation/workout-limits';
 
 export interface ValidationResult {
@@ -177,8 +177,17 @@ export async function validateProgramForPublishing(
  * Calculates program statistics for metadata
  * Handles both strength and cardio programs
  */
+interface ProgramWithWeeks {
+  weeks: Array<{
+    sessions?: unknown[];
+    workouts?: Array<{
+      exercises?: unknown[];
+    }>;
+  }>;
+}
+
 export function calculateProgramStats(
-  program: any,
+  program: ProgramWithWeeks,
   programType: 'strength' | 'cardio'
 ): ProgramStats {
   const weekCount = program.weeks.length;
@@ -188,15 +197,15 @@ export function calculateProgramStats(
 
   if (programType === 'cardio') {
     // For cardio: count sessions instead of workouts/exercises
-    program.weeks.forEach((week: any) => {
+    program.weeks.forEach((week) => {
       workoutCount += week.sessions?.length || 0;
     });
     // Cardio programs don't have exercises, so exerciseCount stays 0
   } else {
     // For strength: count workouts and exercises
-    program.weeks.forEach((week: any) => {
+    program.weeks.forEach((week) => {
       workoutCount += week.workouts?.length || 0;
-      week.workouts?.forEach((workout: any) => {
+      week.workouts?.forEach((workout) => {
         exerciseCount += workout.exercises?.length || 0;
       });
     });
@@ -229,7 +238,8 @@ export async function isProgramPublished(
  * Validates program metadata (level, goals, etc.)
  * This should only be called when actually publishing, not during initial validation
  */
-export function validateProgramMetadata(program: any): ValidationResult {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function validateProgramMetadata(program: Record<string, any>): ValidationResult {
   const errors: string[] = [];
 
   if (!program.level || program.level.trim() === '') {

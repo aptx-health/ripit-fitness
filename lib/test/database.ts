@@ -1,6 +1,6 @@
-import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql'
+import { execSync } from 'node:child_process'
 import { PrismaClient } from '@prisma/client'
-import { execSync } from 'child_process'
+import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql'
 
 export class TestDatabase {
   private container?: StartedPostgreSqlContainer

@@ -1,18 +1,18 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { PrismaClient } from '@prisma/client'
-import { getTestDatabase } from '@/lib/test/database'
-import { createTestUser } from '@/lib/test/factories'
+import type { PrismaClient } from '@prisma/client'
+import { beforeEach, describe, expect, it } from 'vitest'
 import {
+  calculateAvgPace,
   calculateE1RM,
+  deleteCardioPerformance,
+  deleteStrengthPerformance,
   getBestE1RM,
   normalizeWeightToLbs,
-  calculateAvgPace,
-  recordStrengthPerformance,
   recordCardioPerformance,
+  recordStrengthPerformance,
   updateStrengthPerformance,
-  deleteStrengthPerformance,
-  deleteCardioPerformance,
 } from '@/lib/stats/exercise-performance'
+import { getTestDatabase } from '@/lib/test/database'
+import { createTestUser } from '@/lib/test/factories'
 
 describe('Exercise Performance Tracking', () => {
   let prisma: PrismaClient

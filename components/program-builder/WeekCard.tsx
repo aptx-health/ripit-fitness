@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import type { Week, Exercise } from '@/types/program-builder'
+import { useState } from 'react'
+import type { Exercise, Week } from '@/types/program-builder'
 import WorkoutCard from './WorkoutCard'
 
 type WeekCardProps = {
@@ -100,7 +100,6 @@ export default function WeekCard({
                   maxLength={100}
                   placeholder="Week name (e.g. Deload)"
                   className="px-2 py-1 text-sm bg-background border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
-                  autoFocus
                 />
               </div>
               <textarea
@@ -118,13 +117,13 @@ export default function WeekCard({
                 <span className="text-xs text-muted-foreground">{editingWeekDescription.length}/400</span>
               )}
               <div className="flex items-center gap-2">
-                <button
+                <button type="button"
                   onClick={() => onSaveWeekName(week.id)}
                   className="px-2 py-0.5 text-xs bg-success text-success-foreground hover:bg-success-hover font-semibold uppercase"
                 >
                   Save
                 </button>
-                <button
+                <button type="button"
                   onClick={onCancelWeekNameEdit}
                   className="px-2 py-0.5 text-xs text-muted-foreground hover:text-foreground border border-border hover:bg-muted uppercase"
                 >
@@ -141,7 +140,7 @@ export default function WeekCard({
           {!isEditingThisWeek && (
             <DropdownMenu.Root>
               <DropdownMenu.Trigger asChild>
-                <button
+                <button type="button"
                   disabled={isLoading || deletingWeekId === week.id || duplicatingWeekId === week.id}
                   className="px-3 py-1 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted border border-border transition-colors disabled:opacity-50 uppercase tracking-wide"
                 >
@@ -186,7 +185,7 @@ export default function WeekCard({
           )}
         </div>
 
-        <button
+        <button type="button"
           onClick={() => onAddWorkout(week.id)}
           disabled={isLoading}
           className="px-3 py-1 bg-primary text-primary-foreground text-sm hover:bg-primary-hover disabled:opacity-50 doom-button-3d font-semibold uppercase"
@@ -201,7 +200,7 @@ export default function WeekCard({
             {week.description}
           </p>
           {week.description.length > 120 && (
-            <button
+            <button type="button"
               onClick={() => setDescriptionExpanded(!descriptionExpanded)}
               className="text-xs text-muted-foreground/70 hover:text-foreground mt-0.5 transition-colors"
             >

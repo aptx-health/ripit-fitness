@@ -1,60 +1,29 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Palette, Sun, Moon } from 'lucide-react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import { Moon, Palette, Sun } from 'lucide-react';
+import { useThemePreference } from '@/hooks/useThemePreference';
 import {
-  getThemePreference,
-  saveThemePreference,
-  applyTheme,
   THEME_LABELS,
   THEMES,
   type ThemeName,
-  type ThemePreference,
 } from '@/lib/theme';
 
 export function ThemeSelector() {
-  const [preference, setPreference] = useState<ThemePreference | null>(null);
-  const [mounted, setMounted] = useState(false);
-
-  // Hydration-safe: Only render after mounting
-  useEffect(() => {
-    const currentPreference = getThemePreference();
-    setPreference(currentPreference);
-    setMounted(true);
-
-    // Don't apply theme on mount - it's already applied by SSR script
-    // Only apply when user changes it
-  }, []);
+  const { preference, updateTheme } = useThemePreference();
 
   const handleThemeChange = (themeName: ThemeName) => {
     if (!preference) return;
-
-    const newPreference: ThemePreference = {
-      ...preference,
-      themeName,
-    };
-
-    setPreference(newPreference);
-    saveThemePreference(newPreference);
-    applyTheme(newPreference);
+    updateTheme({ ...preference, themeName });
   };
 
   const handleModeToggle = () => {
     if (!preference) return;
-
-    const newPreference: ThemePreference = {
-      ...preference,
-      mode: preference.mode === 'dark' ? 'light' : 'dark',
-    };
-
-    setPreference(newPreference);
-    saveThemePreference(newPreference);
-    applyTheme(newPreference);
+    updateTheme({ ...preference, mode: preference.mode === 'dark' ? 'light' : 'dark' });
   };
 
   // Show placeholder until mounted to prevent hydration mismatch
-  if (!mounted || !preference) {
+  if (!preference) {
     return (
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 bg-muted rounded animate-pulse" />
@@ -68,7 +37,7 @@ export function ThemeSelector() {
       {/* Theme Palette Button with Dropdown */}
       <DropdownMenu.Root>
         <DropdownMenu.Trigger asChild>
-          <button
+          <button type="button"
             className="h-9 w-9 flex items-center justify-center cursor-pointer border-2 bg-input transition-all hover:border-primary hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
             style={{
               borderColor: 'var(--border)',
@@ -104,7 +73,7 @@ export function ThemeSelector() {
       </DropdownMenu.Root>
 
       {/* Mode Toggle Button */}
-      <button
+      <button type="button"
         onClick={handleModeToggle}
         className="h-9 w-9 flex items-center justify-center cursor-pointer border-2 bg-input transition-all hover:border-primary hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
         style={{

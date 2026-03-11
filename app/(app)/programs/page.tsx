@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
+import ConsolidatedProgramsView from '@/components/programs/ConsolidatedProgramsView'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
-import ConsolidatedProgramsView from '@/components/programs/ConsolidatedProgramsView'
 
 // Cache page for 30 seconds to improve navigation performance
 export const revalidate = 30

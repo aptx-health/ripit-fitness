@@ -4,7 +4,7 @@
  * Maps cardio equipment types to user-friendly categories for distance aggregation
  */
 
-import { CardioEquipment } from './equipment-profiles'
+import type { CardioEquipment } from './equipment-profiles'
 
 export type CardioDistanceCategory =
   | 'running'

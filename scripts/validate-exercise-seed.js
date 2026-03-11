@@ -1,12 +1,13 @@
 #!/usr/bin/env node
+/* eslint-disable @typescript-eslint/no-require-imports */
 
 /**
  * Validation script for exercise-library-seed.sql
  * Checks for common issues before running in database
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const VALID_FAUS = [
   'chest', 'mid-back', 'lower-back', 'traps', 'front-delts', 'mid-delts',
@@ -18,10 +19,10 @@ function validateSQL(filePath) {
   console.log('🔍 Validating exercise-library-seed.sql...\n');
 
   const content = fs.readFileSync(filePath, 'utf8');
-  const lines = content.split('\n');
+  const _lines = content.split('\n');
 
-  let errors = [];
-  let warnings = [];
+  const errors = [];
+  const warnings = [];
 
   // Track unique values
   const ids = new Set();
@@ -33,7 +34,7 @@ function validateSQL(filePath) {
 
   console.log(`📊 Found ${exercises.length} exercises\n`);
 
-  exercises.forEach((exerciseBlock, idx) => {
+  exercises.forEach((exerciseBlock, _idx) => {
     const lines = exerciseBlock.split('\n');
 
     // Extract exercise name from comment
@@ -125,7 +126,7 @@ function validateSQL(filePath) {
 
   // Verify all FAUs are represented
   const fauCoverage = {};
-  VALID_FAUS.forEach(fau => fauCoverage[fau] = 0);
+  for (const fau of VALID_FAUS) { fauCoverage[fau] = 0; }
 
   // Count FAU occurrences in exercises
   exercises.forEach(exercise => {
@@ -146,14 +147,14 @@ function validateSQL(filePath) {
   // Report errors
   if (errors.length > 0) {
     console.log(`❌ ERRORS (${errors.length}):\n`);
-    errors.forEach(err => console.log(`   ${err}`));
+    for (const err of errors) { console.log(`   ${err}`); }
     console.log('');
   }
 
   // Report warnings
   if (warnings.length > 0) {
     console.log(`⚠️  WARNINGS (${warnings.length}):\n`);
-    warnings.forEach(warn => console.log(`   ${warn}`));
+    for (const warn of warnings) { console.log(`   ${warn}`); }
     console.log('');
   }
 

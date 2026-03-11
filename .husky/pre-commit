@@ -1,1 +1,2 @@
+npx biome check --staged --fix --no-errors-on-unmatched
 npx lint-staged

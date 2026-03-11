@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { ChevronDown, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ChevronDown, ChevronRight } from 'lucide-react'
+import { useState } from 'react'
 
 type Program = {
   id: string
@@ -50,7 +50,7 @@ export default function ArchivedProgramsList({ programs }: Props) {
   return (
     <div className="bg-card rounded-lg border border-border">
       {/* Collapsible Header */}
-      <button
+      <button type="button"
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full px-6 py-4 flex items-center justify-between hover:bg-muted transition-colors"
       >
@@ -107,7 +107,7 @@ export default function ArchivedProgramsList({ programs }: Props) {
                     >
                       View
                     </Link>
-                    <button
+                    <button type="button"
                       onClick={() => handleUnarchive(program.id, program.name)}
                       disabled={unarchivingId === program.id}
                       className="px-3 py-1.5 text-sm bg-primary-muted text-primary hover:bg-primary rounded font-medium hover:text-primary-foreground disabled:opacity-50 transition-colors"

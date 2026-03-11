@@ -1,5 +1,5 @@
+import { type NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { NextRequest, NextResponse } from 'next/server'
 
 const SESSION_COOKIE = 'better-auth.session_token'
 const SECURE_SESSION_COOKIE = '__Secure-better-auth.session_token'

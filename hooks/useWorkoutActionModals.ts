@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import type { Week, WeekSummary } from '@/types/program-builder'
 
 type UseWorkoutActionModalsParams = {
@@ -12,7 +12,7 @@ type UseWorkoutActionModalsParams = {
 
 export function useWorkoutActionModals({
   editMode,
-  weeksSummary,
+  weeksSummary: _weeksSummary,
   setWeeksCache,
   setWeeks,
   setIsLoading,

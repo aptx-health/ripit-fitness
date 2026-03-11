@@ -1,6 +1,6 @@
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth/server'
-import Link from 'next/link'
 
 export default async function Home() {
   const { user } = await getCurrentUser()

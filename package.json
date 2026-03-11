@@ -7,7 +7,9 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
-    "type-check": "tsc --noEmit",
+    "lint:biome": "biome check .",
+    "lint:all": "biome check . && eslint",
+"type-check": "tsc --noEmit",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
@@ -39,6 +41,7 @@
     "react-dom": "19.2.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.6",
     "@tailwindcss/postcss": "^4",
     "@testcontainers/gcloud": "^11.11.0",
     "@testcontainers/postgresql": "^10.14.0",
@@ -77,6 +80,7 @@
       "bash scripts/check-file-length.sh"
     ]
   },
+  "//lint-staged-note": "Biome runs on staged files via .husky/pre-commit before lint-staged",
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
   }

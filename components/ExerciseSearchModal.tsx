@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
 import { X } from 'lucide-react'
-import { useUserSettings } from '@/hooks/useUserSettings'
-import { ExerciseSearchInterface, ExerciseDefinition } from '@/components/exercise-selection/ExerciseSearchInterface'
-import { SetConfigurationInterface, ExercisePrescription } from '@/components/exercise-selection/SetConfigurationInterface'
+import { useCallback, useMemo, useState } from 'react'
+import { type ExerciseDefinition, ExerciseSearchInterface } from '@/components/exercise-selection/ExerciseSearchInterface'
+import { type ExercisePrescription, SetConfigurationInterface } from '@/components/exercise-selection/SetConfigurationInterface'
 import ExerciseDefinitionEditorModal from '@/components/features/exercise-definition/ExerciseDefinitionEditorModal'
 import { Button } from '@/components/ui/Button'
+import { useUserSettings } from '@/hooks/useUserSettings'
 
 type EditingExercise = {
   id: string
@@ -42,7 +42,7 @@ export default function ExerciseSearchModal({
   onExerciseSelect,
   editingExercise
 }: ExerciseSearchModalProps) {
-  const { settings } = useUserSettings()
+  const { settings: _settings } = useUserSettings()
   const [selectedExercise, setSelectedExercise] = useState<ExerciseDefinition | null>(null)
   const [prescription, setPrescription] = useState<ExercisePrescription | null>(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
@@ -50,31 +50,14 @@ export default function ExerciseSearchModal({
   const [editingExerciseId, setEditingExerciseId] = useState<string | null>(null)
   const [editingExerciseDefinitionId, setEditingExerciseDefinitionId] = useState<string | null>(null)
 
-  // Initialize state when editing
-  useEffect(() => {
-    if (!editingExercise) {
-      setSelectedExercise(null)
-      setPrescription(null)
-      return
-    }
-
-    // Determine intensity type from prescribed sets
-    const firstSet = editingExercise.prescribedSets[0]
-    let intensityType: 'RIR' | 'RPE' | 'NONE' = 'NONE'
-    if (firstSet?.rpe !== null && firstSet?.rpe !== undefined) {
-      intensityType = 'RPE'
-    } else if (firstSet?.rir !== null && firstSet?.rir !== undefined) {
-      intensityType = 'RIR'
-    }
-
-    setSelectedExercise({
+  // Derive effective exercise: user-selected exercise takes priority, then editing exercise
+  const effectiveExercise = useMemo(() => {
+    return selectedExercise ?? (editingExercise ? {
       ...editingExercise.exerciseDefinition,
-      equipment: [],
-      instructions: undefined
-    })
-
-    // Don't set prescription here - SetConfigurationInterface will handle it via initialConfig
-  }, [editingExercise])
+      equipment: [] as string[],
+      instructions: undefined as string | undefined
+    } : null)
+  }, [selectedExercise, editingExercise])
 
   const handleExerciseSelect = useCallback((exercise: ExerciseDefinition) => {
     setSelectedExercise(exercise)
@@ -85,7 +68,7 @@ export default function ExerciseSearchModal({
   }, [])
 
   const handleConfirmExercise = useCallback(() => {
-    if (!selectedExercise || !prescription) return
+    if (!effectiveExercise || !prescription) return
 
     // Validate all rep inputs before submitting
     const hasEmptyReps = prescription.sets.some(set => !set.reps.trim())
@@ -94,13 +77,13 @@ export default function ExerciseSearchModal({
       return
     }
 
-    onExerciseSelect(selectedExercise, prescription)
+    onExerciseSelect(effectiveExercise, prescription)
 
     // Reset form
     setSelectedExercise(null)
     setPrescription(null)
     onClose()
-  }, [selectedExercise, prescription, onExerciseSelect, onClose])
+  }, [effectiveExercise, prescription, onExerciseSelect, onClose])
 
   const handleBackToSearch = useCallback(() => {
     setSelectedExercise(null)
@@ -132,11 +115,10 @@ export default function ExerciseSearchModal({
   }, [])
 
   const handleEditExerciseDefinition = useCallback(() => {
-    const exerciseToEdit = selectedExercise || editingExercise?.exerciseDefinition
-    if (exerciseToEdit) {
-      setEditingExerciseDefinitionId(exerciseToEdit.id)
+    if (effectiveExercise) {
+      setEditingExerciseDefinitionId(effectiveExercise.id)
     }
-  }, [selectedExercise, editingExercise])
+  }, [effectiveExercise])
 
   if (!isOpen) return null
 
@@ -179,9 +161,9 @@ export default function ExerciseSearchModal({
         {/* Header */}
         <div className="flex items-center justify-between px-4 sm:px-6 py-4 sm:py-5 border-b-2 border-border bg-primary text-primary-foreground">
           <h2 className="text-xl font-bold tracking-wide uppercase">
-            {editingExercise ? 'Edit Exercise' : selectedExercise ? 'Configure Exercise' : 'Add Exercise'}
+            {editingExercise ? 'Edit Exercise' : effectiveExercise ? 'Configure Exercise' : 'Add Exercise'}
           </h2>
-          <button
+          <button type="button"
             onClick={handleClose}
             className="text-primary-foreground/80 hover:text-primary-foreground"
           >
@@ -189,18 +171,14 @@ export default function ExerciseSearchModal({
           </button>
         </div>
 
-        {(selectedExercise || editingExercise) ? (
+        {effectiveExercise ? (
           /* Exercise Configuration Interface */
           <>
             <SetConfigurationInterface
-              exercise={selectedExercise || {
-                ...editingExercise!.exerciseDefinition,
-                equipment: [],
-                instructions: undefined
-              }}
+              exercise={effectiveExercise}
               initialConfig={initialConfig}
               onConfigChange={handleConfigChange}
-              isSystemExercise={(selectedExercise || editingExercise?.exerciseDefinition)?.isSystem ?? true}
+              isSystemExercise={effectiveExercise.isSystem ?? true}
               onEditExercise={handleEditExerciseDefinition}
             />
 
@@ -223,14 +201,12 @@ export default function ExerciseSearchModal({
           </>
         ) : (
           /* Exercise Search Interface */
-          <>
-            <ExerciseSearchInterface
+          <ExerciseSearchInterface
               onExerciseSelect={handleExerciseSelect}
               preloadExercises={false}
               onCreateExercise={handleCreateExercise}
               onEditExercise={handleEditExercise}
             />
-          </>
         )}
       </div>
     </div>

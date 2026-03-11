@@ -1,12 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
+import { SPECIALIZED_EQUIPMENT } from '@/lib/constants/program-metadata'
 import { prisma } from '@/lib/db'
 import { logger } from '@/lib/logger'
-import { COMMON_EQUIPMENT, SPECIALIZED_EQUIPMENT } from '@/lib/constants/program-metadata'
 import {
-  validateExerciseDefinition,
-  normalizeExerciseName,
   type CreateExerciseDefinitionInput,
+  normalizeExerciseName,
+  validateExerciseDefinition,
 } from '@/lib/validators/exercise-definition'
 
 /**
@@ -38,8 +38,8 @@ export async function GET(request: NextRequest) {
     const fauFilters = searchParams.get('faus')?.split(',').filter(Boolean) || []
     const equipmentFilters = searchParams.get('equipment')?.split(',').filter(Boolean) || []
     const isSystemParam = searchParams.get('isSystem')
-    const page = Math.max(1, parseInt(searchParams.get('page') || '1'))
-    const limit = Math.min(Math.max(1, parseInt(searchParams.get('limit') || '50')), 100)
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
+    const limit = Math.min(Math.max(1, parseInt(searchParams.get('limit') || '50', 10)), 100)
 
     logger.debug(
       { query, fauFilters, equipmentFilters, isSystemParam, page, limit },

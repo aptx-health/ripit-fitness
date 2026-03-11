@@ -1,6 +1,6 @@
-import { Prisma } from '@prisma/client'
 import { createId } from '@paralleldrive/cuid2'
-import { validateWorkoutLimit, validateBatchWorkoutLimit } from '@/lib/validation/workout-limits'
+import { Prisma } from '@prisma/client'
+import { validateWorkoutLimit } from '@/lib/validation/workout-limits'
 
 /**
  * Type for week data structure used in batch inserts.

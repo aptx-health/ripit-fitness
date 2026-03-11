@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { ChevronDown, ChevronRight } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 type ArchivedProgram = {
   id: string
@@ -34,26 +34,25 @@ export default function ArchivedProgramsSection({
   // Fetch archived programs when expanded
   useEffect(() => {
     if (isExpanded && programs.length === 0) {
+      const fetchArchivedPrograms = async () => {
+        setIsLoading(true)
+        try {
+          const response = await fetch(`${apiPath}/archived?limit=5`)
+          if (!response.ok) {
+            throw new Error('Failed to fetch archived programs')
+          }
+          const data = await response.json()
+          setPrograms(data.programs)
+        } catch (error) {
+          console.error('Error fetching archived programs:', error)
+          alert('Failed to load archived programs. Please try again.')
+        } finally {
+          setIsLoading(false)
+        }
+      }
       fetchArchivedPrograms()
     }
-  }, [isExpanded])
-
-  const fetchArchivedPrograms = async () => {
-    setIsLoading(true)
-    try {
-      const response = await fetch(`${apiPath}/archived?limit=5`)
-      if (!response.ok) {
-        throw new Error('Failed to fetch archived programs')
-      }
-      const data = await response.json()
-      setPrograms(data.programs)
-    } catch (error) {
-      console.error('Error fetching archived programs:', error)
-      alert('Failed to load archived programs. Please try again.')
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  }, [isExpanded, programs.length, apiPath])
 
   const handleUnarchive = async (programId: string, programName: string) => {
     if (
@@ -90,7 +89,7 @@ export default function ArchivedProgramsSection({
   return (
     <div className="bg-card border border-border doom-corners">
       {/* Collapsible Header */}
-      <button
+      <button type="button"
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full px-6 py-4 flex items-center justify-between hover:bg-muted transition-colors"
       >
@@ -161,7 +160,7 @@ export default function ArchivedProgramsSection({
                       )}
                     </div>
                     <div className="ml-4 flex gap-2">
-                      <button
+                      <button type="button"
                         onClick={() =>
                           handleUnarchive(program.id, program.name)
                         }

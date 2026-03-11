@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
     // Get limit from query params (default to 5, max 20)
     const searchParams = request.nextUrl.searchParams
-    const limit = Math.min(parseInt(searchParams.get('limit') || '5'), 20)
+    const limit = Math.min(parseInt(searchParams.get('limit') || '5', 10), 20)
 
     // Fetch recent workout completions with all necessary data
     const completions = await prisma.workoutCompletion.findMany({

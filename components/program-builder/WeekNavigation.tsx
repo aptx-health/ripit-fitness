@@ -13,7 +13,7 @@ export default function WeekNavigation({
 }: WeekNavigationProps) {
   return (
     <div className="flex items-center justify-between gap-4 mb-4">
-      <button
+      <button type="button"
         onClick={() => navigateToWeek(currentWeekIndex - 1)}
         disabled={currentWeekIndex === 0 || isLoadingWeek}
         className={`p-2 border shrink-0 ${
@@ -22,7 +22,7 @@ export default function WeekNavigation({
             : 'border-border/50 text-muted-foreground cursor-not-allowed opacity-50'
         }`}
       >
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
       </button>
@@ -34,7 +34,7 @@ export default function WeekNavigation({
         </h3>
       </div>
 
-      <button
+      <button type="button"
         onClick={() => navigateToWeek(currentWeekIndex + 1)}
         disabled={currentWeekIndex >= totalWeeks - 1 || isLoadingWeek}
         className={`p-2 border shrink-0 ${
@@ -43,7 +43,7 @@ export default function WeekNavigation({
             : 'border-border/50 text-muted-foreground cursor-not-allowed opacity-50'
         }`}
       >
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
       </button>

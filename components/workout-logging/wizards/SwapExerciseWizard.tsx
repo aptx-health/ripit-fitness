@@ -1,17 +1,17 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
-import { WizardDialog, WizardStep } from '@/components/ui/radix/wizard-dialog'
+import { useCallback, useEffect, useState } from 'react'
+import { WizardDialog, type WizardStep } from '@/components/ui/radix/wizard-dialog'
 import {
+  type ExerciseDefinition,
   ExerciseSearchStep,
-  ExerciseDefinition,
 } from '../wizard-steps/ExerciseSearchStep'
-import {
-  SetConfigurationStep,
-  ExercisePrescription,
-} from '../wizard-steps/SetConfigurationStep'
-import { ScopeSelectionStep } from '../wizard-steps/ScopeSelectionStep'
 import { LoadingSuccessStep } from '../wizard-steps/LoadingSuccessStep'
+import { ScopeSelectionStep } from '../wizard-steps/ScopeSelectionStep'
+import {
+  type ExercisePrescription,
+  SetConfigurationStep,
+} from '../wizard-steps/SetConfigurationStep'
 
 interface SwapExerciseWizardProps {
   open: boolean
@@ -36,7 +36,7 @@ export function SwapExerciseWizard({
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [_errorMessage, setErrorMessage] = useState<string | null>(null)
 
   // Reset wizard state when opened
   useEffect(() => {
@@ -93,7 +93,7 @@ export function SwapExerciseWizard({
           throw new Error(error.error || 'Failed to replace exercise')
         }
 
-        const data = await response.json()
+        const _data = await response.json()
 
         // Ensure minimum loading time
         const elapsedTime = Date.now() - startTime

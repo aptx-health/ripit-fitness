@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { PrismaClient } from '@prisma/client'
+import type { PrismaClient } from '@prisma/client'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { recordCardioPerformance, recordStrengthPerformance } from '@/lib/stats/exercise-performance'
 import { getTestDatabase } from '@/lib/test/database'
 import { createTestUser } from '@/lib/test/factories'
-import { recordStrengthPerformance, recordCardioPerformance } from '@/lib/stats/exercise-performance'
 
 describe('Brag Strip Stats', () => {
   let prisma: PrismaClient
@@ -124,7 +124,7 @@ describe('Brag Strip Stats', () => {
   it('should correctly count workouts by time period', async () => {
     // Use a fixed reference date (Wednesday, January 15, 2025 at noon)
     // This avoids edge cases with month/week boundaries
-    const referenceDate = new Date('2025-01-15T12:00:00Z')
+    const _referenceDate = new Date('2025-01-15T12:00:00Z')
 
     // Week starts on Monday Jan 13, 2025
     const startOfWeek = new Date('2025-01-13T00:00:00Z')

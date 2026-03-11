@@ -1,15 +1,15 @@
 'use client'
 
-import { useState, useCallback, useEffect, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
 import { CheckCircle } from 'lucide-react'
-import WeekNavigator from '@/components/ui/WeekNavigator'
+import { useRouter } from 'next/navigation'
+import { useCallback, useEffect, useState, useTransition } from 'react'
 import ActionsMenu from '@/components/ActionsMenu'
-import WorkoutPreviewModal from '@/components/WorkoutPreviewModal'
 import ExerciseLoggingModal from '@/components/ExerciseLoggingModal'
 import { ProgramCompletionModal } from '@/components/ProgramCompletionModal'
-import { useWorkoutStorage } from '@/hooks/useWorkoutStorage'
+import WeekNavigator from '@/components/ui/WeekNavigator'
+import WorkoutPreviewModal from '@/components/WorkoutPreviewModal'
 import WorkoutCard from '@/components/workout/WorkoutCard'
+import { useWorkoutStorage } from '@/hooks/useWorkoutStorage'
 import { clientLogger } from '@/lib/client-logger'
 
 type Workout = {
@@ -328,7 +328,7 @@ export default function StrengthWeekView({
     await checkProgramCompletion(true)
   }
 
-  const handleClearWorkout = async () => {
+  const _handleClearWorkout = async () => {
     if (!selectedWorkoutId) return
     const response = await fetch(`/api/workouts/${selectedWorkoutId}/clear`, { method: 'POST' })
     if (!response.ok) throw new Error('Failed to clear workout')
@@ -414,7 +414,7 @@ export default function StrengthWeekView({
           actions={weekActions.length > 0 ? <ActionsMenu actions={weekActions} size="sm" /> : undefined}
           completionIndicator={
             isProgramComplete ? (
-              <button
+              <button type="button"
                 onClick={() => setShowCompletionModal(true)}
                 className="flex items-center gap-2 px-4 py-2 bg-success text-success-foreground border-2 border-success hover:bg-success-hover font-bold text-sm uppercase tracking-wider transition-all"
                 title="View completion stats and restart program"

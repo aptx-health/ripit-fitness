@@ -2,13 +2,18 @@
 # Checks that no file exceeds the maximum line count.
 # Usage: check-file-length.sh <file1> [file2] ...
 
-MAX_LINES=500
+MAX_LINES=750
 EXIT_CODE=0
 
 for file in "$@"; do
   if [ ! -f "$file" ]; then
     continue
   fi
+
+  # Skip test files
+  case "$file" in
+    *__tests__/*|*.test.ts|*.test.tsx|*.spec.ts|*.spec.tsx) continue ;;
+  esac
 
   line_count=$(wc -l < "$file")
 

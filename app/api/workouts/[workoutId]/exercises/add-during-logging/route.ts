@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 
@@ -90,7 +90,7 @@ export async function POST(
     // Calculate next order number for current workout
     const maxOrder = Math.max(0, ...workout.exercises.map(e => e.order))
     const nextOrder = maxOrder + 1
-
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let addedExercise: any
     let addedToCount = 0
 

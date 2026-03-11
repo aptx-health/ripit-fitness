@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { Search, Filter } from 'lucide-react'
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/radix/popover'
+import { Filter, Search } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/radix/popover'
 
 export type ExerciseDefinition = {
   id: string
@@ -162,8 +162,7 @@ export function ExerciseSearchInterface({
           <div className="text-sm font-bold text-foreground mb-2 tracking-wide">Filter by Muscle Group:</div>
           <Popover open={fauPopoverOpen} onOpenChange={setFauPopoverOpen}>
             <PopoverTrigger asChild>
-              <button
-                type="button"
+              <button type="button"
                 className="w-full px-4 py-2 border-2 border-input hover:border-primary focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-card text-foreground text-left font-bold"
               >
                 {selectedFAU ? FAU_DISPLAY_NAMES[selectedFAU] : 'All Muscle Groups'}
@@ -176,8 +175,7 @@ export function ExerciseSearchInterface({
                 </div>
                 <div className="max-h-64 overflow-y-auto">
                   <div className="grid grid-cols-2 gap-1">
-                    <button
-                      type="button"
+                    <button type="button"
                       onClick={() => handleFAUSelect(null)}
                       className={`w-full px-3 py-2 text-sm border-2 transition-colors font-bold text-left ${
                         selectedFAU === null
@@ -189,8 +187,8 @@ export function ExerciseSearchInterface({
                     </button>
                     {ALL_FAUS.map((fau) => (
                       <button
-                        key={fau}
                         type="button"
+                        key={fau}
                         onClick={() => handleFAUSelect(fau)}
                         className={`w-full px-3 py-2 text-sm border-2 transition-colors font-bold text-left ${
                           selectedFAU === fau
@@ -213,8 +211,7 @@ export function ExerciseSearchInterface({
           <div className="text-sm font-bold text-foreground mb-2 tracking-wide">Filter by Equipment:</div>
           <Popover open={equipmentPopoverOpen} onOpenChange={setEquipmentPopoverOpen}>
             <PopoverTrigger asChild>
-              <button
-                type="button"
+              <button type="button"
                 className="w-full px-4 py-2 border-2 border-input hover:border-primary focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-card text-foreground text-left font-bold"
               >
                 {selectedEquipment ? EQUIPMENT_DISPLAY_NAMES[selectedEquipment] : 'All Equipment'}
@@ -227,8 +224,7 @@ export function ExerciseSearchInterface({
                 </div>
                 <div className="max-h-64 overflow-y-auto">
                   <div className="grid grid-cols-2 gap-1">
-                    <button
-                      type="button"
+                    <button type="button"
                       onClick={() => handleEquipmentSelect(null)}
                       className={`w-full px-3 py-2 text-sm border-2 transition-colors font-bold text-left ${
                         selectedEquipment === null
@@ -240,8 +236,8 @@ export function ExerciseSearchInterface({
                     </button>
                     {EQUIPMENT_TYPES.map((equipment) => (
                       <button
-                        key={equipment}
                         type="button"
+                        key={equipment}
                         onClick={() => handleEquipmentSelect(equipment)}
                         className={`w-full px-3 py-2 text-sm border-2 transition-colors font-bold text-left ${
                           selectedEquipment === equipment
@@ -325,7 +321,7 @@ export function ExerciseSearchInterface({
 
                   <div className="flex gap-2 ml-4 flex-shrink-0">
                     {onEditExercise && !exercise.isSystem && (
-                      <button
+                      <button type="button"
                         onClick={() => onEditExercise(exercise)}
                         className="px-3 py-2 bg-secondary text-secondary-foreground hover:bg-secondary-hover font-bold uppercase tracking-wider text-sm border-2 border-border transition-colors"
                         title="Edit custom exercise"
@@ -333,7 +329,7 @@ export function ExerciseSearchInterface({
                         Edit
                       </button>
                     )}
-                    <button
+                    <button type="button"
                       onClick={() => onExerciseSelect(exercise)}
                       className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover font-bold uppercase tracking-wider text-sm border-2 border-primary-active shadow-[0_3px_0_var(--primary-active),0_5px_8px_rgba(0,0,0,0.4)] hover:shadow-[0_3px_0_var(--primary-active),0_0_20px_rgba(var(--primary-rgb),0.6)] active:translate-y-[3px] active:shadow-[0_0_0_var(--primary-active),0_2px_4px_rgba(0,0,0,0.4)] transition-all"
                     >
@@ -350,7 +346,7 @@ export function ExerciseSearchInterface({
       {/* Fixed Footer - Create New Exercise */}
       {onCreateExercise && (
         <div className="border-t-2 border-border bg-muted/30 px-4 sm:px-6 py-3 flex-shrink-0">
-          <button
+          <button type="button"
             onClick={() => onCreateExercise(searchQuery)}
             className="w-full px-4 py-2 bg-accent text-accent-foreground hover:bg-accent-hover font-bold uppercase tracking-wider text-sm border-2 border-accent transition-colors"
           >

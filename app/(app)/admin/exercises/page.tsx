@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
-import { getCurrentUser } from '@/lib/auth/server'
 import ExerciseAdminTable from '@/components/admin/ExerciseAdminTable'
+import { getCurrentUser } from '@/lib/auth/server'
 
 // Don't cache this page - exercises should be fresh
 export const revalidate = 0

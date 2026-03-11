@@ -1,20 +1,19 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { CheckCircle } from 'lucide-react'
-import {
-  EQUIPMENT_LABELS,
-  INTENSITY_ZONE_LABELS,
-  normalizeEquipment,
-  isValidIntensityZone,
-  type CardioEquipment,
-  type IntensityZone
-} from '@/lib/cardio'
-import WeekNavigator from '@/components/ui/WeekNavigator'
+import { useRouter } from 'next/navigation'
+import { useCallback, useEffect, useState } from 'react'
 import ActionsMenu from '@/components/ActionsMenu'
 import LogCardioModal from '@/components/LogCardioModal'
 import { ProgramCompletionModal } from '@/components/ProgramCompletionModal'
+import WeekNavigator from '@/components/ui/WeekNavigator'
+import {
+  EQUIPMENT_LABELS,
+  INTENSITY_ZONE_LABELS,
+  type IntensityZone, 
+  isValidIntensityZone,
+  normalizeEquipment
+} from '@/lib/cardio'
 import { clientLogger } from '@/lib/client-logger'
 
 type Session = {
@@ -213,7 +212,7 @@ export default function CardioWeekView({
             }
             completionIndicator={
               isProgramComplete ? (
-                <button
+                <button type="button"
                   onClick={() => setShowCompletionModal(true)}
                   className="flex items-center gap-2 px-4 py-2 bg-success text-success-foreground border-2 border-success hover:bg-success-hover font-bold text-sm uppercase tracking-wider transition-all"
                   title="View completion stats"
@@ -253,7 +252,7 @@ export default function CardioWeekView({
                       </h3>
                       {isCompleted && (
                         <span className="doom-badge doom-badge-completed">
-                          <svg
+                          <svg aria-hidden="true"
                             className="w-3 h-3"
                             fill="currentColor"
                             viewBox="0 0 20 20"
@@ -269,7 +268,7 @@ export default function CardioWeekView({
                       )}
                       {isSkipped && (
                         <span className="doom-badge bg-muted-foreground/30 text-foreground/70">
-                          <svg
+                          <svg aria-hidden="true"
                             className="w-3 h-3"
                             fill="none"
                             viewBox="0 0 24 24"
@@ -333,7 +332,7 @@ export default function CardioWeekView({
                   <div className="flex flex-row items-center gap-2">
                     {/* Primary action button */}
                     {isSkipped ? (
-                      <button
+                      <button type="button"
                         onClick={() => handleUnskipSession(session.id)}
                         disabled={isUnskipping}
                         className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider text-sm disabled:opacity-50"
@@ -341,7 +340,7 @@ export default function CardioWeekView({
                         {isUnskipping ? 'RESTORING...' : 'UNSKIP'}
                       </button>
                     ) : (
-                      <button
+                      <button type="button"
                         onClick={() => setLoggingSession(session)}
                         className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider text-sm"
                       >
@@ -351,7 +350,7 @@ export default function CardioWeekView({
 
                     {/* Skip button - only show if no logged status */}
                     {!latestLog && (
-                      <button
+                      <button type="button"
                         onClick={() => handleSkipSession(session.id)}
                         disabled={isSkipping}
                         className="px-3 py-2 border-2 border-border text-foreground bg-transparent hover:bg-muted hover:border-primary active:bg-muted/80 doom-focus-ring text-sm font-semibold uppercase tracking-wider disabled:opacity-50 transition-colors"

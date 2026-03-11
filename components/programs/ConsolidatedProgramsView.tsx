@@ -1,22 +1,22 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import ProgramCard from './ProgramCard'
-import StrengthMetadata from './StrengthMetadata'
-import CardioMetadata from './CardioMetadata'
-import {
-  StrengthPrimaryActions,
-  StrengthUtilityActions,
-} from './StrengthActions'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useRef, useState } from 'react'
+import { useToast } from '@/components/ToastProvider'
+import StrengthActivationModal from '../StrengthActivationModal'
+import ArchivedProgramsSection from './ArchivedProgramsSection'
 import {
   CardioPrimaryActions,
   CardioUtilityActions,
 } from './CardioActions'
-import ArchivedProgramsSection from './ArchivedProgramsSection'
-import { useToast } from '@/components/ToastProvider'
-import StrengthActivationModal from '../StrengthActivationModal'
+import CardioMetadata from './CardioMetadata'
+import ProgramCard from './ProgramCard'
+import {
+  StrengthPrimaryActions,
+  StrengthUtilityActions,
+} from './StrengthActions'
+import StrengthMetadata from './StrengthMetadata'
 
 type StrengthProgram = {
   id: string
@@ -100,6 +100,7 @@ export default function ConsolidatedProgramsView({
         startPolling(programId)
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // Only run on mount
 
   // Poll for cloning status if programId is in URL
@@ -122,7 +123,8 @@ export default function ConsolidatedProgramsView({
         pollingIntervalRef.current = null
       }
     }
-  }, [searchParams])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, cloningProgramId])
 
   const startPolling = async (programId: string) => {
     // Check immediately
@@ -328,7 +330,7 @@ export default function ConsolidatedProgramsView({
 
           {/* Tabs */}
           <div className="flex gap-8 border-b border-border">
-            <button
+            <button type="button"
               onClick={() => handleTabChange('strength')}
               className={`pb-3 font-bold text-lg uppercase tracking-wider transition-colors ${
                 isStrengthTab
@@ -338,7 +340,7 @@ export default function ConsolidatedProgramsView({
             >
               STRENGTH
             </button>
-            <button
+            <button type="button"
               onClick={() => handleTabChange('cardio')}
               className={`pb-3 font-bold text-lg uppercase tracking-wider transition-colors ${
                 !isStrengthTab

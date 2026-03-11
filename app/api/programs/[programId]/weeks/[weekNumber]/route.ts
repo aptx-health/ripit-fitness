@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 
@@ -7,14 +7,14 @@ import { prisma } from '@/lib/db'
  * Fetch a single week's data for the program builder (lazy loading)
  */
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ programId: string; weekNumber: string }> }
 ) {
   try {
     const { programId, weekNumber: weekNumberStr } = await params
     const weekNumber = parseInt(weekNumberStr, 10)
 
-    if (isNaN(weekNumber) || weekNumber < 1) {
+    if (Number.isNaN(weekNumber) || weekNumber < 1) {
       return NextResponse.json(
         { error: 'Invalid week number' },
         { status: 400 }

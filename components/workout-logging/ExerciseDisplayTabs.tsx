@@ -1,10 +1,10 @@
 'use client'
 
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/radix/tabs'
-import SetList from './SetList'
 import { LoadingFrog } from '@/components/ui/loading-frog'
-import type { LoggedSet } from '@/hooks/useWorkoutStorage'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/radix/tabs'
 import type { LoadState } from '@/hooks/useProgressiveExercises'
+import type { LoggedSet } from '@/hooks/useWorkoutStorage'
+import SetList from './SetList'
 
 interface PrescribedSet {
   id: string

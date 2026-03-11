@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Settings, Save, X, Dumbbell } from 'lucide-react'
 import * as Dialog from '@radix-ui/react-dialog'
+import { Dumbbell, Save, Settings, X } from 'lucide-react'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 
 type UserSettings = {
   displayName: string | null
@@ -70,7 +70,7 @@ export default function UserSettingsModal({
               User Settings
             </Dialog.Title>
             <Dialog.Close asChild>
-              <button
+              <button type="button"
                 className="h-8 w-8 flex items-center justify-center border-2 border-border bg-muted hover:bg-secondary transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
                 aria-label="Close"
               >
@@ -104,12 +104,11 @@ export default function UserSettingsModal({
 
             {/* Weight Unit */}
             <div>
-              <label className="block text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
+              <span id="weight-unit-label" className="block text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
                 Default Weight Unit
-              </label>
-              <div className="flex gap-2">
-                <button
-                  type="button"
+              </span>
+              <fieldset className="flex gap-2" aria-labelledby="weight-unit-label">
+                <button type="button"
                   onClick={() => setWeightUnit('lbs')}
                   className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
                     weightUnit === 'lbs'
@@ -119,8 +118,7 @@ export default function UserSettingsModal({
                 >
                   LBS
                 </button>
-                <button
-                  type="button"
+                <button type="button"
                   onClick={() => setWeightUnit('kg')}
                   className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
                     weightUnit === 'kg'
@@ -130,17 +128,16 @@ export default function UserSettingsModal({
                 >
                   KG
                 </button>
-              </div>
+              </fieldset>
             </div>
 
             {/* Intensity Rating */}
             <div>
-              <label className="block text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
+              <span id="intensity-rating-label" className="block text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
                 Default Intensity Rating
-              </label>
-              <div className="flex gap-2">
-                <button
-                  type="button"
+              </span>
+              <fieldset className="flex gap-2" aria-labelledby="intensity-rating-label">
+                <button type="button"
                   onClick={() => setIntensityRating('rpe')}
                   className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
                     intensityRating === 'rpe'
@@ -150,8 +147,7 @@ export default function UserSettingsModal({
                 >
                   RPE
                 </button>
-                <button
-                  type="button"
+                <button type="button"
                   onClick={() => setIntensityRating('rir')}
                   className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
                     intensityRating === 'rir'
@@ -161,7 +157,7 @@ export default function UserSettingsModal({
                 >
                   RIR
                 </button>
-              </div>
+              </fieldset>
               <p className="text-xs text-muted-foreground mt-1">
                 RPE = Rate of Perceived Exertion, RIR = Reps in Reserve
               </p>
@@ -169,9 +165,9 @@ export default function UserSettingsModal({
 
             {/* Admin Section */}
             <div className="pt-4 border-t border-border">
-              <label className="block text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
+              <span id="admin-label" className="block text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
                 Admin
-              </label>
+              </span>
               <Link
                 href="/admin/exercises"
                 onClick={() => onOpenChange(false)}
@@ -191,16 +187,14 @@ export default function UserSettingsModal({
 
             {/* Action Buttons */}
             <div className="flex gap-3 pt-2">
-              <button
-                type="button"
+              <button type="button"
                 onClick={() => onOpenChange(false)}
                 disabled={isSaving}
                 className="flex-1 px-4 py-3 bg-muted text-foreground border-2 border-border hover:bg-secondary transition-colors font-semibold uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
               >
                 Cancel
               </button>
-              <button
-                type="button"
+              <button type="button"
                 onClick={handleSave}
                 disabled={isSaving}
                 className="flex-1 px-4 py-3 bg-primary text-primary-foreground border-2 border-primary hover:bg-primary-hover transition-colors font-semibold uppercase tracking-wider flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"

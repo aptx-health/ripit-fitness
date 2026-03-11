@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import * as AlertDialog from '@radix-ui/react-alert-dialog'
 import { AlertTriangle } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 
 type UnpublishProgramDialogProps = {
   open: boolean
@@ -76,7 +76,7 @@ export default function UnpublishProgramDialog({
 
           {/* Description */}
           <AlertDialog.Description className="text-sm text-muted-foreground mb-6">
-            This will remove <span className="font-medium text-foreground">"{programName}"</span> from
+            This will remove <span className="font-medium text-foreground">&quot;{programName}&quot;</span> from
             the community library. Users who have already added it will keep their copies, but no new
             users can add it.
           </AlertDialog.Description>
@@ -91,7 +91,7 @@ export default function UnpublishProgramDialog({
           {/* Actions */}
           <div className="flex gap-3 justify-end">
             <AlertDialog.Cancel asChild>
-              <button
+              <button type="button"
                 disabled={isDeleting}
                 className="px-4 py-2 border-2 border-border text-foreground hover:border-primary hover:text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider font-semibold text-sm doom-focus-ring"
               >
@@ -99,7 +99,7 @@ export default function UnpublishProgramDialog({
               </button>
             </AlertDialog.Cancel>
             <AlertDialog.Action asChild>
-              <button
+              <button type="button"
                 onClick={handleUnpublish}
                 disabled={isDeleting}
                 className="px-4 py-2 bg-error text-error-foreground hover:bg-error-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider font-semibold text-sm doom-button-3d doom-focus-ring"

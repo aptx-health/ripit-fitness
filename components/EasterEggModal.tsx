@@ -15,22 +15,28 @@ export function EasterEggModal({ isOpen, onClose }: Props) {
       {/* Overlay */}
       <div
         className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50"
+        role="button"
+        tabIndex={0}
         onClick={onClose}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClose() }}
+        aria-label="Close modal"
       />
 
       {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
         <div
           className="bg-card border-2 border-primary p-8 max-w-sm w-full doom-noise doom-shadow pointer-events-auto"
+          role="dialog"
           onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
         >
           {/* Close button */}
-          <button
+          <button type="button"
             onClick={onClose}
             className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
             aria-label="Close"
           >
-            <svg
+            <svg aria-hidden="true"
               className="w-6 h-6"
               fill="none"
               stroke="currentColor"

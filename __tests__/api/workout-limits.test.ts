@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { PrismaClient } from '@prisma/client'
-import { getTestDatabase } from '@/lib/test/database'
-import { createTestUser, createTestProgram } from '@/lib/test/factories'
-import { validateWorkoutLimit, validateBatchWorkoutLimit, MAX_WORKOUTS_PER_WEEK } from '@/lib/validation/workout-limits'
+import type { PrismaClient } from '@prisma/client'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { batchInsertWeekContent } from '@/lib/db/batch-insert'
+import { getTestDatabase } from '@/lib/test/database'
+import { createTestProgram, createTestUser } from '@/lib/test/factories'
+import { MAX_WORKOUTS_PER_WEEK, validateBatchWorkoutLimit, validateWorkoutLimit } from '@/lib/validation/workout-limits'
 
 describe('Workout Limit Validation', () => {
   let prisma: PrismaClient

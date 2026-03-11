@@ -1,22 +1,22 @@
 'use client';
 
+import { Check, ChevronDown, X } from 'lucide-react';
 import { useState } from 'react';
-import { ChevronDown, Check, X } from 'lucide-react';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/radix/popover';
 import {
-  PROGRAM_GOALS,
-  GOAL_LABELS,
-  FITNESS_LEVELS,
-  LEVEL_LABELS,
-  LEVEL_DESCRIPTIONS,
   COMMON_EQUIPMENT,
-  SPECIALIZED_EQUIPMENT,
   EQUIPMENT_LABELS,
-  ProgramMetadata,
+  FITNESS_LEVELS,
+  GOAL_LABELS,
+  LEVEL_DESCRIPTIONS,
+  LEVEL_LABELS,
+  PROGRAM_GOALS,
+  type ProgramMetadata,
+  SPECIALIZED_EQUIPMENT,
 } from '@/lib/constants/program-metadata';
 
 type ProgramMetadataFormProps = {
@@ -51,12 +51,12 @@ export default function ProgramMetadataForm({
     <div className="space-y-6">
       {/* Fitness Level - REQUIRED */}
       <div>
-        <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+        <span id="fitness-level-label" className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
           Fitness Level <span className="text-error">*</span>
-        </label>
+        </span>
         <Popover open={levelPopoverOpen} onOpenChange={setLevelPopoverOpen}>
           <PopoverTrigger asChild>
-            <button className="w-full px-4 py-2 border-2 border-border text-foreground hover:border-primary transition-colors uppercase tracking-wider font-semibold doom-focus-ring flex items-center justify-between text-sm">
+            <button type="button" aria-labelledby="fitness-level-label" className="w-full px-4 py-2 border-2 border-border text-foreground hover:border-primary transition-colors uppercase tracking-wider font-semibold doom-focus-ring flex items-center justify-between text-sm">
               {metadata.level ? LEVEL_LABELS[metadata.level] : 'SELECT LEVEL'}
               <ChevronDown size={16} />
             </button>
@@ -64,7 +64,7 @@ export default function ProgramMetadataForm({
           <PopoverContent className="w-72 p-2" align="start">
             <div className="space-y-1">
               {Object.values(FITNESS_LEVELS).map((level) => (
-                <button
+                <button type="button"
                   key={level}
                   onClick={() => {
                     onChange({ ...metadata, level: level });
@@ -90,13 +90,13 @@ export default function ProgramMetadataForm({
 
       {/* Training Goals - REQUIRED */}
       <div>
-        <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+        <span id="training-goals-label" className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
           Training Goals <span className="text-error">*</span>
           <span className="text-xs font-normal normal-case ml-2 text-muted-foreground/70">
             (Select at least one)
           </span>
-        </label>
-        <div className="grid grid-cols-2 gap-2">
+        </span>
+        <fieldset className="grid grid-cols-2 gap-2" aria-labelledby="training-goals-label">
           {Object.values(PROGRAM_GOALS).map((goal) => (
             <label
               key={goal}
@@ -113,18 +113,18 @@ export default function ProgramMetadataForm({
               </span>
             </label>
           ))}
-        </div>
+        </fieldset>
       </div>
 
       {/* Equipment Needed - OPTIONAL */}
       <div>
-        <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+        <span id="equipment-needed-label" className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
           Equipment Needed <span className="text-xs font-normal normal-case">(Optional)</span>
-        </label>
+        </span>
         <div className="flex gap-2 items-center">
           <Popover open={equipmentPopoverOpen} onOpenChange={setEquipmentPopoverOpen}>
             <PopoverTrigger asChild>
-              <button className="flex-1 px-4 py-2 border-2 border-border text-foreground hover:border-primary transition-colors uppercase tracking-wider font-semibold doom-focus-ring flex items-center justify-between text-sm">
+              <button type="button" className="flex-1 px-4 py-2 border-2 border-border text-foreground hover:border-primary transition-colors uppercase tracking-wider font-semibold doom-focus-ring flex items-center justify-between text-sm">
                 {metadata.equipmentNeeded.length > 0
                   ? `${metadata.equipmentNeeded.length} selected`
                   : 'None selected'}
@@ -183,7 +183,7 @@ export default function ProgramMetadataForm({
             </PopoverContent>
           </Popover>
           {metadata.equipmentNeeded.length > 0 && (
-            <button
+            <button type="button"
               onClick={() => onChange({ ...metadata, equipmentNeeded: [] })}
               className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors uppercase tracking-wider flex items-center gap-1 doom-focus-ring"
             >
@@ -196,10 +196,11 @@ export default function ProgramMetadataForm({
 
       {/* Target Days Per Week - OPTIONAL */}
       <div>
-        <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+        <label htmlFor="target-days-per-week" className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
           Target Days Per Week <span className="text-xs font-normal normal-case">(Optional)</span>
         </label>
         <input
+          id="target-days-per-week"
           type="number"
           min="1"
           max="7"
@@ -207,7 +208,7 @@ export default function ProgramMetadataForm({
           onChange={(e) =>
             onChange({
               ...metadata,
-              targetDaysPerWeek: e.target.value ? parseInt(e.target.value) : null,
+              targetDaysPerWeek: e.target.value ? parseInt(e.target.value, 10) : null,
             })
           }
           placeholder="e.g., 4"
@@ -220,10 +221,11 @@ export default function ProgramMetadataForm({
 
       {/* Duration Display - OPTIONAL */}
       <div>
-        <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+        <label htmlFor="duration-display" className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
           Duration Display <span className="text-xs font-normal normal-case">(Optional)</span>
         </label>
         <input
+          id="duration-display"
           type="text"
           value={metadata.durationDisplay || ''}
           onChange={(e) =>
@@ -233,7 +235,7 @@ export default function ProgramMetadataForm({
           className="w-full px-3 py-2 border-2 border-border bg-input text-foreground text-sm focus:ring-2 focus:ring-primary focus:border-primary doom-focus-ring"
         />
         <p className="text-xs text-muted-foreground mt-1 normal-case">
-          Override the default duration text (e.g., "8-12 weeks", "Until competition")
+          Override the default duration text (e.g., &quot;8-12 weeks&quot;, &quot;Until competition&quot;)
         </p>
       </div>
     </div>

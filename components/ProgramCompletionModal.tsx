@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { X } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
 
 interface CompletionStats {
@@ -107,7 +107,7 @@ export function ProgramCompletionModal({
     return () => {
       abortController.abort()
     }
-  }, [open, programId])
+  }, [open, programId, programType])
 
   const handleRestart = async () => {
     // Prevent double-clicks
@@ -195,7 +195,7 @@ export function ProgramCompletionModal({
           <p className="text-sm text-primary-foreground/90 mt-1">
             Congratulations on finishing your program
           </p>
-          <button
+          <button type="button"
             onClick={onClose}
             className="absolute right-4 top-4 text-primary-foreground/80 hover:text-primary-foreground"
           >
@@ -320,7 +320,7 @@ export function ProgramCompletionModal({
         <div className="px-4 sm:px-6 py-4 border-t-2 border-border bg-muted">
           <div className="flex flex-col gap-3">
             {programType === 'strength' && onRestart && (
-              <button
+              <button type="button"
                 onClick={handleRestart}
                 disabled={loading || restarting}
                 className="w-full px-6 py-3 bg-success text-success-foreground hover:bg-success-hover font-bold uppercase tracking-wider doom-button-3d disabled:opacity-50 disabled:cursor-not-allowed"
@@ -328,7 +328,7 @@ export function ProgramCompletionModal({
                 {restarting ? 'Restarting...' : 'Restart Program'}
               </button>
             )}
-            <button
+            <button type="button"
               onClick={handleChooseNewProgram}
               disabled={restarting}
               className="w-full px-6 py-3 text-secondary-foreground bg-secondary border-2 border-secondary hover:bg-secondary-hover font-bold uppercase tracking-wider transition-all shadow-[0_3px_0_var(--secondary-active),0_5px_8px_rgba(0,0,0,0.4)] hover:shadow-[0_3px_0_var(--secondary-active),0_0_20px_rgba(0,0,0,0.6)] active:translate-y-[3px] active:shadow-[0_0_0_var(--secondary-active),0_2px_4px_rgba(0,0,0,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"

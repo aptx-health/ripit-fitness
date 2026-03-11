@@ -1,6 +1,6 @@
-import { PrismaClient } from '@prisma/client';
-import { FAU_DISPLAY_NAMES } from '@/lib/fau-volume';
+import type { PrismaClient } from '@prisma/client';
 import { EQUIPMENT_LABELS } from '@/lib/constants/program-metadata';
+import { FAU_DISPLAY_NAMES } from '@/lib/fau-volume';
 
 export interface CreateExerciseDefinitionInput {
   name: string;
