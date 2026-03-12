@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Ripit Fitness** is a strength training tracker focused on flexibility and user control. Users import training programs via CSV and track workout completion without rigid app constraints.
+**Ripit Fitness** is a strength training tracker focused on flexibility and user control. Users build programs and track workout completion without rigid app constraints.
 
 **Key Principle**: No multi-tenancy. Single user per account.
 
@@ -96,7 +96,6 @@ When the user asks Claude to make schema changes:
 
 /lib                    # Business logic (max 500 lines per file)
   /db                   # Database client and utilities
-  /csv                  # CSV parsing and validation
   /auth                 # Auth utilities (if needed)
   /queue                # BullMQ job queue (clone jobs)
 
@@ -110,7 +109,6 @@ When the user asks Claude to make schema changes:
 
 /docs                   # Project documentation
   ARCHITECTURE.md       # Architecture decisions and design
-  CSV_SPEC.md          # CSV format specification
   /archive/gcp          # Archived GCP documentation
 
 /__tests__              # Integration tests
@@ -205,38 +203,9 @@ Frontend (polling via /api/programs/[id]/copy-status)
 
 Integration tests in `__tests__/api/clone-worker.test.ts`:
 - **Testcontainers**: PostgreSQL 15 + Redis 7
-- Tests strength/cardio cloning, progressive loading, idempotency
+- Tests strength cloning, progressive loading, idempotency
 - Uses BullMQ Queue/Worker/QueueEvents for job processing
 - Run with: `doppler run --config dev_test -- npm test clone-worker`
-
-## CSV Import Strategy
-
-### Format
-
-Standard CSV with intelligent column detection:
-
-```csv
-week,day,workout_name,exercise,set,reps,weight,rir,notes
-1,1,Upper Power,Bench Press,1,5,135lbs,2,
-1,1,Upper Power,Bench Press,2,5,135lbs,2,
-```
-
-**Required columns**: `week`, `day`, `workout_name`, `exercise`, `set`, `reps`, `weight`
-
-**Optional columns** (auto-detected): `rir`, `rpe`, `notes`
-
-**Metadata inference**:
-- Program name: from filename (`my-program.csv` → "My Program")
-- Optional columns: detected from headers
-
-See `docs/CSV_SPEC.md` for complete specification.
-
-### Import Process
-
-1. Parse CSV and detect columns
-2. Validate required fields and structure
-3. Flatten into database: Program → Weeks → Workouts → Exercises → PrescribedSets
-4. Enable for user selection
 
 ## Next.js 15 Specific Patterns
 
@@ -538,8 +507,6 @@ Self-hosted k8s infrastructure is operational (staging + production). PostgreSQL
 
 - **No multi-tenancy**: One user per account (simpler auth, faster queries)
 - **BetterAuth**: Self-hosted auth, no external auth dependencies
-- **Flatten CSV to DB**: Better querying, no runtime parsing
-- **Infer metadata**: Standard CSV format, user-friendly
 - **Store prescribed + logged**: Enables plan vs actual comparison
 - **Flexible weight field**: Supports "135lbs", "65%", "RPE 8"
 - **BullMQ + Redis for background jobs**: Move large program cloning off Vercel serverless to a dedicated worker container (per-week transactions, progressive loading, automatic retries)
@@ -550,8 +517,6 @@ Self-hosted k8s infrastructure is operational (staging + production). PostgreSQL
 - `/docs/DATABASE_MIGRATIONS.md` - Database migration workflow with Prisma
 - `/docs/LOGGING.md` - Logging configuration and usage with Pino
 - `/docs/STYLING.md` - DOOM theme color system and styling guide
-- `/docs/features/CARDIO_DESIGN.md` - Cardio tracking system design
-- `/docs/features/EXERCISE_PERFORMANCE_TRACKING.md` - Exercise tracking features
 - `/docs/features/PROGRAM_MANAGEMENT_IMPROVEMENTS.md` - Program management enhancements
 - `/docs/features/PERFORMANCE_ANALYSIS.md` - Performance analysis and optimizations
 - `/docs/archive/gcp/` - Archived GCP Pub/Sub documentation (historical reference)

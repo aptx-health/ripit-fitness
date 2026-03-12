@@ -4,7 +4,7 @@
 
 # Ripit Fitness
 
-A focused strength training tracker that lets you import programs from CSV and track workouts without rigid app constraints.
+A focused strength training tracker that lets you build programs and track workouts without rigid app constraints.
 
 **For Contributors:** Get started in 5 minutes with zero external dependencies - just Docker and Node.js!
 
@@ -221,18 +221,6 @@ npm run type-check                      # TypeScript check
 npm run build                           # Production build test
 ```
 
-## CSV Import Format
-
-```csv
-week,day,workout_name,exercise,set,reps,weight,rir,notes
-1,1,Upper Power,Bench Press,1,5,135lbs,2,
-1,1,Upper Power,Bench Press,2,5,135lbs,2,
-1,1,Upper Power,Rows,1,8,95lbs,2,Pause at chest
-```
-
-**Required columns**: `week`, `day`, `workout_name`, `exercise`, `set`, `reps`, `weight`
-**Optional columns**: `rir`, `rpe`, `notes` (auto-detected)
-
 ## Project Structure
 
 ```
@@ -444,8 +432,6 @@ Interested in contributing? Check out [CONTRIBUTING.md](CONTRIBUTING.md) for gui
 ## Documentation
 
 - [docs/STYLING.md](docs/STYLING.md) - DOOM theme color system
-- [docs/features/CARDIO_DESIGN.md](docs/features/CARDIO_DESIGN.md) - Cardio tracking system design
-- [docs/features/EXERCISE_PERFORMANCE_TRACKING.md](docs/features/EXERCISE_PERFORMANCE_TRACKING.md) - Exercise tracking features
 - [CLAUDE.md](CLAUDE.md) - Guide for Claude Code sessions
 
 ## Tech Stack
