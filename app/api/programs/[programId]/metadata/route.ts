@@ -27,66 +27,23 @@ export async function PATCH(
       focusAreas,
     } = body;
 
-    // Check if it's a strength or cardio program
-    const strengthProgram = await prisma.program.findUnique({
+    const program = await prisma.program.update({
       where: {
         id: programId,
         userId: user.id,
       },
-    });
-
-    const cardioProgram = await prisma.cardioProgram.findUnique({
-      where: {
-        id: programId,
-        userId: user.id,
+      data: {
+        goals,
+        level,
+        durationWeeks,
+        durationDisplay,
+        targetDaysPerWeek,
+        equipmentNeeded,
+        focusAreas,
       },
     });
 
-    if (!strengthProgram && !cardioProgram) {
-      return NextResponse.json(
-        { error: 'Program not found' },
-        { status: 404 }
-      );
-    }
-
-    // Update metadata for the appropriate program type
-    if (strengthProgram) {
-      const program = await prisma.program.update({
-        where: {
-          id: programId,
-          userId: user.id,
-        },
-        data: {
-          goals,
-          level,
-          durationWeeks,
-          durationDisplay,
-          targetDaysPerWeek,
-          equipmentNeeded,
-          focusAreas,
-        },
-      });
-
-      return NextResponse.json({ success: true, program });
-    } else {
-      const program = await prisma.cardioProgram.update({
-        where: {
-          id: programId,
-          userId: user.id,
-        },
-        data: {
-          goals,
-          level,
-          durationWeeks,
-          durationDisplay,
-          targetDaysPerWeek,
-          equipmentNeeded,
-          focusAreas,
-        },
-      });
-
-      return NextResponse.json({ success: true, program });
-    }
+    return NextResponse.json({ success: true, program });
   } catch (error) {
     console.error('Error updating program metadata:', error);
     return NextResponse.json(

@@ -6,11 +6,6 @@ import { useEffect, useRef, useState } from 'react'
 import { useToast } from '@/components/ToastProvider'
 import StrengthActivationModal from '../StrengthActivationModal'
 import ArchivedProgramsSection from './ArchivedProgramsSection'
-import {
-  CardioPrimaryActions,
-  CardioUtilityActions,
-} from './CardioActions'
-import CardioMetadata from './CardioMetadata'
 import ProgramCard from './ProgramCard'
 import {
   StrengthPrimaryActions,
@@ -27,39 +22,18 @@ type StrengthProgram = {
   copyStatus: string | null
 }
 
-type CardioProgram = {
-  id: string
-  name: string
-  description: string | null
-  isActive: boolean
-  createdAt: Date
-  copyStatus: string | null
-  weeks: Array<{
-    id: string
-    _count: {
-      sessions: number
-    }
-  }>
-}
-
 type ConsolidatedProgramsViewProps = {
   strengthPrograms: StrengthProgram[]
   archivedStrengthCount: number
-  cardioPrograms: CardioProgram[]
-  archivedCardioCount: number
 }
 
 export default function ConsolidatedProgramsView({
   strengthPrograms,
   archivedStrengthCount,
-  cardioPrograms,
-  archivedCardioCount,
 }: ConsolidatedProgramsViewProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const toast = useToast()
-  const initialTab = searchParams.get('tab') === 'cardio' ? 'cardio' : 'strength'
-  const [activeTab, setActiveTab] = useState<'strength' | 'cardio'>(initialTab)
   const [cloningProgramId, setCloningProgramId] = useState<string | null>(null)
   const [completedClones, setCompletedClones] = useState<Set<string>>(new Set())
   const [localCopyStatuses, setLocalCopyStatuses] = useState<Record<string, string>>({})
@@ -73,24 +47,11 @@ export default function ConsolidatedProgramsView({
   const [activationProgramId, setActivationProgramId] = useState<string | null>(null)
   const [existingActiveProgram, setExistingActiveProgram] = useState<{ id: string; name: string } | null>(null)
 
-  // Sync state from URL on initial load or direct navigation (e.g., shared links)
-  useEffect(() => {
-    const tab = searchParams.get('tab')
-    if (tab === 'cardio' || tab === 'strength') {
-      setActiveTab(current => current === tab ? current : tab)
-    }
-  }, [searchParams])
-
   // On mount, resume polling for any programs already in cloning state
   useEffect(() => {
-    const cloningPrograms = [
-      ...strengthPrograms.filter(p =>
-        p.copyStatus === 'cloning' || p.copyStatus?.startsWith('cloning_week_')
-      ),
-      ...cardioPrograms.filter(p =>
-        p.copyStatus === 'cloning' || p.copyStatus?.startsWith('cloning_week_')
-      )
-    ]
+    const cloningPrograms = strengthPrograms.filter(p =>
+      p.copyStatus === 'cloning' || p.copyStatus?.startsWith('cloning_week_')
+    )
 
     // Resume polling for first cloning program found
     if (cloningPrograms.length > 0 && !cloningProgramId) {
@@ -194,35 +155,17 @@ export default function ConsolidatedProgramsView({
             return updated
           })
 
-          // Determine if this is a strength program
-          const isStrengthProgram = strengthPrograms.some(p => p.id === programId)
-
-          if (isStrengthProgram) {
-            // For strength programs, show activation modal
-            // First check for existing active programs
-            const activeProgram = strengthPrograms.find(p => p.isActive && p.id !== programId)
-            if (activeProgram) {
-              setExistingActiveProgram({ id: activeProgram.id, name: activeProgram.name })
-            }
-
-            setActivationProgramId(programId)
-            setShowActivationModal(true)
-
-            // Clean up URL and stop polling
-            cleanupCloningState()
-
-            // Refresh to get latest data
-            router.refresh()
-          } else {
-            // For cardio programs, just show toast (existing behavior)
-            toast.success('Program added!', `${data.name} has been added to your programs.`)
-
-            // Clean up URL and stop polling
-            cleanupCloningState()
-
-            // Refresh to get latest data - completedClones check will prevent re-polling
-            router.refresh()
+          // Show activation modal
+          const activeProgram = strengthPrograms.find(p => p.isActive && p.id !== programId)
+          if (activeProgram) {
+            setExistingActiveProgram({ id: activeProgram.id, name: activeProgram.name })
           }
+
+          setActivationProgramId(programId)
+          setShowActivationModal(true)
+
+          cleanupCloningState()
+          router.refresh()
         }
         return false
       }
@@ -257,23 +200,8 @@ export default function ConsolidatedProgramsView({
     }
 
     setCloningProgramId(null)
-
-    // Use current activeTab state instead of reading from URL
-    // This prevents overwriting user's manual tab switches
-    window.history.replaceState(null, '', `/programs?tab=${activeTab}`)
-
-    // Note: We keep localCopyStatuses to preserve the 'ready' state
-    // It will be cleared on next full page load
+    window.history.replaceState(null, '', '/programs')
   }
-
-  const handleTabChange = (tab: 'strength' | 'cardio') => {
-    // Update state immediately for instant UI response
-    setActiveTab(tab)
-    // Update URL without going through Next.js router (avoids routing overhead)
-    window.history.replaceState(null, '', `/programs?tab=${tab}`)
-  }
-
-  const isStrengthTab = activeTab === 'strength'
 
   // Sort programs: active first, then by creation date
   // Filter out locally deleted programs
@@ -284,19 +212,6 @@ export default function ConsolidatedProgramsView({
       if (!a.isActive && b.isActive) return 1
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     })
-
-  const sortedCardioPrograms = [...cardioPrograms]
-    .filter(p => !deletedPrograms.has(p.id))
-    .sort((a, b) => {
-      if (a.isActive && !b.isActive) return -1
-      if (!a.isActive && b.isActive) return 1
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    })
-
-  // URL for create button changes based on active tab
-  const createProgramUrl = isStrengthTab
-    ? '/programs/new'
-    : '/cardio/programs/create'
 
   return (
     <div className="min-h-screen bg-background doom-page-enter">
@@ -314,7 +229,7 @@ export default function ConsolidatedProgramsView({
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
               <Link
-                href={createProgramUrl}
+                href="/programs/new"
                 className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider text-sm text-center whitespace-nowrap"
               >
                 CREATE PROGRAM
@@ -327,182 +242,74 @@ export default function ConsolidatedProgramsView({
               </Link>
             </div>
           </div>
-
-          {/* Tabs */}
-          <div className="flex gap-8 border-b border-border">
-            <button type="button"
-              onClick={() => handleTabChange('strength')}
-              className={`pb-3 font-bold text-lg uppercase tracking-wider transition-colors ${
-                isStrengthTab
-                  ? 'text-primary border-b-4 border-primary'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              STRENGTH
-            </button>
-            <button type="button"
-              onClick={() => handleTabChange('cardio')}
-              className={`pb-3 font-bold text-lg uppercase tracking-wider transition-colors ${
-                !isStrengthTab
-                  ? 'text-primary border-b-4 border-primary'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              CARDIO
-            </button>
-          </div>
         </div>
 
-        {/* Strength Tab Content - always rendered, hidden when not active */}
-        <div className={isStrengthTab ? '' : 'hidden'}>
-          <div className="space-y-4">
-            {sortedStrengthPrograms.length === 0 ? (
-              <div className="bg-card border border-border p-12 text-center doom-noise doom-corners">
-                <h2 className="text-xl font-semibold text-foreground mb-2 doom-heading uppercase">
-                  NO STRENGTH PROGRAMS YET
-                </h2>
-                <p className="text-muted-foreground mb-6">
-                  Create a new strength training program to get started
-                </p>
-                <Link
-                  href="/programs/new"
-                  className="inline-block px-6 py-3 bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
-                >
-                  CREATE YOUR FIRST PROGRAM
-                </Link>
-              </div>
-            ) : (
-              sortedStrengthPrograms.map((program) => {
-                // Use local copy status if available, otherwise use prop value
-                const copyStatus = localCopyStatuses[program.id] ?? program.copyStatus
-                const progress = cloningProgress[program.id]
-
-                return (
-                  <ProgramCard
-                    key={program.id}
-                    isActive={program.isActive}
-                    name={program.name}
-                    description={program.description}
-                    copyStatus={copyStatus}
-                    cloningProgress={progress}
-                    metadata={<StrengthMetadata />}
-                    primaryActions={
-                      <StrengthPrimaryActions
-                        programId={program.id}
-                        isActive={program.isActive}
-                        copyStatus={copyStatus}
-                      />
-                    }
-                    utilityActionsDesktop={
-                      <StrengthUtilityActions
-                        programId={program.id}
-                        programName={program.name}
-                        isActive={program.isActive}
-                      />
-                    }
-                    utilityActionsMobile={
-                      <StrengthUtilityActions
-                        programId={program.id}
-                        programName={program.name}
-                        isActive={program.isActive}
-                        isMobile={true}
-                      />
-                    }
-                  />
-                )
-              })
-            )}
-          </div>
-          {archivedStrengthCount > 0 && (
-            <div className="mt-6">
-              <ArchivedProgramsSection
-                count={archivedStrengthCount}
-                programType="strength"
-              />
+        {/* Programs List */}
+        <div className="space-y-4">
+          {sortedStrengthPrograms.length === 0 ? (
+            <div className="bg-card border border-border p-12 text-center doom-noise doom-corners">
+              <h2 className="text-xl font-semibold text-foreground mb-2 doom-heading uppercase">
+                NO PROGRAMS YET
+              </h2>
+              <p className="text-muted-foreground mb-6">
+                Create a new training program to get started
+              </p>
+              <Link
+                href="/programs/new"
+                className="inline-block px-6 py-3 bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
+              >
+                CREATE YOUR FIRST PROGRAM
+              </Link>
             </div>
+          ) : (
+            sortedStrengthPrograms.map((program) => {
+              // Use local copy status if available, otherwise use prop value
+              const copyStatus = localCopyStatuses[program.id] ?? program.copyStatus
+              const progress = cloningProgress[program.id]
+
+              return (
+                <ProgramCard
+                  key={program.id}
+                  isActive={program.isActive}
+                  name={program.name}
+                  description={program.description}
+                  copyStatus={copyStatus}
+                  cloningProgress={progress}
+                  metadata={<StrengthMetadata />}
+                  primaryActions={
+                    <StrengthPrimaryActions
+                      programId={program.id}
+                      isActive={program.isActive}
+                      copyStatus={copyStatus}
+                    />
+                  }
+                  utilityActionsDesktop={
+                    <StrengthUtilityActions
+                      programId={program.id}
+                      programName={program.name}
+                      isActive={program.isActive}
+                    />
+                  }
+                  utilityActionsMobile={
+                    <StrengthUtilityActions
+                      programId={program.id}
+                      programName={program.name}
+                      isActive={program.isActive}
+                      isMobile={true}
+                    />
+                  }
+                />
+              )
+            })
           )}
         </div>
-
-        {/* Cardio Tab Content - always rendered, hidden when not active */}
-        <div className={isStrengthTab ? 'hidden' : ''}>
-          <div className="space-y-4">
-            {sortedCardioPrograms.length === 0 ? (
-              <div className="bg-card border border-border p-12 text-center doom-noise doom-corners">
-                <h2 className="text-xl font-semibold text-foreground mb-2 doom-heading uppercase">
-                  NO CARDIO PROGRAMS YET
-                </h2>
-                <p className="text-muted-foreground mb-6">
-                  Create a new cardio training program to get started
-                </p>
-                <Link
-                  href="/cardio/programs/create"
-                  className="inline-block px-6 py-3 bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
-                >
-                  CREATE YOUR FIRST PROGRAM
-                </Link>
-              </div>
-            ) : (
-              sortedCardioPrograms.map((program) => {
-                const weekCount = program.weeks.length
-                const sessionCount = program.weeks.reduce(
-                  (sum, w) => sum + w._count.sessions,
-                  0
-                )
-
-                // Use local copy status if available, otherwise use prop value
-                const copyStatus = localCopyStatuses[program.id] ?? program.copyStatus
-                const progress = cloningProgress[program.id]
-
-                return (
-                  <ProgramCard
-                    key={program.id}
-                    isActive={program.isActive}
-                    name={program.name}
-                    description={program.description}
-                    copyStatus={copyStatus}
-                    cloningProgress={progress}
-                    metadata={
-                      <CardioMetadata
-                        weekCount={weekCount}
-                        sessionCount={sessionCount}
-                      />
-                    }
-                    primaryActions={
-                      <CardioPrimaryActions
-                        programId={program.id}
-                        isActive={program.isActive}
-                        copyStatus={copyStatus}
-                      />
-                    }
-                    utilityActionsDesktop={
-                      <CardioUtilityActions
-                        programId={program.id}
-                        programName={program.name}
-                        isActive={program.isActive}
-                      />
-                    }
-                    utilityActionsMobile={
-                      <CardioUtilityActions
-                        programId={program.id}
-                        programName={program.name}
-                        isActive={program.isActive}
-                        isMobile={true}
-                      />
-                    }
-                  />
-                )
-              })
-            )}
+        {archivedStrengthCount > 0 && (
+          <div className="mt-6">
+            <ArchivedProgramsSection
+              count={archivedStrengthCount}
+            />
           </div>
-          {archivedCardioCount > 0 && (
-            <div className="mt-6">
-              <ArchivedProgramsSection
-                count={archivedCardioCount}
-                programType="cardio"
-              />
-            </div>
-          )}
-        </div>
+        )}
       </div>
 
       {/* Activation Modal */}
