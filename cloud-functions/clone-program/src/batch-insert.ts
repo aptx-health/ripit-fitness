@@ -4,7 +4,6 @@ import { Prisma, type PrismaClient } from '@prisma/client'
 interface WeekData {
   weekNumber: number
   workouts?: WorkoutData[]
-  sessions?: CardioSessionData[]
 }
 
 interface WorkoutData {
@@ -28,19 +27,6 @@ interface PrescribedSetData {
   weight?: string
   rpe?: number
   rir?: number
-}
-
-interface CardioSessionData {
-  dayNumber: number
-  name: string
-  description?: string
-  targetDuration: number
-  intensityZone?: string
-  equipment?: string
-  targetHRRange?: string
-  targetPowerRange?: string
-  intervalStructure?: string
-  notes?: string
 }
 
 /**
@@ -187,81 +173,5 @@ export async function batchInsertStrengthWeek(
   console.log(
     `Batch insert week ${weekData.weekNumber}: ${duration}ms ` +
     `(${workouts.length} workouts, ${exerciseCount} exercises, ${setCount} sets)`
-  )
-}
-
-/**
- * Batch inserts a cardio program week with all prescribed cardio sessions.
- * Uses raw SQL batch INSERTs to improve performance over nested creates.
- */
-export async function batchInsertCardioWeek(
-  tx: Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'>,
-  weekData: WeekData,
-  programId: string,
-  userId: string
-): Promise<void> {
-  const startTime = Date.now()
-
-  // Pre-generate all IDs
-  const weekId = createId()
-  const sessions = weekData.sessions || []
-
-  // 1. INSERT CardioWeek (single row)
-  await tx.$executeRaw(Prisma.sql`
-    INSERT INTO "CardioWeek" (id, "weekNumber", "cardioProgramId", "userId")
-    VALUES (${weekId}, ${weekData.weekNumber}, ${programId}, ${userId})
-  `)
-
-  // 2. Batch INSERT PrescribedCardioSessions
-  if (sessions.length > 0) {
-    const now = new Date()
-
-    const sessionValues = sessions.map((session) => {
-      return Prisma.sql`(
-        ${createId()},
-        ${weekId},
-        ${session.dayNumber},
-        ${session.name},
-        ${session.description || null},
-        ${session.targetDuration},
-        ${session.intensityZone || null},
-        ${session.equipment || null},
-        ${session.targetHRRange || null},
-        ${session.targetPowerRange || null},
-        ${session.intervalStructure || null},
-        ${session.notes || null},
-        ${userId},
-        ${now},
-        ${now}
-      )`
-    })
-
-    await tx.$executeRaw(Prisma.sql`
-      INSERT INTO "PrescribedCardioSession" (
-        id,
-        "weekId",
-        "dayNumber",
-        name,
-        description,
-        "targetDuration",
-        "intensityZone",
-        equipment,
-        "targetHRRange",
-        "targetPowerRange",
-        "intervalStructure",
-        notes,
-        "userId",
-        "createdAt",
-        "updatedAt"
-      )
-      VALUES ${Prisma.join(sessionValues, ',')}
-    `)
-  }
-
-  const duration = Date.now() - startTime
-
-  console.log(
-    `Batch insert cardio week ${weekData.weekNumber}: ${duration}ms ` +
-    `(${sessions.length} sessions)`
   )
 }
