@@ -142,7 +142,7 @@ describe('Program Metadata', () => {
         },
       })
 
-      const equipment = await detectEquipmentNeeded(prisma, program.id, 'strength')
+      const equipment = await detectEquipmentNeeded(prisma, program.id)
 
       expect(equipment).toContain('barbell')
       expect(equipment).toContain('bench')
@@ -200,7 +200,7 @@ describe('Program Metadata', () => {
         },
       })
 
-      const equipment = await detectEquipmentNeeded(prisma, program.id, 'strength')
+      const equipment = await detectEquipmentNeeded(prisma, program.id)
 
       expect(equipment).toContain('pull_up_bar')
     })
@@ -254,7 +254,7 @@ describe('Program Metadata', () => {
         },
       })
 
-      const equipment = await detectEquipmentNeeded(prisma, program.id, 'strength')
+      const equipment = await detectEquipmentNeeded(prisma, program.id)
 
       expect(equipment).toContain('barbell')
       expect(equipment).toContain('dumbbell')
@@ -309,7 +309,7 @@ describe('Program Metadata', () => {
         },
       })
 
-      const equipment = await detectEquipmentNeeded(prisma, program.id, 'strength')
+      const equipment = await detectEquipmentNeeded(prisma, program.id)
 
       expect(equipment).toContain('bodyweight')
       expect(equipment).toHaveLength(1)
@@ -381,8 +381,7 @@ describe('Program Metadata', () => {
       const result = await publishProgramToCommunity(
         prisma,
         program.id,
-        userId,
-        'strength'
+        userId
       )
 
       expect(result.success).toBe(true)
@@ -416,8 +415,7 @@ describe('Program Metadata', () => {
       const result = await publishProgramToCommunity(
         prisma,
         program.id,
-        userId,
-        'strength'
+        userId
       )
 
       expect(result.success).toBe(false)
@@ -442,8 +440,7 @@ describe('Program Metadata', () => {
       const firstResult = await publishProgramToCommunity(
         prisma,
         program.id,
-        userId,
-        'strength'
+        userId
       )
       expect(firstResult.success).toBe(true)
 
@@ -451,102 +448,11 @@ describe('Program Metadata', () => {
       const secondResult = await publishProgramToCommunity(
         prisma,
         program.id,
-        userId,
-        'strength'
+        userId
       )
       expect(secondResult.success).toBe(false)
       expect(secondResult.error).toContain('already been published')
     })
   })
 
-  describe('Cardio Program Metadata', () => {
-    it('should detect equipment from cardio sessions', async () => {
-      // Create cardio program
-      const cardioProgram = await prisma.cardioProgram.create({
-        data: {
-          userId: userId,
-          name: 'Test Cardio Program',
-          description: 'Test',
-          weeks: {
-            create: [
-              {
-                userId: userId,
-                weekNumber: 1,
-                sessions: {
-                  create: [
-                    {
-                      userId: userId,
-                      name: 'Run',
-                      dayNumber: 1,
-                      targetDuration: 30,
-                      equipment: 'treadmill',
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-      })
-
-      const equipment = await detectEquipmentNeeded(
-        prisma,
-        cardioProgram.id,
-        'cardio'
-      )
-
-      // Note: 'treadmill' is not in our equipment constants, so it should be filtered out
-      expect(equipment).toHaveLength(0)
-    })
-
-    it('should save and publish cardio program metadata', async () => {
-      const cardioProgram = await prisma.cardioProgram.create({
-        data: {
-          userId: userId,
-          name: 'Test Cardio Program',
-          description: 'Test',
-          weeks: {
-            create: [
-              {
-                userId: userId,
-                weekNumber: 1,
-                sessions: {
-                  create: [
-                    {
-                      userId: userId,
-                      name: 'Run',
-                      dayNumber: 1,
-                      targetDuration: 30,
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-          level: 'beginner',
-          goals: ['endurance', 'fat_loss'],
-          targetDaysPerWeek: 3,
-        },
-      })
-
-      // Publish
-      const result = await publishProgramToCommunity(
-        prisma,
-        cardioProgram.id,
-        userId,
-        'cardio'
-      )
-
-      expect(result.success).toBe(true)
-
-      // Verify metadata
-      const communityProgram = await prisma.communityProgram.findUnique({
-        where: { originalProgramId: cardioProgram.id },
-      })
-
-      expect(communityProgram!.level).toBe('beginner')
-      expect(communityProgram!.goals).toEqual(['endurance', 'fat_loss'])
-      expect(communityProgram!.targetDaysPerWeek).toBe(3)
-    })
-  })
 })

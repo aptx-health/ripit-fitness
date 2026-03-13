@@ -22,8 +22,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check strength program first
-    const strengthProgram = await prisma.program.findFirst({
+    const program = await prisma.program.findFirst({
       where: {
         id: programId,
         userId: user.id,
@@ -39,8 +38,8 @@ export async function GET(
       },
     });
 
-    if (strengthProgram) {
-      const copyStatus = strengthProgram.copyStatus || 'ready';
+    if (program) {
+      const copyStatus = program.copyStatus || 'ready';
 
       // Parse progress from status like "cloning_week_3_of_9"
       let progressInfo = null;
@@ -58,16 +57,15 @@ export async function GET(
       if (copyStatus === 'failed') {
         return NextResponse.json({
           status: 'failed',
-          programType: 'strength',
-          name: strengthProgram.name,
+          name: program.name,
           error: 'Clone failed. Please try again.',
         });
       }
 
       // Detect stuck clones
       if (copyStatus === 'cloning' || copyStatus.startsWith('cloning_week_')) {
-        const cloneAge = Date.now() - new Date(strengthProgram.createdAt).getTime();
-        const hasData = strengthProgram._count.weeks > 0;
+        const cloneAge = Date.now() - new Date(program.createdAt).getTime();
+        const hasData = program._count.weeks > 0;
 
         // If cloning completed (has weeks), mark as ready
         if (hasData && copyStatus === 'cloning') {
@@ -78,8 +76,7 @@ export async function GET(
 
           return NextResponse.json({
             status: 'ready',
-            programType: 'strength',
-            name: strengthProgram.name,
+            name: program.name,
           });
         }
 
@@ -92,8 +89,7 @@ export async function GET(
 
           return NextResponse.json({
             status: 'failed',
-            programType: 'strength',
-            name: strengthProgram.name,
+            name: program.name,
             error: 'Clone timed out. Please try again.',
           });
         }
@@ -101,93 +97,7 @@ export async function GET(
 
       return NextResponse.json({
         status: copyStatus,
-        programType: 'strength',
-        name: strengthProgram.name,
-        progress: progressInfo,
-      });
-    }
-
-    // Check cardio program
-    const cardioProgram = await prisma.cardioProgram.findFirst({
-      where: {
-        id: programId,
-        userId: user.id,
-      },
-      select: {
-        id: true,
-        name: true,
-        copyStatus: true,
-        createdAt: true,
-        _count: {
-          select: { weeks: true }
-        }
-      },
-    });
-
-    if (cardioProgram) {
-      const copyStatus = cardioProgram.copyStatus || 'ready';
-
-      // Parse progress from status like "cloning_week_3_of_9"
-      let progressInfo = null;
-      if (copyStatus.startsWith('cloning_week_')) {
-        const match = copyStatus.match(/cloning_week_(\d+)_of_(\d+)/);
-        if (match) {
-          progressInfo = {
-            currentWeek: parseInt(match[1], 10),
-            totalWeeks: parseInt(match[2], 10),
-          };
-        }
-      }
-
-      // Failed state — worker set this before returning 500
-      if (copyStatus === 'failed') {
-        return NextResponse.json({
-          status: 'failed',
-          programType: 'cardio',
-          name: cardioProgram.name,
-          error: 'Clone failed. Please try again.',
-        });
-      }
-
-      // Detect stuck clones
-      if (copyStatus === 'cloning' || copyStatus.startsWith('cloning_week_')) {
-        const cloneAge = Date.now() - new Date(cardioProgram.createdAt).getTime();
-        const hasData = cardioProgram._count.weeks > 0;
-
-        // If cloning completed (has weeks), mark as ready
-        if (hasData && copyStatus === 'cloning') {
-          await prisma.cardioProgram.update({
-            where: { id: programId },
-            data: { copyStatus: 'ready' }
-          });
-
-          return NextResponse.json({
-            status: 'ready',
-            programType: 'cardio',
-            name: cardioProgram.name,
-          });
-        }
-
-        // If stuck for >5 minutes, mark as failed (Cloud Run timeout is 540s)
-        if (cloneAge > 300000) {
-          await prisma.cardioProgram.update({
-            where: { id: programId },
-            data: { copyStatus: 'failed' }
-          });
-
-          return NextResponse.json({
-            status: 'failed',
-            programType: 'cardio',
-            name: cardioProgram.name,
-            error: 'Clone timed out. Please try again.',
-          });
-        }
-      }
-
-      return NextResponse.json({
-        status: copyStatus,
-        programType: 'cardio',
-        name: cardioProgram.name,
+        name: program.name,
         progress: progressInfo,
       });
     }

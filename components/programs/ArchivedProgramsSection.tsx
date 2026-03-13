@@ -13,12 +13,10 @@ type ArchivedProgram = {
 
 type ArchivedProgramsSectionProps = {
   count: number
-  programType: 'strength' | 'cardio'
 }
 
 export default function ArchivedProgramsSection({
   count,
-  programType,
 }: ArchivedProgramsSectionProps) {
   const router = useRouter()
   const [isExpanded, setIsExpanded] = useState(false)
@@ -26,10 +24,7 @@ export default function ArchivedProgramsSection({
   const [isLoading, setIsLoading] = useState(false)
   const [unarchivingId, setUnarchivingId] = useState<string | null>(null)
 
-  const apiPath =
-    programType === 'strength'
-      ? '/api/programs'
-      : '/api/cardio/programs'
+  const apiPath = '/api/programs'
 
   // Fetch archived programs when expanded
   useEffect(() => {

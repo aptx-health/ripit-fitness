@@ -24,26 +24,22 @@ import {
 async function waitForCloningComplete(
   prisma: PrismaClient,
   programId: string,
-  programType: 'strength' | 'cardio' = 'strength',
   timeoutMs: number = 10000
 ): Promise<void> {
   const startTime = Date.now();
-  const pollInterval = 100; // Poll every 100ms
+  const pollInterval = 100;
 
   while (Date.now() - startTime < timeoutMs) {
-    const program = programType === 'strength'
-      ? await prisma.program.findUnique({ where: { id: programId }, select: { copyStatus: true } })
-      : await prisma.cardioProgram.findUnique({ where: { id: programId }, select: { copyStatus: true } });
+    const program = await prisma.program.findUnique({ where: { id: programId }, select: { copyStatus: true } });
 
     if (!program) {
       throw new Error('Program not found - cloning may have failed');
     }
 
     if (program.copyStatus === 'ready') {
-      return; // Cloning complete
+      return;
     }
 
-    // Wait before next poll
     await new Promise(resolve => setTimeout(resolve, pollInterval));
   }
 
@@ -89,8 +85,7 @@ describe('Community Programs API', () => {
       const validation = await validateProgramForPublishing(
         prisma,
         program.id,
-        userId,
-        'strength'
+        userId
       );
 
       // Assert: Validation should pass
@@ -126,8 +121,7 @@ describe('Community Programs API', () => {
       const validation = await validateProgramForPublishing(
         prisma,
         program.id,
-        userId,
-        'strength'
+        userId
       );
 
       // Assert: Validation should fail
@@ -165,8 +159,7 @@ describe('Community Programs API', () => {
       const validation = await validateProgramForPublishing(
         prisma,
         program.id,
-        userId,
-        'strength'
+        userId
       );
 
       // Assert: Validation should fail
@@ -187,8 +180,7 @@ describe('Community Programs API', () => {
       const validation = await validateProgramForPublishing(
         prisma,
         program.id,
-        userId,
-        'strength'
+        userId
       );
 
       // Assert: Validation should fail
@@ -223,7 +215,7 @@ describe('Community Programs API', () => {
       });
 
       // Act: Calculate stats
-      const stats = calculateProgramStats(fullProgram!, 'strength');
+      const stats = calculateProgramStats(fullProgram!);
 
       // Assert: Stats should be correct
       expect(stats.weekCount).toBe(3);
@@ -268,7 +260,7 @@ describe('Community Programs API', () => {
       });
 
       // Act: Publish the program
-      const result = await publishProgramToCommunity(prisma, program.id, userId, 'strength');
+      const result = await publishProgramToCommunity(prisma, program.id, userId);
 
       // Assert: Publishing should succeed
       expect(result.success).toBe(true);
@@ -340,8 +332,7 @@ describe('Community Programs API', () => {
       const firstPublish = await publishProgramToCommunity(
         prisma,
         program.id,
-        userId,
-        'strength'
+        userId
       );
       expect(firstPublish.success).toBe(true);
 
@@ -349,8 +340,7 @@ describe('Community Programs API', () => {
       const secondPublish = await publishProgramToCommunity(
         prisma,
         program.id,
-        userId,
-        'strength'
+        userId
       );
 
       // Assert: Should fail with duplicate error
@@ -382,7 +372,7 @@ describe('Community Programs API', () => {
         },
       });
 
-      await publishProgramToCommunity(prisma, program.id, userId, 'strength');
+      await publishProgramToCommunity(prisma, program.id, userId);
 
       // Act: Check if published
       const isPublished = await isProgramPublished(prisma, program.id);
@@ -419,8 +409,7 @@ describe('Community Programs API', () => {
       const publishResult = await publishProgramToCommunity(
         prisma,
         originalProgram.id,
-        userId,
-        'strength'
+        userId
       );
 
       // Act: Clone the community program
@@ -435,7 +424,7 @@ describe('Community Programs API', () => {
       expect(cloneResult.programId).toBeDefined();
 
       // Wait for background cloning to complete
-      await waitForCloningComplete(prisma, cloneResult.programId!, 'strength');
+      await waitForCloningComplete(prisma, cloneResult.programId!);
 
       // Verify cloned program in database
       const clonedProgram = await prisma.program.findUnique({
@@ -492,8 +481,7 @@ describe('Community Programs API', () => {
       const publishResult = await publishProgramToCommunity(
         prisma,
         originalProgram.id,
-        userId,
-        'strength'
+        userId
       );
 
       const cloneResult = await cloneCommunityProgram(
@@ -503,7 +491,7 @@ describe('Community Programs API', () => {
       );
 
       // Wait for background cloning to complete
-      await waitForCloningComplete(prisma, cloneResult.programId!, 'strength');
+      await waitForCloningComplete(prisma, cloneResult.programId!);
 
       // Act: Delete the original personal program
       await prisma.program.delete({
@@ -563,8 +551,7 @@ describe('Community Programs API', () => {
       const publishResult = await publishProgramToCommunity(
         prisma,
         program.id,
-        userId,
-        'strength'
+        userId
       );
 
       // Act: Delete the community program
@@ -609,8 +596,7 @@ describe('Community Programs API', () => {
       const publishResult = await publishProgramToCommunity(
         prisma,
         program.id,
-        userId,
-        'strength'
+        userId
       );
 
       // Act: Try to delete as different user
@@ -669,10 +655,10 @@ describe('Community Programs API', () => {
         },
       });
 
-      await publishProgramToCommunity(prisma, program1.id, userId, 'strength');
+      await publishProgramToCommunity(prisma, program1.id, userId);
       // Wait a bit to ensure different timestamps
       await new Promise((resolve) => setTimeout(resolve, 10));
-      await publishProgramToCommunity(prisma, program2.id, userId, 'strength');
+      await publishProgramToCommunity(prisma, program2.id, userId);
 
       // Act: Browse community programs
       const result = await simulateBrowseCommunityPrograms(prisma, userId);

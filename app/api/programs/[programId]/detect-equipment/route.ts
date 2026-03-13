@@ -16,34 +16,20 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Detect program type
-    const strengthProgram = await prisma.program.findUnique({
+    // Verify program exists and belongs to user
+    const program = await prisma.program.findUnique({
       where: { id: programId, userId: user.id },
-      select: { programType: true },
+      select: { id: true },
     });
 
-    const cardioProgram = await prisma.cardioProgram.findUnique({
-      where: { id: programId, userId: user.id },
-    });
-
-    const programType = strengthProgram
-      ? 'strength'
-      : cardioProgram
-        ? 'cardio'
-        : null;
-
-    if (!programType) {
+    if (!program) {
       return NextResponse.json(
         { error: 'Program not found' },
         { status: 404 }
       );
     }
 
-    const equipment = await detectEquipmentNeeded(
-      prisma,
-      programId,
-      programType
-    );
+    const equipment = await detectEquipmentNeeded(prisma, programId);
 
     return NextResponse.json({ equipment });
   } catch (error) {

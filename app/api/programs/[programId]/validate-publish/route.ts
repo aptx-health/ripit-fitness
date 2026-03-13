@@ -18,27 +18,11 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Determine if this is a strength or cardio program
-    const strengthProgram = await prisma.program.findFirst({
-      where: { id: programId, userId: user.id },
-    })
-
-    const cardioProgram = await prisma.cardioProgram.findFirst({
-      where: { id: programId, userId: user.id },
-    })
-
-    const programType = strengthProgram ? 'strength' : cardioProgram ? 'cardio' : null
-
-    if (!programType) {
-      return NextResponse.json({ error: 'Program not found' }, { status: 404 })
-    }
-
     // Validate the program
     const validationResult = await validateProgramForPublishing(
       prisma,
       programId,
-      user.id,
-      programType
+      user.id
     )
 
     if (!validationResult.valid) {
@@ -49,41 +33,26 @@ export async function GET(
     }
 
     // Get program stats
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let program: any
-    if (programType === 'strength') {
-      program = await prisma.program.findUnique({
-        where: { id: programId },
-        include: {
-          weeks: {
-            include: {
-              workouts: {
-                include: {
-                  exercises: true,
-                },
+    const program = await prisma.program.findUnique({
+      where: { id: programId, userId: user.id },
+      include: {
+        weeks: {
+          include: {
+            workouts: {
+              include: {
+                exercises: true,
               },
             },
           },
         },
-      })
-    } else {
-      program = await prisma.cardioProgram.findUnique({
-        where: { id: programId },
-        include: {
-          weeks: {
-            include: {
-              sessions: true,
-            },
-          },
-        },
-      })
-    }
+      },
+    })
 
     if (!program) {
       return NextResponse.json({ error: 'Program not found' }, { status: 404 })
     }
 
-    const stats = calculateProgramStats(program, programType)
+    const stats = calculateProgramStats(program)
 
     // Get user's display name (with fallback)
     const displayName = await getUserDisplayName(prisma, user.id)

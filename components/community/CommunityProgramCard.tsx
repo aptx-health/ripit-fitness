@@ -1,6 +1,6 @@
 'use client'
 
-import { Activity, Dumbbell } from 'lucide-react'
+import { Dumbbell } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { EQUIPMENT_LABELS, GOAL_LABELS, LEVEL_LABELS } from '@/lib/constants/program-metadata'
@@ -73,8 +73,7 @@ export default function CommunityProgramCard({
       const data = await response.json()
 
       // Redirect to programs page with cloning parameter for status polling
-      const tab = program.programType === 'cardio' ? 'cardio' : 'strength'
-      router.push(`/programs?tab=${tab}&cloning=${data.programId}`)
+      router.push(`/programs?cloning=${data.programId}`)
     } catch (err) {
       console.error('Error adding program:', err)
       setError(err instanceof Error ? err.message : 'Failed to add program')
@@ -108,14 +107,10 @@ export default function CommunityProgramCard({
             {/* Type badge */}
             <span
               className="px-2 py-1 bg-primary text-primary-foreground text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1 whitespace-nowrap"
-              title={`${program.programType} program`}
+              title="strength program"
             >
-              {program.programType === 'strength' ? (
-                <Dumbbell size={12} />
-              ) : (
-                <Activity size={12} />
-              )}
-              <span>{program.programType}</span>
+              <Dumbbell size={12} />
+              <span>strength</span>
             </span>
           </div>
         </div>
@@ -173,7 +168,7 @@ export default function CommunityProgramCard({
         <div className="flex flex-wrap gap-x-3 sm:gap-x-4 gap-y-1 text-sm sm:text-base text-muted-foreground mb-3">
           <span>{program.durationDisplay || `${program.weekCount} weeks`}</span>
           <span className="hidden sm:inline">•</span>
-          <span>{program.workoutCount} {program.programType === 'cardio' ? 'sessions' : 'workouts'}</span>
+          <span>{program.workoutCount} workouts</span>
           {program.targetDaysPerWeek && (
             <>
               <span className="hidden sm:inline">•</span>

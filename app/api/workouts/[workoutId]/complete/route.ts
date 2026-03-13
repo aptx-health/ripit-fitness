@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
-import { recordStrengthPerformance } from '@/lib/stats/exercise-performance'
+
 
 type LoggedSetInput = {
   exerciseId: string
@@ -134,9 +134,6 @@ export async function POST(
 
       return completionRecord
     })
-
-    // Record performance metrics for brag strip
-    await recordStrengthPerformance(prisma, completion.id, user.id)
 
     return NextResponse.json({
       success: true,
