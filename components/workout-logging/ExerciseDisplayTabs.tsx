@@ -4,6 +4,7 @@ import { LoadingFrog } from '@/components/ui/loading-frog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/radix/tabs'
 import type { LoadState } from '@/hooks/useProgressiveExercises'
 import type { LoggedSet } from '@/hooks/useWorkoutStorage'
+import { EQUIPMENT_LABELS } from '@/lib/constants/program-metadata'
 import SetList from './SetList'
 
 interface PrescribedSet {
@@ -190,7 +191,7 @@ export default function ExerciseDisplayTabs({
                     key={item}
                     className="px-3 py-1.5 text-base sm:text-lg font-medium bg-muted text-foreground rounded-full border border-border"
                   >
-                    {item}
+                    {EQUIPMENT_LABELS[item] || item.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
                   </span>
                 ))}
               </div>
