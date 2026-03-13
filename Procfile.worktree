@@ -1,0 +1,10 @@
+# Overmind Procfile for worktree development
+#
+# Skips the clone worker (requires separate node_modules install in cloud-functions/clone-program)
+# Use this in worktrees: overmind start -f Procfile.worktree
+#
+# Individual process control: overmind restart app | overmind connect app
+
+postgres: ./scripts/start-postgres.sh
+redis: sleep 3 && ./scripts/start-redis.sh
+app: sleep 5 && doppler run -- npm run dev
