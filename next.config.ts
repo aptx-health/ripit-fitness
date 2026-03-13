@@ -1,4 +1,13 @@
+import withSerwistInit from "@serwist/next";
 import type { NextConfig } from "next";
+
+const withSerwist = withSerwistInit({
+  swSrc: "app/sw.ts",
+  swDest: "public/sw.js",
+  disable: process.env.NODE_ENV !== "production",
+  reloadOnOnline: false,
+  cacheOnNavigation: true,
+});
 
 const nextConfig: NextConfig = {
   output: 'standalone',
@@ -13,10 +22,9 @@ const nextConfig: NextConfig = {
     'better-auth',
     'pg',
   ],
-  // Empty Turbopack config to silence webpack config warning
-  // Turbopack automatically handles Node.js module exclusions in browser builds
+  // Turbopack config required for Next.js 16 (used in dev via --turbopack flag)
   turbopack: {},
-  // Keep webpack config for backward compatibility when using --webpack flag
+  // Webpack config used for production builds (--webpack flag) to support Serwist SW generation
   webpack: (config) => {
     // Add fallbacks for Node.js modules not available in browser
     config.resolve.fallback = {
@@ -30,4 +38,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSerwist(nextConfig);
