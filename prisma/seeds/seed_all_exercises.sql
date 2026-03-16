@@ -1,6 +1,6 @@
 -- Complete Exercise Seed Script
 -- Run this in Supabase SQL Editor or via psql to seed all exercises
--- This script seeds all 257 exercises in the correct order
+-- This script seeds all exercises in the correct order
 
 -- IMPORTANT: Legacy exercises (00_legacy_exercises.sql) MUST be applied first
 -- to preserve CUID IDs used in existing programs
@@ -33,25 +33,28 @@
 -- Copy contents of: 04_kettlebell_exercises.sql
 
 -- ============================================================================
--- 05. CLIMBING EXERCISES (21 exercises)
+-- 05. PULL-UP BAR ADVANCED EXERCISES (7 exercises)
 -- ============================================================================
+-- Formerly climbing exercises — climbing-specific equipment removed
 -- Copy contents of: 05_climbing_exercises.sql
 
 -- ============================================================================
--- 06. CABLE MACHINE EXERCISES (34 exercises)
+-- 06. CABLE, MACHINE, BARBELL, TRAP BAR, EZ BAR, TRX EXERCISES (62 exercises)
 -- ============================================================================
+-- Expanded: added gym-specific machines, barbell, trap bar, EZ bar, TRX
 -- Copy contents of: 06_cable_machine_exercises.sql
 
 -- ============================================================================
--- 07. CORE MOBILITY EXERCISES (24 exercises)
+-- 07. CORE & MOBILITY EXERCISES (22 exercises)
 -- ============================================================================
+-- Removed: lacrosse ball, L-Sit (parallel bars)
 -- Copy contents of: 07_core_mobility_exercises.sql
 
 -- ============================================================================
 -- VERIFICATION
 -- ============================================================================
 
--- Total count (should be 257)
+-- Total count (should be 269)
 SELECT COUNT(*) as total_exercises
 FROM "ExerciseDefinition"
 WHERE "isSystem" = true;
@@ -64,8 +67,8 @@ SELECT
     WHEN id LIKE 'ex_db_%' THEN 'Dumbbell'
     WHEN id LIKE 'ex_rb_%' THEN 'Resistance Band'
     WHEN id LIKE 'ex_kb_%' THEN 'Kettlebell'
-    WHEN id LIKE 'ex_cl_%' THEN 'Climbing'
-    WHEN id LIKE 'ex_cm_%' THEN 'Cable/Machine'
+    WHEN id LIKE 'ex_cl_%' THEN 'Pull-Up Bar Advanced'
+    WHEN id LIKE 'ex_cm_%' THEN 'Cable/Machine/Barbell/TRX'
     WHEN id LIKE 'ex_mo_%' THEN 'Core/Mobility'
     WHEN id LIKE 'exdef_%' THEN 'Library (exdef)'
     ELSE 'Other'
@@ -82,7 +85,7 @@ ORDER BY exercise_type;
 -- Dumbbell: 50
 -- Resistance Band: 32
 -- Kettlebell: 27
--- Climbing: 21
--- Cable/Machine: 34
--- Core/Mobility: 24
--- Total: 257
+-- Pull-Up Bar Advanced: 7
+-- Cable/Machine/Barbell/TRX: 62
+-- Core/Mobility: 22
+-- Total: 269

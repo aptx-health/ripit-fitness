@@ -1,5 +1,4 @@
 -- Bodyweight Exercises Seed File
--- Run this in Supabase SQL Editor
 -- System exercises for bodyweight training
 
 INSERT INTO "ExerciseDefinition" (
@@ -27,11 +26,11 @@ INSERT INTO "ExerciseDefinition" (
 ('ex_bw_007', 'Archer Push-Up', 'archer push-up', ARRAY['archer pushup', 'side to side pushup'], 'chest', true, null, '00000000-0000-0000-0000-000000000000', ARRAY['bodyweight'], ARRAY['chest', 'triceps'], ARRAY['front-delts'], NOW(), NOW()),
 
 -- Pull-up/Chin-up variations
-('ex_bw_008', 'Chin-Up', 'chin-up', ARRAY['chinup', 'chin up', 'underhand pullup'], 'back', true, null, '00000000-0000-0000-0000-000000000000', ARRAY['pull-up bar'], ARRAY['biceps', 'lats'], ARRAY['mid-back', 'forearms'], NOW(), NOW()),
-('ex_bw_009', 'Wide Grip Pull-Up', 'wide grip pull-up', ARRAY['wide pullup', 'wide grip pullup'], 'back', true, null, '00000000-0000-0000-0000-000000000000', ARRAY['pull-up bar'], ARRAY['lats'], ARRAY['mid-back', 'biceps'], NOW(), NOW()),
-('ex_bw_010', 'Neutral Grip Pull-Up', 'neutral grip pull-up', ARRAY['neutral pullup', 'parallel grip pullup', 'hammer grip pullup'], 'back', true, null, '00000000-0000-0000-0000-000000000000', ARRAY['pull-up bar'], ARRAY['lats', 'biceps'], ARRAY['forearms'], NOW(), NOW()),
-('ex_bw_011', 'L-Sit Pull-Up', 'l-sit pull-up', ARRAY['l sit pullup', 'lsit pullup'], 'back', true, null, '00000000-0000-0000-0000-000000000000', ARRAY['pull-up bar'], ARRAY['lats', 'biceps', 'abs'], ARRAY['forearms'], NOW(), NOW()),
-('ex_bw_012', 'Muscle-Up', 'muscle-up', ARRAY['muscle up', 'muscleup'], 'back', true, null, '00000000-0000-0000-0000-000000000000', ARRAY['pull-up bar'], ARRAY['lats', 'triceps', 'chest'], ARRAY['front-delts'], NOW(), NOW()),
+('ex_bw_008', 'Chin-Up', 'chin-up', ARRAY['chinup', 'chin up', 'underhand pullup'], 'back', true, null, '00000000-0000-0000-0000-000000000000', ARRAY['pull_up_bar'], ARRAY['biceps', 'lats'], ARRAY['mid-back', 'forearms'], NOW(), NOW()),
+('ex_bw_009', 'Wide Grip Pull-Up', 'wide grip pull-up', ARRAY['wide pullup', 'wide grip pullup'], 'back', true, null, '00000000-0000-0000-0000-000000000000', ARRAY['pull_up_bar'], ARRAY['lats'], ARRAY['mid-back', 'biceps'], NOW(), NOW()),
+('ex_bw_010', 'Neutral Grip Pull-Up', 'neutral grip pull-up', ARRAY['neutral pullup', 'parallel grip pullup', 'hammer grip pullup'], 'back', true, null, '00000000-0000-0000-0000-000000000000', ARRAY['pull_up_bar'], ARRAY['lats', 'biceps'], ARRAY['forearms'], NOW(), NOW()),
+('ex_bw_011', 'L-Sit Pull-Up', 'l-sit pull-up', ARRAY['l sit pullup', 'lsit pullup'], 'back', true, null, '00000000-0000-0000-0000-000000000000', ARRAY['pull_up_bar'], ARRAY['lats', 'biceps', 'abs'], ARRAY['forearms'], NOW(), NOW()),
+('ex_bw_012', 'Muscle-Up', 'muscle-up', ARRAY['muscle up', 'muscleup'], 'back', true, null, '00000000-0000-0000-0000-000000000000', ARRAY['pull_up_bar'], ARRAY['lats', 'triceps', 'chest'], ARRAY['front-delts'], NOW(), NOW()),
 
 -- Squat variations
 ('ex_bw_013', 'Bodyweight Squat', 'bodyweight squat', ARRAY['air squat', 'squat', 'bw squat'], 'legs', true, null, '00000000-0000-0000-0000-000000000000', ARRAY['bodyweight'], ARRAY['quads', 'glutes'], ARRAY['hamstrings'], NOW(), NOW()),
@@ -52,7 +51,7 @@ INSERT INTO "ExerciseDefinition" (
 ('ex_bw_024', 'Bicycle Crunch', 'bicycle crunch', ARRAY['bicycle crunches', 'bicycle'], 'core', true, null, '00000000-0000-0000-0000-000000000000', ARRAY['bodyweight'], ARRAY['abs', 'obliques'], ARRAY[]::text[], NOW(), NOW()),
 ('ex_bw_025', 'Russian Twist', 'russian twist', ARRAY['russian twists'], 'core', true, null, '00000000-0000-0000-0000-000000000000', ARRAY['bodyweight'], ARRAY['obliques', 'abs'], ARRAY[]::text[], NOW(), NOW()),
 ('ex_bw_026', 'Leg Raise', 'leg raise', ARRAY['leg raises', 'lying leg raise'], 'core', true, null, '00000000-0000-0000-0000-000000000000', ARRAY['bodyweight'], ARRAY['abs'], ARRAY[]::text[], NOW(), NOW()),
-('ex_bw_027', 'Hanging Leg Raise', 'hanging leg raise', ARRAY['hanging leg raises', 'hanging knee raise'], 'core', true, null, '00000000-0000-0000-0000-000000000000', ARRAY['pull-up bar'], ARRAY['abs'], ARRAY['forearms', 'lats'], NOW(), NOW()),
+('ex_bw_027', 'Hanging Leg Raise', 'hanging leg raise', ARRAY['hanging leg raises', 'hanging knee raise'], 'core', true, null, '00000000-0000-0000-0000-000000000000', ARRAY['pull_up_bar'], ARRAY['abs'], ARRAY['forearms', 'lats'], NOW(), NOW()),
 ('ex_bw_028', 'Mountain Climber', 'mountain climber', ARRAY['mountain climbers'], 'core', true, null, '00000000-0000-0000-0000-000000000000', ARRAY['bodyweight'], ARRAY['abs'], ARRAY['front-delts'], NOW(), NOW()),
 ('ex_bw_029', 'Hollow Body Hold', 'hollow body hold', ARRAY['hollow hold', 'hollow body'], 'core', true, null, '00000000-0000-0000-0000-000000000000', ARRAY['bodyweight'], ARRAY['abs'], ARRAY[]::text[], NOW(), NOW()),
 ('ex_bw_030', 'V-Up', 'v-up', ARRAY['v up', 'vup', 'jackknife'], 'core', true, null, '00000000-0000-0000-0000-000000000000', ARRAY['bodyweight'], ARRAY['abs'], ARRAY[]::text[], NOW(), NOW()),
@@ -63,11 +62,11 @@ INSERT INTO "ExerciseDefinition" (
 ('ex_bw_033', 'Plank Shoulder Tap', 'plank shoulder tap', ARRAY['shoulder taps', 'plank taps'], 'core', true, null, '00000000-0000-0000-0000-000000000000', ARRAY['bodyweight'], ARRAY['abs'], ARRAY['obliques'], NOW(), NOW()),
 
 -- Dip variations
-('ex_bw_034', 'Tricep Dip', 'tricep dip', ARRAY['triceps dip', 'bench dip'], 'arms', true, null, '00000000-0000-0000-0000-000000000000', ARRAY['dip bars'], ARRAY['triceps'], ARRAY['rear-delts'], NOW(), NOW()),
-('ex_bw_035', 'Chest Dip', 'chest dip', ARRAY['chest dips'], 'chest', true, null, '00000000-0000-0000-0000-000000000000', ARRAY['dip bars'], ARRAY['chest', 'triceps'], ARRAY['front-delts'], NOW(), NOW()),
+('ex_bw_034', 'Tricep Dip', 'tricep dip', ARRAY['triceps dip', 'bench dip'], 'arms', true, null, '00000000-0000-0000-0000-000000000000', ARRAY['dip_bars'], ARRAY['triceps'], ARRAY['rear-delts'], NOW(), NOW()),
+('ex_bw_035', 'Chest Dip', 'chest dip', ARRAY['chest dips'], 'chest', true, null, '00000000-0000-0000-0000-000000000000', ARRAY['dip_bars'], ARRAY['chest', 'triceps'], ARRAY['front-delts'], NOW(), NOW()),
 
 -- Bodyweight back exercises
-('ex_bw_036', 'Inverted Row', 'inverted row', ARRAY['bodyweight row', 'australian pullup', 'horizontal pullup'], 'back', true, null, '00000000-0000-0000-0000-000000000000', ARRAY['barbell', 'rack'], ARRAY['lats', 'mid-back'], ARRAY['biceps', 'rear-delts'], NOW(), NOW()),
+('ex_bw_036', 'Inverted Row', 'inverted row', ARRAY['bodyweight row', 'australian pullup', 'horizontal pullup'], 'back', true, null, '00000000-0000-0000-0000-000000000000', ARRAY['barbell'], ARRAY['lats', 'mid-back'], ARRAY['biceps', 'rear-delts'], NOW(), NOW()),
 ('ex_bw_037', 'Superman', 'superman', ARRAY['superman exercise', 'back extension'], 'back', true, null, '00000000-0000-0000-0000-000000000000', ARRAY['bodyweight'], ARRAY['lower-back', 'glutes'], ARRAY['hamstrings'], NOW(), NOW()),
 
 -- Glute/hamstring exercises
