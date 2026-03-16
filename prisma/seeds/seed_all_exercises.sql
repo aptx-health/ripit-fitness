@@ -54,7 +54,10 @@
 -- VERIFICATION
 -- ============================================================================
 
--- Total count (should be 269)
+-- Total count (should be 265)
+-- Note: 4 fewer than raw seed file totals (269) because ON CONFLICT skips
+-- exercises whose normalizedName already exists from an earlier seed file
+-- (e.g., legacy "Push-Up"/"Chin-Up" overlap with bodyweight variants)
 SELECT COUNT(*) as total_exercises
 FROM "ExerciseDefinition"
 WHERE "isSystem" = true;
@@ -80,12 +83,12 @@ GROUP BY exercise_type
 ORDER BY exercise_type;
 
 -- Expected results:
--- Legacy (CUID): 27
+-- Legacy (CUID): 25
 -- Bodyweight: 42
 -- Dumbbell: 50
 -- Resistance Band: 32
 -- Kettlebell: 27
 -- Pull-Up Bar Advanced: 7
--- Cable/Machine/Barbell/TRX: 62
+-- Cable/Machine/Barbell/TRX: 60
 -- Core/Mobility: 22
--- Total: 269
+-- Total: 265
