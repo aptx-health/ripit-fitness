@@ -27,6 +27,7 @@ interface PrescribedSetData {
   weight?: string
   rpe?: number
   rir?: number
+  isWarmup?: boolean
 }
 
 /**
@@ -146,6 +147,7 @@ export async function batchInsertStrengthWeek(
         ${set.weight || null},
         ${set.rpe || null},
         ${set.rir || null},
+        ${set.isWarmup ?? false},
         ${exerciseId},
         ${userId}
       )`
@@ -159,6 +161,7 @@ export async function batchInsertStrengthWeek(
         weight,
         rpe,
         rir,
+        "isWarmup",
         "exerciseId",
         "userId"
       )
