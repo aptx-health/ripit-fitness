@@ -79,6 +79,7 @@ export async function POST(
           weight: prescribedSet.weight,
           rpe: prescribedSet.rpe,
           rir: prescribedSet.rir,
+          isWarmup: prescribedSet.isWarmup,
           exerciseId: prescribedSet.exerciseId,
           userId: user.id,
         }

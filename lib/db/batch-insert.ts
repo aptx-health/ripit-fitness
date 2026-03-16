@@ -23,6 +23,7 @@ export type WeekData = {
         weight: string | null
         rpe: number | null
         rir: number | null
+        isWarmup?: boolean
       }>
     }>
   }>
@@ -138,6 +139,7 @@ export async function batchInsertWeekContent(
         ${set.weight || null},
         ${set.rpe || null},
         ${set.rir || null},
+        ${set.isWarmup ?? false},
         ${exerciseId},
         ${userId}
       )`
@@ -151,6 +153,7 @@ export async function batchInsertWeekContent(
         weight,
         rpe,
         rir,
+        "isWarmup",
         "exerciseId",
         "userId"
       )

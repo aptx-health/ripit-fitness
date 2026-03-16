@@ -36,6 +36,7 @@ interface PrescribedSetData {
   weight?: string
   rpe?: number
   rir?: number
+  isWarmup?: boolean
 }
 
 /**

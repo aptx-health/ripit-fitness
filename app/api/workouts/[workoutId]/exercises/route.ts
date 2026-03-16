@@ -13,6 +13,7 @@ type AddExerciseRequest = {
     weight?: string
     rpe?: number
     rir?: number
+    isWarmup?: boolean
   }>
 }
 
@@ -108,6 +109,7 @@ export async function POST(
             weight: set.weight || null,
             rpe: set.rpe || null,
             rir: set.rir || null,
+            isWarmup: set.isWarmup ?? false,
             exerciseId: exercise.id,
             userId: user.id,
           }))

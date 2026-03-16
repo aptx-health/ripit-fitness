@@ -23,66 +23,82 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Environment Setup
 
 ```bash
-# ALWAYS use Doppler for environment variables
-doppler run -- [command]
+# ALWAYS use Doppler for environment variables — ALWAYS specify --config explicitly
+doppler run --config dev_personal -- [command]
 
-# Start all services (recommended)
+# Primary repo: start all services
 overmind start                                # Starts PostgreSQL, Redis, worker, Next.js
+overmind start -l postgres,app                # Just DB + app (skip redis/worker)
 
-# Development server (if running services individually)
-doppler run -- npm run dev
+# Worktree: must specify Doppler config with correct BETTER_AUTH_URL for the worktree's port
+DOPPLER_CONFIG=dev_personal_worktree1 overmind start -l postgres,app
 
 # Database operations
-doppler run -- npx prisma studio              # Database GUI
-doppler run -- npx prisma generate            # Generate Prisma client
-doppler run -- npx prisma db push             # Apply schema to local DB (no migration files)
+doppler run --config dev_personal -- npx prisma studio
+doppler run --config dev_personal -- npx prisma generate
+doppler run --config dev_personal -- npx prisma db push
 
 # Testing
-doppler run -- npm test
-doppler run -- npm run type-check
-doppler run -- npm run lint
+doppler run --config dev_test -- npm test
+doppler run --config dev_personal -- npm run type-check
+doppler run --config dev_personal -- npm run lint
 ```
+
+### Worktree-Aware Local Dev
+
+Each git worktree gets **isolated Docker containers** (postgres, redis) on unique ports via `scripts/worktree-env.sh`. The Procfile handles port overrides automatically — Doppler sets all env vars, then `DATABASE_URL`/`REDIS_URL` are overridden with the worktree's port after Doppler runs.
+
+**First time in a new worktree:**
+```bash
+npm install
+doppler run --config dev_personal -- npx prisma generate
+DOPPLER_CONFIG=dev_personal_worktree1 overmind start -l postgres,app
+```
+
+Startup auto-applies schema, creates BetterAuth tables, and seeds a test user: **dmays@test.com / password**.
+
+See `/WORKTREE_SETUP.md` for full details and troubleshooting.
 
 ### Database Migration Strategy
 
-We use **Prisma** for schema management. `prisma db push` applies schema changes locally; production migrations are handled via the infra repo.
+Schema changes require BOTH a local `db push` AND a migration file. CI will block PRs that modify `schema.prisma` without a corresponding migration.
 
-**Quick Reference:**
+**Full process for schema changes:**
 
 ```bash
-# 1. Update prisma/schema.prisma with your changes
+# 1. Edit prisma/schema.prisma
 
-# 2. Apply to local DB
-doppler run -- npx prisma db push
+# 2. Apply to local DB (instant feedback, no migration files)
+doppler run --config dev_personal -- npx prisma db push
 
-# 3. Generate Prisma Client (if needed)
-doppler run -- npx prisma generate
+# 3. Generate Prisma Client
+doppler run --config dev_personal -- npx prisma generate
 
-# 4. Commit schema changes
-git add prisma/schema.prisma
-git commit -m "feat: describe your change"
+# 4. Create migration file manually
+#    Timestamp format: YYYYMMDDHHMMSS (use: date -u +"%Y%m%d%H%M%S")
+mkdir -p prisma/migrations/<timestamp>_<descriptive_name>
+#    Write the SQL in migration.sql (e.g., ALTER TABLE statements)
+
+# 5. Mark migration as already applied locally (db push already did it)
+DATABASE_URL="postgresql://postgres:postgres@localhost:<PG_PORT>/ripit" \
+  npx prisma migrate resolve --applied <timestamp>_<descriptive_name>
+
+# 6. Commit both schema + migration
+git add prisma/schema.prisma prisma/migrations/<timestamp>_<descriptive_name>/
 ```
+
+**Example migration.sql** (for adding a column):
+```sql
+ALTER TABLE "PrescribedSet" ADD COLUMN "isWarmup" BOOLEAN NOT NULL DEFAULT false;
+```
+
+**Why both?** `db push` gives fast local iteration. The migration file is what `prisma migrate deploy` runs in staging/prod during deploy (via init container).
 
 **CRITICAL - Claude's Role in Migrations:**
 
-When the user asks Claude to make schema changes:
-
-1. ✅ **Claude CAN**:
-   - Update `prisma/schema.prisma`
-   - Apply locally with `prisma db push`
-   - Commit schema changes to git
-
-2. ❌ **Claude MUST NEVER**:
-   - Apply migrations directly to production
-   - Execute SQL in production environment
-   - Use `prisma migrate deploy` (production command)
-
-3. 🛑 **When Claude completes a migration**:
-   - Always end with: "Schema updated locally. **Production migration is handled via the infra repo.**"
-   - Never proceed to production deployment automatically
-
-**Local Development**:
-- Edit schema → `doppler run -- npx prisma db push` (applies directly, no migration files)
+1. ✅ **Claude CAN**: Update schema, `db push` locally, create migration files, commit
+2. ❌ **Claude MUST NEVER**: Run `prisma migrate deploy` (production command), apply SQL to production
+3. 🛑 **After completing**: Say "Schema updated locally. **Production migration auto-applies on deploy.**"
 
 ## Project Structure
 
@@ -529,14 +545,13 @@ Self-hosted k8s infrastructure is operational (staging + production). PostgreSQL
 ## Important Notes
 
 - Use `fd` instead of `find` for file searching
-- Always use Doppler for environment variables (`doppler run -- [command]`)
+- **Doppler**: Always specify `--config` explicitly (e.g., `doppler run --config dev_personal --`). Never omit `--config`.
 - No emojis in code or commits unless explicitly requested
 - Keep solutions simple - avoid over-engineering
 - **Git file paths with special characters**: Always wrap file paths containing brackets or other special characters in double quotes when using git commands to prevent shell glob expansion. Example: `git add "app/api/exercises/[exerciseId]/route.ts"` instead of `git add app/api/exercises/[exerciseId]/route.ts`
-- **Local development**: Run `overmind start` to launch PostgreSQL (Docker, port 5433), Redis, worker, and Next.js. The `dev_personal` Doppler config points to local PostgreSQL (`postgres@localhost:5433/ripit`)
+- **Local development**: Use `overmind start` (primary) or `DOPPLER_CONFIG=dev_personal_worktree1 overmind start -l postgres,app` (worktree). Each worktree gets isolated postgres/redis containers on unique ports. Test user `dmays@test.com / password` is auto-seeded.
 - **Prisma version**: Stay on v6.x. Use `npx prisma@6.19.0` to avoid installing v7
--
-For local testing, use the doppler config `dev_test`. Example: `doppler run --config dev_test -- npm run test` This will ensure that the proper Testcontainer with the test database is utilized.
+- **Testing**: Use the `dev_test` doppler config: `doppler run --config dev_test -- npm test`
 
 ## GitHub Discussions
 
