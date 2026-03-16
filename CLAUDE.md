@@ -61,44 +61,44 @@ See `/WORKTREE_SETUP.md` for full details and troubleshooting.
 
 ### Database Migration Strategy
 
-We use **Prisma** for schema management. `prisma db push` applies schema changes locally; production migrations are handled via the infra repo.
+Schema changes require BOTH a local `db push` AND a migration file. CI will block PRs that modify `schema.prisma` without a corresponding migration.
 
-**Quick Reference:**
+**Full process for schema changes:**
 
 ```bash
-# 1. Update prisma/schema.prisma with your changes
+# 1. Edit prisma/schema.prisma
 
-# 2. Apply to local DB
-doppler run -- npx prisma db push
+# 2. Apply to local DB (instant feedback, no migration files)
+doppler run --config dev_personal -- npx prisma db push
 
-# 3. Generate Prisma Client (if needed)
-doppler run -- npx prisma generate
+# 3. Generate Prisma Client
+doppler run --config dev_personal -- npx prisma generate
 
-# 4. Commit schema changes
-git add prisma/schema.prisma
-git commit -m "feat: describe your change"
+# 4. Create migration file manually
+#    Timestamp format: YYYYMMDDHHMMSS (use: date -u +"%Y%m%d%H%M%S")
+mkdir -p prisma/migrations/<timestamp>_<descriptive_name>
+#    Write the SQL in migration.sql (e.g., ALTER TABLE statements)
+
+# 5. Mark migration as already applied locally (db push already did it)
+DATABASE_URL="postgresql://postgres:postgres@localhost:<PG_PORT>/ripit" \
+  npx prisma migrate resolve --applied <timestamp>_<descriptive_name>
+
+# 6. Commit both schema + migration
+git add prisma/schema.prisma prisma/migrations/<timestamp>_<descriptive_name>/
 ```
+
+**Example migration.sql** (for adding a column):
+```sql
+ALTER TABLE "PrescribedSet" ADD COLUMN "isWarmup" BOOLEAN NOT NULL DEFAULT false;
+```
+
+**Why both?** `db push` gives fast local iteration. The migration file is what `prisma migrate deploy` runs in staging/prod during deploy (via init container).
 
 **CRITICAL - Claude's Role in Migrations:**
 
-When the user asks Claude to make schema changes:
-
-1. ✅ **Claude CAN**:
-   - Update `prisma/schema.prisma`
-   - Apply locally with `prisma db push`
-   - Commit schema changes to git
-
-2. ❌ **Claude MUST NEVER**:
-   - Apply migrations directly to production
-   - Execute SQL in production environment
-   - Use `prisma migrate deploy` (production command)
-
-3. 🛑 **When Claude completes a migration**:
-   - Always end with: "Schema updated locally. **Production migration is handled via the infra repo.**"
-   - Never proceed to production deployment automatically
-
-**Local Development**:
-- Edit schema → `doppler run -- npx prisma db push` (applies directly, no migration files)
+1. ✅ **Claude CAN**: Update schema, `db push` locally, create migration files, commit
+2. ❌ **Claude MUST NEVER**: Run `prisma migrate deploy` (production command), apply SQL to production
+3. 🛑 **After completing**: Say "Schema updated locally. **Production migration auto-applies on deploy.**"
 
 ## Project Structure
 
