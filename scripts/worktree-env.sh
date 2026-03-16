@@ -1,0 +1,45 @@
+#!/bin/bash
+# Detects worktree slot and exports unique container names/ports.
+# Source this from other scripts: source "$(dirname "$0")/worktree-env.sh"
+#
+# Slot 0 = primary repo (/Users/dustin/repos/fitcsv)
+# Slot 1-9 = worktrees (derived from path hash)
+#
+# Exports:
+#   WORKTREE_SLOT         - integer slot number
+#   PG_CONTAINER_NAME     - unique postgres container name
+#   PG_PORT               - unique postgres host port
+#   REDIS_CONTAINER_NAME  - unique redis container name
+#   REDIS_PORT            - unique redis host port
+#   PG_VOLUME_NAME        - unique postgres volume name
+
+# Use git to detect worktree — works regardless of symlink resolution
+GIT_COMMON_DIR="$(git rev-parse --git-common-dir 2>/dev/null || true)"
+GIT_DIR="$(git rev-parse --git-dir 2>/dev/null || true)"
+
+# If git-dir != git-common-dir, we're in a worktree
+if [ -n "$GIT_COMMON_DIR" ] && [ -n "$GIT_DIR" ] && [ "$GIT_COMMON_DIR" != "$GIT_DIR" ]; then
+  # Extract worktree name from the git dir path (e.g., .git/worktrees/225-warmup-flag)
+  WORKTREE_NAME=$(basename "$GIT_DIR")
+  # Hash the name to a slot 1-9 (use printf, not echo -n, for POSIX compat)
+  HASH=$(printf '%s' "$WORKTREE_NAME" | cksum | awk '{print $1}')
+  WORKTREE_SLOT=$(( (HASH % 9) + 1 ))
+else
+  WORKTREE_SLOT=0
+fi
+
+if [ "$WORKTREE_SLOT" -eq 0 ]; then
+  PG_CONTAINER_NAME="fitcsv-postgres"
+  PG_PORT=5433
+  REDIS_CONTAINER_NAME="fitcsv-redis"
+  REDIS_PORT=6379
+  PG_VOLUME_NAME="fitcsv-pgdata"
+else
+  PG_CONTAINER_NAME="fitcsv-postgres-wt${WORKTREE_SLOT}"
+  PG_PORT=$((5433 + WORKTREE_SLOT))
+  REDIS_CONTAINER_NAME="fitcsv-redis-wt${WORKTREE_SLOT}"
+  REDIS_PORT=$((6379 + WORKTREE_SLOT))
+  PG_VOLUME_NAME="fitcsv-pgdata-wt${WORKTREE_SLOT}"
+fi
+
+export WORKTREE_SLOT PG_CONTAINER_NAME PG_PORT REDIS_CONTAINER_NAME REDIS_PORT PG_VOLUME_NAME

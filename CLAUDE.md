@@ -23,25 +23,41 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Environment Setup
 
 ```bash
-# ALWAYS use Doppler for environment variables
-doppler run -- [command]
+# ALWAYS use Doppler for environment variables — ALWAYS specify --config explicitly
+doppler run --config dev_personal -- [command]
 
-# Start all services (recommended)
+# Primary repo: start all services
 overmind start                                # Starts PostgreSQL, Redis, worker, Next.js
+overmind start -l postgres,app                # Just DB + app (skip redis/worker)
 
-# Development server (if running services individually)
-doppler run -- npm run dev
+# Worktree: must specify Doppler config with correct BETTER_AUTH_URL for the worktree's port
+DOPPLER_CONFIG=dev_personal_worktree1 overmind start -l postgres,app
 
 # Database operations
-doppler run -- npx prisma studio              # Database GUI
-doppler run -- npx prisma generate            # Generate Prisma client
-doppler run -- npx prisma db push             # Apply schema to local DB (no migration files)
+doppler run --config dev_personal -- npx prisma studio
+doppler run --config dev_personal -- npx prisma generate
+doppler run --config dev_personal -- npx prisma db push
 
 # Testing
-doppler run -- npm test
-doppler run -- npm run type-check
-doppler run -- npm run lint
+doppler run --config dev_test -- npm test
+doppler run --config dev_personal -- npm run type-check
+doppler run --config dev_personal -- npm run lint
 ```
+
+### Worktree-Aware Local Dev
+
+Each git worktree gets **isolated Docker containers** (postgres, redis) on unique ports via `scripts/worktree-env.sh`. The Procfile handles port overrides automatically — Doppler sets all env vars, then `DATABASE_URL`/`REDIS_URL` are overridden with the worktree's port after Doppler runs.
+
+**First time in a new worktree:**
+```bash
+npm install
+doppler run --config dev_personal -- npx prisma generate
+DOPPLER_CONFIG=dev_personal_worktree1 overmind start -l postgres,app
+```
+
+Startup auto-applies schema, creates BetterAuth tables, and seeds a test user: **dmays@test.com / password**.
+
+See `/WORKTREE_SETUP.md` for full details and troubleshooting.
 
 ### Database Migration Strategy
 
@@ -529,14 +545,13 @@ Self-hosted k8s infrastructure is operational (staging + production). PostgreSQL
 ## Important Notes
 
 - Use `fd` instead of `find` for file searching
-- Always use Doppler for environment variables (`doppler run -- [command]`)
+- **Doppler**: Always specify `--config` explicitly (e.g., `doppler run --config dev_personal --`). Never omit `--config`.
 - No emojis in code or commits unless explicitly requested
 - Keep solutions simple - avoid over-engineering
 - **Git file paths with special characters**: Always wrap file paths containing brackets or other special characters in double quotes when using git commands to prevent shell glob expansion. Example: `git add "app/api/exercises/[exerciseId]/route.ts"` instead of `git add app/api/exercises/[exerciseId]/route.ts`
-- **Local development**: Run `overmind start` to launch PostgreSQL (Docker, port 5433), Redis, worker, and Next.js. The `dev_personal` Doppler config points to local PostgreSQL (`postgres@localhost:5433/ripit`)
+- **Local development**: Use `overmind start` (primary) or `DOPPLER_CONFIG=dev_personal_worktree1 overmind start -l postgres,app` (worktree). Each worktree gets isolated postgres/redis containers on unique ports. Test user `dmays@test.com / password` is auto-seeded.
 - **Prisma version**: Stay on v6.x. Use `npx prisma@6.19.0` to avoid installing v7
--
-For local testing, use the doppler config `dev_test`. Example: `doppler run --config dev_test -- npm run test` This will ensure that the proper Testcontainer with the test database is utilized.
+- **Testing**: Use the `dev_test` doppler config: `doppler run --config dev_test -- npm test`
 
 ## GitHub Discussions
 
