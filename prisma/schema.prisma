@@ -121,6 +121,7 @@ model PrescribedSet {
   weight     String?
   rpe        Int?
   rir        Int?
+  isWarmup   Boolean  @default(false)
   exerciseId String
   userId     String
   exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
@@ -157,6 +158,7 @@ model LoggedSet {
   weightUnit   String            @default("lbs")
   rpe          Int?
   rir          Int?
+  isWarmup     Boolean           @default(false)
   exerciseId   String
   completionId String
   createdAt    DateTime          @default(now())

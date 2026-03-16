@@ -143,6 +143,7 @@ export async function POST(
               weight: set.weight,
               rpe: set.rpe,
               rir: set.rir,
+              isWarmup: set.isWarmup,
               exerciseId: newExercise.id,
               userId: user.id,
             }))

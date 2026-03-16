@@ -10,6 +10,7 @@ type LoggedSetInput = {
   weightUnit: string
   rpe: number | null
   rir: number | null
+  isWarmup?: boolean
 }
 
 export async function POST(
@@ -173,6 +174,7 @@ export async function POST(
             weightUnit: set.weightUnit,
             rpe: set.rpe,
             rir: set.rir,
+            isWarmup: set.isWarmup ?? false,
           })),
         })
       }
@@ -275,6 +277,7 @@ export async function GET(
       weightUnit: set.weightUnit,
       rpe: set.rpe,
       rir: set.rir,
+      isWarmup: set.isWarmup,
     }))
 
     return NextResponse.json({

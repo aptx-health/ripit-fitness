@@ -9,6 +9,7 @@ export interface ExerciseHistorySet {
   weightUnit: string;
   rpe: number | null;
   rir: number | null;
+  isWarmup: boolean;
 }
 
 export interface ExerciseHistory {
@@ -68,6 +69,7 @@ export async function getBatchExercisePerformance(
           weightUnit: true,
           rpe: true,
           rir: true,
+          isWarmup: true,
           exercise: {
             select: { exerciseDefinitionId: true }
           }
@@ -95,7 +97,8 @@ export async function getBatchExercisePerformance(
             weight: s.weight,
             weightUnit: s.weightUnit,
             rpe: s.rpe,
-            rir: s.rir
+            rir: s.rir,
+            isWarmup: s.isWarmup
           }));
 
         historyMap.set(defId, {
@@ -161,7 +164,8 @@ export async function getLastExercisePerformance(
       weight: set.weight,
       weightUnit: set.weightUnit,
       rpe: set.rpe,
-      rir: set.rir
+      rir: set.rir,
+      isWarmup: set.isWarmup
     }))
   };
 }

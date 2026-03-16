@@ -125,6 +125,7 @@ export async function POST(
           weight: string | null
           rpe: number | null
           rir: number | null
+          isWarmup: boolean
           exerciseId: string
           userId: string
         }> = []
@@ -161,6 +162,7 @@ export async function POST(
                 weight: set.weight,
                 rpe: set.rpe,
                 rir: set.rir,
+                isWarmup: set.isWarmup,
                 exerciseId: exerciseId,
                 userId: user.id,
               })
@@ -206,6 +208,7 @@ export async function POST(
             weight: string | null
             rpe: number | null
             rir: number | null
+            isWarmup: boolean
             exerciseId: string
             userId: string
           }> = []
