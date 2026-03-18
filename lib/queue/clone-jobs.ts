@@ -6,7 +6,7 @@ export interface ProgramCloneJob {
   communityProgramId: string
   programId: string
   userId: string
-  programType: 'strength' | 'cardio'
+  programType: 'strength'
 }
 
 let queue: Queue | null = null

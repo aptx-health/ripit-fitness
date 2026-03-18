@@ -2,7 +2,6 @@
 
 import { ArrowLeft, Check, ChevronDown, X } from 'lucide-react'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
 import { useMemo, useState } from 'react'
 import {
   Popover,
@@ -47,11 +46,7 @@ export default function CommunityProgramsView({
   communityPrograms,
   currentUserId,
 }: CommunityProgramsViewProps) {
-  const searchParams = useSearchParams()
-  const initialType = searchParams.get('type') || 'all'
-  const [selectedType, setSelectedType] = useState<'all' | 'strength' | 'cardio'>(
-    initialType as 'all' | 'strength' | 'cardio'
-  )
+  const [selectedType] = useState<'all' | 'strength'>('all')
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null)
   const [selectedGoals, setSelectedGoals] = useState<string[]>([])
   const [currentPage, setCurrentPage] = useState(1)
@@ -86,15 +81,6 @@ export default function CommunityProgramsView({
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
     return filteredPrograms.slice(startIndex, startIndex + ITEMS_PER_PAGE)
   }, [filteredPrograms, currentPage])
-
-  // Handle filter change
-  const handleTypeChange = (type: 'all' | 'strength' | 'cardio') => {
-    setSelectedType(type)
-    setCurrentPage(1) // Reset to first page when filter changes
-    // Update URL without navigation
-    const newUrl = type === 'all' ? '/community' : `/community?type=${type}`
-    window.history.replaceState(null, '', newUrl)
-  }
 
   // Handle page change
   const handlePageChange = (page: number) => {
@@ -151,36 +137,9 @@ export default function CommunityProgramsView({
         {/* Filter Buttons */}
         <div className="sticky top-0 bg-background z-10 pb-4 sm:pb-6">
           <div className="flex flex-wrap gap-2">
-            <button type="button"
-              onClick={() => handleTypeChange('all')}
-              className={`px-4 py-2 font-semibold transition-colors text-sm sm:text-base uppercase tracking-wider doom-focus-ring ${
-                selectedType === 'all'
-                  ? 'bg-primary text-primary-foreground doom-button-3d'
-                  : 'border-2 border-border text-foreground hover:border-primary hover:text-primary'
-              }`}
-            >
+            <span className="px-4 py-2 bg-primary text-primary-foreground doom-button-3d font-semibold text-sm sm:text-base uppercase tracking-wider">
               All ({communityPrograms.length})
-            </button>
-            <button type="button"
-              onClick={() => handleTypeChange('strength')}
-              className={`px-4 py-2 font-semibold transition-colors text-sm sm:text-base uppercase tracking-wider doom-focus-ring ${
-                selectedType === 'strength'
-                  ? 'bg-primary text-primary-foreground doom-button-3d'
-                  : 'border-2 border-border text-foreground hover:border-primary hover:text-primary'
-              }`}
-            >
-              Strength ({communityPrograms.filter((p) => p.programType === 'strength').length})
-            </button>
-            <button type="button"
-              onClick={() => handleTypeChange('cardio')}
-              className={`px-4 py-2 font-semibold transition-colors text-sm sm:text-base uppercase tracking-wider doom-focus-ring ${
-                selectedType === 'cardio'
-                  ? 'bg-primary text-primary-foreground doom-button-3d'
-                  : 'border-2 border-border text-foreground hover:border-primary hover:text-primary'
-              }`}
-            >
-              Cardio ({communityPrograms.filter((p) => p.programType === 'cardio').length})
-            </button>
+            </span>
           </div>
 
           {/* Additional Filters - Compact Popovers */}
@@ -274,14 +233,6 @@ export default function CommunityProgramsView({
                 ? 'Be the first to publish a program!'
                 : `No ${selectedType} programs have been published yet.`}
             </p>
-            {selectedType !== 'all' && (
-              <button type="button"
-                onClick={() => handleTypeChange('all')}
-                className="px-4 py-2 border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors uppercase tracking-wider font-semibold doom-focus-ring"
-              >
-                VIEW ALL PROGRAMS
-              </button>
-            )}
           </div>
         ) : (
           <>

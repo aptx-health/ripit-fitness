@@ -36,6 +36,7 @@ export type PrescribedSet = {
   weight?: string | null
   rpe?: number | null
   rir?: number | null
+  isWarmup?: boolean
 }
 
 export type WeekSummary = {

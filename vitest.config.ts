@@ -15,6 +15,7 @@ export default defineConfig({
       '**/dist/**',
       '**/fitcsv-wt2/**',
       '**/fitcsv-wt3/**',
+      '**/.claude/worktrees/**',
       '**/.git/**',
     ],
     env: {

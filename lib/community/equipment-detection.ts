@@ -38,24 +38,21 @@ function normalizeEquipment(equipment: string): string {
 
 export async function detectEquipmentNeeded(
   prisma: PrismaClient,
-  programId: string,
-  programType: 'strength' | 'cardio'
+  programId: string
 ): Promise<string[]> {
   const equipmentSet = new Set<string>();
 
-  if (programType === 'strength') {
-    const program = await prisma.program.findUnique({
-      where: { id: programId },
-      include: {
-        weeks: {
-          include: {
-            workouts: {
-              include: {
-                exercises: {
-                  include: {
-                    exerciseDefinition: {
-                      select: { equipment: true },
-                    },
+  const program = await prisma.program.findUnique({
+    where: { id: programId },
+    include: {
+      weeks: {
+        include: {
+          workouts: {
+            include: {
+              exercises: {
+                include: {
+                  exerciseDefinition: {
+                    select: { equipment: true },
                   },
                 },
               },
@@ -63,42 +60,14 @@ export async function detectEquipmentNeeded(
           },
         },
       },
-    });
+    },
+  });
 
-    program?.weeks.forEach((week) => {
-      week.workouts.forEach((workout) => {
-        workout.exercises.forEach((exercise) => {
-          exercise.exerciseDefinition.equipment.forEach((eq) => {
-            const normalized = normalizeEquipment(eq);
-            const allEquipment = [
-              ...Object.values(COMMON_EQUIPMENT),
-              ...Object.values(SPECIALIZED_EQUIPMENT),
-            ];
-            if (allEquipment.includes(normalized as Equipment)) {
-              equipmentSet.add(normalized as Equipment);
-            }
-          });
-        });
-      });
-    });
-  } else if (programType === 'cardio') {
-    const cardioProgram = await prisma.cardioProgram.findUnique({
-      where: { id: programId },
-      include: {
-        weeks: {
-          include: {
-            sessions: {
-              select: { equipment: true },
-            },
-          },
-        },
-      },
-    });
-
-    cardioProgram?.weeks.forEach((week) => {
-      week.sessions.forEach((session) => {
-        if (session.equipment) {
-          const normalized = normalizeEquipment(session.equipment);
+  program?.weeks.forEach((week) => {
+    week.workouts.forEach((workout) => {
+      workout.exercises.forEach((exercise) => {
+        exercise.exerciseDefinition.equipment.forEach((eq) => {
+          const normalized = normalizeEquipment(eq);
           const allEquipment = [
             ...Object.values(COMMON_EQUIPMENT),
             ...Object.values(SPECIALIZED_EQUIPMENT),
@@ -106,10 +75,10 @@ export async function detectEquipmentNeeded(
           if (allEquipment.includes(normalized as Equipment)) {
             equipmentSet.add(normalized as Equipment);
           }
-        }
+        });
       });
     });
-  }
+  });
 
   return Array.from(equipmentSet).sort();
 }

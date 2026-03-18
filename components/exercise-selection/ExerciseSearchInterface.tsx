@@ -3,6 +3,7 @@
 import { Filter, Search } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/radix/popover'
+import { EQUIPMENT_LABELS } from '@/lib/constants/program-metadata'
 
 export type ExerciseDefinition = {
   id: string
@@ -314,7 +315,7 @@ export function ExerciseSearchInterface({
                     {exercise.equipment.length > 0 && (
                       <div className="mb-2">
                         <span className="text-sm font-bold text-muted-foreground">Equipment: </span>
-                        <span className="text-sm text-foreground">{exercise.equipment.join(', ')}</span>
+                        <span className="text-sm text-foreground">{exercise.equipment.map(eq => EQUIPMENT_LABELS[eq] || eq.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())).join(', ')}</span>
                       </div>
                     )}
                   </div>

@@ -9,6 +9,7 @@ interface PrescribedSetInput {
   weight?: string | null
   rpe?: number | null
   rir?: number | null
+  isWarmup?: boolean
 }
 
 export async function PATCH(
@@ -88,6 +89,7 @@ export async function PATCH(
               weight: set.weight || null,
               rpe: set.rpe || null,
               rir: set.rir || null,
+              isWarmup: set.isWarmup ?? false,
               exerciseId: ex.id,
               userId: user.id
             }))
@@ -179,6 +181,7 @@ export async function PATCH(
                 weight: set.weight || null,
                 rpe: set.rpe || null,
                 rir: set.rir || null,
+                isWarmup: set.isWarmup ?? false,
                 exerciseId: exerciseIdToUpdate,
                 userId: user.id
               }))

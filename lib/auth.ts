@@ -1,5 +1,23 @@
 import { betterAuth } from "better-auth"
 import { Pool } from "pg"
+import { logger } from "@/lib/logger"
+
+const isRelaxedRateLimits = process.env.RELAXED_RATE_LIMITS === "true"
+
+if (isRelaxedRateLimits) {
+  logger.warn("BetterAuth rate limits relaxed — 100 req/60s for auth endpoints")
+}
+
+const rateLimitConfig = isRelaxedRateLimits
+  ? {
+      customRules: {
+        "/sign-up/*": { window: 60, max: 100 },
+        "/sign-in/*": { window: 60, max: 100 },
+        "/change-password": { window: 60, max: 100 },
+        "/change-email": { window: 60, max: 100 },
+      },
+    }
+  : undefined
 
 // Allow Vercel preview deploy origins alongside the configured BETTER_AUTH_URL
 const trustedOrigins = [
@@ -33,6 +51,7 @@ export const auth = betterAuth({
       generateId: false, // Use database default (uuid) — allows explicit ID setting in B2 migration
     },
   },
+  ...(rateLimitConfig && { rateLimit: rateLimitConfig }),
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24, // refresh every 24h

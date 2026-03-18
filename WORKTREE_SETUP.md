@@ -1,195 +1,116 @@
 # Worktree Setup Guide
 
-When setting up a new git worktree, follow these steps:
+## How It Works
 
-## Quick Setup
+Worktrees auto-detect their identity using `git rev-parse` and derive unique Docker container names and ports via `scripts/worktree-env.sh`. No manual port configuration needed — the same `Procfile` and start scripts work in the primary repo and all worktrees.
 
-**Important**: Name your worktrees with `-wt2` or `-wt3` suffix (e.g., `fitcsv-wt2`, `fitcsv-feature-wt3`) to enable automatic detection.
+| Location | Slot | Postgres Port | Redis Port | PG Container | Redis Container |
+|----------|------|---------------|------------|--------------|-----------------|
+| Primary repo | 0 | 5433 | 6379 | fitcsv-postgres | fitcsv-redis |
+| Any worktree | 1-9 (hashed) | 5434-5442 | 6380-6388 | fitcsv-postgres-wt{N} | fitcsv-redis-wt{N} |
 
+To check which slot a worktree gets:
 ```bash
-# 1. Copy Doppler token from primary worktree
-cd /Users/dustin/repos/fitcsv  # primary worktree (wt1)
-doppler configure get token --plain
-
-# 2. Create and configure new worktree
-cd /Users/dustin/repos/fitcsv-wt2  # your new worktree
-doppler configure set token <TOKEN_FROM_STEP_1>
-
-# 3. Run Supabase worktree setup (configures ports and Doppler)
-./scripts/setup-worktree-supabase.sh
-
-# 4. Run standard setup (npm install, Prisma generate)
-./scripts/setup-worktree.sh
-
-# 5. Start Supabase, reset database with migrations, and get JWT keys
-supabase start
-supabase db reset  # CRITICAL: Applies all migrations to match schema
-doppler run -- npx prisma generate  # Regenerate client with migrated schema
-supabase status -o env | grep -E '(ANON_KEY|SERVICE_ROLE_KEY)'
-
-# 6. Set JWT keys in Doppler (replace with actual values)
-doppler secrets set NEXT_PUBLIC_SUPABASE_ANON_KEY='<anon_key_from_above>'
-doppler secrets set SUPABASE_SERVICE_ROLE_KEY='<service_role_key_from_above>'
-
-# 7. Start development
-overmind start
+source scripts/worktree-env.sh
+echo "Slot: $WORKTREE_SLOT, PG: $PG_PORT, Redis: $REDIS_PORT"
 ```
 
-**Important**: Any time you switch branches or pull new migrations, run:
-```bash
-supabase db reset
-doppler run -- npx prisma generate
-overmind restart app  # Restart dev server to pick up new Prisma client
-```
+## Quick Setup (New Worktree)
 
-## What the Setup Script Does
+### Prerequisites
 
-1. Installs root dependencies (`npm install`)
-2. Installs worker dependencies (`cd cloud-functions/clone-program && npm install`)
-3. Generates Prisma client for root
-4. Generates Prisma client for worker
+Each worktree that runs on a different port needs a **Doppler config** with the correct `BETTER_AUTH_URL`. Create one if it doesn't exist:
 
-## Supabase Multi-Worktree Setup
+1. Duplicate `dev_personal` in Doppler as `dev_personal_worktree1` (or similar)
+2. Update `BETTER_AUTH_URL` and `NEXT_PUBLIC_APP_URL` to match the worktree's app port (e.g., `http://localhost:5300`)
 
-Each worktree runs its own isolated Supabase instance on unique ports to avoid conflicts:
-
-| Worktree | API Port | DB Port | Studio Port | Doppler Config |
-|----------|----------|---------|-------------|----------------|
-| wt1 (primary) | 54321 | 54322 | 54323 | `dev_personal_worktree1` |
-| wt2 | 54331 | 54332 | 54333 | `dev_personal_worktree2` |
-| wt3 | 54341 | 54342 | 54343 | `dev_personal_worktree3` |
-
-### How It Works
-
-1. **Port Isolation**: Each worktree's `supabase/config.toml` is configured with unique ports
-2. **Separate Databases**: Each Supabase instance has its own PostgreSQL database
-3. **Independent JWT Keys**: Each instance generates its own authentication keys
-4. **Doppler Configs**: Three configs store the appropriate URLs for each worktree
-
-### Setup Script
-
-The `setup-worktree-supabase.sh` script automatically:
-- Detects worktree number (1, 2, or 3) from directory name
-- Updates `supabase/config.toml` with correct ports
-- Configures Doppler to use the appropriate worktree config
-
-### Manual Setup (if auto-detection fails)
+### Setup Steps
 
 ```bash
-# Manually specify worktree number
-./scripts/setup-worktree-supabase.sh
-# Follow prompts to enter worktree number
+# 1. Install dependencies
+npm install
+cd cloud-functions/clone-program && npm install && cd ../..
 
-# Or populate Doppler config manually
-./scripts/populate-worktree-doppler.sh 2  # for worktree 2
+# 2. Generate Prisma client
+doppler run --config dev_personal -- npx prisma generate
+
+# 3. Start DB + app (skip redis/worker unless needed)
+DOPPLER_CONFIG=dev_personal_worktree1 overmind start -l postgres,app
 ```
 
-### Starting Supabase
+The startup automatically:
+- Creates an isolated postgres container on a unique port
+- Applies Prisma schema (`prisma db push`)
+- Creates BetterAuth tables
+- Seeds a test user: **dmays@test.com** / **password**
 
-The `Procfile` automatically starts Supabase when you run `overmind start`. Each worktree's Supabase will run on its configured ports.
-
-**Access your worktree's services**:
-- wt1: Studio at `http://127.0.0.1:54323`
-- wt2: Studio at `http://127.0.0.1:54333`
-- wt3: Studio at `http://127.0.0.1:54343`
-
-## Requirements
-
-- **Doppler** configured with valid token (see above)
-- **Docker** running (for Pub/Sub emulator and Supabase)
-- **Node.js** v20+
-- **Supabase CLI** installed (`brew install supabase/tap/supabase`)
-
-## Start Development
+### Primary Repo (no worktree)
 
 ```bash
-overmind start
+overmind start              # All services
+overmind start -l postgres,app   # Just DB + app
 ```
+
+No `DOPPLER_CONFIG` needed — defaults to `dev_personal`.
+
+## Key Files
+
+- `scripts/worktree-env.sh` — Detects worktree slot, exports `PG_PORT`, `REDIS_PORT`, container names
+- `scripts/start-postgres.sh` — Starts Docker postgres, applies schema, seeds test user
+- `scripts/start-redis.sh` — Starts Docker redis with worktree-aware names/ports
+- `Procfile` — Sources `worktree-env.sh`, overrides `DATABASE_URL`/`REDIS_URL` after Doppler
+
+## After Schema Changes
+
+```bash
+# If you changed prisma/schema.prisma:
+doppler run --config dev_personal -- npx prisma db push   # or let overmind restart handle it
+doppler run --config dev_personal -- npx prisma generate
+overmind restart app
+```
+
+## Running Multiple Worktrees Simultaneously
+
+Just start overmind in each worktree. Each gets its own postgres and redis containers on unique ports. No conflicts.
+
+**Note**: Next.js port is NOT auto-isolated. Each worktree's Doppler config should specify a unique port via `NEXT_PUBLIC_APP_URL` / `BETTER_AUTH_URL`.
 
 ## Troubleshooting
 
-### Radix UI Components Not Working (Popover, Dialog, etc.)
-
-**Symptom**: Popovers open but buttons aren't clickable, or dialogs don't position correctly.
-
-**Cause**: Missing `node_modules` packages (e.g., `@radix-ui/react-popover`).
-
-**Solution**:
-```bash
-npm install  # Reinstall all dependencies
-overmind restart app
-```
-
-Each worktree needs its own `node_modules` directory.
-
-### "Unknown argument" or "Invalid Prisma invocation" Errors
-
-**Symptom**: API errors mentioning fields that should exist (e.g., "Unknown argument `goals`").
-
-**Cause**: Database schema doesn't match Prisma schema, or Prisma client is stale.
-
-**Solution**:
-```bash
-# Apply all migrations to local database
-supabase db reset
-
-# Regenerate Prisma client
-doppler run -- npx prisma generate
-
-# Restart dev server to pick up new client
-overmind restart app
-```
-
-**Why this happens**: The Prisma client is generated at build time. If you run migrations without regenerating the client, or if the dev server is already running, it will use the old client that doesn't know about new fields.
-
-### "PrismaClientConstructorValidationError: Invalid value undefined for datasource"
-
-This means Doppler isn't providing `DATABASE_URL`. Verify:
-
-```bash
-doppler secrets --only-names
-```
-
-Should show `DATABASE_URL` and other secrets. If not:
-1. Verify Doppler config is set correctly: `doppler configure get config`
-2. Should show `dev_personal_worktree1`, `dev_personal_worktree2`, or `dev_personal_worktree3`
-3. If wrong, run `./scripts/setup-worktree-supabase.sh` again
-
 ### "command not found: next" or "command not found: tsx"
-
-Run the setup script again:
-
 ```bash
-./scripts/setup-worktree.sh
+npm install
 ```
 
-### Running Multiple Worktrees Simultaneously
-
-You can run up to 3 worktrees at the same time without port conflicts:
-
+### "Unknown argument" / Prisma field errors
+Prisma client is stale. Regenerate:
 ```bash
-# In wt1 (primary)
-cd ~/repos/fitcsv
-overmind start
-
-# In wt2 (separate terminal)
-cd ~/repos/fitcsv-wt2
-overmind start
-
-# In wt3 (separate terminal)
-cd ~/repos/fitcsv-wt3
-overmind start
+doppler run --config dev_personal -- npx prisma generate
+overmind restart app
 ```
 
-Each will have its own:
-- Next.js dev server (ports 3000, 3001, 3002 - you may need to update package.json dev script)
-- Supabase instance (isolated databases on different ports)
-- PubSub emulator (same emulator, different projects)
-- Clone worker (different ports: 8082, 8083, 8084)
+### "Invalid origin" on signup/login
+Your Doppler config's `BETTER_AUTH_URL` doesn't match the app's actual URL/port. Update it in Doppler.
 
-**Note**: Update your `package.json` dev script if running multiple Next.js instances:
-```json
-"dev": "next dev -p 3000"  // wt1
-"dev": "next dev -p 3001"  // wt2
-"dev": "next dev -p 3002"  // wt3
+### ECONNREFUSED on signup/login
+The app can't reach postgres. Check that `DATABASE_URL` port matches the actual postgres container port:
+```bash
+source scripts/worktree-env.sh && echo "Expected port: $PG_PORT"
+docker ps | grep fitcsv-postgres
+```
+
+### Port conflict / container name conflict
+Check which slot you got and if another worktree hashed to the same slot:
+```bash
+source scripts/worktree-env.sh && echo $WORKTREE_SLOT
+docker ps | grep fitcsv
+```
+Hash collisions are possible but unlikely (9 slots). If it happens, stop the conflicting worktree first.
+
+### Full DB reset
+```bash
+source scripts/worktree-env.sh
+docker stop $PG_CONTAINER_NAME && docker rm $PG_CONTAINER_NAME
+docker volume rm $PG_VOLUME_NAME
+overmind restart postgres
 ```

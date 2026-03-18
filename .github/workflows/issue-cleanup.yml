@@ -1,30 +1,24 @@
-name: Issue Cleanup
+name: Remove in-progress on close
 
 on:
   issues:
     types: [closed]
 
 jobs:
-  remove-in-progress-label:
+  cleanup-label:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps:
-      - name: Remove in-progress label
-        uses: actions/github-script@v7
+      - uses: actions/github-script@v7
         with:
           script: |
-            const labelName = 'in-progress';
+            const label = 'in-progress';
             const labels = context.payload.issue.labels.map(l => l.name);
-
-            if (!labels.includes(labelName)) {
-              console.log(`Label "${labelName}" not found on issue #${context.issue.number}, skipping.`);
-              return;
+            if (labels.includes(label)) {
+              await github.rest.issues.removeLabel({
+                ...context.repo,
+                issue_number: context.issue.number,
+                name: label,
+              });
             }
-
-            await github.rest.issues.removeLabel({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              name: labelName,
-            });
-
-            console.log(`Removed "${labelName}" label from issue #${context.issue.number}.`);

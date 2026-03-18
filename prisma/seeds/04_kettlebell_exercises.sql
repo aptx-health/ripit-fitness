@@ -1,5 +1,4 @@
 -- Kettlebell Exercises Seed File
--- Run this in Supabase SQL Editor
 -- System exercises for kettlebell training
 
 INSERT INTO "ExerciseDefinition" (

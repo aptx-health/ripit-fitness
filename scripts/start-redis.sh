@@ -1,9 +1,12 @@
 #!/bin/bash
 set -e
 
-CONTAINER_NAME="fitcsv-redis"
+# Load worktree-aware container names and ports
+source "$(dirname "$0")/worktree-env.sh"
+
+CONTAINER_NAME="$REDIS_CONTAINER_NAME"
 IMAGE="redis:7-alpine"
-PORT=6379
+PORT="$REDIS_PORT"
 
 # Cleanup function for graceful shutdown
 cleanup() {
