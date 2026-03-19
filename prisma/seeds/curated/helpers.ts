@@ -86,11 +86,14 @@ export async function createProgramFromSpec(
     for (let i = 0; i < workoutSpec.exercises.length; i++) {
       const exSpec = workoutSpec.exercises[i]
       const def = await findExerciseDef(prisma, exSpec.name)
+      if (!def) {
+        throw new Error(`Exercise definition not found: "${exSpec.name}". Run seedCuratedExerciseDefinitions first.`)
+      }
 
       await prisma.exercise.create({
         data: {
           name: exSpec.name,
-          exerciseDefinitionId: def?.id ?? null,
+          exerciseDefinitionId: def.id,
           order: i + 1,
           workoutId: workout.id,
           userId,
