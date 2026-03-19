@@ -68,6 +68,7 @@ model ExerciseDefinition {
   updatedAt      DateTime   @updatedAt
   equipment      String[]   @default([])
   instructions   String?
+  imageUrls      String[]   @default([])
   primaryFAUs    String[]   @default([])
   secondaryFAUs  String[]   @default([])
   userId         String

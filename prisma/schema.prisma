@@ -78,6 +78,7 @@ model ExerciseDefinition {
   equipment      String[]   @default([])
   instructions   String?
   notes          String?
+  imageUrls      String[]   @default([])
   primaryFAUs    String[]   @default([])
   secondaryFAUs  String[]   @default([])
   userId         String
