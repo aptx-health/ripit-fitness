@@ -1,0 +1,2543 @@
+{
+  "id": "cmmw7ypbs0003vrcxpp70r99f",
+  "name": "Machine Starter",
+  "description": "Day-one program for true beginners and older adults. All machines, fixed movement paths, low cognitive load. Alternating A/B full body workouts, 2-3x/week.\n\nProgram starts with lower volume (sets) and intensity and gradually ramps up. Lower intensity for very taxing exercises like Leg Press - gradually adjust to hard exercises.",
+  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+  "isActive": false,
+  "createdAt": "2026-03-18T15:51:55.577Z",
+  "updatedAt": "2026-03-18T19:01:03.078Z",
+  "isUserCreated": false,
+  "programType": "strength",
+  "isArchived": false,
+  "archivedAt": null,
+  "copyStatus": "ready",
+  "goals": [],
+  "level": null,
+  "durationWeeks": null,
+  "durationDisplay": null,
+  "targetDaysPerWeek": null,
+  "equipmentNeeded": [],
+  "focusAreas": [],
+  "weeks": [
+    {
+      "id": "cmmw7ypbu0005vrcxtltw06zd",
+      "weekNumber": 1,
+      "name": null,
+      "description": "This is an introductory week with lower intensity so you can acclimate to strength training and familiarize yourself with the equipment.",
+      "programId": "cmmw7ypbs0003vrcxpp70r99f",
+      "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+      "workouts": [
+        {
+          "id": "cmmw7ypbv0007vrcx5ooo6c2n",
+          "name": "Machine Full Body A",
+          "dayNumber": 1,
+          "weekId": "cmmw7ypbu0005vrcxtltw06zd",
+          "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+          "exercises": [
+            {
+              "id": "cmmw7ypbw0009vrcxg6edenpf",
+              "name": "Chest Press",
+              "exerciseDefinitionId": "cmludujn60004la0427hncp03",
+              "order": 1,
+              "exerciseGroup": null,
+              "workoutId": "cmmw7ypbv0007vrcx5ooo6c2n",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cmmw7ypbw000avrcxe1aw2bvj",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "cmmw7ypbw0009vrcxg6edenpf",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmw7ypbw000bvrcxsd85gz25",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "cmmw7ypbw0009vrcxg6edenpf",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "cmmw7ypbz000dvrcxd0m4i3ex",
+              "name": "Shoulder Press",
+              "exerciseDefinitionId": "cmmw7ypb50000vrcxov7kfy03",
+              "order": 2,
+              "exerciseGroup": null,
+              "workoutId": "cmmw7ypbv0007vrcx5ooo6c2n",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cmmw7ypbz000evrcx7n39ctnh",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "cmmw7ypbz000dvrcxd0m4i3ex",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmw7ypbz000fvrcxfxghyz1k",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "cmmw7ypbz000dvrcxd0m4i3ex",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "cmmw7ypc1000hvrcxns2u1eix",
+              "name": "Lat Pulldown",
+              "exerciseDefinitionId": "ex_cm_005",
+              "order": 3,
+              "exerciseGroup": null,
+              "workoutId": "cmmw7ypbv0007vrcx5ooo6c2n",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cmmwe8mb50010vr7wirqikgtp",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "cmmw7ypc1000hvrcxns2u1eix",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwe8mb50011vr7wjrvssbw3",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "cmmw7ypc1000hvrcxns2u1eix",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "cmmw7ypc3000lvrcxskzrkr33",
+              "name": "Leg Press",
+              "exerciseDefinitionId": "cmiz7vldb000bvr0mw4qzzagc",
+              "order": 4,
+              "exerciseGroup": null,
+              "workoutId": "cmmw7ypbv0007vrcx5ooo6c2n",
+              "notes": "Feet high on the pad is easier. Feet low requires greater flexibility and strength. Don't lock out knees at the top. Control the eccentric.",
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cmmwe7w7a000mvr7w7f1i26r1",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 5,
+                  "exerciseId": "cmmw7ypc3000lvrcxskzrkr33",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwe7w7a000nvr7wqdycd6e5",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 5,
+                  "exerciseId": "cmmw7ypc3000lvrcxskzrkr33",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "cmmw7ypc4000pvrcx3habtzhz",
+              "name": "Leg Extensions",
+              "exerciseDefinitionId": "cmmw5na9a0003vr1iizasjseb",
+              "order": 5,
+              "exerciseGroup": null,
+              "workoutId": "cmmw7ypbv0007vrcx5ooo6c2n",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cmmwe8w6r0016vr7wmzqjmn3j",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "cmmw7ypc4000pvrcx3habtzhz",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwe8w6r0017vr7wg98qgebs",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "cmmw7ypc4000pvrcx3habtzhz",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "cmmw7ypc6000tvrcx8leg66a6",
+              "name": "Seated Leg Curl",
+              "exerciseDefinitionId": "cmmw5na9b0004vr1iuvpvzyjo",
+              "order": 6,
+              "exerciseGroup": null,
+              "workoutId": "cmmw7ypbv0007vrcx5ooo6c2n",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cmmwe98vc001cvr7w2valp05s",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 5,
+                  "exerciseId": "cmmw7ypc6000tvrcx8leg66a6",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwe98vc001dvr7wycptk7by",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 5,
+                  "exerciseId": "cmmw7ypc6000tvrcx8leg66a6",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "cmmw7ypc8000xvrcx7mxxhhuu",
+              "name": "Back Extension",
+              "exerciseDefinitionId": "cmmw7ypba0001vrcxewg4lugr",
+              "order": 7,
+              "exerciseGroup": null,
+              "workoutId": "cmmw7ypbv0007vrcx5ooo6c2n",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cmmwe9fry001gvr7wxibk7mbf",
+                  "setNumber": 1,
+                  "reps": "10",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 5,
+                  "exerciseId": "cmmw7ypc8000xvrcx7mxxhhuu",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwe9fry001hvr7w99rhyj5y",
+                  "setNumber": 2,
+                  "reps": "10",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 5,
+                  "exerciseId": "cmmw7ypc8000xvrcx7mxxhhuu",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmmw7ypc90011vrcxfrmqhoxg",
+          "name": "Machine Full Body B",
+          "dayNumber": 2,
+          "weekId": "cmmw7ypbu0005vrcxtltw06zd",
+          "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+          "exercises": [
+            {
+              "id": "cmmw7ypca0013vrcxf94rqaxc",
+              "name": "Chest Supported Row",
+              "exerciseDefinitionId": "cmmw5na9d0006vr1il03u66gn",
+              "order": 1,
+              "exerciseGroup": null,
+              "workoutId": "cmmw7ypc90011vrcxfrmqhoxg",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cmmw7ypca0014vrcxybc9sq0v",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "cmmw7ypca0013vrcxf94rqaxc",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmw7ypca0015vrcx4nv1w89s",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "cmmw7ypca0013vrcxf94rqaxc",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "cmmw7ypcb0017vrcxp23xep70",
+              "name": "Dip Machine",
+              "exerciseDefinitionId": "cmmw5na9e0007vr1i9pfrvgdf",
+              "order": 2,
+              "exerciseGroup": null,
+              "workoutId": "cmmw7ypc90011vrcxfrmqhoxg",
+              "notes": "Lean slightly forward for chest emphasis, stay upright for tricep emphasis.",
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cmmw7ypcb0018vrcxgz7zjzso",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "cmmw7ypcb0017vrcxp23xep70",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmw7ypcb0019vrcxwq9dvga5",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "cmmw7ypcb0017vrcxp23xep70",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "cmmw7ypcc001bvrcxrfs39c9g",
+              "name": "Leg Press",
+              "exerciseDefinitionId": "cmiz7vldb000bvr0mw4qzzagc",
+              "order": 3,
+              "exerciseGroup": null,
+              "workoutId": "cmmw7ypc90011vrcxfrmqhoxg",
+              "notes": "Feet high on the pad is easier. Feet low requires greater flexibility and strength. Don't lock out knees at the top. Control the eccentric.",
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cmmwe84om000qvr7wxkppbkhr",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 5,
+                  "exerciseId": "cmmw7ypcc001bvrcxrfs39c9g",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwe84om000rvr7widemucwq",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 5,
+                  "exerciseId": "cmmw7ypcc001bvrcxrfs39c9g",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "cmmw7ypce001fvrcxh62q10kd",
+              "name": "Thigh Adductor",
+              "exerciseDefinitionId": "cmmw5na9f0008vr1ih4th40mr",
+              "order": 4,
+              "exerciseGroup": null,
+              "workoutId": "cmmw7ypc90011vrcxfrmqhoxg",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cmmwe9zki001svr7wyic9od0x",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "cmmw7ypce001fvrcxh62q10kd",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwe9zki001tvr7w86bj5yjs",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "cmmw7ypce001fvrcxh62q10kd",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "cmmw7ypcf001jvrcxnr04wb3j",
+              "name": "Thigh Abductor",
+              "exerciseDefinitionId": "cmmw5na9g0009vr1iqyd269iy",
+              "order": 5,
+              "exerciseGroup": null,
+              "workoutId": "cmmw7ypc90011vrcxfrmqhoxg",
+              "notes": "Lean forward during sets to activate glutes.",
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cmmwea5pv001wvr7w7l0zn4uw",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "cmmw7ypcf001jvrcxnr04wb3j",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwea5pv001xvr7wprcq0pjt",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "cmmw7ypcf001jvrcxnr04wb3j",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "cmmw7ypch001nvrcxmp4tflzp",
+              "name": "Ab Crunch Machine",
+              "exerciseDefinitionId": "cmmw5na9h000avr1i5e0dlaje",
+              "order": 6,
+              "exerciseGroup": null,
+              "workoutId": "cmmw7ypc90011vrcxfrmqhoxg",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cmmweacd70020vr7wyfwmvh0e",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "cmmw7ypch001nvrcxmp4tflzp",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmweacd70021vr7wssct8a94",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "cmmw7ypch001nvrcxmp4tflzp",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "cmmw7ypci001rvrcxr41kfvo0",
+              "name": "Back Extension",
+              "exerciseDefinitionId": "cmmw7ypba0001vrcxewg4lugr",
+              "order": 7,
+              "exerciseGroup": null,
+              "workoutId": "cmmw7ypc90011vrcxfrmqhoxg",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cmmweaehr0024vr7wsc20crto",
+                  "setNumber": 1,
+                  "reps": "10",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "cmmw7ypci001rvrcxr41kfvo0",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmweaehr0025vr7wl7f40q3l",
+                  "setNumber": 2,
+                  "reps": "10",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "cmmw7ypci001rvrcxr41kfvo0",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cmmweqby0002hvr7wrs6lrpfm",
+      "weekNumber": 2,
+      "name": null,
+      "description": "Now we're increasing the intensity slightly. Just challenging ourselves a little bit more with less reps-in-reserve.",
+      "programId": "cmmw7ypbs0003vrcxpp70r99f",
+      "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+      "workouts": [
+        {
+          "id": "i2nc6o7awesqtli1sxxqp46k",
+          "name": "Machine Full Body A",
+          "dayNumber": 1,
+          "weekId": "cmmweqby0002hvr7wrs6lrpfm",
+          "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+          "exercises": [
+            {
+              "id": "ez6hziv1er3glinh7j9qxqk6",
+              "name": "Chest Press",
+              "exerciseDefinitionId": "cmludujn60004la0427hncp03",
+              "order": 1,
+              "exerciseGroup": null,
+              "workoutId": "i2nc6o7awesqtli1sxxqp46k",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "ak4ws87waxrzfkw3r91zm294",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "ez6hziv1er3glinh7j9qxqk6",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "d7dc7zvsrk025gfkisugzlik",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "ez6hziv1er3glinh7j9qxqk6",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "kfbamxzq2krany63em84z50q",
+              "name": "Shoulder Press",
+              "exerciseDefinitionId": "cmmw7ypb50000vrcxov7kfy03",
+              "order": 2,
+              "exerciseGroup": null,
+              "workoutId": "i2nc6o7awesqtli1sxxqp46k",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "siv1seeq1sf3ag7nkcunje7t",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "kfbamxzq2krany63em84z50q",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "fv0774os1vo59j999dip419o",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "kfbamxzq2krany63em84z50q",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "z57ime4ovp5uyp6szf6ylogd",
+              "name": "Lat Pulldown",
+              "exerciseDefinitionId": "ex_cm_005",
+              "order": 3,
+              "exerciseGroup": null,
+              "workoutId": "i2nc6o7awesqtli1sxxqp46k",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "be9ko2aguc9q6yggw3odm896",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "z57ime4ovp5uyp6szf6ylogd",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "wj1ihi0l2qgam704tqruor7i",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "z57ime4ovp5uyp6szf6ylogd",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "cayyegin2egq3lhvw9a0qlq8",
+              "name": "Leg Press",
+              "exerciseDefinitionId": "cmiz7vldb000bvr0mw4qzzagc",
+              "order": 4,
+              "exerciseGroup": null,
+              "workoutId": "i2nc6o7awesqtli1sxxqp46k",
+              "notes": "Feet high on the pad is easier. Feet low requires greater flexibility and strength. Don't lock out knees at the top. Control the eccentric.",
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "vpi2kkfmlz7gpmmqp2fsm9sj",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "cayyegin2egq3lhvw9a0qlq8",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "hf13l8l5ftmliy5rvr1rhdno",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "cayyegin2egq3lhvw9a0qlq8",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "bb8zvton01nt1irk4ohbkjby",
+              "name": "Leg Extensions",
+              "exerciseDefinitionId": "cmmw5na9a0003vr1iizasjseb",
+              "order": 5,
+              "exerciseGroup": null,
+              "workoutId": "i2nc6o7awesqtli1sxxqp46k",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "mpg6otxulni4abeklz406izf",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "bb8zvton01nt1irk4ohbkjby",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "f76e36vt3chwqapk53ig6sv6",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "bb8zvton01nt1irk4ohbkjby",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "erulg6jwdo38uge4ga3ksmc1",
+              "name": "Seated Leg Curl",
+              "exerciseDefinitionId": "cmmw5na9b0004vr1iuvpvzyjo",
+              "order": 6,
+              "exerciseGroup": null,
+              "workoutId": "i2nc6o7awesqtli1sxxqp46k",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "koutdx6p7i6y0edta67ijdsp",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "erulg6jwdo38uge4ga3ksmc1",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "wvow96dqgjirw5fkxd348q74",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "erulg6jwdo38uge4ga3ksmc1",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "mhiegk2d93g36zzqzwjasy7y",
+              "name": "Back Extension",
+              "exerciseDefinitionId": "cmmw7ypba0001vrcxewg4lugr",
+              "order": 7,
+              "exerciseGroup": null,
+              "workoutId": "i2nc6o7awesqtli1sxxqp46k",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "q2pg3vhdhd9mfo2gs2y9go1m",
+                  "setNumber": 1,
+                  "reps": "10",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "mhiegk2d93g36zzqzwjasy7y",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "w3lp3cyjpeumldebbrm4h2o6",
+                  "setNumber": 2,
+                  "reps": "10",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "mhiegk2d93g36zzqzwjasy7y",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "g2yxywpaf8p6v35gf8x9zej3",
+          "name": "Machine Full Body B",
+          "dayNumber": 2,
+          "weekId": "cmmweqby0002hvr7wrs6lrpfm",
+          "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+          "exercises": [
+            {
+              "id": "og2b785bb4lehj1s18y2x3jg",
+              "name": "Chest Supported Row",
+              "exerciseDefinitionId": "cmmw5na9d0006vr1il03u66gn",
+              "order": 1,
+              "exerciseGroup": null,
+              "workoutId": "g2yxywpaf8p6v35gf8x9zej3",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "m8bu7roa4nr2pi6zvvlx8yrs",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "og2b785bb4lehj1s18y2x3jg",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "gf9uw0emejg6wy64g02tiyrn",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "og2b785bb4lehj1s18y2x3jg",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "xe54z4z9qe5jlk1kwp03wlkz",
+              "name": "Dip Machine",
+              "exerciseDefinitionId": "cmmw5na9e0007vr1i9pfrvgdf",
+              "order": 2,
+              "exerciseGroup": null,
+              "workoutId": "g2yxywpaf8p6v35gf8x9zej3",
+              "notes": "Lean slightly forward for chest emphasis, stay upright for tricep emphasis.",
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "mm0a73i81xfm7nc3rapftk7j",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "xe54z4z9qe5jlk1kwp03wlkz",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "aobcin9ik7qolcsnj57rmhov",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "xe54z4z9qe5jlk1kwp03wlkz",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "c44cjjyfvxt4n89ik2529gol",
+              "name": "Leg Press",
+              "exerciseDefinitionId": "cmiz7vldb000bvr0mw4qzzagc",
+              "order": 3,
+              "exerciseGroup": null,
+              "workoutId": "g2yxywpaf8p6v35gf8x9zej3",
+              "notes": "Feet high on the pad is easier. Feet low requires greater flexibility and strength. Don't lock out knees at the top. Control the eccentric.",
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "ysnwjlzc9uipcis3z1kb1vq5",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "c44cjjyfvxt4n89ik2529gol",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "ks6v8d99sx3bf89do85stu3j",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "c44cjjyfvxt4n89ik2529gol",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "ezih9tknn2btwpbxi18xvswz",
+              "name": "Thigh Adductor",
+              "exerciseDefinitionId": "cmmw5na9f0008vr1ih4th40mr",
+              "order": 4,
+              "exerciseGroup": null,
+              "workoutId": "g2yxywpaf8p6v35gf8x9zej3",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "hjhymfp92gmiixnpjo2am17s",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "ezih9tknn2btwpbxi18xvswz",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "ochlhc1pgbp4ma2lf5cq6svz",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "ezih9tknn2btwpbxi18xvswz",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "id5h75dndgrdopuu2j5cbrqy",
+              "name": "Thigh Abductor",
+              "exerciseDefinitionId": "cmmw5na9g0009vr1iqyd269iy",
+              "order": 5,
+              "exerciseGroup": null,
+              "workoutId": "g2yxywpaf8p6v35gf8x9zej3",
+              "notes": "Lean forward during sets to activate glutes.",
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "mtv6ln2juxlwpljd9eth7q0v",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "id5h75dndgrdopuu2j5cbrqy",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "x20dnx7pv97oj4m5yx7jm37l",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "id5h75dndgrdopuu2j5cbrqy",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "g6n1bcffv31e7lhca02mvoz9",
+              "name": "Ab Crunch Machine",
+              "exerciseDefinitionId": "cmmw5na9h000avr1i5e0dlaje",
+              "order": 6,
+              "exerciseGroup": null,
+              "workoutId": "g2yxywpaf8p6v35gf8x9zej3",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "fphs1ef6l3y7t6whaerox6gf",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "g6n1bcffv31e7lhca02mvoz9",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "ykuzxkpvrepvfzpy6za08f4d",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "g6n1bcffv31e7lhca02mvoz9",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "wdto367n9wbqsonhymb8qz2w",
+              "name": "Back Extension",
+              "exerciseDefinitionId": "cmmw7ypba0001vrcxewg4lugr",
+              "order": 7,
+              "exerciseGroup": null,
+              "workoutId": "g2yxywpaf8p6v35gf8x9zej3",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "d9f829tbrhf5uuvlhctmuimo",
+                  "setNumber": 1,
+                  "reps": "10",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "wdto367n9wbqsonhymb8qz2w",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "qmef38mt8636pmpimeo1jxsx",
+                  "setNumber": 2,
+                  "reps": "10",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "wdto367n9wbqsonhymb8qz2w",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cmmwesiau002lvr7wck85vtgk",
+      "weekNumber": 3,
+      "name": null,
+      "description": "Holding steady. Building strength and preparing for next week's higher-intensity.",
+      "programId": "cmmw7ypbs0003vrcxpp70r99f",
+      "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+      "workouts": [
+        {
+          "id": "pt1unrhftw1lcdi3xxjkv3z8",
+          "name": "Machine Full Body A",
+          "dayNumber": 1,
+          "weekId": "cmmwesiau002lvr7wck85vtgk",
+          "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+          "exercises": [
+            {
+              "id": "q8fxq4icis74v30lti1v6j97",
+              "name": "Chest Press",
+              "exerciseDefinitionId": "cmludujn60004la0427hncp03",
+              "order": 1,
+              "exerciseGroup": null,
+              "workoutId": "pt1unrhftw1lcdi3xxjkv3z8",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "n976wb1zprm39lzhdc3jx5i7",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "q8fxq4icis74v30lti1v6j97",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "ez597m0435fmse8r7nyxlr9h",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "q8fxq4icis74v30lti1v6j97",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "d4e7bht6wg971x7cpvmubec1",
+              "name": "Shoulder Press",
+              "exerciseDefinitionId": "cmmw7ypb50000vrcxov7kfy03",
+              "order": 2,
+              "exerciseGroup": null,
+              "workoutId": "pt1unrhftw1lcdi3xxjkv3z8",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "k1iegcbylabfyfqsk57uklxv",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "d4e7bht6wg971x7cpvmubec1",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "qda3ewmpijevqd6ayezm1342",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "d4e7bht6wg971x7cpvmubec1",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "yzhazn6ddkfcx80uz0no6y8e",
+              "name": "Lat Pulldown",
+              "exerciseDefinitionId": "ex_cm_005",
+              "order": 3,
+              "exerciseGroup": null,
+              "workoutId": "pt1unrhftw1lcdi3xxjkv3z8",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "vwrr0snk8j7r66rhgt7erqnf",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "yzhazn6ddkfcx80uz0no6y8e",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "zvmu5z9wc7q1c8rej02azsct",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "yzhazn6ddkfcx80uz0no6y8e",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "b2ukinrdxwdg1cf6ppf7j5dc",
+              "name": "Leg Press",
+              "exerciseDefinitionId": "cmiz7vldb000bvr0mw4qzzagc",
+              "order": 4,
+              "exerciseGroup": null,
+              "workoutId": "pt1unrhftw1lcdi3xxjkv3z8",
+              "notes": "Feet high on the pad is easier. Feet low requires greater flexibility and strength. Don't lock out knees at the top. Control the eccentric.",
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "nrziyiydor81chwldcrcrgtn",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "b2ukinrdxwdg1cf6ppf7j5dc",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "fj60bncl1n7bj6mcb5s0kghj",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "b2ukinrdxwdg1cf6ppf7j5dc",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "m72t2ou8m3xhjojtkn2bm6et",
+              "name": "Leg Extensions",
+              "exerciseDefinitionId": "cmmw5na9a0003vr1iizasjseb",
+              "order": 5,
+              "exerciseGroup": null,
+              "workoutId": "pt1unrhftw1lcdi3xxjkv3z8",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "dreu6lr74wfg4bvadxbk5b30",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "m72t2ou8m3xhjojtkn2bm6et",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "jgw8r0id0bx7avizwxyw7q6s",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "m72t2ou8m3xhjojtkn2bm6et",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "n83spaxlfagdqu2kyxov1cs2",
+              "name": "Seated Leg Curl",
+              "exerciseDefinitionId": "cmmw5na9b0004vr1iuvpvzyjo",
+              "order": 6,
+              "exerciseGroup": null,
+              "workoutId": "pt1unrhftw1lcdi3xxjkv3z8",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "kus083grecyqopd40ukz00k2",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "n83spaxlfagdqu2kyxov1cs2",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "qtzu8p6eyfjt3lnnow2bpvbv",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "n83spaxlfagdqu2kyxov1cs2",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "cedm4rphfuux2fc0pvd9xiv8",
+              "name": "Back Extension",
+              "exerciseDefinitionId": "cmmw7ypba0001vrcxewg4lugr",
+              "order": 7,
+              "exerciseGroup": null,
+              "workoutId": "pt1unrhftw1lcdi3xxjkv3z8",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "kuyuucu5nnnudgepp4xlatud",
+                  "setNumber": 1,
+                  "reps": "10",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "cedm4rphfuux2fc0pvd9xiv8",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "k8d782b94khno1cndji8qkva",
+                  "setNumber": 2,
+                  "reps": "10",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "cedm4rphfuux2fc0pvd9xiv8",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "jc1q3olofvo2jrotrgqkgijy",
+          "name": "Machine Full Body B",
+          "dayNumber": 2,
+          "weekId": "cmmwesiau002lvr7wck85vtgk",
+          "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+          "exercises": [
+            {
+              "id": "opvubz2g5qo0hy8edchoi59y",
+              "name": "Chest Supported Row",
+              "exerciseDefinitionId": "cmmw5na9d0006vr1il03u66gn",
+              "order": 1,
+              "exerciseGroup": null,
+              "workoutId": "jc1q3olofvo2jrotrgqkgijy",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "vucfvyvmd6jidwi61mjjvaon",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "opvubz2g5qo0hy8edchoi59y",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "pjlsvdn37z1o643rt2v0mhsy",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "opvubz2g5qo0hy8edchoi59y",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "ilgl9fo53cxfnxy3lw3bu6b0",
+              "name": "Dip Machine",
+              "exerciseDefinitionId": "cmmw5na9e0007vr1i9pfrvgdf",
+              "order": 2,
+              "exerciseGroup": null,
+              "workoutId": "jc1q3olofvo2jrotrgqkgijy",
+              "notes": "Lean slightly forward for chest emphasis, stay upright for tricep emphasis.",
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "urf9tyi0aklc4xryqh2mred1",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "ilgl9fo53cxfnxy3lw3bu6b0",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "ov2d1nl8uazhsw3t1mqbs8ma",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "ilgl9fo53cxfnxy3lw3bu6b0",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "d71v2tgqqx4xarhrjzz8oefo",
+              "name": "Leg Press",
+              "exerciseDefinitionId": "cmiz7vldb000bvr0mw4qzzagc",
+              "order": 3,
+              "exerciseGroup": null,
+              "workoutId": "jc1q3olofvo2jrotrgqkgijy",
+              "notes": "Feet high on the pad is easier. Feet low requires greater flexibility and strength. Don't lock out knees at the top. Control the eccentric.",
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "ptyobry98dh7ttz227sfj34w",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "d71v2tgqqx4xarhrjzz8oefo",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "oa8chadvw630xwv523qf23xj",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "d71v2tgqqx4xarhrjzz8oefo",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "rtx5ofjtnh8kmbnzoc86x7nc",
+              "name": "Thigh Adductor",
+              "exerciseDefinitionId": "cmmw5na9f0008vr1ih4th40mr",
+              "order": 4,
+              "exerciseGroup": null,
+              "workoutId": "jc1q3olofvo2jrotrgqkgijy",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "fhvlkcmu38kyvm085oxbisha",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "rtx5ofjtnh8kmbnzoc86x7nc",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "g68avpvmfemk1x1bbcxy9j2d",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "rtx5ofjtnh8kmbnzoc86x7nc",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "uo402xh0z18rplgdkdy0pmij",
+              "name": "Thigh Abductor",
+              "exerciseDefinitionId": "cmmw5na9g0009vr1iqyd269iy",
+              "order": 5,
+              "exerciseGroup": null,
+              "workoutId": "jc1q3olofvo2jrotrgqkgijy",
+              "notes": "Lean forward during sets to activate glutes.",
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "jz75gf74knbj9d89u7nc3hrl",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "uo402xh0z18rplgdkdy0pmij",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "k838nmx41kt323jotagk7vqz",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "uo402xh0z18rplgdkdy0pmij",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "ynocsgye76hf1mbpwn59koxh",
+              "name": "Ab Crunch Machine",
+              "exerciseDefinitionId": "cmmw5na9h000avr1i5e0dlaje",
+              "order": 6,
+              "exerciseGroup": null,
+              "workoutId": "jc1q3olofvo2jrotrgqkgijy",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "bn1tgc1x7wzcs10ro3imly1i",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "ynocsgye76hf1mbpwn59koxh",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "ir4cskd9jdkhl24dww3x2p8l",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "ynocsgye76hf1mbpwn59koxh",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "k9ho51q3188fpiouytv1z7uj",
+              "name": "Back Extension",
+              "exerciseDefinitionId": "cmmw7ypba0001vrcxewg4lugr",
+              "order": 7,
+              "exerciseGroup": null,
+              "workoutId": "jc1q3olofvo2jrotrgqkgijy",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "v88wweiz54futlmoh6gtijhk",
+                  "setNumber": 1,
+                  "reps": "10",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "k9ho51q3188fpiouytv1z7uj",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "dlne4ejikd3qafpakl802mm9",
+                  "setNumber": 2,
+                  "reps": "10",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "k9ho51q3188fpiouytv1z7uj",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cmmweu5ws002nvr7w7ih1vx3l",
+      "weekNumber": 4,
+      "name": null,
+      "description": "More intense sets. Less reps held back. Keep working hard!",
+      "programId": "cmmw7ypbs0003vrcxpp70r99f",
+      "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+      "workouts": [
+        {
+          "id": "pa4tecicm9t0tei7k4kwj2uq",
+          "name": "Machine Full Body A",
+          "dayNumber": 1,
+          "weekId": "cmmweu5ws002nvr7w7ih1vx3l",
+          "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+          "exercises": [
+            {
+              "id": "fdum9gpf8hf96iu47w0cqedz",
+              "name": "Chest Press",
+              "exerciseDefinitionId": "cmludujn60004la0427hncp03",
+              "order": 1,
+              "exerciseGroup": null,
+              "workoutId": "pa4tecicm9t0tei7k4kwj2uq",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "w9t35lg5s6ld4vyf0kfec7v8",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "fdum9gpf8hf96iu47w0cqedz",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "bq063wez5au8zbpmorurnel1",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "fdum9gpf8hf96iu47w0cqedz",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "d1dh6dtbvblagfbtddj1gx04",
+              "name": "Shoulder Press",
+              "exerciseDefinitionId": "cmmw7ypb50000vrcxov7kfy03",
+              "order": 2,
+              "exerciseGroup": null,
+              "workoutId": "pa4tecicm9t0tei7k4kwj2uq",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cpqwfr41x78ah95mkpyr2dlg",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "d1dh6dtbvblagfbtddj1gx04",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "rd2md79nsk1wltb0kz4rzis7",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "d1dh6dtbvblagfbtddj1gx04",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "pmrkos6z411p2no8d9s9glq0",
+              "name": "Lat Pulldown",
+              "exerciseDefinitionId": "ex_cm_005",
+              "order": 3,
+              "exerciseGroup": null,
+              "workoutId": "pa4tecicm9t0tei7k4kwj2uq",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "bhl488fnl3p28yc0sxk7t07i",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "pmrkos6z411p2no8d9s9glq0",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "sb597qpzi968clwu9m9crb7h",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "pmrkos6z411p2no8d9s9glq0",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "ci2qb682c3ptjsa63h04ykh4",
+              "name": "Leg Press",
+              "exerciseDefinitionId": "cmiz7vldb000bvr0mw4qzzagc",
+              "order": 4,
+              "exerciseGroup": null,
+              "workoutId": "pa4tecicm9t0tei7k4kwj2uq",
+              "notes": "Feet high on the pad is easier. Feet low requires greater flexibility and strength. Don't lock out knees at the top. Control the eccentric.",
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "hy1tohvteovp2y167mu2fbfz",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "ci2qb682c3ptjsa63h04ykh4",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "ay9jr10msyuq84ontbwrn89w",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "ci2qb682c3ptjsa63h04ykh4",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "zf7uzv55lgyq1ssihhbl4qmm",
+              "name": "Leg Extensions",
+              "exerciseDefinitionId": "cmmw5na9a0003vr1iizasjseb",
+              "order": 5,
+              "exerciseGroup": null,
+              "workoutId": "pa4tecicm9t0tei7k4kwj2uq",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "vuwfttnl73lgisqk1vl74795",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "zf7uzv55lgyq1ssihhbl4qmm",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "tu8gheycl60wku9kdpcexfqe",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "zf7uzv55lgyq1ssihhbl4qmm",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "a7e8qw3y2fsep5sxr4z3o0fr",
+              "name": "Seated Leg Curl",
+              "exerciseDefinitionId": "cmmw5na9b0004vr1iuvpvzyjo",
+              "order": 6,
+              "exerciseGroup": null,
+              "workoutId": "pa4tecicm9t0tei7k4kwj2uq",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "av1ro3an6fv6t7e84euiem7q",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "a7e8qw3y2fsep5sxr4z3o0fr",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "gs7ljf5lmwcpq22679ab3hv8",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "a7e8qw3y2fsep5sxr4z3o0fr",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "l5kfwk1r3gh0t6mi0z01nsu4",
+              "name": "Back Extension",
+              "exerciseDefinitionId": "cmmw7ypba0001vrcxewg4lugr",
+              "order": 7,
+              "exerciseGroup": null,
+              "workoutId": "pa4tecicm9t0tei7k4kwj2uq",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "qni79oal9lvaa81e5tafcndq",
+                  "setNumber": 1,
+                  "reps": "10",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "l5kfwk1r3gh0t6mi0z01nsu4",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "eystxh4g7onncg8uzuvcvaes",
+                  "setNumber": 2,
+                  "reps": "10",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "l5kfwk1r3gh0t6mi0z01nsu4",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "dy5nggcnls6td7y1hg4qo5ow",
+          "name": "Machine Full Body B",
+          "dayNumber": 2,
+          "weekId": "cmmweu5ws002nvr7w7ih1vx3l",
+          "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+          "exercises": [
+            {
+              "id": "nytwcd7rb91vtotbaor0dc8d",
+              "name": "Chest Supported Row",
+              "exerciseDefinitionId": "cmmw5na9d0006vr1il03u66gn",
+              "order": 1,
+              "exerciseGroup": null,
+              "workoutId": "dy5nggcnls6td7y1hg4qo5ow",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "fkrmhob8ywtwp5nbt00mret5",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "nytwcd7rb91vtotbaor0dc8d",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "iu6jkqanxojzjcz23jeud8hm",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "nytwcd7rb91vtotbaor0dc8d",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "hjmzsjwaknt51tdlqfe4co6d",
+              "name": "Dip Machine",
+              "exerciseDefinitionId": "cmmw5na9e0007vr1i9pfrvgdf",
+              "order": 2,
+              "exerciseGroup": null,
+              "workoutId": "dy5nggcnls6td7y1hg4qo5ow",
+              "notes": "Lean slightly forward for chest emphasis, stay upright for tricep emphasis.",
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "n1g6gqmme8xx0x9oli4jpvk7",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "hjmzsjwaknt51tdlqfe4co6d",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "vw9oirs1myvee2kmnzsk1f2q",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "hjmzsjwaknt51tdlqfe4co6d",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "w7xjfwn1kj3p2nj2mdv2oryh",
+              "name": "Leg Press",
+              "exerciseDefinitionId": "cmiz7vldb000bvr0mw4qzzagc",
+              "order": 3,
+              "exerciseGroup": null,
+              "workoutId": "dy5nggcnls6td7y1hg4qo5ow",
+              "notes": "Feet high on the pad is easier. Feet low requires greater flexibility and strength. Don't lock out knees at the top. Control the eccentric.",
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cg9y8ihuru13uhamsanua2ws",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "w7xjfwn1kj3p2nj2mdv2oryh",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "gmdsio9mwqm2eucto4l1ptjc",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 3,
+                  "exerciseId": "w7xjfwn1kj3p2nj2mdv2oryh",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "yianan0eo6qhab2n3g2vnn25",
+              "name": "Thigh Adductor",
+              "exerciseDefinitionId": "cmmw5na9f0008vr1ih4th40mr",
+              "order": 4,
+              "exerciseGroup": null,
+              "workoutId": "dy5nggcnls6td7y1hg4qo5ow",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "z4i7vtf52u3xemj6cldefqfb",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "yianan0eo6qhab2n3g2vnn25",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "ny8kyh7gedm713muswav8mjd",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "yianan0eo6qhab2n3g2vnn25",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "iknm56e9ujsyhwgyo47isfb0",
+              "name": "Thigh Abductor",
+              "exerciseDefinitionId": "cmmw5na9g0009vr1iqyd269iy",
+              "order": 5,
+              "exerciseGroup": null,
+              "workoutId": "dy5nggcnls6td7y1hg4qo5ow",
+              "notes": "Lean forward during sets to activate glutes.",
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "kswu8p17ik100p1qzmi4ismj",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "iknm56e9ujsyhwgyo47isfb0",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cb3xdwrgkg824e2n8cc9hihg",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "iknm56e9ujsyhwgyo47isfb0",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "xonoif2q8hmj96u9r5qhz4bd",
+              "name": "Ab Crunch Machine",
+              "exerciseDefinitionId": "cmmw5na9h000avr1i5e0dlaje",
+              "order": 6,
+              "exerciseGroup": null,
+              "workoutId": "dy5nggcnls6td7y1hg4qo5ow",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "sbsymgtt05bszgdyy2tvco4x",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "xonoif2q8hmj96u9r5qhz4bd",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "lenwpoyo1ovoczha6e12pxrd",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "xonoif2q8hmj96u9r5qhz4bd",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "md8wrf2g9an570wow3a6j8fj",
+              "name": "Back Extension",
+              "exerciseDefinitionId": "cmmw7ypba0001vrcxewg4lugr",
+              "order": 7,
+              "exerciseGroup": null,
+              "workoutId": "dy5nggcnls6td7y1hg4qo5ow",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "ijqazy9bb4zgh4ifoq4pntdf",
+                  "setNumber": 1,
+                  "reps": "10",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "md8wrf2g9an570wow3a6j8fj",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "h7d0muexyfxs619mqsxmnxx5",
+                  "setNumber": 2,
+                  "reps": "10",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "md8wrf2g9an570wow3a6j8fj",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cmmwew0jz002xvr7wm959bfsy",
+      "weekNumber": 5,
+      "name": "Deload Week",
+      "description": "Now that you've hit peak intensity, let's give your body time to recover.",
+      "programId": "cmmw7ypbs0003vrcxpp70r99f",
+      "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+      "workouts": [
+        {
+          "id": "gzwc5xzop7pkow87852qgyjm",
+          "name": "Machine Full Body A",
+          "dayNumber": 1,
+          "weekId": "cmmwew0jz002xvr7wm959bfsy",
+          "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+          "exercises": [
+            {
+              "id": "zkxz2yhkrewqt2y87lu6l0ir",
+              "name": "Chest Press",
+              "exerciseDefinitionId": "cmludujn60004la0427hncp03",
+              "order": 1,
+              "exerciseGroup": null,
+              "workoutId": "gzwc5xzop7pkow87852qgyjm",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "tjophey295etv7ifjqwyful7",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "zkxz2yhkrewqt2y87lu6l0ir",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "ux0de7bu76kl38ko5a3b5qfa",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "zkxz2yhkrewqt2y87lu6l0ir",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "bvi6ec5bhidfav9nyj4mel5q",
+              "name": "Shoulder Press",
+              "exerciseDefinitionId": "cmmw7ypb50000vrcxov7kfy03",
+              "order": 2,
+              "exerciseGroup": null,
+              "workoutId": "gzwc5xzop7pkow87852qgyjm",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "l7i5cf3jy7hz6zw3o7ajfvb2",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "bvi6ec5bhidfav9nyj4mel5q",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "hzk8t9otle6scdenbrp6cvyd",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "bvi6ec5bhidfav9nyj4mel5q",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "lm0fyrtra34ix1p0bj92iky9",
+              "name": "Lat Pulldown",
+              "exerciseDefinitionId": "ex_cm_005",
+              "order": 3,
+              "exerciseGroup": null,
+              "workoutId": "gzwc5xzop7pkow87852qgyjm",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "mh7lrbq97ttd86l9t2oujbzq",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "lm0fyrtra34ix1p0bj92iky9",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "wxfwown7tcu8806pk8dsfwyy",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "lm0fyrtra34ix1p0bj92iky9",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "t3q6i09xmiw1pm4eoho3s0ds",
+              "name": "Leg Press",
+              "exerciseDefinitionId": "cmiz7vldb000bvr0mw4qzzagc",
+              "order": 4,
+              "exerciseGroup": null,
+              "workoutId": "gzwc5xzop7pkow87852qgyjm",
+              "notes": "Feet high on the pad is easier. Feet low requires greater flexibility and strength. Don't lock out knees at the top. Control the eccentric.",
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "ouj10wa3bwnpk59d0x47tlqg",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 5,
+                  "exerciseId": "t3q6i09xmiw1pm4eoho3s0ds",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "idbnmd9gilyljvg85wg1pt7t",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 5,
+                  "exerciseId": "t3q6i09xmiw1pm4eoho3s0ds",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "wz3fslj90bh5yaavwj2veogn",
+              "name": "Leg Extensions",
+              "exerciseDefinitionId": "cmmw5na9a0003vr1iizasjseb",
+              "order": 5,
+              "exerciseGroup": null,
+              "workoutId": "gzwc5xzop7pkow87852qgyjm",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "gbqmoqavyxpgbajkhywfjcyu",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "wz3fslj90bh5yaavwj2veogn",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "tfro53w7lzz6z4y3prms7kvu",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "wz3fslj90bh5yaavwj2veogn",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "ctkm8g9aqene5t4obk35exfk",
+              "name": "Seated Leg Curl",
+              "exerciseDefinitionId": "cmmw5na9b0004vr1iuvpvzyjo",
+              "order": 6,
+              "exerciseGroup": null,
+              "workoutId": "gzwc5xzop7pkow87852qgyjm",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "x1c846n2xe3w3f1awxgfhjob",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 5,
+                  "exerciseId": "ctkm8g9aqene5t4obk35exfk",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "iordjn3oyz0a2wbbjyqv2wf9",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 5,
+                  "exerciseId": "ctkm8g9aqene5t4obk35exfk",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "chm0fo200d0punnin9clnt98",
+              "name": "Back Extension",
+              "exerciseDefinitionId": "cmmw7ypba0001vrcxewg4lugr",
+              "order": 7,
+              "exerciseGroup": null,
+              "workoutId": "gzwc5xzop7pkow87852qgyjm",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "phv3rxwvj0o28frp9mcdklxy",
+                  "setNumber": 1,
+                  "reps": "10",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 5,
+                  "exerciseId": "chm0fo200d0punnin9clnt98",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "tdzhp6fzkf3rozx32zh202q4",
+                  "setNumber": 2,
+                  "reps": "10",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 5,
+                  "exerciseId": "chm0fo200d0punnin9clnt98",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "a5wr8d8vkjdbfejya8mbvttq",
+          "name": "Machine Full Body B",
+          "dayNumber": 2,
+          "weekId": "cmmwew0jz002xvr7wm959bfsy",
+          "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+          "exercises": [
+            {
+              "id": "yznbs8du9alob666bvejzzkn",
+              "name": "Chest Supported Row",
+              "exerciseDefinitionId": "cmmw5na9d0006vr1il03u66gn",
+              "order": 1,
+              "exerciseGroup": null,
+              "workoutId": "a5wr8d8vkjdbfejya8mbvttq",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "pxe4lp4kojx2od33fu514tk1",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "yznbs8du9alob666bvejzzkn",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "aoyzt2rsz2dqasznp4s0pufg",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "yznbs8du9alob666bvejzzkn",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "tz617pffz4gbqlh0x4o8s0qi",
+              "name": "Dip Machine",
+              "exerciseDefinitionId": "cmmw5na9e0007vr1i9pfrvgdf",
+              "order": 2,
+              "exerciseGroup": null,
+              "workoutId": "a5wr8d8vkjdbfejya8mbvttq",
+              "notes": "Lean slightly forward for chest emphasis, stay upright for tricep emphasis.",
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "iio3mix5chio71tbmtxdp7c1",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "tz617pffz4gbqlh0x4o8s0qi",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "r63asiryn2ccnn5ygkq5orcm",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "tz617pffz4gbqlh0x4o8s0qi",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "nn1446fwmvvhs463xh1fj67m",
+              "name": "Leg Press",
+              "exerciseDefinitionId": "cmiz7vldb000bvr0mw4qzzagc",
+              "order": 3,
+              "exerciseGroup": null,
+              "workoutId": "a5wr8d8vkjdbfejya8mbvttq",
+              "notes": "Feet high on the pad is easier. Feet low requires greater flexibility and strength. Don't lock out knees at the top. Control the eccentric.",
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "mwskv2k6m24344x8r2elxkxc",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 5,
+                  "exerciseId": "nn1446fwmvvhs463xh1fj67m",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "fap4nss612k6qah36k90dk77",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 5,
+                  "exerciseId": "nn1446fwmvvhs463xh1fj67m",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "o4b0bu8hxscrbhsdzfg6g18n",
+              "name": "Thigh Adductor",
+              "exerciseDefinitionId": "cmmw5na9f0008vr1ih4th40mr",
+              "order": 4,
+              "exerciseGroup": null,
+              "workoutId": "a5wr8d8vkjdbfejya8mbvttq",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "ugce4cgy2hhsff7usrl1lfib",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "o4b0bu8hxscrbhsdzfg6g18n",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "c4butx2fxfcch32nv9orunlf",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "o4b0bu8hxscrbhsdzfg6g18n",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "cq64nwjetw6bbjpdni5wyulq",
+              "name": "Thigh Abductor",
+              "exerciseDefinitionId": "cmmw5na9g0009vr1iqyd269iy",
+              "order": 5,
+              "exerciseGroup": null,
+              "workoutId": "a5wr8d8vkjdbfejya8mbvttq",
+              "notes": "Lean forward during sets to activate glutes.",
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "m6zzqxo5unufnc04hkrmo80v",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "cq64nwjetw6bbjpdni5wyulq",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "wka0ac78jakr548eov7gl14q",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "cq64nwjetw6bbjpdni5wyulq",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "m3t667kizkx9tel43ccn1mm5",
+              "name": "Ab Crunch Machine",
+              "exerciseDefinitionId": "cmmw5na9h000avr1i5e0dlaje",
+              "order": 6,
+              "exerciseGroup": null,
+              "workoutId": "a5wr8d8vkjdbfejya8mbvttq",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "uxetepij0hxugz9c8b87hvzh",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "m3t667kizkx9tel43ccn1mm5",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "p19l9xx32u8nitwic5tlvmug",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "m3t667kizkx9tel43ccn1mm5",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "evmjo90tlfkglwpjwmqqxek2",
+              "name": "Back Extension",
+              "exerciseDefinitionId": "cmmw7ypba0001vrcxewg4lugr",
+              "order": 7,
+              "exerciseGroup": null,
+              "workoutId": "a5wr8d8vkjdbfejya8mbvttq",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "ybpo3o7v6vmbsq4u72qt8kaw",
+                  "setNumber": 1,
+                  "reps": "10",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "evmjo90tlfkglwpjwmqqxek2",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "d8xlirlrpa4w1xni22slzx1n",
+                  "setNumber": 2,
+                  "reps": "10",
+                  "weight": null,
+                  "rpe": null,
+                  "rir": 4,
+                  "exerciseId": "evmjo90tlfkglwpjwmqqxek2",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
