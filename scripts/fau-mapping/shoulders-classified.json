@@ -1,0 +1,637 @@
+[
+  {
+    "name": "Alternating Cable Shoulder Press",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["triceps", "side-delts"]
+  },
+  {
+    "name": "Alternating Deltoid Raise",
+    "primaryFAUs": ["front-delts", "side-delts"],
+    "secondaryFAUs": []
+  },
+  {
+    "name": "Alternating Kettlebell Press",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["triceps", "side-delts"]
+  },
+  {
+    "name": "Anti-Gravity Press",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["mid-back", "traps", "triceps"]
+  },
+  {
+    "name": "Arm Circles",
+    "primaryFAUs": ["front-delts", "side-delts"],
+    "secondaryFAUs": ["traps"]
+  },
+  {
+    "name": "Arnold Dumbbell Press",
+    "primaryFAUs": ["front-delts", "side-delts"],
+    "secondaryFAUs": ["triceps"]
+  },
+  {
+    "name": "Back Flyes - With Bands",
+    "primaryFAUs": ["rear-delts"],
+    "secondaryFAUs": ["mid-back", "traps"]
+  },
+  {
+    "name": "Backward Medicine Ball Throw",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["abs"]
+  },
+  {
+    "name": "Band Pull Apart",
+    "primaryFAUs": ["rear-delts"],
+    "secondaryFAUs": ["mid-back", "traps"]
+  },
+  {
+    "name": "Barbell Incline Shoulder Raise",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["chest", "serratus-anterior"]
+  },
+  {
+    "name": "Barbell Rear Delt Row",
+    "primaryFAUs": ["rear-delts"],
+    "secondaryFAUs": ["biceps", "lats", "mid-back"]
+  },
+  {
+    "name": "Barbell Shoulder Press",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["triceps", "side-delts"]
+  },
+  {
+    "name": "Battling Ropes",
+    "primaryFAUs": ["front-delts", "side-delts"],
+    "secondaryFAUs": ["chest", "forearms"]
+  },
+  {
+    "name": "Bent Over Dumbbell Rear Delt Raise With Head On Bench",
+    "primaryFAUs": ["rear-delts"],
+    "secondaryFAUs": ["mid-back", "traps"]
+  },
+  {
+    "name": "Bent Over Low-Pulley Side Lateral",
+    "primaryFAUs": ["rear-delts"],
+    "secondaryFAUs": ["lower-back", "mid-back", "traps"]
+  },
+  {
+    "name": "Bradford/Rocky Presses",
+    "primaryFAUs": ["front-delts", "side-delts"],
+    "secondaryFAUs": ["triceps"]
+  },
+  {
+    "name": "Cable Internal Rotation",
+    "primaryFAUs": ["rotator-cuffs"],
+    "secondaryFAUs": []
+  },
+  {
+    "name": "Cable Rear Delt Fly",
+    "primaryFAUs": ["rear-delts"],
+    "secondaryFAUs": ["mid-back", "traps"]
+  },
+  {
+    "name": "Cable Rope Rear-Delt Rows",
+    "primaryFAUs": ["rear-delts"],
+    "secondaryFAUs": ["biceps", "mid-back"]
+  },
+  {
+    "name": "Cable Seated Lateral Raise",
+    "primaryFAUs": ["side-delts"],
+    "secondaryFAUs": ["mid-back", "traps"]
+  },
+  {
+    "name": "Cable Shoulder Press",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["triceps", "side-delts"]
+  },
+  {
+    "name": "Car Drivers",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["forearms", "rotator-cuffs"]
+  },
+  {
+    "name": "Chair Upper Body Stretch",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["biceps", "chest"]
+  },
+  {
+    "name": "Circus Bell",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["forearms", "glutes", "hamstrings", "lower-back", "traps", "triceps"]
+  },
+  {
+    "name": "Clean and Jerk",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["abs", "glutes", "hamstrings", "lower-back", "quads", "traps", "triceps"]
+  },
+  {
+    "name": "Clean and Press",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["abs", "calves", "glutes", "hamstrings", "lower-back", "mid-back", "quads", "traps", "triceps"]
+  },
+  {
+    "name": "Crucifix",
+    "primaryFAUs": ["side-delts"],
+    "secondaryFAUs": ["forearms", "front-delts"]
+  },
+  {
+    "name": "Cuban Press",
+    "primaryFAUs": ["front-delts", "rotator-cuffs"],
+    "secondaryFAUs": ["traps", "side-delts"]
+  },
+  {
+    "name": "Double Kettlebell Jerk",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["calves", "quads", "triceps"]
+  },
+  {
+    "name": "Double Kettlebell Push Press",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["calves", "quads", "triceps"]
+  },
+  {
+    "name": "Double Kettlebell Snatch",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["glutes", "hamstrings", "quads", "traps"]
+  },
+  {
+    "name": "Dumbbell Incline Shoulder Raise",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["triceps", "serratus-anterior"]
+  },
+  {
+    "name": "Dumbbell Lying One-Arm Rear Lateral Raise",
+    "primaryFAUs": ["rear-delts"],
+    "secondaryFAUs": ["mid-back"]
+  },
+  {
+    "name": "Dumbbell Lying Rear Lateral Raise",
+    "primaryFAUs": ["rear-delts"],
+    "secondaryFAUs": ["mid-back", "traps"]
+  },
+  {
+    "name": "Dumbbell One-Arm Shoulder Press",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["triceps", "side-delts"]
+  },
+  {
+    "name": "Dumbbell One-Arm Upright Row",
+    "primaryFAUs": ["side-delts"],
+    "secondaryFAUs": ["biceps", "traps", "front-delts"]
+  },
+  {
+    "name": "Dumbbell Raise",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["biceps"]
+  },
+  {
+    "name": "Dumbbell Scaption",
+    "primaryFAUs": ["front-delts", "side-delts"],
+    "secondaryFAUs": ["traps", "rotator-cuffs"]
+  },
+  {
+    "name": "Dumbbell Shoulder Press",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["triceps", "side-delts"]
+  },
+  {
+    "name": "Elbow Circles",
+    "primaryFAUs": ["front-delts", "side-delts"],
+    "secondaryFAUs": ["traps", "rotator-cuffs"]
+  },
+  {
+    "name": "External Rotation",
+    "primaryFAUs": ["rotator-cuffs"],
+    "secondaryFAUs": ["rear-delts"]
+  },
+  {
+    "name": "External Rotation with Band",
+    "primaryFAUs": ["rotator-cuffs"],
+    "secondaryFAUs": ["rear-delts"]
+  },
+  {
+    "name": "External Rotation with Cable",
+    "primaryFAUs": ["rotator-cuffs"],
+    "secondaryFAUs": ["rear-delts"]
+  },
+  {
+    "name": "Face Pull",
+    "primaryFAUs": ["rear-delts"],
+    "secondaryFAUs": ["mid-back", "rotator-cuffs", "traps"]
+  },
+  {
+    "name": "Front Cable Raise",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["side-delts"]
+  },
+  {
+    "name": "Front Dumbbell Raise",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["side-delts"]
+  },
+  {
+    "name": "Front Incline Dumbbell Raise",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["side-delts"]
+  },
+  {
+    "name": "Front Plate Raise",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["side-delts"]
+  },
+  {
+    "name": "Front Two-Dumbbell Raise",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["side-delts"]
+  },
+  {
+    "name": "Handstand Push-Ups",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["triceps", "traps"]
+  },
+  {
+    "name": "Internal Rotation with Band",
+    "primaryFAUs": ["rotator-cuffs"],
+    "secondaryFAUs": []
+  },
+  {
+    "name": "Iron Cross",
+    "primaryFAUs": ["side-delts", "front-delts"],
+    "secondaryFAUs": ["chest", "glutes", "hamstrings", "lower-back", "quads", "traps"]
+  },
+  {
+    "name": "Jerk Balance",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["glutes", "hamstrings", "quads", "triceps"]
+  },
+  {
+    "name": "Kettlebell Arnold Press",
+    "primaryFAUs": ["front-delts", "side-delts"],
+    "secondaryFAUs": ["triceps"]
+  },
+  {
+    "name": "Kettlebell Pirate Ships",
+    "primaryFAUs": ["front-delts", "side-delts"],
+    "secondaryFAUs": ["abs"]
+  },
+  {
+    "name": "Kettlebell Seated Press",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["triceps", "side-delts"]
+  },
+  {
+    "name": "Kettlebell Seesaw Press",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["triceps", "side-delts"]
+  },
+  {
+    "name": "Kettlebell Thruster",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["quads", "triceps", "glutes"]
+  },
+  {
+    "name": "Kettlebell Turkish Get-Up (Lunge style)",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["abs", "hamstrings", "quads", "triceps"]
+  },
+  {
+    "name": "Kettlebell Turkish Get-Up (Squat style)",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["abs", "calves", "hamstrings", "quads", "triceps"]
+  },
+  {
+    "name": "Kneeling Arm Drill",
+    "primaryFAUs": ["front-delts", "side-delts"],
+    "secondaryFAUs": ["abs"]
+  },
+  {
+    "name": "Landmine Linear Jammer",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["abs", "calves", "chest", "hamstrings", "quads", "triceps"]
+  },
+  {
+    "name": "Lateral Raise - With Bands",
+    "primaryFAUs": ["side-delts"],
+    "secondaryFAUs": ["front-delts"]
+  },
+  {
+    "name": "Leverage Shoulder Press",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["triceps", "side-delts"]
+  },
+  {
+    "name": "Log Lift",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["abs", "chest", "glutes", "hamstrings", "lower-back", "mid-back", "quads", "traps", "triceps"]
+  },
+  {
+    "name": "Low Pulley Row To Neck",
+    "primaryFAUs": ["rear-delts"],
+    "secondaryFAUs": ["biceps", "mid-back", "traps"]
+  },
+  {
+    "name": "Lying One-Arm Lateral Raise",
+    "primaryFAUs": ["side-delts"],
+    "secondaryFAUs": []
+  },
+  {
+    "name": "Lying Rear Delt Raise",
+    "primaryFAUs": ["rear-delts"],
+    "secondaryFAUs": ["mid-back", "traps"]
+  },
+  {
+    "name": "Machine Shoulder (Military) Press",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["triceps", "side-delts"]
+  },
+  {
+    "name": "Medicine Ball Scoop Throw",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["abs", "hamstrings", "quads"]
+  },
+  {
+    "name": "One-Arm Incline Lateral Raise",
+    "primaryFAUs": ["side-delts"],
+    "secondaryFAUs": []
+  },
+  {
+    "name": "One-Arm Kettlebell Clean and Jerk",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["triceps", "traps", "glutes"]
+  },
+  {
+    "name": "One-Arm Kettlebell Jerk",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["calves", "quads", "triceps"]
+  },
+  {
+    "name": "One-Arm Kettlebell Military Press To The Side",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["triceps", "side-delts"]
+  },
+  {
+    "name": "One-Arm Kettlebell Para Press",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["triceps", "side-delts"]
+  },
+  {
+    "name": "One-Arm Kettlebell Push Press",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["calves", "quads", "triceps"]
+  },
+  {
+    "name": "One-Arm Kettlebell Snatch",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["calves", "glutes", "hamstrings", "lower-back", "traps", "triceps"]
+  },
+  {
+    "name": "One-Arm Kettlebell Split Jerk",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["glutes", "hamstrings", "quads", "triceps"]
+  },
+  {
+    "name": "One-Arm Kettlebell Split Snatch",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["hamstrings", "quads", "traps"]
+  },
+  {
+    "name": "One-Arm Side Laterals",
+    "primaryFAUs": ["side-delts"],
+    "secondaryFAUs": ["front-delts"]
+  },
+  {
+    "name": "Power Partials",
+    "primaryFAUs": ["side-delts"],
+    "secondaryFAUs": ["front-delts", "traps"]
+  },
+  {
+    "name": "Push Press",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["quads", "triceps"]
+  },
+  {
+    "name": "Push Press - Behind the Neck",
+    "primaryFAUs": ["front-delts", "side-delts"],
+    "secondaryFAUs": ["calves", "quads", "triceps"]
+  },
+  {
+    "name": "Rack Delivery",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["forearms", "traps"]
+  },
+  {
+    "name": "Return Push from Stance",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["chest", "triceps"]
+  },
+  {
+    "name": "Reverse Flyes",
+    "primaryFAUs": ["rear-delts"],
+    "secondaryFAUs": ["mid-back", "traps"]
+  },
+  {
+    "name": "Reverse Flyes With External Rotation",
+    "primaryFAUs": ["rear-delts"],
+    "secondaryFAUs": ["rotator-cuffs", "mid-back", "traps"]
+  },
+  {
+    "name": "Reverse Machine Flyes",
+    "primaryFAUs": ["rear-delts"],
+    "secondaryFAUs": ["mid-back", "traps"]
+  },
+  {
+    "name": "Round The World Shoulder Stretch",
+    "primaryFAUs": ["front-delts", "side-delts"],
+    "secondaryFAUs": ["biceps", "chest"]
+  },
+  {
+    "name": "Seated Barbell Military Press",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["triceps", "side-delts"]
+  },
+  {
+    "name": "Seated Bent-Over Rear Delt Raise",
+    "primaryFAUs": ["rear-delts"],
+    "secondaryFAUs": ["mid-back", "traps"]
+  },
+  {
+    "name": "Seated Cable Shoulder Press",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["triceps", "side-delts"]
+  },
+  {
+    "name": "Seated Dumbbell Press",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["triceps", "side-delts"]
+  },
+  {
+    "name": "Seated Front Deltoid",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["chest"]
+  },
+  {
+    "name": "Seated Side Lateral Raise",
+    "primaryFAUs": ["side-delts"],
+    "secondaryFAUs": ["front-delts"]
+  },
+  {
+    "name": "See-Saw Press (Alternating Side Press)",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["abs", "triceps", "side-delts"]
+  },
+  {
+    "name": "Shoulder Circles",
+    "primaryFAUs": ["front-delts", "side-delts"],
+    "secondaryFAUs": ["traps", "rotator-cuffs"]
+  },
+  {
+    "name": "Shoulder Press - With Bands",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["triceps", "side-delts"]
+  },
+  {
+    "name": "Shoulder Raise",
+    "primaryFAUs": ["front-delts", "side-delts"],
+    "secondaryFAUs": ["lats"]
+  },
+  {
+    "name": "Shoulder Stretch",
+    "primaryFAUs": ["front-delts", "rear-delts"],
+    "secondaryFAUs": []
+  },
+  {
+    "name": "Side Lateral Raise",
+    "primaryFAUs": ["side-delts"],
+    "secondaryFAUs": ["front-delts"]
+  },
+  {
+    "name": "Side Laterals to Front Raise",
+    "primaryFAUs": ["side-delts", "front-delts"],
+    "secondaryFAUs": ["traps"]
+  },
+  {
+    "name": "Side Wrist Pull",
+    "primaryFAUs": ["side-delts"],
+    "secondaryFAUs": ["forearms", "lats"]
+  },
+  {
+    "name": "Single-Arm Linear Jammer",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["chest", "triceps"]
+  },
+  {
+    "name": "Single Dumbbell Raise",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["forearms", "traps"]
+  },
+  {
+    "name": "Sled Overhead Backward Walk",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["calves", "mid-back", "quads"]
+  },
+  {
+    "name": "Sled Reverse Flye",
+    "primaryFAUs": ["rear-delts"],
+    "secondaryFAUs": ["mid-back", "traps"]
+  },
+  {
+    "name": "Smith Incline Shoulder Raise",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["chest", "serratus-anterior"]
+  },
+  {
+    "name": "Smith Machine One-Arm Upright Row",
+    "primaryFAUs": ["side-delts"],
+    "secondaryFAUs": ["biceps", "traps", "front-delts"]
+  },
+  {
+    "name": "Smith Machine Overhead Shoulder Press",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["triceps", "side-delts"]
+  },
+  {
+    "name": "Standing Alternating Dumbbell Press",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["triceps", "side-delts"]
+  },
+  {
+    "name": "Standing Barbell Press Behind Neck",
+    "primaryFAUs": ["front-delts", "side-delts"],
+    "secondaryFAUs": ["triceps"]
+  },
+  {
+    "name": "Standing Bradford Press",
+    "primaryFAUs": ["front-delts", "side-delts"],
+    "secondaryFAUs": ["triceps"]
+  },
+  {
+    "name": "Standing Dumbbell Press",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["triceps", "side-delts"]
+  },
+  {
+    "name": "Standing Dumbbell Straight-Arm Front Delt Raise Above Head",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["side-delts", "traps"]
+  },
+  {
+    "name": "Standing Front Barbell Raise Over Head",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["side-delts", "traps"]
+  },
+  {
+    "name": "Standing Low-Pulley Deltoid Raise",
+    "primaryFAUs": ["side-delts"],
+    "secondaryFAUs": ["forearms", "front-delts"]
+  },
+  {
+    "name": "Standing Military Press",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["triceps", "side-delts"]
+  },
+  {
+    "name": "Standing Palm-In One-Arm Dumbbell Press",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["triceps", "side-delts"]
+  },
+  {
+    "name": "Standing Palms-In Dumbbell Press",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["triceps", "side-delts"]
+  },
+  {
+    "name": "Standing Two-Arm Overhead Throw",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["chest", "lats"]
+  },
+  {
+    "name": "Straight Raises on Incline Bench",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["traps", "side-delts"]
+  },
+  {
+    "name": "Two-Arm Kettlebell Clean",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["calves", "glutes", "hamstrings", "lower-back", "traps"]
+  },
+  {
+    "name": "Two-Arm Kettlebell Jerk",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["calves", "quads", "triceps"]
+  },
+  {
+    "name": "Two-Arm Kettlebell Military Press",
+    "primaryFAUs": ["front-delts"],
+    "secondaryFAUs": ["triceps", "side-delts"]
+  },
+  {
+    "name": "Upright Barbell Row",
+    "primaryFAUs": ["side-delts"],
+    "secondaryFAUs": ["traps", "front-delts", "biceps"]
+  },
+  {
+    "name": "Upward Stretch",
+    "primaryFAUs": ["front-delts", "side-delts"],
+    "secondaryFAUs": ["chest", "lats"]
+  }
+]
