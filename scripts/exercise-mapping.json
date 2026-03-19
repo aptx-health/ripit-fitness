@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-03-19T21:27:31.392Z",
+  "generated_at": "2026-03-19T23:20:39.844Z",
   "stats": {
-    "our_total": 265,
+    "our_total": 312,
     "their_total": 873,
-    "exact_matches": 62,
-    "alias_matches": 101,
-    "close_matches": 87,
+    "exact_matches": 96,
+    "alias_matches": 113,
+    "close_matches": 88,
     "our_unmatched": 15,
-    "their_unmatched": 699
+    "their_unmatched": 684
   },
   "matches": [
     {
@@ -569,6 +569,312 @@
       "validated": false
     },
     {
+      "our_id": "ex_curated_003",
+      "our_name": "Leg Extensions",
+      "their_id": "Leg_Extensions",
+      "their_name": "Leg Extensions",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_004",
+      "our_name": "Seated Leg Curl",
+      "their_id": "Seated_Leg_Curl",
+      "their_name": "Seated Leg Curl",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_006",
+      "our_name": "Chest Supported Row",
+      "their_id": "Leverage_Iso_Row",
+      "their_name": "Leverage Iso Row",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": true
+    },
+    {
+      "our_id": "ex_curated_007",
+      "our_name": "Dip Machine",
+      "their_id": "Dip_Machine",
+      "their_name": "Dip Machine",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_008",
+      "our_name": "Thigh Adductor",
+      "their_id": "Thigh_Adductor",
+      "their_name": "Thigh Adductor",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_009",
+      "our_name": "Thigh Abductor",
+      "their_id": "Thigh_Abductor",
+      "their_name": "Thigh Abductor",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_010",
+      "our_name": "Ab Crunch Machine",
+      "their_id": "Ab_Crunch_Machine",
+      "their_name": "Ab Crunch Machine",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_011",
+      "our_name": "Machine Preacher Curls",
+      "their_id": "Machine_Preacher_Curls",
+      "their_name": "Machine Preacher Curls",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_012",
+      "our_name": "Standing Biceps Cable Curl",
+      "their_id": "Standing_Biceps_Cable_Curl",
+      "their_name": "Standing Biceps Cable Curl",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_013",
+      "our_name": "Triceps Pushdown",
+      "their_id": "Triceps_Pushdown",
+      "their_name": "Triceps Pushdown",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_014",
+      "our_name": "One-Arm Side Laterals",
+      "their_id": "One-Arm_Side_Laterals",
+      "their_name": "One-Arm Side Laterals",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_016",
+      "our_name": "Standing Cable Wood Chop",
+      "their_id": "Standing_Cable_Wood_Chop",
+      "their_name": "Standing Cable Wood Chop",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_018",
+      "our_name": "Pull Through",
+      "their_id": "Pull_Through",
+      "their_name": "Pull Through",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_019",
+      "our_name": "Seated Cable Rows",
+      "their_id": "Seated_Cable_Rows",
+      "their_name": "Seated Cable Rows",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_020",
+      "our_name": "Goblet Squat",
+      "their_id": "Goblet_Squat",
+      "their_name": "Goblet Squat",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_021",
+      "our_name": "Farmer's Walk",
+      "their_id": "Farmers_Walk",
+      "their_name": "Farmer's Walk",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_022",
+      "our_name": "Dumbbell Step Ups",
+      "their_id": "Dumbbell_Step_Ups",
+      "their_name": "Dumbbell Step Ups",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_023",
+      "our_name": "Barbell Squat",
+      "their_id": "Barbell_Squat",
+      "their_name": "Barbell Squat",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_024",
+      "our_name": "Standing Dumbbell Press",
+      "their_id": "Standing_Dumbbell_Press",
+      "their_name": "Standing Dumbbell Press",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_025",
+      "our_name": "Side Lateral Raise",
+      "their_id": "Side_Lateral_Raise",
+      "their_name": "Side Lateral Raise",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_026",
+      "our_name": "One-Arm Dumbbell Row",
+      "their_id": "One-Arm_Dumbbell_Row",
+      "their_name": "One-Arm Dumbbell Row",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_028",
+      "our_name": "Bent Over Barbell Row",
+      "their_id": "Bent_Over_Barbell_Row",
+      "their_name": "Bent Over Barbell Row",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_030",
+      "our_name": "Lying Triceps Press",
+      "their_id": "Lying_Triceps_Press",
+      "their_name": "Lying Triceps Press",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_031",
+      "our_name": "Smith Machine Incline Bench Press",
+      "their_id": "Smith_Machine_Incline_Bench_Press",
+      "their_name": "Smith Machine Incline Bench Press",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_032",
+      "our_name": "Smith Machine Calf Raise",
+      "their_id": "Smith_Machine_Calf_Raise",
+      "their_name": "Smith Machine Calf Raise",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_036",
+      "our_name": "Standing Calf Raise",
+      "their_id": "Standing_Calf_Raises",
+      "their_name": "Standing Calf Raises",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_039",
+      "our_name": "Incline Dumbbell Press",
+      "their_id": "Incline_Dumbbell_Press",
+      "their_name": "Incline Dumbbell Press",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_046",
+      "our_name": "Pushups",
+      "their_id": "Pushups",
+      "their_name": "Pushups",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_048",
+      "our_name": "Dumbbell Lunges",
+      "their_id": "Dumbbell_Lunges",
+      "their_name": "Dumbbell Lunges",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_049",
+      "our_name": "Barbell Glute Bridge",
+      "their_id": "Barbell_Glute_Bridge",
+      "their_name": "Barbell Glute Bridge",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_050",
+      "our_name": "Dumbbell Floor Press",
+      "their_id": "Dumbbell_Floor_Press",
+      "their_name": "Dumbbell Floor Press",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_056",
+      "our_name": "Bodyweight Step-Ups",
+      "their_id": "Dumbbell_Step_Ups",
+      "their_name": "Dumbbell Step Ups",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": true
+    },
+    {
+      "our_id": "ex_curated_060",
+      "our_name": "Assisted Pull-up",
+      "their_id": "Pullups",
+      "their_name": "Pullups",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": true
+    },
+    {
+      "our_id": "ex_curated_061",
+      "our_name": "Assisted Dip",
+      "their_id": "Dips_-_Chest_Version",
+      "their_name": "Dips - Chest Version",
+      "match_type": "exact",
+      "confidence": "high",
+      "validated": true
+    },
+    {
       "our_id": "cmiz7vk1i0003vr0mqucd1f52",
       "our_name": "Barbell Row",
       "their_id": "Bent_Over_Barbell_Row",
@@ -983,6 +1289,78 @@
       "validated": false
     },
     {
+      "our_id": "ex_curated_000",
+      "our_name": "Chest Press",
+      "their_id": "Leverage_Chest_Press",
+      "their_name": "Leverage Chest Press",
+      "match_type": "alias",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_001",
+      "our_name": "Shoulder Press",
+      "their_id": "Machine_Shoulder_Military_Press",
+      "their_name": "Machine Shoulder (Military) Press",
+      "match_type": "alias",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_005",
+      "our_name": "Back Extension",
+      "their_id": "Hyperextensions_Back_Extensions",
+      "their_name": "Hyperextensions (Back Extensions)",
+      "match_type": "alias",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_027",
+      "our_name": "Bench Press",
+      "their_id": "Barbell_Bench_Press_-_Medium_Grip",
+      "their_name": "Barbell Bench Press - Medium Grip",
+      "match_type": "alias",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_051",
+      "our_name": "Pull-Ups",
+      "their_id": "Pullups",
+      "their_name": "Pullups",
+      "match_type": "alias",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_058",
+      "our_name": "Hip Thrust",
+      "their_id": "Barbell_Hip_Thrust",
+      "their_name": "Barbell Hip Thrust",
+      "match_type": "alias",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_062",
+      "our_name": "Leg Press Calf Press",
+      "their_id": "Calf_Press_On_The_Leg_Press_Machine",
+      "their_name": "Calf Press On The Leg Press Machine",
+      "match_type": "alias",
+      "confidence": "high",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_067",
+      "our_name": "Dumbbell Overhead Triceps Extension",
+      "their_id": "Sled_Overhead_Triceps_Extension",
+      "their_name": "Sled Overhead Triceps Extension",
+      "match_type": "alias",
+      "confidence": "high",
+      "validated": false
+    },
+    {
       "our_id": "cmiz7vm4s000fvr0mfh2shcrv",
       "our_name": "Front Squat",
       "their_id": "Barbell_Full_Squat",
@@ -1307,6 +1685,33 @@
       "validated": false
     },
     {
+      "our_id": "ex_curated_033",
+      "our_name": "Lat Pull-Around",
+      "their_id": "One_Arm_Lat_Pulldown",
+      "their_name": "One Arm Lat Pulldown",
+      "match_type": "alias",
+      "confidence": "medium",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_057",
+      "our_name": "Bodyweight Bulgarian Split Squat",
+      "their_id": "Barbell_Side_Split_Squat",
+      "their_name": "Barbell Side Split Squat",
+      "match_type": "alias",
+      "confidence": "medium",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_068",
+      "our_name": "Roman Chair Leg Lift",
+      "their_id": "Hanging_Leg_Raise",
+      "their_name": "Hanging Leg Raise",
+      "match_type": "alias",
+      "confidence": "medium",
+      "validated": false
+    },
+    {
       "our_id": "cmiz7vk780004vr0md53c57bz",
       "our_name": "Overhead Press",
       "their_id": "Barbell_Shoulder_Press",
@@ -1473,6 +1878,15 @@
       "our_name": "Foam Roll Upper Back",
       "their_id": "Upper_Back-Leg_Grab",
       "their_name": "Upper Back-Leg Grab",
+      "match_type": "alias",
+      "confidence": "low",
+      "validated": false
+    },
+    {
+      "our_id": "ex_curated_052",
+      "our_name": "Pike Pushups",
+      "their_id": "Handstand_Push-Ups",
+      "their_name": "Handstand Push-Ups",
       "match_type": "alias",
       "confidence": "low",
       "validated": false
@@ -2238,6 +2652,16 @@
       "validated": false
     },
     {
+      "our_id": "ex_curated_054",
+      "our_name": "Bodyweight Lunges",
+      "their_id": "Bodyweight_Walking_Lunge",
+      "their_name": "Bodyweight Walking Lunge",
+      "match_type": "close",
+      "confidence": "medium",
+      "similarity": 0.667,
+      "validated": false
+    },
+    {
       "our_id": "ex_bw_016",
       "our_name": "Bulgarian Split Squat",
       "their_id": "Suspended_Split_Squat",
@@ -2540,10 +2964,6 @@
       "name": "Barbell Ab Rollout - On Knees"
     },
     {
-      "id": "Barbell_Bench_Press_-_Medium_Grip",
-      "name": "Barbell Bench Press - Medium Grip"
-    },
-    {
       "id": "Barbell_Curls_Lying_Against_An_Incline",
       "name": "Barbell Curls Lying Against An Incline"
     },
@@ -2578,10 +2998,6 @@
     {
       "id": "Barbell_Side_Bend",
       "name": "Barbell Side Bend"
-    },
-    {
-      "id": "Barbell_Squat",
-      "name": "Barbell Squat"
     },
     {
       "id": "Barbell_Squat_To_A_Bench",
@@ -2794,10 +3210,6 @@
     {
       "id": "Calf_Press",
       "name": "Calf Press"
-    },
-    {
-      "id": "Calf_Press_On_The_Leg_Press_Machine",
-      "name": "Calf Press On The Leg Press Machine"
     },
     {
       "id": "Calf_Raise_On_A_Dumbbell",
@@ -3070,10 +3482,6 @@
     {
       "id": "Dumbbell_Bench_Press_with_Neutral_Grip",
       "name": "Dumbbell Bench Press with Neutral Grip"
-    },
-    {
-      "id": "Dumbbell_Floor_Press",
-      "name": "Dumbbell Floor Press"
     },
     {
       "id": "Dumbbell_Incline_Row",
@@ -3400,10 +3808,6 @@
       "name": "Hurdle Hops"
     },
     {
-      "id": "Hyperextensions_Back_Extensions",
-      "name": "Hyperextensions (Back Extensions)"
-    },
-    {
       "id": "Hyperextensions_With_No_Hyperextension_Bench",
       "name": "Hyperextensions With No Hyperextension Bench"
     },
@@ -3668,10 +4072,6 @@
       "name": "Leg-Up Hamstring Stretch"
     },
     {
-      "id": "Leverage_Chest_Press",
-      "name": "Leverage Chest Press"
-    },
-    {
       "id": "Leverage_Deadlift",
       "name": "Leverage Deadlift"
     },
@@ -3686,10 +4086,6 @@
     {
       "id": "Leverage_Incline_Chest_Press",
       "name": "Leverage Incline Chest Press"
-    },
-    {
-      "id": "Leverage_Iso_Row",
-      "name": "Leverage Iso Row"
     },
     {
       "id": "Leverage_Shoulder_Press",
@@ -3818,10 +4214,6 @@
     {
       "id": "Lying_T-Bar_Row",
       "name": "Lying T-Bar Row"
-    },
-    {
-      "id": "Lying_Triceps_Press",
-      "name": "Lying Triceps Press"
     },
     {
       "id": "Machine_Bench_Press",
@@ -4508,10 +4900,6 @@
       "name": "Side Hop-Sprint"
     },
     {
-      "id": "Side_Lateral_Raise",
-      "name": "Side Lateral Raise"
-    },
-    {
       "id": "Side_Laterals_to_Front_Raise",
       "name": "Side Laterals to Front Raise"
     },
@@ -4620,10 +5008,6 @@
       "name": "Smith Machine Bent Over Row"
     },
     {
-      "id": "Smith_Machine_Calf_Raise",
-      "name": "Smith Machine Calf Raise"
-    },
-    {
       "id": "Smith_Machine_Close-Grip_Bench_Press",
       "name": "Smith Machine Close-Grip Bench Press"
     },
@@ -4638,10 +5022,6 @@
     {
       "id": "Smith_Machine_Hip_Raise",
       "name": "Smith Machine Hip Raise"
-    },
-    {
-      "id": "Smith_Machine_Incline_Bench_Press",
-      "name": "Smith Machine Incline Bench Press"
     },
     {
       "id": "Smith_Machine_Leg_Press",
@@ -4784,10 +5164,6 @@
       "name": "Standing Bent-Over Two-Arm Dumbbell Triceps Extension"
     },
     {
-      "id": "Standing_Biceps_Cable_Curl",
-      "name": "Standing Biceps Cable Curl"
-    },
-    {
       "id": "Standing_Biceps_Stretch",
       "name": "Standing Biceps Stretch"
     },
@@ -4806,10 +5182,6 @@
     {
       "id": "Standing_Concentration_Curl",
       "name": "Standing Concentration Curl"
-    },
-    {
-      "id": "Standing_Dumbbell_Press",
-      "name": "Standing Dumbbell Press"
     },
     {
       "id": "Standing_Dumbbell_Reverse_Curl",
@@ -5022,14 +5394,6 @@
     {
       "id": "The_Straddle",
       "name": "The Straddle"
-    },
-    {
-      "id": "Thigh_Abductor",
-      "name": "Thigh Abductor"
-    },
-    {
-      "id": "Thigh_Adductor",
-      "name": "Thigh Adductor"
     },
     {
       "id": "Tire_Flip",

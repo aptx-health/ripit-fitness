@@ -1,9 +1,10 @@
 /**
  * Build Exercise Name Mapping
  *
- * Parses our seed SQL files to extract exercise names + IDs,
- * fetches the free-exercise-db JSON, and performs normalized
- * name matching (exact + fuzzy) to produce a mapping file.
+ * Parses our seed SQL files AND curated TypeScript exercise definitions
+ * to extract exercise names + IDs, fetches the free-exercise-db JSON,
+ * and performs normalized name matching (exact + fuzzy) to produce a
+ * mapping file.
  *
  * Usage:
  *   npx ts-node --skip-project \
@@ -98,6 +99,66 @@ function parseAllSeedFiles(seedDir: string): OurExercise[] {
 }
 
 // ---------------------------------------------------------------------------
+// Curated TypeScript Exercise Parsing
+// ---------------------------------------------------------------------------
+
+function parseCuratedExerciseDefs(filePath: string): OurExercise[] {
+  const content = fs.readFileSync(filePath, 'utf-8')
+  const exercises: OurExercise[] = []
+
+  // Match: { name: 'Exercise Name', category: '...', aliases: [...] }
+  // Uses alternation to handle apostrophes in double-quoted names (e.g. "Farmer's Walk")
+  const entryRegex =
+    /\{\s*name:\s*(?:'([^']+)'|"([^"]+)")\s*,\s*category:\s*['"][^'"]+['"]\s*,\s*aliases:\s*\[([^\]]*)\]\s*\}/g
+
+  let match: RegExpExecArray | null
+  let index = 0
+  while ((match = entryRegex.exec(content)) !== null) {
+    const [, singleQuoteName, doubleQuoteName, aliasesRaw] = match
+    const name = singleQuoteName || doubleQuoteName
+
+    const aliases: string[] = []
+    const aliasRegex = /['"]([^'"]+)['"]/g
+    let aliasMatch: RegExpExecArray | null
+    while ((aliasMatch = aliasRegex.exec(aliasesRaw)) !== null) {
+      aliases.push(aliasMatch[1])
+    }
+
+    const id = `ex_curated_${String(index).padStart(3, '0')}`
+    const normalizedName = name.toLowerCase()
+    exercises.push({ id, name, normalizedName, aliases })
+    index++
+  }
+
+  return exercises
+}
+
+// ---------------------------------------------------------------------------
+// Manual Overrides
+// ---------------------------------------------------------------------------
+
+interface ManualOverrides {
+  overrides: Record<string, string>
+}
+
+function loadManualOverrides(scriptDir: string): Map<string, string> {
+  const overridePath = path.join(scriptDir, 'exercise-manual-overrides.json')
+  if (!fs.existsSync(overridePath)) {
+    return new Map()
+  }
+
+  const data = JSON.parse(
+    fs.readFileSync(overridePath, 'utf-8')
+  ) as ManualOverrides
+  const map = new Map<string, string>()
+  for (const [ourName, theirId] of Object.entries(data.overrides)) {
+    map.set(ourName.toLowerCase(), theirId)
+  }
+  console.log(`  Manual overrides: ${map.size}`)
+  return map
+}
+
+// ---------------------------------------------------------------------------
 // Free Exercise DB Fetching
 // ---------------------------------------------------------------------------
 
@@ -129,36 +190,81 @@ async function main() {
 
   console.log('=== Exercise Name Mapping Builder ===\n')
 
-  // 1. Parse seed files
+  // 1. Parse seed files (SQL + curated TypeScript)
   console.log('Parsing seed SQL files...')
-  const ourExercises = parseAllSeedFiles(seedDir)
+  const sqlExercises = parseAllSeedFiles(seedDir)
+  console.log(`  SQL seed exercises: ${sqlExercises.length}`)
+
+  const curatedPath = path.join(seedDir, 'curated', 'exercise-defs.ts')
+  const curatedExercises = parseCuratedExerciseDefs(curatedPath)
+  console.log(`  Curated exercise defs: ${curatedExercises.length}`)
+
+  // Merge, deduplicating by normalizedName (SQL exercises take priority)
+  const seenNormalized = new Set(sqlExercises.map((e) => e.normalizedName))
+  const ourExercises = [...sqlExercises]
+  let curatedNew = 0
+  for (const ex of curatedExercises) {
+    if (!seenNormalized.has(ex.normalizedName)) {
+      seenNormalized.add(ex.normalizedName)
+      ourExercises.push(ex)
+      curatedNew++
+    }
+  }
+  console.log(`  New from curated (not in SQL): ${curatedNew}`)
   console.log(`\nTotal unique exercises (ours): ${ourExercises.length}`)
 
-  // 2. Fetch free-exercise-db
+  // 2. Load manual overrides
+  const manualOverrides = loadManualOverrides(scriptDir)
+
+  // 3. Fetch free-exercise-db
   const theirExercises = await fetchFreeExerciseDb()
 
-  // 3. Build lookup structures
+  // 4. Build lookup structures
   const theirNormalized = new Map<string, TheirExercise>()
   const theirDeepNormalized = new Map<string, TheirExercise>()
   const theirNormalizedList: { norm: string; exercise: TheirExercise }[] = []
+  const theirById = new Map<string, TheirExercise>()
 
   for (const ex of theirExercises) {
     const norm = normalize(ex.name)
     const deep = deepNormalize(ex.name)
     theirNormalized.set(norm, ex)
+    theirById.set(ex.id, ex)
     if (!theirDeepNormalized.has(deep)) {
       theirDeepNormalized.set(deep, ex)
     }
     theirNormalizedList.push({ norm, exercise: ex })
   }
 
-  // 4. Match exercises
+  // 5. Match exercises
   console.log('\nMatching exercises...')
   const matches: Match[] = []
   const unmatchedOurs: UnmatchedExercise[] = []
   const matchedTheirIds = new Set<string>()
 
   for (const ourEx of ourExercises) {
+    // Check manual overrides first
+    const overrideId = manualOverrides.get(ourEx.name.toLowerCase())
+    if (overrideId) {
+      const theirEx = theirById.get(overrideId)
+      if (theirEx) {
+        matches.push({
+          our_id: ourEx.id,
+          our_name: ourEx.name,
+          their_id: theirEx.id,
+          their_name: theirEx.name,
+          match_type: 'exact',
+          confidence: 'high',
+          validated: true,
+        })
+        matchedTheirIds.add(theirEx.id)
+        continue
+      }
+      console.warn(
+        `  Warning: manual override "${ourEx.name}" -> "${overrideId}" not found in free-exercise-db`
+      )
+    }
+
     const candidate = findBestMatch(
       ourEx,
       theirNormalized,
