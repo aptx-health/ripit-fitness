@@ -1,0 +1,467 @@
+[
+  {
+    "name": "3/4 Sit-Up",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["hip-flexors"]
+  },
+  {
+    "name": "Ab Crunch Machine",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": []
+  },
+  {
+    "name": "Ab Roller",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["front-delts", "lats"]
+  },
+  {
+    "name": "Advanced Kettlebell Windmill",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["abs", "glutes", "hamstrings"]
+  },
+  {
+    "name": "Air Bike",
+    "primaryFAUs": ["abs", "obliques"],
+    "secondaryFAUs": ["hip-flexors"]
+  },
+  {
+    "name": "Alternate Heel Touchers",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["abs"]
+  },
+  {
+    "name": "Barbell Ab Rollout",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["front-delts", "lower-back"]
+  },
+  {
+    "name": "Barbell Ab Rollout - On Knees",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["front-delts", "lower-back"]
+  },
+  {
+    "name": "Barbell Rollout from Bench",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["lats", "front-delts"]
+  },
+  {
+    "name": "Barbell Side Bend",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["abs", "lower-back"]
+  },
+  {
+    "name": "Bent-Knee Hip Raise",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["hip-flexors"]
+  },
+  {
+    "name": "Bent Press",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["front-delts", "triceps", "glutes"]
+  },
+  {
+    "name": "Bosu Ball Cable Crunch With Side Bends",
+    "primaryFAUs": ["abs", "obliques"],
+    "secondaryFAUs": []
+  },
+  {
+    "name": "Bottoms Up",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["hip-flexors"]
+  },
+  {
+    "name": "Butt-Ups",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["front-delts"]
+  },
+  {
+    "name": "Cable Crunch",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": []
+  },
+  {
+    "name": "Cable Judo Flip",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["abs", "front-delts"]
+  },
+  {
+    "name": "Cable Reverse Crunch",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["hip-flexors"]
+  },
+  {
+    "name": "Cable Russian Twists",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["abs"]
+  },
+  {
+    "name": "Cable Seated Crunch",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": []
+  },
+  {
+    "name": "Cocoons",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["hip-flexors"]
+  },
+  {
+    "name": "Cross-Body Crunch",
+    "primaryFAUs": ["abs", "obliques"],
+    "secondaryFAUs": []
+  },
+  {
+    "name": "Crunch - Hands Overhead",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": []
+  },
+  {
+    "name": "Crunch - Legs On Exercise Ball",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": []
+  },
+  {
+    "name": "Crunches",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": []
+  },
+  {
+    "name": "Dead Bug",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["obliques", "hip-flexors"]
+  },
+  {
+    "name": "Decline Crunch",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["hip-flexors"]
+  },
+  {
+    "name": "Decline Oblique Crunch",
+    "primaryFAUs": ["abs", "obliques"],
+    "secondaryFAUs": ["hip-flexors"]
+  },
+  {
+    "name": "Decline Reverse Crunch",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["hip-flexors"]
+  },
+  {
+    "name": "Double Kettlebell Windmill",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["abs", "glutes", "hamstrings"]
+  },
+  {
+    "name": "Dumbbell Side Bend",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["abs"]
+  },
+  {
+    "name": "Elbow to Knee",
+    "primaryFAUs": ["abs", "obliques"],
+    "secondaryFAUs": ["hip-flexors"]
+  },
+  {
+    "name": "Exercise Ball Crunch",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": []
+  },
+  {
+    "name": "Exercise Ball Pull-In",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["hip-flexors"]
+  },
+  {
+    "name": "Flat Bench Leg Pull-In",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["hip-flexors"]
+  },
+  {
+    "name": "Flat Bench Lying Leg Raise",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["hip-flexors"]
+  },
+  {
+    "name": "Frog Sit-Ups",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": []
+  },
+  {
+    "name": "Gorilla Chin/Crunch",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["biceps", "lats"]
+  },
+  {
+    "name": "Hanging Leg Raise",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["hip-flexors"]
+  },
+  {
+    "name": "Hanging Pike",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["hip-flexors"]
+  },
+  {
+    "name": "Jackknife Sit-Up",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["hip-flexors"]
+  },
+  {
+    "name": "Janda Sit-Up",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": []
+  },
+  {
+    "name": "Kettlebell Figure 8",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["abs", "hamstrings", "front-delts"]
+  },
+  {
+    "name": "Kettlebell Pass Between The Legs",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["abs", "glutes", "hamstrings"]
+  },
+  {
+    "name": "Kettlebell Windmill",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["abs", "glutes", "hamstrings"]
+  },
+  {
+    "name": "Knee/Hip Raise On Parallel Bars",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["hip-flexors"]
+  },
+  {
+    "name": "Kneeling Cable Crunch With Alternating Oblique Twists",
+    "primaryFAUs": ["abs", "obliques"],
+    "secondaryFAUs": []
+  },
+  {
+    "name": "Landmine 180's",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["abs", "front-delts", "glutes"]
+  },
+  {
+    "name": "Leg Pull-In",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["hip-flexors"]
+  },
+  {
+    "name": "Lower Back Curl",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["lower-back"]
+  },
+  {
+    "name": "Medicine Ball Full Twist",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["abs", "front-delts"]
+  },
+  {
+    "name": "Oblique Crunches",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["abs"]
+  },
+  {
+    "name": "Oblique Crunches - On The Floor",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["abs"]
+  },
+  {
+    "name": "One-Arm High-Pulley Cable Side Bends",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["abs"]
+  },
+  {
+    "name": "One-Arm Medicine Ball Slam",
+    "primaryFAUs": ["abs", "obliques"],
+    "secondaryFAUs": ["lats", "front-delts"]
+  },
+  {
+    "name": "Otis-Up",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["front-delts", "chest", "triceps"]
+  },
+  {
+    "name": "Overhead Stretch",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["lats", "chest"]
+  },
+  {
+    "name": "Pallof Press",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["abs"]
+  },
+  {
+    "name": "Pallof Press With Rotation",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["abs", "front-delts"]
+  },
+  {
+    "name": "Plank",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["obliques"]
+  },
+  {
+    "name": "Plate Twist",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["abs"]
+  },
+  {
+    "name": "Press Sit-Up",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["front-delts", "chest", "triceps"]
+  },
+  {
+    "name": "Reverse Crunch",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["hip-flexors"]
+  },
+  {
+    "name": "Rope Crunch",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": []
+  },
+  {
+    "name": "Russian Twist",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["abs"]
+  },
+  {
+    "name": "Scissor Kick",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["hip-flexors"]
+  },
+  {
+    "name": "Seated Barbell Twist",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["abs"]
+  },
+  {
+    "name": "Seated Flat Bench Leg Pull-In",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["hip-flexors"]
+  },
+  {
+    "name": "Seated Leg Tucks",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["hip-flexors"]
+  },
+  {
+    "name": "Seated Overhead Stretch",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": []
+  },
+  {
+    "name": "Side Bridge",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["abs", "front-delts"]
+  },
+  {
+    "name": "Side Jackknife",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["abs"]
+  },
+  {
+    "name": "Sit-Up",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["hip-flexors"]
+  },
+  {
+    "name": "Sledgehammer Swings",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["abs", "forearms", "lats"]
+  },
+  {
+    "name": "Smith Machine Hip Raise",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["hip-flexors"]
+  },
+  {
+    "name": "Spell Caster",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["abs", "front-delts", "glutes"]
+  },
+  {
+    "name": "Spider Crawl",
+    "primaryFAUs": ["abs", "obliques"],
+    "secondaryFAUs": ["front-delts", "chest"]
+  },
+  {
+    "name": "Standing Cable Lift",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["abs", "front-delts"]
+  },
+  {
+    "name": "Standing Cable Wood Chop",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["abs", "front-delts"]
+  },
+  {
+    "name": "Standing Lateral Stretch",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["abs"]
+  },
+  {
+    "name": "Standing Rope Crunch",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": []
+  },
+  {
+    "name": "Stomach Vacuum",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": []
+  },
+  {
+    "name": "Supine One-Arm Overhead Throw",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["front-delts", "chest", "lats"]
+  },
+  {
+    "name": "Supine Two-Arm Overhead Throw",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["front-delts", "chest", "lats"]
+  },
+  {
+    "name": "Suspended Fallout",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["front-delts", "chest", "lower-back"]
+  },
+  {
+    "name": "Suspended Reverse Crunch",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["hip-flexors"]
+  },
+  {
+    "name": "Toe Touchers",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": []
+  },
+  {
+    "name": "Torso Rotation",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["abs"]
+  },
+  {
+    "name": "Tuck Crunch",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["hip-flexors"]
+  },
+  {
+    "name": "Weighted Ball Side Bend",
+    "primaryFAUs": ["obliques"],
+    "secondaryFAUs": ["abs"]
+  },
+  {
+    "name": "Weighted Crunches",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": []
+  },
+  {
+    "name": "Weighted Sit-Ups - With Bands",
+    "primaryFAUs": ["abs"],
+    "secondaryFAUs": ["hip-flexors"]
+  },
+  {
+    "name": "Wind Sprints",
+    "primaryFAUs": ["abs", "obliques"],
+    "secondaryFAUs": []
+  }
+]

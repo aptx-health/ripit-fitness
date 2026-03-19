@@ -1,0 +1,21 @@
+{
+  "description": "Maps free-exercise-db muscle group names to our FAU taxonomy. For 1:1 mappings, the value is a single-element array. Shoulders and abdominals require per-exercise overrides (see shoulders-classified.json and abs-classified.json).",
+  "mappings": {
+    "biceps": ["biceps"],
+    "triceps": ["triceps"],
+    "chest": ["chest"],
+    "lats": ["lats"],
+    "traps": ["traps"],
+    "forearms": ["forearms"],
+    "glutes": ["glutes"],
+    "hamstrings": ["hamstrings"],
+    "quadriceps": ["quads"],
+    "calves": ["calves"],
+    "adductors": ["adductors"],
+    "abductors": ["abductors"],
+    "lower back": ["lower-back"],
+    "middle back": ["mid-back"],
+    "neck": ["neck"]
+  },
+  "requiresPerExerciseOverride": ["shoulders", "abdominals"]
+}
