@@ -272,10 +272,10 @@ model CommunityProgram {
   name              String
   description       String
   programType       String   @default("strength")
-  authorUserId      String
+  authorUserId      String?
   displayName       String
   publishedAt       DateTime @default(now())
-  originalProgramId String   @unique
+  originalProgramId String?  @unique
 
   // Denormalized program data for immutability
   programData Json
@@ -285,8 +285,11 @@ model CommunityProgram {
   workoutCount  Int
   exerciseCount Int
 
+  curated Boolean @default(false)
+
   @@index([programType])
   @@index([publishedAt(sort: Desc)])
   @@index([authorUserId])
   @@index([originalProgramId])
+  @@index([curated])
 }

@@ -293,10 +293,10 @@ model CommunityProgram {
   name              String
   description       String
   programType       String   @default("strength")
-  authorUserId      String
+  authorUserId      String?
   displayName       String
   publishedAt       DateTime @default(now())
-  originalProgramId String   @unique(map: "community_programs_original_program_id_key")
+  originalProgramId String?  @unique(map: "community_programs_original_program_id_key")
   programData       Json
   weekCount         Int
   workoutCount      Int
@@ -308,6 +308,7 @@ model CommunityProgram {
   targetDaysPerWeek Int?
   equipmentNeeded   String[] @default([])
   focusAreas        String[] @default([])
+  curated           Boolean  @default(false)
 
   @@index([programType])
   @@index([publishedAt(sort: Desc)])
@@ -317,6 +318,7 @@ model CommunityProgram {
   @@index([goals], type: Gin)
   @@index([equipmentNeeded], type: Gin)
   @@index([programType, publishedAt(sort: Desc)])
+  @@index([curated])
 }
 
 model ExercisePerformanceLog {

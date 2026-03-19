@@ -1,0 +1,780 @@
+{
+  "id": "cmmwrdyq60005vrwf5gk21jhs",
+  "name": "Home Training",
+  "description": "Equipment-free bodyweight program. All you need is a pull-up bar and a step or chair for elevated split squats. High volume to compensate for low load. 3x/week.\n\nSometimes you can't make it to the gym. Here's one week of home exercises to keep you going!",
+  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+  "isActive": false,
+  "createdAt": "2026-03-19T00:55:40.302Z",
+  "updatedAt": "2026-03-19T00:56:53.812Z",
+  "isUserCreated": false,
+  "programType": "strength",
+  "isArchived": false,
+  "archivedAt": null,
+  "copyStatus": "ready",
+  "goals": [],
+  "level": null,
+  "durationWeeks": null,
+  "durationDisplay": null,
+  "targetDaysPerWeek": null,
+  "equipmentNeeded": [],
+  "focusAreas": [],
+  "weeks": [
+    {
+      "id": "cmmwrdyq70007vrwflmt7p5i8",
+      "weekNumber": 1,
+      "name": null,
+      "description": null,
+      "programId": "cmmwrdyq60005vrwf5gk21jhs",
+      "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+      "workouts": [
+        {
+          "id": "cmmwrdyq80009vrwf3qkcebec",
+          "name": "Push + Legs",
+          "dayNumber": 1,
+          "weekId": "cmmwrdyq70007vrwflmt7p5i8",
+          "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+          "exercises": [
+            {
+              "id": "cmmwrdyqa000bvrwf5l80jbgr",
+              "name": "Pushups",
+              "exerciseDefinitionId": "cmmw5na9y000vvr1itecejbyh",
+              "order": 1,
+              "exerciseGroup": null,
+              "workoutId": "cmmwrdyq80009vrwf3qkcebec",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cmmwrdyqa000cvrwf7mexx11y",
+                  "setNumber": 1,
+                  "reps": "15-20",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqa000bvrwf5l80jbgr",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqa000dvrwf4a6e0hno",
+                  "setNumber": 2,
+                  "reps": "15-20",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqa000bvrwf5l80jbgr",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqa000evrwfyl63cqsb",
+                  "setNumber": 3,
+                  "reps": "15-20",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqa000bvrwf5l80jbgr",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqa000fvrwf5b3mtdci",
+                  "setNumber": 4,
+                  "reps": "15-20",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqa000bvrwf5l80jbgr",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "cmmwrdyqc000hvrwffgwyzmt8",
+              "name": "Pike Pushups",
+              "exerciseDefinitionId": "cmmwrdyq10001vrwfucquk6hr",
+              "order": 2,
+              "exerciseGroup": null,
+              "workoutId": "cmmwrdyq80009vrwf3qkcebec",
+              "notes": "Walk hands closer to feet for more shoulder emphasis. Keep core tight.",
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cmmwrdyqc000ivrwf2457q7rf",
+                  "setNumber": 1,
+                  "reps": "10-12",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqc000hvrwffgwyzmt8",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqc000jvrwf82ibzmd5",
+                  "setNumber": 2,
+                  "reps": "10-12",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqc000hvrwffgwyzmt8",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqc000kvrwfeuzoxy49",
+                  "setNumber": 3,
+                  "reps": "10-12",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqc000hvrwffgwyzmt8",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "cmmwrdyqe000mvrwfiw67uqy1",
+              "name": "Bodyweight Squat",
+              "exerciseDefinitionId": "ex_bw_013",
+              "order": 3,
+              "exerciseGroup": null,
+              "workoutId": "cmmwrdyq80009vrwf3qkcebec",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cmmwrdyqe000nvrwf6mj3rc8p",
+                  "setNumber": 1,
+                  "reps": "20",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqe000mvrwfiw67uqy1",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqe000ovrwf0ph0m50w",
+                  "setNumber": 2,
+                  "reps": "20",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqe000mvrwfiw67uqy1",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqe000pvrwfn2ipjg0a",
+                  "setNumber": 3,
+                  "reps": "20",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqe000mvrwfiw67uqy1",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqe000qvrwfmgt3685n",
+                  "setNumber": 4,
+                  "reps": "20",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqe000mvrwfiw67uqy1",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "cmmwrdyqg000svrwfqtyvcx7x",
+              "name": "Bodyweight Lunges",
+              "exerciseDefinitionId": "cmmwrdyq20002vrwfqy5r489j",
+              "order": 4,
+              "exerciseGroup": null,
+              "workoutId": "cmmwrdyq80009vrwf3qkcebec",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cmmwrdyqg000tvrwf3da1jaj2",
+                  "setNumber": 1,
+                  "reps": "12/leg",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqg000svrwfqtyvcx7x",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqg000uvrwfrm1zyscx",
+                  "setNumber": 2,
+                  "reps": "12/leg",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqg000svrwfqtyvcx7x",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqg000vvrwft5l3uq55",
+                  "setNumber": 3,
+                  "reps": "12/leg",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqg000svrwfqtyvcx7x",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "cmmwrdyqi000xvrwfjl67vxv1",
+              "name": "Glute Bridge",
+              "exerciseDefinitionId": "ex_bw_038",
+              "order": 5,
+              "exerciseGroup": null,
+              "workoutId": "cmmwrdyq80009vrwf3qkcebec",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cmmwrdyqi000yvrwfqjx19in6",
+                  "setNumber": 1,
+                  "reps": "20",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqi000xvrwfjl67vxv1",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqi000zvrwft6mrl0qb",
+                  "setNumber": 2,
+                  "reps": "20",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqi000xvrwfjl67vxv1",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqi0010vrwfehkfnvlu",
+                  "setNumber": 3,
+                  "reps": "20",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqi000xvrwfjl67vxv1",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmmwrdyqj0012vrwfl6oeifii",
+          "name": "Pull + Legs",
+          "dayNumber": 2,
+          "weekId": "cmmwrdyq70007vrwflmt7p5i8",
+          "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+          "exercises": [
+            {
+              "id": "cmmwrdyqk0014vrwfyr8brseg",
+              "name": "Pull-Ups",
+              "exerciseDefinitionId": "cmmwrdypz0000vrwfr4v4oo7l",
+              "order": 1,
+              "exerciseGroup": null,
+              "workoutId": "cmmwrdyqj0012vrwfl6oeifii",
+              "notes": "Full dead hang at bottom, chin over bar at top.",
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cmmwrdyqk0015vrwfijui2lls",
+                  "setNumber": 1,
+                  "reps": "AMRAP",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqk0014vrwfyr8brseg",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqk0016vrwfiwlr05jr",
+                  "setNumber": 2,
+                  "reps": "AMRAP",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqk0014vrwfyr8brseg",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqk0017vrwferlbgjrd",
+                  "setNumber": 3,
+                  "reps": "AMRAP",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqk0014vrwfyr8brseg",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqk0018vrwf11lim42k",
+                  "setNumber": 4,
+                  "reps": "AMRAP",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqk0014vrwfyr8brseg",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "cmmwrdyql001avrwficoc5m05",
+              "name": "Inverted Row",
+              "exerciseDefinitionId": "ex_bw_036",
+              "order": 2,
+              "exerciseGroup": null,
+              "workoutId": "cmmwrdyqj0012vrwfl6oeifii",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cmmwrdyqm001bvrwfglqlw54i",
+                  "setNumber": 1,
+                  "reps": "10-12",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyql001avrwficoc5m05",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqm001cvrwf0r6166qd",
+                  "setNumber": 2,
+                  "reps": "10-12",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyql001avrwficoc5m05",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqm001dvrwfj1vqcxs9",
+                  "setNumber": 3,
+                  "reps": "10-12",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyql001avrwficoc5m05",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "cmmwrdyqn001fvrwfvnw0esng",
+              "name": "Bodyweight Bulgarian Split Squat",
+              "exerciseDefinitionId": "cmmwrdyq50004vrwfgkuu02y4",
+              "order": 3,
+              "exerciseGroup": null,
+              "workoutId": "cmmwrdyqj0012vrwfl6oeifii",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cmmwrdyqn001gvrwf2akc565n",
+                  "setNumber": 1,
+                  "reps": "10/leg",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqn001fvrwfvnw0esng",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqn001hvrwfwjtmhow1",
+                  "setNumber": 2,
+                  "reps": "10/leg",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqn001fvrwfvnw0esng",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqn001ivrwfpo0hx1h2",
+                  "setNumber": 3,
+                  "reps": "10/leg",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqn001fvrwfvnw0esng",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqn001jvrwfwdza3vmx",
+                  "setNumber": 4,
+                  "reps": "10/leg",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqn001fvrwfvnw0esng",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "cmmwrdyqp001lvrwfbzln40hd",
+              "name": "Bodyweight Step-Ups",
+              "exerciseDefinitionId": "cmmwrdyq40003vrwf1pk48x3g",
+              "order": 4,
+              "exerciseGroup": null,
+              "workoutId": "cmmwrdyqj0012vrwfl6oeifii",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cmmwrdyqp001mvrwfmgedx5ld",
+                  "setNumber": 1,
+                  "reps": "12/leg",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqp001lvrwfbzln40hd",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqp001nvrwfgtv5enlx",
+                  "setNumber": 2,
+                  "reps": "12/leg",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqp001lvrwfbzln40hd",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqp001ovrwf12cr80o7",
+                  "setNumber": 3,
+                  "reps": "12/leg",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqp001lvrwfbzln40hd",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "cmmwrdyqq001qvrwfotwdcvov",
+              "name": "Glute Bridge",
+              "exerciseDefinitionId": "ex_bw_038",
+              "order": 5,
+              "exerciseGroup": null,
+              "workoutId": "cmmwrdyqj0012vrwfl6oeifii",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cmmwrdyqq001rvrwf43b2nyf9",
+                  "setNumber": 1,
+                  "reps": "20",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqq001qvrwfotwdcvov",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqq001svrwf9ok52ny5",
+                  "setNumber": 2,
+                  "reps": "20",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqq001qvrwfotwdcvov",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqq001tvrwf2ldaerrg",
+                  "setNumber": 3,
+                  "reps": "20",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqq001qvrwfotwdcvov",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmmwrdyqr001vvrwfzdyh0oyf",
+          "name": "Full Body",
+          "dayNumber": 3,
+          "weekId": "cmmwrdyq70007vrwflmt7p5i8",
+          "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+          "exercises": [
+            {
+              "id": "cmmwrdyqs001xvrwffda0eh0c",
+              "name": "Pull-Ups",
+              "exerciseDefinitionId": "cmmwrdypz0000vrwfr4v4oo7l",
+              "order": 1,
+              "exerciseGroup": null,
+              "workoutId": "cmmwrdyqr001vvrwfzdyh0oyf",
+              "notes": "Full dead hang at bottom, chin over bar at top.",
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cmmwrdyqs001yvrwffhhoby5w",
+                  "setNumber": 1,
+                  "reps": "AMRAP",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqs001xvrwffda0eh0c",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqs001zvrwfkaleprfp",
+                  "setNumber": 2,
+                  "reps": "AMRAP",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqs001xvrwffda0eh0c",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqs0020vrwf5fl6rqib",
+                  "setNumber": 3,
+                  "reps": "AMRAP",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqs001xvrwffda0eh0c",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "cmmwrdyqt0022vrwfyri7c6cl",
+              "name": "Pushups",
+              "exerciseDefinitionId": "cmmw5na9y000vvr1itecejbyh",
+              "order": 2,
+              "exerciseGroup": null,
+              "workoutId": "cmmwrdyqr001vvrwfzdyh0oyf",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cmmwrdyqt0023vrwfgwm2g6e5",
+                  "setNumber": 1,
+                  "reps": "20",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqt0022vrwfyri7c6cl",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqt0024vrwfp14qieua",
+                  "setNumber": 2,
+                  "reps": "20",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqt0022vrwfyri7c6cl",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqt0025vrwfoqcfxezp",
+                  "setNumber": 3,
+                  "reps": "20",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqt0022vrwfyri7c6cl",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqt0026vrwfuk8gkxti",
+                  "setNumber": 4,
+                  "reps": "20",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqt0022vrwfyri7c6cl",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "cmmwrdyqv0028vrwfqhcisrxi",
+              "name": "Bodyweight Squat",
+              "exerciseDefinitionId": "ex_bw_013",
+              "order": 3,
+              "exerciseGroup": null,
+              "workoutId": "cmmwrdyqr001vvrwfzdyh0oyf",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cmmwrdyqv0029vrwfuyuj6tll",
+                  "setNumber": 1,
+                  "reps": "20",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqv0028vrwfqhcisrxi",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqv002avrwf9b42si43",
+                  "setNumber": 2,
+                  "reps": "20",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqv0028vrwfqhcisrxi",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqv002bvrwf779n327f",
+                  "setNumber": 3,
+                  "reps": "20",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqv0028vrwfqhcisrxi",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqv002cvrwf8pdjdko5",
+                  "setNumber": 4,
+                  "reps": "20",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqv0028vrwfqhcisrxi",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "cmmwrdyqw002evrwf0bb7ht7r",
+              "name": "Bodyweight Bulgarian Split Squat",
+              "exerciseDefinitionId": "cmmwrdyq50004vrwfgkuu02y4",
+              "order": 4,
+              "exerciseGroup": null,
+              "workoutId": "cmmwrdyqr001vvrwfzdyh0oyf",
+              "notes": null,
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cmmwrdyqw002fvrwfpv9dl6gk",
+                  "setNumber": 1,
+                  "reps": "10/leg",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqw002evrwf0bb7ht7r",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqw002gvrwfw7guqulb",
+                  "setNumber": 2,
+                  "reps": "10/leg",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqw002evrwf0bb7ht7r",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqw002hvrwfht0t88kp",
+                  "setNumber": 3,
+                  "reps": "10/leg",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqw002evrwf0bb7ht7r",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            },
+            {
+              "id": "cmmwrdyqy002jvrwf71l6l8oz",
+              "name": "Pike Pushups",
+              "exerciseDefinitionId": "cmmwrdyq10001vrwfucquk6hr",
+              "order": 5,
+              "exerciseGroup": null,
+              "workoutId": "cmmwrdyqr001vvrwfzdyh0oyf",
+              "notes": "Walk hands closer to feet for more shoulder emphasis. Keep core tight.",
+              "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
+              "isOneOff": false,
+              "workoutCompletionId": null,
+              "prescribedSets": [
+                {
+                  "id": "cmmwrdyqy002kvrwfa3brozk0",
+                  "setNumber": 1,
+                  "reps": "12",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqy002jvrwf71l6l8oz",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqy002lvrwfe58clxt3",
+                  "setNumber": 2,
+                  "reps": "12",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqy002jvrwf71l6l8oz",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                },
+                {
+                  "id": "cmmwrdyqy002mvrwf837a9og3",
+                  "setNumber": 3,
+                  "reps": "12",
+                  "weight": "",
+                  "rpe": null,
+                  "rir": 2,
+                  "exerciseId": "cmmwrdyqy002jvrwf71l6l8oz",
+                  "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

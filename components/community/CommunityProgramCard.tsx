@@ -11,7 +11,7 @@ type CommunityProgram = {
   name: string
   description: string
   programType: string
-  authorUserId: string
+  authorUserId: string | null
   displayName: string
   publishedAt: Date
   weekCount: number
