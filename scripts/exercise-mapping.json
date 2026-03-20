@@ -880,8 +880,8 @@
       "their_id": "Bent_Over_Barbell_Row",
       "their_name": "Bent Over Barbell Row",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "cmiz7vmmg000ivr0mojncaj84",
@@ -889,8 +889,8 @@
       "their_id": "Seated_Cable_Rows",
       "their_name": "Seated Cable Rows",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "cmiz7vjvh0002vr0mtcmhiz70",
@@ -898,8 +898,8 @@
       "their_id": "Barbell_Deadlift",
       "their_name": "Barbell Deadlift",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "cmiz7vmgd000hvr0mkidkt6uu",
@@ -907,8 +907,8 @@
       "their_id": "One-Arm_Dumbbell_Row",
       "their_name": "One-Arm Dumbbell Row",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "cmiz7vkvr0008vr0m7rv3dapc",
@@ -916,8 +916,8 @@
       "their_id": "Pullups",
       "their_name": "Pullups",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "cmiz7vmyl000kvr0mmr9a482v",
@@ -925,8 +925,8 @@
       "their_id": "Parallel_Bar_Dip",
       "their_name": "Parallel Bar Dip",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "cmiz7vnam000mvr0mano9z27r",
@@ -934,8 +934,8 @@
       "their_id": "Standing_Calf_Raises",
       "their_name": "Standing Calf Raises",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "cmiz7vljh000cvr0mlk0r5kco",
@@ -943,8 +943,8 @@
       "their_id": "Seated_Leg_Curl",
       "their_name": "Seated Leg Curl",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_bw_001",
@@ -952,8 +952,8 @@
       "their_id": "Pushups",
       "their_name": "Pushups",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_bw_021",
@@ -961,8 +961,8 @@
       "their_id": "Split_Jump",
       "their_name": "Split Jump",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_bw_023",
@@ -970,8 +970,8 @@
       "their_id": "Crunches",
       "their_name": "Crunches",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_bw_034",
@@ -979,8 +979,8 @@
       "their_id": "Bench_Dips",
       "their_name": "Bench Dips",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_db_001",
@@ -988,8 +988,8 @@
       "their_id": "Incline_Dumbbell_Press",
       "their_name": "Incline Dumbbell Press",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_db_007",
@@ -997,8 +997,8 @@
       "their_id": "Arnold_Dumbbell_Press",
       "their_name": "Arnold Dumbbell Press",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_db_009",
@@ -1006,8 +1006,8 @@
       "their_id": "Lying_Rear_Delt_Raise",
       "their_name": "Lying Rear Delt Raise",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_db_010",
@@ -1015,8 +1015,8 @@
       "their_id": "Standing_Dumbbell_Upright_Row",
       "their_name": "Standing Dumbbell Upright Row",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_db_011",
@@ -1024,26 +1024,26 @@
       "their_id": "One-Arm_Dumbbell_Row",
       "their_name": "One-Arm Dumbbell Row",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_db_023",
       "our_name": "Dumbbell Overhead Tricep Extension",
-      "their_id": "Lying_Dumbbell_Tricep_Extension",
-      "their_name": "Lying Dumbbell Tricep Extension",
+      "their_id": "Standing_Dumbbell_Triceps_Extension",
+      "their_name": "Standing Dumbbell Triceps Extension",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_db_027",
       "our_name": "Dumbbell Skull Crusher",
-      "their_id": "Cable_Lying_Triceps_Extension",
-      "their_name": "Cable Lying Triceps Extension",
+      "their_id": "EZ-Bar_Skullcrusher",
+      "their_name": "EZ-Bar Skullcrusher",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_db_028",
@@ -1051,8 +1051,8 @@
       "their_id": "Goblet_Squat",
       "their_name": "Goblet Squat",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_db_041",
@@ -1060,8 +1060,8 @@
       "their_id": "Russian_Twist",
       "their_name": "Russian Twist",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_db_046",
@@ -1069,8 +1069,8 @@
       "their_id": "Dumbbell_Squat",
       "their_name": "Dumbbell Squat",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_db_049",
@@ -1078,17 +1078,8 @@
       "their_id": "Clean_and_Press",
       "their_name": "Clean and Press",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
-    },
-    {
-      "our_id": "ex_rb_027",
-      "our_name": "Band Standing Abduction",
-      "their_id": "Band_Hip_Adductions",
-      "their_name": "Band Hip Adductions",
-      "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_rb_029",
@@ -1096,8 +1087,8 @@
       "their_id": "Monster_Walk",
       "their_name": "Monster Walk",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_rb_030",
@@ -1105,8 +1096,8 @@
       "their_id": "Pallof_Press",
       "their_name": "Pallof Press",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_kb_006",
@@ -1114,8 +1105,8 @@
       "their_id": "Clean_and_Press",
       "their_name": "Clean and Press",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_kb_010",
@@ -1123,8 +1114,8 @@
       "their_id": "Floor_Press",
       "their_name": "Floor Press",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_kb_012",
@@ -1132,8 +1123,8 @@
       "their_id": "Goblet_Squat",
       "their_name": "Goblet Squat",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_kb_024",
@@ -1141,8 +1132,8 @@
       "their_id": "Russian_Twist",
       "their_name": "Russian Twist",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_kb_025",
@@ -1150,8 +1141,8 @@
       "their_id": "Farmers_Walk",
       "their_name": "Farmer's Walk",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_cm_013",
@@ -1159,8 +1150,8 @@
       "their_id": "Cable_Rear_Delt_Fly",
       "their_name": "Cable Rear Delt Fly",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_cm_014",
@@ -1168,8 +1159,8 @@
       "their_id": "Face_Pull",
       "their_name": "Face Pull",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_cm_018",
@@ -1177,8 +1168,8 @@
       "their_id": "Triceps_Pushdown",
       "their_name": "Triceps Pushdown",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_cm_022",
@@ -1186,8 +1177,8 @@
       "their_id": "Glute_Kickback",
       "their_name": "Glute Kickback",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_cm_026",
@@ -1195,8 +1186,8 @@
       "their_id": "Standing_Cable_Wood_Chop",
       "their_name": "Standing Cable Wood Chop",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_cm_027",
@@ -1204,8 +1195,8 @@
       "their_id": "Pallof_Press",
       "their_name": "Pallof Press",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_cm_038",
@@ -1213,8 +1204,8 @@
       "their_id": "Dip_Machine",
       "their_name": "Dip Machine",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_cm_042",
@@ -1222,8 +1213,8 @@
       "their_id": "Ab_Crunch_Machine",
       "their_name": "Ab Crunch Machine",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_cm_046",
@@ -1231,17 +1222,17 @@
       "their_id": "Close-Grip_Barbell_Bench_Press",
       "their_name": "Close-Grip Barbell Bench Press",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_cm_047",
       "our_name": "Barbell Skull Crusher",
-      "their_id": "Lying_Dumbbell_Tricep_Extension",
-      "their_name": "Lying Dumbbell Tricep Extension",
+      "their_id": "EZ-Bar_Skullcrusher",
+      "their_name": "EZ-Bar Skullcrusher",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_cm_048",
@@ -1249,8 +1240,8 @@
       "their_id": "Good_Morning",
       "their_name": "Good Morning",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_cm_054",
@@ -1258,8 +1249,8 @@
       "their_id": "Preacher_Curl",
       "their_name": "Preacher Curl",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_cm_055",
@@ -1267,8 +1258,8 @@
       "their_id": "Inverted_Row",
       "their_name": "Inverted Row",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_mo_001",
@@ -1276,8 +1267,8 @@
       "their_id": "Ab_Roller",
       "their_name": "Ab Roller",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_mo_009",
@@ -1285,8 +1276,8 @@
       "their_id": "Kneeling_Hip_Flexor",
       "their_name": "Kneeling Hip Flexor",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_curated_000",
@@ -1294,8 +1285,8 @@
       "their_id": "Leverage_Chest_Press",
       "their_name": "Leverage Chest Press",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_curated_001",
@@ -1303,8 +1294,8 @@
       "their_id": "Machine_Shoulder_Military_Press",
       "their_name": "Machine Shoulder (Military) Press",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_curated_005",
@@ -1312,8 +1303,8 @@
       "their_id": "Hyperextensions_Back_Extensions",
       "their_name": "Hyperextensions (Back Extensions)",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_curated_027",
@@ -1321,8 +1312,8 @@
       "their_id": "Barbell_Bench_Press_-_Medium_Grip",
       "their_name": "Barbell Bench Press - Medium Grip",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_curated_051",
@@ -1330,8 +1321,8 @@
       "their_id": "Pullups",
       "their_name": "Pullups",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_curated_058",
@@ -1339,8 +1330,8 @@
       "their_id": "Barbell_Hip_Thrust",
       "their_name": "Barbell Hip Thrust",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_curated_062",
@@ -1348,26 +1339,26 @@
       "their_id": "Calf_Press_On_The_Leg_Press_Machine",
       "their_name": "Calf Press On The Leg Press Machine",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_curated_067",
       "our_name": "Dumbbell Overhead Triceps Extension",
-      "their_id": "Sled_Overhead_Triceps_Extension",
-      "their_name": "Sled Overhead Triceps Extension",
+      "their_id": "Standing_Dumbbell_Triceps_Extension",
+      "their_name": "Standing Dumbbell Triceps Extension",
       "match_type": "alias",
-      "confidence": "high",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "cmiz7vm4s000fvr0mfh2shcrv",
       "our_name": "Front Squat",
-      "their_id": "Barbell_Full_Squat",
-      "their_name": "Barbell Full Squat",
+      "their_id": "Front_Squat_Clean_Grip",
+      "their_name": "Front Squat (Clean Grip)",
       "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "cmiz7vn4b000lvr0m5aq17wb7",
@@ -1375,35 +1366,17 @@
       "their_id": "Bodyweight_Walking_Lunge",
       "their_name": "Bodyweight Walking Lunge",
       "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
-    },
-    {
-      "our_id": "ex_bw_007",
-      "our_name": "Archer Push-Up",
-      "their_id": "Side_To_Side_Chins",
-      "their_name": "Side To Side Chins",
-      "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
-    },
-    {
-      "our_id": "ex_bw_011",
-      "our_name": "L-Sit Pull-Up",
-      "their_id": "V-Bar_Pullup",
-      "their_name": "V-Bar Pullup",
-      "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_bw_014",
       "our_name": "Jump Squat",
-      "their_id": "Split_Jump",
-      "their_name": "Split Jump",
+      "their_id": "Freehand_Jump_Squat",
+      "their_name": "Freehand Jump Squat",
       "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_bw_015",
@@ -1411,17 +1384,8 @@
       "their_id": "One_Leg_Barbell_Squat",
       "their_name": "One Leg Barbell Squat",
       "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
-    },
-    {
-      "our_id": "ex_bw_019",
-      "our_name": "Reverse Lunge",
-      "their_id": "Elevated_Back_Lunge",
-      "their_name": "Elevated Back Lunge",
-      "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_bw_026",
@@ -1429,26 +1393,17 @@
       "their_id": "Hanging_Leg_Raise",
       "their_name": "Hanging Leg Raise",
       "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
-    },
-    {
-      "our_id": "ex_bw_033",
-      "our_name": "Plank Shoulder Tap",
-      "their_id": "Shoulder_Raise",
-      "their_name": "Shoulder Raise",
-      "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_bw_040",
       "our_name": "Nordic Curl",
-      "their_id": "Ball_Leg_Curl",
-      "their_name": "Ball Leg Curl",
+      "their_id": "Floor_Glute-Ham_Raise",
+      "their_name": "Floor Glute-Ham Raise",
       "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_db_008",
@@ -1456,17 +1411,17 @@
       "their_id": "Front_Dumbbell_Raise",
       "their_name": "Front Dumbbell Raise",
       "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_db_013",
       "our_name": "Dumbbell Deadlift",
-      "their_id": "Dumbbell_Flyes",
-      "their_name": "Dumbbell Flyes",
+      "their_id": "Stiff-Legged_Dumbbell_Deadlift",
+      "their_name": "Stiff-Legged Dumbbell Deadlift",
       "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_db_017",
@@ -1474,89 +1429,35 @@
       "their_id": "Alternate_Incline_Dumbbell_Curl",
       "their_name": "Alternate Incline Dumbbell Curl",
       "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_db_039",
       "our_name": "Dumbbell Stiff Leg Deadlift",
-      "their_id": "Dumbbell_Flyes",
-      "their_name": "Dumbbell Flyes",
+      "their_id": "Stiff-Legged_Dumbbell_Deadlift",
+      "their_name": "Stiff-Legged Dumbbell Deadlift",
       "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_db_043",
       "our_name": "Dumbbell Wrist Curl",
-      "their_id": "Cable_Wrist_Curl",
-      "their_name": "Cable Wrist Curl",
+      "their_id": "Palms-Up_Dumbbell_Wrist_Curl_Over_A_Bench",
+      "their_name": "Palms-Up Dumbbell Wrist Curl Over A Bench",
       "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_db_044",
       "our_name": "Dumbbell Reverse Wrist Curl",
-      "their_id": "Reverse_Cable_Curl",
-      "their_name": "Reverse Cable Curl",
+      "their_id": "Palms-Down_Dumbbell_Wrist_Curl_Over_A_Bench",
+      "their_name": "Palms-Down Dumbbell Wrist Curl Over A Bench",
       "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
-    },
-    {
-      "our_id": "ex_rb_005",
-      "our_name": "Band Row",
-      "their_id": "Seated_Cable_Rows",
-      "their_name": "Seated Cable Rows",
-      "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
-    },
-    {
-      "our_id": "ex_rb_007",
-      "our_name": "Band Deadlift",
-      "their_id": "Reverse_Band_Deadlift",
-      "their_name": "Reverse Band Deadlift",
-      "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
-    },
-    {
-      "our_id": "ex_rb_024",
-      "our_name": "Band Glute Bridge",
-      "their_id": "Barbell_Glute_Bridge",
-      "their_name": "Barbell Glute Bridge",
-      "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
-    },
-    {
-      "our_id": "ex_rb_025",
-      "our_name": "Band Hip Thrust",
-      "their_id": "Barbell_Hip_Thrust",
-      "their_name": "Barbell Hip Thrust",
-      "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
-    },
-    {
-      "our_id": "ex_rb_026",
-      "our_name": "Band Lunge",
-      "their_id": "Barbell_Lunge",
-      "their_name": "Barbell Lunge",
-      "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
-    },
-    {
-      "our_id": "ex_kb_001",
-      "our_name": "Kettlebell Swing",
-      "their_id": "Russian_Twist",
-      "their_name": "Russian Twist",
-      "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_kb_003",
@@ -1564,8 +1465,8 @@
       "their_id": "Vertical_Swing",
       "their_name": "Vertical Swing",
       "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_kb_008",
@@ -1573,8 +1474,8 @@
       "their_id": "Barbell_Shoulder_Press",
       "their_name": "Barbell Shoulder Press",
       "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_kb_017",
@@ -1582,35 +1483,8 @@
       "their_id": "One-Arm_Kettlebell_Row",
       "their_name": "One-Arm Kettlebell Row",
       "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
-    },
-    {
-      "our_id": "ex_kb_019",
-      "our_name": "Kettlebell Deadlift",
-      "their_id": "Car_Deadlift",
-      "their_name": "Car Deadlift",
-      "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
-    },
-    {
-      "our_id": "ex_kb_026",
-      "our_name": "Kettlebell Rack Carry",
-      "their_id": "Rack_Pulls",
-      "their_name": "Rack Pulls",
-      "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
-    },
-    {
-      "our_id": "ex_kb_027",
-      "our_name": "Kettlebell Overhead Carry",
-      "their_id": "Overhead_Lat",
-      "their_name": "Overhead Lat",
-      "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_cl_015",
@@ -1618,8 +1492,8 @@
       "their_id": "Side_To_Side_Chins",
       "their_name": "Side To Side Chins",
       "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_cm_005",
@@ -1627,35 +1501,17 @@
       "their_id": "Wide-Grip_Lat_Pulldown",
       "their_name": "Wide-Grip Lat Pulldown",
       "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_cm_017",
       "our_name": "Cable Hammer Curl",
-      "their_id": "Cable_Wrist_Curl",
-      "their_name": "Cable Wrist Curl",
+      "their_id": "Cable_Hammer_Curls_-_Rope_Attachment",
+      "their_name": "Cable Hammer Curls - Rope Attachment",
       "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
-    },
-    {
-      "our_id": "ex_cm_020",
-      "our_name": "Cable Tricep Kickback",
-      "their_id": "Glute_Kickback",
-      "their_name": "Glute Kickback",
-      "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
-    },
-    {
-      "our_id": "ex_cm_060",
-      "our_name": "TRX Hamstring Curl",
-      "their_id": "Ball_Leg_Curl",
-      "their_name": "Ball Leg Curl",
-      "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_mo_012",
@@ -1663,8 +1519,8 @@
       "their_id": "Downward_Facing_Balance",
       "their_name": "Downward Facing Balance",
       "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_mo_014",
@@ -1672,17 +1528,8 @@
       "their_id": "Spinal_Stretch",
       "their_name": "Spinal Stretch",
       "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
-    },
-    {
-      "our_id": "ex_mo_015",
-      "our_name": "90/90 Hip Stretch",
-      "their_id": "Seated_Calf_Stretch",
-      "their_name": "Seated Calf Stretch",
-      "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_curated_033",
@@ -1690,8 +1537,8 @@
       "their_id": "One_Arm_Lat_Pulldown",
       "their_name": "One Arm Lat Pulldown",
       "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_curated_057",
@@ -1708,8 +1555,8 @@
       "their_id": "Hanging_Leg_Raise",
       "their_name": "Hanging Leg Raise",
       "match_type": "alias",
-      "confidence": "medium",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "cmiz7vk780004vr0md53c57bz",
@@ -1717,17 +1564,8 @@
       "their_id": "Barbell_Shoulder_Press",
       "their_name": "Barbell Shoulder Press",
       "match_type": "alias",
-      "confidence": "low",
-      "validated": false
-    },
-    {
-      "our_id": "ex_bw_030",
-      "our_name": "V-Up",
-      "their_id": "Side_Jackknife",
-      "their_name": "Side Jackknife",
-      "match_type": "alias",
-      "confidence": "low",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_db_031",
@@ -1739,58 +1577,13 @@
       "validated": true
     },
     {
-      "our_id": "ex_db_038",
-      "our_name": "Dumbbell Single Leg Deadlift",
-      "their_id": "Single-Leg_Lateral_Hop",
-      "their_name": "Single-Leg Lateral Hop",
-      "match_type": "alias",
-      "confidence": "low",
-      "validated": false
-    },
-    {
-      "our_id": "ex_db_050",
-      "our_name": "Man Maker",
-      "their_id": "Dumbbell_Bench_Press",
-      "their_name": "Dumbbell Bench Press",
-      "match_type": "alias",
-      "confidence": "low",
-      "validated": false
-    },
-    {
       "our_id": "ex_rb_031",
       "our_name": "Band Woodchop",
       "their_id": "Standing_Cable_Wood_Chop",
       "their_name": "Standing Cable Wood Chop",
       "match_type": "alias",
-      "confidence": "low",
-      "validated": false
-    },
-    {
-      "our_id": "ex_kb_020",
-      "our_name": "Single Leg Kettlebell Deadlift",
-      "their_id": "Single_Leg_Butt_Kick",
-      "their_name": "Single Leg Butt Kick",
-      "match_type": "alias",
-      "confidence": "low",
-      "validated": false
-    },
-    {
-      "our_id": "ex_cl_014",
-      "our_name": "Frenchies",
-      "their_id": "Weighted_Pull_Ups",
-      "their_name": "Weighted Pull Ups",
-      "match_type": "alias",
-      "confidence": "low",
-      "validated": false
-    },
-    {
-      "our_id": "ex_cl_016",
-      "our_name": "Assisted One Arm Pull-Up",
-      "their_id": "One-Arm_Side_Laterals",
-      "their_name": "One-Arm Side Laterals",
-      "match_type": "alias",
-      "confidence": "low",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_cm_003",
@@ -1798,62 +1591,44 @@
       "their_id": "Low_Cable_Crossover",
       "their_name": "Low Cable Crossover",
       "match_type": "alias",
-      "confidence": "low",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_cm_035",
       "our_name": "Machine Chest Supported Row",
-      "their_id": "Seated_Good_Mornings",
-      "their_name": "Seated Good Mornings",
+      "their_id": "Leverage_High_Row",
+      "their_name": "Leverage High Row",
       "match_type": "alias",
-      "confidence": "low",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_cm_040",
       "our_name": "Machine Leg Adduction",
-      "their_id": "Dip_Machine",
-      "their_name": "Dip Machine",
+      "their_id": "Thigh_Adductor",
+      "their_name": "Thigh Adductor",
       "match_type": "alias",
-      "confidence": "low",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_cm_041",
       "our_name": "Machine Leg Abduction",
-      "their_id": "Dip_Machine",
-      "their_name": "Dip Machine",
+      "their_id": "Thigh_Abductor",
+      "their_name": "Thigh Abductor",
       "match_type": "alias",
-      "confidence": "low",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_cm_051",
       "our_name": "Trap Bar Farmer Carry",
-      "their_id": "Trap_Bar_Deadlift",
-      "their_name": "Trap Bar Deadlift",
+      "their_id": "Farmer's_Walk",
+      "their_name": "Farmer's Walk",
       "match_type": "alias",
-      "confidence": "low",
-      "validated": false
-    },
-    {
-      "our_id": "ex_cm_061",
-      "our_name": "TRX Pike",
-      "their_id": "Decline_Push-Up",
-      "their_name": "Decline Push-Up",
-      "match_type": "alias",
-      "confidence": "low",
-      "validated": false
-    },
-    {
-      "our_id": "ex_mo_006",
-      "our_name": "Copenhagen Plank",
-      "their_id": "Adductor",
-      "their_name": "Adductor",
-      "match_type": "alias",
-      "confidence": "low",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_mo_010",
@@ -1861,8 +1636,8 @@
       "their_id": "Spinal_Stretch",
       "their_name": "Spinal Stretch",
       "match_type": "alias",
-      "confidence": "low",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_mo_022",
@@ -1870,8 +1645,8 @@
       "their_id": "Quadriceps-SMR",
       "their_name": "Quadriceps-SMR",
       "match_type": "alias",
-      "confidence": "low",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_mo_023",
@@ -1879,8 +1654,8 @@
       "their_id": "Upper_Back-Leg_Grab",
       "their_name": "Upper Back-Leg Grab",
       "match_type": "alias",
-      "confidence": "low",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "ex_curated_052",
@@ -1888,8 +1663,8 @@
       "their_id": "Handstand_Push-Ups",
       "their_name": "Handstand Push-Ups",
       "match_type": "alias",
-      "confidence": "low",
-      "validated": false
+      "confidence": "reviewed",
+      "validated": true
     },
     {
       "our_id": "cmiz7vjju0000vr0m4b1o6bec",
@@ -2422,12 +2197,28 @@
       "name": "Pike Push-Up"
     },
     {
+      "id": "ex_bw_007",
+      "name": "Archer Push-Up"
+    },
+    {
       "id": "ex_bw_010",
       "name": "Neutral Grip Pull-Up"
     },
     {
+      "id": "ex_bw_011",
+      "name": "L-Sit Pull-Up"
+    },
+    {
+      "id": "ex_bw_019",
+      "name": "Reverse Lunge"
+    },
+    {
       "id": "ex_bw_029",
       "name": "Hollow Body Hold"
+    },
+    {
+      "id": "ex_bw_030",
+      "name": "V-Up"
     },
     {
       "id": "ex_bw_031",
@@ -2438,8 +2229,20 @@
       "name": "Plank to Push-Up"
     },
     {
+      "id": "ex_bw_033",
+      "name": "Plank Shoulder Tap"
+    },
+    {
       "id": "ex_bw_041",
       "name": "Burpee"
+    },
+    {
+      "id": "ex_cl_014",
+      "name": "Frenchies"
+    },
+    {
+      "id": "ex_cl_016",
+      "name": "Assisted One Arm Pull-Up"
     },
     {
       "id": "ex_cl_017",
@@ -2466,6 +2269,10 @@
       "name": "Cable Bicep Curl"
     },
     {
+      "id": "ex_cm_020",
+      "name": "Cable Tricep Kickback"
+    },
+    {
       "id": "ex_cm_023",
       "name": "Cable Hip Abduction"
     },
@@ -2484,6 +2291,14 @@
     {
       "id": "ex_cm_059",
       "name": "TRX Pistol Squat"
+    },
+    {
+      "id": "ex_cm_060",
+      "name": "TRX Hamstring Curl"
+    },
+    {
+      "id": "ex_cm_061",
+      "name": "TRX Pike"
     },
     {
       "id": "ex_cm_062",
@@ -2506,12 +2321,24 @@
       "name": "Dumbbell Hip Thrust"
     },
     {
+      "id": "ex_db_038",
+      "name": "Dumbbell Single Leg Deadlift"
+    },
+    {
       "id": "ex_db_042",
       "name": "Dumbbell Woodchop"
     },
     {
       "id": "ex_db_047",
       "name": "Dumbbell Snatch"
+    },
+    {
+      "id": "ex_db_050",
+      "name": "Man Maker"
+    },
+    {
+      "id": "ex_kb_001",
+      "name": "Kettlebell Swing"
     },
     {
       "id": "ex_kb_013",
@@ -2522,8 +2349,24 @@
       "name": "Kettlebell Lunge"
     },
     {
+      "id": "ex_kb_019",
+      "name": "Kettlebell Deadlift"
+    },
+    {
+      "id": "ex_kb_020",
+      "name": "Single Leg Kettlebell Deadlift"
+    },
+    {
       "id": "ex_kb_023",
       "name": "Kettlebell Halo"
+    },
+    {
+      "id": "ex_kb_026",
+      "name": "Kettlebell Rack Carry"
+    },
+    {
+      "id": "ex_kb_027",
+      "name": "Kettlebell Overhead Carry"
     },
     {
       "id": "ex_mo_003",
@@ -2534,8 +2377,16 @@
       "name": "Dragon Flag"
     },
     {
+      "id": "ex_mo_006",
+      "name": "Copenhagen Plank"
+    },
+    {
       "id": "ex_mo_013",
       "name": "Cobra Stretch"
+    },
+    {
+      "id": "ex_mo_015",
+      "name": "90/90 Hip Stretch"
     },
     {
       "id": "ex_mo_016",
@@ -2562,8 +2413,16 @@
       "name": "Band Push-Up"
     },
     {
+      "id": "ex_rb_005",
+      "name": "Band Row"
+    },
+    {
       "id": "ex_rb_006",
       "name": "Band Lat Pulldown"
+    },
+    {
+      "id": "ex_rb_007",
+      "name": "Band Deadlift"
     },
     {
       "id": "ex_rb_011",
@@ -2608,6 +2467,22 @@
     {
       "id": "ex_rb_023",
       "name": "Band Leg Curl"
+    },
+    {
+      "id": "ex_rb_024",
+      "name": "Band Glute Bridge"
+    },
+    {
+      "id": "ex_rb_025",
+      "name": "Band Hip Thrust"
+    },
+    {
+      "id": "ex_rb_026",
+      "name": "Band Lunge"
+    },
+    {
+      "id": "ex_rb_027",
+      "name": "Band Standing Abduction"
     },
     {
       "id": "ex_rb_028",
