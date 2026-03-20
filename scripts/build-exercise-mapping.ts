@@ -256,6 +256,9 @@ async function main() {
           match_type: 'exact',
           confidence: 'high',
           validated: true,
+          force: theirEx.force,
+          mechanic: theirEx.mechanic,
+          level: theirEx.level,
         })
         matchedTheirIds.add(theirEx.id)
         continue
@@ -284,6 +287,9 @@ async function main() {
           ? { similarity: candidate.similarity }
           : {}),
         validated: false,
+        force: candidate.theirExercise.force,
+        mechanic: candidate.theirExercise.mechanic,
+        level: candidate.theirExercise.level,
       })
       matchedTheirIds.add(candidate.theirExercise.id)
     } else {
