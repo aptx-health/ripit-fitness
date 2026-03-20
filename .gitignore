@@ -51,3 +51,7 @@ next-env.d.ts
 # serwist service worker (generated at build time)
 public/sw*
 public/swe-worker*
+
+# generated scripts output
+scripts/update-image-urls.sql
+scripts/test-exercise-mapping.json

@@ -1,27 +1,7 @@
 /**
- * Sync Exercise Images
- *
- * Downloads exercise images from free-exercise-db GitHub and uploads
- * them to a MinIO bucket. Generates SQL to update ExerciseDefinition.imageUrls.
- *
- * Usage:
- *   npx ts-node --skip-project \
- *     --compiler-options '{"module":"commonjs","target":"ES2020","types":["node"]}' \
- *     scripts/sync-exercise-images.ts [options]
- *
- * Options:
- *   --dry-run          Preview without downloading or uploading
- *   --force            Re-upload images that already exist in MinIO
- *   --concurrency=N    Parallel exercise processing (default: 5)
- *   -h, --help         Show help
- *
- * Environment:
- *   MINIO_ENDPOINT     MinIO host (default: localhost)
- *   MINIO_PORT         MinIO port (default: 9000)
- *   MINIO_ACCESS_KEY   MinIO access key (required unless --dry-run)
- *   MINIO_SECRET_KEY   MinIO secret key (required unless --dry-run)
- *   MINIO_BUCKET       Bucket name (default: exercise-images)
- *   MINIO_USE_SSL      Use SSL (default: false)
+ * Sync Exercise Images — downloads from free-exercise-db GitHub,
+ * uploads to MinIO, generates SQL to update ExerciseDefinition.imageUrls.
+ * Run with --help for usage details.
  */
 
 /* eslint-disable @typescript-eslint/no-require-imports */
@@ -29,9 +9,7 @@ const https = require('https') as typeof import('https')
 const fs = require('fs') as typeof import('fs')
 const path = require('path') as typeof import('path')
 
-// ---------------------------------------------------------------------------
 // Types
-// ---------------------------------------------------------------------------
 
 interface MappingMatch {
   our_id: string
@@ -65,31 +43,31 @@ interface Config {
   dryRun: boolean
   force: boolean
   concurrency: number
+  mappingPath: string
   minio: {
-    endpoint: string
+    endpointUrl: string
+    host: string
     port: number
+    useSSL: boolean
     accessKey: string
     secretKey: string
     bucket: string
-    useSSL: boolean
   }
 }
 
-// ---------------------------------------------------------------------------
 // Constants
-// ---------------------------------------------------------------------------
 
 const GITHUB_RAW_BASE =
   'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises'
+// free-exercise-db stores 2 images per exercise (start/end position)
 const IMAGE_INDICES = [0, 1]
 const MAX_RETRIES = 3
+const MAX_REDIRECTS = 5
 const BASE_RETRY_DELAY_MS = 1000
-const MAPPING_PATH = path.join(__dirname, 'exercise-mapping.json')
+const DEFAULT_MAPPING_PATH = path.join(__dirname, 'exercise-mapping.json')
 const OUTPUT_SQL_PATH = path.join(__dirname, 'update-image-urls.sql')
 
-// ---------------------------------------------------------------------------
 // CLI Parsing
-// ---------------------------------------------------------------------------
 
 function printHelp(): void {
   console.log(`Usage: npx ts-node --skip-project \\
@@ -97,18 +75,17 @@ function printHelp(): void {
   scripts/sync-exercise-images.ts [options]
 
 Options:
-  --dry-run          Preview actions without downloading or uploading
+  --dry-run          Preview without downloading or uploading
   --force            Re-upload images even if they already exist
   --concurrency=N    Parallel downloads (default: 5)
+  --mapping=PATH     Path to mapping JSON (default: scripts/exercise-mapping.json)
   -h, --help         Show this help
 
 Environment:
-  MINIO_ENDPOINT     MinIO host (default: localhost)
-  MINIO_PORT         MinIO port (default: 9000)
-  MINIO_ACCESS_KEY   MinIO access key (required unless --dry-run)
-  MINIO_SECRET_KEY   MinIO secret key (required unless --dry-run)
-  MINIO_BUCKET       Bucket name (default: exercise-images)
-  MINIO_USE_SSL      Use SSL connection (default: false)`)
+  MINIO_ENDPOINT      Full URL (default: http://localhost:9000)
+  MINIO_ROOT_USER     Access key (required unless --dry-run)
+  MINIO_ROOT_PASSWORD Secret key (required unless --dry-run)
+  MINIO_BUCKET        Bucket name (default: exercise-images)`)
 }
 
 function parseConfig(): Config {
@@ -120,6 +97,10 @@ function parseConfig(): Config {
   }
 
   const concurrencyArg = args.find((a) => a.startsWith('--concurrency='))
+  const mappingArg = args.find((a) => a.startsWith('--mapping='))
+
+  const endpointUrl = process.env.MINIO_ENDPOINT || 'http://localhost:9000'
+  const parsed = new URL(endpointUrl)
 
   return {
     dryRun: args.includes('--dry-run'),
@@ -127,34 +108,43 @@ function parseConfig(): Config {
     concurrency: concurrencyArg
       ? parseInt(concurrencyArg.split('=')[1], 10)
       : 5,
+    mappingPath: mappingArg
+      ? path.resolve(mappingArg.split('=')[1])
+      : DEFAULT_MAPPING_PATH,
     minio: {
-      endpoint: process.env.MINIO_ENDPOINT || 'localhost',
-      port: parseInt(process.env.MINIO_PORT || '9000', 10),
-      accessKey: process.env.MINIO_ACCESS_KEY || '',
-      secretKey: process.env.MINIO_SECRET_KEY || '',
+      endpointUrl,
+      host: parsed.hostname,
+      port: parsed.port ? parseInt(parsed.port, 10) : (parsed.protocol === 'https:' ? 443 : 9000),
+      useSSL: parsed.protocol === 'https:',
+      accessKey: process.env.MINIO_ROOT_USER || '',
+      secretKey: process.env.MINIO_ROOT_PASSWORD || '',
       bucket: process.env.MINIO_BUCKET || 'exercise-images',
-      useSSL: process.env.MINIO_USE_SSL === 'true',
     },
   }
 }
 
-// ---------------------------------------------------------------------------
+//
 // HTTP Download with Retries
-// ---------------------------------------------------------------------------
+//
 
 function downloadBuffer(
   url: string,
-  attempt = 1
+  attempt = 1,
+  redirectCount = 0
 ): Promise<Buffer | null> {
   return new Promise((resolve, reject) => {
     https
       .get(url, (res) => {
-        // Follow redirects
+        // Follow redirects (with loop protection)
         if (
           (res.statusCode === 301 || res.statusCode === 302) &&
           res.headers.location
         ) {
-          resolve(downloadBuffer(res.headers.location, attempt))
+          if (redirectCount >= MAX_REDIRECTS) {
+            reject(new Error(`Too many redirects (${MAX_REDIRECTS}): ${url}`))
+            return
+          }
+          resolve(downloadBuffer(res.headers.location, attempt, redirectCount + 1))
           return
         }
 
@@ -202,15 +192,15 @@ function downloadBuffer(
   })
 }
 
-// ---------------------------------------------------------------------------
+//
 // MinIO Helpers
-// ---------------------------------------------------------------------------
+//
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function createMinioClient(config: Config): any {
   const Minio = require('minio')
   return new Minio.Client({
-    endPoint: config.minio.endpoint,
+    endPoint: config.minio.host,
     port: config.minio.port,
     useSSL: config.minio.useSSL,
     accessKey: config.minio.accessKey,
@@ -232,8 +222,22 @@ async function objectExists(client: any, bucket: string, key: string): Promise<b
   try {
     await client.statObject(bucket, key)
     return true
-  } catch {
-    return false
+  } catch (err: unknown) {
+    const code = (err as { code?: string })?.code
+    if (code === 'NotFound' || code === 'NoSuchKey') {
+      return false
+    }
+    throw err
+  }
+}
+
+function contentTypeForKey(key: string): string {
+  const ext = key.split('.').pop()?.toLowerCase()
+  switch (ext) {
+    case 'png': return 'image/png'
+    case 'gif': return 'image/gif'
+    case 'webp': return 'image/webp'
+    default: return 'image/jpeg'
   }
 }
 
@@ -245,13 +249,13 @@ async function uploadBuffer(
   data: Buffer
 ): Promise<void> {
   await client.putObject(bucket, key, data, data.length, {
-    'Content-Type': 'image/jpeg',
+    'Content-Type': contentTypeForKey(key),
   })
 }
 
-// ---------------------------------------------------------------------------
+//
 // Process a Single Exercise
-// ---------------------------------------------------------------------------
+//
 
 async function syncExercise(
   match: MappingMatch,
@@ -280,15 +284,11 @@ async function syncExercise(
 
     // Check if already exists in MinIO
     if (!config.force) {
-      try {
-        const exists = await objectExists(client, config.minio.bucket, objectKey)
-        if (exists) {
-          result.images.push(objectKey)
-          result.skipped++
-          continue
-        }
-      } catch {
-        // If check fails, proceed with upload attempt
+      const exists = await objectExists(client, config.minio.bucket, objectKey)
+      if (exists) {
+        result.images.push(objectKey)
+        result.skipped++
+        continue
       }
     }
 
@@ -316,9 +316,13 @@ async function syncExercise(
   return result
 }
 
-// ---------------------------------------------------------------------------
+//
 // SQL Generation
-// ---------------------------------------------------------------------------
+//
+
+function escapeSql(value: string): string {
+  return value.replace(/'/g, "''")
+}
 
 function generateSql(results: SyncResult[]): string {
   const withImages = results.filter((r) => r.images.length > 0)
@@ -334,12 +338,12 @@ function generateSql(results: SyncResult[]): string {
 
   for (const result of withImages) {
     const arrayLiteral = result.images
-      .map((img) => `'${img}'`)
+      .map((img) => `'${escapeSql(img)}'`)
       .join(', ')
     lines.push(
       `-- ${result.exerciseName}`,
       `UPDATE "ExerciseDefinition" SET "imageUrls" = ARRAY[${arrayLiteral}]`,
-      `  WHERE id = '${result.exerciseId}';`,
+      `  WHERE id = '${escapeSql(result.exerciseId)}';`,
       ''
     )
   }
@@ -348,9 +352,9 @@ function generateSql(results: SyncResult[]): string {
   return lines.join('\n')
 }
 
-// ---------------------------------------------------------------------------
+//
 // Batch Processing
-// ---------------------------------------------------------------------------
+//
 
 async function processBatch<T, R>(
   items: T[],
@@ -366,9 +370,9 @@ async function processBatch<T, R>(
   return results
 }
 
-// ---------------------------------------------------------------------------
+//
 // Main
-// ---------------------------------------------------------------------------
+//
 
 async function main() {
   const config = parseConfig()
@@ -379,15 +383,31 @@ async function main() {
   console.log(`Concurrency: ${config.concurrency}`)
 
   // Read mapping file
-  if (!fs.existsSync(MAPPING_PATH)) {
-    console.error(`\nMapping file not found: ${MAPPING_PATH}`)
+  if (!fs.existsSync(config.mappingPath)) {
+    console.error(`\nMapping file not found: ${config.mappingPath}`)
     console.error('Run build-exercise-mapping.ts first.')
     process.exit(1)
   }
 
+  console.log(`Mapping: ${config.mappingPath}`)
   const mapping: MappingFile = JSON.parse(
-    fs.readFileSync(MAPPING_PATH, 'utf-8')
+    fs.readFileSync(config.mappingPath, 'utf-8')
   )
+
+  if (!Array.isArray(mapping.matches)) {
+    console.error('\nInvalid mapping file: missing "matches" array')
+    process.exit(1)
+  }
+
+  const invalid = mapping.matches.filter((m) => !m.our_id || !m.their_id)
+  if (invalid.length > 0) {
+    console.error(`\n${invalid.length} mapping entries missing our_id or their_id:`)
+    for (const m of invalid.slice(0, 5)) {
+      console.error(`  name="${m.our_name}" our_id="${m.our_id}" their_id="${m.their_id}"`)
+    }
+    process.exit(1)
+  }
+
   const matches = mapping.matches
   console.log(`\nFound ${matches.length} matched exercises`)
   console.log(
@@ -402,13 +422,11 @@ async function main() {
   if (!config.dryRun) {
     if (!config.minio.accessKey || !config.minio.secretKey) {
       console.error(
-        '\nMINIO_ACCESS_KEY and MINIO_SECRET_KEY are required (unless --dry-run)'
+        '\nMINIO_ROOT_USER and MINIO_ROOT_PASSWORD are required (unless --dry-run)'
       )
       process.exit(1)
     }
-    console.log(
-      `\nConnecting to MinIO at ${config.minio.endpoint}:${config.minio.port}...`
-    )
+    console.log(`\nConnecting to MinIO at ${config.minio.endpointUrl}...`)
     minioClient = createMinioClient(config)
     await ensureBucket(minioClient, config.minio.bucket)
     console.log(`Using bucket: ${config.minio.bucket}`)
