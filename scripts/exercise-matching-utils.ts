@@ -49,6 +49,9 @@ export interface Match {
   confidence: Confidence
   similarity?: number
   validated: boolean
+  force?: string | null
+  mechanic?: string | null
+  level?: string | null
 }
 
 export interface UnmatchedExercise {

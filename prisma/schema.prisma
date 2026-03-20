@@ -81,6 +81,9 @@ model ExerciseDefinition {
   imageUrls      String[]   @default([])
   primaryFAUs    String[]   @default([])
   secondaryFAUs  String[]   @default([])
+  force          String?
+  mechanic       String?
+  level          String?
   userId         String
   exercises      Exercise[]
 
