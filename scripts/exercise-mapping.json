@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-19T23:20:39.844Z",
+  "generated_at": "2026-03-20T01:32:17.135Z",
   "stats": {
     "our_total": 312,
     "their_total": 873,
@@ -17,7 +17,10 @@
       "their_name": "Barbell Curl",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "cmiz7vnpc000ovr0mcuhs0bum",
@@ -26,7 +29,10 @@
       "their_name": "Hammer Curls",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "cmiz7vl76000avr0m27zo6aos",
@@ -35,7 +41,10 @@
       "their_name": "Triceps Pushdown",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "cmiz7vkpg0007vr0mpbaneax3",
@@ -44,7 +53,10 @@
       "their_name": "Dumbbell Bench Press",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "cmiz7vnjj000nvr0mgfa1vmx1",
@@ -53,7 +65,10 @@
       "their_name": "Plank",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "static",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "cmiz7vlqf000dvr0mm39bhj97",
@@ -62,7 +77,10 @@
       "their_name": "Leg Extensions",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "cmiz7vldb000bvr0mw4qzzagc",
@@ -71,7 +89,10 @@
       "their_name": "Leg Press",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "cmiz7vkdh0005vr0mr5dm18ls",
@@ -80,7 +101,10 @@
       "their_name": "Romanian Deadlift",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "cmiz7vma9000gvr0mmjmxhp9s",
@@ -89,7 +113,10 @@
       "their_name": "Sumo Deadlift",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "cmiz7vmsh000jvr0mq9pwqarc",
@@ -98,7 +125,10 @@
       "their_name": "Face Pull",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_bw_004",
@@ -107,7 +137,10 @@
       "their_name": "Decline Push-Up",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_bw_005",
@@ -116,7 +149,10 @@
       "their_name": "Incline Push-Up",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_bw_008",
@@ -125,7 +161,10 @@
       "their_name": "Chin-Up",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_bw_012",
@@ -134,7 +173,10 @@
       "their_name": "Muscle Up",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_bw_013",
@@ -143,7 +185,10 @@
       "their_name": "Bodyweight Squat",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_bw_022",
@@ -152,7 +197,10 @@
       "their_name": "Sit-Up",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_bw_025",
@@ -161,7 +209,10 @@
       "their_name": "Russian Twist",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_bw_027",
@@ -170,7 +221,10 @@
       "their_name": "Hanging Leg Raise",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "expert"
     },
     {
       "our_id": "ex_bw_028",
@@ -179,7 +233,10 @@
       "their_name": "Mountain Climbers",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_bw_036",
@@ -188,7 +245,10 @@
       "their_name": "Inverted Row",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_bw_037",
@@ -197,7 +257,10 @@
       "their_name": "Superman",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "static",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_bw_039",
@@ -206,7 +269,10 @@
       "their_name": "Single Leg Glute Bridge",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_db_002",
@@ -215,7 +281,10 @@
       "their_name": "Decline Dumbbell Bench Press",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_db_006",
@@ -224,7 +293,10 @@
       "their_name": "Dumbbell Shoulder Press",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_db_015",
@@ -233,7 +305,10 @@
       "their_name": "Dumbbell Shrug",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_db_018",
@@ -242,7 +317,10 @@
       "their_name": "Incline Dumbbell Curl",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_db_019",
@@ -251,7 +329,10 @@
       "their_name": "Concentration Curls",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_db_020",
@@ -260,7 +341,10 @@
       "their_name": "Preacher Curl",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_db_021",
@@ -269,7 +353,10 @@
       "their_name": "Spider Curl",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_db_022",
@@ -278,7 +365,10 @@
       "their_name": "Zottman Curl",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_db_026",
@@ -287,7 +377,10 @@
       "their_name": "Tate Press",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_db_032",
@@ -296,7 +389,10 @@
       "their_name": "Dumbbell Lunges",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_db_040",
@@ -305,7 +401,10 @@
       "their_name": "Dumbbell Side Bend",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_db_045",
@@ -314,7 +413,10 @@
       "their_name": "Farmer's Walk",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": null,
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_db_048",
@@ -323,7 +425,10 @@
       "their_name": "Dumbbell Clean",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_rb_004",
@@ -332,7 +437,10 @@
       "their_name": "Band Pull Apart",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_rb_008",
@@ -341,7 +449,10 @@
       "their_name": "Band Good Morning",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_kb_011",
@@ -350,7 +461,10 @@
       "their_name": "Kettlebell Thruster",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_kb_014",
@@ -359,7 +473,10 @@
       "their_name": "Kettlebell Pistol Squat",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "expert"
     },
     {
       "our_id": "ex_kb_022",
@@ -368,7 +485,10 @@
       "their_name": "Kettlebell Windmill",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_cl_021",
@@ -377,7 +497,10 @@
       "their_name": "Scapular Pull-Up",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_002",
@@ -386,7 +509,10 @@
       "their_name": "Cable Crossover",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_004",
@@ -395,7 +521,10 @@
       "their_name": "Cable Chest Press",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_008",
@@ -404,7 +533,10 @@
       "their_name": "Straight-Arm Pulldown",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_009",
@@ -413,7 +545,10 @@
       "their_name": "Seated Cable Rows",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_024",
@@ -422,7 +557,10 @@
       "their_name": "Cable Hip Adduction",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_025",
@@ -431,7 +569,10 @@
       "their_name": "Cable Crunch",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_028",
@@ -440,7 +581,10 @@
       "their_name": "Cable Russian Twists",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_029",
@@ -449,7 +593,10 @@
       "their_name": "Smith Machine Bench Press",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_030",
@@ -458,7 +605,10 @@
       "their_name": "Smith Machine Squat",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_039",
@@ -467,7 +617,10 @@
       "their_name": "Machine Preacher Curls",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_043",
@@ -476,7 +629,10 @@
       "their_name": "Barbell Hip Thrust",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_cm_044",
@@ -485,7 +641,10 @@
       "their_name": "Barbell Lunge",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_cm_045",
@@ -494,7 +653,10 @@
       "their_name": "Barbell Shrug",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_049",
@@ -503,7 +665,10 @@
       "their_name": "Trap Bar Deadlift",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_052",
@@ -512,7 +677,10 @@
       "their_name": "EZ-Bar Curl",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_mo_002",
@@ -521,7 +689,10 @@
       "their_name": "Dead Bug",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_mo_007",
@@ -530,7 +701,10 @@
       "their_name": "Pallof Press",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_mo_011",
@@ -539,7 +713,10 @@
       "their_name": "Child's Pose",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "static",
+      "mechanic": null,
+      "level": "beginner"
     },
     {
       "our_id": "ex_mo_017",
@@ -548,7 +725,10 @@
       "their_name": "Arm Circles",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_mo_018",
@@ -557,7 +737,10 @@
       "their_name": "World's Greatest Stretch",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "static",
+      "mechanic": null,
+      "level": "intermediate"
     },
     {
       "our_id": "ex_mo_019",
@@ -566,7 +749,10 @@
       "their_name": "Inchworm",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": null,
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_003",
@@ -575,7 +761,10 @@
       "their_name": "Leg Extensions",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_004",
@@ -584,7 +773,10 @@
       "their_name": "Seated Leg Curl",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_006",
@@ -593,7 +785,10 @@
       "their_name": "Leverage Iso Row",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": true,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_007",
@@ -602,7 +797,10 @@
       "their_name": "Dip Machine",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_008",
@@ -611,7 +809,10 @@
       "their_name": "Thigh Adductor",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_009",
@@ -620,7 +821,10 @@
       "their_name": "Thigh Abductor",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_010",
@@ -629,7 +833,10 @@
       "their_name": "Ab Crunch Machine",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_curated_011",
@@ -638,7 +845,10 @@
       "their_name": "Machine Preacher Curls",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_012",
@@ -647,7 +857,10 @@
       "their_name": "Standing Biceps Cable Curl",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_013",
@@ -656,7 +869,10 @@
       "their_name": "Triceps Pushdown",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_014",
@@ -665,7 +881,10 @@
       "their_name": "One-Arm Side Laterals",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_016",
@@ -674,7 +893,10 @@
       "their_name": "Standing Cable Wood Chop",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_018",
@@ -683,7 +905,10 @@
       "their_name": "Pull Through",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_019",
@@ -692,7 +917,10 @@
       "their_name": "Seated Cable Rows",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_020",
@@ -701,7 +929,10 @@
       "their_name": "Goblet Squat",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_021",
@@ -710,7 +941,10 @@
       "their_name": "Farmer's Walk",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": null,
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_curated_022",
@@ -719,7 +953,10 @@
       "their_name": "Dumbbell Step Ups",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_curated_023",
@@ -728,7 +965,10 @@
       "their_name": "Barbell Squat",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_024",
@@ -737,7 +977,10 @@
       "their_name": "Standing Dumbbell Press",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_025",
@@ -746,7 +989,10 @@
       "their_name": "Side Lateral Raise",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_026",
@@ -755,7 +1001,10 @@
       "their_name": "One-Arm Dumbbell Row",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_028",
@@ -764,7 +1013,10 @@
       "their_name": "Bent Over Barbell Row",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_030",
@@ -773,7 +1025,10 @@
       "their_name": "Lying Triceps Press",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_curated_031",
@@ -782,7 +1037,10 @@
       "their_name": "Smith Machine Incline Bench Press",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_032",
@@ -791,7 +1049,10 @@
       "their_name": "Smith Machine Calf Raise",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_036",
@@ -800,7 +1061,10 @@
       "their_name": "Standing Calf Raises",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_039",
@@ -809,7 +1073,10 @@
       "their_name": "Incline Dumbbell Press",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_046",
@@ -818,7 +1085,10 @@
       "their_name": "Pushups",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_048",
@@ -827,7 +1097,10 @@
       "their_name": "Dumbbell Lunges",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_049",
@@ -836,7 +1109,10 @@
       "their_name": "Barbell Glute Bridge",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_curated_050",
@@ -845,7 +1121,10 @@
       "their_name": "Dumbbell Floor Press",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_curated_056",
@@ -854,7 +1133,10 @@
       "their_name": "Dumbbell Step Ups",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": true,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_curated_060",
@@ -863,7 +1145,10 @@
       "their_name": "Pullups",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": true,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_061",
@@ -872,7 +1157,10 @@
       "their_name": "Dips - Chest Version",
       "match_type": "exact",
       "confidence": "high",
-      "validated": true
+      "validated": true,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "cmiz7vk1i0003vr0mqucd1f52",
@@ -880,8 +1168,11 @@
       "their_id": "Bent_Over_Barbell_Row",
       "their_name": "Bent Over Barbell Row",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "cmiz7vmmg000ivr0mojncaj84",
@@ -889,8 +1180,11 @@
       "their_id": "Seated_Cable_Rows",
       "their_name": "Seated Cable Rows",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "cmiz7vjvh0002vr0mtcmhiz70",
@@ -898,8 +1192,11 @@
       "their_id": "Barbell_Deadlift",
       "their_name": "Barbell Deadlift",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "cmiz7vmgd000hvr0mkidkt6uu",
@@ -907,8 +1204,11 @@
       "their_id": "One-Arm_Dumbbell_Row",
       "their_name": "One-Arm Dumbbell Row",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "cmiz7vkvr0008vr0m7rv3dapc",
@@ -916,8 +1216,11 @@
       "their_id": "Pullups",
       "their_name": "Pullups",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "cmiz7vmyl000kvr0mmr9a482v",
@@ -925,8 +1228,11 @@
       "their_id": "Parallel_Bar_Dip",
       "their_name": "Parallel Bar Dip",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "cmiz7vnam000mvr0mano9z27r",
@@ -934,8 +1240,11 @@
       "their_id": "Standing_Calf_Raises",
       "their_name": "Standing Calf Raises",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "cmiz7vljh000cvr0mlk0r5kco",
@@ -943,8 +1252,11 @@
       "their_id": "Seated_Leg_Curl",
       "their_name": "Seated Leg Curl",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_bw_001",
@@ -952,8 +1264,11 @@
       "their_id": "Pushups",
       "their_name": "Pushups",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_bw_021",
@@ -961,8 +1276,11 @@
       "their_id": "Split_Jump",
       "their_name": "Split Jump",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_bw_023",
@@ -970,8 +1288,11 @@
       "their_id": "Crunches",
       "their_name": "Crunches",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_bw_034",
@@ -979,8 +1300,11 @@
       "their_id": "Bench_Dips",
       "their_name": "Bench Dips",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_db_001",
@@ -988,8 +1312,11 @@
       "their_id": "Incline_Dumbbell_Press",
       "their_name": "Incline Dumbbell Press",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_db_007",
@@ -997,8 +1324,11 @@
       "their_id": "Arnold_Dumbbell_Press",
       "their_name": "Arnold Dumbbell Press",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_db_009",
@@ -1006,8 +1336,11 @@
       "their_id": "Lying_Rear_Delt_Raise",
       "their_name": "Lying Rear Delt Raise",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_db_010",
@@ -1015,8 +1348,11 @@
       "their_id": "Standing_Dumbbell_Upright_Row",
       "their_name": "Standing Dumbbell Upright Row",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_db_011",
@@ -1024,26 +1360,35 @@
       "their_id": "One-Arm_Dumbbell_Row",
       "their_name": "One-Arm Dumbbell Row",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_db_023",
       "our_name": "Dumbbell Overhead Tricep Extension",
-      "their_id": "Standing_Dumbbell_Triceps_Extension",
-      "their_name": "Standing Dumbbell Triceps Extension",
+      "their_id": "Lying_Dumbbell_Tricep_Extension",
+      "their_name": "Lying Dumbbell Tricep Extension",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_db_027",
       "our_name": "Dumbbell Skull Crusher",
-      "their_id": "EZ-Bar_Skullcrusher",
-      "their_name": "EZ-Bar Skullcrusher",
+      "their_id": "Cable_Lying_Triceps_Extension",
+      "their_name": "Cable Lying Triceps Extension",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_db_028",
@@ -1051,8 +1396,11 @@
       "their_id": "Goblet_Squat",
       "their_name": "Goblet Squat",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_db_041",
@@ -1060,8 +1408,11 @@
       "their_id": "Russian_Twist",
       "their_name": "Russian Twist",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_db_046",
@@ -1069,8 +1420,11 @@
       "their_id": "Dumbbell_Squat",
       "their_name": "Dumbbell Squat",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_db_049",
@@ -1078,8 +1432,23 @@
       "their_id": "Clean_and_Press",
       "their_name": "Clean and Press",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
+    },
+    {
+      "our_id": "ex_rb_027",
+      "our_name": "Band Standing Abduction",
+      "their_id": "Band_Hip_Adductions",
+      "their_name": "Band Hip Adductions",
+      "match_type": "alias",
+      "confidence": "high",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_rb_029",
@@ -1087,8 +1456,11 @@
       "their_id": "Monster_Walk",
       "their_name": "Monster Walk",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_rb_030",
@@ -1096,8 +1468,11 @@
       "their_id": "Pallof_Press",
       "their_name": "Pallof Press",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_kb_006",
@@ -1105,8 +1480,11 @@
       "their_id": "Clean_and_Press",
       "their_name": "Clean and Press",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_kb_010",
@@ -1114,8 +1492,11 @@
       "their_id": "Floor_Press",
       "their_name": "Floor Press",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_kb_012",
@@ -1123,8 +1504,11 @@
       "their_id": "Goblet_Squat",
       "their_name": "Goblet Squat",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_kb_024",
@@ -1132,8 +1516,11 @@
       "their_id": "Russian_Twist",
       "their_name": "Russian Twist",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_kb_025",
@@ -1141,8 +1528,11 @@
       "their_id": "Farmers_Walk",
       "their_name": "Farmer's Walk",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": null,
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_cm_013",
@@ -1150,8 +1540,11 @@
       "their_id": "Cable_Rear_Delt_Fly",
       "their_name": "Cable Rear Delt Fly",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_014",
@@ -1159,8 +1552,11 @@
       "their_id": "Face_Pull",
       "their_name": "Face Pull",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_cm_018",
@@ -1168,8 +1564,11 @@
       "their_id": "Triceps_Pushdown",
       "their_name": "Triceps Pushdown",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_022",
@@ -1177,8 +1576,11 @@
       "their_id": "Glute_Kickback",
       "their_name": "Glute Kickback",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_026",
@@ -1186,8 +1588,11 @@
       "their_id": "Standing_Cable_Wood_Chop",
       "their_name": "Standing Cable Wood Chop",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_027",
@@ -1195,8 +1600,11 @@
       "their_id": "Pallof_Press",
       "their_name": "Pallof Press",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_038",
@@ -1204,8 +1612,11 @@
       "their_id": "Dip_Machine",
       "their_name": "Dip Machine",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_042",
@@ -1213,8 +1624,11 @@
       "their_id": "Ab_Crunch_Machine",
       "their_name": "Ab Crunch Machine",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_cm_046",
@@ -1222,17 +1636,23 @@
       "their_id": "Close-Grip_Barbell_Bench_Press",
       "their_name": "Close-Grip Barbell Bench Press",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_047",
       "our_name": "Barbell Skull Crusher",
-      "their_id": "EZ-Bar_Skullcrusher",
-      "their_name": "EZ-Bar Skullcrusher",
+      "their_id": "Lying_Dumbbell_Tricep_Extension",
+      "their_name": "Lying Dumbbell Tricep Extension",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_cm_048",
@@ -1240,8 +1660,11 @@
       "their_id": "Good_Morning",
       "their_name": "Good Morning",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_cm_054",
@@ -1249,8 +1672,11 @@
       "their_id": "Preacher_Curl",
       "their_name": "Preacher Curl",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_055",
@@ -1258,8 +1684,11 @@
       "their_id": "Inverted_Row",
       "their_name": "Inverted Row",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_mo_001",
@@ -1267,8 +1696,11 @@
       "their_id": "Ab_Roller",
       "their_name": "Ab Roller",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_mo_009",
@@ -1276,8 +1708,11 @@
       "their_id": "Kneeling_Hip_Flexor",
       "their_name": "Kneeling Hip Flexor",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "static",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_000",
@@ -1285,8 +1720,11 @@
       "their_id": "Leverage_Chest_Press",
       "their_name": "Leverage Chest Press",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_001",
@@ -1294,8 +1732,11 @@
       "their_id": "Machine_Shoulder_Military_Press",
       "their_name": "Machine Shoulder (Military) Press",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_005",
@@ -1303,8 +1744,11 @@
       "their_id": "Hyperextensions_Back_Extensions",
       "their_name": "Hyperextensions (Back Extensions)",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_027",
@@ -1312,8 +1756,11 @@
       "their_id": "Barbell_Bench_Press_-_Medium_Grip",
       "their_name": "Barbell Bench Press - Medium Grip",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_051",
@@ -1321,8 +1768,11 @@
       "their_id": "Pullups",
       "their_name": "Pullups",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_058",
@@ -1330,8 +1780,11 @@
       "their_id": "Barbell_Hip_Thrust",
       "their_name": "Barbell Hip Thrust",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_curated_062",
@@ -1339,26 +1792,35 @@
       "their_id": "Calf_Press_On_The_Leg_Press_Machine",
       "their_name": "Calf Press On The Leg Press Machine",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_067",
       "our_name": "Dumbbell Overhead Triceps Extension",
-      "their_id": "Standing_Dumbbell_Triceps_Extension",
-      "their_name": "Standing Dumbbell Triceps Extension",
+      "their_id": "Sled_Overhead_Triceps_Extension",
+      "their_name": "Sled Overhead Triceps Extension",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "high",
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "cmiz7vm4s000fvr0mfh2shcrv",
       "our_name": "Front Squat",
-      "their_id": "Front_Squat_Clean_Grip",
-      "their_name": "Front Squat (Clean Grip)",
+      "their_id": "Barbell_Full_Squat",
+      "their_name": "Barbell Full Squat",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "medium",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "cmiz7vn4b000lvr0m5aq17wb7",
@@ -1366,17 +1828,47 @@
       "their_id": "Bodyweight_Walking_Lunge",
       "their_name": "Bodyweight Walking Lunge",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "medium",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_bw_007",
+      "our_name": "Archer Push-Up",
+      "their_id": "Side_To_Side_Chins",
+      "their_name": "Side To Side Chins",
+      "match_type": "alias",
+      "confidence": "medium",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "intermediate"
+    },
+    {
+      "our_id": "ex_bw_011",
+      "our_name": "L-Sit Pull-Up",
+      "their_id": "V-Bar_Pullup",
+      "their_name": "V-Bar Pullup",
+      "match_type": "alias",
+      "confidence": "medium",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_bw_014",
       "our_name": "Jump Squat",
-      "their_id": "Freehand_Jump_Squat",
-      "their_name": "Freehand Jump Squat",
+      "their_id": "Split_Jump",
+      "their_name": "Split Jump",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "medium",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_bw_015",
@@ -1384,8 +1876,23 @@
       "their_id": "One_Leg_Barbell_Squat",
       "their_name": "One Leg Barbell Squat",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "medium",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "expert"
+    },
+    {
+      "our_id": "ex_bw_019",
+      "our_name": "Reverse Lunge",
+      "their_id": "Elevated_Back_Lunge",
+      "their_name": "Elevated Back Lunge",
+      "match_type": "alias",
+      "confidence": "medium",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_bw_026",
@@ -1393,17 +1900,35 @@
       "their_id": "Hanging_Leg_Raise",
       "their_name": "Hanging Leg Raise",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "medium",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "expert"
+    },
+    {
+      "our_id": "ex_bw_033",
+      "our_name": "Plank Shoulder Tap",
+      "their_id": "Shoulder_Raise",
+      "their_name": "Shoulder Raise",
+      "match_type": "alias",
+      "confidence": "medium",
+      "validated": false,
+      "force": "pull",
+      "mechanic": null,
+      "level": "beginner"
     },
     {
       "our_id": "ex_bw_040",
       "our_name": "Nordic Curl",
-      "their_id": "Floor_Glute-Ham_Raise",
-      "their_name": "Floor Glute-Ham Raise",
+      "their_id": "Ball_Leg_Curl",
+      "their_name": "Ball Leg Curl",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "medium",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_db_008",
@@ -1411,17 +1936,23 @@
       "their_id": "Front_Dumbbell_Raise",
       "their_name": "Front Dumbbell Raise",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "medium",
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_db_013",
       "our_name": "Dumbbell Deadlift",
-      "their_id": "Stiff-Legged_Dumbbell_Deadlift",
-      "their_name": "Stiff-Legged Dumbbell Deadlift",
+      "their_id": "Dumbbell_Flyes",
+      "their_name": "Dumbbell Flyes",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "medium",
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_db_017",
@@ -1429,35 +1960,119 @@
       "their_id": "Alternate_Incline_Dumbbell_Curl",
       "their_name": "Alternate Incline Dumbbell Curl",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "medium",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_db_039",
       "our_name": "Dumbbell Stiff Leg Deadlift",
-      "their_id": "Stiff-Legged_Dumbbell_Deadlift",
-      "their_name": "Stiff-Legged Dumbbell Deadlift",
+      "their_id": "Dumbbell_Flyes",
+      "their_name": "Dumbbell Flyes",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "medium",
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_db_043",
       "our_name": "Dumbbell Wrist Curl",
-      "their_id": "Palms-Up_Dumbbell_Wrist_Curl_Over_A_Bench",
-      "their_name": "Palms-Up Dumbbell Wrist Curl Over A Bench",
+      "their_id": "Cable_Wrist_Curl",
+      "their_name": "Cable Wrist Curl",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "medium",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_db_044",
       "our_name": "Dumbbell Reverse Wrist Curl",
-      "their_id": "Palms-Down_Dumbbell_Wrist_Curl_Over_A_Bench",
-      "their_name": "Palms-Down Dumbbell Wrist Curl Over A Bench",
+      "their_id": "Reverse_Cable_Curl",
+      "their_name": "Reverse Cable Curl",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "medium",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_rb_005",
+      "our_name": "Band Row",
+      "their_id": "Seated_Cable_Rows",
+      "their_name": "Seated Cable Rows",
+      "match_type": "alias",
+      "confidence": "medium",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_rb_007",
+      "our_name": "Band Deadlift",
+      "their_id": "Reverse_Band_Deadlift",
+      "their_name": "Reverse Band Deadlift",
+      "match_type": "alias",
+      "confidence": "medium",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "expert"
+    },
+    {
+      "our_id": "ex_rb_024",
+      "our_name": "Band Glute Bridge",
+      "their_id": "Barbell_Glute_Bridge",
+      "their_name": "Barbell Glute Bridge",
+      "match_type": "alias",
+      "confidence": "medium",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
+    },
+    {
+      "our_id": "ex_rb_025",
+      "our_name": "Band Hip Thrust",
+      "their_id": "Barbell_Hip_Thrust",
+      "their_name": "Barbell Hip Thrust",
+      "match_type": "alias",
+      "confidence": "medium",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
+    },
+    {
+      "our_id": "ex_rb_026",
+      "our_name": "Band Lunge",
+      "their_id": "Barbell_Lunge",
+      "their_name": "Barbell Lunge",
+      "match_type": "alias",
+      "confidence": "medium",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
+    },
+    {
+      "our_id": "ex_kb_001",
+      "our_name": "Kettlebell Swing",
+      "their_id": "Russian_Twist",
+      "their_name": "Russian Twist",
+      "match_type": "alias",
+      "confidence": "medium",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_kb_003",
@@ -1465,8 +2080,11 @@
       "their_id": "Vertical_Swing",
       "their_name": "Vertical Swing",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "medium",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_kb_008",
@@ -1474,8 +2092,11 @@
       "their_id": "Barbell_Shoulder_Press",
       "their_name": "Barbell Shoulder Press",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "medium",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_kb_017",
@@ -1483,8 +2104,47 @@
       "their_id": "One-Arm_Kettlebell_Row",
       "their_name": "One-Arm Kettlebell Row",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "medium",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "intermediate"
+    },
+    {
+      "our_id": "ex_kb_019",
+      "our_name": "Kettlebell Deadlift",
+      "their_id": "Car_Deadlift",
+      "their_name": "Car Deadlift",
+      "match_type": "alias",
+      "confidence": "medium",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "intermediate"
+    },
+    {
+      "our_id": "ex_kb_026",
+      "our_name": "Kettlebell Rack Carry",
+      "their_id": "Rack_Pulls",
+      "their_name": "Rack Pulls",
+      "match_type": "alias",
+      "confidence": "medium",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "intermediate"
+    },
+    {
+      "our_id": "ex_kb_027",
+      "our_name": "Kettlebell Overhead Carry",
+      "their_id": "Overhead_Lat",
+      "their_name": "Overhead Lat",
+      "match_type": "alias",
+      "confidence": "medium",
+      "validated": false,
+      "force": "static",
+      "mechanic": null,
+      "level": "expert"
     },
     {
       "our_id": "ex_cl_015",
@@ -1492,8 +2152,11 @@
       "their_id": "Side_To_Side_Chins",
       "their_name": "Side To Side Chins",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "medium",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_cm_005",
@@ -1501,17 +2164,47 @@
       "their_id": "Wide-Grip_Lat_Pulldown",
       "their_name": "Wide-Grip Lat Pulldown",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "medium",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_017",
       "our_name": "Cable Hammer Curl",
-      "their_id": "Cable_Hammer_Curls_-_Rope_Attachment",
-      "their_name": "Cable Hammer Curls - Rope Attachment",
+      "their_id": "Cable_Wrist_Curl",
+      "their_name": "Cable Wrist Curl",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "medium",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_cm_020",
+      "our_name": "Cable Tricep Kickback",
+      "their_id": "Glute_Kickback",
+      "their_name": "Glute Kickback",
+      "match_type": "alias",
+      "confidence": "medium",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_cm_060",
+      "our_name": "TRX Hamstring Curl",
+      "their_id": "Ball_Leg_Curl",
+      "their_name": "Ball Leg Curl",
+      "match_type": "alias",
+      "confidence": "medium",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_mo_012",
@@ -1519,8 +2212,11 @@
       "their_id": "Downward_Facing_Balance",
       "their_name": "Downward Facing Balance",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "medium",
+      "validated": false,
+      "force": "static",
+      "mechanic": "isolation",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_mo_014",
@@ -1528,8 +2224,23 @@
       "their_id": "Spinal_Stretch",
       "their_name": "Spinal Stretch",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "medium",
+      "validated": false,
+      "force": "static",
+      "mechanic": "isolation",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_mo_015",
+      "our_name": "90/90 Hip Stretch",
+      "their_id": "Seated_Calf_Stretch",
+      "their_name": "Seated Calf Stretch",
+      "match_type": "alias",
+      "confidence": "medium",
+      "validated": false,
+      "force": "static",
+      "mechanic": null,
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_033",
@@ -1537,17 +2248,23 @@
       "their_id": "One_Arm_Lat_Pulldown",
       "their_name": "One Arm Lat Pulldown",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "medium",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_057",
       "our_name": "Bodyweight Bulgarian Split Squat",
-      "their_id": "Split_Squat_with_Dumbbells",
-      "their_name": "Split Squat with Dumbbells",
+      "their_id": "Barbell_Side_Split_Squat",
+      "their_name": "Barbell Side Split Squat",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "medium",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_068",
@@ -1555,8 +2272,11 @@
       "their_id": "Hanging_Leg_Raise",
       "their_name": "Hanging Leg Raise",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "medium",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "expert"
     },
     {
       "our_id": "cmiz7vk780004vr0md53c57bz",
@@ -1564,17 +2284,59 @@
       "their_id": "Barbell_Shoulder_Press",
       "their_name": "Barbell Shoulder Press",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "low",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
+    },
+    {
+      "our_id": "ex_bw_030",
+      "our_name": "V-Up",
+      "their_id": "Side_Jackknife",
+      "their_name": "Side Jackknife",
+      "match_type": "alias",
+      "confidence": "low",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_db_031",
       "our_name": "Dumbbell Bulgarian Split Squat",
-      "their_id": "Split_Squat_with_Dumbbells",
-      "their_name": "Split Squat with Dumbbells",
+      "their_id": "Barbell_Side_Split_Squat",
+      "their_name": "Barbell Side Split Squat",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "low",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_db_038",
+      "our_name": "Dumbbell Single Leg Deadlift",
+      "their_id": "Single-Leg_Lateral_Hop",
+      "their_name": "Single-Leg Lateral Hop",
+      "match_type": "alias",
+      "confidence": "low",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_db_050",
+      "our_name": "Man Maker",
+      "their_id": "Dumbbell_Bench_Press",
+      "their_name": "Dumbbell Bench Press",
+      "match_type": "alias",
+      "confidence": "low",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_rb_031",
@@ -1582,8 +2344,47 @@
       "their_id": "Standing_Cable_Wood_Chop",
       "their_name": "Standing Cable Wood Chop",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "low",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_kb_020",
+      "our_name": "Single Leg Kettlebell Deadlift",
+      "their_id": "Single_Leg_Butt_Kick",
+      "their_name": "Single Leg Butt Kick",
+      "match_type": "alias",
+      "confidence": "low",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_cl_014",
+      "our_name": "Frenchies",
+      "their_id": "Weighted_Pull_Ups",
+      "their_name": "Weighted Pull Ups",
+      "match_type": "alias",
+      "confidence": "low",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "intermediate"
+    },
+    {
+      "our_id": "ex_cl_016",
+      "our_name": "Assisted One Arm Pull-Up",
+      "their_id": "One-Arm_Side_Laterals",
+      "their_name": "One-Arm Side Laterals",
+      "match_type": "alias",
+      "confidence": "low",
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_003",
@@ -1591,44 +2392,83 @@
       "their_id": "Low_Cable_Crossover",
       "their_name": "Low Cable Crossover",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "low",
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_035",
       "our_name": "Machine Chest Supported Row",
-      "their_id": "Leverage_High_Row",
-      "their_name": "Leverage High Row",
+      "their_id": "Seated_Good_Mornings",
+      "their_name": "Seated Good Mornings",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "low",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_cm_040",
       "our_name": "Machine Leg Adduction",
-      "their_id": "Thigh_Adductor",
-      "their_name": "Thigh Adductor",
+      "their_id": "Dip_Machine",
+      "their_name": "Dip Machine",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "low",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_041",
       "our_name": "Machine Leg Abduction",
-      "their_id": "Thigh_Abductor",
-      "their_name": "Thigh Abductor",
+      "their_id": "Dip_Machine",
+      "their_name": "Dip Machine",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "low",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_051",
       "our_name": "Trap Bar Farmer Carry",
-      "their_id": "Farmer's_Walk",
-      "their_name": "Farmer's Walk",
+      "their_id": "Trap_Bar_Deadlift",
+      "their_name": "Trap Bar Deadlift",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "low",
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_cm_061",
+      "our_name": "TRX Pike",
+      "their_id": "Decline_Push-Up",
+      "their_name": "Decline Push-Up",
+      "match_type": "alias",
+      "confidence": "low",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_mo_006",
+      "our_name": "Copenhagen Plank",
+      "their_id": "Adductor",
+      "their_name": "Adductor",
+      "match_type": "alias",
+      "confidence": "low",
+      "validated": false,
+      "force": "static",
+      "mechanic": "isolation",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_mo_010",
@@ -1636,8 +2476,11 @@
       "their_id": "Spinal_Stretch",
       "their_name": "Spinal Stretch",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "low",
+      "validated": false,
+      "force": "static",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_mo_022",
@@ -1645,8 +2488,11 @@
       "their_id": "Quadriceps-SMR",
       "their_name": "Quadriceps-SMR",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "low",
+      "validated": false,
+      "force": "static",
+      "mechanic": "isolation",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_mo_023",
@@ -1654,8 +2500,11 @@
       "their_id": "Upper_Back-Leg_Grab",
       "their_name": "Upper Back-Leg Grab",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "low",
+      "validated": false,
+      "force": "static",
+      "mechanic": null,
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_052",
@@ -1663,58 +2512,76 @@
       "their_id": "Handstand_Push-Ups",
       "their_name": "Handstand Push-Ups",
       "match_type": "alias",
-      "confidence": "reviewed",
-      "validated": true
+      "confidence": "low",
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "expert"
     },
     {
       "our_id": "cmiz7vjju0000vr0m4b1o6bec",
       "our_name": "Barbell Bench Press",
-      "their_id": "Barbell_Bench_Press_-_Medium_Grip",
-      "their_name": "Barbell Bench Press - Medium Grip",
+      "their_id": "Decline_Barbell_Bench_Press",
+      "their_name": "Decline Barbell Bench Press",
       "match_type": "close",
-      "confidence": "reviewed",
+      "confidence": "high",
       "similarity": 0.721,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "cmiz7vkji0006vr0mrxfixnvy",
       "our_name": "Incline Barbell Bench Press",
-      "their_id": "Barbell_Incline_Bench_Press_-_Medium_Grip",
-      "their_name": "Barbell Incline Bench Press - Medium Grip",
+      "their_id": "Decline_Barbell_Bench_Press",
+      "their_name": "Decline Barbell Bench Press",
       "match_type": "close",
-      "confidence": "reviewed",
+      "confidence": "high",
       "similarity": 0.822,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "cmiz7vjpo0001vr0msv9of7ib",
       "our_name": "Barbell Back Squat",
-      "their_id": "Barbell_Squat",
-      "their_name": "Barbell Squat",
+      "their_id": "Barbell_Hack_Squat",
+      "their_name": "Barbell Hack Squat",
       "match_type": "close",
-      "confidence": "reviewed",
+      "confidence": "high",
       "similarity": 0.797,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "cmiz7vlyh000evr0m9d8snpzh",
       "our_name": "Lateral Raise",
-      "their_id": "Side_Lateral_Raise",
-      "their_name": "Side Lateral Raise",
+      "their_id": "Lateral_Raise_-_With_Bands",
+      "their_name": "Lateral Raise - With Bands",
       "match_type": "close",
-      "confidence": "reviewed",
+      "confidence": "high",
       "similarity": 0.694,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_bw_020",
       "our_name": "Walking Lunge",
-      "their_id": "Bodyweight_Walking_Lunge",
-      "their_name": "Bodyweight Walking Lunge",
+      "their_id": "Barbell_Walking_Lunge",
+      "their_name": "Barbell Walking Lunge",
       "match_type": "close",
-      "confidence": "reviewed",
+      "confidence": "high",
       "similarity": 0.643,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_bw_038",
@@ -1724,7 +2591,10 @@
       "match_type": "close",
       "confidence": "high",
       "similarity": 0.633,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_bw_042",
@@ -1734,7 +2604,10 @@
       "match_type": "close",
       "confidence": "high",
       "similarity": 0.797,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "expert"
     },
     {
       "our_id": "ex_db_003",
@@ -1744,7 +2617,10 @@
       "match_type": "close",
       "confidence": "high",
       "similarity": 0.728,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_db_004",
@@ -1754,7 +2630,10 @@
       "match_type": "close",
       "confidence": "high",
       "similarity": 0.801,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_db_014",
@@ -1764,7 +2643,10 @@
       "match_type": "close",
       "confidence": "high",
       "similarity": 0.66,
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_db_035",
@@ -1774,7 +2656,10 @@
       "match_type": "close",
       "confidence": "high",
       "similarity": 0.796,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_db_036",
@@ -1784,17 +2669,75 @@
       "match_type": "close",
       "confidence": "high",
       "similarity": 0.714,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_rb_013",
       "our_name": "Band Face Pull",
-      "their_id": "Band_Pull_Apart",
-      "their_name": "Band Pull Apart",
+      "their_id": "Face_Pull",
+      "their_name": "Face Pull",
       "match_type": "close",
-      "confidence": "reviewed",
+      "confidence": "high",
       "similarity": 0.655,
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "intermediate"
+    },
+    {
+      "our_id": "ex_rb_016",
+      "our_name": "Band Hammer Curl",
+      "their_id": "Hammer_Curls",
+      "their_name": "Hammer Curls",
+      "match_type": "close",
+      "confidence": "high",
+      "similarity": 0.677,
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_rb_018",
+      "our_name": "Band Tricep Pushdown",
+      "their_id": "Triceps_Pushdown",
+      "their_name": "Triceps Pushdown",
+      "match_type": "close",
+      "confidence": "high",
+      "similarity": 0.708,
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_rb_021",
+      "our_name": "Band Leg Press",
+      "their_id": "Leg_Press",
+      "their_name": "Leg Press",
+      "match_type": "close",
+      "confidence": "high",
+      "similarity": 0.641,
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_rb_022",
+      "our_name": "Band Leg Extension",
+      "their_id": "Leg_Extensions",
+      "their_name": "Leg Extensions",
+      "match_type": "close",
+      "confidence": "high",
+      "similarity": 0.694,
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_kb_002",
@@ -1804,7 +2747,10 @@
       "match_type": "close",
       "confidence": "high",
       "similarity": 0.786,
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_kb_004",
@@ -1812,9 +2758,12 @@
       "their_id": "Double_Kettlebell_Snatch",
       "their_name": "Double Kettlebell Snatch",
       "match_type": "close",
-      "confidence": "reviewed",
+      "confidence": "high",
       "similarity": 0.687,
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "expert"
     },
     {
       "our_id": "ex_kb_009",
@@ -1822,9 +2771,12 @@
       "their_id": "Double_Kettlebell_Push_Press",
       "their_name": "Double Kettlebell Push Press",
       "match_type": "close",
-      "confidence": "reviewed",
+      "confidence": "high",
       "similarity": 0.745,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_kb_021",
@@ -1834,7 +2786,10 @@
       "match_type": "close",
       "confidence": "high",
       "similarity": 0.803,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_cm_019",
@@ -1844,7 +2799,10 @@
       "match_type": "close",
       "confidence": "high",
       "similarity": 0.831,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_021",
@@ -1854,7 +2812,23 @@
       "match_type": "close",
       "confidence": "high",
       "similarity": 0.667,
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_cm_023",
+      "our_name": "Cable Hip Abduction",
+      "their_id": "Cable_Hip_Adduction",
+      "their_name": "Cable Hip Adduction",
+      "match_type": "close",
+      "confidence": "high",
+      "similarity": 0.799,
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_053",
@@ -1864,17 +2838,62 @@
       "match_type": "close",
       "confidence": "high",
       "similarity": 0.728,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_cm_058",
+      "our_name": "TRX Face Pull",
+      "their_id": "Face_Pull",
+      "their_name": "Face Pull",
+      "match_type": "close",
+      "confidence": "high",
+      "similarity": 0.679,
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_bw_002",
       "our_name": "Wide Push-Up",
-      "their_id": "Push-Up_Wide",
-      "their_name": "Push-Up Wide",
+      "their_id": "Decline_Push-Up",
+      "their_name": "Decline Push-Up",
       "match_type": "close",
-      "confidence": "reviewed",
+      "confidence": "medium",
       "similarity": 0.658,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_bw_003",
+      "our_name": "Diamond Push-Up",
+      "their_id": "Decline_Push-Up",
+      "their_name": "Decline Push-Up",
+      "match_type": "close",
+      "confidence": "medium",
+      "similarity": 0.658,
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_bw_006",
+      "our_name": "Pike Push-Up",
+      "their_id": "Plyo_Push-up",
+      "their_name": "Plyo Push-up",
+      "match_type": "close",
+      "confidence": "medium",
+      "similarity": 0.7,
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_bw_009",
@@ -1882,19 +2901,25 @@
       "their_id": "Wide-Grip_Rear_Pull-Up",
       "their_name": "Wide-Grip Rear Pull-Up",
       "match_type": "close",
-      "confidence": "reviewed",
+      "confidence": "medium",
       "similarity": 0.786,
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_bw_017",
       "our_name": "Sissy Squat",
-      "their_id": "Weighted_Sissy_Squat",
-      "their_name": "Weighted Sissy Squat",
+      "their_id": "Sit_Squats",
+      "their_name": "Sit Squats",
       "match_type": "close",
-      "confidence": "reviewed",
+      "confidence": "medium",
       "similarity": 0.63,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": null,
+      "level": "beginner"
     },
     {
       "our_id": "ex_bw_018",
@@ -1904,17 +2929,36 @@
       "match_type": "close",
       "confidence": "medium",
       "similarity": 0.667,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_bw_024",
       "our_name": "Bicycle Crunch",
-      "their_id": "Cross-Body_Crunch",
-      "their_name": "Cross-Body Crunch",
+      "their_id": "Cable_Crunch",
+      "their_name": "Cable Crunch",
       "match_type": "close",
-      "confidence": "reviewed",
+      "confidence": "medium",
       "similarity": 0.624,
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_bw_032",
+      "our_name": "Plank to Push-Up",
+      "their_id": "Plyo_Push-up",
+      "their_name": "Plyo Push-up",
+      "match_type": "close",
+      "confidence": "medium",
+      "similarity": 0.596,
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_bw_035",
@@ -1924,7 +2968,10 @@
       "match_type": "close",
       "confidence": "medium",
       "similarity": 0.539,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_db_012",
@@ -1934,7 +2981,10 @@
       "match_type": "close",
       "confidence": "medium",
       "similarity": 0.823,
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_db_016",
@@ -1944,17 +2994,23 @@
       "match_type": "close",
       "confidence": "medium",
       "similarity": 0.675,
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_db_024",
       "our_name": "Single Arm Overhead Tricep Extension",
-      "their_id": "Standing_Dumbbell_Triceps_Extension",
-      "their_name": "Standing Dumbbell Triceps Extension",
+      "their_id": "Sled_Overhead_Triceps_Extension",
+      "their_name": "Sled Overhead Triceps Extension",
       "match_type": "close",
-      "confidence": "reviewed",
+      "confidence": "medium",
       "similarity": 0.698,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_db_025",
@@ -1964,7 +3020,36 @@
       "match_type": "close",
       "confidence": "medium",
       "similarity": 0.708,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_db_029",
+      "our_name": "Dumbbell Front Squat",
+      "their_id": "Dumbbell_Squat",
+      "their_name": "Dumbbell Squat",
+      "match_type": "close",
+      "confidence": "medium",
+      "similarity": 0.683,
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_db_030",
+      "our_name": "Dumbbell Sumo Squat",
+      "their_id": "Dumbbell_Squat",
+      "their_name": "Dumbbell Squat",
+      "match_type": "close",
+      "confidence": "medium",
+      "similarity": 0.702,
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_db_033",
@@ -1974,7 +3059,88 @@
       "match_type": "close",
       "confidence": "medium",
       "similarity": 0.734,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
+    },
+    {
+      "our_id": "ex_db_034",
+      "our_name": "Dumbbell Walking Lunge",
+      "their_id": "Barbell_Walking_Lunge",
+      "their_name": "Barbell Walking Lunge",
+      "match_type": "close",
+      "confidence": "medium",
+      "similarity": 0.734,
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_db_037",
+      "our_name": "Dumbbell Hip Thrust",
+      "their_id": "Barbell_Hip_Thrust",
+      "their_name": "Barbell Hip Thrust",
+      "match_type": "close",
+      "confidence": "medium",
+      "similarity": 0.72,
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
+    },
+    {
+      "our_id": "ex_db_047",
+      "our_name": "Dumbbell Snatch",
+      "their_id": "Dumbbell_Squat",
+      "their_name": "Dumbbell Squat",
+      "match_type": "close",
+      "confidence": "medium",
+      "similarity": 0.633,
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_rb_001",
+      "our_name": "Band Chest Press",
+      "their_id": "Cable_Chest_Press",
+      "their_name": "Cable Chest Press",
+      "match_type": "close",
+      "confidence": "medium",
+      "similarity": 0.7,
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_rb_003",
+      "our_name": "Band Push-Up",
+      "their_id": "Plyo_Push-up",
+      "their_name": "Plyo Push-up",
+      "match_type": "close",
+      "confidence": "medium",
+      "similarity": 0.658,
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_rb_006",
+      "our_name": "Band Lat Pulldown",
+      "their_id": "One_Arm_Lat_Pulldown",
+      "their_name": "One Arm Lat Pulldown",
+      "match_type": "close",
+      "confidence": "medium",
+      "similarity": 0.603,
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_rb_009",
@@ -1984,7 +3150,10 @@
       "match_type": "close",
       "confidence": "medium",
       "similarity": 0.722,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_rb_010",
@@ -1994,7 +3163,23 @@
       "match_type": "close",
       "confidence": "medium",
       "similarity": 0.722,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_rb_012",
+      "our_name": "Band Rear Delt Fly",
+      "their_id": "Cable_Rear_Delt_Fly",
+      "their_name": "Cable Rear Delt Fly",
+      "match_type": "close",
+      "confidence": "medium",
+      "similarity": 0.755,
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_rb_014",
@@ -2004,7 +3189,62 @@
       "match_type": "close",
       "confidence": "medium",
       "similarity": 0.688,
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_rb_015",
+      "our_name": "Band Bicep Curl",
+      "their_id": "Machine_Bicep_Curl",
+      "their_name": "Machine Bicep Curl",
+      "match_type": "close",
+      "confidence": "medium",
+      "similarity": 0.686,
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_rb_017",
+      "our_name": "Band Tricep Extension",
+      "their_id": "Machine_Triceps_Extension",
+      "their_name": "Machine Triceps Extension",
+      "match_type": "close",
+      "confidence": "medium",
+      "similarity": 0.721,
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_rb_020",
+      "our_name": "Band Squat",
+      "their_id": "Box_Squat",
+      "their_name": "Box Squat",
+      "match_type": "close",
+      "confidence": "medium",
+      "similarity": 0.617,
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
+    },
+    {
+      "our_id": "ex_rb_023",
+      "our_name": "Band Leg Curl",
+      "their_id": "Ball_Leg_Curl",
+      "their_name": "Ball Leg Curl",
+      "match_type": "close",
+      "confidence": "medium",
+      "similarity": 0.748,
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_kb_005",
@@ -2014,7 +3254,10 @@
       "match_type": "close",
       "confidence": "medium",
       "similarity": 0.714,
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_kb_007",
@@ -2024,7 +3267,62 @@
       "match_type": "close",
       "confidence": "medium",
       "similarity": 0.775,
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "intermediate"
+    },
+    {
+      "our_id": "ex_kb_013",
+      "our_name": "Kettlebell Front Squat",
+      "their_id": "Kettlebell_Pistol_Squat",
+      "their_name": "Kettlebell Pistol Squat",
+      "match_type": "close",
+      "confidence": "medium",
+      "similarity": 0.695,
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "expert"
+    },
+    {
+      "our_id": "ex_kb_015",
+      "our_name": "Kettlebell Lunge",
+      "their_id": "Kettlebell_Thruster",
+      "their_name": "Kettlebell Thruster",
+      "match_type": "close",
+      "confidence": "medium",
+      "similarity": 0.609,
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
+    },
+    {
+      "our_id": "ex_cl_018",
+      "our_name": "Reverse Wrist Curl",
+      "their_id": "Reverse_Cable_Curl",
+      "their_name": "Reverse Cable Curl",
+      "match_type": "close",
+      "confidence": "medium",
+      "similarity": 0.686,
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_cm_001",
+      "our_name": "Cable Chest Fly",
+      "their_id": "Cable_Chest_Press",
+      "their_name": "Cable Chest Press",
+      "match_type": "close",
+      "confidence": "medium",
+      "similarity": 0.7,
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_006",
@@ -2034,7 +3332,23 @@
       "match_type": "close",
       "confidence": "medium",
       "similarity": 0.797,
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_cm_007",
+      "our_name": "Reverse Grip Lat Pulldown",
+      "their_id": "Wide-Grip_Lat_Pulldown",
+      "their_name": "Wide-Grip Lat Pulldown",
+      "match_type": "close",
+      "confidence": "medium",
+      "similarity": 0.74,
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_010",
@@ -2042,9 +3356,12 @@
       "their_id": "Single-Arm_Cable_Crossover",
       "their_name": "Single-Arm Cable Crossover",
       "match_type": "close",
-      "confidence": "reviewed",
+      "confidence": "medium",
       "similarity": 0.725,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_011",
@@ -2054,7 +3371,10 @@
       "match_type": "close",
       "confidence": "medium",
       "similarity": 0.74,
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_012",
@@ -2064,7 +3384,10 @@
       "match_type": "close",
       "confidence": "medium",
       "similarity": 0.706,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_015",
@@ -2074,37 +3397,62 @@
       "match_type": "close",
       "confidence": "medium",
       "similarity": 0.647,
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "intermediate"
+    },
+    {
+      "our_id": "ex_cm_016",
+      "our_name": "Cable Bicep Curl",
+      "their_id": "Machine_Bicep_Curl",
+      "their_name": "Machine Bicep Curl",
+      "match_type": "close",
+      "confidence": "medium",
+      "similarity": 0.686,
+      "validated": false,
+      "force": "pull",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_032",
       "our_name": "Machine Chest Press",
-      "their_id": "Leverage_Chest_Press",
-      "their_name": "Leverage Chest Press",
+      "their_id": "Cable_Chest_Press",
+      "their_name": "Cable Chest Press",
       "match_type": "close",
-      "confidence": "reviewed",
+      "confidence": "medium",
       "similarity": 0.686,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_036",
       "our_name": "Machine Lat Pulldown",
-      "their_id": "Wide-Grip_Lat_Pulldown",
-      "their_name": "Wide-Grip Lat Pulldown",
+      "their_id": "One_Arm_Lat_Pulldown",
+      "their_name": "One Arm Lat Pulldown",
       "match_type": "close",
-      "confidence": "reviewed",
+      "confidence": "medium",
       "similarity": 0.577,
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_037",
       "our_name": "Machine Back Extension",
-      "their_id": "Hyperextensions_Back_Extensions",
-      "their_name": "Hyperextensions (Back Extensions)",
+      "their_id": "Machine_Triceps_Extension",
+      "their_name": "Machine Triceps Extension",
       "match_type": "close",
-      "confidence": "reviewed",
+      "confidence": "medium",
       "similarity": 0.721,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_cm_033",
@@ -2114,7 +3462,23 @@
       "match_type": "close",
       "confidence": "medium",
       "similarity": 0.725,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_cm_056",
+      "our_name": "TRX Chest Press",
+      "their_id": "Cable_Chest_Press",
+      "their_name": "Cable Chest Press",
+      "match_type": "close",
+      "confidence": "medium",
+      "similarity": 0.669,
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_mo_008",
@@ -2124,7 +3488,23 @@
       "match_type": "close",
       "confidence": "medium",
       "similarity": 0.7,
-      "validated": true
+      "validated": false,
+      "force": "static",
+      "mechanic": null,
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_mo_013",
+      "our_name": "Cobra Stretch",
+      "their_id": "Cat_Stretch",
+      "their_name": "Cat Stretch",
+      "match_type": "close",
+      "confidence": "medium",
+      "similarity": 0.613,
+      "validated": false,
+      "force": "static",
+      "mechanic": null,
+      "level": "beginner"
     },
     {
       "our_id": "ex_curated_054",
@@ -2134,37 +3514,88 @@
       "match_type": "close",
       "confidence": "medium",
       "similarity": 0.667,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "beginner"
     },
     {
       "our_id": "ex_bw_016",
       "our_name": "Bulgarian Split Squat",
-      "their_id": "Split_Squat_with_Dumbbells",
-      "their_name": "Split Squat with Dumbbells",
+      "their_id": "Suspended_Split_Squat",
+      "their_name": "Suspended Split Squat",
       "match_type": "close",
-      "confidence": "reviewed",
+      "confidence": "low",
       "similarity": 0.635,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_db_005",
       "our_name": "Dumbbell Pullover",
-      "their_id": "Straight-Arm_Dumbbell_Pullover",
-      "their_name": "Straight-Arm Dumbbell Pullover",
+      "their_id": "Dumbbell_Flyes",
+      "their_name": "Dumbbell Flyes",
       "match_type": "close",
-      "confidence": "reviewed",
+      "confidence": "low",
       "similarity": 0.59,
-      "validated": true
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_db_042",
+      "our_name": "Dumbbell Woodchop",
+      "their_id": "Dumbbell_Scaption",
+      "their_name": "Dumbbell Scaption",
+      "match_type": "close",
+      "confidence": "low",
+      "similarity": 0.561,
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_rb_011",
+      "our_name": "Band Front Raise",
+      "their_id": "Front_Cable_Raise",
+      "their_name": "Front Cable Raise",
+      "match_type": "close",
+      "confidence": "low",
+      "similarity": 0.56,
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_rb_019",
+      "our_name": "Band Tricep Kickback",
+      "their_id": "Tricep_Dumbbell_Kickback",
+      "their_name": "Tricep Dumbbell Kickback",
+      "match_type": "close",
+      "confidence": "low",
+      "similarity": 0.554,
+      "validated": false,
+      "force": "push",
+      "mechanic": "isolation",
+      "level": "beginner"
     },
     {
       "our_id": "ex_kb_016",
       "our_name": "Kettlebell Reverse Lunge",
-      "their_id": "Dumbbell_Rear_Lunge",
-      "their_name": "Dumbbell Rear Lunge",
+      "their_id": "Crossover_Reverse_Lunge",
+      "their_name": "Crossover Reverse Lunge",
       "match_type": "close",
-      "confidence": "reviewed",
+      "confidence": "low",
       "similarity": 0.638,
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": null,
+      "level": "intermediate"
     },
     {
       "our_id": "ex_kb_018",
@@ -2174,323 +3605,124 @@
       "match_type": "close",
       "confidence": "low",
       "similarity": 0.617,
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "expert"
+    },
+    {
+      "our_id": "ex_kb_023",
+      "our_name": "Kettlebell Halo",
+      "their_id": "Kettlebell_Thruster",
+      "their_name": "Kettlebell Thruster",
+      "match_type": "close",
+      "confidence": "low",
+      "similarity": 0.582,
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "intermediate"
     },
     {
       "our_id": "ex_cm_050",
       "our_name": "Trap Bar Shrug",
-      "their_id": "Barbell_Shrug",
-      "their_name": "Barbell Shrug",
+      "their_id": "Trap_Bar_Deadlift",
+      "their_name": "Trap Bar Deadlift",
       "match_type": "close",
-      "confidence": "reviewed",
+      "confidence": "low",
       "similarity": 0.59,
-      "validated": true
+      "validated": false,
+      "force": "pull",
+      "mechanic": "compound",
+      "level": "beginner"
+    },
+    {
+      "our_id": "ex_cm_059",
+      "our_name": "TRX Pistol Squat",
+      "their_id": "Kettlebell_Pistol_Squat",
+      "their_name": "Kettlebell Pistol Squat",
+      "match_type": "close",
+      "confidence": "low",
+      "similarity": 0.629,
+      "validated": false,
+      "force": "push",
+      "mechanic": "compound",
+      "level": "expert"
+    },
+    {
+      "our_id": "ex_mo_020",
+      "our_name": "Scorpion Stretch",
+      "their_id": "Shoulder_Stretch",
+      "their_name": "Shoulder Stretch",
+      "match_type": "close",
+      "confidence": "low",
+      "similarity": 0.579,
+      "validated": false,
+      "force": "pull",
+      "mechanic": null,
+      "level": "beginner"
     }
   ],
   "our_unmatched": [
     {
-      "id": "ex_bw_003",
-      "name": "Diamond Push-Up"
-    },
-    {
-      "id": "ex_bw_006",
-      "name": "Pike Push-Up"
-    },
-    {
-      "id": "ex_bw_007",
-      "name": "Archer Push-Up"
-    },
-    {
-      "id": "ex_bw_010",
-      "name": "Neutral Grip Pull-Up"
-    },
-    {
-      "id": "ex_bw_011",
-      "name": "L-Sit Pull-Up"
-    },
-    {
-      "id": "ex_bw_019",
-      "name": "Reverse Lunge"
-    },
-    {
-      "id": "ex_bw_029",
-      "name": "Hollow Body Hold"
-    },
-    {
-      "id": "ex_bw_030",
-      "name": "V-Up"
-    },
-    {
-      "id": "ex_bw_031",
-      "name": "Side Plank"
-    },
-    {
-      "id": "ex_bw_032",
-      "name": "Plank to Push-Up"
-    },
-    {
-      "id": "ex_bw_033",
-      "name": "Plank Shoulder Tap"
-    },
-    {
-      "id": "ex_bw_041",
-      "name": "Burpee"
-    },
-    {
-      "id": "ex_cl_014",
-      "name": "Frenchies"
-    },
-    {
-      "id": "ex_cl_016",
-      "name": "Assisted One Arm Pull-Up"
-    },
-    {
-      "id": "ex_cl_017",
-      "name": "Lock-Off Hold"
-    },
-    {
-      "id": "ex_cl_018",
-      "name": "Reverse Wrist Curl"
-    },
-    {
-      "id": "ex_cl_020",
-      "name": "Front Lever Progression"
-    },
-    {
-      "id": "ex_cm_001",
-      "name": "Cable Chest Fly"
-    },
-    {
-      "id": "ex_cm_007",
-      "name": "Reverse Grip Lat Pulldown"
-    },
-    {
-      "id": "ex_cm_016",
-      "name": "Cable Bicep Curl"
-    },
-    {
-      "id": "ex_cm_020",
-      "name": "Cable Tricep Kickback"
-    },
-    {
-      "id": "ex_cm_023",
-      "name": "Cable Hip Abduction"
-    },
-    {
-      "id": "ex_cm_056",
-      "name": "TRX Chest Press"
-    },
-    {
-      "id": "ex_cm_057",
-      "name": "TRX Y Raise"
-    },
-    {
-      "id": "ex_cm_058",
-      "name": "TRX Face Pull"
-    },
-    {
-      "id": "ex_cm_059",
-      "name": "TRX Pistol Squat"
-    },
-    {
-      "id": "ex_cm_060",
-      "name": "TRX Hamstring Curl"
-    },
-    {
-      "id": "ex_cm_061",
-      "name": "TRX Pike"
-    },
-    {
-      "id": "ex_cm_062",
-      "name": "TRX Body Saw"
-    },
-    {
-      "id": "ex_db_029",
-      "name": "Dumbbell Front Squat"
-    },
-    {
-      "id": "ex_db_030",
-      "name": "Dumbbell Sumo Squat"
-    },
-    {
-      "id": "ex_db_034",
-      "name": "Dumbbell Walking Lunge"
-    },
-    {
-      "id": "ex_db_037",
-      "name": "Dumbbell Hip Thrust"
-    },
-    {
-      "id": "ex_db_038",
-      "name": "Dumbbell Single Leg Deadlift"
-    },
-    {
-      "id": "ex_db_042",
-      "name": "Dumbbell Woodchop"
-    },
-    {
-      "id": "ex_db_047",
-      "name": "Dumbbell Snatch"
-    },
-    {
-      "id": "ex_db_050",
-      "name": "Man Maker"
-    },
-    {
-      "id": "ex_kb_001",
-      "name": "Kettlebell Swing"
-    },
-    {
-      "id": "ex_kb_013",
-      "name": "Kettlebell Front Squat"
-    },
-    {
-      "id": "ex_kb_015",
-      "name": "Kettlebell Lunge"
-    },
-    {
-      "id": "ex_kb_019",
-      "name": "Kettlebell Deadlift"
-    },
-    {
-      "id": "ex_kb_020",
-      "name": "Single Leg Kettlebell Deadlift"
-    },
-    {
-      "id": "ex_kb_023",
-      "name": "Kettlebell Halo"
-    },
-    {
-      "id": "ex_kb_026",
-      "name": "Kettlebell Rack Carry"
-    },
-    {
-      "id": "ex_kb_027",
-      "name": "Kettlebell Overhead Carry"
-    },
-    {
-      "id": "ex_mo_003",
-      "name": "Bird Dog"
-    },
-    {
-      "id": "ex_mo_004",
-      "name": "Dragon Flag"
-    },
-    {
-      "id": "ex_mo_006",
-      "name": "Copenhagen Plank"
-    },
-    {
-      "id": "ex_mo_013",
-      "name": "Cobra Stretch"
-    },
-    {
-      "id": "ex_mo_015",
-      "name": "90/90 Hip Stretch"
-    },
-    {
-      "id": "ex_mo_016",
-      "name": "Leg Swing"
-    },
-    {
-      "id": "ex_mo_020",
-      "name": "Scorpion Stretch"
-    },
-    {
-      "id": "ex_mo_021",
-      "name": "Foam Roll IT Band"
-    },
-    {
-      "id": "ex_rb_001",
-      "name": "Band Chest Press"
+      "id": "ex_rb_032",
+      "name": "Band Anti-Rotation Press"
     },
     {
       "id": "ex_rb_002",
       "name": "Band Chest Fly"
     },
     {
-      "id": "ex_rb_003",
-      "name": "Band Push-Up"
-    },
-    {
-      "id": "ex_rb_005",
-      "name": "Band Row"
-    },
-    {
-      "id": "ex_rb_006",
-      "name": "Band Lat Pulldown"
-    },
-    {
-      "id": "ex_rb_007",
-      "name": "Band Deadlift"
-    },
-    {
-      "id": "ex_rb_011",
-      "name": "Band Front Raise"
-    },
-    {
-      "id": "ex_rb_012",
-      "name": "Band Rear Delt Fly"
-    },
-    {
-      "id": "ex_rb_015",
-      "name": "Band Bicep Curl"
-    },
-    {
-      "id": "ex_rb_016",
-      "name": "Band Hammer Curl"
-    },
-    {
-      "id": "ex_rb_017",
-      "name": "Band Tricep Extension"
-    },
-    {
-      "id": "ex_rb_018",
-      "name": "Band Tricep Pushdown"
-    },
-    {
-      "id": "ex_rb_019",
-      "name": "Band Tricep Kickback"
-    },
-    {
-      "id": "ex_rb_020",
-      "name": "Band Squat"
-    },
-    {
-      "id": "ex_rb_021",
-      "name": "Band Leg Press"
-    },
-    {
-      "id": "ex_rb_022",
-      "name": "Band Leg Extension"
-    },
-    {
-      "id": "ex_rb_023",
-      "name": "Band Leg Curl"
-    },
-    {
-      "id": "ex_rb_024",
-      "name": "Band Glute Bridge"
-    },
-    {
-      "id": "ex_rb_025",
-      "name": "Band Hip Thrust"
-    },
-    {
-      "id": "ex_rb_026",
-      "name": "Band Lunge"
-    },
-    {
-      "id": "ex_rb_027",
-      "name": "Band Standing Abduction"
-    },
-    {
       "id": "ex_rb_028",
       "name": "Band Clamshell"
     },
     {
-      "id": "ex_rb_032",
-      "name": "Band Anti-Rotation Press"
+      "id": "ex_mo_003",
+      "name": "Bird Dog"
+    },
+    {
+      "id": "ex_bw_041",
+      "name": "Burpee"
+    },
+    {
+      "id": "ex_mo_004",
+      "name": "Dragon Flag"
+    },
+    {
+      "id": "ex_mo_021",
+      "name": "Foam Roll IT Band"
+    },
+    {
+      "id": "ex_cl_020",
+      "name": "Front Lever Progression"
+    },
+    {
+      "id": "ex_bw_029",
+      "name": "Hollow Body Hold"
+    },
+    {
+      "id": "ex_mo_016",
+      "name": "Leg Swing"
+    },
+    {
+      "id": "ex_cl_017",
+      "name": "Lock-Off Hold"
+    },
+    {
+      "id": "ex_bw_010",
+      "name": "Neutral Grip Pull-Up"
+    },
+    {
+      "id": "ex_bw_031",
+      "name": "Side Plank"
+    },
+    {
+      "id": "ex_cm_062",
+      "name": "TRX Body Saw"
+    },
+    {
+      "id": "ex_cm_057",
+      "name": "TRX Y Raise"
     }
   ],
   "their_unmatched": [
