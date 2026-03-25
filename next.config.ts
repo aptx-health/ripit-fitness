@@ -11,6 +11,14 @@ const withSerwist = withSerwistInit({
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cdn.ripit.fit',
+      },
+    ],
+  },
   // Externalize server-only packages to prevent bundling in client/edge
   serverExternalPackages: [
     'pino',

@@ -94,6 +94,7 @@ export async function GET(
             secondaryFAUs: true,
             equipment: true,
             instructions: true,
+            imageUrls: true,
             isSystem: true,
             createdBy: true,
           },
