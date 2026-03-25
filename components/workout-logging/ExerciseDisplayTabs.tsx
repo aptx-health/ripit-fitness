@@ -144,7 +144,7 @@ export default function ExerciseDisplayTabs({
             {exercise.exerciseDefinition?.instructions && (
               <div>
                 <h4 className="text-lg sm:text-xl font-semibold text-foreground mb-3">Instructions</h4>
-                <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed">
+                <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed whitespace-pre-line">
                   {exercise.exerciseDefinition.instructions}
                 </p>
               </div>
