@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/radix/
 import type { LoadState } from '@/hooks/useProgressiveExercises'
 import type { LoggedSet } from '@/hooks/useWorkoutStorage'
 import { EQUIPMENT_LABELS } from '@/lib/constants/program-metadata'
+import Image from 'next/image'
 import SetList from './SetList'
 
 interface PrescribedSet {
@@ -25,6 +26,7 @@ interface Exercise {
     secondaryFAUs: string[]
     equipment: string[]
     instructions?: string
+    imageUrls?: string[]
   }
 }
 
@@ -141,6 +143,24 @@ export default function ExerciseDisplayTabs({
 
       <TabsContent value="info" className="flex-1 overflow-y-auto px-4">
         <div className="space-y-6">
+          {exercise.exerciseDefinition?.imageUrls && exercise.exerciseDefinition.imageUrls.length > 0 && (
+            <div>
+              <div className="grid grid-cols-2 gap-3">
+                {exercise.exerciseDefinition.imageUrls.map((url, i) => (
+                  <div key={url} className="relative aspect-square rounded-lg overflow-hidden bg-muted">
+                    <Image
+                      src={url}
+                      alt={`${exercise.name} - ${i === 0 ? 'start' : 'end'} position`}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 640px) 45vw, 300px"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {exercise.exerciseDefinition?.instructions && (
             <div>
               <h4 className="text-lg sm:text-xl font-semibold text-foreground mb-3">Instructions</h4>
@@ -198,7 +218,8 @@ export default function ExerciseDisplayTabs({
             </div>
           )}
 
-          {!exercise.exerciseDefinition?.instructions &&
+          {!exercise.exerciseDefinition?.imageUrls?.length &&
+            !exercise.exerciseDefinition?.instructions &&
             !exercise.exerciseDefinition?.primaryFAUs?.length &&
             !exercise.exerciseDefinition?.secondaryFAUs?.length &&
             !exercise.exerciseDefinition?.equipment?.length && (

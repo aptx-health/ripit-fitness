@@ -27,6 +27,7 @@ export type Exercise = {
     secondaryFAUs: string[]
     equipment: string[]
     instructions?: string
+    imageUrls?: string[]
     isSystem: boolean
     createdBy: string | null
   }
