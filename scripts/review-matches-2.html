@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Exercise Match Review - Find Better Matches</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, system-ui, sans-serif; background: #1a1a2e; color: #e0e0e0; padding: 20px; max-width: 1100px; margin: 0 auto; }
+  h1 { color: #00ff88; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 20px; font-size: 14px; }
+  .stats { display: flex; gap: 16px; margin-bottom: 20px; font-size: 14px; }
+  .stat { background: #16213e; padding: 8px 14px; border-radius: 6px; }
+  .stat .n { color: #00ff88; font-weight: bold; }
+
+  .exercise-card {
+    background: #16213e; border-radius: 8px; padding: 14px; margin-bottom: 10px;
+    border-left: 4px solid #333;
+  }
+  .exercise-card.resolved { border-left-color: #00ff88; opacity: 0.6; }
+  .exercise-card.no-match { border-left-color: #ffaa00; }
+
+  .exercise-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .our-name { font-weight: bold; font-size: 15px; color: #fff; min-width: 280px; }
+  .old-match { font-size: 12px; color: #ff4444; }
+  .old-match::before { content: "was: "; color: #666; }
+
+  .candidates { display: flex; flex-wrap: wrap; gap: 6px; }
+  .candidate {
+    padding: 4px 10px; border-radius: 4px; font-size: 13px;
+    cursor: pointer; border: 1px solid #333; background: #0a0a1a;
+    transition: all 0.15s;
+  }
+  .candidate:hover { border-color: #00ff88; background: #1a2744; }
+  .candidate.selected { border-color: #00ff88; background: #00ff8822; color: #00ff88; }
+  .candidate .score { color: #666; font-size: 11px; margin-left: 4px; }
+
+  .no-match-btn {
+    padding: 4px 10px; border-radius: 4px; font-size: 13px;
+    cursor: pointer; border: 1px solid #ff444444; background: #0a0a1a; color: #ff4444;
+    transition: all 0.15s;
+  }
+  .no-match-btn:hover { border-color: #ff4444; background: #ff444422; }
+  .no-match-btn.selected { border-color: #ff4444; background: #ff444433; }
+
+  .my-pick {
+    font-size: 11px; color: #00ff88; margin-left: 8px; padding: 2px 6px;
+    background: #00ff8811; border-radius: 3px;
+  }
+
+  .actions { position: sticky; bottom: 0; background: #1a1a2e; padding: 16px 0; border-top: 2px solid #333; margin-top: 20px; display: flex; gap: 12px; align-items: center; }
+  button {
+    padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer;
+    font-size: 14px; font-weight: bold;
+  }
+  .btn-auto { background: #333; color: #e0e0e0; }
+  .btn-auto:hover { background: #444; }
+  .btn-export { background: #00ff88; color: #1a1a2e; }
+  .btn-export:hover { background: #00cc6a; }
+  .export-status { color: #00ff88; font-size: 14px; }
+
+  textarea { display: none; width: 100%; height: 300px; background: #0a0a1a; color: #00ff88; border: 1px solid #333; border-radius: 6px; padding: 12px; font-family: monospace; font-size: 12px; margin-top: 12px; }
+  textarea.visible { display: block; }
+</style>
+</head>
+<body>
+
+<h1>Find Better Matches</h1>
+<p class="subtitle">57 exercises need a match (or confirmation of no match). Click a candidate to select it, or "No match" to mark as unmatched. My suggested pick is highlighted.</p>
+
+<div class="stats">
+  <div class="stat">Total: <span class="n">57</span></div>
+  <div class="stat">Resolved: <span class="n" id="resolved-count">0</span></div>
+  <div class="stat">Remaining: <span class="n" id="remaining-count">57</span></div>
+</div>
+
+<div id="exercises"></div>
+
+<div class="actions">
+  <button class="btn-auto" onclick="autoSelectPicks()">Auto-select my picks</button>
+  <button class="btn-export" onclick="exportResults()">Export Results</button>
+  <span class="export-status" id="export-status"></span>
+</div>
+
+<textarea id="output"></textarea>
+
+<script>
+const exercises = [
+  // My suggested picks are marked. null = no good match exists in their DB
+  { our_id:"ex_bw_020", our:"Walking Lunge", old_their:"Barbell Walking Lunge", pick:"Bodyweight_Walking_Lunge",
+    candidates:[
+      {name:"Bodyweight Walking Lunge",id:"Bodyweight_Walking_Lunge",score:0.667},
+      {name:"Barbell Walking Lunge",id:"Barbell_Walking_Lunge",score:0.667},
+    ]},
+  { our_id:"ex_rb_013", our:"Band Face Pull", old_their:"Face Pull", pick:null,
+    candidates:[
+      {name:"Face Pull",id:"Face_Pull",score:0.667},
+      {name:"Band Pull Apart",id:"Band_Pull_Apart",score:0.5},
+    ]},
+  { our_id:"cmiz7vjju0000vr0m4b1o6bec", our:"Barbell Bench Press", old_their:"Decline Barbell Bench Press", pick:"Barbell_Bench_Press_-_Medium_Grip",
+    candidates:[
+      {name:"Barbell Bench Press - Medium Grip",id:"Barbell_Bench_Press_-_Medium_Grip",score:0.6},
+      {name:"Decline Barbell Bench Press",id:"Decline_Barbell_Bench_Press",score:0.75},
+      {name:"Close-Grip Barbell Bench Press",id:"Close-Grip_Barbell_Bench_Press",score:0.6},
+    ]},
+  { our_id:"cmiz7vkji0006vr0mrxfixnvy", our:"Incline Barbell Bench Press", old_their:"Decline Barbell Bench Press", pick:"Barbell_Incline_Bench_Press_-_Medium_Grip",
+    candidates:[
+      {name:"Barbell Incline Bench Press - Medium Grip",id:"Barbell_Incline_Bench_Press_-_Medium_Grip",score:0.667},
+      {name:"Decline Barbell Bench Press",id:"Decline_Barbell_Bench_Press",score:0.75},
+    ]},
+  { our_id:"cmiz7vjpo0001vr0msv9of7ib", our:"Barbell Back Squat", old_their:"Barbell Hack Squat", pick:"Barbell_Squat",
+    candidates:[
+      {name:"Barbell Squat",id:"Barbell_Squat",score:0.667},
+      {name:"Barbell Hack Squat",id:"Barbell_Hack_Squat",score:0.5},
+      {name:"Barbell Full Squat",id:"Barbell_Full_Squat",score:0.5},
+    ]},
+  { our_id:"cmiz7vlyh000evr0m9d8snpzh", our:"Lateral Raise", old_their:"Lateral Raise - With Bands", pick:"Side_Lateral_Raise",
+    candidates:[
+      {name:"Side Lateral Raise",id:"Side_Lateral_Raise",score:0.667},
+      {name:"Lateral Raise - With Bands",id:"Lateral_Raise_-_With_Bands",score:0.5},
+      {name:"Cable Seated Lateral Raise",id:"Cable_Seated_Lateral_Raise",score:0.5},
+    ]},
+  { our_id:"ex_rb_016", our:"Band Hammer Curl", old_their:"Hammer Curls", pick:null,
+    candidates:[
+      {name:"Hammer Curls",id:"Hammer_Curls",score:0.5},
+      {name:"Alternate Hammer Curl",id:"Alternate_Hammer_Curl",score:0.5},
+    ]},
+  { our_id:"ex_rb_018", our:"Band Tricep Pushdown", old_their:"Triceps Pushdown", pick:null,
+    candidates:[
+      {name:"Triceps Pushdown",id:"Triceps_Pushdown",score:0.25},
+    ]},
+  { our_id:"ex_rb_021", our:"Band Leg Press", old_their:"Leg Press", pick:null,
+    candidates:[
+      {name:"Leg Press",id:"Leg_Press",score:0.667},
+    ]},
+  { our_id:"ex_rb_022", our:"Band Leg Extension", old_their:"Leg Extensions", pick:null,
+    candidates:[
+      {name:"Leg Extensions",id:"Leg_Extensions",score:0.5},
+      {name:"Single-Leg Leg Extension",id:"Single-Leg_Leg_Extension",score:0.5},
+    ]},
+  { our_id:"ex_kb_004", our:"Kettlebell Snatch", old_their:"Double Kettlebell Snatch", pick:"Double_Kettlebell_Snatch",
+    candidates:[
+      {name:"Double Kettlebell Snatch",id:"Double_Kettlebell_Snatch",score:0.667},
+      {name:"Snatch",id:"Snatch",score:0.5},
+    ]},
+  { our_id:"ex_kb_009", our:"Kettlebell Push Press", old_their:"Double Kettlebell Push Press", pick:"Double_Kettlebell_Push_Press",
+    candidates:[
+      {name:"Double Kettlebell Push Press",id:"Double_Kettlebell_Push_Press",score:0.75},
+    ]},
+  { our_id:"ex_cm_023", our:"Cable Hip Abduction", old_their:"Cable Hip Adduction", pick:null,
+    candidates:[
+      {name:"Cable Hip Adduction",id:"Cable_Hip_Adduction",score:0.5},
+      {name:"Thigh Abductor",id:"Thigh_Abductor",score:0.0},
+    ]},
+  { our_id:"ex_cm_058", our:"TRX Face Pull", old_their:"Face Pull", pick:null,
+    candidates:[
+      {name:"Face Pull",id:"Face_Pull",score:0.667},
+    ]},
+  { our_id:"ex_bw_009", our:"Wide Grip Pull-Up", old_their:"Wide-Grip Rear Pull-Up", pick:"Wide-Grip_Rear_Pull-Up",
+    candidates:[
+      {name:"Wide-Grip Rear Pull-Up",id:"Wide-Grip_Rear_Pull-Up",score:0.8},
+      {name:"Wide-Grip Lat Pulldown",id:"Wide-Grip_Lat_Pulldown",score:0.4},
+    ]},
+  { our_id:"ex_db_029", our:"Dumbbell Front Squat", old_their:"Dumbbell Squat", pick:"Dumbbell_Squat",
+    candidates:[
+      {name:"Dumbbell Squat",id:"Dumbbell_Squat",score:0.667},
+    ]},
+  { our_id:"ex_db_034", our:"Dumbbell Walking Lunge", old_their:"Barbell Walking Lunge", pick:null,
+    candidates:[
+      {name:"Barbell Walking Lunge",id:"Barbell_Walking_Lunge",score:0.5},
+      {name:"Dumbbell Rear Lunge",id:"Dumbbell_Rear_Lunge",score:0.5},
+      {name:"Bodyweight Walking Lunge",id:"Bodyweight_Walking_Lunge",score:0.5},
+    ]},
+  { our_id:"ex_db_037", our:"Dumbbell Hip Thrust", old_their:"Barbell Hip Thrust", pick:"Barbell_Hip_Thrust",
+    candidates:[
+      {name:"Barbell Hip Thrust",id:"Barbell_Hip_Thrust",score:0.5},
+    ]},
+  { our_id:"ex_bw_002", our:"Wide Push-Up", old_their:"Decline Push-Up", pick:"Push-Up_Wide",
+    candidates:[
+      {name:"Push-Up Wide",id:"Push-Up_Wide",score:1.0},
+    ]},
+  { our_id:"ex_bw_003", our:"Diamond Push-Up", old_their:"Decline Push-Up", pick:null,
+    candidates:[
+      {name:"Suspended Push-Up",id:"Suspended_Push-Up",score:0.5},
+      {name:"Decline Push-Up",id:"Decline_Push-Up",score:0.5},
+    ]},
+  { our_id:"ex_bw_006", our:"Pike Push-Up", old_their:"Plyo Push-up", pick:null,
+    candidates:[
+      {name:"Suspended Push-Up",id:"Suspended_Push-Up",score:0.5},
+      {name:"Plyo Push-up",id:"Plyo_Push-up",score:0.5},
+    ]},
+  { our_id:"ex_bw_017", our:"Sissy Squat", old_their:"Sit Squats", pick:"Weighted_Sissy_Squat",
+    candidates:[
+      {name:"Weighted Sissy Squat",id:"Weighted_Sissy_Squat",score:0.667},
+      {name:"Sit Squats",id:"Sit_Squats",score:0.333},
+    ]},
+  { our_id:"ex_bw_024", our:"Bicycle Crunch", old_their:"Cable Crunch", pick:null,
+    candidates:[
+      {name:"Tuck Crunch",id:"Tuck_Crunch",score:0.333},
+      {name:"Cable Crunch",id:"Cable_Crunch",score:0.333},
+      {name:"Cross-Body Crunch",id:"Cross-Body_Crunch",score:0.333},
+    ]},
+  { our_id:"ex_bw_032", our:"Plank to Push-Up", old_their:"Plyo Push-up", pick:null,
+    candidates:[
+      {name:"Push Up to Side Plank",id:"Push_Up_to_Side_Plank",score:0.75},
+      {name:"Front Plank",id:"Front_Plank",score:0.333},
+    ]},
+  { our_id:"ex_db_024", our:"Single Arm Overhead Tricep Extension", old_their:"Sled Overhead Triceps Extension", pick:null,
+    candidates:[
+      {name:"Cable One Arm Tricep Extension",id:"Cable_One_Arm_Tricep_Extension",score:0.429},
+      {name:"Sled Overhead Triceps Extension",id:"Sled_Overhead_Triceps_Extension",score:0.4},
+      {name:"Standing Overhead Barbell Triceps Extension",id:"Standing_Overhead_Barbell_Triceps_Extension",score:0.333},
+      {name:"Standing Dumbbell Triceps Extension",id:"Standing_Dumbbell_Triceps_Extension",score:0.333},
+    ]},
+  { our_id:"ex_db_030", our:"Dumbbell Sumo Squat", old_their:"Dumbbell Squat", pick:null,
+    candidates:[
+      {name:"Dumbbell Squat",id:"Dumbbell_Squat",score:0.667},
+      {name:"Sumo Deadlift",id:"Sumo_Deadlift",score:0.333},
+    ]},
+  { our_id:"ex_db_047", our:"Dumbbell Snatch", old_their:"Dumbbell Squat", pick:null,
+    candidates:[
+      {name:"Snatch",id:"Snatch",score:0.5},
+      {name:"Double Kettlebell Snatch",id:"Double_Kettlebell_Snatch",score:0.333},
+    ]},
+  { our_id:"ex_rb_001", our:"Band Chest Press", old_their:"Cable Chest Press", pick:null,
+    candidates:[
+      {name:"Leverage Chest Press",id:"Leverage_Chest_Press",score:0.5},
+      {name:"Cable Chest Press",id:"Cable_Chest_Press",score:0.5},
+    ]},
+  { our_id:"ex_rb_003", our:"Band Push-Up", old_their:"Plyo Push-up", pick:null,
+    candidates:[
+      {name:"Suspended Push-Up",id:"Suspended_Push-Up",score:0.5},
+      {name:"Plyo Push-up",id:"Plyo_Push-up",score:0.5},
+    ]},
+  { our_id:"ex_rb_006", our:"Band Lat Pulldown", old_their:"One Arm Lat Pulldown", pick:null,
+    candidates:[
+      {name:"Wide-Grip Lat Pulldown",id:"Wide-Grip_Lat_Pulldown",score:0.4},
+      {name:"One Arm Lat Pulldown",id:"One_Arm_Lat_Pulldown",score:0.4},
+      {name:"Close-Grip Front Lat Pulldown",id:"Close-Grip_Front_Lat_Pulldown",score:0.333},
+    ]},
+  { our_id:"ex_rb_012", our:"Band Rear Delt Fly", old_their:"Cable Rear Delt Fly", pick:null,
+    candidates:[
+      {name:"Cable Rear Delt Fly",id:"Cable_Rear_Delt_Fly",score:0.6},
+    ]},
+  { our_id:"ex_rb_015", our:"Band Bicep Curl", old_their:"Machine Bicep Curl", pick:null,
+    candidates:[
+      {name:"Machine Bicep Curl",id:"Machine_Bicep_Curl",score:0.5},
+      {name:"Dumbbell Bicep Curl",id:"Dumbbell_Bicep_Curl",score:0.5},
+    ]},
+  { our_id:"ex_rb_017", our:"Band Tricep Extension", old_their:"Machine Triceps Extension", pick:null,
+    candidates:[
+      {name:"Lying Dumbbell Tricep Extension",id:"Lying_Dumbbell_Tricep_Extension",score:0.4},
+      {name:"Machine Triceps Extension",id:"Machine_Triceps_Extension",score:0.4},
+    ]},
+  { our_id:"ex_rb_020", our:"Band Squat", old_their:"Box Squat", pick:null,
+    candidates:[
+      {name:"Reverse Band Power Squat",id:"Reverse_Band_Power_Squat",score:0.5},
+      {name:"Box Squat",id:"Box_Squat",score:0.333},
+    ]},
+  { our_id:"ex_rb_023", our:"Band Leg Curl", old_their:"Ball Leg Curl", pick:null,
+    candidates:[
+      {name:"Standing Leg Curl",id:"Standing_Leg_Curl",score:0.5},
+      {name:"Ball Leg Curl",id:"Ball_Leg_Curl",score:0.5},
+      {name:"Seated Leg Curl",id:"Seated_Leg_Curl",score:0.5},
+    ]},
+  { our_id:"ex_kb_013", our:"Kettlebell Front Squat", old_their:"Kettlebell Pistol Squat", pick:null,
+    candidates:[
+      {name:"Kettlebell Pistol Squat",id:"Kettlebell_Pistol_Squat",score:0.5},
+      {name:"Front Squat (Clean Grip)",id:"Front_Squat_Clean_Grip",score:0.5},
+    ]},
+  { our_id:"ex_kb_015", our:"Kettlebell Lunge", old_their:"Kettlebell Thruster", pick:null,
+    candidates:[
+      {name:"Lunge Sprint",id:"Lunge_Sprint",score:0.333},
+      {name:"Barbell Lunge",id:"Barbell_Lunge",score:0.333},
+      {name:"Kettlebell Thruster",id:"Kettlebell_Thruster",score:0.333},
+    ]},
+  { our_id:"ex_cl_018", our:"Reverse Wrist Curl", old_their:"Reverse Cable Curl", pick:null,
+    candidates:[
+      {name:"Reverse Cable Curl",id:"Reverse_Cable_Curl",score:0.5},
+      {name:"Dumbbell Lying Pronation",id:"Dumbbell_Lying_Pronation",score:0.0},
+    ]},
+  { our_id:"ex_cm_001", our:"Cable Chest Fly", old_their:"Cable Chest Press", pick:null,
+    candidates:[
+      {name:"Cable Chest Press",id:"Cable_Chest_Press",score:0.5},
+      {name:"Flat Bench Cable Flyes",id:"Flat_Bench_Cable_Flyes",score:0.4},
+    ]},
+  { our_id:"ex_cm_007", our:"Reverse Grip Lat Pulldown", old_their:"Wide-Grip Lat Pulldown", pick:null,
+    candidates:[
+      {name:"Wide-Grip Lat Pulldown",id:"Wide-Grip_Lat_Pulldown",score:0.6},
+      {name:"Close-Grip Front Lat Pulldown",id:"Close-Grip_Front_Lat_Pulldown",score:0.4},
+      {name:"V-Bar Pulldown",id:"V-Bar_Pulldown",score:0.333},
+    ]},
+  { our_id:"ex_cm_010", our:"Single Arm Cable Row", old_their:"Single-Arm Cable Crossover", pick:null,
+    candidates:[
+      {name:"Single-Arm Cable Crossover",id:"Single-Arm_Cable_Crossover",score:0.6},
+      {name:"Seated Cable Rows",id:"Seated_Cable_Rows",score:0.4},
+    ]},
+  { our_id:"ex_cm_016", our:"Cable Bicep Curl", old_their:"Machine Bicep Curl", pick:null,
+    candidates:[
+      {name:"Reverse Cable Curl",id:"Reverse_Cable_Curl",score:0.5},
+      {name:"Machine Bicep Curl",id:"Machine_Bicep_Curl",score:0.5},
+      {name:"Overhead Cable Curl",id:"Overhead_Cable_Curl",score:0.5},
+    ]},
+  { our_id:"ex_cm_032", our:"Machine Chest Press", old_their:"Cable Chest Press", pick:"Machine_Bench_Press",
+    candidates:[
+      {name:"Machine Bench Press",id:"Machine_Bench_Press",score:0.5},
+      {name:"Cable Chest Press",id:"Cable_Chest_Press",score:0.5},
+      {name:"Leverage Chest Press",id:"Leverage_Chest_Press",score:0.5},
+    ]},
+  { our_id:"ex_cm_036", our:"Machine Lat Pulldown", old_their:"One Arm Lat Pulldown", pick:"Wide-Grip_Lat_Pulldown",
+    candidates:[
+      {name:"Wide-Grip Lat Pulldown",id:"Wide-Grip_Lat_Pulldown",score:0.4},
+      {name:"Close-Grip Front Lat Pulldown",id:"Close-Grip_Front_Lat_Pulldown",score:0.333},
+      {name:"One Arm Lat Pulldown",id:"One_Arm_Lat_Pulldown",score:0.4},
+    ]},
+  { our_id:"ex_cm_037", our:"Machine Back Extension", old_their:"Machine Triceps Extension", pick:null,
+    candidates:[
+      {name:"Machine Triceps Extension",id:"Machine_Triceps_Extension",score:0.5},
+      {name:"Hyperextensions (Back Extensions)",id:"Hyperextensions_Back_Extensions",score:0.333},
+    ]},
+  { our_id:"ex_cm_056", our:"TRX Chest Press", old_their:"Cable Chest Press", pick:null,
+    candidates:[
+      {name:"Leverage Chest Press",id:"Leverage_Chest_Press",score:0.5},
+      {name:"Cable Chest Press",id:"Cable_Chest_Press",score:0.5},
+    ]},
+  { our_id:"ex_mo_013", our:"Cobra Stretch", old_their:"Cat Stretch", pick:null,
+    candidates:[
+      {name:"Upward Stretch",id:"Upward_Stretch",score:0.333},
+      {name:"Cat Stretch",id:"Cat_Stretch",score:0.333},
+    ]},
+  { our_id:"ex_bw_016", our:"Bulgarian Split Squat", old_their:"Suspended Split Squat", pick:null,
+    candidates:[
+      {name:"Suspended Split Squat",id:"Suspended_Split_Squat",score:0.5},
+      {name:"Single Leg Push-off",id:"Single_Leg_Push-off",score:0.0},
+    ]},
+  { our_id:"ex_db_005", our:"Dumbbell Pullover", old_their:"Dumbbell Flyes", pick:"Straight-Arm_Dumbbell_Pullover",
+    candidates:[
+      {name:"Straight-Arm Dumbbell Pullover",id:"Straight-Arm_Dumbbell_Pullover",score:0.5},
+      {name:"Dumbbell Flyes",id:"Dumbbell_Flyes",score:0.333},
+    ]},
+  { our_id:"ex_db_042", our:"Dumbbell Woodchop", old_their:"Dumbbell Scaption", pick:null,
+    candidates:[
+      {name:"Dumbbell Scaption",id:"Dumbbell_Scaption",score:0.333},
+    ]},
+  { our_id:"ex_rb_011", our:"Band Front Raise", old_their:"Front Cable Raise", pick:null,
+    candidates:[
+      {name:"Front Raise And Pullover",id:"Front_Raise_And_Pullover",score:0.5},
+      {name:"Front Cable Raise",id:"Front_Cable_Raise",score:0.5},
+    ]},
+  { our_id:"ex_rb_019", our:"Band Tricep Kickback", old_their:"Tricep Dumbbell Kickback", pick:null,
+    candidates:[
+      {name:"Tricep Dumbbell Kickback",id:"Tricep_Dumbbell_Kickback",score:0.5},
+    ]},
+  { our_id:"ex_kb_016", our:"Kettlebell Reverse Lunge", old_their:"Crossover Reverse Lunge", pick:null,
+    candidates:[
+      {name:"Crossover Reverse Lunge",id:"Crossover_Reverse_Lunge",score:0.5},
+      {name:"Dumbbell Rear Lunge",id:"Dumbbell_Rear_Lunge",score:0.333},
+    ]},
+  { our_id:"ex_kb_023", our:"Kettlebell Halo", old_their:"Kettlebell Thruster", pick:null,
+    candidates:[
+      {name:"Kettlebell Windmill",id:"Kettlebell_Windmill",score:0.333},
+      {name:"Kettlebell Thruster",id:"Kettlebell_Thruster",score:0.333},
+    ]},
+  { our_id:"ex_cm_050", our:"Trap Bar Shrug", old_their:"Trap Bar Deadlift", pick:null,
+    candidates:[
+      {name:"Trap Bar Deadlift",id:"Trap_Bar_Deadlift",score:0.5},
+      {name:"Barbell Shrug",id:"Barbell_Shrug",score:0.333},
+    ]},
+  { our_id:"ex_cm_059", our:"TRX Pistol Squat", old_their:"Kettlebell Pistol Squat", pick:null,
+    candidates:[
+      {name:"Kettlebell Pistol Squat",id:"Kettlebell_Pistol_Squat",score:0.5},
+    ]},
+  { our_id:"ex_mo_020", our:"Scorpion Stretch", old_their:"Shoulder Stretch", pick:null,
+    candidates:[
+      {name:"Shoulder Stretch",id:"Shoulder_Stretch",score:0.333},
+    ]},
+];
+
+const selections = {}; // our_id -> their_id | 'none'
+
+function render() {
+  const container = document.getElementById('exercises');
+  let html = '';
+  for (let i = 0; i < exercises.length; i++) {
+    const ex = exercises[i];
+    const sel = selections[ex.our_id];
+    const resolved = sel !== undefined;
+    html += `<div class="exercise-card ${resolved ? (sel === 'none' ? 'no-match' : 'resolved') : ''}" id="card-${i}">`;
+    html += `<div class="exercise-header">`;
+    html += `<span class="our-name">${ex.our}</span>`;
+    html += `<span class="old-match">${ex.old_their}</span>`;
+    html += `</div>`;
+    html += `<div class="candidates">`;
+    for (const c of ex.candidates) {
+      const isPick = c.id === ex.pick;
+      const isSelected = sel === c.id;
+      html += `<span class="candidate ${isSelected ? 'selected' : ''}" onclick="select(${i},'${c.id}')">`;
+      html += `${c.name}<span class="score">${c.score}</span>`;
+      if (isPick) html += `<span class="my-pick">suggested</span>`;
+      html += `</span>`;
+    }
+    const noMatchSelected = sel === 'none';
+    html += `<span class="no-match-btn ${noMatchSelected ? 'selected' : ''}" onclick="select(${i},'none')">No match</span>`;
+    html += `</div></div>`;
+  }
+  container.innerHTML = html;
+}
+
+function select(i, theirId) {
+  const ex = exercises[i];
+  if (selections[ex.our_id] === theirId) {
+    delete selections[ex.our_id]; // toggle off
+  } else {
+    selections[ex.our_id] = theirId;
+  }
+  render();
+  updateCounts();
+}
+
+function autoSelectPicks() {
+  for (let i = 0; i < exercises.length; i++) {
+    const ex = exercises[i];
+    if (selections[ex.our_id] === undefined) {
+      if (ex.pick) {
+        selections[ex.our_id] = ex.pick;
+      } else {
+        selections[ex.our_id] = 'none';
+      }
+    }
+  }
+  render();
+  updateCounts();
+}
+
+function updateCounts() {
+  const resolved = Object.keys(selections).length;
+  document.getElementById('resolved-count').textContent = resolved;
+  document.getElementById('remaining-count').textContent = exercises.length - resolved;
+}
+
+function exportResults() {
+  const results = {
+    reviewed_at: new Date().toISOString(),
+    new_matches: [],
+    no_match: [],
+    unresolved: []
+  };
+
+  for (const ex of exercises) {
+    const sel = selections[ex.our_id];
+    if (sel === undefined) {
+      results.unresolved.push({ our_id: ex.our_id, our_name: ex.our });
+    } else if (sel === 'none') {
+      results.no_match.push({ our_id: ex.our_id, our_name: ex.our });
+    } else {
+      const candidate = ex.candidates.find(c => c.id === sel);
+      results.new_matches.push({
+        our_id: ex.our_id,
+        our_name: ex.our,
+        their_id: sel,
+        their_name: candidate ? candidate.name : sel
+      });
+    }
+  }
+
+  const json = JSON.stringify(results, null, 2);
+  const ta = document.getElementById('output');
+  ta.value = json;
+  ta.classList.add('visible');
+  ta.select();
+
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'match-fixes.json';
+  a.click();
+  URL.revokeObjectURL(url);
+
+  document.getElementById('export-status').textContent =
+    `Exported: ${results.new_matches.length} new matches, ${results.no_match.length} no match, ${results.unresolved.length} unresolved`;
+}
+
+render();
+</script>
+</body>
+</html>

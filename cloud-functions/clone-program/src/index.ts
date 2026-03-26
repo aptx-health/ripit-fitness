@@ -1,7 +1,7 @@
 import http from 'node:http'
 import { PrismaClient } from '@prisma/client'
 import { type Job, Worker } from 'bullmq'
-import { cloneCardioProgramData, cloneStrengthProgramData, type ProgramCloneJob } from './cloning'
+import { cloneStrengthProgramData, type ProgramCloneJob } from './cloning'
 
 const QUEUE_NAME = 'program-clone-jobs'
 
@@ -53,11 +53,7 @@ async function processCloneJob(job: Job<ProgramCloneJob>): Promise<void> {
   // programData is stored as JSON - cast to the expected structure
   const programData = communityProgram.programData as { weeks: unknown[] }
 
-  if (programType === 'cardio') {
-    await cloneCardioProgramData(prisma, programId, programData as Parameters<typeof cloneCardioProgramData>[2], userId)
-  } else {
-    await cloneStrengthProgramData(prisma, programId, programData as Parameters<typeof cloneStrengthProgramData>[2], userId)
-  }
+  await cloneStrengthProgramData(prisma, programId, programData as Parameters<typeof cloneStrengthProgramData>[2], userId)
 
   console.log(`Clone job completed: programId=${programId}`)
 }
@@ -87,17 +83,10 @@ worker.on('failed', async (job, error) => {
   if (job.attemptsMade >= (job.opts.attempts ?? 1)) {
     console.error(`All retries exhausted for program ${job.data.programId}, marking as failed`)
     try {
-      if (job.data.programType === 'cardio') {
-        await prisma.cardioProgram.update({
-          where: { id: job.data.programId },
-          data: { copyStatus: 'failed' },
-        })
-      } else {
-        await prisma.program.update({
-          where: { id: job.data.programId },
-          data: { copyStatus: 'failed' },
-        })
-      }
+      await prisma.program.update({
+        where: { id: job.data.programId },
+        data: { copyStatus: 'failed' },
+      })
     } catch (statusError) {
       console.error('Failed to update copyStatus to failed:', statusError)
     }

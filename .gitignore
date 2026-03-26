@@ -47,3 +47,11 @@ yarn-error.log*
 next-env.d.ts
 
 /app/generated/prisma
+
+# serwist service worker (generated at build time)
+public/sw*
+public/swe-worker*
+
+# generated scripts output
+scripts/update-image-urls.sql
+scripts/test-exercise-mapping.json

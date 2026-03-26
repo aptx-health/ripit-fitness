@@ -18,7 +18,6 @@ import { startRedisContainer, stopRedisContainer } from '@/lib/test/redis-contai
 
 // Import cloning functions from worker
 import {
-  cloneCardioProgramData,
   cloneStrengthProgramData,
 } from '../../cloud-functions/clone-program/src/cloning';
 
@@ -56,7 +55,7 @@ describe('Program Cloning via BullMQ Worker', () => {
     testWorker = new Worker(
       QUEUE_NAME,
       async (job: Job<ProgramCloneJob>) => {
-        const { communityProgramId, programId, userId: jobUserId, programType } = job.data;
+        const { communityProgramId, programId, userId: jobUserId } = job.data;
 
         const communityProgram = await prisma.communityProgram.findUnique({
           where: { id: communityProgramId },
@@ -69,13 +68,8 @@ describe('Program Cloning via BullMQ Worker', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const programData = communityProgram.programData as any;
 
-        if (programType === 'cardio') {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await cloneCardioProgramData(prisma as any, programId, programData, jobUserId);
-        } else {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await cloneStrengthProgramData(prisma as any, programId, programData, jobUserId);
-        }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await cloneStrengthProgramData(prisma as any, programId, programData, jobUserId);
       },
       { connection: getConnection(), concurrency: 1 }
     );
@@ -147,8 +141,7 @@ describe('Program Cloning via BullMQ Worker', () => {
       const publishResult = await publishProgramToCommunity(
         prisma,
         originalProgram.id,
-        userId,
-        'strength'
+        userId
       );
       expect(publishResult.success).toBe(true);
 
@@ -275,8 +268,7 @@ describe('Program Cloning via BullMQ Worker', () => {
       const publishResult = await publishProgramToCommunity(
         prisma,
         originalProgram.id,
-        userId,
-        'strength'
+        userId
       );
 
       const cloneResult = await cloneCommunityProgram(
@@ -312,161 +304,6 @@ describe('Program Cloning via BullMQ Worker', () => {
     }, 30000);
   });
 
-  describe('Cardio Program Cloning', () => {
-    it('should clone a cardio program with all sessions', async () => {
-      // Arrange: Create and publish a cardio program
-      const cardioProgram = await prisma.cardioProgram.create({
-        data: {
-          name: 'Test Cardio Program',
-          description: 'Cardio test',
-          userId,
-          isActive: false,
-          weeks: {
-            create: [
-              {
-                weekNumber: 1,
-                userId,
-                sessions: {
-                  create: [
-                    {
-                      dayNumber: 1,
-                      name: 'Easy Run',
-                      targetDuration: 30,
-                      intensityZone: 'Zone 2',
-                      userId,
-                    },
-                    {
-                      dayNumber: 3,
-                      name: 'Tempo Run',
-                      targetDuration: 45,
-                      intensityZone: 'Zone 3',
-                      userId,
-                    },
-                  ],
-                },
-              },
-              {
-                weekNumber: 2,
-                userId,
-                sessions: {
-                  create: [
-                    {
-                      dayNumber: 2,
-                      name: 'Long Run',
-                      targetDuration: 60,
-                      intensityZone: 'Zone 2',
-                      userId,
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-      });
-
-      // Publish to community
-      const fullCardioProgram = await prisma.cardioProgram.findUnique({
-        where: { id: cardioProgram.id },
-        include: {
-          weeks: {
-            include: {
-              sessions: true,
-            },
-          },
-        },
-      });
-
-      const communityProgram = await prisma.communityProgram.create({
-        data: {
-          name: fullCardioProgram!.name,
-          description: fullCardioProgram!.description!,
-          programType: 'cardio',
-          authorUserId: userId,
-          originalProgramId: cardioProgram.id,
-          displayName: 'Test Author',
-          weekCount: 2,
-          workoutCount: 0,
-          exerciseCount: 0,
-          programData: {
-            weeks: fullCardioProgram!.weeks.map((w) => ({
-              weekNumber: w.weekNumber,
-              sessions: w.sessions.map((s) => ({
-                dayNumber: s.dayNumber,
-                name: s.name,
-                targetDuration: s.targetDuration,
-                intensityZone: s.intensityZone,
-                description: s.description,
-                equipment: s.equipment,
-                targetHRRange: s.targetHRRange,
-                targetPowerRange: s.targetPowerRange,
-                intervalStructure: s.intervalStructure,
-                notes: s.notes,
-              })),
-            })),
-          },
-        },
-      });
-
-      // Act: Clone the cardio program
-      const cloneResult = await cloneCommunityProgram(
-        prisma,
-        communityProgram.id,
-        otherUserId
-      );
-
-      expect(cloneResult.success).toBe(true);
-
-      // Wait for processing to complete
-      await new Promise((resolve) => {
-        const checkInterval = setInterval(async () => {
-          const program = await prisma.cardioProgram.findUnique({
-            where: { id: cloneResult.programId },
-          });
-          if (program && program.copyStatus === 'ready') {
-            clearInterval(checkInterval);
-            resolve(undefined);
-          }
-        }, 200);
-
-        setTimeout(() => {
-          clearInterval(checkInterval);
-          resolve(undefined);
-        }, 15000);
-      });
-
-      // Assert: Verify cloned cardio program
-      const clonedCardioProgram = await prisma.cardioProgram.findUnique({
-        where: { id: cloneResult.programId },
-        include: {
-          weeks: {
-            include: {
-              sessions: true,
-            },
-          },
-        },
-      });
-
-      expect(clonedCardioProgram).toBeTruthy();
-      expect(clonedCardioProgram!.copyStatus).toBe('ready');
-      expect(clonedCardioProgram!.userId).toBe(otherUserId);
-      expect(clonedCardioProgram!.weeks.length).toBe(2);
-
-      // Verify sessions
-      const totalSessions = clonedCardioProgram!.weeks.reduce(
-        (sum, w) => sum + w.sessions.length,
-        0
-      );
-      expect(totalSessions).toBe(3);
-
-      // Verify specific session details
-      const firstSession = clonedCardioProgram!.weeks[0].sessions[0];
-      expect(firstSession.name).toBe('Easy Run');
-      expect(firstSession.targetDuration).toBe(30);
-      expect(firstSession.intensityZone).toBe('Zone 2');
-    }, 30000);
-  });
-
   describe('Idempotency', () => {
     it('should mark program as ready if all weeks already exist (retry scenario)', async () => {
       // Arrange: Create and publish a program
@@ -496,8 +333,7 @@ describe('Program Cloning via BullMQ Worker', () => {
       const publishResult = await publishProgramToCommunity(
         prisma,
         originalProgram.id,
-        userId,
-        'strength'
+        userId
       );
 
       const cloneResult = await cloneCommunityProgram(
@@ -594,8 +430,7 @@ describe('Program Cloning via BullMQ Worker', () => {
       const publishResult = await publishProgramToCommunity(
         prisma,
         originalProgram.id,
-        userId,
-        'strength'
+        userId
       );
 
       // Create shell program manually

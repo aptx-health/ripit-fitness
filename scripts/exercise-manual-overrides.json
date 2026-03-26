@@ -1,0 +1,9 @@
+{
+  "description": "Manual exercise mappings for cases where automated fuzzy matching can't bridge the naming gap. Keys are our exercise names (case-insensitive), values are their_id from free-exercise-db.",
+  "overrides": {
+    "Assisted Dip": "Dips_-_Chest_Version",
+    "Assisted Pull-up": "Pullups",
+    "Chest Supported Row": "Leverage_Iso_Row",
+    "Bodyweight Step-Ups": "Dumbbell_Step_Ups"
+  }
+}

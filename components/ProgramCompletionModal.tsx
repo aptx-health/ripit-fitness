@@ -13,20 +13,14 @@ interface CompletionStats {
   totalWorkouts: number
   completedWorkouts: number
   skippedWorkouts: number
-  // Strength program stats
   totalExercises?: number
   totalVolume?: number
   totalSets?: number
-  // Cardio program stats
-  totalDuration?: number
-  totalDistance?: number
-  totalSessions?: number
 }
 
 interface ProgramCompletionModalProps {
   open: boolean
   programId: string
-  programType?: 'strength' | 'cardio'
   onClose: () => void
   onRestart?: () => void
 }
@@ -34,7 +28,6 @@ interface ProgramCompletionModalProps {
 export function ProgramCompletionModal({
   open,
   programId,
-  programType = 'strength',
   onClose,
   onRestart,
 }: ProgramCompletionModalProps) {
@@ -64,11 +57,7 @@ export function ProgramCompletionModal({
         setError(null)
         clientLogger.debug('[CompletionModal] Fetching stats...')
 
-        const statsUrl = programType === 'cardio'
-          ? `/api/cardio/programs/${programId}/completion-stats`
-          : `/api/programs/${programId}/completion-stats`
-
-        const response = await fetch(statsUrl, {
+        const response = await fetch(`/api/programs/${programId}/completion-stats`, {
           signal: abortController.signal
         })
 
@@ -107,7 +96,7 @@ export function ProgramCompletionModal({
     return () => {
       abortController.abort()
     }
-  }, [open, programId, programType])
+  }, [open, programId])
 
   const handleRestart = async () => {
     // Prevent double-clicks
@@ -117,11 +106,7 @@ export function ProgramCompletionModal({
       setRestarting(true)
       setError(null)
 
-      const restartUrl = programType === 'cardio'
-        ? `/api/cardio/programs/${programId}/restart`
-        : `/api/programs/${programId}/restart`
-
-      const response = await fetch(restartUrl, {
+      const response = await fetch(`/api/programs/${programId}/restart`, {
         method: 'POST',
       })
 
@@ -159,9 +144,7 @@ export function ProgramCompletionModal({
     if (restarting) return
 
     onClose()
-    // Navigate to appropriate programs page
-    const programsPath = programType === 'cardio' ? '/cardio/programs' : '/programs'
-    router.push(programsPath)
+    router.push('/programs')
   }
 
   const formatVolume = (volume: number | undefined | null) => {
@@ -238,7 +221,7 @@ export function ProgramCompletionModal({
                     {stats.totalWorkouts}
                   </div>
                   <div className="text-xs text-muted-foreground uppercase tracking-wide mt-1">
-                    Total {programType === 'cardio' ? 'Sessions' : 'Workouts'}
+                    Total Workouts
                   </div>
                 </div>
 
@@ -251,60 +234,32 @@ export function ProgramCompletionModal({
                   </div>
                 </div>
 
-                {programType === 'strength' && (
-                  <>
-                    <div className="border-2 border-border bg-muted/30 p-4">
-                      <div className="text-3xl font-bold text-foreground">
-                        {stats.totalExercises}
-                      </div>
-                      <div className="text-xs text-muted-foreground uppercase tracking-wide mt-1">
-                        Exercises
-                      </div>
-                    </div>
+                <div className="border-2 border-border bg-muted/30 p-4">
+                  <div className="text-3xl font-bold text-foreground">
+                    {stats.totalExercises}
+                  </div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wide mt-1">
+                    Exercises
+                  </div>
+                </div>
 
-                    <div className="border-2 border-border bg-muted/30 p-4">
-                      <div className="text-3xl font-bold text-foreground">
-                        {formatVolume(stats.totalVolume)}
-                      </div>
-                      <div className="text-xs text-muted-foreground uppercase tracking-wide mt-1">
-                        Volume (lbs)
-                      </div>
-                    </div>
+                <div className="border-2 border-border bg-muted/30 p-4">
+                  <div className="text-3xl font-bold text-foreground">
+                    {formatVolume(stats.totalVolume)}
+                  </div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wide mt-1">
+                    Volume (lbs)
+                  </div>
+                </div>
 
-                    <div className="border-2 border-border bg-muted/30 p-4 col-span-2">
-                      <div className="text-3xl font-bold text-foreground">
-                        {stats.totalSets}
-                      </div>
-                      <div className="text-xs text-muted-foreground uppercase tracking-wide mt-1">
-                        Total Sets
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {programType === 'cardio' && (
-                  <>
-                    <div className="border-2 border-border bg-muted/30 p-4">
-                      <div className="text-3xl font-bold text-foreground">
-                        {stats.totalDuration ? Math.round(stats.totalDuration / 60) : 0}
-                      </div>
-                      <div className="text-xs text-muted-foreground uppercase tracking-wide mt-1">
-                        Hours
-                      </div>
-                    </div>
-
-                    {stats.totalDistance && stats.totalDistance > 0 && (
-                      <div className="border-2 border-border bg-muted/30 p-4">
-                        <div className="text-3xl font-bold text-foreground">
-                          {stats.totalDistance.toFixed(1)}
-                        </div>
-                        <div className="text-xs text-muted-foreground uppercase tracking-wide mt-1">
-                          Miles
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
+                <div className="border-2 border-border bg-muted/30 p-4 col-span-2">
+                  <div className="text-3xl font-bold text-foreground">
+                    {stats.totalSets}
+                  </div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wide mt-1">
+                    Total Sets
+                  </div>
+                </div>
               </div>
 
               {stats.skippedWorkouts > 0 && (
@@ -319,7 +274,7 @@ export function ProgramCompletionModal({
         {/* Footer */}
         <div className="px-4 sm:px-6 py-4 border-t-2 border-border bg-muted">
           <div className="flex flex-col gap-3">
-            {programType === 'strength' && onRestart && (
+            {onRestart && (
               <button type="button"
                 onClick={handleRestart}
                 disabled={loading || restarting}

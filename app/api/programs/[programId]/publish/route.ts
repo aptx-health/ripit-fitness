@@ -22,18 +22,12 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Determine if this is a strength or cardio program
-    const strengthProgram = await prisma.program.findFirst({
+    // Verify program exists and belongs to user
+    const program = await prisma.program.findFirst({
       where: { id: programId, userId: user.id },
     });
 
-    const cardioProgram = await prisma.cardioProgram.findFirst({
-      where: { id: programId, userId: user.id },
-    });
-
-    const programType = strengthProgram ? 'strength' : cardioProgram ? 'cardio' : null;
-
-    if (!programType) {
+    if (!program) {
       return NextResponse.json({ error: 'Program not found' }, { status: 404 });
     }
 
@@ -50,8 +44,7 @@ export async function POST(
     const validation = await validateProgramForPublishing(
       prisma,
       programId,
-      user.id,
-      programType
+      user.id
     );
     if (!validation.valid) {
       return NextResponse.json(
@@ -61,15 +54,6 @@ export async function POST(
     }
 
     // Validate metadata
-    const program =
-      programType === 'strength'
-        ? await prisma.program.findUnique({ where: { id: programId } })
-        : await prisma.cardioProgram.findUnique({ where: { id: programId } });
-
-    if (!program) {
-      return NextResponse.json({ error: 'Program not found' }, { status: 404 });
-    }
-
     const metadataValidation = validateProgramMetadata(program);
     if (!metadataValidation.valid) {
       return NextResponse.json(
@@ -85,8 +69,7 @@ export async function POST(
     const result = await publishProgramToCommunity(
       prisma,
       programId,
-      user.id,
-      programType
+      user.id
     );
 
     if (!result.success) {

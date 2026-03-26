@@ -68,9 +68,12 @@ export async function recordStrengthPerformance(
     },
   })
 
-  // Group logged sets by exercise
-  const exerciseMap = new Map<string, typeof loggedSets>()
-  for (const set of loggedSets) {
+  // Filter out warmup sets — they don't count toward performance metrics
+  const workingSets = loggedSets.filter(set => !set.isWarmup)
+
+  // Group working sets by exercise
+  const exerciseMap = new Map<string, typeof workingSets>()
+  for (const set of workingSets) {
     const exerciseId = set.exerciseId
     if (!exerciseMap.has(exerciseId)) {
       exerciseMap.set(exerciseId, [])

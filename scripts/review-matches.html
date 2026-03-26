@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Exercise Match Review</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, system-ui, sans-serif; background: #1a1a2e; color: #e0e0e0; padding: 20px; }
+  h1 { color: #00ff88; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 20px; font-size: 14px; }
+  .stats { display: flex; gap: 16px; margin-bottom: 20px; font-size: 14px; }
+  .stat { background: #16213e; padding: 8px 14px; border-radius: 6px; }
+  .stat .n { color: #00ff88; font-weight: bold; }
+
+  .section { margin-bottom: 30px; }
+  .section-header { font-size: 18px; font-weight: bold; margin-bottom: 10px; padding: 8px 0; border-bottom: 1px solid #333; }
+  .section-header.good { color: #00ff88; }
+  .section-header.ok { color: #ffaa00; }
+  .section-header.bad { color: #ff4444; }
+
+  .match-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 12px; border-radius: 6px; margin-bottom: 4px;
+    background: #16213e; transition: background 0.15s;
+  }
+  .match-row:hover { background: #1a2744; }
+  .match-row.checked { opacity: 0.5; }
+
+  .match-row input[type="checkbox"] {
+    width: 20px; height: 20px; accent-color: #00ff88; cursor: pointer; flex-shrink: 0;
+  }
+
+  .verdict-badge {
+    font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 4px;
+    width: 48px; text-align: center; flex-shrink: 0;
+  }
+  .verdict-badge.good { background: #00ff8833; color: #00ff88; }
+  .verdict-badge.ok { background: #ffaa0033; color: #ffaa00; }
+  .verdict-badge.bad { background: #ff444433; color: #ff4444; }
+
+  .conf { font-size: 11px; color: #666; width: 50px; flex-shrink: 0; }
+
+  .names { flex: 1; display: flex; align-items: center; gap: 8px; font-size: 14px; min-width: 0; }
+  .our-name { color: #e0e0e0; font-weight: 500; min-width: 200px; flex-shrink: 0; }
+  .arrow { color: #555; flex-shrink: 0; }
+  .their-name { color: #aaa; }
+
+  .reason { font-size: 12px; color: #666; flex-shrink: 0; max-width: 280px; }
+
+  .actions { position: sticky; bottom: 0; background: #1a1a2e; padding: 16px 0; border-top: 2px solid #333; margin-top: 20px; display: flex; gap: 12px; align-items: center; }
+  button {
+    padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer;
+    font-size: 14px; font-weight: bold;
+  }
+  .btn-export { background: #00ff88; color: #1a1a2e; }
+  .btn-export:hover { background: #00cc6a; }
+  .btn-check-all { background: #333; color: #e0e0e0; }
+  .btn-check-all:hover { background: #444; }
+  .export-status { color: #00ff88; font-size: 14px; }
+
+  textarea { display: none; width: 100%; height: 300px; background: #0a0a1a; color: #00ff88; border: 1px solid #333; border-radius: 6px; padding: 12px; font-family: monospace; font-size: 12px; margin-top: 12px; }
+  textarea.visible { display: block; }
+</style>
+</head>
+<body>
+
+<h1>Exercise Match Review</h1>
+<p class="subtitle">Check the box = agree with the verdict. Uncheck = you disagree (you'll fix it). Export when done.</p>
+
+<div class="stats">
+  <div class="stat">Total: <span class="n" id="total">88</span></div>
+  <div class="stat">Checked: <span class="n" id="checked-count">0</span></div>
+  <div class="stat">Remaining: <span class="n" id="remaining-count">88</span></div>
+</div>
+
+<div id="matches-container"></div>
+
+<div class="actions">
+  <button class="btn-check-all" onclick="checkAllInSection('good')">Check all GOOD</button>
+  <button class="btn-check-all" onclick="checkAllInSection('ok')">Check all OK</button>
+  <button class="btn-check-all" onclick="checkAllInSection('bad')">Check all BAD</button>
+  <button class="btn-export" onclick="exportResults()">Export Results JSON</button>
+  <span class="export-status" id="export-status"></span>
+</div>
+
+<textarea id="output"></textarea>
+
+<script>
+const matches = [
+  // HIGH - GOOD (same exercise, naming difference)
+  { our_id:"ex_bw_042", our:"Handstand Push-Up", their_id:"Handstand_Push-Ups", their:"Handstand Push-Ups", verdict:"good", reason:"Just plural", conf:"high" },
+  { our_id:"ex_db_003", our:"Dumbbell Fly", their_id:"Dumbbell_Flyes", their:"Dumbbell Flyes", verdict:"good", reason:"Spelling variant", conf:"high" },
+  { our_id:"ex_db_004", our:"Incline Dumbbell Fly", their_id:"Incline_Dumbbell_Flyes", their:"Incline Dumbbell Flyes", verdict:"good", reason:"Spelling variant", conf:"high" },
+  { our_id:"ex_db_035", our:"Dumbbell Step-Up", their_id:"Dumbbell_Step_Ups", their:"Dumbbell Step Ups", verdict:"good", reason:"Formatting difference", conf:"high" },
+  { our_id:"ex_db_036", our:"Dumbbell Calf Raise", their_id:"Standing_Dumbbell_Calf_Raise", their:"Standing Dumbbell Calf Raise", verdict:"good", reason:"Same exercise", conf:"high" },
+  { our_id:"ex_kb_002", our:"Single Arm Kettlebell Swing", their_id:"One-Arm_Kettlebell_Swings", their:"One-Arm Kettlebell Swings", verdict:"good", reason:"Same exercise", conf:"high" },
+  { our_id:"ex_kb_021", our:"Kettlebell Turkish Get-Up", their_id:"Kettlebell_Turkish_Get-Up_Lunge_style", their:"Kettlebell Turkish Get-Up (Lunge style)", verdict:"good", reason:"Close variant", conf:"high" },
+  { our_id:"ex_cm_019", our:"Cable Overhead Tricep Extension", their_id:"Cable_Rope_Overhead_Triceps_Extension", their:"Cable Rope Overhead Triceps Extension", verdict:"good", reason:"Same exercise", conf:"high" },
+  { our_id:"ex_cm_021", our:"Cable Pull Through", their_id:"Pull_Through", their:"Pull Through", verdict:"good", reason:"Same exercise", conf:"high" },
+  { our_id:"ex_cm_053", our:"EZ Bar Skull Crusher", their_id:"EZ-Bar_Skullcrusher", their:"EZ-Bar Skullcrusher", verdict:"good", reason:"Same exercise", conf:"high" },
+
+  // HIGH - OK (same movement, minor equipment/stance diff)
+  { our_id:"ex_bw_020", our:"Walking Lunge", their_id:"Barbell_Walking_Lunge", their:"Barbell Walking Lunge", verdict:"ok", reason:"Same movement, barbell added", conf:"high" },
+  { our_id:"ex_bw_038", our:"Glute Bridge", their_id:"Barbell_Glute_Bridge", their:"Barbell Glute Bridge", verdict:"ok", reason:"Same movement, barbell added", conf:"high" },
+  { our_id:"ex_db_014", our:"Dumbbell Romanian Deadlift", their_id:"Romanian_Deadlift", their:"Romanian Deadlift", verdict:"ok", reason:"Same movement, equipment may differ", conf:"high" },
+  { our_id:"ex_rb_013", our:"Band Face Pull", their_id:"Face_Pull", their:"Face Pull", verdict:"ok", reason:"Same movement, different resistance", conf:"high" },
+
+  // HIGH - BAD
+  { our_id:"cmiz7vjju0000vr0m4b1o6bec", our:"Barbell Bench Press", their_id:"Decline_Barbell_Bench_Press", their:"Decline Barbell Bench Press", verdict:"bad", reason:"Flat vs decline - different angle", conf:"high" },
+  { our_id:"cmiz7vkji0006vr0mrxfixnvy", our:"Incline Barbell Bench Press", their_id:"Decline_Barbell_Bench_Press", their:"Decline Barbell Bench Press", verdict:"bad", reason:"Incline vs decline - opposite angles", conf:"high" },
+  { our_id:"cmiz7vjpo0001vr0msv9of7ib", our:"Barbell Back Squat", their_id:"Barbell_Hack_Squat", their:"Barbell Hack Squat", verdict:"bad", reason:"Completely different movement", conf:"high" },
+  { our_id:"cmiz7vlyh000evr0m9d8snpzh", our:"Lateral Raise", their_id:"Lateral_Raise_-_With_Bands", their:"Lateral Raise - With Bands", verdict:"bad", reason:"Dumbbell vs bands", conf:"high" },
+  { our_id:"ex_rb_016", our:"Band Hammer Curl", their_id:"Hammer_Curls", their:"Hammer Curls", verdict:"bad", reason:"Band vs dumbbell", conf:"high" },
+  { our_id:"ex_rb_018", our:"Band Tricep Pushdown", their_id:"Triceps_Pushdown", their:"Triceps Pushdown", verdict:"bad", reason:"Band vs cable", conf:"high" },
+  { our_id:"ex_rb_021", our:"Band Leg Press", their_id:"Leg_Press", their:"Leg Press", verdict:"bad", reason:"Band vs machine - totally different", conf:"high" },
+  { our_id:"ex_rb_022", our:"Band Leg Extension", their_id:"Leg_Extensions", their:"Leg Extensions", verdict:"bad", reason:"Band vs machine - totally different", conf:"high" },
+  { our_id:"ex_kb_004", our:"Kettlebell Snatch", their_id:"Double_Kettlebell_Snatch", their:"Double Kettlebell Snatch", verdict:"bad", reason:"Single vs double KB", conf:"high" },
+  { our_id:"ex_kb_009", our:"Kettlebell Push Press", their_id:"Double_Kettlebell_Push_Press", their:"Double Kettlebell Push Press", verdict:"bad", reason:"Single vs double KB", conf:"high" },
+  { our_id:"ex_cm_023", our:"Cable Hip Abduction", their_id:"Cable_Hip_Adduction", their:"Cable Hip Adduction", verdict:"bad", reason:"Opposite movements!", conf:"high" },
+  { our_id:"ex_cm_058", our:"TRX Face Pull", their_id:"Face_Pull", their:"Face Pull", verdict:"bad", reason:"TRX vs cable - different equipment", conf:"high" },
+
+  // MEDIUM - GOOD
+  { our_id:"ex_bw_018", our:"Bodyweight Lunge", their_id:"Bodyweight_Walking_Lunge", their:"Bodyweight Walking Lunge", verdict:"good", reason:"Close enough", conf:"medium" },
+  { our_id:"ex_bw_035", our:"Chest Dip", their_id:"Dips_-_Chest_Version", their:"Dips - Chest Version", verdict:"good", reason:"Same exercise", conf:"medium" },
+  { our_id:"ex_db_012", our:"Bent Over Dumbbell Row", their_id:"Bent_Over_Two-Dumbbell_Row", their:"Bent Over Two-Dumbbell Row", verdict:"good", reason:"Same exercise", conf:"medium" },
+  { our_id:"ex_db_016", our:"Dumbbell Curl", their_id:"Dumbbell_Bicep_Curl", their:"Dumbbell Bicep Curl", verdict:"good", reason:"Same exercise", conf:"medium" },
+  { our_id:"ex_db_025", our:"Dumbbell Tricep Kickback", their_id:"Tricep_Dumbbell_Kickback", their:"Tricep Dumbbell Kickback", verdict:"good", reason:"Same exercise, word order", conf:"medium" },
+  { our_id:"ex_db_033", our:"Dumbbell Reverse Lunge", their_id:"Dumbbell_Rear_Lunge", their:"Dumbbell Rear Lunge", verdict:"good", reason:"Reverse = rear", conf:"medium" },
+  { our_id:"ex_rb_009", our:"Band Shoulder Press", their_id:"Shoulder_Press_-_With_Bands", their:"Shoulder Press - With Bands", verdict:"good", reason:"Same exercise!", conf:"medium" },
+  { our_id:"ex_rb_010", our:"Band Lateral Raise", their_id:"Lateral_Raise_-_With_Bands", their:"Lateral Raise - With Bands", verdict:"good", reason:"Same exercise!", conf:"medium" },
+  { our_id:"ex_rb_014", our:"Band Upright Row", their_id:"Upright_Row_-_With_Bands", their:"Upright Row - With Bands", verdict:"good", reason:"Same exercise!", conf:"medium" },
+  { our_id:"ex_kb_005", our:"Kettlebell Clean", their_id:"Kettlebell_Dead_Clean", their:"Kettlebell Dead Clean", verdict:"good", reason:"Close variant", conf:"medium" },
+  { our_id:"ex_cm_006", our:"Close Grip Lat Pulldown", their_id:"Close-Grip_Front_Lat_Pulldown", their:"Close-Grip Front Lat Pulldown", verdict:"good", reason:"Same exercise", conf:"medium" },
+  { our_id:"ex_cm_012", our:"Cable Front Raise", their_id:"Front_Cable_Raise", their:"Front Cable Raise", verdict:"good", reason:"Word order", conf:"medium" },
+  { our_id:"ex_cm_015", our:"Cable Upright Row", their_id:"Upright_Cable_Row", their:"Upright Cable Row", verdict:"good", reason:"Word order", conf:"medium" },
+  { our_id:"ex_cm_033", our:"Machine Shoulder Press", their_id:"Machine_Shoulder_Military_Press", their:"Machine Shoulder (Military) Press", verdict:"good", reason:"Same exercise", conf:"medium" },
+  { our_id:"ex_curated_054", our:"Bodyweight Lunges", their_id:"Bodyweight_Walking_Lunge", their:"Bodyweight Walking Lunge", verdict:"good", reason:"Close enough", conf:"medium" },
+
+  // MEDIUM - OK
+  { our_id:"ex_bw_009", our:"Wide Grip Pull-Up", their_id:"Wide-Grip_Rear_Pull-Up", their:"Wide-Grip Rear Pull-Up", verdict:"ok", reason:"Similar, rear vs front", conf:"medium" },
+  { our_id:"ex_db_029", our:"Dumbbell Front Squat", their_id:"Dumbbell_Squat", their:"Dumbbell Squat", verdict:"ok", reason:"Front rack position differs", conf:"medium" },
+  { our_id:"ex_db_034", our:"Dumbbell Walking Lunge", their_id:"Barbell_Walking_Lunge", their:"Barbell Walking Lunge", verdict:"ok", reason:"Same movement, different equipment", conf:"medium" },
+  { our_id:"ex_db_037", our:"Dumbbell Hip Thrust", their_id:"Barbell_Hip_Thrust", their:"Barbell Hip Thrust", verdict:"ok", reason:"Same movement, different equipment", conf:"medium" },
+  { our_id:"ex_kb_007", our:"Kettlebell High Pull", their_id:"Kettlebell_Sumo_High_Pull", their:"Kettlebell Sumo High Pull", verdict:"ok", reason:"Similar movement", conf:"medium" },
+  { our_id:"ex_cm_011", our:"Cable Lateral Raise", their_id:"Cable_Seated_Lateral_Raise", their:"Cable Seated Lateral Raise", verdict:"ok", reason:"Standing vs seated", conf:"medium" },
+  { our_id:"ex_mo_008", our:"Cat-Cow Stretch", their_id:"Cat_Stretch", their:"Cat Stretch", verdict:"ok", reason:"Cat is half of cat-cow", conf:"medium" },
+
+  // MEDIUM - BAD
+  { our_id:"ex_bw_002", our:"Wide Push-Up", their_id:"Decline_Push-Up", their:"Decline Push-Up", verdict:"bad", reason:"Different variations", conf:"medium" },
+  { our_id:"ex_bw_003", our:"Diamond Push-Up", their_id:"Decline_Push-Up", their:"Decline Push-Up", verdict:"bad", reason:"Different variations", conf:"medium" },
+  { our_id:"ex_bw_006", our:"Pike Push-Up", their_id:"Plyo_Push-up", their:"Plyo Push-up", verdict:"bad", reason:"Completely different", conf:"medium" },
+  { our_id:"ex_bw_017", our:"Sissy Squat", their_id:"Sit_Squats", their:"Sit Squats", verdict:"bad", reason:"Different exercises", conf:"medium" },
+  { our_id:"ex_bw_024", our:"Bicycle Crunch", their_id:"Cable_Crunch", their:"Cable Crunch", verdict:"bad", reason:"Different exercises", conf:"medium" },
+  { our_id:"ex_bw_032", our:"Plank to Push-Up", their_id:"Plyo_Push-up", their:"Plyo Push-up", verdict:"bad", reason:"Different exercises", conf:"medium" },
+  { our_id:"ex_db_024", our:"Single Arm Overhead Tricep Extension", their_id:"Sled_Overhead_Triceps_Extension", their:"Sled Overhead Triceps Extension", verdict:"bad", reason:"Sled?!", conf:"medium" },
+  { our_id:"ex_db_030", our:"Dumbbell Sumo Squat", their_id:"Dumbbell_Squat", their:"Dumbbell Squat", verdict:"bad", reason:"Different stance", conf:"medium" },
+  { our_id:"ex_db_047", our:"Dumbbell Snatch", their_id:"Dumbbell_Squat", their:"Dumbbell Squat", verdict:"bad", reason:"Completely different!", conf:"medium" },
+  { our_id:"ex_rb_001", our:"Band Chest Press", their_id:"Cable_Chest_Press", their:"Cable Chest Press", verdict:"bad", reason:"Band vs cable", conf:"medium" },
+  { our_id:"ex_rb_003", our:"Band Push-Up", their_id:"Plyo_Push-up", their:"Plyo Push-up", verdict:"bad", reason:"Different exercises", conf:"medium" },
+  { our_id:"ex_rb_006", our:"Band Lat Pulldown", their_id:"One_Arm_Lat_Pulldown", their:"One Arm Lat Pulldown", verdict:"bad", reason:"Different equipment", conf:"medium" },
+  { our_id:"ex_rb_012", our:"Band Rear Delt Fly", their_id:"Cable_Rear_Delt_Fly", their:"Cable Rear Delt Fly", verdict:"bad", reason:"Band vs cable", conf:"medium" },
+  { our_id:"ex_rb_015", our:"Band Bicep Curl", their_id:"Machine_Bicep_Curl", their:"Machine Bicep Curl", verdict:"bad", reason:"Band vs machine", conf:"medium" },
+  { our_id:"ex_rb_017", our:"Band Tricep Extension", their_id:"Machine_Triceps_Extension", their:"Machine Triceps Extension", verdict:"bad", reason:"Band vs machine", conf:"medium" },
+  { our_id:"ex_rb_020", our:"Band Squat", their_id:"Box_Squat", their:"Box Squat", verdict:"bad", reason:"Different exercises", conf:"medium" },
+  { our_id:"ex_rb_023", our:"Band Leg Curl", their_id:"Ball_Leg_Curl", their:"Ball Leg Curl", verdict:"bad", reason:"Different equipment", conf:"medium" },
+  { our_id:"ex_kb_013", our:"Kettlebell Front Squat", their_id:"Kettlebell_Pistol_Squat", their:"Kettlebell Pistol Squat", verdict:"bad", reason:"Completely different", conf:"medium" },
+  { our_id:"ex_kb_015", our:"Kettlebell Lunge", their_id:"Kettlebell_Thruster", their:"Kettlebell Thruster", verdict:"bad", reason:"Completely different", conf:"medium" },
+  { our_id:"ex_cl_018", our:"Reverse Wrist Curl", their_id:"Reverse_Cable_Curl", their:"Reverse Cable Curl", verdict:"bad", reason:"Different exercises", conf:"medium" },
+  { our_id:"ex_cm_001", our:"Cable Chest Fly", their_id:"Cable_Chest_Press", their:"Cable Chest Press", verdict:"bad", reason:"Fly vs press", conf:"medium" },
+  { our_id:"ex_cm_007", our:"Reverse Grip Lat Pulldown", their_id:"Wide-Grip_Lat_Pulldown", their:"Wide-Grip Lat Pulldown", verdict:"bad", reason:"Opposite grips", conf:"medium" },
+  { our_id:"ex_cm_010", our:"Single Arm Cable Row", their_id:"Single-Arm_Cable_Crossover", their:"Single-Arm Cable Crossover", verdict:"bad", reason:"Row vs crossover", conf:"medium" },
+  { our_id:"ex_cm_016", our:"Cable Bicep Curl", their_id:"Machine_Bicep_Curl", their:"Machine Bicep Curl", verdict:"bad", reason:"Cable vs machine", conf:"medium" },
+  { our_id:"ex_cm_032", our:"Machine Chest Press", their_id:"Cable_Chest_Press", their:"Cable Chest Press", verdict:"bad", reason:"Machine vs cable", conf:"medium" },
+  { our_id:"ex_cm_036", our:"Machine Lat Pulldown", their_id:"One_Arm_Lat_Pulldown", their:"One Arm Lat Pulldown", verdict:"bad", reason:"Machine vs cable, bilateral vs unilateral", conf:"medium" },
+  { our_id:"ex_cm_037", our:"Machine Back Extension", their_id:"Machine_Triceps_Extension", their:"Machine Triceps Extension", verdict:"bad", reason:"Completely different!", conf:"medium" },
+  { our_id:"ex_cm_056", our:"TRX Chest Press", their_id:"Cable_Chest_Press", their:"Cable Chest Press", verdict:"bad", reason:"TRX vs cable", conf:"medium" },
+  { our_id:"ex_mo_013", our:"Cobra Stretch", their_id:"Cat_Stretch", their:"Cat Stretch", verdict:"bad", reason:"Different stretches", conf:"medium" },
+
+  // LOW - GOOD
+  { our_id:"ex_kb_018", our:"Kettlebell Renegade Row", their_id:"Alternating_Renegade_Row", their:"Alternating Renegade Row", verdict:"good", reason:"Same exercise", conf:"low" },
+
+  // LOW - BAD
+  { our_id:"ex_bw_016", our:"Bulgarian Split Squat", their_id:"Suspended_Split_Squat", their:"Suspended Split Squat", verdict:"bad", reason:"Different exercises", conf:"low" },
+  { our_id:"ex_db_005", our:"Dumbbell Pullover", their_id:"Dumbbell_Flyes", their:"Dumbbell Flyes", verdict:"bad", reason:"Different exercises", conf:"low" },
+  { our_id:"ex_db_042", our:"Dumbbell Woodchop", their_id:"Dumbbell_Scaption", their:"Dumbbell Scaption", verdict:"bad", reason:"Different exercises", conf:"low" },
+  { our_id:"ex_rb_011", our:"Band Front Raise", their_id:"Front_Cable_Raise", their:"Front Cable Raise", verdict:"bad", reason:"Band vs cable", conf:"low" },
+  { our_id:"ex_rb_019", our:"Band Tricep Kickback", their_id:"Tricep_Dumbbell_Kickback", their:"Tricep Dumbbell Kickback", verdict:"bad", reason:"Band vs dumbbell", conf:"low" },
+  { our_id:"ex_kb_016", our:"Kettlebell Reverse Lunge", their_id:"Crossover_Reverse_Lunge", their:"Crossover Reverse Lunge", verdict:"bad", reason:"Different exercises", conf:"low" },
+  { our_id:"ex_kb_023", our:"Kettlebell Halo", their_id:"Kettlebell_Thruster", their:"Kettlebell Thruster", verdict:"bad", reason:"Completely different", conf:"low" },
+  { our_id:"ex_cm_050", our:"Trap Bar Shrug", their_id:"Trap_Bar_Deadlift", their:"Trap Bar Deadlift", verdict:"bad", reason:"Different exercises", conf:"low" },
+  { our_id:"ex_cm_059", our:"TRX Pistol Squat", their_id:"Kettlebell_Pistol_Squat", their:"Kettlebell Pistol Squat", verdict:"bad", reason:"TRX vs kettlebell", conf:"low" },
+  { our_id:"ex_mo_020", our:"Scorpion Stretch", their_id:"Shoulder_Stretch", their:"Shoulder Stretch", verdict:"bad", reason:"Different stretches", conf:"low" },
+];
+
+function render() {
+  const container = document.getElementById('matches-container');
+  const sections = [
+    { verdict: 'good', label: `GOOD matches - validate these (${matches.filter(m=>m.verdict==='good').length})`, cls: 'good' },
+    { verdict: 'ok', label: `OK matches - usable but not perfect (${matches.filter(m=>m.verdict==='ok').length})`, cls: 'ok' },
+    { verdict: 'bad', label: `BAD matches - reject these (${matches.filter(m=>m.verdict==='bad').length})`, cls: 'bad' },
+  ];
+
+  let html = '';
+  for (const sec of sections) {
+    const items = matches.filter(m => m.verdict === sec.verdict);
+    html += `<div class="section">`;
+    html += `<div class="section-header ${sec.cls}">${sec.label}</div>`;
+    for (let i = 0; i < matches.length; i++) {
+      const m = matches[i];
+      if (m.verdict !== sec.verdict) continue;
+      html += `
+        <div class="match-row" id="row-${i}">
+          <input type="checkbox" id="cb-${i}" onchange="toggleRow(${i})" />
+          <span class="verdict-badge ${m.verdict}">${m.verdict.toUpperCase()}</span>
+          <span class="conf">${m.conf}</span>
+          <div class="names">
+            <span class="our-name">${m.our}</span>
+            <span class="arrow">~~</span>
+            <span class="their-name">${m.their}</span>
+          </div>
+          <span class="reason">${m.reason}</span>
+        </div>`;
+    }
+    html += `</div>`;
+  }
+  container.innerHTML = html;
+}
+
+function toggleRow(i) {
+  const cb = document.getElementById(`cb-${i}`);
+  const row = document.getElementById(`row-${i}`);
+  row.classList.toggle('checked', cb.checked);
+  updateCounts();
+}
+
+function updateCounts() {
+  const total = matches.length;
+  const checked = document.querySelectorAll('input[type="checkbox"]:checked').length;
+  document.getElementById('checked-count').textContent = checked;
+  document.getElementById('remaining-count').textContent = total - checked;
+}
+
+function checkAllInSection(verdict) {
+  for (let i = 0; i < matches.length; i++) {
+    if (matches[i].verdict === verdict) {
+      const cb = document.getElementById(`cb-${i}`);
+      cb.checked = true;
+      document.getElementById(`row-${i}`).classList.add('checked');
+    }
+  }
+  updateCounts();
+}
+
+function exportResults() {
+  const results = {
+    reviewed_at: new Date().toISOString(),
+    validate: [],   // GOOD/OK that user agreed with -> set validated:true
+    reject: [],     // BAD that user agreed with -> remove from matches
+    needs_attention: [] // anything user DIDN'T check -> needs manual review
+  };
+
+  for (let i = 0; i < matches.length; i++) {
+    const m = matches[i];
+    const cb = document.getElementById(`cb-${i}`);
+    const entry = { our_id: m.our_id, our_name: m.our, their_id: m.their_id, their_name: m.their, verdict: m.verdict };
+
+    if (cb.checked) {
+      if (m.verdict === 'good' || m.verdict === 'ok') {
+        results.validate.push(entry);
+      } else {
+        results.reject.push(entry);
+      }
+    } else {
+      results.needs_attention.push(entry);
+    }
+  }
+
+  const json = JSON.stringify(results, null, 2);
+  const ta = document.getElementById('output');
+  ta.value = json;
+  ta.classList.add('visible');
+  ta.select();
+
+  // Also trigger download
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'match-review-results.json';
+  a.click();
+  URL.revokeObjectURL(url);
+
+  document.getElementById('export-status').textContent =
+    `Exported: ${results.validate.length} validated, ${results.reject.length} rejected, ${results.needs_attention.length} need attention`;
+}
+
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+version: 1
+scanned_at: 2026-03-25T17:49:49.042311Z
+inventory:
+    languages:
+        - javascript
+        - typescript
+    package_managers:
+        - npm
+    build_files:
+        - package.json
+    ci:
+        - github-actions
+    tooling:
+        secrets: doppler
+        process: foreman
+        containers: docker
+        env: []
+    existing_claude_config:
+        settings_json: false
+        agent_def: false
+        claude_md: true
+context:
+    build_command: "doppler run --config dev_personal -- npm run build"
+    test_command: "doppler run --config dev_test -- npm test"
+    lint_command: "doppler run --config dev_personal -- npm run lint"
+    special_instructions: |
+        Always specify --config with doppler run. For worktrees use dev_personal_worktree1.
+        NEVER run doppler run --config preview or --config prd.
+        Type-check: doppler run --config dev_personal -- npm run type-check
+        Prisma v6.x only: use npx prisma@6.19.0 to avoid installing v7.
+        Docker must be running for tests (Testcontainers for PostgreSQL + Redis).
+        Pre-commit hooks via Husky + lint-staged enforce 500-line file limit.
+        Use fd instead of find for file searching.
+    tools_needed:
+        - npm
+        - npx
+        - doppler
+        - overmind
+        - git
+        - gh
+        - docker
+        - fd
+        - node
+permissions:
+    allowed_tools:
+        # File access
+        - "Read"
+        - "Edit"
+        - "Write"
+        - "Glob"
+        - "Grep"
+        # Basic filesystem
+        - "Bash(ls *)"
+        - "Bash(mkdir *)"
+        - "Bash(which *)"
+        - "Bash(wc *)"
+        - "Bash(cp *)"
+        - "Bash(rm *)"
+        - "Bash(chmod *)"
+        - "Bash(cat *)"
+        - "Bash(echo *)"
+        - "Bash(printf *)"
+        - "Bash(diff *)"
+        - "Bash(pwd *)"
+        - "Bash(cd *)"
+        - "Bash(bash *)"
+        - "Bash(sed *)"
+        - "Bash(awk *)"
+        - "Bash(od *)"
+        - "Bash(xxd *)"
+        - "Bash(head *)"
+        - "Bash(tail *)"
+        - "Bash(sort *)"
+        - "Bash(uniq *)"
+        - "Bash(cut *)"
+        - "Bash(tr *)"
+        - "Bash(tee *)"
+        - "Bash(touch *)"
+        - "Bash(mv *)"
+        - "Bash(date *)"
+        # File search
+        - "Bash(fd *)"
+        - "Bash(rg *)"
+        - "Bash(grep *)"
+        # Git subcommands
+        - "Bash(git add *)"
+        - "Bash(git commit *)"
+        - "Bash(git checkout *)"
+        - "Bash(git log *)"
+        - "Bash(git diff *)"
+        - "Bash(git status *)"
+        - "Bash(git branch *)"
+        - "Bash(git show *)"
+        - "Bash(git remote *)"
+        - "Bash(git fetch *)"
+        - "Bash(git push *)"
+        - "Bash(git pull *)"
+        - "Bash(git rebase *)"
+        - "Bash(git worktree *)"
+        - "Bash(git stash *)"
+        - "Bash(git merge *)"
+        - "Bash(git rev-parse *)"
+        - "Bash(git config *)"
+        - "Bash(git clone *)"
+        - "Bash(git cherry-pick *)"
+        - "Bash(git reset *)"
+        - "Bash(git restore *)"
+        - "Bash(git tag *)"
+        - "Bash(git am *)"
+        # GitHub CLI
+        - "Bash(gh issue *)"
+        - "Bash(gh pr *)"
+        - "Bash(gh api *)"
+        - "Bash(gh run *)"
+        - "Bash(gh repo *)"
+        # Node/JS
+        - "Bash(npm *)"
+        - "Bash(npx *)"
+        - "Bash(node *)"
+        # Doppler (safe configs only)
+        - "Bash(doppler run --config dev_personal *)"
+        - "Bash(doppler run --config dev_test *)"
+        - "Bash(doppler run --config dev_personal_worktree1 *)"
+        # Process manager
+        - "Bash(overmind *)"
+        - "Bash(DOPPLER_CONFIG=dev_personal_worktree1 overmind *)"
+        # Docker
+        - "Bash(docker *)"
+        - "Bash(docker-compose *)"
+        # Env-var-prefixed commands (from prior agent patterns)
+        - "Bash(GIT_EDITOR=true *)"
+        - "Bash(GIT_AUTHOR_NAME=*)"
+        - "Bash(DATABASE_URL=*)"
+        - "Bash(TMPFILE=*)"
+        - "Bash(BODY=*)"
+        - "Bash(T=*)"
+        # Agent messaging
+        - "Bash(agent-*)"
+        - "Bash(AGENT_NAME=*)"
+validation:
+    status: untested
+    failures: []

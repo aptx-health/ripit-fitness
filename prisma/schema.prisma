@@ -78,8 +78,12 @@ model ExerciseDefinition {
   equipment      String[]   @default([])
   instructions   String?
   notes          String?
+  imageUrls      String[]   @default([])
   primaryFAUs    String[]   @default([])
   secondaryFAUs  String[]   @default([])
+  force          String?
+  mechanic       String?
+  level          String?
   userId         String
   exercises      Exercise[]
 
@@ -121,6 +125,7 @@ model PrescribedSet {
   weight     String?
   rpe        Int?
   rir        Int?
+  isWarmup   Boolean  @default(false)
   exerciseId String
   userId     String
   exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
@@ -157,6 +162,7 @@ model LoggedSet {
   weightUnit   String            @default("lbs")
   rpe          Int?
   rir          Int?
+  isWarmup     Boolean           @default(false)
   exerciseId   String
   completionId String
   createdAt    DateTime          @default(now())
@@ -293,10 +299,10 @@ model CommunityProgram {
   name              String
   description       String
   programType       String   @default("strength")
-  authorUserId      String
+  authorUserId      String?
   displayName       String
   publishedAt       DateTime @default(now())
-  originalProgramId String   @unique(map: "community_programs_original_program_id_key")
+  originalProgramId String?  @unique(map: "community_programs_original_program_id_key")
   programData       Json
   weekCount         Int
   workoutCount      Int
@@ -308,6 +314,7 @@ model CommunityProgram {
   targetDaysPerWeek Int?
   equipmentNeeded   String[] @default([])
   focusAreas        String[] @default([])
+  curated           Boolean  @default(false)
 
   @@index([programType])
   @@index([publishedAt(sort: Desc)])
@@ -317,6 +324,7 @@ model CommunityProgram {
   @@index([goals], type: Gin)
   @@index([equipmentNeeded], type: Gin)
   @@index([programType, publishedAt(sort: Desc)])
+  @@index([curated])
 }
 
 model ExercisePerformanceLog {

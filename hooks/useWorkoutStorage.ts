@@ -10,6 +10,7 @@ export type LoggedSet = {
   weightUnit: string
   rpe: number | null
   rir: number | null
+  isWarmup?: boolean
 }
 
 type StoredWorkoutData = {
