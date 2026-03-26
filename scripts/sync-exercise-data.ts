@@ -175,11 +175,15 @@ async function syncExerciseDefinitions(exercises: ExerciseDef[]) {
 
 // Exercises with bad image matches — skip image sync, clear if present
 const SKIP_IMAGES = new Set([
-  'ex_bw_016',       // Bulgarian Split Squat — matched to Suspended Split Squat (side lunge)
-  'ex_db_031',       // Dumbbell Bulgarian Split Squat — matched to Barbell Side Split Squat (side lunge)
   'ex_curated_033',  // Lat Pull-Around — images don't match the exercise
-  'ex_curated_057',  // Bodyweight Bulgarian Split Squat — matched to Barbell Side Split Squat
 ])
+
+// Exercises with manually uploaded images (not derived from mapping)
+const MANUAL_IMAGES: Record<string, string[]> = {
+  'ex_bw_016': ['ex_bw_016/0.jpg', 'ex_bw_016/1.jpg'],         // Bulgarian Split Squat
+  'ex_db_031': ['ex_db_031/0.jpg', 'ex_db_031/1.jpg'],         // Dumbbell Bulgarian Split Squat
+  'ex_curated_057': ['ex_curated_057/0.jpg', 'ex_curated_057/1.jpg'], // Bodyweight Bulgarian Split Squat
+}
 
 async function syncImageUrls(
   mapping: MappingMatch[],
@@ -203,6 +207,23 @@ async function syncImageUrls(
     }
   }
   if (cleared > 0) console.log(`  Cleared ${cleared} bad image matches`)
+
+  // Apply manually uploaded images
+  let manual = 0
+  for (const [id, imageUrls] of Object.entries(MANUAL_IMAGES)) {
+    const ex = await prisma.exerciseDefinition.findUnique({
+      where: { id },
+      select: { imageUrls: true },
+    })
+    if (ex && JSON.stringify(ex.imageUrls) !== JSON.stringify(imageUrls)) {
+      await prisma.exerciseDefinition.update({
+        where: { id },
+        data: { imageUrls },
+      })
+      manual++
+    }
+  }
+  if (manual > 0) console.log(`  Set ${manual} manual image overrides`)
 
   // Build lookup: for curated exercises, find the original exercise that
   // shares the same free-exercise-db match (to reuse its image path)
