@@ -54,7 +54,6 @@ export async function GET(
         }
       }
 
-      // Failed state — worker set this before returning 500
       if (copyStatus === 'failed') {
         return NextResponse.json({
           status: 'failed',
