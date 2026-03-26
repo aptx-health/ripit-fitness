@@ -176,6 +176,7 @@ async function syncExerciseDefinitions(exercises: ExerciseDef[]) {
 // Exercises with bad image matches — skip image sync, clear if present
 const SKIP_IMAGES = new Set([
   'ex_bw_016',       // Bulgarian Split Squat — matched to Suspended Split Squat (side lunge)
+  'ex_db_031',       // Dumbbell Bulgarian Split Squat — matched to Barbell Side Split Squat (side lunge)
   'ex_curated_033',  // Lat Pull-Around — images don't match the exercise
   'ex_curated_057',  // Bodyweight Bulgarian Split Squat — matched to Barbell Side Split Squat
 ])
