@@ -42,10 +42,13 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Prisma migrations support (for k8s init container)
+# Prisma migrations + exercise data sync (for k8s init container)
 COPY --from=builder /app/prisma ./prisma
-RUN npm install prisma@6.19.0 --save-exact --no-audit --no-fund
+RUN npm install prisma@6.19.0 tsx@4.19.4 typescript@5.8.3 @types/node@22.15.3 --save-exact --no-audit --no-fund
 COPY scripts/prisma-migrate.sh ./scripts/prisma-migrate.sh
+COPY scripts/sync-exercise-data.ts ./scripts/sync-exercise-data.ts
+COPY scripts/exercise-mapping.json ./scripts/exercise-mapping.json
+COPY scripts/validated-exercise-ids.json ./scripts/validated-exercise-ids.json
 RUN chmod +x ./scripts/prisma-migrate.sh
 
 USER nextjs
