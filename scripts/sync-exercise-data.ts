@@ -173,11 +173,35 @@ async function syncExerciseDefinitions(exercises: ExerciseDef[]) {
 
 // ── Step 2: Sync image URLs ────────────────────────────────────────
 
+// Exercises with bad image matches — skip image sync, clear if present
+const SKIP_IMAGES = new Set([
+  'ex_bw_016',       // Bulgarian Split Squat — matched to Suspended Split Squat (side lunge)
+  'ex_curated_033',  // Lat Pull-Around — images don't match the exercise
+  'ex_curated_057',  // Bodyweight Bulgarian Split Squat — matched to Barbell Side Split Squat
+])
+
 async function syncImageUrls(
   mapping: MappingMatch[],
   validatedIds: Set<string>
 ) {
   console.log('Step 2: Syncing image URLs...')
+
+  // Clear images for exercises with known bad matches
+  let cleared = 0
+  for (const id of SKIP_IMAGES) {
+    const ex = await prisma.exerciseDefinition.findUnique({
+      where: { id },
+      select: { imageUrls: true },
+    })
+    if (ex && ex.imageUrls.length > 0) {
+      await prisma.exerciseDefinition.update({
+        where: { id },
+        data: { imageUrls: [] },
+      })
+      cleared++
+    }
+  }
+  if (cleared > 0) console.log(`  Cleared ${cleared} bad image matches`)
 
   // Build lookup: for curated exercises, find the original exercise that
   // shares the same free-exercise-db match (to reuse its image path)
@@ -191,6 +215,9 @@ async function syncImageUrls(
   let skipped = 0
 
   for (const m of mapping) {
+    // Skip exercises with known bad image matches
+    if (SKIP_IMAGES.has(m.our_id)) continue
+
     // Only process validated exercises and curated exercises
     if (!validatedIds.has(m.our_id) && !m.our_id.startsWith('ex_curated_')) {
       continue
@@ -379,7 +406,7 @@ async function verify() {
   const errors: string[] = []
   if (exerciseCount < 312) errors.push(`Expected >= 312 exercises, got ${exerciseCount}`)
   if (withInstructions < 230) errors.push(`Expected >= 230 with instructions, got ${withInstructions}`)
-  if (withImages < 280) errors.push(`Expected >= 280 with images, got ${withImages}`)
+  if (withImages < 275) errors.push(`Expected >= 275 with images, got ${withImages}`)
   if (communityPrograms < 10) errors.push(`Expected >= 10 community programs, got ${communityPrograms}`)
 
   if (errors.length > 0) {
