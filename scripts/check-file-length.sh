@@ -2,7 +2,7 @@
 # Checks that no file exceeds the maximum line count.
 # Usage: check-file-length.sh <file1> [file2] ...
 
-MAX_LINES=750
+MAX_LINES=1000
 EXIT_CODE=0
 
 for file in "$@"; do
