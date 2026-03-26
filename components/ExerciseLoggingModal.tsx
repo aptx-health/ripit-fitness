@@ -217,7 +217,7 @@ export default function ExerciseLoggingModal({
       reps: parseInt(currentSet.reps, 10),
       weight: parseFloat(currentSet.weight),
       weightUnit: currentSet.weightUnit,
-      rpe: currentSet.rpe ? parseInt(currentSet.rpe, 10) : null,
+      rpe: currentSet.rpe ? parseFloat(currentSet.rpe) : null,
       rir: currentSet.rir ? parseInt(currentSet.rir, 10) : null,
     }
 
