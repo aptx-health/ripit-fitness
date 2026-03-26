@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { type Prisma, PrismaClient } from '@prisma/client'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 
@@ -96,71 +96,137 @@ const CURATED_PROGRAMS: CuratedMeta[] = [
   },
 ]
 
-const DISPLAY_NAME = 'Iron Works Fitness'
+const DISPLAY_NAME = 'Ripit Fitness'
+
+const updateMode = process.argv.includes('--update')
+
+// Resolve exerciseDefinitionIds in programData to match the target database.
+// Snapshots contain IDs from the environment where they were generated, which
+// may not exist in staging/prod. This rewrites them using normalizedName lookups.
+function resolveExerciseIds(
+  programData: Record<string, unknown>,
+  idLookup: Map<string, string>
+): { resolved: Record<string, unknown>; missing: string[] } {
+  const missing: string[] = []
+  const data = JSON.parse(JSON.stringify(programData)) // deep clone
+
+  for (const week of (data.weeks || []) as Array<Record<string, unknown>>) {
+    for (const workout of (week.workouts || []) as Array<Record<string, unknown>>) {
+      for (const exercise of (workout.exercises || []) as Array<Record<string, unknown>>) {
+        const name = exercise.name as string
+        const normalized = name.toLowerCase()
+        const resolvedId = idLookup.get(normalized)
+        if (resolvedId) {
+          exercise.exerciseDefinitionId = resolvedId
+        } else {
+          missing.push(name)
+        }
+      }
+    }
+  }
+
+  return { resolved: data, missing }
+}
+
+function buildProgramData(
+  meta: CuratedMeta,
+  snapshotDir: string,
+  idLookup: Map<string, string>
+) {
+  const raw = readFileSync(join(snapshotDir, meta.file), 'utf-8')
+  const rawProgramData = JSON.parse(raw)
+
+  const { resolved: programData, missing } = resolveExerciseIds(rawProgramData, idLookup)
+
+  if (missing.length > 0) {
+    console.warn(`  WARNING: ${rawProgramData.name} has ${missing.length} unresolved exercises:`)
+    for (const name of [...new Set(missing)]) {
+      console.warn(`    - ${name}`)
+    }
+  }
+
+  const weeks = (programData.weeks || []) as Array<Record<string, unknown>>
+  const weekCount = weeks.length
+  const firstWeekWorkouts = (weeks[0]?.workouts || []) as Array<Record<string, unknown>>
+  const workoutsPerWeek = firstWeekWorkouts.length
+  const workoutCount = weekCount * workoutsPerWeek
+  let exerciseCount = 0
+  for (const week of weeks) {
+    for (const workout of (week.workouts || []) as Array<Record<string, unknown>>) {
+      exerciseCount += ((workout.exercises || []) as unknown[]).length
+    }
+  }
+
+  const durationDisplay = weekCount === 1
+    ? '1 week (repeating)'
+    : `${weekCount} weeks`
+
+  return {
+    name: (programData.name || '') as string,
+    description: (programData.description || '') as string,
+    programType: (programData.programType || 'strength') as string,
+    displayName: DISPLAY_NAME,
+    programData: programData as Prisma.InputJsonValue,
+    curated: true,
+    weekCount,
+    workoutCount,
+    exerciseCount,
+    level: meta.level,
+    goals: meta.goals,
+    targetDaysPerWeek: meta.targetDaysPerWeek,
+    durationWeeks: weekCount,
+    durationDisplay,
+    equipmentNeeded: meta.equipmentNeeded,
+    focusAreas: meta.focusAreas,
+  }
+}
 
 async function main() {
+  if (updateMode) {
+    console.log('Running in --update mode (will replace existing programs)\n')
+  }
+
+  // Build normalizedName → id lookup from the target database
+  const allDefs = await prisma.exerciseDefinition.findMany({
+    select: { id: true, normalizedName: true },
+  })
+  const idLookup = new Map(allDefs.map((d) => [d.normalizedName, d.id]))
+  console.log(`Loaded ${idLookup.size} exercise definitions for ID resolution\n`)
+
   const snapshotDir = join(__dirname, 'snapshots')
 
   let created = 0
+  let updated = 0
   let skipped = 0
 
   for (const meta of CURATED_PROGRAMS) {
-    const raw = readFileSync(join(snapshotDir, meta.file), 'utf-8')
-    const programData = JSON.parse(raw)
+    const data = buildProgramData(meta, snapshotDir, idLookup)
 
-    // Check if already exists by name
     const existing = await prisma.communityProgram.findFirst({
-      where: { name: programData.name, curated: true },
+      where: { name: data.name, curated: true },
     })
 
     if (existing) {
-      console.log(`  SKIP (exists): ${programData.name}`)
-      skipped++
+      if (updateMode) {
+        await prisma.communityProgram.update({
+          where: { id: existing.id },
+          data,
+        })
+        console.log(`  UPDATED: ${data.name} (${data.weekCount}w, ${data.workoutCount} workouts, ${data.exerciseCount} exercises)`)
+        updated++
+      } else {
+        console.log(`  SKIP (exists): ${data.name}`)
+        skipped++
+      }
       continue
     }
 
-    // Count exercises and workouts from the snapshot
-    const weeks = programData.weeks || []
-    const weekCount = weeks.length
-    const workoutsPerWeek = weeks[0]?.workouts?.length || 0
-    const workoutCount = weekCount * workoutsPerWeek
-    let exerciseCount = 0
-    for (const week of weeks) {
-      for (const workout of week.workouts || []) {
-        exerciseCount += (workout.exercises || []).length
-      }
-    }
-
-    const durationDisplay = weekCount === 1
-      ? '1 week (repeating)'
-      : `${weekCount} weeks`
-
-    await prisma.communityProgram.create({
-      data: {
-        name: programData.name,
-        description: programData.description || '',
-        programType: programData.programType || 'strength',
-        displayName: DISPLAY_NAME,
-        programData,
-        curated: true,
-        weekCount,
-        workoutCount,
-        exerciseCount,
-        level: meta.level,
-        goals: meta.goals,
-        targetDaysPerWeek: meta.targetDaysPerWeek,
-        durationWeeks: weekCount,
-        durationDisplay,
-        equipmentNeeded: meta.equipmentNeeded,
-        focusAreas: meta.focusAreas,
-      },
-    })
-
-    console.log(`  CREATED: ${programData.name} (${weekCount}w, ${workoutCount} workouts, ${exerciseCount} exercises)`)
+    await prisma.communityProgram.create({ data })
+    console.log(`  CREATED: ${data.name} (${data.weekCount}w, ${data.workoutCount} workouts, ${data.exerciseCount} exercises)`)
     created++
   }
 
-  console.log(`\nDone. Created ${created}, skipped ${skipped}.`)
+  console.log(`\nDone. Created ${created}, updated ${updated}, skipped ${skipped}.`)
 }
 
 main().catch(console.error).finally(() => prisma.$disconnect())

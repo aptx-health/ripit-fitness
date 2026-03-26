@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/radix/tabs'
 import type { LoadState } from '@/hooks/useProgressiveExercises'
@@ -99,6 +100,7 @@ export default function ExerciseDisplayTabs({
   onDeleteSet,
   loggingForm,
 }: ExerciseDisplayTabsProps) {
+  const [expandedImage, setExpandedImage] = useState<string | null>(null)
   const loggedCount = loggedSets.length
   const totalCount = prescribedSets.length
   const hasNotes = !!exercise.notes
@@ -146,17 +148,25 @@ export default function ExerciseDisplayTabs({
           {exercise.exerciseDefinition?.imageUrls && exercise.exerciseDefinition.imageUrls.length > 0 && (
             <div>
               <div className="grid grid-cols-2 gap-3">
-                {exercise.exerciseDefinition.imageUrls.map((url, i) => (
-                  <div key={url} className="relative aspect-square rounded-lg overflow-hidden bg-muted">
-                    <Image
-                      src={url}
-                      alt={`${exercise.name} - ${i === 0 ? 'start' : 'end'} position`}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 640px) 45vw, 300px"
-                    />
-                  </div>
-                ))}
+                {exercise.exerciseDefinition.imageUrls.map((url, i) => {
+                  const src = url.startsWith('http') ? url : `https://cdn.ripit.fit/exercise-images/${url}`
+                  return (
+                    <button
+                      key={url}
+                      type="button"
+                      onClick={() => setExpandedImage(src)}
+                      className="relative aspect-square rounded-lg overflow-hidden bg-muted cursor-pointer"
+                    >
+                      <Image
+                        src={src}
+                        alt={`${exercise.name} - ${i === 0 ? 'start' : 'end'} position`}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 640px) 45vw, 300px"
+                      />
+                    </button>
+                  )
+                })}
               </div>
             </div>
           )}
@@ -287,6 +297,24 @@ export default function ExerciseDisplayTabs({
           </div>
         )}
       </TabsContent>
+
+      {expandedImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
+          style={{ position: 'fixed', inset: 0, zIndex: 50 }}
+          onClick={() => setExpandedImage(null)}
+        >
+          <div className="relative w-[90vw] max-w-lg aspect-square">
+            <Image
+              src={expandedImage}
+              alt={exercise.name}
+              fill
+              className="object-contain"
+              sizes="90vw"
+            />
+          </div>
+        </div>
+      )}
     </Tabs>
   )
 }
