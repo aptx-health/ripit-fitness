@@ -53,3 +53,19 @@ jobs:
             NEXT_PUBLIC_APP_URL=${{ vars.NEXT_PUBLIC_APP_URL }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Notify Discord (production builds)
+        if: github.ref_name == 'main'
+        run: |
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          curl -s -H "Content-Type: application/json" -d "{
+            \"embeds\": [{
+              \"title\": \"Production image ready\",
+              \"description\": \"Update infra repo with new image tag:\n\`\`\`\nsha-${{ github.sha }}\n\`\`\`\",
+              \"color\": 5025616,
+              \"fields\": [
+                {\"name\": \"Commit\", \"value\": \"[\`${SHORT_SHA}\`](https://github.com/${{ github.repository }}/commit/${{ github.sha }})\", \"inline\": true},
+                {\"name\": \"Image\", \"value\": \"\`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}\`\", \"inline\": false}
+              ]
+            }]
+          }" "${{ secrets.DISCORD_WEBHOOK_URL }}"
