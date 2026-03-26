@@ -1,7 +1,10 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useUserSettings } from '@/hooks/useUserSettings'
+import { IntensitySelector } from './inputs/IntensitySelector'
+import { RepsStepper } from './inputs/RepsStepper'
+import { WeightKeypad } from './inputs/WeightKeypad'
 
 interface PrescribedSet {
   id: string
@@ -33,6 +36,8 @@ interface SetLoggingFormProps {
   }) => void
 }
 
+type ExpandedInput = 'weight' | 'rpe' | 'rir' | null
+
 export default function SetLoggingForm({
   prescribedSet,
   hasLoggedAllPrescribed,
@@ -42,13 +47,14 @@ export default function SetLoggingForm({
   onSetChange,
 }: SetLoggingFormProps) {
   const { settings } = useUserSettings()
+  const [expandedInput, setExpandedInput] = useState<ExpandedInput>(null)
 
   // Update weight unit when settings change
   useEffect(() => {
     if (settings?.defaultWeightUnit && currentSet.weightUnit !== settings.defaultWeightUnit) {
       onSetChange({
         ...currentSet,
-        weightUnit: settings.defaultWeightUnit
+        weightUnit: settings.defaultWeightUnit,
       })
     }
   }, [settings?.defaultWeightUnit, currentSet, onSetChange])
@@ -66,92 +72,65 @@ export default function SetLoggingForm({
     )
   }
 
+  const handleExpand = (input: ExpandedInput) => {
+    setExpandedInput(input)
+  }
+
+  const handleCollapse = () => {
+    setExpandedInput(null)
+  }
+
+  const showReps = expandedInput === null || expandedInput === 'weight'
+  const showWeight = true // always visible, either compact or expanded
+  const showIntensity = expandedInput === null || expandedInput === 'rpe' || expandedInput === 'rir'
+
   return (
     <div className="flex-shrink-0">
       <div className="space-y-3">
-        {/* Reps and Weight - Side by side */}
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label htmlFor="log-reps" className="block text-sm font-semibold text-foreground mb-1 uppercase tracking-wider">
-              Reps *
-            </label>
-            <input
-              id="log-reps"
-              type="number"
-              inputMode="numeric"
-              value={currentSet.reps}
-              onChange={(e) =>
-                onSetChange({ ...currentSet, reps: e.target.value })
-              }
-              placeholder={prescribedSet?.reps.toString() || '0'}
-              className="w-full px-4 py-3 text-lg border-2 border-input focus:ring-2 focus:ring-primary focus:border-primary bg-muted text-foreground"
-            />
-          </div>
+        {/* Reps stepper - always visible when no input is expanded, hidden when intensity is expanded */}
+        {showReps && (
+          <RepsStepper
+            value={currentSet.reps}
+            onChange={(val) => onSetChange({ ...currentSet, reps: val })}
+            placeholder={prescribedSet?.reps?.toString()}
+          />
+        )}
 
-          <div>
-            <label htmlFor="log-weight" className="block text-sm font-semibold text-foreground mb-1 uppercase tracking-wider">
-              Weight * ({currentSet.weightUnit})
-            </label>
-            <input
-              id="log-weight"
-              type="number"
-              inputMode="decimal"
-              step="0.5"
-              value={currentSet.weight}
-              onChange={(e) =>
-                onSetChange({ ...currentSet, weight: e.target.value })
-              }
-              placeholder={prescribedSet?.weight?.replace(/[^0-9.]/g, '') || '0'}
-              className="w-full px-4 py-3 text-lg border-2 border-input focus:ring-2 focus:ring-primary focus:border-primary bg-muted text-foreground"
-            />
-          </div>
-        </div>
+        {/* Weight keypad - always visible (compact or expanded) */}
+        {showWeight && (
+          <WeightKeypad
+            value={currentSet.weight}
+            weightUnit={currentSet.weightUnit}
+            onChange={(val) => onSetChange({ ...currentSet, weight: val })}
+            isExpanded={expandedInput === 'weight'}
+            onExpand={() => handleExpand('weight')}
+            onCollapse={handleCollapse}
+          />
+        )}
 
-        {/* Optional RPE/RIR */}
-        {(hasRpe || hasRir) && (
-          <div className="grid grid-cols-2 gap-3">
-            {hasRir && (
-              <div>
-                <label htmlFor="log-rir" className="block text-sm font-semibold text-foreground mb-1 uppercase tracking-wider">
-                  RIR (optional)
-                </label>
-                <input
-                  id="log-rir"
-                  type="number"
-                  inputMode="numeric"
-                  min="0"
-                  max="10"
-                  value={currentSet.rir}
-                  onChange={(e) =>
-                    onSetChange({ ...currentSet, rir: e.target.value })
-                  }
-                  placeholder={prescribedSet?.rir?.toString() || '—'}
-                  className="w-full px-4 py-3 text-lg border-2 border-input focus:ring-2 focus:ring-primary focus:border-primary bg-muted text-foreground"
-                />
-              </div>
-            )}
+        {/* Intensity selectors - only when exercise uses them */}
+        {showIntensity && hasRir && (
+          <IntensitySelector
+            type="rir"
+            value={currentSet.rir}
+            onChange={(val) => onSetChange({ ...currentSet, rir: val })}
+            prescribedValue={prescribedSet?.rir}
+            isExpanded={expandedInput === 'rir'}
+            onExpand={() => handleExpand('rir')}
+            onCollapse={handleCollapse}
+          />
+        )}
 
-            {hasRpe && (
-              <div>
-                <label htmlFor="log-rpe" className="block text-sm font-semibold text-foreground mb-1 uppercase tracking-wider">
-                  RPE (optional)
-                </label>
-                <input
-                  id="log-rpe"
-                  type="number"
-                  inputMode="numeric"
-                  min="1"
-                  max="10"
-                  value={currentSet.rpe}
-                  onChange={(e) =>
-                    onSetChange({ ...currentSet, rpe: e.target.value })
-                  }
-                  placeholder={prescribedSet?.rpe?.toString() || '—'}
-                  className="w-full px-4 py-3 text-lg border-2 border-input focus:ring-2 focus:ring-primary focus:border-primary bg-muted text-foreground"
-                />
-              </div>
-            )}
-          </div>
+        {showIntensity && hasRpe && (
+          <IntensitySelector
+            type="rpe"
+            value={currentSet.rpe}
+            onChange={(val) => onSetChange({ ...currentSet, rpe: val })}
+            prescribedValue={prescribedSet?.rpe}
+            isExpanded={expandedInput === 'rpe'}
+            onExpand={() => handleExpand('rpe')}
+            onCollapse={handleCollapse}
+          />
         )}
       </div>
     </div>
