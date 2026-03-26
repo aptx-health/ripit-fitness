@@ -1,79 +1,12 @@
-import { type NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth/server'
-import { getUserDisplayName } from '@/lib/community/publishing'
-import { calculateProgramStats, validateProgramForPublishing } from '@/lib/community/validation'
-import { prisma } from '@/lib/db'
+import { NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ programId: string }> }
-) {
-  try {
-    const { programId } = await params
-
-    // Get authenticated user
-    const { user, error } = await getCurrentUser()
-
-    if (error || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Validate the program
-    const validationResult = await validateProgramForPublishing(
-      prisma,
-      programId,
-      user.id
-    )
-
-    if (!validationResult.valid) {
-      return NextResponse.json({
-        valid: false,
-        errors: validationResult.errors,
-      })
-    }
-
-    // Get program stats
-    const program = await prisma.program.findUnique({
-      where: { id: programId, userId: user.id },
-      include: {
-        weeks: {
-          include: {
-            workouts: {
-              include: {
-                exercises: true,
-              },
-            },
-          },
-        },
-      },
-    })
-
-    if (!program) {
-      return NextResponse.json({ error: 'Program not found' }, { status: 404 })
-    }
-
-    const stats = calculateProgramStats(program)
-
-    // Get user's display name (with fallback)
-    const displayName = await getUserDisplayName(prisma, user.id)
-
-    return NextResponse.json({
-      valid: true,
-      errors: [],
-      stats,
-      displayName: displayName === 'Anonymous User' ? null : displayName,
-      metadata: {
-        goals: program.goals,
-        level: program.level,
-        durationWeeks: program.durationWeeks,
-        durationDisplay: program.durationDisplay,
-        targetDaysPerWeek: program.targetDaysPerWeek,
-        equipmentNeeded: program.equipmentNeeded,
-        focusAreas: program.focusAreas,
-      },
-    })
-  } catch (error) {
-    console.error('Error validating program for publishing:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
+// Community program publishing is disabled for users.
+// Community programs are curated and managed by admins only.
+export async function GET() {
+  logger.info('Rejected attempt to validate program for publishing - feature disabled');
+  return NextResponse.json(
+    { error: 'Publishing programs to the community is no longer available' },
+    { status: 403 }
+  );
 }
