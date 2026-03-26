@@ -19,3 +19,11 @@ echo "Running migrations..."
 ./node_modules/.bin/prisma migrate deploy
 
 echo "Migration completed successfully."
+
+echo ""
+echo "=== Exercise Data Sync ==="
+echo "Timestamp: $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+echo "==="
+./node_modules/.bin/tsx scripts/sync-exercise-data.ts
+
+echo "Data sync completed successfully."
