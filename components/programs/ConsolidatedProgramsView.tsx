@@ -170,6 +170,19 @@ export default function ConsolidatedProgramsView({
         return false
       }
 
+      if (data.status === 'failed') {
+        // Clone failed — worker exhausted retries or marked as failed
+        if (!completedClonesRef.current.has(programId)) {
+          completedClonesRef.current.add(programId)
+          setCompletedClones(prev => new Set(prev).add(programId))
+          setDeletedPrograms(prev => new Set(prev).add(programId))
+          toast.error('Failed to copy program', data.error || 'The program cloning failed. Please try again.')
+          cleanupCloningState()
+          router.refresh()
+        }
+        return false
+      }
+
       if (data.status === 'not_found') {
         // Program was deleted (cloning failed)
         if (!completedClonesRef.current.has(programId)) {

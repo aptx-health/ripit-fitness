@@ -1,4 +1,5 @@
 import type { PrismaClient } from '@prisma/client';
+import { logger } from '@/lib/logger';
 import { publishProgramCloneJob } from '@/lib/queue/clone-jobs';
 
 export interface CloneResult {
@@ -109,19 +110,35 @@ export async function cloneCommunityProgram(
     });
 
     // Publish clone job to queue
-    await publishProgramCloneJob({
-      communityProgramId: communityProgram.id,
-      programId: shellProgram.id,
-      userId: userId,
-      programType: 'strength',
-    });
+    try {
+      await publishProgramCloneJob({
+        communityProgramId: communityProgram.id,
+        programId: shellProgram.id,
+        userId: userId,
+        programType: 'strength',
+      });
+    } catch (publishError) {
+      // Job enqueue failed — mark shell program as failed so it doesn't stay stuck in 'cloning'
+      logger.error(
+        { error: publishError, programId: shellProgram.id },
+        'Failed to publish clone job, marking program as failed'
+      );
+      await prisma.program.update({
+        where: { id: shellProgram.id },
+        data: { copyStatus: 'failed' },
+      });
+      return {
+        success: false,
+        error: 'Failed to start program cloning',
+      };
+    }
 
     return {
       success: true,
       programId: shellProgram.id,
     };
   } catch (error) {
-    console.error('Failed to clone community program:', error);
+    logger.error({ error }, 'Failed to clone community program');
     return {
       success: false,
       error: 'Failed to add program',
