@@ -1,13 +1,14 @@
 'use client'
 
 import { AlertTriangle } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import { type Exercise, type ExerciseHistory, useProgressiveExercises } from '@/hooks/useProgressiveExercises'
 import { useSyncState } from '@/hooks/useSyncState'
 // Import LoggedSet type from the hook to ensure consistency
 import { type LoggedSet, useWorkoutStorage } from '@/hooks/useWorkoutStorage'
+import { parseRepsFromPrescribed } from '@/lib/constants/intensity-presets'
 import { useWorkoutSyncService } from '@/lib/sync/workoutSync'
 import ExerciseDefinitionEditorModal from './features/exercise-definition/ExerciseDefinitionEditorModal'
 import SyncDetailsModal from './SyncDetailsModal'
@@ -174,6 +175,39 @@ export default function ExerciseLoggingModal({
   const hasRpe = currentPrescribedSets.some((s) => s.rpe !== null)
   const hasRir = currentPrescribedSets.some((s) => s.rir !== null)
 
+  // Pre-fill form when exercise loads or set number changes
+  const lastPrefillKey = useRef<string>('')
+  useEffect(() => {
+    if (!currentExercise) return
+
+    const prefillKey = `${currentExercise.id}-${nextSetNumber}`
+    if (lastPrefillKey.current === prefillKey) return
+    lastPrefillKey.current = prefillKey
+
+    const targetPrescribed = currentPrescribedSets.find(s => s.setNumber === nextSetNumber)
+
+    // Pre-fill reps from prescribed set (high end of range)
+    const prefillReps = parseRepsFromPrescribed(targetPrescribed?.reps)
+
+    // Weight: carry forward from last logged set, or default to 0
+    const lastLogged = currentExerciseLoggedSets.length > 0
+      ? currentExerciseLoggedSets[currentExerciseLoggedSets.length - 1]
+      : null
+    const prefillWeight = lastLogged ? String(lastLogged.weight) : '0'
+
+    // Intensity: pre-fill from prescribed
+    const prefillRpe = targetPrescribed?.rpe != null ? String(targetPrescribed.rpe) : ''
+    const prefillRir = targetPrescribed?.rir != null ? String(targetPrescribed.rir) : ''
+
+    setCurrentSet(prev => ({
+      ...prev,
+      reps: prefillReps,
+      weight: prefillWeight,
+      rpe: prefillRpe,
+      rir: prefillRir,
+    }))
+  }, [currentExercise, nextSetNumber, currentPrescribedSets, currentExerciseLoggedSets])
+
   const handleLogSet = useCallback(() => {
     if (!currentSet.reps || !currentSet.weight || !currentExercise) return
 
@@ -203,36 +237,48 @@ export default function ExerciseLoggingModal({
       return updatedSets
     })
 
-    // Reset form
+    // Pre-fill for next set: reps from next prescribed, weight carried forward
+    const nextNextSetNumber = nextSetNumber + 1
+    const nextPrescribed = currentPrescribedSets.find(s => s.setNumber === nextNextSetNumber)
+    const nextReps = parseRepsFromPrescribed(nextPrescribed?.reps || prescribedSet?.reps)
+    const nextRpe = nextPrescribed?.rpe != null ? String(nextPrescribed.rpe) : ''
+    const nextRir = nextPrescribed?.rir != null ? String(nextPrescribed.rir) : ''
+
+    // Update prefill key so the useEffect doesn't overwrite
+    lastPrefillKey.current = `${currentExercise.id}-${nextNextSetNumber}`
+
     setCurrentSet({
-      reps: '',
-      weight: '',
+      reps: nextReps,
+      weight: currentSet.weight, // carry forward weight from just-logged set
       weightUnit: currentSet.weightUnit,
-      rpe: '',
-      rir: '',
+      rpe: nextRpe,
+      rir: nextRir,
     })
-  }, [currentSet, currentExercise, nextSetNumber, setLoggedSets, addSets, addPendingSets])
+  }, [currentSet, currentExercise, nextSetNumber, currentPrescribedSets, prescribedSet, setLoggedSets, addSets, addPendingSets])
 
   const handleNextExercise = () => {
+    // Reset prefill key so the useEffect will pre-fill for the new exercise
+    lastPrefillKey.current = ''
     goToNext()
-    setCurrentSet({
+    setCurrentSet(prev => ({
       reps: '',
       weight: '',
-      weightUnit: 'lbs',
+      weightUnit: prev.weightUnit,
       rpe: '',
       rir: '',
-    })
+    }))
   }
 
   const handlePreviousExercise = () => {
+    lastPrefillKey.current = ''
     goToPrevious()
-    setCurrentSet({
+    setCurrentSet(prev => ({
       reps: '',
       weight: '',
-      weightUnit: 'lbs',
+      weightUnit: prev.weightUnit,
       rpe: '',
       rir: '',
-    })
+    }))
   }
 
   const handleReplaceExercise = () => {
