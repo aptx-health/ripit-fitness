@@ -54,14 +54,6 @@ export default function Header({ userEmail }: Props) {
                   </Link>
                 )
               })}
-              {process.env.NODE_ENV === 'development' && (
-                <Link
-                  href="/dev/mobile-spike"
-                  className="text-xs font-mono text-muted-foreground hover:text-accent transition-colors"
-                >
-                  spike
-                </Link>
-              )}
             </div>
           </div>
 
