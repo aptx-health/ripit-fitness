@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
+import { clientLogger } from '@/lib/client-logger'
 import { useToast } from '@/components/ToastProvider'
 import StrengthActivationModal from '../StrengthActivationModal'
 import ArchivedProgramsSection from './ArchivedProgramsSection'
@@ -112,8 +113,17 @@ export default function ConsolidatedProgramsView({
     pollingIntervalRef.current = intervalId
   }
 
+  const handleCloneFailed = (programId: string, message?: string) => {
+    if (completedClonesRef.current.has(programId)) return
+    completedClonesRef.current.add(programId)
+    setCompletedClones(prev => new Set(prev).add(programId))
+    setDeletedPrograms(prev => new Set(prev).add(programId))
+    toast.error('Failed to copy program', message || 'The program cloning failed. Please try again.')
+    cleanupCloningState()
+    router.refresh()
+  }
+
   const checkCopyStatus = async (programId: string): Promise<boolean> => {
-    // Don't check again if we've already completed this clone (use ref for synchronous check)
     if (completedClonesRef.current.has(programId)) {
       return false
     }
@@ -122,40 +132,27 @@ export default function ConsolidatedProgramsView({
       const response = await fetch(`/api/programs/${programId}/copy-status`)
 
       if (!response.ok) {
-        // Program not found - likely failed and was deleted
-        if (!completedClonesRef.current.has(programId)) {
-          completedClonesRef.current.add(programId)
-          setCompletedClones(prev => new Set(prev).add(programId))
-          setDeletedPrograms(prev => new Set(prev).add(programId))
-          toast.error('Failed to copy program', 'The program cloning failed. Please try again.')
-          cleanupCloningState()
-          router.refresh()
-        }
+        handleCloneFailed(programId)
         return false
       }
 
       const data = await response.json()
 
-      // Update progress info if available
       if (data.progress) {
         setCloningProgress(prev => ({ ...prev, [programId]: data.progress }))
       }
 
       if (data.status === 'ready') {
-        // Cloning complete!
         if (!completedClonesRef.current.has(programId)) {
           completedClonesRef.current.add(programId)
           setCompletedClones(prev => new Set(prev).add(programId))
-          // Update local state immediately so card updates
           setLocalCopyStatuses(prev => ({ ...prev, [programId]: 'ready' }))
-          // Clear progress info
           setCloningProgress(prev => {
             const updated = { ...prev }
             delete updated[programId]
             return updated
           })
 
-          // Show activation modal
           const activeProgram = strengthPrograms.find(p => p.isActive && p.id !== programId)
           if (activeProgram) {
             setExistingActiveProgram({ id: activeProgram.id, name: activeProgram.name })
@@ -170,37 +167,15 @@ export default function ConsolidatedProgramsView({
         return false
       }
 
-      if (data.status === 'failed') {
-        // Clone failed — worker exhausted retries or marked as failed
-        if (!completedClonesRef.current.has(programId)) {
-          completedClonesRef.current.add(programId)
-          setCompletedClones(prev => new Set(prev).add(programId))
-          setDeletedPrograms(prev => new Set(prev).add(programId))
-          toast.error('Failed to copy program', data.error || 'The program cloning failed. Please try again.')
-          cleanupCloningState()
-          router.refresh()
-        }
-        return false
-      }
-
-      if (data.status === 'not_found') {
-        // Program was deleted (cloning failed)
-        if (!completedClonesRef.current.has(programId)) {
-          completedClonesRef.current.add(programId)
-          setCompletedClones(prev => new Set(prev).add(programId))
-          setDeletedPrograms(prev => new Set(prev).add(programId))
-          toast.error('Failed to copy program', 'The program cloning failed. Please try again.')
-          cleanupCloningState()
-          router.refresh()
-        }
+      if (data.status === 'failed' || data.status === 'not_found') {
+        handleCloneFailed(programId, data.error)
         return false
       }
 
       // Still cloning
       return true
     } catch (error) {
-      console.error('Error checking copy status:', error)
-      // Continue polling on error
+      clientLogger.error('Error checking copy status:', error)
       return true
     }
   }
