@@ -1,7 +1,7 @@
 'use client'
 
 import { Delete } from 'lucide-react'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 
 interface WeightKeypadProps {
   value: string
@@ -27,24 +27,30 @@ export function WeightKeypad({
   onExpand,
   onCollapse,
 }: WeightKeypadProps) {
-  const [replaceOnNext, setReplaceOnNext] = useState(false)
+  const replaceOnNext = useRef(false)
+
+  // Set replaceOnNext when expanding
+  useEffect(() => {
+    if (isExpanded) {
+      replaceOnNext.current = true
+    }
+  }, [isExpanded])
 
   const handleExpand = () => {
-    setReplaceOnNext(true)
     onExpand()
   }
 
   const handleKeyPress = useCallback((key: string) => {
     if (key === 'CLR') {
       onChange('')
-      setReplaceOnNext(false)
+      replaceOnNext.current = false
       return
     }
 
     if (key === 'DEL') {
-      if (replaceOnNext) {
+      if (replaceOnNext.current) {
         onChange('')
-        setReplaceOnNext(false)
+        replaceOnNext.current = false
         return
       }
       const newValue = value.slice(0, -1)
@@ -53,10 +59,10 @@ export function WeightKeypad({
     }
 
     // Digit
-    if (replaceOnNext) {
+    if (replaceOnNext.current) {
       // First keystroke replaces the pre-filled value
       onChange(key === '0' ? '0' : key)
-      setReplaceOnNext(false)
+      replaceOnNext.current = false
       return
     }
 
@@ -74,10 +80,10 @@ export function WeightKeypad({
     }
 
     onChange(candidate)
-  }, [value, onChange, replaceOnNext])
+  }, [value, onChange])
 
   const handleDone = () => {
-    setReplaceOnNext(false)
+    replaceOnNext.current = false
     onCollapse()
   }
 
