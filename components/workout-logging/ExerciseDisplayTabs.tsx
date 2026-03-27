@@ -1,12 +1,12 @@
 'use client'
 
+import Image from 'next/image'
 import { useState } from 'react'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/radix/tabs'
 import type { LoadState } from '@/hooks/useProgressiveExercises'
 import type { LoggedSet } from '@/hooks/useWorkoutStorage'
 import { EQUIPMENT_LABELS } from '@/lib/constants/program-metadata'
-import Image from 'next/image'
 import SetList from './SetList'
 
 interface PrescribedSet {
@@ -55,6 +55,7 @@ interface ExerciseDisplayTabsProps {
   hasHistoryIndicator?: boolean // Pre-computed indicator for dot (updates reactively)
   onDeleteSet: (setNumber: number) => void
   loggingForm: React.ReactNode
+  isInputExpanded?: boolean
 }
 
 const FAU_DISPLAY_NAMES: Record<string, string> = {
@@ -99,6 +100,7 @@ export default function ExerciseDisplayTabs({
   hasHistoryIndicator = false,
   onDeleteSet,
   loggingForm,
+  isInputExpanded = false,
 }: ExerciseDisplayTabsProps) {
   const [expandedImage, setExpandedImage] = useState<string | null>(null)
   const loggedCount = loggedSets.length
@@ -134,12 +136,14 @@ export default function ExerciseDisplayTabs({
       </TabsList>
 
       <TabsContent value="log-sets" className="flex-1 overflow-y-auto px-4 flex flex-col gap-3">
-        <SetList
-          prescribedSets={prescribedSets}
-          loggedSets={loggedSets}
-          exerciseHistory={null}
-          onDeleteSet={onDeleteSet}
-        />
+        {!isInputExpanded && (
+          <SetList
+            prescribedSets={prescribedSets}
+            loggedSets={loggedSets}
+            exerciseHistory={null}
+            onDeleteSet={onDeleteSet}
+          />
+        )}
         {loggingForm}
       </TabsContent>
 
@@ -300,9 +304,12 @@ export default function ExerciseDisplayTabs({
 
       {expandedImage && (
         <div
+          role="button"
+          tabIndex={0}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
           style={{ position: 'fixed', inset: 0, zIndex: 50 }}
           onClick={() => setExpandedImage(null)}
+          onKeyDown={(e) => { if (e.key === 'Escape' || e.key === 'Enter') setExpandedImage(null) }}
         >
           <div className="relative w-[90vw] max-w-lg aspect-square">
             <Image
