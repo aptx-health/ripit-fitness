@@ -45,6 +45,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # Prisma migrations + exercise data sync (for k8s init container)
 COPY --from=builder /app/prisma ./prisma
 RUN npm install prisma@6.19.0 tsx@4.19.4 typescript@5.8.3 @types/node@22.15.3 --save-exact --no-audit --no-fund --ignore-scripts
+RUN npx prisma@6.19.0 generate
+RUN chown -R nextjs:nodejs /app/node_modules/.prisma /app/node_modules/@prisma
 COPY scripts/prisma-migrate.sh ./scripts/prisma-migrate.sh
 COPY scripts/sync-exercise-data.ts ./scripts/sync-exercise-data.ts
 COPY scripts/exercise-mapping.json ./scripts/exercise-mapping.json
