@@ -112,9 +112,9 @@ export function WeightKeypad({
     )
   }
 
-  // Expanded view with keypad
+  // Expanded view with keypad - mt-auto pushes to bottom of flex container
   return (
-    <div>
+    <div className="mt-auto">
       <span className="block text-sm font-semibold text-foreground mb-1 uppercase tracking-wider">
         Weight ({weightUnit})
       </span>
