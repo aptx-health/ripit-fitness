@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import { type Exercise, type ExerciseHistory, useProgressiveExercises } from '@/hooks/useProgressiveExercises'
+import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
 import { useWorkoutDraft } from '@/hooks/useWorkoutDraft'
 import { completeDraft, discardDraft } from '@/lib/api/workout-sets'
 import { parseRepsFromPrescribed } from '@/lib/constants/intensity-presets'
@@ -203,6 +204,38 @@ export default function ExerciseLoggingModal({
     }))
   }
 
+  // Swipe navigation between exercises
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null)
+  const slideTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null)
+
+  const triggerSlide = useCallback((direction: 'left' | 'right', action: () => void) => {
+    setSlideDirection(direction)
+    if (slideTimeoutRef.current) clearTimeout(slideTimeoutRef.current)
+    slideTimeoutRef.current = setTimeout(() => {
+      action()
+      setSlideDirection(null)
+    }, 150)
+  }, [])
+
+  const swipeHandlers = useSwipeNavigation({
+    onSwipeLeft: () => {
+      if (currentIndex < totalExercises - 1) {
+        triggerSlide('left', handleNextExercise)
+      }
+    },
+    onSwipeRight: () => {
+      if (currentIndex > 0) {
+        triggerSlide('right', handlePreviousExercise)
+      }
+    },
+  })
+
+  useEffect(() => {
+    return () => {
+      if (slideTimeoutRef.current) clearTimeout(slideTimeoutRef.current)
+    }
+  }, [])
+
   const handleReplaceExercise = () => setActiveWizard('swap')
   const handleAddExercise = () => setActiveWizard('add')
   const handleDeleteExercise = () => setActiveWizard('delete')
@@ -369,8 +402,14 @@ export default function ExerciseLoggingModal({
             </div>
           )}
 
-          {/* Content area with tabs */}
-          <div className="flex-1 overflow-hidden pb-2">
+          {/* Content area with tabs — swipeable */}
+          <div
+            className={`flex-1 overflow-hidden pb-2 transition-transform duration-150 ease-out ${
+              slideDirection === 'left' ? '-translate-x-4 opacity-80' :
+              slideDirection === 'right' ? 'translate-x-4 opacity-80' : ''
+            }`}
+            {...swipeHandlers}
+          >
             {currentExerciseState === 'loading' || currentExerciseState === 'pending' ? (
               <div className="flex flex-col items-center justify-center h-full py-12">
                 <LoadingFrog size={48} speed={0.8} />
