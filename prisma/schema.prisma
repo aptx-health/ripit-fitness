@@ -170,6 +170,7 @@ model LoggedSet {
   completion   WorkoutCompletion @relation(fields: [completionId], references: [id], onDelete: Cascade)
   exercise     Exercise          @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
 
+  @@unique([completionId, exerciseId, setNumber])
   @@index([exerciseId])
   @@index([completionId])
   @@index([userId])
