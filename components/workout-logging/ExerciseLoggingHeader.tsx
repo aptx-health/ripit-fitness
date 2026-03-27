@@ -36,14 +36,14 @@ export default function ExerciseLoggingHeader({
           )}
           <button
             onClick={onMinimize}
-            className="min-h-9 min-w-9 flex items-center justify-center rounded-lg bg-white/15 hover:bg-white/25 transition-colors"
+            className="min-h-9 min-w-9 flex items-center justify-center border-2 border-white/30 bg-white/15 hover:bg-white/25 transition-colors doom-focus-ring"
             aria-label="Minimize workout"
           >
             <ChevronDown className="h-4 w-4" />
           </button>
           <button
             onClick={onClose}
-            className="min-h-9 min-w-9 flex items-center justify-center rounded-lg bg-white/15 hover:bg-white/25 transition-colors"
+            className="min-h-9 min-w-9 flex items-center justify-center border-2 border-white/30 bg-white/15 hover:bg-white/25 transition-colors doom-focus-ring"
             aria-label="Close workout"
           >
             <X className="h-4 w-4" />

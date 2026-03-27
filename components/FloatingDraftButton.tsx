@@ -17,7 +17,7 @@ export default function FloatingDraftButton() {
           router.push(`/training?resume=${activeDraft.workoutId}`)
         }
       }}
-      className="md:hidden fixed right-4 min-h-12 min-w-12 flex items-center justify-center rounded-full bg-accent text-white shadow-lg animate-pulse"
+      className="md:hidden fixed right-4 min-h-12 min-w-12 flex items-center justify-center border-2 border-white/20 bg-accent text-white shadow-[2px_2px_0_rgba(0,0,0,0.3)] animate-pulse"
       style={{
         top: 'calc(env(safe-area-inset-top, 0px) + 0.5rem)',
         zIndex: 45,
