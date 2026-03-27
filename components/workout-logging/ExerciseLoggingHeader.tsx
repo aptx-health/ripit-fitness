@@ -1,5 +1,6 @@
 'use client'
 
+import { ChevronDown, X } from 'lucide-react'
 import type { SyncStatus } from '@/hooks/useSyncState'
 import SyncStatusIcon from '../SyncStatusIcon'
 
@@ -9,6 +10,8 @@ interface ExerciseLoggingHeaderProps {
   syncStatus: SyncStatus
   pendingSetsCount: number
   onSyncClick: () => void
+  onMinimize: () => void
+  onClose: () => void
 }
 
 export default function ExerciseLoggingHeader({
@@ -17,6 +20,8 @@ export default function ExerciseLoggingHeader({
   syncStatus,
   pendingSetsCount,
   onSyncClick,
+  onMinimize,
+  onClose,
 }: ExerciseLoggingHeaderProps) {
   return (
     <div
@@ -28,12 +33,27 @@ export default function ExerciseLoggingHeader({
           Exercise {currentExerciseIndex + 1} of {totalExercises}
         </div>
 
-        {/* Sync Status Icon */}
-        <SyncStatusIcon
-          status={syncStatus}
-          pendingCount={pendingSetsCount}
-          onClick={onSyncClick}
-        />
+        <div className="flex items-center gap-2">
+          <SyncStatusIcon
+            status={syncStatus}
+            pendingCount={pendingSetsCount}
+            onClick={onSyncClick}
+          />
+          <button
+            onClick={onMinimize}
+            className="min-h-9 min-w-9 flex items-center justify-center rounded-lg bg-white/15 hover:bg-white/25 transition-colors"
+            aria-label="Minimize workout"
+          >
+            <ChevronDown className="h-4 w-4" />
+          </button>
+          <button
+            onClick={onClose}
+            className="min-h-9 min-w-9 flex items-center justify-center rounded-lg bg-white/15 hover:bg-white/25 transition-colors"
+            aria-label="Close workout"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
       </div>
     </div>
   )

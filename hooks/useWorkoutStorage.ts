@@ -70,7 +70,10 @@ export function useWorkoutStorage(workoutId: string) {
 
   // Load workout data from localStorage on mount
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    if (typeof window === 'undefined' || !workoutId) {
+      setIsLoaded(true)
+      return
+    }
 
     let mounted = true
 
@@ -116,7 +119,7 @@ export function useWorkoutStorage(workoutId: string) {
 
   // Save to localStorage whenever loggedSets changes
   useEffect(() => {
-    if (!isLoaded || typeof window === 'undefined') return
+    if (!isLoaded || typeof window === 'undefined' || !workoutId) return
 
     const storageKey = getStorageKey(workoutId)
 

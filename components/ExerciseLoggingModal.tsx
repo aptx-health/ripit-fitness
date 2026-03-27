@@ -112,6 +112,38 @@ export default function ExerciseLoggingModal({
   // Enhanced persistence with localStorage backing
   const { loggedSets, setLoggedSets, isLoaded, clearStoredWorkout } = useWorkoutStorage(workoutId)
 
+  // Hydrate from DB draft when localStorage is empty but a draft exists
+  const [hydratedFromDb, setHydratedFromDb] = useState(false)
+  useEffect(() => {
+    if (!isLoaded || hydratedFromDb) return
+    if (loggedSets.length > 0) {
+      setHydratedFromDb(true)
+      return
+    }
+    if (!workoutCompletionId) {
+      setHydratedFromDb(true)
+      return
+    }
+
+    // localStorage is empty but DB draft exists — fetch sets from DB
+    const hydrate = async () => {
+      try {
+        const res = await fetch(`/api/workouts/${workoutId}/draft`)
+        if (!res.ok) { setHydratedFromDb(true); return }
+        const data = await res.json()
+        if (data.draft?.loggedSets?.length > 0) {
+          console.log(`Hydrated ${data.draft.loggedSets.length} sets from DB draft`)
+          setLoggedSets(data.draft.loggedSets)
+        }
+      } catch (err) {
+        console.error('Failed to hydrate from DB draft:', err)
+      } finally {
+        setHydratedFromDb(true)
+      }
+    }
+    hydrate()
+  }, [isLoaded, hydratedFromDb, loggedSets.length, workoutCompletionId, workoutId, setLoggedSets])
+
   // Validate and clean up localStorage on load - defer until exercises are loaded
   useEffect(() => {
     if (!isLoaded || !allExercisesLoaded || loggedSets.length === 0) return
@@ -319,14 +351,27 @@ export default function ExerciseLoggingModal({
       await syncCurrentState(loggedSets)
     }
 
+    // Clear localStorage — DB is now the source of truth for the draft
+    clearStoredWorkout()
+
     onClose(true) // Pass true to indicate workout was updated
   }
 
-  const handleExitDiscard = () => {
+  const handleExitDiscard = async () => {
     console.log('Discarding workout...')
     clearStoredWorkout()
     setShowExitConfirm(false)
-    onClose()
+
+    // Delete DB draft if one exists
+    if (workoutCompletionId || workoutId) {
+      try {
+        await fetch(`/api/workouts/${workoutId}/clear`, { method: 'POST' })
+      } catch (err) {
+        console.error('Failed to clear DB draft:', err)
+      }
+    }
+
+    onClose(true)
   }
 
   const handleWizardComplete = async () => {
@@ -521,6 +566,8 @@ export default function ExerciseLoggingModal({
             syncStatus={syncState.status}
             pendingSetsCount={syncState.pendingSets}
             onSyncClick={() => setShowSyncDetails(true)}
+            onMinimize={handleExitSaveAsDraft}
+            onClose={handleExitWorkout}
           />
 
           {/* Exercise Navigation */}
