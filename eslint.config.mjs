@@ -29,6 +29,7 @@ const eslintConfig = defineConfig([
     ".claude/**",
     "fitcsv-wt2/**",
     "cloud-functions/**/dist/**",
+    "scripts/**",
   ]),
 ]);
 

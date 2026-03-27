@@ -199,7 +199,13 @@ export default function ExerciseLoggingModal({
       onClose()
     } catch (error) {
       console.error('Error completing workout:', error)
-      alert('Failed to save workout. Please try again.')
+      setIsSubmitting(false)
+      setIsConfirming(false)
+      const message = !navigator.onLine
+        ? 'You\'re offline. Your sets are saved locally. Reopen this workout when you have a connection to complete it.'
+        : 'Failed to save workout. Please try again.'
+      alert(message)
+      return
     } finally {
       setIsSubmitting(false)
     }
