@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/server';
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/programs/[programId]/copy-status
@@ -53,7 +54,6 @@ export async function GET(
         }
       }
 
-      // Failed state — worker set this before returning 500
       if (copyStatus === 'failed') {
         return NextResponse.json({
           status: 'failed',
@@ -109,7 +109,7 @@ export async function GET(
     }, { status: 404 });
 
   } catch (error) {
-    console.error('Error checking copy status:', error);
+    logger.error({ error, context: 'copy-status' }, 'Error checking copy status');
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

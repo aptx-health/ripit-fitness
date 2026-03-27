@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import BottomNav from '@/components/BottomNav'
 import Header from '@/components/Header'
 import { getCurrentUser } from '@/lib/auth/server'
 
@@ -16,7 +17,8 @@ export default async function AppLayout({
   return (
     <div className="min-h-screen">
       <Header userEmail={user.email || ''} />
-      {children}
+      <div className="pb-20 md:pb-0">{children}</div>
+      <BottomNav />
     </div>
   )
 }

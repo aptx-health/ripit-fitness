@@ -1,19 +1,20 @@
 'use client'
 
 import { AlertTriangle } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import { type Exercise, type ExerciseHistory, useProgressiveExercises } from '@/hooks/useProgressiveExercises'
 import { useWorkoutDraft } from '@/hooks/useWorkoutDraft'
 import { completeDraft, discardDraft } from '@/lib/api/workout-sets'
+import { parseRepsFromPrescribed } from '@/lib/constants/intensity-presets'
 import type { LoggedSet } from '@/types/workout'
 import ExerciseDefinitionEditorModal from './features/exercise-definition/ExerciseDefinitionEditorModal'
 import ExerciseActionsFooter from './workout-logging/ExerciseActionsFooter'
 import ExerciseDisplayTabs from './workout-logging/ExerciseDisplayTabs'
 import ExerciseLoggingHeader from './workout-logging/ExerciseLoggingHeader'
 import ExerciseNavigation from './workout-logging/ExerciseNavigation'
-import SetLoggingForm from './workout-logging/SetLoggingForm'
+import SetLoggingForm, { type ExpandedInput } from './workout-logging/SetLoggingForm'
 import { AddExerciseWizard } from './workout-logging/wizards/AddExerciseWizard'
 import { DeleteExerciseWizard } from './workout-logging/wizards/DeleteExerciseWizard'
 import { EditExerciseWizard } from './workout-logging/wizards/EditExerciseWizard'
@@ -63,6 +64,9 @@ export default function ExerciseLoggingModal({
   }>({ show: false })
   const [showExitConfirm, setShowExitConfirm] = useState(false)
 
+  // Input expansion state (lifted from SetLoggingForm for SetList visibility)
+  const [expandedInput, setExpandedInput] = useState<ExpandedInput>(null)
+
   // Wizard state
   const [activeWizard, setActiveWizard] = useState<'add' | 'swap' | 'edit' | 'delete' | null>(null)
   const [navigateToLastExercise, setNavigateToLastExercise] = useState(false)
@@ -110,6 +114,39 @@ export default function ExerciseLoggingModal({
   const hasRpe = currentPrescribedSets.some((s) => s.rpe !== null)
   const hasRir = currentPrescribedSets.some((s) => s.rir !== null)
 
+  // Pre-fill form when exercise loads or set number changes
+  const lastPrefillKey = useRef<string>('')
+  useEffect(() => {
+    if (!currentExercise) return
+
+    const prefillKey = `${currentExercise.id}-${nextSetNumber}`
+    if (lastPrefillKey.current === prefillKey) return
+    lastPrefillKey.current = prefillKey
+
+    const targetPrescribed = currentPrescribedSets.find(s => s.setNumber === nextSetNumber)
+
+    // Pre-fill reps from prescribed set (high end of range)
+    const prefillReps = parseRepsFromPrescribed(targetPrescribed?.reps)
+
+    // Weight: carry forward from last logged set, or default to 0
+    const lastLogged = currentExerciseLoggedSets.length > 0
+      ? currentExerciseLoggedSets[currentExerciseLoggedSets.length - 1]
+      : null
+    const prefillWeight = lastLogged ? String(lastLogged.weight) : '0'
+
+    // Intensity: pre-fill from prescribed
+    const prefillRpe = targetPrescribed?.rpe != null ? String(targetPrescribed.rpe) : ''
+    const prefillRir = targetPrescribed?.rir != null ? String(targetPrescribed.rir) : ''
+
+    setCurrentSet(prev => ({
+      ...prev,
+      reps: prefillReps,
+      weight: prefillWeight,
+      rpe: prefillRpe,
+      rir: prefillRir,
+    }))
+  }, [currentExercise, nextSetNumber, currentPrescribedSets, currentExerciseLoggedSets])
+
   const handleLogSet = useCallback(() => {
     if (!currentSet.reps || !currentSet.weight || !currentExercise) return
 
@@ -119,28 +156,51 @@ export default function ExerciseLoggingModal({
       reps: parseInt(currentSet.reps, 10),
       weight: parseFloat(currentSet.weight),
       weightUnit: currentSet.weightUnit,
-      rpe: currentSet.rpe ? parseInt(currentSet.rpe, 10) : null,
+      rpe: currentSet.rpe ? parseFloat(currentSet.rpe) : null,
       rir: currentSet.rir ? parseInt(currentSet.rir, 10) : null,
     })
 
-    // Reset form
+    // Pre-fill for next set: reps from next prescribed, weight carried forward
+    const nextNextSetNumber = nextSetNumber + 1
+    const nextPrescribed = currentPrescribedSets.find(s => s.setNumber === nextNextSetNumber)
+    const nextReps = parseRepsFromPrescribed(nextPrescribed?.reps || prescribedSet?.reps)
+    const nextRpe = nextPrescribed?.rpe != null ? String(nextPrescribed.rpe) : ''
+    const nextRir = nextPrescribed?.rir != null ? String(nextPrescribed.rir) : ''
+
+    // Update prefill key so the useEffect doesn't overwrite
+    lastPrefillKey.current = `${currentExercise.id}-${nextNextSetNumber}`
+
     setCurrentSet({
-      reps: '',
-      weight: '',
+      reps: nextReps,
+      weight: currentSet.weight, // carry forward weight from just-logged set
       weightUnit: currentSet.weightUnit,
-      rpe: '',
-      rir: '',
+      rpe: nextRpe,
+      rir: nextRir,
     })
-  }, [currentSet, currentExercise, nextSetNumber, logSet])
+  }, [currentSet, currentExercise, nextSetNumber, currentPrescribedSets, prescribedSet, logSet])
 
   const handleNextExercise = () => {
+    lastPrefillKey.current = ''
     goToNext()
-    setCurrentSet({ reps: '', weight: '', weightUnit: 'lbs', rpe: '', rir: '' })
+    setCurrentSet(prev => ({
+      reps: '',
+      weight: '',
+      weightUnit: prev.weightUnit,
+      rpe: '',
+      rir: '',
+    }))
   }
 
   const handlePreviousExercise = () => {
+    lastPrefillKey.current = ''
     goToPrevious()
-    setCurrentSet({ reps: '', weight: '', weightUnit: 'lbs', rpe: '', rir: '' })
+    setCurrentSet(prev => ({
+      reps: '',
+      weight: '',
+      weightUnit: prev.weightUnit,
+      rpe: '',
+      rir: '',
+    }))
   }
 
   const handleReplaceExercise = () => setActiveWizard('swap')
@@ -211,6 +271,13 @@ export default function ExerciseLoggingModal({
     }
   }
 
+  const performDeleteSet = useCallback((exerciseId: string, setNumber: number) => {
+    const set = loggedSets.find(
+      s => s.exerciseId === exerciseId && s.setNumber === setNumber
+    )
+    deleteSet(set?.id, exerciseId, setNumber)
+  }, [loggedSets, deleteSet])
+
   const handleDeleteSet = useCallback((setNumber: number) => {
     if (!currentExercise) return
 
@@ -223,15 +290,7 @@ export default function ExerciseLoggingModal({
     }
 
     performDeleteSet(exerciseId, setNumber)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentExercise?.id, loggedSets, currentExercise])
-
-  const performDeleteSet = useCallback((exerciseId: string, setNumber: number) => {
-    const set = loggedSets.find(
-      s => s.exerciseId === exerciseId && s.setNumber === setNumber
-    )
-    deleteSet(set?.id, exerciseId, setNumber)
-  }, [loggedSets, deleteSet])
+  }, [currentExercise?.id, loggedSets, currentExercise, performDeleteSet])
 
   const handleConfirmDelete = useCallback(() => {
     if (showDeleteConfirm.exerciseId && showDeleteConfirm.setNumber) {
@@ -339,6 +398,7 @@ export default function ExerciseLoggingModal({
                 historyState={currentHistoryState}
                 hasHistoryIndicator={hasHistoryForCurrentExercise}
                 onDeleteSet={handleDeleteSet}
+                isInputExpanded={expandedInput !== null}
                 loggingForm={
                   <SetLoggingForm
                     prescribedSet={prescribedSet}
@@ -347,14 +407,16 @@ export default function ExerciseLoggingModal({
                     hasRir={hasRir}
                     currentSet={currentSet}
                     onSetChange={setCurrentSet}
+                    expandedInput={expandedInput}
+                    onExpandedInputChange={setExpandedInput}
                   />
                 }
               />
             ) : null}
           </div>
 
-          {/* Actions Footer */}
-          <ExerciseActionsFooter
+          {/* Actions Footer - hidden when an input is expanded */}
+          {expandedInput === null && <ExerciseActionsFooter
             currentExerciseName={currentExercise?.name || 'Exercise'}
             nextSetNumber={nextSetNumber}
             totalLoggedSets={totalLoggedSets}
@@ -368,7 +430,7 @@ export default function ExerciseLoggingModal({
             onReplaceExercise={handleReplaceExercise}
             onDeleteExercise={handleDeleteExercise}
             onExitWorkout={handleExitWorkout}
-          />
+          />}
 
           {/* Workout completion confirmation */}
           {isConfirming && (
