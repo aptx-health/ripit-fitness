@@ -1743,3 +1743,108 @@ body {
 .animate-shimmer {
   animation: shimmer 2s infinite;
 }
+
+/* Prose styles for Learn article markdown content */
+.prose-learn {
+  color: var(--foreground);
+  font-size: 0.9375rem;
+  line-height: 1.7;
+}
+.prose-learn h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  color: var(--foreground);
+}
+.prose-learn h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1.75rem;
+  margin-bottom: 0.5rem;
+  color: var(--foreground);
+}
+.prose-learn h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--foreground);
+}
+.prose-learn p {
+  margin-bottom: 1rem;
+}
+.prose-learn a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+.prose-learn a:hover {
+  color: var(--warning-text);
+}
+.prose-learn strong {
+  font-weight: 600;
+  color: var(--foreground);
+}
+.prose-learn ul,
+.prose-learn ol {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+.prose-learn ul {
+  list-style-type: disc;
+}
+.prose-learn ol {
+  list-style-type: decimal;
+}
+.prose-learn li {
+  margin-bottom: 0.25rem;
+}
+.prose-learn blockquote {
+  border-left: 3px solid var(--primary);
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+.prose-learn code {
+  background: var(--muted);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.8125rem;
+}
+.prose-learn pre {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+.prose-learn pre code {
+  background: transparent;
+  padding: 0;
+}
+.prose-learn img {
+  max-width: 100%;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+.prose-learn hr {
+  border-color: var(--border);
+  margin: 2rem 0;
+}
+.prose-learn table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+.prose-learn th,
+.prose-learn td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+.prose-learn th {
+  background: var(--muted);
+  font-weight: 600;
+}
