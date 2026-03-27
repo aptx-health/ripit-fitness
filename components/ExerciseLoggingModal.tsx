@@ -581,8 +581,8 @@ export default function ExerciseLoggingModal({
             ) : null}
           </div>
 
-          {/* Actions Footer */}
-          <ExerciseActionsFooter
+          {/* Actions Footer - hidden when an input is expanded */}
+          {expandedInput === null && <ExerciseActionsFooter
             currentExerciseName={currentExercise?.name || 'Exercise'}
             nextSetNumber={nextSetNumber}
             totalLoggedSets={totalLoggedSets}
@@ -596,7 +596,7 @@ export default function ExerciseLoggingModal({
             onReplaceExercise={handleReplaceExercise}
             onDeleteExercise={handleDeleteExercise}
             onExitWorkout={handleExitWorkout}
-          />
+          />}
 
           {/* Workout completion confirmation modal */}
           {isConfirming && (
