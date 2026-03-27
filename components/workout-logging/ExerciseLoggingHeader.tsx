@@ -1,22 +1,17 @@
 'use client'
 
-import type { SyncStatus } from '@/hooks/useSyncState'
-import SyncStatusIcon from '../SyncStatusIcon'
+import { AlertCircle } from 'lucide-react'
 
 interface ExerciseLoggingHeaderProps {
   currentExerciseIndex: number
   totalExercises: number
-  syncStatus: SyncStatus
-  pendingSetsCount: number
-  onSyncClick: () => void
+  failedSetCount?: number
 }
 
 export default function ExerciseLoggingHeader({
   currentExerciseIndex,
   totalExercises,
-  syncStatus,
-  pendingSetsCount,
-  onSyncClick,
+  failedSetCount = 0,
 }: ExerciseLoggingHeaderProps) {
   return (
     <div
@@ -28,12 +23,12 @@ export default function ExerciseLoggingHeader({
           Exercise {currentExerciseIndex + 1} of {totalExercises}
         </div>
 
-        {/* Sync Status Icon */}
-        <SyncStatusIcon
-          status={syncStatus}
-          pendingCount={pendingSetsCount}
-          onClick={onSyncClick}
-        />
+        {failedSetCount > 0 && (
+          <div className="flex items-center gap-1 text-warning text-sm">
+            <AlertCircle size={16} />
+            <span>{failedSetCount} unsaved</span>
+          </div>
+        )}
       </div>
     </div>
   )
