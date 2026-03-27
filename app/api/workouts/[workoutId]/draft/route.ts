@@ -268,8 +268,9 @@ export async function GET(
       })
     }
 
-    // Transform logged sets to match expected format
+    // Transform logged sets — include id for per-set operations
     const loggedSets = draftCompletion.loggedSets.map(set => ({
+      id: set.id,
       exerciseId: set.exerciseId,
       setNumber: set.setNumber,
       reps: set.reps,

@@ -9,7 +9,6 @@ import { ProgramCompletionModal } from '@/components/ProgramCompletionModal'
 import WeekNavigator from '@/components/ui/WeekNavigator'
 import WorkoutPreviewModal from '@/components/WorkoutPreviewModal'
 import WorkoutCard from '@/components/workout/WorkoutCard'
-import { useWorkoutStorage } from '@/hooks/useWorkoutStorage'
 import { clientLogger } from '@/lib/client-logger'
 import { useDraftWorkout } from '@/lib/contexts/DraftWorkoutContext'
 
@@ -168,9 +167,6 @@ export default function StrengthWeekView({
   const [showCompletionModal, setShowCompletionModal] = useState(false)
   const [isRestarting, setIsRestarting] = useState(false)
   const [isProgramComplete, setIsProgramComplete] = useState(false)
-
-  // For clearing localStorage when resetting workout
-  const { clearStoredWorkout } = useWorkoutStorage(selectedWorkoutId || '')
 
   // Auto-resume draft workout when navigated with ?resume= param
   const resumeWorkoutId = searchParams.get('resume')
@@ -336,23 +332,9 @@ export default function StrengthWeekView({
     setModalMode('logging')
   }
 
-  const handleCompleteWorkout = async (loggedSets: Array<{
-    exerciseId: string
-    setNumber: number
-    reps: number
-    weight: number
-    weightUnit: string
-    rpe: number | null
-    rir: number | null
-  }>) => {
-    if (!selectedWorkoutId) return
-    const response = await fetch(`/api/workouts/${selectedWorkoutId}/complete`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ loggedSets }),
-    })
-    if (!response.ok) throw new Error('Failed to complete workout')
-    handleCloseModal(true) // Pass true to indicate workout was updated
+  // Completion is handled inside ExerciseLoggingModal now (per-set writes + status flip)
+  const handleCompleteWorkout = async () => {
+    handleCloseModal(true)
     await checkProgramCompletion(true)
   }
 
@@ -360,7 +342,6 @@ export default function StrengthWeekView({
     if (!selectedWorkoutId) return
     const response = await fetch(`/api/workouts/${selectedWorkoutId}/clear`, { method: 'POST' })
     if (!response.ok) throw new Error('Failed to clear workout')
-    clearStoredWorkout()
     setModalKey(prev => prev + 1)
     // Refetch the workout data/metadata
     if (modalMode === 'preview') {

@@ -16,6 +16,16 @@ You are a code reviewer for a Next.js 15 / TypeScript / Prisma application. Your
 - Always specify `--config` with `doppler run`. NEVER use `--config preview` or `--config prd`.
 - Prisma v6.x only — use `npx prisma@6.19.0` to avoid installing v7.
 
+### Doppler setup (IMPORTANT — do this first)
+
+Doppler must be bound to a project in the working directory before any `doppler run` commands will work. In worktrees (or any fresh checkout), run this once before anything else:
+
+```bash
+doppler setup --project fitcsv --config dev_personal --no-interactive
+```
+
+If `doppler run` fails with "You must specify a project", this is why.
+
 ### Things to watch for in this codebase
 
 - **Next.js 15 params**: Dynamic route params must be `Promise`-based — `const { id } = await params;`

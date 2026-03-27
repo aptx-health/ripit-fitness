@@ -1,15 +1,11 @@
 'use client'
 
-import { ChevronDown, X } from 'lucide-react'
-import type { SyncStatus } from '@/hooks/useSyncState'
-import SyncStatusIcon from '../SyncStatusIcon'
+import { AlertCircle, ChevronDown, X } from 'lucide-react'
 
 interface ExerciseLoggingHeaderProps {
   currentExerciseIndex: number
   totalExercises: number
-  syncStatus: SyncStatus
-  pendingSetsCount: number
-  onSyncClick: () => void
+  failedSetCount?: number
   onMinimize: () => void
   onClose: () => void
 }
@@ -17,9 +13,7 @@ interface ExerciseLoggingHeaderProps {
 export default function ExerciseLoggingHeader({
   currentExerciseIndex,
   totalExercises,
-  syncStatus,
-  pendingSetsCount,
-  onSyncClick,
+  failedSetCount = 0,
   onMinimize,
   onClose,
 }: ExerciseLoggingHeaderProps) {
@@ -34,11 +28,12 @@ export default function ExerciseLoggingHeader({
         </div>
 
         <div className="flex items-center gap-2">
-          <SyncStatusIcon
-            status={syncStatus}
-            pendingCount={pendingSetsCount}
-            onClick={onSyncClick}
-          />
+          {failedSetCount > 0 && (
+            <div className="flex items-center gap-1 text-warning text-sm">
+              <AlertCircle size={16} />
+              <span>{failedSetCount} unsaved</span>
+            </div>
+          )}
           <button
             onClick={onMinimize}
             className="min-h-9 min-w-9 flex items-center justify-center rounded-lg bg-white/15 hover:bg-white/25 transition-colors"
