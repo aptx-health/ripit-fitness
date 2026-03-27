@@ -445,7 +445,7 @@ model ContentReadStatus {
 model Collection {
   id           String   @id @default(cuid())
   name         String
-  description  String
+  description  String   @db.VarChar(280)
   displayOrder Int
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

@@ -62,7 +62,7 @@ CREATE TABLE "ContentReadStatus" (
 CREATE TABLE "Collection" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "description" TEXT NOT NULL,
+    "description" VARCHAR(280) NOT NULL,
     "displayOrder" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
