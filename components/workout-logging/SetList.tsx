@@ -59,19 +59,26 @@ export default function SetList({
         </div>
       )}
 
-      {/* Prescribed Sets Reference */}
-      <div>
-        <h4 className="text-base sm:text-lg font-bold text-foreground mb-2 uppercase tracking-wider">Target</h4>
-        <div className="bg-muted p-3 sm:p-4 space-y-2 border-2 border-border">
-          {prescribedSets.map((set) => (
-            <div key={set.id} className="text-base sm:text-lg text-foreground">
-              Set {set.setNumber}: {set.reps} reps @ {set.weight || '—'}
-              {set.rir !== null && ` • RIR ${set.rir}`}
-              {set.rpe !== null && ` • RPE ${set.rpe}`}
+      {/* Prescribed Sets Reference - only show sets not yet logged */}
+      {(() => {
+        const loggedSetNumbers = new Set(loggedSets.map(s => s.setNumber))
+        const remainingSets = prescribedSets.filter(s => !loggedSetNumbers.has(s.setNumber))
+        if (remainingSets.length === 0) return null
+        return (
+          <div>
+            <h4 className="text-base sm:text-lg font-bold text-foreground mb-2 uppercase tracking-wider">Target</h4>
+            <div className="bg-muted p-3 sm:p-4 space-y-2 border-2 border-border">
+              {remainingSets.map((set) => (
+                <div key={set.id} className="text-base sm:text-lg text-foreground">
+                  Set {set.setNumber}: {set.reps} reps @ {set.weight || '—'}
+                  {set.rir !== null && ` • RIR ${set.rir}`}
+                  {set.rpe !== null && ` • RPE ${set.rpe}`}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
+        )
+      })()}
 
       {/* Logged Sets */}
       {loggedSets.length > 0 && (
