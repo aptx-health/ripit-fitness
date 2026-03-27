@@ -16,7 +16,6 @@ export function IntensitySelector({
   type,
   value,
   onChange,
-  prescribedValue,
   isExpanded,
   onExpand,
   onCollapse,
@@ -25,9 +24,6 @@ export function IntensitySelector({
   const label = type === 'rpe' ? 'RPE' : 'RIR'
 
   const numericValue = value ? parseFloat(value) : null
-  const selectedPreset = numericValue !== null
-    ? presets.find(p => p.value === numericValue)
-    : null
 
   const handleSelect = (preset: IntensityPreset) => {
     onChange(String(preset.value))
