@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useUserSettings } from '@/hooks/useUserSettings'
 import { IntensitySelector } from './inputs/IntensitySelector'
 import { RepsStepper } from './inputs/RepsStepper'
@@ -14,6 +14,8 @@ interface PrescribedSet {
   rpe: number | null
   rir: number | null
 }
+
+export type ExpandedInput = 'weight' | 'rpe' | 'rir' | null
 
 interface SetLoggingFormProps {
   prescribedSet: PrescribedSet | undefined
@@ -34,9 +36,9 @@ interface SetLoggingFormProps {
     rpe: string
     rir: string
   }) => void
+  expandedInput: ExpandedInput
+  onExpandedInputChange: (input: ExpandedInput) => void
 }
-
-type ExpandedInput = 'weight' | 'rpe' | 'rir' | null
 
 export default function SetLoggingForm({
   prescribedSet,
@@ -45,9 +47,10 @@ export default function SetLoggingForm({
   hasRir,
   currentSet,
   onSetChange,
+  expandedInput,
+  onExpandedInputChange,
 }: SetLoggingFormProps) {
   const { settings } = useUserSettings()
-  const [expandedInput, setExpandedInput] = useState<ExpandedInput>(null)
 
   // Update weight unit when settings change
   useEffect(() => {
@@ -73,11 +76,11 @@ export default function SetLoggingForm({
   }
 
   const handleExpand = (input: ExpandedInput) => {
-    setExpandedInput(input)
+    onExpandedInputChange(input)
   }
 
   const handleCollapse = () => {
-    setExpandedInput(null)
+    onExpandedInputChange(null)
   }
 
   const showReps = expandedInput === null || expandedInput === 'weight'

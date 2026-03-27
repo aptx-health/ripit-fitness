@@ -16,7 +16,7 @@ import ExerciseActionsFooter from './workout-logging/ExerciseActionsFooter'
 import ExerciseDisplayTabs from './workout-logging/ExerciseDisplayTabs'
 import ExerciseLoggingHeader from './workout-logging/ExerciseLoggingHeader'
 import ExerciseNavigation from './workout-logging/ExerciseNavigation'
-import SetLoggingForm from './workout-logging/SetLoggingForm'
+import SetLoggingForm, { type ExpandedInput } from './workout-logging/SetLoggingForm'
 import { AddExerciseWizard } from './workout-logging/wizards/AddExerciseWizard'
 import { DeleteExerciseWizard } from './workout-logging/wizards/DeleteExerciseWizard'
 import { EditExerciseWizard } from './workout-logging/wizards/EditExerciseWizard'
@@ -80,6 +80,9 @@ export default function ExerciseLoggingModal({
     isDeleteAll?: boolean
   }>({ show: false })
   const [showExitConfirm, setShowExitConfirm] = useState(false)
+
+  // Input expansion state (lifted from SetLoggingForm for SetList visibility)
+  const [expandedInput, setExpandedInput] = useState<ExpandedInput>(null)
 
   // Wizard state
   const [activeWizard, setActiveWizard] = useState<'add' | 'swap' | 'edit' | 'delete' | null>(null)
@@ -387,8 +390,7 @@ export default function ExerciseLoggingModal({
 
     // Direct deletion for safe operations
     performDeleteSet(exerciseId, setNumber)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentExercise?.id, loggedSets, currentExercise])
+  }, [currentExercise?.id, loggedSets, currentExercise, performDeleteSet])
 
   const performDeleteSet = useCallback((exerciseId: string, setNumber: number) => {
     console.log(`Deleting set ${setNumber} for exercise ${exerciseId}`)
@@ -562,6 +564,7 @@ export default function ExerciseLoggingModal({
                 historyState={currentHistoryState}
                 hasHistoryIndicator={hasHistoryForCurrentExercise}
                 onDeleteSet={handleDeleteSet}
+                isInputExpanded={expandedInput !== null}
                 loggingForm={
                   <SetLoggingForm
                     prescribedSet={prescribedSet}
@@ -570,6 +573,8 @@ export default function ExerciseLoggingModal({
                     hasRir={hasRir}
                     currentSet={currentSet}
                     onSetChange={setCurrentSet}
+                    expandedInput={expandedInput}
+                    onExpandedInputChange={setExpandedInput}
                   />
                 }
               />
