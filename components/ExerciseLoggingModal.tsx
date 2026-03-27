@@ -371,6 +371,24 @@ export default function ExerciseLoggingModal({
     }
   }
 
+  const performDeleteSet = useCallback((exerciseId: string, setNumber: number) => {
+    console.log(`Deleting set ${setNumber} for exercise ${exerciseId}`)
+
+    const beforeCount = loggedSets.length
+    setLoggedSets(prev =>
+      prev.filter(
+        (s) => !(s.exerciseId === exerciseId && s.setNumber === setNumber)
+      )
+    )
+
+    const afterCount = loggedSets.length - 1
+    console.log(`Deletion impact: ${beforeCount} -> ${afterCount} total sets`)
+
+    setHasUnsavedChanges(true)
+
+    console.log('Set deleted locally - will sync with next batch or manual sync')
+  }, [loggedSets, setLoggedSets])
+
   const handleDeleteSet = useCallback((setNumber: number) => {
     if (!currentExercise) return
 
@@ -391,24 +409,6 @@ export default function ExerciseLoggingModal({
     // Direct deletion for safe operations
     performDeleteSet(exerciseId, setNumber)
   }, [currentExercise?.id, loggedSets, currentExercise, performDeleteSet])
-
-  const performDeleteSet = useCallback((exerciseId: string, setNumber: number) => {
-    console.log(`Deleting set ${setNumber} for exercise ${exerciseId}`)
-
-    const beforeCount = loggedSets.length
-    setLoggedSets(prev =>
-      prev.filter(
-        (s) => !(s.exerciseId === exerciseId && s.setNumber === setNumber)
-      )
-    )
-
-    const afterCount = loggedSets.length - 1
-    console.log(`Deletion impact: ${beforeCount} -> ${afterCount} total sets`)
-
-    setHasUnsavedChanges(true)
-
-    console.log('Set deleted locally - will sync with next batch or manual sync')
-  }, [loggedSets, setLoggedSets])
 
   const handleConfirmDelete = useCallback(() => {
     if (showDeleteConfirm.exerciseId && showDeleteConfirm.setNumber) {
