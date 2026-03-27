@@ -1,13 +1,16 @@
 'use client'
 
-import { Dumbbell, Save } from 'lucide-react'
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
+import { Dumbbell, Moon, Palette, Save, Sun } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { ThemeSelector } from '@/components/ThemeSelector'
-import { useUserSettings, type UserSettings } from '@/hooks/useUserSettings'
+import { useThemePreference } from '@/hooks/useThemePreference'
+import { useUserSettings } from '@/hooks/useUserSettings'
+import { THEME_LABELS, THEMES, type ThemeName } from '@/lib/theme'
 
 export default function SettingsPage() {
   const { settings, isLoading, updateSettings } = useUserSettings()
+  const { preference, updateTheme } = useThemePreference()
   const [displayName, setDisplayName] = useState('')
   const [weightUnit, setWeightUnit] = useState<'lbs' | 'kg'>('lbs')
   const [intensityRating, setIntensityRating] = useState<'rpe' | 'rir'>('rpe')
@@ -58,12 +61,79 @@ export default function SettingsPage() {
           <div className="text-sm text-muted-foreground">Loading...</div>
         ) : (
           <>
-            {/* Theme */}
-            <div>
-              <span className="block text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
-                Theme
-              </span>
-              <ThemeSelector />
+            {/* Theme + Mode */}
+            <div className="flex gap-2">
+              {/* Theme selector — 2/3 */}
+              <div className="flex-[2]">
+                <span className="block text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
+                  Theme
+                </span>
+                <DropdownMenu.Root>
+                  <DropdownMenu.Trigger asChild>
+                    <button
+                      type="button"
+                      className="w-full px-4 py-2 border-2 border-border bg-muted text-foreground font-semibold uppercase tracking-wider transition-colors hover:border-primary hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background flex items-center justify-center gap-2"
+                    >
+                      <Palette className="w-4 h-4" />
+                      {preference ? THEME_LABELS[preference.themeName] : '...'}
+                    </button>
+                  </DropdownMenu.Trigger>
+                  <DropdownMenu.Portal>
+                    <DropdownMenu.Content
+                      className="bg-card border-2 border-primary shadow-lg z-50 min-w-[180px]"
+                      sideOffset={5}
+                      align="start"
+                    >
+                      {THEMES.map((themeName) => (
+                        <DropdownMenu.Item
+                          key={themeName}
+                          onClick={() =>
+                            preference &&
+                            updateTheme({ ...preference, themeName })
+                          }
+                          className={`w-full px-4 py-2.5 text-left text-sm font-semibold uppercase tracking-wider transition-colors cursor-pointer outline-none ${
+                            preference?.themeName === themeName
+                              ? 'bg-primary text-primary-foreground'
+                              : 'hover:bg-muted text-foreground'
+                          }`}
+                        >
+                          {THEME_LABELS[themeName]}
+                        </DropdownMenu.Item>
+                      ))}
+                    </DropdownMenu.Content>
+                  </DropdownMenu.Portal>
+                </DropdownMenu.Root>
+              </div>
+
+              {/* Light/Dark toggle — 1/3 */}
+              <div className="flex-1">
+                <span className="block text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
+                  Mode
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    preference &&
+                    updateTheme({
+                      ...preference,
+                      mode: preference.mode === 'dark' ? 'light' : 'dark',
+                    })
+                  }
+                  className="w-full px-4 py-2 border-2 border-border bg-muted text-foreground font-semibold uppercase tracking-wider transition-colors hover:border-primary hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background flex items-center justify-center gap-2"
+                >
+                  {preference?.mode === 'dark' ? (
+                    <>
+                      <Moon className="w-4 h-4" />
+                      Dark
+                    </>
+                  ) : (
+                    <>
+                      <Sun className="w-4 h-4" />
+                      Light
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
 
             {/* Display Name */}
