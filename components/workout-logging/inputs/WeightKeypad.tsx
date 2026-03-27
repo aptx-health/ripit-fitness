@@ -92,9 +92,10 @@ export function WeightKeypad({
           type="button"
           onClick={handleExpand}
           className="w-full h-14 px-4 flex items-center justify-center
-            bg-muted border-2 border-input
+            bg-muted border-2 border-input border-b-4
             text-2xl font-bold text-foreground tabular-nums
-            hover:border-primary active:bg-secondary transition-colors"
+            hover:border-primary active:bg-secondary active:border-b-2 active:translate-y-[2px]
+            transition-all duration-75"
         >
           {value || '0'}
           <span className="text-sm font-semibold text-muted-foreground ml-2">

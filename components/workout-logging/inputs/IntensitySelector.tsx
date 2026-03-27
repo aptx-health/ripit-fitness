@@ -44,18 +44,14 @@ export function IntensitySelector({
         <button
           type="button"
           onClick={onExpand}
-          className="w-full h-14 px-4 flex items-center justify-between
-            bg-muted border-2 border-input
-            hover:border-primary active:bg-secondary transition-colors text-left"
+          className="w-full h-14 px-4 flex items-center justify-center
+            bg-muted border-2 border-input border-b-4
+            hover:border-primary active:bg-secondary active:border-b-2 active:translate-y-[2px]
+            transition-all duration-75"
         >
           <span className="text-2xl font-bold text-foreground tabular-nums">
-            {value || (prescribedValue != null ? String(prescribedValue) : '--')}
+            {value || '--'}
           </span>
-          {selectedPreset && (
-            <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider truncate ml-2">
-              {selectedPreset.description}
-            </span>
-          )}
         </button>
       </div>
     )
@@ -89,7 +85,7 @@ export function IntensitySelector({
               }`}>
                 {preset.label}
               </span>
-              <span className="text-sm text-muted-foreground font-medium">
+              <span className="text-base text-muted-foreground font-medium">
                 {preset.description}
               </span>
             </button>
@@ -104,7 +100,7 @@ export function IntensitySelector({
             onCollapse()
           }}
           className="w-full px-4 py-3 bg-muted border-2 border-input
-            text-muted-foreground font-bold uppercase tracking-wider text-sm
+            text-muted-foreground font-bold uppercase tracking-wider text-base
             hover:border-primary hover:bg-secondary transition-colors"
         >
           Skip {label}

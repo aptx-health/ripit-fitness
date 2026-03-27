@@ -28,17 +28,17 @@ export function RepsStepper({ value, onChange, placeholder }: RepsStepperProps) 
       <span className="block text-sm font-semibold text-foreground mb-1 uppercase tracking-wider">
         Reps
       </span>
-      <div className="flex items-center gap-0">
+      <div className="flex items-center gap-2">
         <button
           type="button"
           onClick={handleDecrement}
           disabled={!hasValue || numericValue <= 0}
           className="flex-shrink-0 w-14 h-14 flex items-center justify-center
-            bg-muted border-2 border-input border-r-0
-            text-foreground hover:bg-secondary hover:border-primary
-            active:bg-primary active:text-primary-foreground
-            disabled:opacity-30 disabled:hover:bg-muted disabled:hover:border-input
-            transition-colors"
+            bg-error/15 border-2 border-error/40 border-b-4
+            text-error hover:bg-error/25 hover:border-error
+            active:bg-error active:text-white active:border-b-2 active:translate-y-[2px]
+            disabled:opacity-30 disabled:hover:bg-error/15 disabled:hover:border-error/40
+            transition-all duration-75"
           aria-label="Decrease reps"
         >
           <Minus size={24} strokeWidth={3} />
@@ -60,10 +60,10 @@ export function RepsStepper({ value, onChange, placeholder }: RepsStepperProps) 
           type="button"
           onClick={handleIncrement}
           className="flex-shrink-0 w-14 h-14 flex items-center justify-center
-            bg-muted border-2 border-input border-l-0
-            text-foreground hover:bg-secondary hover:border-primary
-            active:bg-primary active:text-primary-foreground
-            transition-colors"
+            bg-success/15 border-2 border-success/40 border-b-4
+            text-success hover:bg-success/25 hover:border-success
+            active:bg-success active:text-white active:border-b-2 active:translate-y-[2px]
+            transition-all duration-75"
           aria-label="Increase reps"
         >
           <Plus size={24} strokeWidth={3} />
