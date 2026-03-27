@@ -94,7 +94,6 @@ CREATE TABLE "ArticleComment" (
 CREATE UNIQUE INDEX "Article_slug_key" ON "Article"("slug");
 CREATE INDEX "Article_authorId_idx" ON "Article"("authorId");
 CREATE INDEX "Article_status_idx" ON "Article"("status");
-CREATE INDEX "Article_slug_idx" ON "Article"("slug");
 CREATE INDEX "Article_level_idx" ON "Article"("level");
 CREATE INDEX "Article_publishedAt_idx" ON "Article"("publishedAt" DESC);
 CREATE INDEX "Article_status_publishedAt_idx" ON "Article"("status", "publishedAt" DESC);

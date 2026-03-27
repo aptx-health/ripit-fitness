@@ -404,7 +404,6 @@ model Article {
 
   @@index([authorId])
   @@index([status])
-  @@index([slug])
   @@index([level])
   @@index([publishedAt(sort: Desc)])
   @@index([status, publishedAt(sort: Desc)])
