@@ -91,7 +91,7 @@ export function WeightKeypad({
   if (!isExpanded) {
     return (
       <div>
-        <span className="block text-sm font-semibold text-foreground mb-1 uppercase tracking-wider">
+        <span className="block text-xs text-muted-foreground mb-1 uppercase tracking-wider">
           Weight ({weightUnit})
         </span>
         <button
@@ -115,7 +115,7 @@ export function WeightKeypad({
   // Expanded view with keypad - mt-auto pushes to bottom of flex container
   return (
     <div className="mt-auto">
-      <span className="block text-sm font-semibold text-foreground mb-1 uppercase tracking-wider">
+      <span className="block text-xs text-muted-foreground mb-1 uppercase tracking-wider">
         Weight ({weightUnit})
       </span>
 
