@@ -5,6 +5,9 @@ on:
     branches:
       - dev
       - main
+  pull_request:
+    branches:
+      - dev
 
 env:
   REGISTRY: ghcr.io
@@ -34,7 +37,10 @@ jobs:
       - name: Determine image tags
         id: tags
         run: |
-          if [ "${{ github.ref_name }}" = "main" ]; then
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            SHORT_SHA=$(echo "${{ github.event.pull_request.head.sha }}" | cut -c1-7)
+            echo "tags=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:pr-${{ github.event.pull_request.number }}-sha-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.ref_name }}" = "main" ]; then
             echo "tags=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}" >> "$GITHUB_OUTPUT"
           elif [ "${{ github.ref_name }}" = "dev" ]; then
             echo "tags=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:staging" >> "$GITHUB_OUTPUT"
@@ -50,7 +56,7 @@ jobs:
           push: true
           tags: ${{ steps.tags.outputs.tags }}
           build-args: |
-            NEXT_PUBLIC_APP_URL=${{ vars.NEXT_PUBLIC_APP_URL }}
+            NEXT_PUBLIC_APP_URL=${{ vars.NEXT_PUBLIC_APP_URL || 'https://staging.ripit.fit' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

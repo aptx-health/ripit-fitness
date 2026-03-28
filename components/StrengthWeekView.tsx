@@ -1,7 +1,7 @@
 'use client'
 
 import { CheckCircle } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState, useTransition } from 'react'
 import ActionsMenu from '@/components/ActionsMenu'
 import ExerciseLoggingModal from '@/components/ExerciseLoggingModal'
@@ -9,8 +9,8 @@ import { ProgramCompletionModal } from '@/components/ProgramCompletionModal'
 import WeekNavigator from '@/components/ui/WeekNavigator'
 import WorkoutPreviewModal from '@/components/WorkoutPreviewModal'
 import WorkoutCard from '@/components/workout/WorkoutCard'
-import { useWorkoutStorage } from '@/hooks/useWorkoutStorage'
 import { clientLogger } from '@/lib/client-logger'
+import { useDraftWorkout } from '@/lib/contexts/DraftWorkoutContext'
 
 type Workout = {
   id: string
@@ -151,6 +151,8 @@ export default function StrengthWeekView({
   totalWeeks
 }: Props) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const { activeDraft, refreshDraft } = useDraftWorkout()
   const [isPending, startTransition] = useTransition()
   const [updatingWorkoutId, setUpdatingWorkoutId] = useState<string | null>(null)
   const [skippingWorkout, setSkippingWorkout] = useState<string | null>(null)
@@ -166,8 +168,19 @@ export default function StrengthWeekView({
   const [isRestarting, setIsRestarting] = useState(false)
   const [isProgramComplete, setIsProgramComplete] = useState(false)
 
-  // For clearing localStorage when resetting workout
-  const { clearStoredWorkout } = useWorkoutStorage(selectedWorkoutId || '')
+  // Auto-resume draft workout when navigated with ?resume= param
+  const resumeWorkoutId = searchParams.get('resume')
+  useEffect(() => {
+    if (resumeWorkoutId && !modalMode) {
+      // Clear the param from URL without triggering a navigation
+      const url = new URL(window.location.href)
+      url.searchParams.delete('resume')
+      window.history.replaceState(null, '', url.toString())
+
+      handleOpenLogging(resumeWorkoutId)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resumeWorkoutId])
 
   const checkProgramCompletion = useCallback(async (openModal = false) => {
     // Skip check if we're currently restarting
@@ -260,6 +273,14 @@ export default function StrengthWeekView({
 
   // Opens logging modal with progressive loading (fast!)
   const handleOpenLogging = async (workoutId: string) => {
+    // Prevent opening a different workout while a draft exists
+    if (activeDraft && activeDraft.workoutId !== workoutId) {
+      alert(
+        `You have an in-progress workout ("${activeDraft.workoutName}"). Resume or discard it first.`
+      )
+      return
+    }
+
     setSelectedWorkoutId(workoutId)
     const metadata = await fetchWorkoutMetadata(workoutId)
     if (!metadata) return
@@ -281,6 +302,9 @@ export default function StrengthWeekView({
     setSelectedWorkoutId(null)
     setWorkoutData(null)
     setWorkoutMetadata(null)
+
+    // Refresh draft context so floating button reflects current state
+    refreshDraft()
 
     if (workoutUpdated && workoutId) {
       // Track which workout is updating and use transition to show loading until refresh completes
@@ -308,23 +332,9 @@ export default function StrengthWeekView({
     setModalMode('logging')
   }
 
-  const handleCompleteWorkout = async (loggedSets: Array<{
-    exerciseId: string
-    setNumber: number
-    reps: number
-    weight: number
-    weightUnit: string
-    rpe: number | null
-    rir: number | null
-  }>) => {
-    if (!selectedWorkoutId) return
-    const response = await fetch(`/api/workouts/${selectedWorkoutId}/complete`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ loggedSets }),
-    })
-    if (!response.ok) throw new Error('Failed to complete workout')
-    handleCloseModal(true) // Pass true to indicate workout was updated
+  // Completion is handled inside ExerciseLoggingModal now (per-set writes + status flip)
+  const handleCompleteWorkout = async () => {
+    handleCloseModal(true)
     await checkProgramCompletion(true)
   }
 
@@ -332,7 +342,6 @@ export default function StrengthWeekView({
     if (!selectedWorkoutId) return
     const response = await fetch(`/api/workouts/${selectedWorkoutId}/clear`, { method: 'POST' })
     if (!response.ok) throw new Error('Failed to clear workout')
-    clearStoredWorkout()
     setModalKey(prev => prev + 1)
     // Refetch the workout data/metadata
     if (modalMode === 'preview') {

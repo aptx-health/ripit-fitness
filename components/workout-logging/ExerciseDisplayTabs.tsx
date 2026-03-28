@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/radix/tabs'
 import type { LoadState } from '@/hooks/useProgressiveExercises'
-import type { LoggedSet } from '@/hooks/useWorkoutStorage'
+import type { LoggedSet } from '@/types/workout'
 import { EQUIPMENT_LABELS } from '@/lib/constants/program-metadata'
 import SetList from './SetList'
 
@@ -109,14 +109,9 @@ export default function ExerciseDisplayTabs({
 
   return (
     <Tabs defaultValue="log-sets" className="w-full h-full flex flex-col">
-      <TabsList className="flex-shrink-0">
+      <TabsList className="flex-shrink-0 sticky top-0 z-10 overflow-hidden">
         <TabsTrigger value="log-sets">
           <span>Log Sets</span>
-          {loggedCount > 0 && (
-            <span className="ml-2 text-xs sm:text-sm px-2 py-0.5 rounded-full bg-accent/20 text-accent-foreground font-semibold">
-              {loggedCount}/{totalCount}
-            </span>
-          )}
         </TabsTrigger>
         <TabsTrigger value="info">
           <span>Info</span>
@@ -135,7 +130,8 @@ export default function ExerciseDisplayTabs({
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="log-sets" className="flex-1 overflow-y-auto px-4 flex flex-col gap-3">
+      <TabsContent value="log-sets" className="flex-1 overflow-y-auto px-4 flex flex-col gap-2">
+        {loggingForm}
         {!isInputExpanded && (
           <SetList
             prescribedSets={prescribedSets}
@@ -144,7 +140,6 @@ export default function ExerciseDisplayTabs({
             onDeleteSet={onDeleteSet}
           />
         )}
-        {loggingForm}
       </TabsContent>
 
       <TabsContent value="info" className="flex-1 overflow-y-auto px-4">

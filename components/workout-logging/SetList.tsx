@@ -1,6 +1,7 @@
 'use client'
 
-import type { LoggedSet } from '@/hooks/useWorkoutStorage'
+import { AlertCircle, Trash2 } from 'lucide-react'
+import type { LoggedSet } from '@/types/workout'
 
 interface PrescribedSet {
   id: string
@@ -33,85 +34,82 @@ interface SetListProps {
   onDeleteSet: (setNumber: number) => void
 }
 
+function formatIntensity(set: { rpe: number | null; rir: number | null }) {
+  if (set.rir !== null) return `RIR ${set.rir}`
+  if (set.rpe !== null) return `RPE ${set.rpe}`
+  return null
+}
+
 export default function SetList({
   prescribedSets,
   loggedSets,
   exerciseHistory,
   onDeleteSet,
 }: SetListProps) {
+  const loggedSetNumbers = new Set(loggedSets.map(s => s.setNumber))
+  const remainingSets = prescribedSets.filter(s => !loggedSetNumbers.has(s.setNumber))
+
   return (
-    <>
-      {/* Last Performance (if available) */}
+    <div className="space-y-1">
+      {/* Last Performance — compact inline */}
       {exerciseHistory && (
-        <div className="mb-4">
-          <h4 className="text-sm font-semibold text-foreground mb-2">
-            Last Time ({new Date(exerciseHistory.completedAt).toLocaleDateString()})
-          </h4>
-          <div className="bg-primary-muted  p-3 space-y-1 border border-primary-muted-dark">
-            {exerciseHistory.sets.map((set) => (
-              <div key={set.setNumber} className="text-sm text-primary">
-                Set {set.setNumber}: {set.reps} reps @ {set.weight}{set.weightUnit}
-                {set.rir !== null && ` • RIR ${set.rir}`}
-                {set.rpe !== null && ` • RPE ${set.rpe}`}
-              </div>
-            ))}
-          </div>
+        <div className="text-xs text-muted-foreground px-1 pb-1">
+          Last ({new Date(exerciseHistory.completedAt).toLocaleDateString()}):
+          {' '}
+          {exerciseHistory.sets.map((set, i) => (
+            <span key={set.setNumber}>
+              {i > 0 && ' · '}
+              {set.reps}×{set.weight}{set.weightUnit}
+              {formatIntensity(set) ? ` ${formatIntensity(set)}` : ''}
+            </span>
+          ))}
         </div>
       )}
 
-      {/* Prescribed Sets Reference - only show sets not yet logged */}
-      {(() => {
-        const loggedSetNumbers = new Set(loggedSets.map(s => s.setNumber))
-        const remainingSets = prescribedSets.filter(s => !loggedSetNumbers.has(s.setNumber))
-        if (remainingSets.length === 0) return null
+      {/* Logged sets — compact inline rows */}
+      {loggedSets.map((set) => {
+        const isFailed = set._syncStatus === 'error'
+        const isPending = set._syncStatus === 'pending'
         return (
-          <div>
-            <h4 className="text-base sm:text-lg font-bold text-foreground mb-2 uppercase tracking-wider">Target</h4>
-            <div className="bg-muted p-3 sm:p-4 space-y-2 border-2 border-border">
-              {remainingSets.map((set) => (
-                <div key={set.id} className="text-base sm:text-lg text-foreground">
-                  Set {set.setNumber}: {set.reps} reps @ {set.weight || '—'}
-                  {set.rir !== null && ` • RIR ${set.rir}`}
-                  {set.rpe !== null && ` • RPE ${set.rpe}`}
-                </div>
-              ))}
-            </div>
+          <div
+            key={`${set.exerciseId}-${set.setNumber}`}
+            className={`flex items-center justify-between px-2 py-1.5 text-sm ${
+              isFailed
+                ? 'text-warning'
+                : 'text-success-text opacity-70'
+            }`}
+          >
+            <span className="flex items-center gap-1.5">
+              {isFailed && <AlertCircle size={14} className="flex-shrink-0" />}
+              <span className="font-semibold">{set.setNumber}.</span>
+              {set.reps}×{set.weight}{set.weightUnit}
+              {formatIntensity(set) ? ` · ${formatIntensity(set)}` : ''}
+              {isPending && <span className="text-xs text-muted-foreground">saving...</span>}
+            </span>
+            <button
+              type="button"
+              onClick={() => onDeleteSet(set.setNumber)}
+              className="text-error/50 hover:text-error p-0.5"
+            >
+              <Trash2 size={14} />
+            </button>
           </div>
         )
-      })()}
+      })}
 
-      {/* Logged Sets */}
-      {loggedSets.length > 0 && (
-        <div className="mt-4">
-          <h4 className="text-base sm:text-lg font-bold text-foreground mb-2 uppercase tracking-wider">Logged Sets</h4>
-          <div className="space-y-2">
-            {loggedSets.map((set) => (
-              <div
-                key={`${set.exerciseId}-${set.setNumber}`}
-                className="bg-success-muted border-2 border-success-border p-3 sm:p-4 flex items-center justify-between"
-              >
-                <div className="text-base sm:text-lg">
-                  <span className="font-bold text-foreground">Set {set.setNumber}:</span>{' '}
-                  <span className="text-success-text font-medium">
-                    {set.reps} reps @ {set.weight}
-                    {set.weightUnit}
-                    {set.rir !== null && ` • RIR ${set.rir}`}
-                    {set.rpe !== null && ` • RPE ${set.rpe}`}
-                  </span>
-                </div>
-                <button type="button"
-                  onClick={() => onDeleteSet(set.setNumber)}
-                  className="text-error hover:text-error-hover p-1 ml-2 doom-focus-ring"
-                >
-                  <svg aria-hidden="true" className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
-              </div>
-            ))}
-          </div>
+      {/* Remaining prescribed sets — muted, compact */}
+      {remainingSets.map((set) => (
+        <div
+          key={set.id}
+          className="flex items-center px-2 py-1.5 text-sm text-muted-foreground"
+        >
+          <span className="font-semibold">{set.setNumber}.</span>
+          <span className="ml-1.5">
+            {set.reps} reps @ {set.weight || '—'}
+            {formatIntensity(set) ? ` · ${formatIntensity(set)}` : ''}
+          </span>
         </div>
-      )}
-    </>
+      ))}
+    </div>
   )
 }

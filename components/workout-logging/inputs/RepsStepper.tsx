@@ -25,7 +25,7 @@ export function RepsStepper({ value, onChange, placeholder }: RepsStepperProps) 
 
   return (
     <div>
-      <span className="block text-sm font-semibold text-foreground mb-1 uppercase tracking-wider">
+      <span className="block text-xs text-muted-foreground mb-1 uppercase tracking-wider">
         Reps
       </span>
       <div className="flex items-center gap-2">
