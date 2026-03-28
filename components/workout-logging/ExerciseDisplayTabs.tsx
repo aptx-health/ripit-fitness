@@ -109,14 +109,9 @@ export default function ExerciseDisplayTabs({
 
   return (
     <Tabs defaultValue="log-sets" className="w-full h-full flex flex-col">
-      <TabsList className="flex-shrink-0">
+      <TabsList className="flex-shrink-0 sticky top-0 z-10 overflow-hidden">
         <TabsTrigger value="log-sets">
           <span>Log Sets</span>
-          {loggedCount > 0 && (
-            <span className="ml-2 text-xs sm:text-sm px-2 py-0.5 rounded-full bg-accent/20 text-accent-foreground font-semibold">
-              {loggedCount}/{totalCount}
-            </span>
-          )}
         </TabsTrigger>
         <TabsTrigger value="info">
           <span>Info</span>
