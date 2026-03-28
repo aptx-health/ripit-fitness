@@ -170,21 +170,23 @@ export default function ArticleEditor({ article, onSave, onCancel, onDelete }: A
             <option value="advanced">Advanced</option>
           </select>
         </div>
-        <div>
-          <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
-            Status
-          </label>
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="w-full px-3 py-2 bg-input border-2 border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          >
-            <option value="draft">Draft</option>
-            <option value="pending_review">Pending Review</option>
-            <option value="published">Published</option>
-            <option value="rejected">Rejected</option>
-          </select>
-        </div>
+        {article && (
+          <div>
+            <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
+              Status
+            </label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="w-full px-3 py-2 bg-input border-2 border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="draft">Draft</option>
+              <option value="pending_review">Pending Review</option>
+              <option value="published">Published</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+        )}
       </div>
 
       {/* Tags */}
