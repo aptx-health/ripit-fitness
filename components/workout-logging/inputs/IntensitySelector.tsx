@@ -34,7 +34,7 @@ export function IntensitySelector({
   if (!isExpanded) {
     return (
       <div>
-        <span className="block text-sm font-semibold text-foreground mb-1 uppercase tracking-wider">
+        <span className="block text-xs text-muted-foreground mb-1 uppercase tracking-wider">
           {label} (optional)
         </span>
         <button
@@ -56,7 +56,7 @@ export function IntensitySelector({
   // Expanded view with preset grid
   return (
     <div>
-      <span className="block text-sm font-semibold text-foreground mb-1 uppercase tracking-wider">
+      <span className="block text-xs text-muted-foreground mb-1 uppercase tracking-wider">
         {label} (optional)
       </span>
 

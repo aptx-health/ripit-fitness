@@ -130,7 +130,8 @@ export default function ExerciseDisplayTabs({
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="log-sets" className="flex-1 overflow-y-auto px-4 flex flex-col gap-3">
+      <TabsContent value="log-sets" className="flex-1 overflow-y-auto px-4 flex flex-col gap-2">
+        {loggingForm}
         {!isInputExpanded && (
           <SetList
             prescribedSets={prescribedSets}
@@ -139,7 +140,6 @@ export default function ExerciseDisplayTabs({
             onDeleteSet={onDeleteSet}
           />
         )}
-        {loggingForm}
       </TabsContent>
 
       <TabsContent value="info" className="flex-1 overflow-y-auto px-4">
