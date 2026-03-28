@@ -17,7 +17,13 @@ export default async function AppLayout({
   return (
     <div className="min-h-screen">
       <Header userEmail={user.email || ''} />
-      <div className="pb-20 md:pb-0">{children}</div>
+      <div className="pb-20 md:pb-0">
+        <div
+          className="md:hidden"
+          style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+        />
+        {children}
+      </div>
       <BottomNav />
     </div>
   )

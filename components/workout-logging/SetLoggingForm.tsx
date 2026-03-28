@@ -89,7 +89,7 @@ export default function SetLoggingForm({
 
   return (
     <div className={expandedInput !== null ? 'flex-1 flex flex-col' : 'flex-shrink-0'}>
-      <div className={expandedInput !== null ? 'flex-1 flex flex-col' : 'space-y-3'}>
+      <div className={expandedInput !== null ? 'flex-1 flex flex-col' : 'space-y-2'}>
         {/* Reps stepper - always visible when no input is expanded, hidden when intensity is expanded */}
         {showReps && (
           <RepsStepper

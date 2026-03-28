@@ -1,6 +1,9 @@
 'use client'
 
+import { useState } from 'react'
 import { type ButtonHTMLAttributes, forwardRef } from 'react'
+
+const lintTest: any = 'this should fail biome and eslint'
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'accent' | 'success' | 'danger' | 'ghost' | 'outline'
