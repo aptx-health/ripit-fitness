@@ -4,6 +4,7 @@ import { AlertTriangle } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { LoadingFrog } from '@/components/ui/loading-frog'
+import { useImagePrefetch } from '@/hooks/useImagePrefetch'
 import { type Exercise, type ExerciseHistory, useProgressiveExercises } from '@/hooks/useProgressiveExercises'
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
 import { useWorkoutDraft } from '@/hooks/useWorkoutDraft'
@@ -82,6 +83,7 @@ export default function ExerciseLoggingModal({
     goToExercise,
     goToNext,
     goToPrevious,
+    loadedExercises,
     currentExerciseHistory,
     currentHistoryState,
     hasHistoryForCurrentExercise,
@@ -90,6 +92,9 @@ export default function ExerciseLoggingModal({
     initialExercise: initialExercise ?? undefined,
     initialHistory: initialHistory ?? undefined,
   })
+
+  // Pre-fetch exercise images so Info tab loads instantly
+  useImagePrefetch(loadedExercises)
 
   // DB-first persistence with write-through localStorage cache
   const {
