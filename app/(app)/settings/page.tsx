@@ -1,16 +1,20 @@
 'use client'
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { Dumbbell, Moon, Palette, Save, Sun } from 'lucide-react'
+import { Dumbbell, Moon, Palette, Save, Shield, Sun } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { useSession } from '@/lib/auth-client'
 import { useThemePreference } from '@/hooks/useThemePreference'
 import { useUserSettings } from '@/hooks/useUserSettings'
-import { THEME_LABELS, THEMES, type ThemeName } from '@/lib/theme'
+import { THEME_LABELS, THEMES } from '@/lib/theme'
 
 export default function SettingsPage() {
+  const { data: session } = useSession()
   const { settings, isLoading, updateSettings } = useUserSettings()
   const { preference, updateTheme } = useThemePreference()
+  const userRole = (session?.user as Record<string, unknown>)?.role as string | undefined
+  const isAdmin = userRole === 'admin' || userRole === 'editor'
   const [displayName, setDisplayName] = useState('')
   const [weightUnit, setWeightUnit] = useState<'lbs' | 'kg'>('lbs')
   const [intensityRating, setIntensityRating] = useState<'rpe' | 'rir'>('rpe')
@@ -255,19 +259,28 @@ export default function SettingsPage() {
               {isSaving ? 'Saving...' : saved ? 'Saved' : 'Save'}
             </button>
 
-            {/* Admin */}
-            <div className="pt-4 border-t border-border">
-              <span className="block text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
-                Admin
-              </span>
-              <Link
-                href="/admin/exercises"
-                className="w-full px-4 py-3 bg-muted text-foreground border-2 border-border hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2"
-              >
-                <Dumbbell size={18} />
-                Manage Exercise Definitions
-              </Link>
-            </div>
+            {/* Admin — visible to admin/editor roles only */}
+            {isAdmin && (
+              <div className="pt-4 border-t border-border space-y-2">
+                <span className="block text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
+                  Admin
+                </span>
+                <Link
+                  href="/admin"
+                  className="w-full px-4 py-3 bg-muted text-foreground border-2 border-border hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2"
+                >
+                  <Shield size={18} />
+                  Admin Panel
+                </Link>
+                <Link
+                  href="/admin/exercises"
+                  className="w-full px-4 py-3 bg-muted text-foreground border-2 border-border hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2"
+                >
+                  <Dumbbell size={18} />
+                  Manage Exercise Definitions
+                </Link>
+              </div>
+            )}
 
             {/* Sign Out */}
             <div className="pt-4 border-t border-border">
