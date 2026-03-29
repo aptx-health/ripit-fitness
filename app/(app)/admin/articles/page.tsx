@@ -60,11 +60,11 @@ export default function AdminArticlesPage() {
 
   const statusColor = (status: string) => {
     switch (status) {
-      case 'published': return 'text-green-400 bg-green-900/30 border-green-700'
-      case 'draft': return 'text-zinc-400 bg-zinc-800 border-zinc-600'
-      case 'pending_review': return 'text-yellow-400 bg-yellow-900/30 border-yellow-700'
-      case 'rejected': return 'text-red-400 bg-red-900/30 border-red-700'
-      default: return 'text-zinc-400 bg-zinc-800 border-zinc-600'
+      case 'published': return 'text-green-800 bg-green-100 border-green-300 dark:text-green-400 dark:bg-green-900/30 dark:border-green-700'
+      case 'draft': return 'text-zinc-700 bg-zinc-100 border-zinc-300 dark:text-zinc-400 dark:bg-zinc-800 dark:border-zinc-600'
+      case 'pending_review': return 'text-yellow-800 bg-yellow-100 border-yellow-300 dark:text-yellow-400 dark:bg-yellow-900/30 dark:border-yellow-700'
+      case 'rejected': return 'text-red-800 bg-red-100 border-red-300 dark:text-red-400 dark:bg-red-900/30 dark:border-red-700'
+      default: return 'text-zinc-700 bg-zinc-100 border-zinc-300 dark:text-zinc-400 dark:bg-zinc-800 dark:border-zinc-600'
     }
   }
 
