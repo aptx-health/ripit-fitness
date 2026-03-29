@@ -1,10 +1,10 @@
 'use client'
 
+import { ArrowLeft, Clock } from 'lucide-react'
+import Link from 'next/link'
 import { useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { ArrowLeft, Clock } from 'lucide-react'
-import Link from 'next/link'
 import { clientLogger } from '@/lib/client-logger'
 
 interface Tag {
@@ -40,13 +40,13 @@ interface ArticleDetailProps {
 function levelColor(level: string) {
   switch (level) {
     case 'beginner':
-      return 'bg-green-900/40 text-green-400 border border-green-700'
+      return 'bg-green-900/40 text-green-400 border-2 border-green-700'
     case 'intermediate':
-      return 'bg-orange-900/40 text-orange-400 border border-orange-700'
+      return 'bg-orange-900/40 text-orange-400 border-2 border-orange-700'
     case 'advanced':
-      return 'bg-red-900/40 text-red-400 border border-red-700'
+      return 'bg-red-900/40 text-red-400 border-2 border-red-700'
     default:
-      return 'bg-zinc-700 text-zinc-300'
+      return 'bg-muted text-muted-foreground'
   }
 }
 
@@ -69,7 +69,7 @@ export default function ArticleDetail({ article, relatedArticles }: ArticleDetai
         {/* Back navigation */}
         <Link
           href="/learn"
-          className="inline-flex items-center gap-1 text-xs text-zinc-400 hover:text-orange-400 transition-colors mb-6"
+          className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors mb-6 uppercase tracking-wider font-semibold"
         >
           <ArrowLeft className="h-3 w-3" />
           Back to Learn
@@ -79,26 +79,28 @@ export default function ArticleDetail({ article, relatedArticles }: ArticleDetai
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-3">
             <span
-              className={`text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wide ${levelColor(article.level)}`}
+              className={`text-[10px] px-2 py-0.5 font-semibold uppercase tracking-wider doom-label ${levelColor(article.level)}`}
             >
               {article.level}
             </span>
             {article.readTimeMinutes && (
-              <span className="flex items-center gap-1 text-[10px] text-zinc-500">
+              <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
                 <Clock className="h-3 w-3" />
                 {article.readTimeMinutes} min read
               </span>
             )}
           </div>
 
-          <h1 className="text-2xl font-bold text-orange-50 mb-3">{article.title}</h1>
+          <h1 className="text-2xl font-bold text-foreground mb-3 doom-heading uppercase tracking-wider">
+            {article.title}
+          </h1>
 
           {article.tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {article.tags.map((tag) => (
                 <span
                   key={tag.id}
-                  className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-700 text-zinc-300"
+                  className="text-[10px] px-2 py-0.5 bg-muted text-muted-foreground border border-border"
                 >
                   {tag.name}
                 </span>
@@ -116,8 +118,8 @@ export default function ArticleDetail({ article, relatedArticles }: ArticleDetai
 
         {/* Related articles */}
         {relatedArticles.length > 0 && (
-          <div className="border-t border-zinc-700 pt-8">
-            <h2 className="text-sm font-semibold text-orange-50 mb-4 uppercase tracking-wide">
+          <div className="border-t-2 border-border pt-8">
+            <h2 className="text-sm font-bold text-foreground mb-4 doom-heading uppercase tracking-wider">
               Related Articles
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -125,19 +127,19 @@ export default function ArticleDetail({ article, relatedArticles }: ArticleDetai
                 <Link
                   key={related.id}
                   href={`/learn/${related.slug}`}
-                  className="block bg-zinc-800 border border-zinc-700 rounded-lg p-3
-                    hover:border-orange-600/50 transition-colors"
+                  className="block bg-card border border-border p-3 doom-corners
+                    hover:border-primary/50 hover:shadow-md transition"
                 >
                   <span
-                    className={`text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wide ${levelColor(related.level)}`}
+                    className={`text-[10px] px-2 py-0.5 font-semibold uppercase tracking-wider doom-label ${levelColor(related.level)}`}
                   >
                     {related.level}
                   </span>
-                  <h3 className="text-sm font-medium text-orange-50 mt-2 line-clamp-2">
+                  <h3 className="text-sm font-medium text-foreground mt-2 line-clamp-2">
                     {related.title}
                   </h3>
                   {related.readTimeMinutes && (
-                    <span className="text-[10px] text-zinc-500 mt-1 block">
+                    <span className="text-[10px] text-muted-foreground mt-1 block">
                       {related.readTimeMinutes} min read
                     </span>
                   )}

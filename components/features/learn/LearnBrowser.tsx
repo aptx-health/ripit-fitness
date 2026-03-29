@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { Search, X, BookOpen, Clock, ChevronRight } from 'lucide-react'
+import { BookOpen, ChevronRight, Clock, Search, X } from 'lucide-react'
 import Link from 'next/link'
+import { useCallback, useEffect, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
 
 interface Tag {
@@ -49,13 +49,13 @@ const FILTER_CATEGORIES: { key: FilterCategory; label: string }[] = [
 function levelColor(level: string) {
   switch (level) {
     case 'beginner':
-      return 'bg-green-900/40 text-green-400 border border-green-700'
+      return 'bg-green-900/40 text-green-400 border-2 border-green-700'
     case 'intermediate':
-      return 'bg-orange-900/40 text-orange-400 border border-orange-700'
+      return 'bg-orange-900/40 text-orange-400 border-2 border-orange-700'
     case 'advanced':
-      return 'bg-red-900/40 text-red-400 border border-red-700'
+      return 'bg-red-900/40 text-red-400 border-2 border-red-700'
     default:
-      return 'bg-zinc-700 text-zinc-300'
+      return 'bg-muted text-muted-foreground'
   }
 }
 
@@ -151,29 +151,35 @@ export default function LearnBrowser() {
     allTags.filter((t) => t.category === category)
 
   return (
-    <div className="min-h-screen bg-background px-4 sm:px-6 py-8">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-xl font-bold mb-1 text-orange-50">Learn</h1>
-        <p className="text-sm text-zinc-400 mb-6">
-          Articles and guides to help you get the most out of your training.
-        </p>
+    <div className="min-h-screen bg-background doom-page-enter">
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-foreground doom-title uppercase tracking-wider">
+            LEARN
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Articles and guides to help you get the most out of your training.
+          </p>
+        </div>
 
         {/* Search bar */}
         <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search articles..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-10 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg
-              text-sm text-orange-50 placeholder:text-zinc-500
-              focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-600"
+            className="w-full pl-10 pr-10 py-2.5 bg-card border-2 border-border
+              text-sm text-foreground placeholder:text-muted-foreground
+              focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
           />
           {search && (
             <button
+              type="button"
               onClick={() => setSearch('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-300"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             >
               <X className="h-4 w-4" />
             </button>
@@ -183,19 +189,21 @@ export default function LearnBrowser() {
         {/* Filter toggle + active filter pills */}
         <div className="flex items-center gap-2 mb-4 flex-wrap">
           <button
+            type="button"
             onClick={() => setShowFilters(!showFilters)}
-            className={`text-xs px-3 py-1.5 rounded-md border transition-colors ${
+            className={`text-xs px-3 py-1.5 border-2 transition-colors font-semibold uppercase tracking-wider ${
               showFilters || hasActiveFilters
-                ? 'bg-orange-600/20 border-orange-600 text-orange-400'
-                : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:text-zinc-300'
+                ? 'bg-primary/20 border-primary text-primary'
+                : 'bg-card border-border text-muted-foreground hover:text-foreground'
             }`}
           >
             Filters {hasActiveFilters && `(${selectedLevels.length + Object.values(selectedTags).flat().length})`}
           </button>
           {hasActiveFilters && (
             <button
+              type="button"
               onClick={clearFilters}
-              className="text-xs text-zinc-500 hover:text-zinc-300"
+              className="text-xs text-muted-foreground hover:text-foreground uppercase tracking-wider"
             >
               Clear all
             </button>
@@ -204,21 +212,22 @@ export default function LearnBrowser() {
 
         {/* Filter panel */}
         {showFilters && (
-          <div className="mb-6 p-4 bg-zinc-800/50 border border-zinc-700 rounded-lg space-y-4">
+          <div className="mb-6 p-4 bg-card border-2 border-border doom-noise space-y-4">
             {/* Level filter */}
             <div>
-              <p className="text-xs font-medium text-zinc-400 mb-2 uppercase tracking-wide">
+              <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
                 Level
               </p>
               <div className="flex flex-wrap gap-2">
                 {LEVEL_OPTIONS.map((level) => (
                   <button
+                    type="button"
                     key={level}
                     onClick={() => toggleLevel(level)}
-                    className={`text-xs px-3 py-1 rounded-full border transition-colors capitalize ${
+                    className={`text-xs px-3 py-1 border-2 transition-colors capitalize font-medium ${
                       selectedLevels.includes(level)
                         ? levelColor(level)
-                        : 'bg-zinc-800 border-zinc-600 text-zinc-400 hover:text-zinc-300'
+                        : 'bg-card border-border text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     {level}
@@ -233,18 +242,19 @@ export default function LearnBrowser() {
               if (tags.length === 0) return null
               return (
                 <div key={key}>
-                  <p className="text-xs font-medium text-zinc-400 mb-2 uppercase tracking-wide">
+                  <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
                     {label}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {tags.map((tag) => (
                       <button
+                        type="button"
                         key={tag.id}
                         onClick={() => toggleTag(key, tag.name)}
-                        className={`text-xs px-3 py-1 rounded-full border transition-colors ${
+                        className={`text-xs px-3 py-1 border-2 transition-colors font-medium ${
                           selectedTags[key].includes(tag.name)
-                            ? 'bg-orange-600/20 border-orange-600 text-orange-400'
-                            : 'bg-zinc-800 border-zinc-600 text-zinc-400 hover:text-zinc-300'
+                            ? 'bg-primary/20 border-primary text-primary'
+                            : 'bg-card border-border text-muted-foreground hover:text-foreground'
                         }`}
                       >
                         {tag.name}
@@ -260,19 +270,19 @@ export default function LearnBrowser() {
         {/* Collections section */}
         {!search && !hasActiveFilters && collections.length > 0 && (
           <div className="mb-8">
-            <h2 className="text-sm font-semibold text-orange-50 mb-3 uppercase tracking-wide">
+            <h2 className="text-sm font-bold text-foreground mb-3 doom-heading uppercase tracking-wider">
               Collections
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {collections.map((col) => (
                 <div
                   key={col.id}
-                  className="bg-zinc-800 border border-zinc-700 rounded-lg p-4"
+                  className="bg-card border-2 border-border p-4 doom-noise doom-corners"
                 >
-                  <h3 className="text-sm font-semibold text-orange-50 mb-1">
+                  <h3 className="text-sm font-semibold text-foreground mb-1 uppercase tracking-wider">
                     {col.name}
                   </h3>
-                  <p className="text-xs text-zinc-400 mb-3 line-clamp-2">
+                  <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
                     {col.description}
                   </p>
                   <div className="space-y-1">
@@ -280,9 +290,9 @@ export default function LearnBrowser() {
                       <Link
                         key={article.id}
                         href={`/learn/${article.slug}`}
-                        className="flex items-center gap-2 text-xs text-zinc-300 hover:text-orange-400 transition-colors"
+                        className="flex items-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors"
                       >
-                        <ChevronRight className="h-3 w-3 text-zinc-500" />
+                        <ChevronRight className="h-3 w-3" />
                         <span className="truncate">{article.title}</span>
                       </Link>
                     ))}
@@ -295,18 +305,18 @@ export default function LearnBrowser() {
 
         {/* Browse section */}
         <div>
-          <h2 className="text-sm font-semibold text-orange-50 mb-3 uppercase tracking-wide">
+          <h2 className="text-sm font-bold text-foreground mb-3 doom-heading uppercase tracking-wider">
             {search || hasActiveFilters ? 'Results' : 'Browse'}
           </h2>
 
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16">
-              <div className="h-6 w-6 border-2 border-orange-600 border-t-transparent rounded-full animate-spin" />
+              <div className="h-6 w-6 border-2 border-primary border-t-transparent animate-spin" />
             </div>
           ) : articles.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <BookOpen className="h-10 w-10 text-zinc-600 mb-3" />
-              <p className="text-sm text-zinc-400">
+            <div className="bg-card border border-border p-12 text-center doom-noise doom-corners">
+              <BookOpen className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground">
                 {search || hasActiveFilters
                   ? 'No articles match your search.'
                   : 'No articles published yet.'}
@@ -329,25 +339,25 @@ function ArticleCardItem({ article }: { article: ArticleCard }) {
   return (
     <Link
       href={`/learn/${article.slug}`}
-      className="block bg-zinc-800 border border-zinc-700 rounded-lg p-4
-        hover:border-orange-600/50 hover:bg-zinc-800/80 transition-colors group"
+      className="block bg-card border border-border p-4 doom-corners
+        hover:border-primary/50 hover:shadow-md transition group"
     >
       {/* Header: level badge + read status */}
       <div className="flex items-center justify-between mb-2">
         <span
-          className={`text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wide ${levelColor(article.level)}`}
+          className={`text-[10px] px-2 py-0.5 font-semibold uppercase tracking-wider doom-label ${levelColor(article.level)}`}
         >
           {article.level}
         </span>
         {article.readStatus ? (
-          <span className="text-[10px] text-green-400 font-medium">
+          <span className="text-[10px] text-green-400 font-semibold uppercase tracking-wider">
             Read {relativeTime(article.readStatus.lastReadAt)}
           </span>
         ) : null}
       </div>
 
       {/* Title */}
-      <h3 className="text-sm font-semibold text-orange-50 mb-2 group-hover:text-orange-400 transition-colors line-clamp-2">
+      <h3 className="text-sm font-semibold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-2">
         {article.title}
       </h3>
 
@@ -357,13 +367,13 @@ function ArticleCardItem({ article }: { article: ArticleCard }) {
           {article.tags.slice(0, 4).map((tag) => (
             <span
               key={tag.id}
-              className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-700 text-zinc-300"
+              className="text-[10px] px-2 py-0.5 bg-muted text-muted-foreground border border-border"
             >
               {tag.name}
             </span>
           ))}
           {article.tags.length > 4 && (
-            <span className="text-[10px] text-zinc-500">
+            <span className="text-[10px] text-muted-foreground">
               +{article.tags.length - 4}
             </span>
           )}
@@ -372,7 +382,7 @@ function ArticleCardItem({ article }: { article: ArticleCard }) {
 
       {/* Read time */}
       {article.readTimeMinutes && (
-        <div className="flex items-center gap-1 text-[10px] text-zinc-500">
+        <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
           <Clock className="h-3 w-3" />
           <span>{article.readTimeMinutes} min read</span>
         </div>
