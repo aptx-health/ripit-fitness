@@ -52,10 +52,25 @@ export default function CollectionDetail({
   return (
     <div className="min-h-screen bg-background doom-page-enter">
       <div className="max-w-2xl mx-auto px-4 py-8">
-        {/* Back navigation */}
+        {/* Mobile: floating back button */}
         <Link
           href="/learn"
-          className="inline-flex items-center gap-1 text-xs text-muted-foreground
+          className="sm:hidden fixed left-3 flex items-center justify-center
+            min-h-10 min-w-10 bg-card border-2 border-border text-muted-foreground
+            shadow-[2px_2px_0_rgba(0,0,0,0.3)]"
+          style={{
+            top: 'calc(env(safe-area-inset-top, 0px) + 0.5rem)',
+            zIndex: 45,
+          }}
+          aria-label="Back to Learn"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Link>
+
+        {/* Desktop: inline back link */}
+        <Link
+          href="/learn"
+          className="hidden sm:inline-flex items-center gap-1 text-xs text-muted-foreground
             hover:text-primary transition-colors mb-6 uppercase tracking-wider font-semibold"
         >
           <ArrowLeft className="h-3 w-3" />
@@ -63,7 +78,7 @@ export default function CollectionDetail({
         </Link>
 
         {/* Collection header */}
-        <div className="bg-card border-2 border-border p-6 doom-noise doom-corners mb-6">
+        <div className="bg-card border-2 border-border p-6 doom-noise doom-corners mb-6 mt-14 sm:mt-0">
           <h1 className="text-2xl font-bold text-foreground doom-title uppercase tracking-wider mb-2">
             {collection.name}
           </h1>
