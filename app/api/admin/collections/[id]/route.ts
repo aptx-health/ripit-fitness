@@ -8,7 +8,7 @@ import { logger } from '@/lib/logger'
  * Get a single collection with articles.
  */
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -131,7 +131,7 @@ export async function PATCH(
  * Delete a collection (cascade removes article associations).
  */
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {

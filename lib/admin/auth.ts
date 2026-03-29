@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getCurrentUser, type AuthUser, type UserRole } from '@/lib/auth/server'
+import { type AuthUser, getCurrentUser, type UserRole } from '@/lib/auth/server'
 import { logger } from '@/lib/logger'
 
 const ADMIN_ROLES: UserRole[] = ['admin']

@@ -34,6 +34,7 @@ export default function TagManager() {
 
   const [refreshKey, refreshTags] = useReducer((x: number) => x + 1, 0)
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: refreshKey triggers re-fetch intentionally
   useEffect(() => {
     let cancelled = false
     fetch('/api/admin/tags')
@@ -121,29 +122,29 @@ export default function TagManager() {
         <div className="flex-1">
           <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
             Name
+            <input
+              type="text"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder="Tag name"
+              onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
+              className="w-full px-3 py-2 bg-input border-2 border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm mt-1"
+            />
           </label>
-          <input
-            type="text"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            placeholder="Tag name"
-            onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
-            className="w-full px-3 py-2 bg-input border-2 border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-          />
         </div>
         <div>
           <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
             Category
+            <select
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+              className="block px-3 py-2 bg-input border-2 border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm mt-1"
+            >
+              {CATEGORIES.map((cat) => (
+                <option key={cat} value={cat}>{CATEGORY_LABELS[cat]}</option>
+              ))}
+            </select>
           </label>
-          <select
-            value={newCategory}
-            onChange={(e) => setNewCategory(e.target.value)}
-            className="px-3 py-2 bg-input border-2 border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-          >
-            {CATEGORIES.map((cat) => (
-              <option key={cat} value={cat}>{CATEGORY_LABELS[cat]}</option>
-            ))}
-          </select>
         </div>
         <button
           type="button"
@@ -189,10 +190,10 @@ export default function TagManager() {
                             <option key={cat} value={cat}>{CATEGORY_LABELS[cat]}</option>
                           ))}
                         </select>
-                        <button onClick={() => handleUpdate(tag.id)} className="text-green-400 hover:text-green-300 p-1">
+                        <button type="button" onClick={() => handleUpdate(tag.id)} className="text-green-400 hover:text-green-300 p-1">
                           <Plus size={14} />
                         </button>
-                        <button onClick={() => setEditingId(null)} className="text-muted-foreground hover:text-foreground p-1">
+                        <button type="button" onClick={() => setEditingId(null)} className="text-muted-foreground hover:text-foreground p-1">
                           <X size={14} />
                         </button>
                       </>
@@ -200,10 +201,10 @@ export default function TagManager() {
                       <>
                         <span className="flex-1 text-sm text-foreground">{tag.name}</span>
                         <span className="text-xs text-muted-foreground">{tag.articleCount} articles</span>
-                        <button onClick={() => startEdit(tag)} className="text-muted-foreground hover:text-foreground p-1">
+                        <button type="button" onClick={() => startEdit(tag)} className="text-muted-foreground hover:text-foreground p-1">
                           <Pencil size={14} />
                         </button>
-                        <button onClick={() => handleDelete(tag.id)} className="text-red-400 hover:text-red-300 p-1">
+                        <button type="button" onClick={() => handleDelete(tag.id)} className="text-red-400 hover:text-red-300 p-1">
                           <Trash2 size={14} />
                         </button>
                       </>

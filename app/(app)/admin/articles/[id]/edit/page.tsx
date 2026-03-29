@@ -24,6 +24,7 @@ export default function EditArticlePage() {
   const [error, setError] = useState<string | null>(null)
   const [refreshKey, refresh] = useReducer((x: number) => x + 1, 0)
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: refreshKey triggers re-fetch intentionally
   useEffect(() => {
     let cancelled = false
     fetch(`/api/admin/articles/${id}`)

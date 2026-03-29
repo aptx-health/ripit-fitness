@@ -4,9 +4,9 @@ import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { Dumbbell, Moon, Palette, Save, Shield, Sun } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { useSession } from '@/lib/auth-client'
 import { useThemePreference } from '@/hooks/useThemePreference'
 import { useUserSettings } from '@/hooks/useUserSettings'
+import { useSession } from '@/lib/auth-client'
 import { THEME_LABELS, THEMES } from '@/lib/theme'
 
 export default function SettingsPage() {

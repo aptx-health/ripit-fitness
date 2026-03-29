@@ -45,6 +45,7 @@ export default function CollectionBuilder() {
 
   const [refreshKey, refreshCollections] = useReducer((x: number) => x + 1, 0)
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: refreshKey triggers re-fetch intentionally
   useEffect(() => {
     let cancelled = false
     Promise.all([
@@ -115,10 +116,10 @@ export default function CollectionBuilder() {
 
       {showCreate && (
         <div className="p-4 bg-card border-2 border-border space-y-3">
-          <div>
-            <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
+          <label className="block">
+            <span className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
               Name
-            </label>
+            </span>
             <input
               type="text"
               value={newName}
@@ -126,20 +127,21 @@ export default function CollectionBuilder() {
               className="w-full px-3 py-2 bg-input border-2 border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm"
               placeholder="Collection name"
             />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
+          </label>
+          <label className="block">
+            <span className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
               Description ({newDescription.length}/280)
-            </label>
+            </span>
             <textarea
               value={newDescription}
               onChange={(e) => setNewDescription(e.target.value.slice(0, 280))}
               className="w-full px-3 py-2 bg-input border-2 border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm resize-none h-20"
               placeholder="Short description"
             />
-          </div>
+          </label>
           <div className="flex gap-2">
             <button
+              type="button"
               onClick={handleCreate}
               disabled={creating || !newName.trim() || !newDescription.trim()}
               className="px-4 py-2 bg-primary text-primary-foreground border-2 border-primary font-semibold uppercase tracking-wider text-xs disabled:opacity-50 transition-colors"
@@ -147,6 +149,7 @@ export default function CollectionBuilder() {
               {creating ? 'Creating...' : 'Create'}
             </button>
             <button
+              type="button"
               onClick={() => setShowCreate(false)}
               className="px-4 py-2 bg-muted text-foreground border-2 border-border font-semibold uppercase tracking-wider text-xs transition-colors"
             >
@@ -270,13 +273,13 @@ function CollectionCard({
           )}
         </div>
         <div className="flex items-center gap-1 ml-4">
-          <button onClick={onEdit} className="text-muted-foreground hover:text-foreground p-2">
+          <button type="button" onClick={onEdit} className="text-muted-foreground hover:text-foreground p-2">
             {isEditing ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </button>
-          <button onClick={onEdit} className="text-muted-foreground hover:text-foreground p-2">
+          <button type="button" onClick={onEdit} className="text-muted-foreground hover:text-foreground p-2">
             <Pencil size={14} />
           </button>
-          <button onClick={onDelete} className="text-red-400 hover:text-red-300 p-2">
+          <button type="button" onClick={onDelete} className="text-red-400 hover:text-red-300 p-2">
             <Trash2 size={14} />
           </button>
         </div>
@@ -293,13 +296,13 @@ function CollectionCard({
                 <div key={id} className="flex items-center gap-2 p-2 bg-muted border border-border text-sm">
                   <span className="text-xs text-muted-foreground w-6">{index + 1}.</span>
                   <span className="flex-1 truncate text-foreground">{article?.title || id}</span>
-                  <button onClick={() => moveArticle(index, -1)} disabled={index === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-30 p-1">
+                  <button type="button" onClick={() => moveArticle(index, -1)} disabled={index === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-30 p-1">
                     <ArrowUp size={12} />
                   </button>
-                  <button onClick={() => moveArticle(index, 1)} disabled={index === articleIds.length - 1} className="text-muted-foreground hover:text-foreground disabled:opacity-30 p-1">
+                  <button type="button" onClick={() => moveArticle(index, 1)} disabled={index === articleIds.length - 1} className="text-muted-foreground hover:text-foreground disabled:opacity-30 p-1">
                     <ArrowDown size={12} />
                   </button>
-                  <button onClick={() => removeArticle(id)} className="text-red-400 hover:text-red-300 p-1">
+                  <button type="button" onClick={() => removeArticle(id)} className="text-red-400 hover:text-red-300 p-1">
                     <X size={12} />
                   </button>
                 </div>
@@ -316,6 +319,7 @@ function CollectionCard({
               <div className="mt-1 max-h-40 overflow-y-auto space-y-1">
                 {unusedArticles.map((article) => (
                   <button
+                    type="button"
                     key={article.id}
                     onClick={() => addArticle(article.id)}
                     className="w-full text-left p-2 bg-muted border border-border hover:bg-secondary text-sm text-foreground transition-colors flex items-center gap-2"
@@ -331,6 +335,7 @@ function CollectionCard({
 
           <div className="flex gap-2 pt-2">
             <button
+              type="button"
               onClick={handleSave}
               disabled={saving}
               className="px-4 py-2 bg-primary text-primary-foreground border-2 border-primary font-semibold uppercase tracking-wider text-xs disabled:opacity-50 transition-colors"
@@ -338,6 +343,7 @@ function CollectionCard({
               {saving ? 'Saving...' : 'Save'}
             </button>
             <button
+              type="button"
               onClick={onEdit}
               className="px-4 py-2 bg-muted text-foreground border-2 border-border font-semibold uppercase tracking-wider text-xs transition-colors"
             >

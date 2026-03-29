@@ -35,6 +35,7 @@ export default function ExerciseLoggingHeader({
             </div>
           )}
           <button
+            type="button"
             onClick={onMinimize}
             className="min-h-9 min-w-9 flex items-center justify-center border-2 border-white/30 bg-white/15 hover:bg-white/25 transition-colors doom-focus-ring"
             aria-label="Minimize workout"
@@ -42,6 +43,7 @@ export default function ExerciseLoggingHeader({
             <ChevronDown className="h-4 w-4" />
           </button>
           <button
+            type="button"
             onClick={onClose}
             className="min-h-9 min-w-9 flex items-center justify-center border-2 border-white/30 bg-white/15 hover:bg-white/25 transition-colors doom-focus-ring"
             aria-label="Close workout"

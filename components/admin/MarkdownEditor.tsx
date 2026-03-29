@@ -22,9 +22,9 @@ export default function MarkdownEditor({ value, onChange }: MarkdownEditorProps)
   return (
     <div>
       <div className="flex items-center justify-between mb-1">
-        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           Body (Markdown)
-        </label>
+        </span>
         <div className="flex items-center gap-3">
           <span className="text-xs text-muted-foreground">
             {wordCount} words / ~{readTime} min read
@@ -165,7 +165,7 @@ function InlineMarkdown({ text }: { text: string }) {
         parts.push(<span key={key++}>{processInline(remaining.slice(0, imgMatch.index))}</span>)
       }
       parts.push(
-        // eslint-disable-next-line @next/next/no-img-element
+        // biome-ignore lint/performance/noImgElement: markdown preview renders user-provided URLs
         <img key={key++} src={imgMatch[2]} alt={imgMatch[1]} className="max-w-full h-auto my-2 border border-border" />
       )
       remaining = remaining.slice(imgMatch.index + imgMatch[0].length)

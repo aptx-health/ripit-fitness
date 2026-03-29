@@ -5,8 +5,8 @@ import { useState } from 'react'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/radix/tabs'
 import type { LoadState } from '@/hooks/useProgressiveExercises'
-import type { LoggedSet } from '@/types/workout'
 import { EQUIPMENT_LABELS } from '@/lib/constants/program-metadata'
+import type { LoggedSet } from '@/types/workout'
 import SetList from './SetList'
 
 interface PrescribedSet {

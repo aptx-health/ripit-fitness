@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
-import { isEditorRole } from '@/lib/admin/auth'
 import ExerciseAdminTable from '@/components/admin/ExerciseAdminTable'
+import { isEditorRole } from '@/lib/admin/auth'
 import { getCurrentUser } from '@/lib/auth/server'
 
 // Don't cache this page - exercises should be fresh

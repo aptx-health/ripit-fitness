@@ -59,10 +59,13 @@ export default function MediaUploader({ onInsert }: MediaUploaderProps) {
 
   return (
     <div>
-      <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
+      <span className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
         Media Upload
-      </label>
+      </span>
+      {/* biome-ignore lint/a11y/useKeyWithClickEvents: file upload drop zone with hidden input */}
       <div
+        role="button"
+        tabIndex={0}
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleDrop}
         className="border-2 border-dashed border-border p-4 text-center hover:border-primary transition-colors cursor-pointer"
@@ -81,7 +84,7 @@ export default function MediaUploader({ onInsert }: MediaUploaderProps) {
             Uploading...
           </div>
         ) : preview ? (
-          // eslint-disable-next-line @next/next/no-img-element
+          // biome-ignore lint/performance/noImgElement: preview of blob URL before upload
           <img src={preview} alt="Preview" className="max-h-32 mx-auto" />
         ) : (
           <div className="flex flex-col items-center gap-2 text-muted-foreground">

@@ -50,7 +50,7 @@ async function fetchWithRetry<T>(
       // Wait before retrying (exponential backoff)
       if (attempt < retries - 1) {
         await new Promise(resolve =>
-          setTimeout(resolve, BASE_DELAY_MS * Math.pow(2, attempt))
+          setTimeout(resolve, BASE_DELAY_MS * 2 ** attempt)
         )
       }
     }
