@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowLeft, ChevronLeft, ChevronRight, Clock } from 'lucide-react'
+import { ArrowLeft, BookOpen, ChevronLeft, ChevronRight, Clock } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
@@ -83,37 +83,82 @@ export default function ArticleDetail({
     ? collectionContext.articles[collectionContext.currentIndex + 1]
     : null
 
+  const backHref = collectionContext
+    ? `/learn/collections/${collectionContext.id}`
+    : '/learn'
+
   return (
     <div className={`min-h-screen bg-background px-4 sm:px-6 py-8 ${collectionContext ? 'pb-24 sm:pb-8' : ''}`}>
       <div className="max-w-2xl mx-auto">
-        {/* Back navigation — contextual */}
+
+        {/* Mobile: floating back button (top-left, mirrors draft button pattern) */}
         {collectionContext ? (
-          <div className="mb-6">
+          <Link
+            href={backHref}
+            className="sm:hidden fixed left-3 flex items-center gap-2 px-3 py-2
+              bg-card border-2 border-border text-foreground
+              shadow-[2px_2px_0_rgba(0,0,0,0.3)]"
+            style={{
+              top: 'calc(env(safe-area-inset-top, 0px) + 0.5rem)',
+              zIndex: 45,
+            }}
+            aria-label={`Back to ${collectionContext.name}`}
+          >
+            <BookOpen className="h-4 w-4 text-primary flex-shrink-0" />
+            <span className="text-[10px] font-bold uppercase tracking-wider max-w-[120px] truncate">
+              {collectionContext.name}
+            </span>
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+              {collectionContext.currentIndex + 1}/{collectionContext.articles.length}
+            </span>
+          </Link>
+        ) : (
+          <Link
+            href={backHref}
+            className="sm:hidden fixed left-3 flex items-center justify-center
+              min-h-10 min-w-10 bg-card border-2 border-border text-muted-foreground
+              shadow-[2px_2px_0_rgba(0,0,0,0.3)]"
+            style={{
+              top: 'calc(env(safe-area-inset-top, 0px) + 0.5rem)',
+              zIndex: 45,
+            }}
+            aria-label="Back to Learn"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+        )}
+
+        {/* Desktop: inline breadcrumb nav */}
+        <div className="hidden sm:block mb-6">
+          {collectionContext ? (
             <Link
-              href={`/learn/collections/${collectionContext.id}`}
+              href={backHref}
+              className="inline-flex items-center gap-2 px-3 py-1.5
+                bg-card border-2 border-border text-foreground
+                hover:border-primary/50 transition-all group"
+            >
+              <BookOpen className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+              <span className="text-xs font-semibold uppercase tracking-wider group-hover:text-primary transition-colors">
+                {collectionContext.name}
+              </span>
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                {collectionContext.currentIndex + 1}/{collectionContext.articles.length}
+              </span>
+            </Link>
+          ) : (
+            <Link
+              href={backHref}
               className="inline-flex items-center gap-1 text-xs text-muted-foreground
                 hover:text-primary transition-colors uppercase tracking-wider font-semibold"
             >
               <ArrowLeft className="h-3 w-3" />
-              {collectionContext.name}
+              Back to Learn
             </Link>
-            <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-wider font-semibold">
-              Article {collectionContext.currentIndex + 1} of {collectionContext.articles.length}
-            </p>
-          </div>
-        ) : (
-          <Link
-            href="/learn"
-            className="inline-flex items-center gap-1 text-xs text-muted-foreground
-              hover:text-primary transition-colors mb-6 uppercase tracking-wider font-semibold"
-          >
-            <ArrowLeft className="h-3 w-3" />
-            Back to Learn
-          </Link>
-        )}
+          )}
+        </div>
 
         {/* Article header */}
-        <div className="mb-6">
+        <div className="mb-6 mt-14 sm:mt-0">
           <div className="flex items-center gap-3 mb-3">
             <span
               className={`text-[10px] px-2 py-0.5 font-semibold uppercase tracking-wider doom-label ${levelColor(article.level)}`}
