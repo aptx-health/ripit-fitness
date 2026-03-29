@@ -4,6 +4,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Clock } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
+import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'
 import { clientLogger } from '@/lib/client-logger'
 
@@ -147,7 +148,7 @@ export default function ArticleDetail({
 
         {/* Article body - markdown */}
         <div className="prose-learn mb-12">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
             {article.body}
           </ReactMarkdown>
         </div>
