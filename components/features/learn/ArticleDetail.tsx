@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowLeft, Clock } from 'lucide-react'
+import { ArrowLeft, ChevronLeft, ChevronRight, Clock } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
@@ -32,9 +32,17 @@ interface ArticleData {
   tags: Tag[]
 }
 
+interface CollectionContext {
+  id: string
+  name: string
+  articles: { slug: string; title: string }[]
+  currentIndex: number
+}
+
 interface ArticleDetailProps {
   article: ArticleData
   relatedArticles: RelatedArticle[]
+  collectionContext?: CollectionContext | null
 }
 
 function levelColor(level: string) {
@@ -50,7 +58,11 @@ function levelColor(level: string) {
   }
 }
 
-export default function ArticleDetail({ article, relatedArticles }: ArticleDetailProps) {
+export default function ArticleDetail({
+  article,
+  relatedArticles,
+  collectionContext,
+}: ArticleDetailProps) {
   // Auto-mark as read when article is viewed
   useEffect(() => {
     async function markRead() {
@@ -63,17 +75,41 @@ export default function ArticleDetail({ article, relatedArticles }: ArticleDetai
     markRead()
   }, [article.slug])
 
+  const prevArticle = collectionContext && collectionContext.currentIndex > 0
+    ? collectionContext.articles[collectionContext.currentIndex - 1]
+    : null
+  const nextArticle = collectionContext && collectionContext.currentIndex < collectionContext.articles.length - 1
+    ? collectionContext.articles[collectionContext.currentIndex + 1]
+    : null
+
   return (
-    <div className="min-h-screen bg-background px-4 sm:px-6 py-8">
+    <div className={`min-h-screen bg-background px-4 sm:px-6 py-8 ${collectionContext ? 'pb-24 sm:pb-8' : ''}`}>
       <div className="max-w-2xl mx-auto">
-        {/* Back navigation */}
-        <Link
-          href="/learn"
-          className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors mb-6 uppercase tracking-wider font-semibold"
-        >
-          <ArrowLeft className="h-3 w-3" />
-          Back to Learn
-        </Link>
+        {/* Back navigation — contextual */}
+        {collectionContext ? (
+          <div className="mb-6">
+            <Link
+              href={`/learn/collections/${collectionContext.id}`}
+              className="inline-flex items-center gap-1 text-xs text-muted-foreground
+                hover:text-primary transition-colors uppercase tracking-wider font-semibold"
+            >
+              <ArrowLeft className="h-3 w-3" />
+              {collectionContext.name}
+            </Link>
+            <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-wider font-semibold">
+              Article {collectionContext.currentIndex + 1} of {collectionContext.articles.length}
+            </p>
+          </div>
+        ) : (
+          <Link
+            href="/learn"
+            className="inline-flex items-center gap-1 text-xs text-muted-foreground
+              hover:text-primary transition-colors mb-6 uppercase tracking-wider font-semibold"
+          >
+            <ArrowLeft className="h-3 w-3" />
+            Back to Learn
+          </Link>
+        )}
 
         {/* Article header */}
         <div className="mb-6">
@@ -116,8 +152,66 @@ export default function ArticleDetail({ article, relatedArticles }: ArticleDetai
           </ReactMarkdown>
         </div>
 
-        {/* Related articles */}
-        {relatedArticles.length > 0 && (
+        {/* Collection prev/next — inline for desktop */}
+        {collectionContext && (
+          <div className="hidden sm:flex border-t-2 border-border pt-6 mb-8 items-stretch gap-3">
+            {prevArticle ? (
+              <Link
+                href={`/learn/${prevArticle.slug}?collection=${collectionContext.id}`}
+                className="flex-1 flex items-center gap-3 p-4 bg-card border-2 border-border
+                  hover:border-primary/50 transition-all group"
+              >
+                <ChevronLeft className="h-5 w-5 flex-shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
+                <div className="min-w-0">
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold block">
+                    Previous
+                  </span>
+                  <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors truncate block">
+                    {prevArticle.title}
+                  </span>
+                </div>
+              </Link>
+            ) : (
+              <div className="flex-1" />
+            )}
+            {nextArticle ? (
+              <Link
+                href={`/learn/${nextArticle.slug}?collection=${collectionContext.id}`}
+                className="flex-1 flex items-center justify-end gap-3 p-4 bg-card border-2 border-border
+                  hover:border-primary/50 transition-all group text-right"
+              >
+                <div className="min-w-0">
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold block">
+                    Next
+                  </span>
+                  <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors truncate block">
+                    {nextArticle.title}
+                  </span>
+                </div>
+                <ChevronRight className="h-5 w-5 flex-shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
+              </Link>
+            ) : (
+              <Link
+                href={`/learn/collections/${collectionContext.id}`}
+                className="flex-1 flex items-center justify-end gap-3 p-4 bg-card border-2 border-green-900/50
+                  hover:border-green-700 transition-all group text-right"
+              >
+                <div className="min-w-0">
+                  <span className="text-[10px] text-green-400 uppercase tracking-wider font-semibold block">
+                    Complete
+                  </span>
+                  <span className="text-sm font-semibold text-green-400 group-hover:text-green-300 transition-colors truncate block">
+                    Back to Collection
+                  </span>
+                </div>
+                <ChevronRight className="h-5 w-5 flex-shrink-0 text-green-400 group-hover:text-green-300 transition-colors" />
+              </Link>
+            )}
+          </div>
+        )}
+
+        {/* Related articles — only shown outside collection context */}
+        {!collectionContext && relatedArticles.length > 0 && (
           <div className="border-t-2 border-border pt-8">
             <h2 className="text-sm font-bold text-foreground mb-4 doom-heading uppercase tracking-wider">
               Related Articles
@@ -149,6 +243,69 @@ export default function ArticleDetail({ article, relatedArticles }: ArticleDetai
           </div>
         )}
       </div>
+
+      {/* Mobile fixed bottom nav — collection prev/next */}
+      {collectionContext && (
+        <div className="fixed bottom-16 left-0 right-0 sm:hidden bg-card border-t-2 border-border z-40">
+          <div className="flex items-stretch">
+            {prevArticle ? (
+              <Link
+                href={`/learn/${prevArticle.slug}?collection=${collectionContext.id}`}
+                className="flex-1 flex items-center gap-2 px-4 py-3 border-r border-border
+                  active:bg-muted transition-colors"
+              >
+                <ChevronLeft className="h-4 w-4 flex-shrink-0 text-primary" />
+                <div className="min-w-0">
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold block">
+                    Prev
+                  </span>
+                  <span className="text-xs text-foreground truncate block">
+                    {prevArticle.title}
+                  </span>
+                </div>
+              </Link>
+            ) : (
+              <div className="flex-1 px-4 py-3 border-r border-border" />
+            )}
+
+            {/* Position indicator */}
+            <div className="flex items-center px-3">
+              <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider whitespace-nowrap">
+                {collectionContext.currentIndex + 1}/{collectionContext.articles.length}
+              </span>
+            </div>
+
+            {nextArticle ? (
+              <Link
+                href={`/learn/${nextArticle.slug}?collection=${collectionContext.id}`}
+                className="flex-1 flex items-center justify-end gap-2 px-4 py-3 border-l border-border
+                  active:bg-muted transition-colors"
+              >
+                <div className="min-w-0 text-right">
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold block">
+                    Next
+                  </span>
+                  <span className="text-xs text-foreground truncate block">
+                    {nextArticle.title}
+                  </span>
+                </div>
+                <ChevronRight className="h-4 w-4 flex-shrink-0 text-primary" />
+              </Link>
+            ) : (
+              <Link
+                href={`/learn/collections/${collectionContext.id}`}
+                className="flex-1 flex items-center justify-end gap-2 px-4 py-3 border-l border-border
+                  active:bg-muted transition-colors"
+              >
+                <span className="text-xs text-green-400 font-semibold uppercase tracking-wider">
+                  Done
+                </span>
+                <ChevronRight className="h-4 w-4 flex-shrink-0 text-green-400" />
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

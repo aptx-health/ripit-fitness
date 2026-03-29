@@ -1,6 +1,6 @@
 'use client'
 
-import { Activity, LayoutGrid, BookOpen, Settings } from 'lucide-react'
+import { Activity, BookOpen, LayoutGrid, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 

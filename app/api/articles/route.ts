@@ -20,6 +20,7 @@ export async function GET(request: NextRequest) {
 
     // Build where clause for published articles only
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // biome-ignore lint/suspicious/noExplicitAny: Prisma where clause built dynamically
     const where: any = {
       status: 'published',
     }
@@ -132,7 +133,7 @@ export async function GET(request: NextRequest) {
       },
     })
 
-    // Fetch collections with their articles for the collections section
+    // Fetch collections with their articles and read status for the collections section
     const collections = await prisma.collection.findMany({
       orderBy: { displayOrder: 'asc' },
       select: {
@@ -141,7 +142,6 @@ export async function GET(request: NextRequest) {
         description: true,
         articles: {
           orderBy: { order: 'asc' },
-          take: 4,
           select: {
             article: {
               select: {
@@ -150,6 +150,11 @@ export async function GET(request: NextRequest) {
                 slug: true,
                 level: true,
                 readTimeMinutes: true,
+                status: true,
+                readStatuses: {
+                  where: { userId: user.id },
+                  select: { lastReadAt: true },
+                },
               },
             },
           },
@@ -157,11 +162,38 @@ export async function GET(request: NextRequest) {
       },
     })
 
+    // Format collections with read progress
+    const formattedCollections = collections.map((col) => {
+      const publishedArticles = col.articles.filter(
+        (ca) => ca.article.status === 'published'
+      )
+      const readCount = publishedArticles.filter(
+        (ca) => ca.article.readStatuses.length > 0
+      ).length
+      return {
+        id: col.id,
+        name: col.name,
+        description: col.description,
+        readCount,
+        totalCount: publishedArticles.length,
+        articles: publishedArticles.slice(0, 4).map(({ article }) => ({
+          article: {
+            id: article.id,
+            title: article.title,
+            slug: article.slug,
+            level: article.level,
+            readTimeMinutes: article.readTimeMinutes,
+            isRead: article.readStatuses.length > 0,
+          },
+        })),
+      }
+    })
+
     return NextResponse.json({
       success: true,
       articles: formatted,
       tags,
-      collections,
+      collections: formattedCollections,
     })
   } catch (err) {
     logger.error({ error: err, context: 'articles-browse' }, 'Failed to fetch articles')

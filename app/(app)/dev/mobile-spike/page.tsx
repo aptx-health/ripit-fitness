@@ -1,14 +1,14 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { Activity, BookOpen, Dumbbell, LayoutGrid, Settings } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Dumbbell, Activity, LayoutGrid, BookOpen, Settings } from 'lucide-react'
 import {
-  type Tab,
-  Z,
-  TabContent,
-  FullScreenModal,
   DebugOverlay,
+  FullScreenModal,
+  type Tab,
+  TabContent,
+  Z,
 } from './components'
 
 /**
@@ -91,6 +91,7 @@ export default function MobileSpikePage() {
 
           {hasDraft && (
             <button
+              type="button"
               onClick={() => {
                 if (confirm('Reopen draft workout?')) {
                   setModalOpen(true)
@@ -138,6 +139,7 @@ export default function MobileSpikePage() {
               const isActive = activeTab === id
               return (
                 <button
+                  type="button"
                   key={id}
                   onClick={() => handleTabSwitch(id)}
                   className={`flex-1 flex flex-col items-center justify-center gap-0.5 min-h-12 min-w-12 transition-colors ${
@@ -173,6 +175,7 @@ export default function MobileSpikePage() {
       {/* Toggle debug button — bottom right, above nav */}
       {!showDebug && !modalOpen && (
         <button
+          type="button"
           onClick={() => setShowDebug(true)}
           className="md:hidden fixed right-3 bg-accent text-white rounded-full min-h-8 min-w-8 flex items-center justify-center text-xs font-bold shadow-lg"
           style={{

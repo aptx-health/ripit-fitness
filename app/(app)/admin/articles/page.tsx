@@ -105,6 +105,7 @@ export default function AdminArticlesPage() {
       <div className="flex gap-1 mb-6 overflow-x-auto">
         {STATUS_TABS.map((tab) => (
           <button
+            type="button"
             key={tab}
             onClick={() => setActiveStatus(tab)}
             className={`px-3 py-1.5 text-xs font-semibold uppercase tracking-wider border-2 transition-colors ${
