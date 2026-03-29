@@ -1,6 +1,6 @@
 'use client'
 
-import { BookOpen, Check, ChevronRight, Clock, Search, X } from 'lucide-react'
+import { BookOpen, Clock, Search, X } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
@@ -28,16 +28,6 @@ interface CollectionData {
   description: string
   readCount: number
   totalCount: number
-  articles: {
-    article: {
-      id: string
-      title: string
-      slug: string
-      level: string
-      readTimeMinutes: number | null
-      isRead: boolean
-    }
-  }[]
 }
 
 type FilterCategory = 'topic' | 'body_area' | 'context'
@@ -302,12 +292,11 @@ export default function LearnBrowser() {
                         {col.readCount}/{col.totalCount}
                       </span>
                     </div>
-                    <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
+                    <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
                       {col.description}
                     </p>
-
                     {/* Progress bar */}
-                    <div className="h-1 bg-muted border border-border overflow-hidden mb-3">
+                    <div className="h-1 bg-muted border border-border overflow-hidden">
                       <div
                         className={`h-full transition-all duration-500 ${
                           isComplete
@@ -316,24 +305,6 @@ export default function LearnBrowser() {
                         }`}
                         style={{ width: `${progressPercent}%` }}
                       />
-                    </div>
-
-                    <div className="space-y-1">
-                      {col.articles.map(({ article }) => (
-                        <div
-                          key={article.id}
-                          className="flex items-center gap-2 text-xs text-muted-foreground"
-                        >
-                          {article.isRead ? (
-                            <Check className="h-3 w-3 text-green-400 flex-shrink-0" />
-                          ) : (
-                            <ChevronRight className="h-3 w-3 flex-shrink-0" />
-                          )}
-                          <span className={`truncate ${article.isRead ? 'text-muted-foreground' : ''}`}>
-                            {article.title}
-                          </span>
-                        </div>
-                      ))}
                     </div>
                   </Link>
                 )
