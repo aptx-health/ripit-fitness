@@ -42,11 +42,11 @@ const FILTER_CATEGORIES: { key: FilterCategory; label: string }[] = [
 function levelColor(level: string) {
   switch (level) {
     case 'beginner':
-      return 'bg-green-900/40 text-green-400 border-2 border-green-700'
+      return 'bg-green-100 text-green-800 border-2 border-green-300 dark:bg-green-900/40 dark:text-green-400 dark:border-green-700'
     case 'intermediate':
-      return 'bg-orange-900/40 text-orange-400 border-2 border-orange-700'
+      return 'bg-orange-100 text-orange-800 border-2 border-orange-300 dark:bg-orange-900/40 dark:text-orange-400 dark:border-orange-700'
     case 'advanced':
-      return 'bg-red-900/40 text-red-400 border-2 border-red-700'
+      return 'bg-red-100 text-red-800 border-2 border-red-300 dark:bg-red-900/40 dark:text-red-400 dark:border-red-700'
     default:
       return 'bg-muted text-muted-foreground'
   }
