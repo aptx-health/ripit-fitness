@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { ChevronUp, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 export type Tab = 'training' | 'programs' | 'learn' | 'settings'
 
@@ -62,6 +62,7 @@ function TrainingContent({
         'Day 6: Active Recovery',
       ].map((day, i) => (
         <button
+          type="button"
           key={i}
           onClick={() => {
             if (hasDraft) {
@@ -211,6 +212,7 @@ function SettingsContent({
       <div className="pt-2 border-t border-border">
         <h2 className="text-sm font-bold mb-2">Test Controls</h2>
         <button
+          type="button"
           onClick={onToggleDraft}
           className="px-4 py-2 rounded-lg border-2 border-border bg-card text-sm hover:border-accent transition-colors"
         >
@@ -256,6 +258,7 @@ export function FullScreenModal({
         </div>
         <div className="flex items-center gap-2">
           <button
+            type="button"
             onClick={onMinimize}
             className="min-h-10 min-w-10 flex items-center justify-center rounded-lg border-2 border-border hover:border-accent transition-colors"
             aria-label="Minimize workout"
@@ -263,6 +266,7 @@ export function FullScreenModal({
             <ChevronUp className="h-4 w-4 rotate-180" />
           </button>
           <button
+            type="button"
             onClick={() => {
               if (confirm('Exit workout? Your draft will be saved.')) {
                 onClose()
@@ -311,6 +315,7 @@ export function FullScreenModal({
               }}
             />
             <button
+              type="button"
               onClick={() => {
                 const input = document.getElementById(
                   'set-input'
@@ -351,10 +356,10 @@ export function FullScreenModal({
           paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.75rem)',
         }}
       >
-        <button className="flex-1 py-3 rounded-lg bg-accent text-white font-bold text-sm">
+        <button type="button" className="flex-1 py-3 rounded-lg bg-accent text-white font-bold text-sm">
           Log Set
         </button>
-        <button className="flex-1 py-3 rounded-lg bg-success text-white font-bold text-sm">
+        <button type="button" className="flex-1 py-3 rounded-lg bg-success text-white font-bold text-sm">
           Complete
         </button>
       </div>
@@ -384,7 +389,7 @@ export function DebugOverlay({ onClose }: { onClose: () => void }) {
         standalone:
           'standalone' in window.navigator &&
           (window.navigator as Navigator & { standalone: boolean }).standalone,
-        userAgent: navigator.userAgent.slice(0, 60) + '...',
+        userAgent: `${navigator.userAgent.slice(0, 60)}...`,
       })
     }
     update()
@@ -405,6 +410,7 @@ export function DebugOverlay({ onClose }: { onClose: () => void }) {
       }}
     >
       <button
+        type="button"
         onClick={onClose}
         className="absolute top-1 right-2 text-white text-xs"
         style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}

@@ -168,19 +168,7 @@ export default function StrengthWeekView({
   const [isRestarting, setIsRestarting] = useState(false)
   const [isProgramComplete, setIsProgramComplete] = useState(false)
 
-  // Auto-resume draft workout when navigated with ?resume= param
   const resumeWorkoutId = searchParams.get('resume')
-  useEffect(() => {
-    if (resumeWorkoutId && !modalMode) {
-      // Clear the param from URL without triggering a navigation
-      const url = new URL(window.location.href)
-      url.searchParams.delete('resume')
-      window.history.replaceState(null, '', url.toString())
-
-      handleOpenLogging(resumeWorkoutId)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resumeWorkoutId])
 
   const checkProgramCompletion = useCallback(async (openModal = false) => {
     // Skip check if we're currently restarting
@@ -295,6 +283,18 @@ export default function StrengthWeekView({
 
     setModalMode('logging')
   }
+
+  // Auto-resume draft workout when navigated with ?resume= param
+  useEffect(() => {
+    if (resumeWorkoutId && !modalMode) {
+      // Clear the param from URL without triggering a navigation
+      const url = new URL(window.location.href)
+      url.searchParams.delete('resume')
+      window.history.replaceState(null, '', url.toString())
+
+      handleOpenLogging(resumeWorkoutId)
+    }
+  }, [resumeWorkoutId, handleOpenLogging, modalMode])
 
   const handleCloseModal = (workoutUpdated = false) => {
     const workoutId = selectedWorkoutId

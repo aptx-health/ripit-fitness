@@ -1,6 +1,6 @@
 'use client'
 
-import { BookOpen, ChevronRight, Clock, Search, X } from 'lucide-react'
+import { BookOpen, Clock, Search, X } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
@@ -26,15 +26,8 @@ interface CollectionData {
   id: string
   name: string
   description: string
-  articles: {
-    article: {
-      id: string
-      title: string
-      slug: string
-      level: string
-      readTimeMinutes: number | null
-    }
-  }[]
+  readCount: number
+  totalCount: number
 }
 
 type FilterCategory = 'topic' | 'body_area' | 'context'
@@ -49,11 +42,11 @@ const FILTER_CATEGORIES: { key: FilterCategory; label: string }[] = [
 function levelColor(level: string) {
   switch (level) {
     case 'beginner':
-      return 'bg-green-900/40 text-green-400 border-2 border-green-700'
+      return 'bg-green-100 text-green-800 border-2 border-green-300 dark:bg-green-900/40 dark:text-green-400 dark:border-green-700'
     case 'intermediate':
-      return 'bg-orange-900/40 text-orange-400 border-2 border-orange-700'
+      return 'bg-orange-100 text-orange-800 border-2 border-orange-300 dark:bg-orange-900/40 dark:text-orange-400 dark:border-orange-700'
     case 'advanced':
-      return 'bg-red-900/40 text-red-400 border-2 border-red-700'
+      return 'bg-red-100 text-red-800 border-2 border-red-300 dark:bg-red-900/40 dark:text-red-400 dark:border-red-700'
     default:
       return 'bg-muted text-muted-foreground'
   }
@@ -274,31 +267,48 @@ export default function LearnBrowser() {
               Collections
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {collections.map((col) => (
-                <div
-                  key={col.id}
-                  className="bg-card border-2 border-border p-4 doom-noise doom-corners"
-                >
-                  <h3 className="text-sm font-semibold text-foreground mb-1 uppercase tracking-wider">
-                    {col.name}
-                  </h3>
-                  <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
-                    {col.description}
-                  </p>
-                  <div className="space-y-1">
-                    {col.articles.map(({ article }) => (
-                      <Link
-                        key={article.id}
-                        href={`/learn/${article.slug}`}
-                        className="flex items-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors"
+              {collections.map((col) => {
+                const isComplete = col.readCount === col.totalCount && col.totalCount > 0
+                const progressPercent = col.totalCount > 0 ? (col.readCount / col.totalCount) * 100 : 0
+                return (
+                  <Link
+                    key={col.id}
+                    href={`/learn/collections/${col.id}`}
+                    className={`block bg-card border-2 p-4 doom-noise doom-corners transition-all group ${
+                      isComplete
+                        ? 'border-green-900/50 hover:border-green-700'
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider group-hover:text-primary transition-colors">
+                        {col.name}
+                      </h3>
+                      <span
+                        className={`text-[10px] font-bold uppercase tracking-wider whitespace-nowrap flex-shrink-0 ${
+                          isComplete ? 'text-green-400' : 'text-muted-foreground'
+                        }`}
                       >
-                        <ChevronRight className="h-3 w-3" />
-                        <span className="truncate">{article.title}</span>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              ))}
+                        {col.readCount}/{col.totalCount}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                      {col.description}
+                    </p>
+                    {/* Progress bar */}
+                    <div className="h-1 bg-muted border border-border overflow-hidden">
+                      <div
+                        className={`h-full transition-all duration-500 ${
+                          isComplete
+                            ? 'bg-green-500'
+                            : 'bg-primary'
+                        }`}
+                        style={{ width: `${progressPercent}%` }}
+                      />
+                    </div>
+                  </Link>
+                )
+              })}
             </div>
           </div>
         )}

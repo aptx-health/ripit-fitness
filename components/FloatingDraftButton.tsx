@@ -12,6 +12,7 @@ export default function FloatingDraftButton() {
 
   return (
     <button
+      type="button"
       onClick={() => {
         if (confirm(`Resume "${activeDraft.workoutName}"?`)) {
           router.push(`/training?resume=${activeDraft.workoutId}`)

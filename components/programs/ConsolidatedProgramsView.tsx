@@ -3,8 +3,8 @@
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
-import { clientLogger } from '@/lib/client-logger'
 import { useToast } from '@/components/ToastProvider'
+import { clientLogger } from '@/lib/client-logger'
 import StrengthActivationModal from '../StrengthActivationModal'
 import ArchivedProgramsSection from './ArchivedProgramsSection'
 import ProgramCard from './ProgramCard'
@@ -48,69 +48,15 @@ export default function ConsolidatedProgramsView({
   const [activationProgramId, setActivationProgramId] = useState<string | null>(null)
   const [existingActiveProgram, setExistingActiveProgram] = useState<{ id: string; name: string } | null>(null)
 
-  // On mount, resume polling for any programs already in cloning state
-  useEffect(() => {
-    const cloningPrograms = strengthPrograms.filter(p =>
-      p.copyStatus === 'cloning' || p.copyStatus?.startsWith('cloning_week_')
-    )
-
-    // Resume polling for first cloning program found
-    if (cloningPrograms.length > 0 && !cloningProgramId) {
-      const programId = cloningPrograms[0].id
-      if (!completedClones.has(programId)) {
-        setCloningProgramId(programId)
-        startPolling(programId)
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // Only run on mount
-
-  // Poll for cloning status if programId is in URL
-  useEffect(() => {
-    const cloningId = searchParams.get('cloning')
-
-    // Don't start polling if already completed
-    if (cloningId && completedClones.has(cloningId)) {
-      return
+  const cleanupCloningState = () => {
+    // Clear the polling interval first
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current)
+      pollingIntervalRef.current = null
     }
 
-    if (cloningId && cloningId !== cloningProgramId) {
-      setCloningProgramId(cloningId)
-      startPolling(cloningId)
-    }
-
-    return () => {
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current)
-        pollingIntervalRef.current = null
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, cloningProgramId])
-
-  const startPolling = async (programId: string) => {
-    // Check immediately
-    const shouldContinue = await checkCopyStatus(programId)
-
-    if (!shouldContinue) {
-      return
-    }
-
-    // Then poll every 2 seconds
-    const intervalId = setInterval(async () => {
-      const shouldContinue = await checkCopyStatus(programId)
-
-      if (!shouldContinue) {
-        clearInterval(intervalId)
-        // Also clear the ref if it still exists
-        if (pollingIntervalRef.current === intervalId) {
-          pollingIntervalRef.current = null
-        }
-      }
-    }, 2000)
-
-    // Store in ref for external cleanup
-    pollingIntervalRef.current = intervalId
+    setCloningProgramId(null)
+    window.history.replaceState(null, '', '/programs')
   }
 
   const handleCloneFailed = (programId: string, message?: string) => {
@@ -180,16 +126,70 @@ export default function ConsolidatedProgramsView({
     }
   }
 
-  const cleanupCloningState = () => {
-    // Clear the polling interval first
-    if (pollingIntervalRef.current) {
-      clearInterval(pollingIntervalRef.current)
-      pollingIntervalRef.current = null
+  const startPolling = async (programId: string) => {
+    // Check immediately
+    const shouldContinue = await checkCopyStatus(programId)
+
+    if (!shouldContinue) {
+      return
     }
 
-    setCloningProgramId(null)
-    window.history.replaceState(null, '', '/programs')
+    // Then poll every 2 seconds
+    const intervalId = setInterval(async () => {
+      const shouldContinue = await checkCopyStatus(programId)
+
+      if (!shouldContinue) {
+        clearInterval(intervalId)
+        // Also clear the ref if it still exists
+        if (pollingIntervalRef.current === intervalId) {
+          pollingIntervalRef.current = null
+        }
+      }
+    }, 2000)
+
+    // Store in ref for external cleanup
+    pollingIntervalRef.current = intervalId
   }
+
+  // On mount, resume polling for any programs already in cloning state
+  useEffect(() => {
+    const cloningPrograms = strengthPrograms.filter(p =>
+      p.copyStatus === 'cloning' || p.copyStatus?.startsWith('cloning_week_')
+    )
+
+    // Resume polling for first cloning program found
+    if (cloningPrograms.length > 0 && !cloningProgramId) {
+      const programId = cloningPrograms[0].id
+      if (!completedClones.has(programId)) {
+        setCloningProgramId(programId)
+        startPolling(programId)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cloningProgramId, completedClones.has, startPolling, strengthPrograms.filter]) // Only run on mount
+
+  // Poll for cloning status if programId is in URL
+  useEffect(() => {
+    const cloningId = searchParams.get('cloning')
+
+    // Don't start polling if already completed
+    if (cloningId && completedClones.has(cloningId)) {
+      return
+    }
+
+    if (cloningId && cloningId !== cloningProgramId) {
+      setCloningProgramId(cloningId)
+      startPolling(cloningId)
+    }
+
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current)
+        pollingIntervalRef.current = null
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, cloningProgramId, completedClones.has, startPolling])
 
   // Sort programs: active first, then by creation date
   // Filter out locally deleted programs

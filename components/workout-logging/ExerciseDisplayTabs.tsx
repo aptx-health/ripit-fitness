@@ -103,8 +103,6 @@ export default function ExerciseDisplayTabs({
   isInputExpanded = false,
 }: ExerciseDisplayTabsProps) {
   const [expandedImage, setExpandedImage] = useState<string | null>(null)
-  const loggedCount = loggedSets.length
-  const totalCount = prescribedSets.length
   const hasNotes = !!exercise.notes
 
   return (
