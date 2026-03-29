@@ -50,9 +50,9 @@ export default function TagSelector({ selectedIds, onChange }: TagSelectorProps)
 
   return (
     <div>
-      <label className="block text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
+      <span className="block text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
         Tags
-      </label>
+      </span>
       <div className="space-y-3">
         {Object.entries(CATEGORY_LABELS).map(([category, label]) => {
           const categoryTags = grouped[category] || []

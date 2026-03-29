@@ -114,7 +114,7 @@ export default function ArticleEditor({ article, onSave, onCancel, onDelete }: A
   }
 
   const handleMediaInsert = (markdown: string) => {
-    setBody((prev) => prev + '\n' + markdown)
+    setBody((prev) => `${prev}\n${markdown}`)
   }
 
   return (
@@ -125,10 +125,10 @@ export default function ArticleEditor({ article, onSave, onCancel, onDelete }: A
 
       {/* Title + Slug */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
+        <label className="block">
+          <span className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
             Title
-          </label>
+          </span>
           <input
             type="text"
             value={title}
@@ -136,11 +136,11 @@ export default function ArticleEditor({ article, onSave, onCancel, onDelete }: A
             placeholder="Article title"
             className="w-full px-3 py-2 bg-input border-2 border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
-        </div>
-        <div>
-          <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
+        </label>
+        <label className="block">
+          <span className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
             Slug
-          </label>
+          </span>
           <input
             type="text"
             value={slug}
@@ -151,15 +151,15 @@ export default function ArticleEditor({ article, onSave, onCancel, onDelete }: A
             placeholder="url-friendly-slug"
             className="w-full px-3 py-2 bg-input border-2 border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary font-mono text-sm"
           />
-        </div>
+        </label>
       </div>
 
       {/* Level + Status */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
+        <label className="block">
+          <span className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
             Level
-          </label>
+          </span>
           <select
             value={level}
             onChange={(e) => setLevel(e.target.value)}
@@ -169,12 +169,12 @@ export default function ArticleEditor({ article, onSave, onCancel, onDelete }: A
             <option value="intermediate">Intermediate</option>
             <option value="advanced">Advanced</option>
           </select>
-        </div>
+        </label>
         {article && (
-          <div>
-            <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
+          <label className="block">
+            <span className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
               Status
-            </label>
+            </span>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
@@ -185,7 +185,7 @@ export default function ArticleEditor({ article, onSave, onCancel, onDelete }: A
               <option value="published">Published</option>
               <option value="rejected">Rejected</option>
             </select>
-          </div>
+          </label>
         )}
       </div>
 

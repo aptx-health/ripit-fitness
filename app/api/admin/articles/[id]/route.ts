@@ -9,7 +9,7 @@ import { logger } from '@/lib/logger'
  * Get a single article with all relations.
  */
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -145,7 +145,7 @@ export async function PATCH(
  * Delete an article (cascade deletes tags, read statuses, etc.).
  */
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
