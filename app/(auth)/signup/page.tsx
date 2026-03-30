@@ -3,10 +3,10 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { Button } from '@/components/ui/Button'
 import { OAuthButtons } from '@/components/features/auth/OAuthButtons'
 import { AuthPageHeader } from '@/components/features/auth/AuthPageHeader'
 import { OrDivider } from '@/components/features/auth/OrDivider'
+import { Button } from '@/components/ui/Button'
 import { signUp } from '@/lib/auth-client'
 
 export default function SignupPage() {

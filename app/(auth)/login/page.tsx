@@ -2,11 +2,11 @@
 
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useState, Suspense } from 'react'
-import { Button } from '@/components/ui/Button'
+import { Suspense, useState } from 'react'
 import { OAuthButtons } from '@/components/features/auth/OAuthButtons'
 import { AuthPageHeader } from '@/components/features/auth/AuthPageHeader'
 import { OrDivider } from '@/components/features/auth/OrDivider'
+import { Button } from '@/components/ui/Button'
 import { signIn } from '@/lib/auth-client'
 
 function getOAuthError(errorParam: string | null): string | null {
