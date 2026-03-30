@@ -331,13 +331,14 @@ export default function SettingsPage() {
               <FeedbackModal open={feedbackOpen} onOpenChange={setFeedbackOpen} />
             </div>
 
-            {/* Support */}
+            {/* Donate */}
+            {process.env.NEXT_PUBLIC_VENMO_HANDLE && (
             <div className="pt-4 border-t border-border">
               <span className="block text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
-                Support
+                Donate
               </span>
               <a
-                href="https://venmo.com/dusty-maze"
+                href={`https://venmo.com/${process.env.NEXT_PUBLIC_VENMO_HANDLE}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full md:w-auto md:min-w-[200px] px-4 py-3 bg-muted text-foreground border-2 border-border hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2"
@@ -349,6 +350,7 @@ export default function SettingsPage() {
                 Ripit is built by a local developer who loves lifting. If it helps your training, consider buying him a coffee.
               </p>
             </div>
+            )}
 
             {/* Sign Out */}
             <div className="pt-4 border-t border-border">
