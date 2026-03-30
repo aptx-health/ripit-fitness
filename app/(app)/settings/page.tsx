@@ -1,7 +1,7 @@
 'use client'
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { KeyRound, MessageSquarePlus, Moon, Palette, Save, Shield, Sun } from 'lucide-react'
+import { Heart, KeyRound, MessageSquarePlus, Moon, Palette, Save, Shield, Sun } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import FeedbackModal from '@/components/features/FeedbackModal'
@@ -312,22 +312,32 @@ export default function SettingsPage() {
               </div>
             )}
 
-            {/* Feedback */}
+            {/* Feedback & Donate */}
             <div className="pt-4 border-t border-border">
               <span className="block text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
-                Feedback
+                Feedback & Support
               </span>
-              <button
-                type="button"
-                onClick={() => setFeedbackOpen(true)}
-                className="w-full md:w-auto md:min-w-[200px] px-4 py-3 bg-muted text-foreground border-2 border-border hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2"
-              >
-                <MessageSquarePlus size={18} />
-                Send Feedback
-              </button>
-              <p className="text-sm text-muted-foreground mt-1">
-                Report bugs, request features, or let us know what you think
-              </p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setFeedbackOpen(true)}
+                  className="flex-1 px-4 py-3 bg-muted text-foreground border-2 border-border hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2"
+                >
+                  <MessageSquarePlus size={18} />
+                  Send Feedback
+                </button>
+                {process.env.NEXT_PUBLIC_VENMO_HANDLE && (
+                <a
+                  href={`https://venmo.com/${process.env.NEXT_PUBLIC_VENMO_HANDLE}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 px-4 py-3 bg-muted text-foreground border-2 border-border hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2"
+                >
+                  <Heart size={18} />
+                  Support Ripit
+                </a>
+                )}
+              </div>
               <FeedbackModal open={feedbackOpen} onOpenChange={setFeedbackOpen} />
             </div>
 
