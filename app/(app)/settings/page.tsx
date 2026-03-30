@@ -1,7 +1,7 @@
 'use client'
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { KeyRound, MessageSquarePlus, Moon, Palette, Save, Shield, Sun } from 'lucide-react'
+import { Heart, KeyRound, MessageSquarePlus, Moon, Palette, Save, Shield, Sun } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import FeedbackModal from '@/components/features/FeedbackModal'
@@ -329,6 +329,25 @@ export default function SettingsPage() {
                 Report bugs, request features, or let us know what you think
               </p>
               <FeedbackModal open={feedbackOpen} onOpenChange={setFeedbackOpen} />
+            </div>
+
+            {/* Support */}
+            <div className="pt-4 border-t border-border">
+              <span className="block text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
+                Support
+              </span>
+              <a
+                href="https://venmo.com/dusty-maze"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full md:w-auto md:min-w-[200px] px-4 py-3 bg-muted text-foreground border-2 border-border hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2"
+              >
+                <Heart size={18} />
+                Support Ripit
+              </a>
+              <p className="text-sm text-muted-foreground mt-1">
+                Ripit is built by a local developer who loves lifting. If it helps your training, consider buying him a coffee.
+              </p>
             </div>
 
             {/* Sign Out */}
