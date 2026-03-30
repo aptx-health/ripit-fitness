@@ -47,7 +47,7 @@ export default function ArchivedProgramsSection({
       }
       fetchArchivedPrograms()
     }
-  }, [isExpanded, programs.length, apiPath])
+  }, [isExpanded, programs.length])
 
   const handleUnarchive = async (programId: string, programName: string) => {
     if (

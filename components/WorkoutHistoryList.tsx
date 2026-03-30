@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 type Exercise = {
   name: string
@@ -46,16 +46,7 @@ export default function WorkoutHistoryList({ count }: Props) {
   const [isLoading, setIsLoading] = useState(true)
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
 
-  // Fetch workout history on mount
-  useEffect(() => {
-    if (count > 0) {
-      fetchWorkoutHistory()
-    } else {
-      setIsLoading(false)
-    }
-  }, [count])
-
-  const fetchWorkoutHistory = async () => {
+  const fetchWorkoutHistory = useCallback(async () => {
     setIsLoading(true)
     try {
       const response = await fetch('/api/workouts/history?limit=5')
@@ -70,7 +61,16 @@ export default function WorkoutHistoryList({ count }: Props) {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [])
+
+  // Fetch workout history on mount
+  useEffect(() => {
+    if (count > 0) {
+      fetchWorkoutHistory()
+    } else {
+      setIsLoading(false)
+    }
+  }, [count, fetchWorkoutHistory])
 
   const toggleExpanded = (id: string) => {
     setExpandedIds(prev => {

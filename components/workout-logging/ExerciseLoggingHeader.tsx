@@ -1,22 +1,21 @@
 'use client'
 
-import type { SyncStatus } from '@/hooks/useSyncState'
-import SyncStatusIcon from '../SyncStatusIcon'
+import { AlertCircle, ChevronDown, X } from 'lucide-react'
 
 interface ExerciseLoggingHeaderProps {
   currentExerciseIndex: number
   totalExercises: number
-  syncStatus: SyncStatus
-  pendingSetsCount: number
-  onSyncClick: () => void
+  failedSetCount?: number
+  onMinimize: () => void
+  onClose: () => void
 }
 
 export default function ExerciseLoggingHeader({
   currentExerciseIndex,
   totalExercises,
-  syncStatus,
-  pendingSetsCount,
-  onSyncClick,
+  failedSetCount = 0,
+  onMinimize,
+  onClose,
 }: ExerciseLoggingHeaderProps) {
   return (
     <div
@@ -28,12 +27,30 @@ export default function ExerciseLoggingHeader({
           Exercise {currentExerciseIndex + 1} of {totalExercises}
         </div>
 
-        {/* Sync Status Icon */}
-        <SyncStatusIcon
-          status={syncStatus}
-          pendingCount={pendingSetsCount}
-          onClick={onSyncClick}
-        />
+        <div className="flex items-center gap-2">
+          {failedSetCount > 0 && (
+            <div className="flex items-center gap-1 text-warning text-sm">
+              <AlertCircle size={16} />
+              <span>{failedSetCount} unsaved</span>
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={onMinimize}
+            className="min-h-9 min-w-9 flex items-center justify-center border-2 border-white/30 bg-white/15 hover:bg-white/25 transition-colors doom-focus-ring"
+            aria-label="Minimize workout"
+          >
+            <ChevronDown className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="min-h-9 min-w-9 flex items-center justify-center border-2 border-white/30 bg-white/15 hover:bg-white/25 transition-colors doom-focus-ring"
+            aria-label="Close workout"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
       </div>
     </div>
   )
