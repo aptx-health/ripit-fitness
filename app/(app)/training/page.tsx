@@ -42,7 +42,7 @@ export default async function TrainingPage({ searchParams }: Props) {
       <div className="max-w-2xl mx-auto">
         {/* Page Header */}
         <div className="px-4 sm:px-0 mb-4">
-          <h1 className="text-3xl font-bold text-foreground doom-title uppercase tracking-wider">
+          <h1 className="text-4xl font-bold text-foreground doom-title uppercase tracking-wider">
             TRAINING
           </h1>
         </div>
