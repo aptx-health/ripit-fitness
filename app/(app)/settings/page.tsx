@@ -312,45 +312,34 @@ export default function SettingsPage() {
               </div>
             )}
 
-            {/* Feedback */}
+            {/* Feedback & Donate */}
             <div className="pt-4 border-t border-border">
               <span className="block text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
-                Feedback
+                Feedback & Support
               </span>
-              <button
-                type="button"
-                onClick={() => setFeedbackOpen(true)}
-                className="w-full md:w-auto md:min-w-[200px] px-4 py-3 bg-muted text-foreground border-2 border-border hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2"
-              >
-                <MessageSquarePlus size={18} />
-                Send Feedback
-              </button>
-              <p className="text-sm text-muted-foreground mt-1">
-                Report bugs, request features, or let us know what you think
-              </p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setFeedbackOpen(true)}
+                  className="flex-1 px-4 py-3 bg-muted text-foreground border-2 border-border hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2"
+                >
+                  <MessageSquarePlus size={18} />
+                  Send Feedback
+                </button>
+                {process.env.NEXT_PUBLIC_VENMO_HANDLE && (
+                <a
+                  href={`https://venmo.com/${process.env.NEXT_PUBLIC_VENMO_HANDLE}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 px-4 py-3 bg-muted text-foreground border-2 border-border hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2"
+                >
+                  <Heart size={18} />
+                  Support Ripit
+                </a>
+                )}
+              </div>
               <FeedbackModal open={feedbackOpen} onOpenChange={setFeedbackOpen} />
             </div>
-
-            {/* Donate */}
-            {process.env.NEXT_PUBLIC_VENMO_HANDLE && (
-            <div className="pt-4 border-t border-border">
-              <span className="block text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
-                Donate
-              </span>
-              <a
-                href={`https://venmo.com/${process.env.NEXT_PUBLIC_VENMO_HANDLE}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full md:w-auto md:inline-flex md:min-w-[200px] px-4 py-3 bg-muted text-foreground border-2 border-border hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2"
-              >
-                <Heart size={18} />
-                Support Ripit
-              </a>
-              <p className="text-sm text-muted-foreground mt-1">
-                Ripit is built by a local developer who loves lifting. If it helps your training, consider buying him a coffee.
-              </p>
-            </div>
-            )}
 
             {/* Sign Out */}
             <div className="pt-4 border-t border-border">
