@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useState } from 'react'
+import { AuthPageHeader } from '@/components/features/auth/AuthPageHeader'
 import { Button } from '@/components/ui/Button'
 
 function CompleteProfileForm() {
@@ -55,14 +56,9 @@ function CompleteProfileForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="max-w-md w-full space-y-8 p-8 bg-card rounded-lg shadow-lg border border-border">
-        <div>
-          <h2 className="text-3xl font-bold text-center text-foreground">Almost there</h2>
-          <p className="mt-2 text-center text-muted-foreground">
-            {provider} didn&apos;t share your email. Enter it below to finish setting up your account.
-          </p>
-        </div>
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+      <div className="max-w-md w-full space-y-8 p-6 sm:p-8 bg-card rounded-lg shadow-lg border border-border">
+        <AuthPageHeader subtitle={`${provider} didn\u2019t share your email. Enter it below to finish setting up your account.`} />
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
@@ -121,6 +117,7 @@ function CompleteProfileForm() {
             disabled={loading}
             loading={loading}
             variant="primary"
+            doom
             className="w-full"
           >
             {needsPassword ? 'Link account' : 'Continue'}
