@@ -4,10 +4,10 @@
 
 Worktrees auto-detect their identity using `git rev-parse` and derive unique Docker container names and ports via `scripts/worktree-env.sh`. No manual port configuration needed — the same `Procfile` and start scripts work in the primary repo and all worktrees.
 
-| Location | Slot | Postgres Port | Redis Port | PG Container | Redis Container |
-|----------|------|---------------|------------|--------------|-----------------|
-| Primary repo | 0 | 5433 | 6379 | fitcsv-postgres | fitcsv-redis |
-| Any worktree | 1-9 (hashed) | 5434-5442 | 6380-6388 | fitcsv-postgres-wt{N} | fitcsv-redis-wt{N} |
+| Location | Slot | App Port | Postgres Port | Redis Port | PG Container | Redis Container |
+|----------|------|----------|---------------|------------|--------------|-----------------|
+| Primary repo | 0 | 3000 | 5433 | 6379 | fitcsv-postgres | fitcsv-redis |
+| Any worktree | 1-9 (hashed) | 3100-3900 | 5434-5442 | 6380-6388 | fitcsv-postgres-wt{N} | fitcsv-redis-wt{N} |
 
 To check which slot a worktree gets:
 ```bash
@@ -16,13 +16,6 @@ echo "Slot: $WORKTREE_SLOT, PG: $PG_PORT, Redis: $REDIS_PORT"
 ```
 
 ## Quick Setup (New Worktree)
-
-### Prerequisites
-
-Each worktree that runs on a different port needs a **Doppler config** with the correct `BETTER_AUTH_URL`. Create one if it doesn't exist:
-
-1. Duplicate `dev_personal` in Doppler as `dev_personal_worktree1` (or similar)
-2. Update `BETTER_AUTH_URL` and `NEXT_PUBLIC_APP_URL` to match the worktree's app port (e.g., `http://localhost:5300`)
 
 ### Setup Steps
 
@@ -73,7 +66,7 @@ overmind restart app
 
 Just start overmind in each worktree. Each gets its own postgres and redis containers on unique ports. No conflicts.
 
-**Note**: Next.js port is NOT auto-isolated. Each worktree's Doppler config should specify a unique port via `NEXT_PUBLIC_APP_URL` / `BETTER_AUTH_URL`.
+All ports (including Next.js, `BETTER_AUTH_URL`, and `NEXT_PUBLIC_APP_URL`) are auto-derived from the worktree slot. No per-worktree Doppler config needed for port differences.
 
 ## Troubleshooting
 
@@ -90,7 +83,7 @@ overmind restart app
 ```
 
 ### "Invalid origin" on signup/login
-Your Doppler config's `BETTER_AUTH_URL` doesn't match the app's actual URL/port. Update it in Doppler.
+`BETTER_AUTH_URL` is auto-set from the worktree slot. If you still see this, check that nothing is overriding the port (e.g., a Doppler config that hardcodes a different `BETTER_AUTH_URL`).
 
 ### ECONNREFUSED on signup/login
 The app can't reach postgres. Check that `DATABASE_URL` port matches the actual postgres container port:
