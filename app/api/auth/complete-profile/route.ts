@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth/server'
 import { Pool } from 'pg'
+import { getCurrentUser } from '@/lib/auth/server'
 import { logger } from '@/lib/logger'
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })

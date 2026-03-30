@@ -26,7 +26,7 @@ export async function GET(_request: NextRequest) {
           userId: user.id,
           displayName: null,
           defaultWeightUnit: 'lbs',
-          defaultIntensityRating: 'rpe'
+          defaultIntensityRating: 'rir'
         }
       })
     } catch (upsertError: unknown) {
@@ -92,7 +92,7 @@ export async function PUT(request: NextRequest) {
         userId: user.id,
         displayName: displayName?.trim() || null,
         defaultWeightUnit: defaultWeightUnit || 'lbs',
-        defaultIntensityRating: defaultIntensityRating || 'rpe'
+        defaultIntensityRating: defaultIntensityRating || 'rir'
       }
     })
 

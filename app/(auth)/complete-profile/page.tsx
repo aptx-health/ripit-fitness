@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useState, Suspense } from 'react'
+import { Suspense, useState } from 'react'
 import { Button } from '@/components/ui/Button'
 
 function CompleteProfileForm() {
