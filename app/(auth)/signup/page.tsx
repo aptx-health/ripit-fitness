@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
+import { OAuthButtons } from '@/components/features/auth/OAuthButtons'
 import { signUp } from '@/lib/auth-client'
 
 export default function SignupPage() {
@@ -61,7 +62,18 @@ export default function SignupPage() {
           <p className="mt-2 text-center text-muted-foreground">Create your account</p>
         </div>
 
-        <form onSubmit={handleSignup} className="mt-8 space-y-6">
+        <OAuthButtons />
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-border" />
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-card text-muted-foreground">or</span>
+          </div>
+        </div>
+
+        <form onSubmit={handleSignup} className="space-y-6">
           {error && (
             <div className="bg-error-muted border border-error-border text-error-text px-4 py-3 rounded">
               {error}
