@@ -58,6 +58,7 @@ export async function getStrengthWeekByNumber(
       select: {
         id: true,
         weekNumber: true,
+        description: true,
         workouts: {
           select: {
             id: true,

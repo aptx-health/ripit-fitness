@@ -39,9 +39,11 @@ type WorkoutCompletion = {
 
 type Props = {
   count: number
+  /** Compact mode shows fewer items and a section header, for inline use */
+  compact?: boolean
 }
 
-export default function WorkoutHistoryList({ count }: Props) {
+export default function WorkoutHistoryList({ count, compact = false }: Props) {
   const [completions, setCompletions] = useState<WorkoutCompletion[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
@@ -49,7 +51,8 @@ export default function WorkoutHistoryList({ count }: Props) {
   const fetchWorkoutHistory = useCallback(async () => {
     setIsLoading(true)
     try {
-      const response = await fetch('/api/workouts/history?limit=5')
+      const limit = compact ? 3 : 5
+      const response = await fetch(`/api/workouts/history?limit=${limit}`)
       if (!response.ok) {
         throw new Error('Failed to fetch workout history')
       }
@@ -61,7 +64,7 @@ export default function WorkoutHistoryList({ count }: Props) {
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [compact])
 
   // Fetch workout history on mount
   useEffect(() => {
@@ -85,6 +88,7 @@ export default function WorkoutHistoryList({ count }: Props) {
   }
 
   if (count === 0) {
+    if (compact) return null
     return (
       <div className="bg-card border border-border p-8 text-center doom-noise doom-card">
         <p className="text-muted-foreground">
@@ -94,35 +98,44 @@ export default function WorkoutHistoryList({ count }: Props) {
     )
   }
 
+  const skeletonCount = compact ? 3 : 5
+
   if (isLoading) {
-    // Loading skeleton
     return (
-      <div className="space-y-3">
-        {[1, 2, 3, 4, 5].map((i) => (
-          <div
-            key={i}
-            className="bg-card border border-border rounded-lg p-4 space-y-3"
-          >
-            <div className="flex justify-between items-start">
-              <div className="flex-1 space-y-2">
-                <div className="h-5 bg-muted animate-pulse rounded w-32" />
-                <div className="h-6 bg-muted animate-pulse rounded w-48" />
+      <div>
+        {compact && (
+          <h3 className="text-sm font-bold text-muted-foreground doom-heading uppercase tracking-wider mb-3">
+            RECENT
+          </h3>
+        )}
+        <div className="space-y-3">
+          {Array.from({ length: skeletonCount }, (_, i) => (
+            <div
+              key={i}
+              className="bg-card border border-border p-4 space-y-3"
+            >
+              <div className="flex justify-between items-start">
+                <div className="flex-1 space-y-2">
+                  <div className="h-5 bg-muted animate-pulse w-32" />
+                  <div className="h-6 bg-muted animate-pulse w-48" />
+                </div>
+                <div className="h-6 w-24 bg-muted animate-pulse" />
               </div>
-              <div className="h-6 w-24 bg-muted animate-pulse rounded" />
             </div>
-            <div className="space-y-2">
-              <div className="h-4 bg-muted animate-pulse rounded w-full" />
-              <div className="h-4 bg-muted animate-pulse rounded w-5/6" />
-              <div className="h-4 bg-muted animate-pulse rounded w-4/5" />
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-3">
+    <div>
+      {compact && (
+        <h3 className="text-sm font-bold text-muted-foreground doom-heading uppercase tracking-wider mb-3">
+          RECENT
+        </h3>
+      )}
+      <div className="space-y-3">
       {completions.map((completion) => {
         const isExpanded = expandedIds.has(completion.id)
         const isCompleted = completion.status === 'completed'
@@ -235,6 +248,7 @@ export default function WorkoutHistoryList({ count }: Props) {
           </div>
         )
       })}
+      </div>
     </div>
   )
 }

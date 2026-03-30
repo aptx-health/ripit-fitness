@@ -11,6 +11,7 @@ export type CurrentStrengthWeekData = {
   week: {
     id: string
     weekNumber: number
+    description: string | null
     workouts: Array<{
       id: string
       name: string
@@ -113,6 +114,7 @@ export async function getCurrentStrengthWeek(
       select: {
         id: true,
         weekNumber: true,
+        description: true,
         workouts: {
           select: {
             id: true,
