@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth"
 import { Pool } from "pg"
+import { Resend } from "resend"
 import { logger } from "@/lib/logger"
 
 const isRelaxedRateLimits = process.env.RELAXED_RATE_LIMITS === "true"
@@ -15,6 +16,8 @@ const rateLimitConfig = isRelaxedRateLimits
         "/sign-in/*": { window: 60, max: 100 },
         "/change-password": { window: 60, max: 100 },
         "/change-email": { window: 60, max: 100 },
+        "/forget-password": { window: 60, max: 100 },
+        "/reset-password": { window: 60, max: 100 },
       },
     }
   : undefined
@@ -45,6 +48,25 @@ export const auth = betterAuth({
         return bcrypt.default.compare(password, hash)
       },
     },
+    sendResetPassword: async ({ user, url }) => {
+      const resend = new Resend(process.env.RESEND_API_KEY)
+      const from = process.env.EMAIL_FROM || "noreply@ripit.fit"
+      const { error } = await resend.emails.send({
+        from: `Ripit Fitness <${from}>`,
+        to: user.email,
+        subject: "Reset your password",
+        html: `
+          <h2>Password Reset</h2>
+          <p>You requested a password reset for your Ripit Fitness account.</p>
+          <p><a href="${url}">Click here to reset your password</a></p>
+          <p>This link expires in 1 hour. If you didn't request this, you can ignore this email.</p>
+        `,
+      })
+      if (error) {
+        logger.error({ error, userId: user.id }, "Failed to send password reset email")
+      }
+    },
+    resetPasswordTokenExpiresIn: 3600, // 1 hour
   },
   socialProviders: {
     google: {

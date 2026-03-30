@@ -22,6 +22,7 @@ export async function updateSession(request: NextRequest) {
   if (!hasSession &&
       !pathname.startsWith('/login') &&
       !pathname.startsWith('/signup') &&
+      !pathname.startsWith('/forgot-password') &&
       !pathname.startsWith('/reset-password') &&
       !pathname.startsWith('/auth/complete-profile') &&
       !pathname.startsWith('/_next') &&

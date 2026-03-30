@@ -94,7 +94,7 @@ function LoginForm() {
                 placeholder="••••••••"
               />
               <div className="mt-1 text-right">
-                <Link href="/reset-password" className="text-sm text-muted-foreground hover:text-primary">
+                <Link href="/forgot-password" className="text-sm text-muted-foreground hover:text-primary">
                   Forgot password?
                 </Link>
               </div>
