@@ -2,8 +2,8 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useState } from 'react'
-import { Button } from '@/components/ui/Button'
 import { AuthPageHeader } from '@/components/features/auth/AuthPageHeader'
+import { Button } from '@/components/ui/Button'
 
 function CompleteProfileForm() {
   const _router = useRouter()
