@@ -30,7 +30,7 @@ doppler run --config dev_personal -- [command]
 overmind start                                # Starts PostgreSQL, Redis, worker, Next.js
 overmind start -l postgres,app                # Just DB + app (skip redis/worker)
 
-# Worktree: must specify Doppler config with correct BETTER_AUTH_URL for the worktree's port
+# Worktree: port and auth URLs are auto-derived from worktree slot
 DOPPLER_CONFIG=dev_personal_worktree1 overmind start -l postgres,app
 
 # Database operations
