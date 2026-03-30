@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react'
 import FeedbackModal from '@/components/features/FeedbackModal'
 import { useThemePreference } from '@/hooks/useThemePreference'
 import { useUserSettings } from '@/hooks/useUserSettings'
-import { useSession } from '@/lib/auth-client'
+import { authClient, useSession } from '@/lib/auth-client'
 import { THEME_LABELS, THEMES } from '@/lib/theme'
 
 type ConnectedAccounts = {
@@ -28,6 +28,13 @@ export default function SettingsPage() {
   const [saved, setSaved] = useState(false)
   const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccounts | null>(null)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
+  const [showPasswordChange, setShowPasswordChange] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmNewPassword, setConfirmNewPassword] = useState('')
+  const [passwordError, setPasswordError] = useState<string | null>(null)
+  const [passwordSuccess, setPasswordSuccess] = useState(false)
+  const [isChangingPassword, setIsChangingPassword] = useState(false)
 
   useEffect(() => {
     if (settings) {
@@ -282,18 +289,114 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              {/* Change Password — stub */}
-              <button
-                type="button"
-                disabled
-                className="px-4 py-2 border-2 border-border bg-muted text-muted-foreground font-semibold uppercase tracking-wider text-sm flex items-center gap-2 opacity-50 cursor-not-allowed"
-              >
-                <KeyRound size={16} />
-                Change Password
-                <span className="text-sm font-normal normal-case tracking-normal ml-1">
-                  (coming soon)
-                </span>
-              </button>
+              {/* Change Password */}
+              <div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowPasswordChange(!showPasswordChange)
+                    setPasswordError(null)
+                    setPasswordSuccess(false)
+                  }}
+                  className="px-4 py-2 border-2 border-border bg-muted text-foreground hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center gap-2"
+                >
+                  <KeyRound size={16} />
+                  Change Password
+                </button>
+
+                {showPasswordChange && (
+                  <div className="mt-3 space-y-3">
+                    <div>
+                      <label htmlFor="currentPassword" className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
+                        Current Password
+                      </label>
+                      <input
+                        id="currentPassword"
+                        type="password"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        className="w-full px-3 py-2 bg-input border-2 border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="newPassword" className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
+                        New Password
+                      </label>
+                      <input
+                        id="newPassword"
+                        type="password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        className="w-full px-3 py-2 bg-input border-2 border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="confirmNewPassword" className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
+                        Confirm New Password
+                      </label>
+                      <input
+                        id="confirmNewPassword"
+                        type="password"
+                        value={confirmNewPassword}
+                        onChange={(e) => setConfirmNewPassword(e.target.value)}
+                        className="w-full px-3 py-2 bg-input border-2 border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
+                      />
+                    </div>
+
+                    {passwordError && (
+                      <div className="p-2 bg-error/10 border-2 border-error text-error text-sm">
+                        {passwordError}
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        setPasswordError(null)
+                        setPasswordSuccess(false)
+
+                        if (newPassword.length < 6) {
+                          setPasswordError('New password must be at least 6 characters')
+                          return
+                        }
+                        if (newPassword !== confirmNewPassword) {
+                          setPasswordError('New passwords do not match')
+                          return
+                        }
+
+                        setIsChangingPassword(true)
+                        try {
+                          const result = await authClient.changePassword({
+                            currentPassword,
+                            newPassword,
+                            revokeOtherSessions: true,
+                          })
+                          if (result.error) {
+                            setPasswordError(result.error.message || 'Failed to change password')
+                          } else {
+                            setPasswordSuccess(true)
+                            setShowPasswordChange(false)
+                          }
+                        } catch (err) {
+                          setPasswordError(err instanceof Error ? err.message : 'Failed to change password')
+                        } finally {
+                          setIsChangingPassword(false)
+                        }
+                      }}
+                      disabled={isChangingPassword || !currentPassword || !newPassword || !confirmNewPassword}
+                      className="w-full md:w-auto md:min-w-[200px] px-4 py-2 bg-primary text-primary-foreground border-2 border-primary hover:bg-primary-hover transition-colors font-semibold uppercase tracking-wider text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isChangingPassword ? 'Changing...' : 'Update Password'}
+                    </button>
+                  </div>
+                )}
+
+                {passwordSuccess && (
+                  <div className="mt-3 p-2 bg-success/10 border-2 border-success text-success text-sm">
+                    Password changed successfully
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Admin — visible to admin/editor roles only */}
