@@ -1,9 +1,10 @@
 'use client'
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { KeyRound, Moon, Palette, Save, Shield, Sun } from 'lucide-react'
+import { KeyRound, MessageSquarePlus, Moon, Palette, Save, Shield, Sun } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import FeedbackModal from '@/components/features/FeedbackModal'
 import { useThemePreference } from '@/hooks/useThemePreference'
 import { useUserSettings } from '@/hooks/useUserSettings'
 import { useSession } from '@/lib/auth-client'
@@ -26,6 +27,7 @@ export default function SettingsPage() {
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
   const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccounts | null>(null)
+  const [feedbackOpen, setFeedbackOpen] = useState(false)
 
   useEffect(() => {
     if (settings) {
@@ -309,6 +311,25 @@ export default function SettingsPage() {
                 </Link>
               </div>
             )}
+
+            {/* Feedback */}
+            <div className="pt-4 border-t border-border">
+              <span className="block text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
+                Feedback
+              </span>
+              <button
+                type="button"
+                onClick={() => setFeedbackOpen(true)}
+                className="w-full md:w-auto md:min-w-[200px] px-4 py-3 bg-muted text-foreground border-2 border-border hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2"
+              >
+                <MessageSquarePlus size={18} />
+                Send Feedback
+              </button>
+              <p className="text-sm text-muted-foreground mt-1">
+                Report bugs, request features, or let us know what you think
+              </p>
+              <FeedbackModal open={feedbackOpen} onOpenChange={setFeedbackOpen} />
+            </div>
 
             {/* Sign Out */}
             <div className="pt-4 border-t border-border">
