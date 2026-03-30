@@ -46,6 +46,30 @@ export const auth = betterAuth({
       },
     },
   },
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    },
+    discord: {
+      clientId: process.env.DISCORD_CLIENT_ID!,
+      clientSecret: process.env.DISCORD_CLIENT_SECRET!,
+    },
+  },
+  accountLinking: {
+    enabled: true,
+    trustedProviders: ["google"],
+  },
+  user: {
+    additionalFields: {
+      role: {
+        type: "string",
+        defaultValue: "user",
+        required: false,
+        input: false, // users cannot set their own role via signup
+      },
+    },
+  },
   advanced: {
     database: {
       generateId: false, // Use database default (uuid) — allows explicit ID setting in B2 migration

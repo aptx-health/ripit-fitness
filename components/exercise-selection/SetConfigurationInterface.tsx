@@ -4,6 +4,7 @@ import { Plus, Trash } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/radix/popover'
 import { useUserSettings } from '@/hooks/useUserSettings'
+import { RIR_PRESETS, RPE_PRESETS } from '@/lib/constants/intensity-presets'
 import type { ExerciseDefinition } from './ExerciseSearchInterface'
 
 type Tab = 'sets' | 'notes'
@@ -48,26 +49,7 @@ const REP_PRESETS = [
   { value: 'AMRAP', label: 'AMRAP', description: 'As Many Reps As Possible' }
 ]
 
-const RIR_PRESETS = [
-  { value: 0, label: '0', description: 'Max effort, failure reached. Use sparingly' },
-  { value: 1, label: '1', description: '1 rep left in the tank' },
-  { value: 2, label: '2', description: '2 reps left in the tank' },
-  { value: 3, label: '3', description: '3 reps left in the tank' },
-  { value: 4, label: '4', description: '4 reps left in the tank' },
-  { value: 5, label: '5+', description: 'Warmup / Deload sets' }
-]
-
-const RPE_PRESETS = [
-  { value: 6.0, label: '6', description: 'Light effort, easy reps' },
-  { value: 6.5, label: '6.5', description: 'Light to moderate effort' },
-  { value: 7.0, label: '7', description: 'Moderate effort, could do several more' },
-  { value: 7.5, label: '7.5', description: 'Moderate to challenging' },
-  { value: 8.0, label: '8', description: 'Challenging, 2-3 reps left' },
-  { value: 8.5, label: '8.5', description: 'Very challenging, 1-2 reps left' },
-  { value: 9.0, label: '9', description: 'Very hard, 1 rep left' },
-  { value: 9.5, label: '9.5', description: 'Near maximal, failure on next rep' },
-  { value: 10, label: '10', description: 'Max effort, failure reached. Use sparingly' }
-]
+// RPE_PRESETS and RIR_PRESETS imported from @/lib/constants/intensity-presets
 
 export function SetConfigurationInterface({
   exercise,

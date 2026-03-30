@@ -1,7 +1,10 @@
 import { redirect } from 'next/navigation'
+import BottomNav from '@/components/BottomNav'
+import FloatingDraftButton from '@/components/FloatingDraftButton'
 import Header from '@/components/Header'
 import FeedbackButton from '@/components/features/FeedbackButton'
 import { getCurrentUser } from '@/lib/auth/server'
+import { DraftWorkoutProvider } from '@/lib/contexts/DraftWorkoutContext'
 
 export default async function AppLayout({
   children,
@@ -15,10 +18,20 @@ export default async function AppLayout({
   }
 
   return (
-    <div className="min-h-screen">
-      <Header userEmail={user.email || ''} />
-      {children}
-      <FeedbackButton />
-    </div>
+    <DraftWorkoutProvider>
+      <div className="min-h-screen">
+        <Header userEmail={user.email || ''} />
+        <FloatingDraftButton />
+        <div className="pb-20 md:pb-0">
+          <div
+            className="md:hidden"
+            style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+          />
+          {children}
+        </div>
+        <BottomNav />
+        <FeedbackButton />
+      </div>
+    </DraftWorkoutProvider>
   )
 }

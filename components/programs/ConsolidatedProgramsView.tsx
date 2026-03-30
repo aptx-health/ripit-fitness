@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { useToast } from '@/components/ToastProvider'
+import { clientLogger } from '@/lib/client-logger'
 import StrengthActivationModal from '../StrengthActivationModal'
 import ArchivedProgramsSection from './ArchivedProgramsSection'
 import ProgramCard from './ProgramCard'
@@ -47,45 +48,83 @@ export default function ConsolidatedProgramsView({
   const [activationProgramId, setActivationProgramId] = useState<string | null>(null)
   const [existingActiveProgram, setExistingActiveProgram] = useState<{ id: string; name: string } | null>(null)
 
-  // On mount, resume polling for any programs already in cloning state
-  useEffect(() => {
-    const cloningPrograms = strengthPrograms.filter(p =>
-      p.copyStatus === 'cloning' || p.copyStatus?.startsWith('cloning_week_')
-    )
+  const cleanupCloningState = () => {
+    // Clear the polling interval first
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current)
+      pollingIntervalRef.current = null
+    }
 
-    // Resume polling for first cloning program found
-    if (cloningPrograms.length > 0 && !cloningProgramId) {
-      const programId = cloningPrograms[0].id
-      if (!completedClones.has(programId)) {
-        setCloningProgramId(programId)
-        startPolling(programId)
+    setCloningProgramId(null)
+    window.history.replaceState(null, '', '/programs')
+  }
+
+  const handleCloneFailed = (programId: string, message?: string) => {
+    if (completedClonesRef.current.has(programId)) return
+    completedClonesRef.current.add(programId)
+    setCompletedClones(prev => new Set(prev).add(programId))
+    setDeletedPrograms(prev => new Set(prev).add(programId))
+    toast.error('Failed to copy program', message || 'The program cloning failed. Please try again.')
+    cleanupCloningState()
+    router.refresh()
+  }
+
+  const checkCopyStatus = async (programId: string): Promise<boolean> => {
+    if (completedClonesRef.current.has(programId)) {
+      return false
+    }
+
+    try {
+      const response = await fetch(`/api/programs/${programId}/copy-status`)
+
+      if (!response.ok) {
+        handleCloneFailed(programId)
+        return false
       }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // Only run on mount
 
-  // Poll for cloning status if programId is in URL
-  useEffect(() => {
-    const cloningId = searchParams.get('cloning')
+      const data = await response.json()
 
-    // Don't start polling if already completed
-    if (cloningId && completedClones.has(cloningId)) {
-      return
-    }
-
-    if (cloningId && cloningId !== cloningProgramId) {
-      setCloningProgramId(cloningId)
-      startPolling(cloningId)
-    }
-
-    return () => {
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current)
-        pollingIntervalRef.current = null
+      if (data.progress) {
+        setCloningProgress(prev => ({ ...prev, [programId]: data.progress }))
       }
+
+      if (data.status === 'ready') {
+        if (!completedClonesRef.current.has(programId)) {
+          completedClonesRef.current.add(programId)
+          setCompletedClones(prev => new Set(prev).add(programId))
+          setLocalCopyStatuses(prev => ({ ...prev, [programId]: 'ready' }))
+          setCloningProgress(prev => {
+            const updated = { ...prev }
+            delete updated[programId]
+            return updated
+          })
+
+          const activeProgram = strengthPrograms.find(p => p.isActive && p.id !== programId)
+          if (activeProgram) {
+            setExistingActiveProgram({ id: activeProgram.id, name: activeProgram.name })
+          }
+
+          setActivationProgramId(programId)
+          setShowActivationModal(true)
+
+          cleanupCloningState()
+          router.refresh()
+        }
+        return false
+      }
+
+      if (data.status === 'failed' || data.status === 'not_found') {
+        handleCloneFailed(programId, data.error)
+        return false
+      }
+
+      // Still cloning
+      return true
+    } catch (error) {
+      clientLogger.error('Error checking copy status:', error)
+      return true
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, cloningProgramId])
+  }
 
   const startPolling = async (programId: string) => {
     // Check immediately
@@ -112,96 +151,45 @@ export default function ConsolidatedProgramsView({
     pollingIntervalRef.current = intervalId
   }
 
-  const checkCopyStatus = async (programId: string): Promise<boolean> => {
-    // Don't check again if we've already completed this clone (use ref for synchronous check)
-    if (completedClonesRef.current.has(programId)) {
-      return false
+  // On mount, resume polling for any programs already in cloning state
+  useEffect(() => {
+    const cloningPrograms = strengthPrograms.filter(p =>
+      p.copyStatus === 'cloning' || p.copyStatus?.startsWith('cloning_week_')
+    )
+
+    // Resume polling for first cloning program found
+    if (cloningPrograms.length > 0 && !cloningProgramId) {
+      const programId = cloningPrograms[0].id
+      if (!completedClones.has(programId)) {
+        setCloningProgramId(programId)
+        startPolling(programId)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cloningProgramId, completedClones.has, startPolling, strengthPrograms.filter]) // Only run on mount
+
+  // Poll for cloning status if programId is in URL
+  useEffect(() => {
+    const cloningId = searchParams.get('cloning')
+
+    // Don't start polling if already completed
+    if (cloningId && completedClones.has(cloningId)) {
+      return
     }
 
-    try {
-      const response = await fetch(`/api/programs/${programId}/copy-status`)
-
-      if (!response.ok) {
-        // Program not found - likely failed and was deleted
-        if (!completedClonesRef.current.has(programId)) {
-          completedClonesRef.current.add(programId)
-          setCompletedClones(prev => new Set(prev).add(programId))
-          setDeletedPrograms(prev => new Set(prev).add(programId))
-          toast.error('Failed to copy program', 'The program cloning failed. Please try again.')
-          cleanupCloningState()
-          router.refresh()
-        }
-        return false
-      }
-
-      const data = await response.json()
-
-      // Update progress info if available
-      if (data.progress) {
-        setCloningProgress(prev => ({ ...prev, [programId]: data.progress }))
-      }
-
-      if (data.status === 'ready') {
-        // Cloning complete!
-        if (!completedClonesRef.current.has(programId)) {
-          completedClonesRef.current.add(programId)
-          setCompletedClones(prev => new Set(prev).add(programId))
-          // Update local state immediately so card updates
-          setLocalCopyStatuses(prev => ({ ...prev, [programId]: 'ready' }))
-          // Clear progress info
-          setCloningProgress(prev => {
-            const updated = { ...prev }
-            delete updated[programId]
-            return updated
-          })
-
-          // Show activation modal
-          const activeProgram = strengthPrograms.find(p => p.isActive && p.id !== programId)
-          if (activeProgram) {
-            setExistingActiveProgram({ id: activeProgram.id, name: activeProgram.name })
-          }
-
-          setActivationProgramId(programId)
-          setShowActivationModal(true)
-
-          cleanupCloningState()
-          router.refresh()
-        }
-        return false
-      }
-
-      if (data.status === 'not_found') {
-        // Program was deleted (cloning failed)
-        if (!completedClonesRef.current.has(programId)) {
-          completedClonesRef.current.add(programId)
-          setCompletedClones(prev => new Set(prev).add(programId))
-          setDeletedPrograms(prev => new Set(prev).add(programId))
-          toast.error('Failed to copy program', 'The program cloning failed. Please try again.')
-          cleanupCloningState()
-          router.refresh()
-        }
-        return false
-      }
-
-      // Still cloning
-      return true
-    } catch (error) {
-      console.error('Error checking copy status:', error)
-      // Continue polling on error
-      return true
-    }
-  }
-
-  const cleanupCloningState = () => {
-    // Clear the polling interval first
-    if (pollingIntervalRef.current) {
-      clearInterval(pollingIntervalRef.current)
-      pollingIntervalRef.current = null
+    if (cloningId && cloningId !== cloningProgramId) {
+      setCloningProgramId(cloningId)
+      startPolling(cloningId)
     }
 
-    setCloningProgramId(null)
-    window.history.replaceState(null, '', '/programs')
-  }
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current)
+        pollingIntervalRef.current = null
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, cloningProgramId, completedClones.has, startPolling])
 
   // Sort programs: active first, then by creation date
   // Filter out locally deleted programs

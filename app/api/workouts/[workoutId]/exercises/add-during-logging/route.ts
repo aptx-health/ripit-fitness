@@ -91,6 +91,7 @@ export async function POST(
     const maxOrder = Math.max(0, ...workout.exercises.map(e => e.order))
     const nextOrder = maxOrder + 1
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // biome-ignore lint/suspicious/noExplicitAny: complex Prisma return type varies by branch
     let addedExercise: any
     let addedToCount = 0
 

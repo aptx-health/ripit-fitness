@@ -1,16 +1,27 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Suspense, useState } from 'react'
+import { AuthPageHeader } from '@/components/features/auth/AuthPageHeader'
+import { OAuthButtons } from '@/components/features/auth/OAuthButtons'
+import { OrDivider } from '@/components/features/auth/OrDivider'
 import { Button } from '@/components/ui/Button'
 import { signIn } from '@/lib/auth-client'
 
-export default function LoginPage() {
+function getOAuthError(errorParam: string | null): string | null {
+  if (!errorParam) return null
+  if (errorParam === 'access_denied') return 'Sign-in was cancelled. Please try again.'
+  return 'Could not complete sign-in. Please try again or sign in with email.'
+}
+
+function LoginForm() {
   const _router = useRouter()
+  const searchParams = useSearchParams()
+  const oauthError = getOAuthError(searchParams.get('error'))
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(oauthError)
   const [loading, setLoading] = useState(false)
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -38,14 +49,15 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="max-w-md w-full space-y-8 p-8 bg-card rounded-lg shadow-lg border border-border">
-        <div>
-          <h2 className="text-3xl font-bold text-center text-foreground">Ripit</h2>
-          <p className="mt-2 text-center text-muted-foreground">Sign in to your account</p>
-        </div>
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+      <div className="max-w-md w-full space-y-8 p-6 sm:p-8 bg-card rounded-lg shadow-lg border border-border">
+        <AuthPageHeader />
 
-        <form onSubmit={handleLogin} className="mt-8 space-y-6">
+        <OAuthButtons />
+
+        <OrDivider />
+
+        <form onSubmit={handleLogin} className="space-y-6">
           {error && (
             <div className="bg-error-muted border border-error-border text-error-text px-4 py-3 rounded">
               {error}
@@ -81,6 +93,11 @@ export default function LoginPage() {
                 className="mt-1 block w-full px-3 py-2 bg-background border border-input rounded-md shadow-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 placeholder="••••••••"
               />
+              <div className="mt-1 text-right">
+                <Link href="/reset-password" className="text-sm text-muted-foreground hover:text-primary">
+                  Forgot password?
+                </Link>
+              </div>
             </div>
           </div>
 
@@ -89,6 +106,7 @@ export default function LoginPage() {
             disabled={loading}
             loading={loading}
             variant="primary"
+            doom
             className="w-full"
           >
             Sign in
@@ -103,5 +121,13 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   )
 }

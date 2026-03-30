@@ -5,9 +5,12 @@ import { headers } from 'next/headers'
 import { auth } from '@/lib/auth'
 import { logger } from '@/lib/logger'
 
+export type UserRole = 'user' | 'author' | 'editor' | 'admin'
+
 export interface AuthUser {
   id: string
   email?: string
+  role: UserRole
 }
 
 export interface AuthResult {
@@ -29,6 +32,7 @@ export async function getCurrentUser(): Promise<AuthResult> {
       user: {
         id: mockUserId,
         email: 'dev@local.dev',
+        role: (process.env.MOCK_USER_ROLE as UserRole) || 'user',
       },
       error: null,
     }
@@ -47,6 +51,7 @@ export async function getCurrentUser(): Promise<AuthResult> {
       user: {
         id: session.user.id,
         email: session.user.email,
+        role: (session.user.role as UserRole) || 'user',
       },
       error: null,
     }

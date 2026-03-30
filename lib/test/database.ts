@@ -158,8 +158,10 @@ let globalTestDb: TestDatabase | null = null
 
 export async function getTestDatabase(): Promise<TestDatabase> {
   if (!globalTestDb) {
-    globalTestDb = new TestDatabase()
-    await globalTestDb.start()
+    const db = new TestDatabase()
+    await db.start()
+    // Only assign after successful start so a failed attempt can be retried
+    globalTestDb = db
   }
   return globalTestDb
 }

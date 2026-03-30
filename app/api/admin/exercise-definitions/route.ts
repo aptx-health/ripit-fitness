@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth/server'
+import { requireEditor } from '@/lib/admin/auth'
 import { SPECIALIZED_EQUIPMENT } from '@/lib/constants/program-metadata'
 import { prisma } from '@/lib/db'
 import { logger } from '@/lib/logger'
@@ -23,15 +23,8 @@ import {
  */
 export async function GET(request: NextRequest) {
   try {
-    const { user, error: authError } = await getCurrentUser()
-
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // TODO: Add admin check when admin system is built
-    // const isAdmin = await checkUserIsAdmin(user.id)
-    // if (!isAdmin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    const auth = await requireEditor()
+    if (auth.response) return auth.response
 
     const { searchParams } = new URL(request.url)
     const query = searchParams.get('query') || ''
@@ -188,15 +181,9 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const { user, error: authError } = await getCurrentUser()
-
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // TODO: Add admin check when admin system is built
-    // const isAdmin = await checkUserIsAdmin(user.id)
-    // if (!isAdmin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    const auth = await requireEditor()
+    if (auth.response) return auth.response
+    const user = auth.user
 
     const body = await request.json()
     const input: CreateExerciseDefinitionInput = {

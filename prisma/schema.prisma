@@ -170,6 +170,7 @@ model LoggedSet {
   completion   WorkoutCompletion @relation(fields: [completionId], references: [id], onDelete: Cascade)
   exercise     Exercise          @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
 
+  @@unique([completionId, exerciseId, setNumber])
   @@index([exerciseId])
   @@index([completionId])
   @@index([userId])
@@ -287,7 +288,7 @@ model UserSettings {
   userId                 String   @unique
   displayName            String?
   defaultWeightUnit      String   @default("lbs")
-  defaultIntensityRating String   @default("rpe")
+  defaultIntensityRating String   @default("rir")
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 
@@ -361,6 +362,125 @@ model ExercisePerformanceLog {
   @@index([userId, equipment, completedAt])
   @@index([userId, type, completedAt])
 }
+
+// -- Learning Infrastructure --
+
+enum ArticleLevel {
+  beginner
+  intermediate
+  advanced
+}
+
+enum ArticleStatus {
+  draft
+  pending_review
+  published
+  rejected
+}
+
+enum TagCategory {
+  topic
+  body_area
+  context
+}
+
+model Article {
+  id              String        @id @default(cuid())
+  title           String
+  slug            String        @unique
+  body            String
+  level           ArticleLevel
+  status          ArticleStatus @default(draft)
+  authorId        String
+  reviewNote      String?
+  readTimeMinutes Int?
+  publishedAt     DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  tags               ArticleTag[]
+  readStatuses       ContentReadStatus[]
+  collectionArticles CollectionArticle[]
+  comments           ArticleComment[]
+
+  @@index([authorId])
+  @@index([status])
+  @@index([level])
+  @@index([publishedAt(sort: Desc)])
+  @@index([status, publishedAt(sort: Desc)])
+}
+
+model Tag {
+  id       String      @id @default(cuid())
+  name     String
+  category TagCategory
+
+  articles ArticleTag[]
+
+  @@unique([name, category])
+  @@index([category])
+}
+
+model ArticleTag {
+  articleId String
+  tagId     String
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, tagId])
+  @@index([tagId])
+}
+
+model ContentReadStatus {
+  userId      String
+  articleId   String
+  firstReadAt DateTime @default(now())
+  lastReadAt  DateTime @default(now())
+  article     Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, articleId])
+  @@index([userId])
+  @@index([articleId])
+}
+
+model Collection {
+  id           String   @id @default(cuid())
+  name         String
+  description  String   @db.VarChar(280)
+  displayOrder Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  articles CollectionArticle[]
+
+  @@index([displayOrder])
+}
+
+model CollectionArticle {
+  collectionId String
+  articleId    String
+  order        Int
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  article      Article    @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@id([collectionId, articleId])
+  @@index([articleId])
+}
+
+model ArticleComment {
+  id        String   @id @default(cuid())
+  articleId String
+  userId    String
+  body      String
+  createdAt DateTime @default(now())
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@index([articleId])
+  @@index([userId])
+  @@index([articleId, createdAt])
+}
+
+// -- User Feedback --
 
 model Feedback {
   id        String   @id @default(cuid())

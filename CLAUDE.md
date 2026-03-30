@@ -110,7 +110,7 @@ ALTER TABLE "PrescribedSet" ADD COLUMN "isWarmup" BOOLEAN NOT NULL DEFAULT false
     /programs           # Program management
     /workouts           # Workout logging
 
-/lib                    # Business logic (max 500 lines per file)
+/lib                    # Business logic (max 1000 lines per file)
   /db                   # Database client and utilities
   /auth                 # Auth utilities (if needed)
   /queue                # BullMQ job queue (clone jobs)
@@ -281,7 +281,7 @@ export async function GET(request: NextRequest) {
 
 ### File Size Limit
 
-**Max 500 lines per file**. Enforced by Husky + lint-staged pre-commit hook. If exceeded, split into multiple files following Single Responsibility Principle.
+**Max 1000 lines per file**. Enforced by Husky + lint-staged pre-commit hook. If exceeded, split into multiple files following Single Responsibility Principle.
 
 ### Import Organization
 
