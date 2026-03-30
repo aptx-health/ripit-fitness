@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useState, Suspense } from 'react'
 import { Button } from '@/components/ui/Button'
 import { OAuthButtons } from '@/components/features/auth/OAuthButtons'
+import { AuthPageHeader } from '@/components/features/auth/AuthPageHeader'
+import { OrDivider } from '@/components/features/auth/OrDivider'
 import { signIn } from '@/lib/auth-client'
 
 function getOAuthError(errorParam: string | null): string | null {
@@ -47,23 +49,13 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="max-w-md w-full space-y-8 p-8 bg-card rounded-lg shadow-lg border border-border">
-        <div>
-          <h2 className="text-3xl font-bold text-center text-foreground">Ripit</h2>
-          <p className="mt-2 text-center text-muted-foreground">Sign in to your account</p>
-        </div>
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+      <div className="max-w-md w-full space-y-8 p-6 sm:p-8 bg-card rounded-lg shadow-lg border border-border">
+        <AuthPageHeader />
 
         <OAuthButtons />
 
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-border" />
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-card text-muted-foreground">or</span>
-          </div>
-        </div>
+        <OrDivider />
 
         <form onSubmit={handleLogin} className="space-y-6">
           {error && (
@@ -101,6 +93,11 @@ function LoginForm() {
                 className="mt-1 block w-full px-3 py-2 bg-background border border-input rounded-md shadow-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 placeholder="••••••••"
               />
+              <div className="mt-1 text-right">
+                <Link href="/reset-password" className="text-sm text-muted-foreground hover:text-primary">
+                  Forgot password?
+                </Link>
+              </div>
             </div>
           </div>
 
@@ -109,6 +106,7 @@ function LoginForm() {
             disabled={loading}
             loading={loading}
             variant="primary"
+            doom
             className="w-full"
           >
             Sign in
