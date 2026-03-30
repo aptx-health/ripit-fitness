@@ -341,7 +341,7 @@ export default function SettingsPage() {
                 href={`https://venmo.com/${process.env.NEXT_PUBLIC_VENMO_HANDLE}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full md:w-auto md:min-w-[200px] px-4 py-3 bg-muted text-foreground border-2 border-border hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2"
+                className="w-full md:w-auto md:inline-flex md:min-w-[200px] px-4 py-3 bg-muted text-foreground border-2 border-border hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2"
               >
                 <Heart size={18} />
                 Support Ripit
