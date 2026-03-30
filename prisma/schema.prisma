@@ -361,3 +361,20 @@ model ExercisePerformanceLog {
   @@index([userId, equipment, completedAt])
   @@index([userId, type, completedAt])
 }
+
+model Feedback {
+  id        String   @id @default(cuid())
+  userId    String
+  category  String   // "bug" | "feature" | "confusion" | "general"
+  message   String
+  pageUrl   String
+  userAgent String?
+  status    String   @default("new") // "new" | "reviewed" | "resolved"
+  adminNote String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt(sort: Desc)])
+}
