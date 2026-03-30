@@ -24,6 +24,7 @@ export async function updateSession(request: NextRequest) {
       !pathname.startsWith('/signup') &&
       !pathname.startsWith('/forgot-password') &&
       !pathname.startsWith('/reset-password') &&
+      !pathname.startsWith('/auth/complete-profile') &&
       !pathname.startsWith('/_next') &&
       !pathname.startsWith('/api')) {
     const url = request.nextUrl.clone()
@@ -31,8 +32,9 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Authenticated user trying to access auth pages
+  // Authenticated user trying to access auth pages (except complete-profile which needs a session)
   if (hasSession &&
+      !pathname.startsWith('/auth/complete-profile') &&
       (pathname.startsWith('/login') || pathname.startsWith('/signup'))) {
     const url = request.nextUrl.clone()
     url.pathname = '/'

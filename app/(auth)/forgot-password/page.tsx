@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { AuthPageHeader } from '@/components/features/auth/AuthPageHeader'
 import { Button } from '@/components/ui/Button'
 import { authClient } from '@/lib/auth-client'
 
@@ -38,36 +39,29 @@ export default function ForgotPasswordPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="max-w-md w-full space-y-8 p-8 bg-card rounded-lg shadow-lg border border-border">
-          <div>
-            <h2 className="text-3xl font-bold text-center text-foreground">Check your email</h2>
-            <p className="mt-2 text-center text-muted-foreground">
-              If an account exists for <strong>{email}</strong>, we sent a password reset link.
-              Check your inbox and spam folder.
-            </p>
-          </div>
-          <p className="text-center text-sm text-muted-foreground">
-            <Link href="/login" className="font-medium text-primary hover:text-primary-hover">
+      <div className="min-h-screen flex items-center justify-center bg-background px-4">
+        <div className="max-w-md w-full space-y-8 p-6 sm:p-8 bg-card rounded-lg shadow-lg border border-border">
+          <AuthPageHeader subtitle="Check your email" />
+          <p className="text-center text-muted-foreground">
+            If an account exists for <strong>{email}</strong>, we sent a password reset link.
+            Check your inbox and spam folder.
+          </p>
+          <div className="text-center">
+            <Link href="/login" className="text-sm font-medium text-primary hover:text-primary-hover">
               Back to login
             </Link>
-          </p>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="max-w-md w-full space-y-8 p-8 bg-card rounded-lg shadow-lg border border-border">
-        <div>
-          <h2 className="text-3xl font-bold text-center text-foreground">Reset password</h2>
-          <p className="mt-2 text-center text-muted-foreground">
-            Enter your email and we&apos;ll send you a reset link.
-          </p>
-        </div>
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+      <div className="max-w-md w-full space-y-8 p-6 sm:p-8 bg-card rounded-lg shadow-lg border border-border">
+        <AuthPageHeader subtitle="Reset your password" />
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
             <div className="bg-error-muted border border-error-border text-error-text px-4 py-3 rounded">
               {error}
@@ -94,6 +88,7 @@ export default function ForgotPasswordPage() {
             disabled={loading}
             loading={loading}
             variant="primary"
+            doom
             className="w-full"
           >
             Send reset link

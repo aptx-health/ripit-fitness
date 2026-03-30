@@ -288,7 +288,7 @@ model UserSettings {
   userId                 String   @unique
   displayName            String?
   defaultWeightUnit      String   @default("lbs")
-  defaultIntensityRating String   @default("rpe")
+  defaultIntensityRating String   @default("rir")
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 
@@ -478,4 +478,23 @@ model ArticleComment {
   @@index([articleId])
   @@index([userId])
   @@index([articleId, createdAt])
+}
+
+// -- User Feedback --
+
+model Feedback {
+  id        String   @id @default(cuid())
+  userId    String
+  category  String   // "bug" | "feature" | "confusion" | "general"
+  message   String
+  pageUrl   String
+  userAgent String?
+  status    String   @default("new") // "new" | "reviewed" | "resolved"
+  adminNote String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt(sort: Desc)])
 }

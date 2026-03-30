@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import BottomNav from '@/components/BottomNav'
 import FloatingDraftButton from '@/components/FloatingDraftButton'
 import Header from '@/components/Header'
+import FeedbackButton from '@/components/features/FeedbackButton'
 import { getCurrentUser } from '@/lib/auth/server'
 import { DraftWorkoutProvider } from '@/lib/contexts/DraftWorkoutContext'
 
@@ -29,6 +30,7 @@ export default async function AppLayout({
           {children}
         </div>
         <BottomNav />
+        <FeedbackButton />
       </div>
     </DraftWorkoutProvider>
   )

@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Suspense, useState } from 'react'
+import { AuthPageHeader } from '@/components/features/auth/AuthPageHeader'
 import { Button } from '@/components/ui/Button'
 import { authClient } from '@/lib/auth-client'
 
@@ -21,19 +22,17 @@ function ResetPasswordForm() {
 
   if (!token && !errorParam) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="max-w-md w-full space-y-8 p-8 bg-card rounded-lg shadow-lg border border-border">
-          <div>
-            <h2 className="text-3xl font-bold text-center text-foreground">Invalid link</h2>
-            <p className="mt-2 text-center text-muted-foreground">
-              This password reset link is missing a token. Please request a new one.
-            </p>
-          </div>
-          <p className="text-center text-sm text-muted-foreground">
-            <Link href="/forgot-password" className="font-medium text-primary hover:text-primary-hover">
+      <div className="min-h-screen flex items-center justify-center bg-background px-4">
+        <div className="max-w-md w-full space-y-8 p-6 sm:p-8 bg-card rounded-lg shadow-lg border border-border">
+          <AuthPageHeader subtitle="Invalid link" />
+          <p className="text-center text-muted-foreground">
+            This password reset link is missing a token. Please request a new one.
+          </p>
+          <div className="text-center">
+            <Link href="/forgot-password" className="text-sm font-medium text-primary hover:text-primary-hover">
               Request new reset link
             </Link>
-          </p>
+          </div>
         </div>
       </div>
     )
@@ -41,19 +40,17 @@ function ResetPasswordForm() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="max-w-md w-full space-y-8 p-8 bg-card rounded-lg shadow-lg border border-border">
-          <div>
-            <h2 className="text-3xl font-bold text-center text-foreground">Password reset</h2>
-            <p className="mt-2 text-center text-muted-foreground">
-              Your password has been updated. You can now sign in with your new password.
-            </p>
-          </div>
-          <p className="text-center text-sm text-muted-foreground">
-            <Link href="/login" className="font-medium text-primary hover:text-primary-hover">
+      <div className="min-h-screen flex items-center justify-center bg-background px-4">
+        <div className="max-w-md w-full space-y-8 p-6 sm:p-8 bg-card rounded-lg shadow-lg border border-border">
+          <AuthPageHeader subtitle="Password updated" />
+          <p className="text-center text-muted-foreground">
+            Your password has been updated. You can now sign in with your new password.
+          </p>
+          <div className="text-center">
+            <Link href="/login" className="text-sm font-medium text-primary hover:text-primary-hover">
               Back to login
             </Link>
-          </p>
+          </div>
         </div>
       </div>
     )
@@ -96,16 +93,11 @@ function ResetPasswordForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="max-w-md w-full space-y-8 p-8 bg-card rounded-lg shadow-lg border border-border">
-        <div>
-          <h2 className="text-3xl font-bold text-center text-foreground">Set new password</h2>
-          <p className="mt-2 text-center text-muted-foreground">
-            Enter your new password below.
-          </p>
-        </div>
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+      <div className="max-w-md w-full space-y-8 p-6 sm:p-8 bg-card rounded-lg shadow-lg border border-border">
+        <AuthPageHeader subtitle="Set new password" />
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
             <div className="bg-error-muted border border-error-border text-error-text px-4 py-3 rounded">
               {error}
@@ -151,6 +143,7 @@ function ResetPasswordForm() {
             disabled={loading || !!errorParam}
             loading={loading}
             variant="primary"
+            doom
             className="w-full"
           >
             Reset password
