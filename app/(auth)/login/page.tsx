@@ -1,16 +1,25 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, Suspense } from 'react'
 import { Button } from '@/components/ui/Button'
+import { OAuthButtons } from '@/components/features/auth/OAuthButtons'
 import { signIn } from '@/lib/auth-client'
 
-export default function LoginPage() {
+function getOAuthError(errorParam: string | null): string | null {
+  if (!errorParam) return null
+  if (errorParam === 'access_denied') return 'Sign-in was cancelled. Please try again.'
+  return 'Could not complete sign-in. Please try again or sign in with email.'
+}
+
+function LoginForm() {
   const _router = useRouter()
+  const searchParams = useSearchParams()
+  const oauthError = getOAuthError(searchParams.get('error'))
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(oauthError)
   const [loading, setLoading] = useState(false)
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -45,7 +54,18 @@ export default function LoginPage() {
           <p className="mt-2 text-center text-muted-foreground">Sign in to your account</p>
         </div>
 
-        <form onSubmit={handleLogin} className="mt-8 space-y-6">
+        <OAuthButtons />
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-border" />
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-card text-muted-foreground">or</span>
+          </div>
+        </div>
+
+        <form onSubmit={handleLogin} className="space-y-6">
           {error && (
             <div className="bg-error-muted border border-error-border text-error-text px-4 py-3 rounded">
               {error}
@@ -103,5 +123,13 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   )
 }
