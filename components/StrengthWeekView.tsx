@@ -3,10 +3,10 @@
 import { CheckCircle } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState, useTransition } from 'react'
-import ActionsMenu from '@/components/ActionsMenu'
 import ExerciseLoggingModal from '@/components/ExerciseLoggingModal'
 import { ProgramCompletionModal } from '@/components/ProgramCompletionModal'
 import WeekNavigator from '@/components/ui/WeekNavigator'
+import WorkoutHistoryList from '@/components/WorkoutHistoryList'
 import WorkoutPreviewModal from '@/components/WorkoutPreviewModal'
 import WorkoutCard from '@/components/workout/WorkoutCard'
 import { clientLogger } from '@/lib/client-logger'
@@ -29,6 +29,7 @@ type Workout = {
 type Week = {
   id: string
   weekNumber: number
+  description: string | null
   workouts: Workout[]
 }
 
@@ -37,6 +38,7 @@ type Props = {
   programName: string
   week: Week
   totalWeeks: number
+  historyCount: number
 }
 
 type ModalMode = 'preview' | 'logging' | null
@@ -148,7 +150,8 @@ export default function StrengthWeekView({
   programId,
   programName,
   week,
-  totalWeeks
+  totalWeeks,
+  historyCount,
 }: Props) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -400,27 +403,15 @@ export default function StrengthWeekView({
   }, [selectedWorkoutId, fetchWorkoutMetadata])
 
   const hasIncompleteWorkouts = week.workouts.some(w => w.completions.length === 0)
-  const weekActions = hasIncompleteWorkouts
-    ? [{
-        label: 'Complete Week',
-        icon: CheckCircle,
-        onClick: handleCompleteWeek,
-        requiresConfirmation: true,
-        confirmationMessage: 'This will mark all remaining workouts as skipped. Are you sure?',
-        variant: 'warning' as const,
-        disabled: completingWeek
-      }]
-    : []
 
   return (
-    <div className="bg-card border-y sm:border border-border doom-noise doom-card p-4 sm:p-6">
+    <div className="bg-card border-y sm:border border-border doom-noise doom-card doom-corners p-4 sm:p-6">
       <div className="mb-4 sm:mb-6">
         <WeekNavigator
           currentWeek={week.weekNumber}
           totalWeeks={totalWeeks}
           baseUrl="/training"
           programName={programName}
-          actions={weekActions.length > 0 ? <ActionsMenu actions={weekActions} size="sm" /> : undefined}
           completionIndicator={
             isProgramComplete ? (
               <button type="button"
@@ -434,6 +425,11 @@ export default function StrengthWeekView({
             ) : undefined
           }
         />
+        {week.description && (
+          <p className="text-sm text-muted-foreground text-center mt-2 px-4 leading-relaxed">
+            {week.description}
+          </p>
+        )}
       </div>
 
       <div className="space-y-3">
@@ -450,7 +446,32 @@ export default function StrengthWeekView({
             onLog={handleOpenLogging}
           />
         ))}
+
+        {hasIncompleteWorkouts && (
+          <button
+            type="button"
+            onClick={() => {
+              if (confirm('This will mark all remaining workouts as skipped. Are you sure?')) {
+                handleCompleteWeek()
+              }
+            }}
+            disabled={completingWeek}
+            className="w-full py-3 border border-border text-muted-foreground hover:text-foreground hover:border-primary hover:bg-muted/50 transition-all text-sm font-semibold uppercase tracking-wider doom-focus-ring disabled:opacity-50"
+          >
+            <div className="flex items-center justify-center gap-2">
+              <CheckCircle size={16} />
+              {completingWeek ? 'COMPLETING...' : 'COMPLETE WEEK'}
+            </div>
+          </button>
+        )}
       </div>
+
+      {/* Recent History */}
+      {historyCount > 0 && (
+        <div className="mt-6 pt-6 border-t border-border">
+          <WorkoutHistoryList count={historyCount} compact />
+        </div>
+      )}
 
       {/* Preview Modal - uses full workout data */}
       {workoutData && modalMode === 'preview' && (
