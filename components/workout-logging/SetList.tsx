@@ -1,6 +1,7 @@
 'use client'
 
 import { AlertCircle, Trash2 } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import type { LoggedSet } from '@/types/workout'
 
 interface PrescribedSet {
@@ -32,6 +33,7 @@ interface SetListProps {
   loggedSets: LoggedSet[]
   exerciseHistory: ExerciseHistory | null
   onDeleteSet: (setNumber: number) => void
+  exerciseId?: string
 }
 
 function formatIntensity(set: { rpe: number | null; rir: number | null }) {
@@ -45,9 +47,36 @@ export default function SetList({
   loggedSets,
   exerciseHistory,
   onDeleteSet,
+  exerciseId,
 }: SetListProps) {
   const loggedSetNumbers = new Set(loggedSets.map(s => s.setNumber))
   const remainingSets = prescribedSets.filter(s => !loggedSetNumbers.has(s.setNumber))
+
+  // Track which set was just logged for the power-up flash animation
+  const prevExerciseRef = useRef(exerciseId)
+  const prevCountRef = useRef(loggedSets.length)
+  const [flashSetNumber, setFlashSetNumber] = useState<number | null>(null)
+
+  useEffect(() => {
+    const count = loggedSets.length
+
+    // Exercise changed — reset tracking, no animation
+    if (exerciseId !== prevExerciseRef.current) {
+      prevExerciseRef.current = exerciseId
+      prevCountRef.current = count
+      setFlashSetNumber(null)
+      return
+    }
+
+    if (count > prevCountRef.current) {
+      const newest = loggedSets[count - 1]
+      setFlashSetNumber(newest.setNumber)
+      const timer = setTimeout(() => setFlashSetNumber(null), 650)
+      prevCountRef.current = count
+      return () => clearTimeout(timer)
+    }
+    prevCountRef.current = count
+  }, [loggedSets.length, exerciseId])
 
   return (
     <div className="space-y-1">
@@ -77,7 +106,7 @@ export default function SetList({
               isFailed
                 ? 'text-warning'
                 : 'text-success-text opacity-70'
-            }`}
+            } ${flashSetNumber === set.setNumber ? 'doom-set-logged' : ''}`}
           >
             <span className="flex items-center gap-1.5">
               {isFailed && <AlertCircle size={14} className="flex-shrink-0" />}

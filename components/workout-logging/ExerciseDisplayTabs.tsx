@@ -136,6 +136,7 @@ export default function ExerciseDisplayTabs({
             loggedSets={loggedSets}
             exerciseHistory={null}
             onDeleteSet={onDeleteSet}
+            exerciseId={exercise.id}
           />
         )}
       </TabsContent>
