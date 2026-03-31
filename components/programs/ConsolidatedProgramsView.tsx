@@ -228,6 +228,7 @@ export default function ConsolidatedProgramsView({
         <div className="px-4 sm:px-0 mb-4">
           {activeProgram ? (
             <ActiveProgramStrip
+              programId={activeProgram.id}
               programName={activeProgram.name}
               currentWeek={activeWeekInfo?.weekNumber ?? null}
               totalWeeks={activeWeekInfo?.totalWeeks ?? null}
