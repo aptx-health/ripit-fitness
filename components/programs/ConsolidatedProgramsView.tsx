@@ -1,18 +1,14 @@
 'use client'
 
-import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
+import CommunityProgramsView from '@/components/community/CommunityProgramsView'
 import { useToast } from '@/components/ToastProvider'
 import { clientLogger } from '@/lib/client-logger'
 import StrengthActivationModal from '../StrengthActivationModal'
+import ActiveProgramStrip from './ActiveProgramStrip'
 import ArchivedProgramsSection from './ArchivedProgramsSection'
-import ProgramCard from './ProgramCard'
-import {
-  StrengthPrimaryActions,
-  StrengthUtilityActions,
-} from './StrengthActions'
-import StrengthMetadata from './StrengthMetadata'
+import MyProgramsList from './MyProgramsList'
 
 type StrengthProgram = {
   id: string
@@ -21,20 +17,53 @@ type StrengthProgram = {
   isActive: boolean
   createdAt: Date
   copyStatus: string | null
+  targetDaysPerWeek: number | null
+  _count: { weeks: number }
 }
 
-type ConsolidatedProgramsViewProps = {
+type CommunityProgram = {
+  id: string
+  name: string
+  description: string
+  programType: string
+  authorUserId: string | null
+  displayName: string
+  publishedAt: Date
+  weekCount: number
+  workoutCount: number
+  exerciseCount: number
+  goals: string[]
+  level: string | null
+  durationDisplay: string | null
+  targetDaysPerWeek: number | null
+  equipmentNeeded: string[]
+  focusAreas: string[]
+}
+
+type Props = {
   strengthPrograms: StrengthProgram[]
   archivedStrengthCount: number
+  communityPrograms: CommunityProgram[]
+  currentUserId: string
+  activeWeekInfo: { weekNumber: number; totalWeeks: number } | null
 }
 
 export default function ConsolidatedProgramsView({
   strengthPrograms,
   archivedStrengthCount,
-}: ConsolidatedProgramsViewProps) {
+  communityPrograms,
+  currentUserId,
+  activeWeekInfo,
+}: Props) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const toast = useToast()
+
+  // Tab state
+  const tabParam = searchParams.get('tab')
+  const [activeTab, setActiveTab] = useState<'my' | 'browse'>(tabParam === 'browse' ? 'browse' : 'my')
+
+  // Cloning state
   const [cloningProgramId, setCloningProgramId] = useState<string | null>(null)
   const [completedClones, setCompletedClones] = useState<Set<string>>(new Set())
   const [localCopyStatuses, setLocalCopyStatuses] = useState<Record<string, string>>({})
@@ -48,13 +77,13 @@ export default function ConsolidatedProgramsView({
   const [activationProgramId, setActivationProgramId] = useState<string | null>(null)
   const [existingActiveProgram, setExistingActiveProgram] = useState<{ id: string; name: string } | null>(null)
 
+  const activeProgram = strengthPrograms.find(p => p.isActive)
+
   const cleanupCloningState = () => {
-    // Clear the polling interval first
     if (pollingIntervalRef.current) {
       clearInterval(pollingIntervalRef.current)
       pollingIntervalRef.current = null
     }
-
     setCloningProgramId(null)
     window.history.replaceState(null, '', '/programs')
   }
@@ -70,13 +99,10 @@ export default function ConsolidatedProgramsView({
   }
 
   const checkCopyStatus = async (programId: string): Promise<boolean> => {
-    if (completedClonesRef.current.has(programId)) {
-      return false
-    }
+    if (completedClonesRef.current.has(programId)) return false
 
     try {
       const response = await fetch(`/api/programs/${programId}/copy-status`)
-
       if (!response.ok) {
         handleCloneFailed(programId)
         return false
@@ -99,14 +125,14 @@ export default function ConsolidatedProgramsView({
             return updated
           })
 
-          const activeProgram = strengthPrograms.find(p => p.isActive && p.id !== programId)
-          if (activeProgram) {
-            setExistingActiveProgram({ id: activeProgram.id, name: activeProgram.name })
+          const existingActive = strengthPrograms.find(p => p.isActive && p.id !== programId)
+          if (existingActive) {
+            setExistingActiveProgram({ id: existingActive.id, name: existingActive.name })
           }
 
           setActivationProgramId(programId)
           setShowActivationModal(true)
-
+          setActiveTab('my')
           cleanupCloningState()
           router.refresh()
         }
@@ -118,7 +144,6 @@ export default function ConsolidatedProgramsView({
         return false
       }
 
-      // Still cloning
       return true
     } catch (error) {
       clientLogger.error('Error checking copy status:', error)
@@ -127,37 +152,27 @@ export default function ConsolidatedProgramsView({
   }
 
   const startPolling = async (programId: string) => {
-    // Check immediately
     const shouldContinue = await checkCopyStatus(programId)
+    if (!shouldContinue) return
 
-    if (!shouldContinue) {
-      return
-    }
-
-    // Then poll every 2 seconds
     const intervalId = setInterval(async () => {
       const shouldContinue = await checkCopyStatus(programId)
-
       if (!shouldContinue) {
         clearInterval(intervalId)
-        // Also clear the ref if it still exists
         if (pollingIntervalRef.current === intervalId) {
           pollingIntervalRef.current = null
         }
       }
     }, 2000)
 
-    // Store in ref for external cleanup
     pollingIntervalRef.current = intervalId
   }
 
-  // On mount, resume polling for any programs already in cloning state
+  // Resume polling for cloning programs on mount
   useEffect(() => {
     const cloningPrograms = strengthPrograms.filter(p =>
       p.copyStatus === 'cloning' || p.copyStatus?.startsWith('cloning_week_')
     )
-
-    // Resume polling for first cloning program found
     if (cloningPrograms.length > 0 && !cloningProgramId) {
       const programId = cloningPrograms[0].id
       if (!completedClones.has(programId)) {
@@ -166,19 +181,16 @@ export default function ConsolidatedProgramsView({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cloningProgramId, completedClones.has, startPolling, strengthPrograms.filter]) // Only run on mount
+  }, [])
 
-  // Poll for cloning status if programId is in URL
+  // Poll for cloning status from URL param (after adding from community)
   useEffect(() => {
     const cloningId = searchParams.get('cloning')
-
-    // Don't start polling if already completed
-    if (cloningId && completedClones.has(cloningId)) {
-      return
-    }
+    if (cloningId && completedClones.has(cloningId)) return
 
     if (cloningId && cloningId !== cloningProgramId) {
       setCloningProgramId(cloningId)
+      setActiveTab('my')
       startPolling(cloningId)
     }
 
@@ -189,115 +201,97 @@ export default function ConsolidatedProgramsView({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, cloningProgramId, completedClones.has, startPolling])
+  }, [searchParams, cloningProgramId])
 
-  // Sort programs: active first, then by creation date
-  // Filter out locally deleted programs
-  const sortedStrengthPrograms = [...strengthPrograms]
-    .filter(p => !deletedPrograms.has(p.id))
-    .sort((a, b) => {
-      if (a.isActive && !b.isActive) return -1
-      if (!a.isActive && b.isActive) return 1
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    })
+  const handleTabChange = (tab: 'my' | 'browse') => {
+    setActiveTab(tab)
+    const url = new URL(window.location.href)
+    if (tab === 'browse') {
+      url.searchParams.set('tab', 'browse')
+    } else {
+      url.searchParams.delete('tab')
+    }
+    window.history.replaceState(null, '', url.toString())
+  }
 
   return (
     <div className="min-h-screen bg-background doom-page-enter">
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-2xl mx-auto sm:px-6 py-4">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-4xl font-bold text-foreground doom-title uppercase tracking-wider">
-                PROGRAMS
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                Create and manage your training programs
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Link
-                href="/programs/new"
-                className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider text-sm text-center whitespace-nowrap"
-              >
-                CREATE PROGRAM
-              </Link>
-              <Link
-                href="/community"
-                className="px-4 py-2 border-2 border-accent text-accent hover:bg-accent-muted doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider text-sm text-center whitespace-nowrap"
-              >
-                COMMUNITY
-              </Link>
-            </div>
-          </div>
+        <div className="px-4 sm:px-0 mb-4">
+          <h1 className="text-4xl font-bold text-foreground doom-title uppercase tracking-wider">
+            PROGRAMS
+          </h1>
         </div>
 
-        {/* Programs List */}
-        <div className="space-y-4">
-          {sortedStrengthPrograms.length === 0 ? (
-            <div className="bg-card border border-border p-12 text-center doom-noise doom-corners">
-              <h2 className="text-xl font-semibold text-foreground mb-2 doom-heading uppercase">
-                NO PROGRAMS YET
-              </h2>
-              <p className="text-muted-foreground mb-6">
-                Create a new training program to get started
-              </p>
-              <Link
-                href="/programs/new"
-                className="inline-block px-6 py-3 bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
-              >
-                CREATE YOUR FIRST PROGRAM
-              </Link>
-            </div>
+        {/* Active Program Strip */}
+        <div className="px-4 sm:px-0 mb-4">
+          {activeProgram ? (
+            <ActiveProgramStrip
+              programName={activeProgram.name}
+              currentWeek={activeWeekInfo?.weekNumber ?? null}
+              totalWeeks={activeWeekInfo?.totalWeeks ?? null}
+            />
           ) : (
-            sortedStrengthPrograms.map((program) => {
-              // Use local copy status if available, otherwise use prop value
-              const copyStatus = localCopyStatuses[program.id] ?? program.copyStatus
-              const progress = cloningProgress[program.id]
-
-              return (
-                <ProgramCard
-                  key={program.id}
-                  isActive={program.isActive}
-                  name={program.name}
-                  description={program.description}
-                  copyStatus={copyStatus}
-                  cloningProgress={progress}
-                  metadata={<StrengthMetadata />}
-                  primaryActions={
-                    <StrengthPrimaryActions
-                      programId={program.id}
-                      isActive={program.isActive}
-                      copyStatus={copyStatus}
-                    />
-                  }
-                  utilityActionsDesktop={
-                    <StrengthUtilityActions
-                      programId={program.id}
-                      programName={program.name}
-                      isActive={program.isActive}
-                    />
-                  }
-                  utilityActionsMobile={
-                    <StrengthUtilityActions
-                      programId={program.id}
-                      programName={program.name}
-                      isActive={program.isActive}
-                      isMobile={true}
-                    />
-                  }
-                />
-              )
-            })
+            <div className="border border-border border-l-4 border-l-muted-foreground bg-card doom-noise p-3 sm:p-4">
+              <p className="text-sm text-muted-foreground">
+                No active program — activate or browse one below
+              </p>
+            </div>
           )}
         </div>
-        {archivedStrengthCount > 0 && (
-          <div className="mt-6">
-            <ArchivedProgramsSection
-              count={archivedStrengthCount}
-            />
+
+        {/* Tab Toggle */}
+        <div className="px-4 sm:px-0 mb-4">
+          <div className="flex border border-border">
+            <button
+              type="button"
+              onClick={() => handleTabChange('my')}
+              className={`flex-1 py-2.5 text-sm font-bold uppercase tracking-wider transition-colors doom-focus-ring ${
+                activeTab === 'my'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-card text-muted-foreground hover:text-foreground hover:bg-muted/50'
+              }`}
+            >
+              MY PROGRAMS
+            </button>
+            <button
+              type="button"
+              onClick={() => handleTabChange('browse')}
+              className={`flex-1 py-2.5 text-sm font-bold uppercase tracking-wider transition-colors doom-focus-ring ${
+                activeTab === 'browse'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-card text-muted-foreground hover:text-foreground hover:bg-muted/50'
+              }`}
+            >
+              BROWSE
+            </button>
           </div>
-        )}
+        </div>
+
+        {/* Tab Content */}
+        <div className="px-4 sm:px-0">
+          {activeTab === 'my' ? (
+            <div className="space-y-4">
+              <MyProgramsList
+                programs={strengthPrograms}
+                cloningProgress={cloningProgress}
+                localCopyStatuses={localCopyStatuses}
+                deletedPrograms={deletedPrograms}
+                hasActiveProgram={!!activeProgram}
+              />
+
+              {archivedStrengthCount > 0 && (
+                <ArchivedProgramsSection count={archivedStrengthCount} />
+              )}
+            </div>
+          ) : (
+            <CommunityProgramsView
+              communityPrograms={communityPrograms}
+              currentUserId={currentUserId}
+            />
+          )}
+        </div>
       </div>
 
       {/* Activation Modal */}

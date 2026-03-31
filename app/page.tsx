@@ -1,13 +1,17 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth/server'
+import { prisma } from '@/lib/db'
 
 export default async function Home() {
   const { user } = await getCurrentUser()
 
-  // If user is logged in, redirect to programs page
   if (user) {
-    redirect('/programs')
+    // If user has an active program, go straight to Training
+    const hasActiveProgram = await prisma.program.count({
+      where: { userId: user.id, isActive: true, isArchived: false },
+    })
+    redirect(hasActiveProgram > 0 ? '/training' : '/programs')
   }
 
   // Landing page for non-authenticated users
