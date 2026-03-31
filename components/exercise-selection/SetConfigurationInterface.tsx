@@ -217,22 +217,22 @@ export function SetConfigurationInterface({
   return (
     <div className="flex-1 overflow-y-auto min-h-0">
       {/* Exercise Details */}
-      <div className="py-4 pb-0 bg-muted">
+      <div className="py-3 pb-0 bg-card">
         <div className="px-4 sm:px-6">
           {/* Exercise name */}
-          <h3 className="font-bold text-foreground text-lg tracking-wide uppercase">
+          <h3 className="font-bold text-foreground text-lg tracking-wide uppercase doom-heading">
             {exercise.name}
           </h3>
 
-          {/* Folder-style Tabs */}
-          <div className="flex gap-1 mt-2 -mb-[2px] relative z-10">
+          {/* Tabs */}
+          <div className="flex mt-2 border-b border-border">
             <button
               type="button"
               onClick={() => setActiveTab('sets')}
               className={`relative px-4 py-2 text-sm font-bold uppercase tracking-wider transition-all ${
                 activeTab === 'sets'
-                  ? 'text-primary border-2 border-b-0 border-primary bg-card shadow-[0_0_10px_rgba(var(--primary-rgb),0.3)]'
-                  : 'text-muted-foreground border-2 border-border bg-muted/50 hover:text-primary hover:shadow-[0_0_8px_rgba(var(--primary-rgb),0.2)]'
+                  ? 'text-primary border-b-2 border-primary'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               Sets
@@ -242,8 +242,8 @@ export function SetConfigurationInterface({
               onClick={() => setActiveTab('notes')}
               className={`relative px-4 py-2 text-sm font-bold uppercase tracking-wider transition-all ${
                 activeTab === 'notes'
-                  ? 'text-primary border-2 border-b-0 border-primary bg-card shadow-[0_0_10px_rgba(var(--primary-rgb),0.3)]'
-                  : 'text-muted-foreground border-2 border-border bg-muted/50 hover:text-primary hover:shadow-[0_0_8px_rgba(var(--primary-rgb),0.2)]'
+                  ? 'text-primary border-b-2 border-primary'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               Notes
@@ -255,7 +255,7 @@ export function SetConfigurationInterface({
               <button
                 type="button"
                 onClick={onEditExercise}
-                className="relative px-4 py-2 text-sm font-bold uppercase tracking-wider transition-all text-muted-foreground border-2 border-border bg-muted/50 hover:text-primary hover:shadow-[0_0_8px_rgba(var(--primary-rgb),0.2)]"
+                className="relative px-4 py-2 text-sm font-bold uppercase tracking-wider transition-all text-muted-foreground hover:text-foreground"
                 aria-label="Edit exercise definition"
               >
                 Edit
@@ -266,55 +266,62 @@ export function SetConfigurationInterface({
       </div>
 
       {/* Tab Content */}
-      <div className="px-4 sm:px-6 py-4 bg-card border-t-2 border-border">
+      <div className="px-4 sm:px-6 py-4 bg-card">
         {activeTab === 'sets' ? (
           <div className="space-y-4">
             {/* Exercise-level Intensity Type */}
-          <div>
-            <label htmlFor="exercise-intensity-type" className="block text-base font-bold text-foreground mb-2 tracking-wide uppercase">
-              Intensity Type (All Sets)
-            </label>
-            <select
-              id="exercise-intensity-type"
-              value={exerciseIntensityType}
-              onChange={(e) => setExerciseIntensityType(e.target.value as 'RIR' | 'RPE' | 'NONE')}
-              className="w-full px-3 py-2 border-2 border-input focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-muted text-foreground doom-input"
-            >
-              <option value="NONE">None</option>
-              <option value="RIR">RIR (Reps in Reserve)</option>
-              <option value="RPE">RPE (Rate of Perceived Exertion)</option>
-            </select>
-          </div>
+            <div>
+              <label htmlFor="exercise-intensity-type" className="block text-sm font-bold text-muted-foreground mb-1.5 uppercase tracking-wider">
+                INTENSITY TYPE
+              </label>
+              <select
+                id="exercise-intensity-type"
+                value={exerciseIntensityType}
+                onChange={(e) => setExerciseIntensityType(e.target.value as 'RIR' | 'RPE' | 'NONE')}
+                className="w-full px-3 py-2.5 border border-border focus:outline-none focus:border-primary bg-card text-foreground text-base"
+              >
+                <option value="NONE">None</option>
+                <option value="RIR">RIR (Reps in Reserve)</option>
+                <option value="RPE">RPE (Rate of Perceived Exertion)</option>
+              </select>
+            </div>
 
-          {/* Individual Set Configuration */}
-          <div>
-            <h4 className="text-base font-bold text-foreground mb-3 tracking-wide uppercase">Sets</h4>
-            <div className="space-y-2">
-              {sets.map((set, index) => (
-                <div key={set.setNumber} className="border-2 border-border p-3 bg-muted">
-                  <div className="flex items-center gap-4">
-                    <div className="flex-shrink-0 w-16">
-                      <span className="text-base font-bold text-foreground tracking-wide uppercase">Set {set.setNumber}</span>
-                    </div>
+            {/* Individual Set Configuration - Table Layout */}
+            <div>
+              <h4 className="text-sm font-bold text-muted-foreground mb-2 uppercase tracking-wider">SETS</h4>
+              <div className="border border-border divide-y divide-border">
+                {/* Table header */}
+                <div className="flex items-center px-3 py-1.5 bg-muted/50">
+                  <span className="w-12 text-sm font-bold text-muted-foreground uppercase tracking-wider">#</span>
+                  <span className="flex-1 text-sm font-bold text-muted-foreground uppercase tracking-wider">REPS</span>
+                  {exerciseIntensityType !== 'NONE' && (
+                    <span className="flex-1 text-sm font-bold text-muted-foreground uppercase tracking-wider">{exerciseIntensityType}</span>
+                  )}
+                  <span className="w-10" />
+                </div>
+
+                {/* Set rows */}
+                {sets.map((set, index) => (
+                  <div key={set.setNumber} className="flex items-center px-3 py-2.5 gap-2">
+                    <span className="w-12 text-base font-bold text-muted-foreground">{set.setNumber}</span>
 
                     {/* Reps */}
                     <div className="flex-1">
-                      <span className="block text-base font-bold text-foreground mb-1 tracking-wide uppercase">Reps</span>
                       <Popover>
                         <PopoverTrigger asChild>
                           <button
                             type="button"
-                            className="w-full px-3 py-2 text-sm border-2 border-input hover:border-primary focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-card text-foreground text-left"
+                            className="w-full px-3 py-2 text-base border border-border hover:border-primary bg-card text-foreground text-left font-semibold transition-colors"
                           >
                             {set.reps || '8-12'}
                           </button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-80 p-3" align="start">
+                        <PopoverContent className="w-72 p-3" align="start">
                           <div className="space-y-2">
-                            <div className="text-sm font-bold text-foreground uppercase tracking-wide mb-2">
-                              Select Reps
+                            <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
+                              SELECT REPS
                             </div>
-                            <div className="grid grid-cols-4 gap-2">
+                            <div className="grid grid-cols-4 gap-1.5">
                               {REP_PRESETS.map((preset) => (
                                 <button
                                   key={preset.value}
@@ -324,10 +331,10 @@ export function SetConfigurationInterface({
                                     setCustomRepInput({ ...customRepInput, [index]: '' })
                                     setRepValidationError({ ...repValidationError, [index]: '' })
                                   }}
-                                  className={`px-3 py-2 text-sm border-2 transition-colors font-bold ${
+                                  className={`px-2 py-1.5 text-sm border transition-colors font-bold ${
                                     set.reps === preset.value
                                       ? 'bg-primary text-primary-foreground border-primary'
-                                      : 'bg-muted text-foreground border-input hover:border-primary'
+                                      : 'bg-card text-foreground border-border hover:border-primary'
                                   }`}
                                 >
                                   {preset.label}
@@ -335,15 +342,13 @@ export function SetConfigurationInterface({
                               ))}
                             </div>
                             {REP_PRESETS.find(p => p.value === set.reps) && (
-                              <div className="px-2 py-2 bg-primary/10 border border-primary/30 rounded">
-                                <div className="text-sm text-primary font-bold">
-                                  {REP_PRESETS.find(p => p.value === set.reps)?.description}
-                                </div>
+                              <div className="px-2 py-1.5 bg-primary/10 border border-primary/30 text-xs text-primary font-bold">
+                                {REP_PRESETS.find(p => p.value === set.reps)?.description}
                               </div>
                             )}
-                            <div className="pt-2 border-t-2 border-border">
-                              <div className="text-sm font-bold text-foreground uppercase tracking-wide mb-2">
-                                Custom
+                            <div className="pt-2 border-t border-border">
+                              <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
+                                CUSTOM
                               </div>
                               <input
                                 type="text"
@@ -352,7 +357,6 @@ export function SetConfigurationInterface({
                                   const value = e.target.value
                                   setCustomRepInput({ ...customRepInput, [index]: value })
                                   handleSetUpdate(index, 'reps', value)
-
                                   const error = validateRepFormat(value)
                                   setRepValidationError({ ...repValidationError, [index]: error || '' })
                                 }}
@@ -362,10 +366,10 @@ export function SetConfigurationInterface({
                                 }}
                                 onFocus={(e) => e.target.select()}
                                 placeholder="e.g., 5, 8-12, 20+"
-                                className={`w-full px-3 py-2 text-sm border-2 focus:outline-none focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-card text-foreground ${
+                                className={`w-full px-3 py-1.5 text-sm border focus:outline-none bg-card text-foreground ${
                                   repValidationError[index]
                                     ? 'border-error focus:border-error'
-                                    : 'border-input focus:border-primary'
+                                    : 'border-border focus:border-primary'
                                 }`}
                               />
                               {repValidationError[index] && (
@@ -382,42 +386,39 @@ export function SetConfigurationInterface({
                     {/* Intensity Value */}
                     {exerciseIntensityType !== 'NONE' && (
                       <div className="flex-1">
-                        <span className="block text-base font-bold text-foreground mb-1 tracking-wide uppercase">
-                          {exerciseIntensityType} Value
-                        </span>
                         <Popover>
                           <PopoverTrigger asChild>
                             <button
                               type="button"
-                              className="w-full px-3 py-2 text-sm border-2 border-input hover:border-primary focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-card text-foreground text-left"
+                              className="w-full px-3 py-2 text-base border border-border hover:border-primary bg-card text-foreground text-left font-semibold transition-colors"
                             >
                               {set.intensityValue !== undefined ? set.intensityValue : exerciseIntensityType === 'RIR' ? '0-5' : '6-10'}
                             </button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-80 p-3" align="start">
+                          <PopoverContent className="w-72 p-3" align="start">
                             <div className="space-y-2">
-                              <div className="mb-3">
-                                <div className="text-sm font-bold text-foreground uppercase tracking-wide">
-                                  Select {exerciseIntensityType}
+                              <div className="mb-2">
+                                <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                                  SELECT {exerciseIntensityType}
                                 </div>
-                                <div className="text-xs text-muted-foreground mt-1 font-medium">
+                                <div className="text-xs text-muted-foreground mt-1">
                                   {exerciseIntensityType === 'RIR'
-                                    ? 'Reps in Reserve: How many more reps you could do'
-                                    : 'Rate of Perceived Exertion: How hard the set feels (1-10 scale)'
+                                    ? 'How many more reps you could do'
+                                    : 'How hard the set feels (1-10)'
                                   }
                                 </div>
                               </div>
-                              <div className={`grid gap-2 ${exerciseIntensityType === 'RIR' ? 'grid-cols-6' : 'grid-cols-5'}`}>
+                              <div className={`grid gap-1.5 ${exerciseIntensityType === 'RIR' ? 'grid-cols-6' : 'grid-cols-5'}`}>
                                 {exerciseIntensityType === 'RIR' ? (
                                   RIR_PRESETS.map((preset) => (
                                     <button
                                       key={preset.value}
                                       type="button"
                                       onClick={() => handleSetUpdate(index, 'intensityValue', preset.value)}
-                                      className={`px-3 py-2 text-sm border-2 transition-colors font-bold ${
+                                      className={`px-2 py-1.5 text-sm border transition-colors font-bold ${
                                         set.intensityValue === preset.value
                                           ? 'bg-primary text-primary-foreground border-primary'
-                                          : 'bg-muted text-foreground border-input hover:border-primary'
+                                          : 'bg-card text-foreground border-border hover:border-primary'
                                       }`}
                                     >
                                       {preset.label}
@@ -429,10 +430,10 @@ export function SetConfigurationInterface({
                                       key={preset.value}
                                       type="button"
                                       onClick={() => handleSetUpdate(index, 'intensityValue', preset.value)}
-                                      className={`px-3 py-2 text-sm border-2 transition-colors font-bold ${
+                                      className={`px-2 py-1.5 text-sm border transition-colors font-bold ${
                                         set.intensityValue === preset.value
                                           ? 'bg-primary text-primary-foreground border-primary'
-                                          : 'bg-muted text-foreground border-input hover:border-primary'
+                                          : 'bg-card text-foreground border-border hover:border-primary'
                                       }`}
                                     >
                                       {preset.label}
@@ -441,13 +442,11 @@ export function SetConfigurationInterface({
                                 )}
                               </div>
                               {set.intensityValue !== undefined && (
-                                <div className="px-2 py-2 bg-primary/10 border border-primary/30 rounded">
-                                  <div className="text-sm text-primary font-bold">
-                                    {exerciseIntensityType === 'RIR'
-                                      ? RIR_PRESETS.find(p => p.value === set.intensityValue)?.description
-                                      : RPE_PRESETS.find(p => p.value === set.intensityValue)?.description
-                                    }
-                                  </div>
+                                <div className="px-2 py-1.5 bg-primary/10 border border-primary/30 text-xs text-primary font-bold">
+                                  {exerciseIntensityType === 'RIR'
+                                    ? RIR_PRESETS.find(p => p.value === set.intensityValue)?.description
+                                    : RPE_PRESETS.find(p => p.value === set.intensityValue)?.description
+                                  }
                                 </div>
                               )}
                             </div>
@@ -458,54 +457,51 @@ export function SetConfigurationInterface({
 
                     {/* Duplicate Button - Only for existing sets */}
                     {showDuplicateButton && set.id && onDuplicateSet && (
-                      <div className="flex-shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => handleDuplicateSet(set.id!)}
-                          disabled={duplicatingSetId !== null}
-                          className="p-2 text-primary hover:text-primary-hover hover:bg-primary-muted border-2 border-transparent hover:border-primary transition-colors disabled:opacity-50"
-                          title="Duplicate this set"
-                        >
-                          <Plus size={20} />
-                        </button>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleDuplicateSet(set.id!)}
+                        disabled={duplicatingSetId !== null}
+                        className="p-1.5 text-primary hover:text-primary-hover transition-colors disabled:opacity-50"
+                        title="Duplicate this set"
+                      >
+                        <Plus size={16} />
+                      </button>
                     )}
 
                     {/* Delete Button */}
-                    {sets.length > 1 && (
-                      <div className="flex-shrink-0">
+                    <div className="w-10 flex justify-end">
+                      {sets.length > 1 && (
                         <button
                           type="button"
                           onClick={() => handleDeleteSet(index)}
-                          className="p-2 text-error hover:text-error-hover hover:bg-error-muted border-2 border-transparent hover:border-error transition-colors"
+                          className="p-1.5 text-error/50 hover:text-error transition-colors"
                           title="Delete this set"
                         >
-                          <Trash size={20} />
+                          <Trash size={16} />
                         </button>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
 
-            {/* Add Set Button */}
-            <button
-              type="button"
-              onClick={handleAddSet}
-              className="w-full mt-3 px-6 py-3 bg-primary text-primary-foreground hover:bg-primary-hover transition-colors flex items-center justify-center gap-2 font-bold uppercase tracking-wider doom-button-3d"
-            >
-              <Plus size={18} />
-              Add Set (Clones Last)
-            </button>
-          </div>
+              {/* Add Set Button */}
+              <button
+                type="button"
+                onClick={handleAddSet}
+                className="w-full mt-2 py-2.5 border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary transition-colors flex items-center justify-center gap-2 text-base font-bold uppercase tracking-wider"
+              >
+                <Plus size={16} />
+                ADD SET (CLONES LAST)
+              </button>
+            </div>
 
           </div>
         ) : (
           /* Notes Tab */
           <div>
-            <label htmlFor="exercise-notes-config" className="block text-base font-bold text-foreground mb-2 tracking-wide uppercase">
-              Exercise Notes (Optional)
+            <label htmlFor="exercise-notes-config" className="block text-sm font-bold text-muted-foreground mb-1.5 uppercase tracking-wider">
+              EXERCISE NOTES
             </label>
             <textarea
               id="exercise-notes-config"
@@ -513,7 +509,7 @@ export function SetConfigurationInterface({
               onChange={(e) => setExerciseNotes(e.target.value)}
               placeholder="Add any notes for this exercise (e.g., form cues, modifications, etc.)"
               rows={10}
-              className="w-full px-3 py-2 border-2 border-input focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] text-sm bg-card text-foreground"
+              className="w-full px-3 py-2 border border-border focus:outline-none focus:border-primary text-base bg-card text-foreground"
             />
           </div>
         )}

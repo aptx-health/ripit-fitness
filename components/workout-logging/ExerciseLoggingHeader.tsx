@@ -19,25 +19,25 @@ export default function ExerciseLoggingHeader({
 }: ExerciseLoggingHeaderProps) {
   return (
     <div
-      className="bg-primary text-white px-4 py-3 border-b-2 border-primary-muted-dark flex-shrink-0"
-      style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.75rem)' }}
+      className="bg-primary text-white px-4 py-2 border-b border-primary-muted-dark flex-shrink-0"
+      style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.5rem)' }}
     >
       <div className="flex items-center justify-between gap-2">
-        <div className="text-base text-primary-foreground opacity-90 uppercase tracking-wider font-medium">
-          Exercise {currentExerciseIndex + 1} of {totalExercises}
+        <div className="text-sm text-primary-foreground/80 uppercase tracking-wider font-bold">
+          EXERCISE {currentExerciseIndex + 1} OF {totalExercises}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           {failedSetCount > 0 && (
-            <div className="flex items-center gap-1 text-warning text-sm">
-              <AlertCircle size={16} />
+            <div className="flex items-center gap-1 text-warning text-xs font-semibold">
+              <AlertCircle size={14} />
               <span>{failedSetCount} unsaved</span>
             </div>
           )}
           <button
             type="button"
             onClick={onMinimize}
-            className="min-h-9 min-w-9 flex items-center justify-center border-2 border-white/30 bg-white/15 hover:bg-white/25 transition-colors doom-focus-ring"
+            className="h-8 w-8 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/15 transition-colors doom-focus-ring"
             aria-label="Minimize workout"
           >
             <ChevronDown className="h-4 w-4" />
@@ -45,7 +45,7 @@ export default function ExerciseLoggingHeader({
           <button
             type="button"
             onClick={onClose}
-            className="min-h-9 min-w-9 flex items-center justify-center border-2 border-white/30 bg-white/15 hover:bg-white/25 transition-colors doom-focus-ring"
+            className="h-8 w-8 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/15 transition-colors doom-focus-ring"
             aria-label="Close workout"
           >
             <X className="h-4 w-4" />

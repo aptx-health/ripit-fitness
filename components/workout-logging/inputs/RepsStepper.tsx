@@ -25,28 +25,28 @@ export function RepsStepper({ value, onChange, placeholder }: RepsStepperProps) 
 
   return (
     <div>
-      <span className="block text-xs text-muted-foreground mb-1 uppercase tracking-wider">
-        Reps
+      <span className="block text-xs text-muted-foreground mb-1 font-bold uppercase tracking-wider">
+        REPS
       </span>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center">
         <button
           type="button"
           onClick={handleDecrement}
           disabled={!hasValue || numericValue <= 0}
-          className="flex-shrink-0 w-14 h-14 flex items-center justify-center
-            bg-error/15 border-2 border-error/40 border-b-4
-            text-error hover:bg-error/25 hover:border-error
-            active:bg-error active:text-white active:border-b-2 active:translate-y-[2px]
-            disabled:opacity-30 disabled:hover:bg-error/15 disabled:hover:border-error/40
+          className="flex-shrink-0 w-12 h-12 flex items-center justify-center
+            border border-border text-muted-foreground
+            hover:text-error hover:border-error hover:bg-error/10
+            active:bg-error active:text-white
+            disabled:opacity-20 disabled:hover:text-muted-foreground disabled:hover:border-border disabled:hover:bg-transparent
             transition-all duration-75"
           aria-label="Decrease reps"
         >
-          <Minus size={24} strokeWidth={3} />
+          <Minus size={18} strokeWidth={2.5} />
         </button>
 
         <div
-          className="flex-1 h-14 flex items-center justify-center
-            bg-muted border-2 border-input
+          className="flex-1 h-12 flex items-center justify-center
+            bg-card border-y border-border
             text-2xl font-bold text-foreground tabular-nums min-w-[60px]"
         >
           {hasValue ? numericValue : (
@@ -59,14 +59,14 @@ export function RepsStepper({ value, onChange, placeholder }: RepsStepperProps) 
         <button
           type="button"
           onClick={handleIncrement}
-          className="flex-shrink-0 w-14 h-14 flex items-center justify-center
-            bg-success/15 border-2 border-success/40 border-b-4
-            text-success hover:bg-success/25 hover:border-success
-            active:bg-success active:text-white active:border-b-2 active:translate-y-[2px]
+          className="flex-shrink-0 w-12 h-12 flex items-center justify-center
+            border border-border text-muted-foreground
+            hover:text-success hover:border-success hover:bg-success/10
+            active:bg-success active:text-white
             transition-all duration-75"
           aria-label="Increase reps"
         >
-          <Plus size={24} strokeWidth={3} />
+          <Plus size={18} strokeWidth={2.5} />
         </button>
       </div>
     </div>

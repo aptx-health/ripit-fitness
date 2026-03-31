@@ -34,15 +34,15 @@ export function IntensitySelector({
   if (!isExpanded) {
     return (
       <div>
-        <span className="block text-xs text-muted-foreground mb-1 uppercase tracking-wider">
-          {label} (optional)
+        <span className="block text-xs text-muted-foreground mb-1 font-bold uppercase tracking-wider">
+          {label}
         </span>
         <button
           type="button"
           onClick={onExpand}
-          className="w-full h-14 px-4 flex items-center justify-center
-            bg-muted border-2 border-input border-b-4
-            hover:border-primary active:bg-secondary active:border-b-2 active:translate-y-[2px]
+          className="w-full h-12 px-4 flex items-center justify-center
+            bg-card border border-border
+            hover:border-primary
             transition-all duration-75"
         >
           <span className="text-2xl font-bold text-foreground tabular-nums">
@@ -56,11 +56,11 @@ export function IntensitySelector({
   // Expanded view with preset grid
   return (
     <div>
-      <span className="block text-xs text-muted-foreground mb-1 uppercase tracking-wider">
-        {label} (optional)
+      <span className="block text-xs text-muted-foreground mb-1 font-bold uppercase tracking-wider">
+        {label}
       </span>
 
-      <div className="space-y-1">
+      <div className="border border-border divide-y divide-border">
         {presets.map((preset) => {
           const isSelected = numericValue === preset.value
           return (
@@ -68,20 +68,20 @@ export function IntensitySelector({
               key={preset.value}
               type="button"
               onClick={() => handleSelect(preset)}
-              className={`w-full px-4 py-3 flex items-center gap-3
-                border-2 transition-colors text-left
-                active:bg-primary active:text-primary-foreground active:border-primary
+              className={`w-full px-3 py-2.5 flex items-center gap-3
+                transition-colors text-left
+                active:bg-primary active:text-primary-foreground
                 ${isSelected
-                  ? 'bg-primary/10 border-primary text-foreground shadow-[0_0_10px_rgba(var(--primary-rgb),0.2)]'
-                  : 'bg-muted border-input text-foreground hover:border-primary hover:bg-secondary'
+                  ? 'bg-primary/10 text-foreground'
+                  : 'bg-card text-foreground hover:bg-muted'
                 }`}
             >
-              <span className={`text-xl font-bold tabular-nums min-w-[40px] ${
+              <span className={`text-lg font-bold tabular-nums min-w-[36px] ${
                 isSelected ? 'text-primary' : ''
               }`}>
                 {preset.label}
               </span>
-              <span className="text-base text-muted-foreground font-medium">
+              <span className="text-sm text-muted-foreground">
                 {preset.description}
               </span>
             </button>
@@ -95,11 +95,11 @@ export function IntensitySelector({
             onChange('')
             onCollapse()
           }}
-          className="w-full px-4 py-3 bg-muted border-2 border-input
-            text-muted-foreground font-bold uppercase tracking-wider text-base
-            hover:border-primary hover:bg-secondary transition-colors"
+          className="w-full px-3 py-2.5 bg-card
+            text-muted-foreground font-bold uppercase tracking-wider text-sm
+            hover:bg-muted transition-colors"
         >
-          Skip {label}
+          SKIP {label}
         </button>
       </div>
     </div>

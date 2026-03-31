@@ -95,50 +95,66 @@ export default function SetList({
         </div>
       )}
 
-      {/* Logged sets — compact inline rows */}
-      {loggedSets.map((set) => {
-        const isFailed = set._syncStatus === 'error'
-        const isPending = set._syncStatus === 'pending'
-        return (
-          <div
-            key={`${set.exerciseId}-${set.setNumber}`}
-            className={`flex items-center justify-between px-2 py-1.5 text-sm ${
-              isFailed
-                ? 'text-warning'
-                : 'text-success-text opacity-70'
-            } ${flashSetNumber === set.setNumber ? 'doom-set-logged' : ''}`}
-          >
-            <span className="flex items-center gap-1.5">
-              {isFailed && <AlertCircle size={14} className="flex-shrink-0" />}
-              <span className="font-semibold">{set.setNumber}.</span>
-              {set.reps}×{set.weight}{set.weightUnit}
-              {formatIntensity(set) ? ` · ${formatIntensity(set)}` : ''}
-              {isPending && <span className="text-xs text-muted-foreground">saving...</span>}
-            </span>
-            <button
-              type="button"
-              onClick={() => onDeleteSet(set.setNumber)}
-              className="text-error/50 hover:text-error p-0.5"
-            >
-              <Trash2 size={14} />
-            </button>
-          </div>
-        )
-      })}
-
-      {/* Remaining prescribed sets — muted, compact */}
-      {remainingSets.map((set) => (
-        <div
-          key={set.id}
-          className="flex items-center px-2 py-1.5 text-sm text-muted-foreground"
-        >
-          <span className="font-semibold">{set.setNumber}.</span>
-          <span className="ml-1.5">
-            {set.reps} reps @ {set.weight || '—'}
-            {formatIntensity(set) ? ` · ${formatIntensity(set)}` : ''}
+      {/* Logged sets */}
+      {loggedSets.length > 0 && (
+        <div>
+          <span className="block text-xs font-bold text-success-text/60 uppercase tracking-wider px-1 mb-0.5">
+            LOGGED
           </span>
+          {loggedSets.map((set) => {
+            const isFailed = set._syncStatus === 'error'
+            const isPending = set._syncStatus === 'pending'
+            return (
+              <div
+                key={`${set.exerciseId}-${set.setNumber}`}
+                className={`flex items-center justify-between px-2 py-1.5 text-base ${
+                  isFailed
+                    ? 'text-warning'
+                    : 'text-success-text opacity-70'
+                } ${flashSetNumber === set.setNumber ? 'doom-set-logged' : ''}`}
+              >
+                <span className="flex items-center gap-1.5">
+                  {isFailed && <AlertCircle size={14} className="flex-shrink-0" />}
+                  <span className="font-bold">{set.setNumber}.</span>
+                  {set.reps}×{set.weight}{set.weightUnit}
+                  {formatIntensity(set) ? ` · ${formatIntensity(set)}` : ''}
+                  {isPending && <span className="text-xs text-muted-foreground">saving...</span>}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => onDeleteSet(set.setNumber)}
+                  className="text-error/50 hover:text-error p-0.5"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            )
+          })}
         </div>
-      ))}
+      )}
+
+      {/* Remaining prescribed sets */}
+      {remainingSets.length > 0 && (
+        <div className="mt-1">
+          <span className="block text-xs font-bold text-muted-foreground uppercase tracking-wider px-1 mb-0.5">
+            PRESCRIBED
+          </span>
+          <div className="border border-border/50 divide-y divide-border/30">
+            {remainingSets.map((set) => (
+              <div
+                key={set.id}
+                className="flex items-center px-2 py-1.5 text-base text-muted-foreground/70"
+              >
+                <span className="font-bold w-6">{set.setNumber}.</span>
+                <span>
+                  {set.reps} reps @ {set.weight || '—'}
+                  {formatIntensity(set) ? ` · ${formatIntensity(set)}` : ''}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
