@@ -91,16 +91,16 @@ export function WeightKeypad({
   if (!isExpanded) {
     return (
       <div>
-        <span className="block text-xs text-muted-foreground mb-1 uppercase tracking-wider">
-          Weight ({weightUnit})
+        <span className="block text-xs text-muted-foreground mb-1 font-bold uppercase tracking-wider">
+          WEIGHT ({weightUnit.toUpperCase()})
         </span>
         <button
           type="button"
           onClick={handleExpand}
-          className="w-full h-14 px-4 flex items-center justify-center
-            bg-muted border-2 border-input border-b-4
+          className="w-full h-12 px-4 flex items-center justify-center
+            bg-card border border-border
             text-2xl font-bold text-foreground tabular-nums
-            hover:border-primary active:bg-secondary active:border-b-2 active:translate-y-[2px]
+            hover:border-primary
             transition-all duration-75"
         >
           {value || '0'}
@@ -115,16 +115,16 @@ export function WeightKeypad({
   // Expanded view with keypad - mt-auto pushes to bottom of flex container
   return (
     <div className="mt-auto">
-      <span className="block text-xs text-muted-foreground mb-1 uppercase tracking-wider">
-        Weight ({weightUnit})
+      <span className="block text-xs text-muted-foreground mb-1 font-bold uppercase tracking-wider">
+        WEIGHT ({weightUnit.toUpperCase()})
       </span>
 
       {/* Current value display */}
       <div
-        className="w-full h-14 px-4 flex items-center justify-center
+        className="w-full h-12 px-4 flex items-center justify-center
           bg-card border-2 border-primary
           text-2xl font-bold text-foreground tabular-nums
-          shadow-[0_0_10px_rgba(var(--primary-rgb),0.3)]"
+          shadow-[0_0_8px_rgba(var(--primary-rgb),0.2)]"
       >
         {value || '0'}
         <span className="text-sm font-semibold text-muted-foreground ml-2">
@@ -133,23 +133,23 @@ export function WeightKeypad({
       </div>
 
       {/* Number keypad grid */}
-      <div className="grid grid-cols-3 gap-1 mt-1">
+      <div className="grid grid-cols-3 gap-px mt-px bg-border">
         {KEYPAD_KEYS.map((key) => (
           <button
             key={key}
             type="button"
             onClick={() => handleKeyPress(key)}
-            className={`h-12 flex items-center justify-center
-              font-bold text-lg border-2 transition-colors
-              active:bg-primary active:text-primary-foreground active:border-primary
+            className={`h-11 flex items-center justify-center
+              font-bold text-lg transition-colors
+              active:bg-primary active:text-primary-foreground
               ${key === 'CLR'
-                ? 'bg-muted text-muted-foreground border-input hover:border-primary text-sm uppercase tracking-wider'
+                ? 'bg-muted text-muted-foreground hover:bg-secondary text-sm uppercase tracking-wider'
                 : key === 'DEL'
-                  ? 'bg-muted text-muted-foreground border-input hover:border-primary'
-                  : 'bg-muted text-foreground border-input hover:border-primary hover:bg-secondary'
+                  ? 'bg-muted text-muted-foreground hover:bg-secondary'
+                  : 'bg-card text-foreground hover:bg-secondary'
               }`}
           >
-            {key === 'DEL' ? <Delete size={20} /> : key}
+            {key === 'DEL' ? <Delete size={18} /> : key}
           </button>
         ))}
       </div>
@@ -158,12 +158,12 @@ export function WeightKeypad({
       <button
         type="button"
         onClick={handleDone}
-        className="w-full mt-1 h-12 bg-primary text-primary-foreground
-          font-bold uppercase tracking-wider text-base
+        className="w-full mt-px h-11 bg-primary text-primary-foreground
+          font-bold uppercase tracking-wider text-sm
           hover:bg-primary/90 active:bg-primary/80
-          transition-colors doom-button-3d"
+          transition-colors"
       >
-        Done
+        DONE
       </button>
     </div>
   )

@@ -73,21 +73,21 @@ export default function ExerciseActionsFooter({
   ]
 
   return (
-    <div className="border-t-2 border-border px-4 py-3 bg-muted flex-shrink-0">
-      <div className="grid grid-cols-[53%_34%_10%] sm:grid-cols-[55%_35%_10%] gap-3">
+    <div className="border-t border-border px-3 py-2 bg-card flex-shrink-0">
+      <div className="flex items-center gap-2">
         {/* Log Set Button */}
         <button type="button"
           onClick={onLogSet}
           disabled={!canLogSet || hasLoggedAllPrescribed}
-          className="py-3 bg-accent text-accent-foreground font-bold uppercase tracking-wider transition-all hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed doom-button-3d doom-focus-ring"
+          className="flex-1 py-2.5 bg-accent text-accent-foreground text-sm font-bold uppercase tracking-wider transition-all hover:bg-accent/90 disabled:opacity-40 disabled:cursor-not-allowed doom-button-3d doom-focus-ring"
         >
-          Log Set {nextSetNumber}
+          LOG SET {nextSetNumber}
         </button>
 
         {/* Complete Workout Button */}
         <button type="button"
           disabled={isSubmitting || totalLoggedSets === 0}
-          className="py-3 bg-success text-success-foreground font-bold uppercase tracking-wider transition-all hover:bg-success/90 disabled:opacity-50 disabled:cursor-not-allowed doom-button-3d doom-focus-ring"
+          className="py-2.5 px-4 border border-success text-success text-sm font-bold uppercase tracking-wider transition-all hover:bg-success hover:text-success-foreground disabled:opacity-30 disabled:cursor-not-allowed doom-button-3d doom-focus-ring"
           onMouseDown={(e) => {
             if (isSubmitting || totalLoggedSets === 0) return;
             e.preventDefault();
@@ -101,7 +101,7 @@ export default function ExerciseActionsFooter({
         <ActionsMenu
           variant="default"
           size="md"
-          className="h-full aspect-square"
+          className="self-stretch w-10"
           actions={actions}
         />
       </div>
