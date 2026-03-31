@@ -94,5 +94,20 @@ ON CONFLICT (id) DO UPDATE SET password = EXCLUDED.password;
 " 2>&1
 echo "Test user seeded (dmays@test.com / password / admin)"
 
+# Seed exercise definitions (SQL files — idempotent via ON CONFLICT DO NOTHING)
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SEEDS_DIR="$SCRIPT_DIR/../prisma/seeds"
+echo "Seeding exercise definitions..."
+for f in "$SEEDS_DIR"/0[0-8]_*.sql; do
+  PGPASSWORD=$POSTGRES_PASSWORD psql -h localhost -p $PORT -U $POSTGRES_USER -d $POSTGRES_DB -f "$f" > /dev/null 2>&1
+done
+echo "Exercise definitions seeded"
+
+# Seed dev content (program, workout history, learning articles)
+echo "Seeding dev content..."
+DATABASE_URL="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:$PORT/$POSTGRES_DB" \
+  npx ts-node --compiler-options '{"module":"CommonJS","types":["node"]}' "$SEEDS_DIR/seed-dev-content.ts" 2>&1
+echo "Dev content seeded"
+
 # Wait for docker process to exit (keeps script running)
 wait $DOCKER_PID

@@ -77,10 +77,12 @@ export async function POST(request: NextRequest) {
     logger.info({ feedbackId: feedback.id, category, userId: user.id }, 'Feedback submitted')
 
     // Discord notification (fire and forget)
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ripit.fit'
     sendDiscordNotification({
       title: `Feedback: ${category.charAt(0).toUpperCase() + category.slice(1)}`,
       description: message.trim().substring(0, 200) + (message.trim().length > 200 ? '...' : ''),
       color: 0xEA580C,
+      url: `${appUrl}/admin/feedback?expand=${feedback.id}`,
       fields: [
         { name: 'Page', value: pageUrl, inline: true },
         { name: 'User', value: user.email || user.id, inline: true },
