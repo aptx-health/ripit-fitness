@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { feedbackId } = await request.json()
+    const { feedbackId, labels: extraLabels } = await request.json()
     if (!feedbackId) {
       return NextResponse.json({ error: 'feedbackId is required' }, { status: 400 })
     }
@@ -57,7 +57,11 @@ export async function POST(request: NextRequest) {
       `*Created from in-app feedback (ID: ${feedback.id})*`,
     ].filter(Boolean).join('\n')
 
-    const label = CATEGORY_LABELS[feedback.category] || 'feedback'
+    const categoryLabel = CATEGORY_LABELS[feedback.category] || 'feedback'
+    const validExtras = Array.isArray(extraLabels)
+      ? extraLabels.filter((l: unknown) => typeof l === 'string' && l.trim().length > 0)
+      : []
+    const labels = [...new Set([categoryLabel, 'user-feedback', ...validExtras])]
 
     // Create GitHub issue
     const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/issues`, {
@@ -71,7 +75,7 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         title,
         body,
-        labels: [label, 'user-feedback'],
+        labels,
       }),
     })
 
