@@ -1839,6 +1839,25 @@ body {
   animation: doom-badge-pulse 1.5s ease-in-out infinite;
 }
 
+@keyframes doom-set-logged {
+  0% {
+    box-shadow: 0 0 0 rgba(var(--success-rgb), 0);
+    background-color: transparent;
+  }
+  20% {
+    box-shadow: 0 0 12px rgba(var(--success-rgb), 0.6), inset 0 0 8px rgba(var(--success-rgb), 0.1);
+    background-color: rgba(var(--success-rgb), 0.12);
+  }
+  100% {
+    box-shadow: 0 0 0 rgba(var(--success-rgb), 0);
+    background-color: transparent;
+  }
+}
+
+.doom-set-logged {
+  animation: doom-set-logged 0.6s ease-out;
+}
+
 @keyframes doom-badge-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.8; }
