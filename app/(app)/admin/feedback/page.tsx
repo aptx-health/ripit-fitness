@@ -1,7 +1,8 @@
 'use client'
 
-import { Check, CheckCheck, ExternalLink, MessageSquarePlus } from 'lucide-react'
+import { Check, CheckCheck, ExternalLink, MessageSquarePlus, Tag } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 
 import type { FeedbackStatus } from '@/types/feedback'
 
@@ -19,6 +20,13 @@ interface FeedbackItem {
 
 const STATUS_TABS = ['all', 'new', 'reviewed', 'resolved'] as const
 
+const CATEGORY_LABELS: Record<string, string> = {
+  bug: 'bug',
+  feature: 'enhancement',
+  confusion: 'ux',
+  general: 'feedback',
+}
+
 export default function AdminFeedbackPage() {
   const [feedback, setFeedback] = useState<FeedbackItem[]>([])
   const [total, setTotal] = useState(0)
@@ -28,6 +36,17 @@ export default function AdminFeedbackPage() {
   const [adminNote, setAdminNote] = useState('')
   const [updating, setUpdating] = useState<string | null>(null)
   const [creatingIssue, setCreatingIssue] = useState<string | null>(null)
+  const [issueLabels, setIssueLabels] = useState('')
+  const searchParams = useSearchParams()
+
+  // Auto-expand feedback item from URL (e.g., Discord deep link)
+  useEffect(() => {
+    const expandId = searchParams.get('expand')
+    if (expandId) {
+      setActiveStatus('all')
+      setExpandedId(expandId)
+    }
+  }, [searchParams])
 
   useEffect(() => {
     let cancelled = false
@@ -44,6 +63,13 @@ export default function AdminFeedbackPage() {
           setFeedback(json.feedback || [])
           setTotal(json.total || 0)
           setLoading(false)
+
+          // If auto-expanding from URL, set the admin note for the expanded item
+          const expandId = searchParams.get('expand')
+          if (expandId) {
+            const match = (json.feedback || []).find((f: FeedbackItem) => f.id === expandId)
+            if (match) setAdminNote(match.adminNote || '')
+          }
         }
       })
       .catch(() => { if (!cancelled) setLoading(false) })
@@ -79,10 +105,15 @@ export default function AdminFeedbackPage() {
   const createIssue = async (item: FeedbackItem) => {
     setCreatingIssue(item.id)
     try {
+      const labels = issueLabels
+        .split(',')
+        .map((l) => l.trim())
+        .filter(Boolean)
+
       const res = await fetch('/api/admin/feedback/create-issue', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ feedbackId: item.id }),
+        body: JSON.stringify({ feedbackId: item.id, labels }),
       })
 
       if (res.ok) {
@@ -113,9 +144,11 @@ export default function AdminFeedbackPage() {
     if (expandedId === item.id) {
       setExpandedId(null)
       setAdminNote('')
+      setIssueLabels('')
     } else {
       setExpandedId(item.id)
       setAdminNote(item.adminNote || '')
+      setIssueLabels('')
     }
   }
 
@@ -254,6 +287,30 @@ export default function AdminFeedbackPage() {
                       className="w-full px-3 py-2 bg-input border-2 border-border text-foreground text-sm placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
+
+                  {/* Labels for GitHub issue */}
+                  {!item.adminNote?.includes('GitHub Issue:') && (
+                    <div>
+                      <label
+                        htmlFor={`labels-${item.id}`}
+                        className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1"
+                      >
+                        <Tag size={12} />
+                        Issue Labels
+                      </label>
+                      <input
+                        id={`labels-${item.id}`}
+                        type="text"
+                        value={issueLabels}
+                        onChange={(e) => setIssueLabels(e.target.value)}
+                        placeholder="e.g. priority, agent-task (comma-separated)"
+                        className="w-full px-3 py-2 bg-input border-2 border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Category label ({CATEGORY_LABELS[item.category] || 'feedback'}) and user-feedback are added automatically
+                      </p>
+                    </div>
+                  )}
 
                   {/* Action buttons */}
                   <div className="flex flex-wrap gap-2">
