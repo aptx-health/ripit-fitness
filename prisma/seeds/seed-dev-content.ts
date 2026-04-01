@@ -5,7 +5,7 @@
  */
 import { PrismaClient } from '@prisma/client'
 import { seedCuratedExerciseDefinitions } from './curated/exercise-defs'
-import { DEV_ARTICLES } from './dev-articles'
+import { COLLECTIONS } from './dev-articles'
 
 const prisma = new PrismaClient()
 
@@ -281,75 +281,98 @@ async function seedLearningContent() {
     SELECT COUNT(*) as count FROM "Collection" WHERE name = 'Getting Started'
   `
   if (Number(existingCollection[0]?.count) > 0) {
-    console.log('Learning collection already exists — skipping')
+    console.log('Learning collections already exist — skipping')
     return
   }
 
-  // Create articles
-  const articleIds: string[] = []
-  for (const article of DEV_ARTICLES) {
+  // Collect all unique tags across all articles
+  const allTags = new Set<string>()
+  for (const collection of COLLECTIONS) {
+    for (const article of collection.articles) {
+      for (const tag of article.tags) {
+        allTags.add(tag)
+      }
+    }
+  }
+
+  // Create tags
+  const tagIdMap = new Map<string, string>()
+  for (const tagName of allTags) {
     const result = await prisma.$queryRaw<{ id: string }[]>`
-      INSERT INTO "Article" (id, title, slug, body, level, status, "authorId", "readTimeMinutes", "publishedAt", "createdAt", "updatedAt")
-      VALUES (
-        gen_random_uuid()::text,
-        ${article.title},
-        ${article.slug},
-        ${article.body},
-        ${article.level}::"ArticleLevel",
-        'published'::"ArticleStatus",
-        ${USER_ID},
-        ${article.readTimeMinutes},
-        NOW(),
-        NOW(),
-        NOW()
-      )
-      ON CONFLICT (slug) DO NOTHING
+      INSERT INTO "Tag" (id, name, category)
+      VALUES (gen_random_uuid()::text, ${tagName}, 'topic'::"TagCategory")
+      ON CONFLICT (name, category) DO UPDATE SET name = EXCLUDED.name
       RETURNING id
     `
     if (result.length > 0) {
-      articleIds.push(result[0].id)
+      tagIdMap.set(tagName, result[0].id)
     }
   }
 
-  if (articleIds.length === 0) {
-    console.log('Articles already exist or insert failed — skipping collection')
-    return
-  }
+  let totalArticles = 0
 
-  // Create collection
-  const collectionResult = await prisma.$queryRaw<{ id: string }[]>`
-    INSERT INTO "Collection" (id, name, description, "displayOrder", "createdAt", "updatedAt")
-    VALUES (gen_random_uuid()::text, 'Getting Started', 'Everything you need to know to start training with confidence.', 1, NOW(), NOW())
-    RETURNING id
-  `
-
-  if (collectionResult.length > 0) {
-    const collectionId = collectionResult[0].id
-    for (let i = 0; i < articleIds.length; i++) {
-      await prisma.$queryRaw`
-        INSERT INTO "CollectionArticle" ("collectionId", "articleId", "order")
-        VALUES (${collectionId}, ${articleIds[i]}, ${i + 1})
-        ON CONFLICT DO NOTHING
+  for (const collection of COLLECTIONS) {
+    // Create articles for this collection
+    const articleIds: string[] = []
+    for (const article of collection.articles) {
+      const result = await prisma.$queryRaw<{ id: string }[]>`
+        INSERT INTO "Article" (id, title, slug, body, level, status, "authorId", "readTimeMinutes", "publishedAt", "createdAt", "updatedAt")
+        VALUES (
+          gen_random_uuid()::text,
+          ${article.title},
+          ${article.slug},
+          ${article.body},
+          ${article.level}::"ArticleLevel",
+          'published'::"ArticleStatus",
+          ${USER_ID},
+          ${article.readTimeMinutes},
+          NOW(),
+          NOW(),
+          NOW()
+        )
+        ON CONFLICT (slug) DO NOTHING
+        RETURNING id
       `
+      if (result.length > 0) {
+        articleIds.push(result[0].id)
+        totalArticles++
+
+        // Create article-tag associations
+        for (const tagName of article.tags) {
+          const tagId = tagIdMap.get(tagName)
+          if (tagId) {
+            await prisma.$queryRaw`
+              INSERT INTO "ArticleTag" ("articleId", "tagId")
+              VALUES (${result[0].id}, ${tagId})
+              ON CONFLICT DO NOTHING
+            `
+          }
+        }
+      }
     }
-  }
 
-  // Create a few tags
-  const tags = [
-    { name: 'Beginner Basics', category: 'topic' },
-    { name: 'Strength Training', category: 'topic' },
-    { name: 'Recovery', category: 'topic' },
-  ]
-
-  for (const tag of tags) {
-    await prisma.$queryRaw`
-      INSERT INTO "Tag" (id, name, category)
-      VALUES (gen_random_uuid()::text, ${tag.name}, ${tag.category}::"TagCategory")
-      ON CONFLICT (name, category) DO NOTHING
+    // Create collection
+    const collectionResult = await prisma.$queryRaw<{ id: string }[]>`
+      INSERT INTO "Collection" (id, name, description, "displayOrder", "createdAt", "updatedAt")
+      VALUES (gen_random_uuid()::text, ${collection.name}, ${collection.description}, ${collection.displayOrder}, NOW(), NOW())
+      RETURNING id
     `
+
+    if (collectionResult.length > 0) {
+      const collectionId = collectionResult[0].id
+      for (let i = 0; i < articleIds.length; i++) {
+        await prisma.$queryRaw`
+          INSERT INTO "CollectionArticle" ("collectionId", "articleId", "order")
+          VALUES (${collectionId}, ${articleIds[i]}, ${i + 1})
+          ON CONFLICT DO NOTHING
+        `
+      }
+    }
+
+    console.log(`  "${collection.name}": ${articleIds.length} articles`)
   }
 
-  console.log(`Created ${articleIds.length} articles in "Getting Started" collection`)
+  console.log(`Created ${totalArticles} articles across ${COLLECTIONS.length} collections`)
 }
 
 async function main() {
