@@ -11,11 +11,11 @@ import { getStrengthWeekByNumber } from '@/lib/db/week-navigation'
 export const revalidate = 30
 
 type Props = {
-  searchParams: Promise<{ week?: string }>
+  searchParams: Promise<{ week?: string; debugHistoryCount?: string }>
 }
 
 export default async function TrainingPage({ searchParams }: Props) {
-  const { week: weekParam } = await searchParams
+  const { week: weekParam, debugHistoryCount } = await searchParams
   const { user, error } = await getCurrentUser()
 
   if (error || !user) {
@@ -25,7 +25,7 @@ export default async function TrainingPage({ searchParams }: Props) {
   const requestedWeek = weekParam ? parseInt(weekParam, 10) : null
   const validWeekParam = requestedWeek && !Number.isNaN(requestedWeek) && requestedWeek > 0
 
-  const [weekData, workoutHistoryCount] = await Promise.all([
+  const [weekData, rawHistoryCount] = await Promise.all([
     validWeekParam
       ? getStrengthWeekByNumber(user.id, requestedWeek)
       : getCurrentStrengthWeek(user.id),
@@ -36,6 +36,14 @@ export default async function TrainingPage({ searchParams }: Props) {
       }
     })
   ])
+
+  // Dev-only override for testing contextual content triggers
+  const debugOverride = process.env.NODE_ENV !== 'production' && debugHistoryCount
+    ? parseInt(debugHistoryCount, 10)
+    : undefined
+  const workoutHistoryCount = debugOverride !== undefined && !Number.isNaN(debugOverride)
+    ? debugOverride
+    : rawHistoryCount
 
   return (
     <div className="min-h-screen bg-background sm:px-6 py-4">
