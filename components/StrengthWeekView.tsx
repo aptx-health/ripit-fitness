@@ -8,6 +8,7 @@ import { BeginnerPrimerWizard } from '@/components/features/training/BeginnerPri
 import { StickNudgeBanner } from '@/components/features/training/StickNudgeBanner'
 import { WarmupInterstitial } from '@/components/features/training/WarmupInterstitial'
 import { ProgramCompletionModal } from '@/components/ProgramCompletionModal'
+import { useTour } from '@/components/tour'
 import WeekNavigator from '@/components/ui/WeekNavigator'
 import WorkoutHistoryList from '@/components/WorkoutHistoryList'
 import WorkoutPreviewModal from '@/components/WorkoutPreviewModal'
@@ -15,6 +16,7 @@ import WorkoutCard from '@/components/workout/WorkoutCard'
 import { useUserSettings } from '@/hooks/useUserSettings'
 import { clientLogger } from '@/lib/client-logger'
 import { useDraftWorkout } from '@/lib/contexts/DraftWorkoutContext'
+import { TRAINING_PAGE_STEPS, TRAINING_PAGE_TOUR_ID } from '@/lib/tour/steps/training-page'
 
 type Workout = {
   id: string
@@ -182,6 +184,21 @@ export default function StrengthWeekView({
   const showPrimer = historyCount === 0 && !settings?.dismissedPrimer && !settingsLoading
   const showWarmup = historyCount < 4 && !settings?.dismissedWarmup
   const showStickNudge = historyCount >= 3 && historyCount <= 8 && !settings?.dismissedStickNudge && !settingsLoading
+
+  // Training page guided tour
+  const { startTour: startPageTour, isActive: tourActive } = useTour()
+  useEffect(() => {
+    if (settingsLoading || !settings || tourActive) return
+    try {
+      const completed: string[] = JSON.parse(settings.completedTours || '[]')
+      if (!completed.includes(TRAINING_PAGE_TOUR_ID)) {
+        const timer = setTimeout(() => {
+          startPageTour(TRAINING_PAGE_TOUR_ID, TRAINING_PAGE_STEPS)
+        }, 300)
+        return () => clearTimeout(timer)
+      }
+    } catch { /* invalid JSON, skip */ }
+  }, [settingsLoading, settings, tourActive, startPageTour])
 
   const checkProgramCompletion = useCallback(async (openModal = false) => {
     // Skip check if we're currently restarting

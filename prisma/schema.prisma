@@ -292,6 +292,7 @@ model UserSettings {
   dismissedPrimer        Boolean  @default(false)
   dismissedWarmup        Boolean  @default(false)
   dismissedStickNudge    Boolean  @default(false)
+  completedTours         String   @default("[]")
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 

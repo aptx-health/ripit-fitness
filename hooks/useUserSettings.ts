@@ -7,6 +7,7 @@ export type UserSettings = {
   dismissedPrimer: boolean
   dismissedWarmup: boolean
   dismissedStickNudge: boolean
+  completedTours: string
 }
 
 type UseUserSettingsReturn = {

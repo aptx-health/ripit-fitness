@@ -3,13 +3,16 @@
 import { AlertTriangle } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useTour } from '@/components/tour'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import { useImagePrefetch } from '@/hooks/useImagePrefetch'
 import { type Exercise, type ExerciseHistory, useProgressiveExercises } from '@/hooks/useProgressiveExercises'
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
+import { useUserSettings } from '@/hooks/useUserSettings'
 import { useWorkoutDraft } from '@/hooks/useWorkoutDraft'
 import { completeDraft, discardDraft } from '@/lib/api/workout-sets'
 import { parseRepsFromPrescribed } from '@/lib/constants/intensity-presets'
+import { WORKOUT_LOGGER_STEPS, WORKOUT_LOGGER_TOUR_ID } from '@/lib/tour/steps/workout-logger'
 import type { LoggedSet } from '@/types/workout'
 import ExerciseDefinitionEditorModal from './features/exercise-definition/ExerciseDefinitionEditorModal'
 import ExerciseActionsFooter from './workout-logging/ExerciseActionsFooter'
@@ -69,6 +72,10 @@ export default function ExerciseLoggingModal({
   // Input expansion state (lifted from SetLoggingForm for SetList visibility)
   const [expandedInput, setExpandedInput] = useState<ExpandedInput>(null)
 
+  // Guided tour
+  const { startTour, setTourPaused, isActive: tourActive } = useTour()
+  const { settings: userSettings } = useUserSettings()
+
   // Wizard state
   const [activeWizard, setActiveWizard] = useState<'add' | 'swap' | 'edit' | 'delete' | null>(null)
   const [navigateToLastExercise, setNavigateToLastExercise] = useState(false)
@@ -106,6 +113,26 @@ export default function ExerciseLoggingModal({
     flushFailedSets,
     clearCache,
   } = useWorkoutDraft(workoutId)
+
+  // Start logger tour for first-time users once the exercise loads
+  useEffect(() => {
+    if (!currentExercise || !userSettings || tourActive) return
+    try {
+      const completed: string[] = JSON.parse(userSettings.completedTours || '[]')
+      if (!completed.includes(WORKOUT_LOGGER_TOUR_ID)) {
+        // Small delay so the UI renders before the tour overlay appears
+        const timer = setTimeout(() => {
+          startTour(WORKOUT_LOGGER_TOUR_ID, WORKOUT_LOGGER_STEPS)
+        }, 500)
+        return () => clearTimeout(timer)
+      }
+    } catch { /* invalid JSON, skip */ }
+  }, [currentExercise, userSettings, tourActive, startTour])
+
+  // Pause tour when inputs expand (layout shifts)
+  useEffect(() => {
+    setTourPaused(expandedInput !== null)
+  }, [expandedInput, setTourPaused])
 
   const currentPrescribedSets = currentExercise?.prescribedSets || []
   const currentExerciseLoggedSets = loggedSets.filter(

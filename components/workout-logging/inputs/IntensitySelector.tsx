@@ -33,7 +33,7 @@ export function IntensitySelector({
   // Compact view
   if (!isExpanded) {
     return (
-      <div>
+      <div data-tour="intensity-input">
         <span className="block text-xs text-muted-foreground mb-1 font-bold uppercase tracking-wider">
           {label}
         </span>
