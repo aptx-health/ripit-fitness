@@ -33,7 +33,7 @@ export function WarmupInterstitial({ open, onContinue, onDismissPermanently }: W
   return (
     <div
       style={{ position: 'fixed', inset: 0, zIndex: 50 }}
-      className="flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+      className="flex items-center justify-center backdrop-blur-md bg-black/40 dark:bg-black/60 p-4"
     >
       <div
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}

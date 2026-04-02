@@ -24,36 +24,32 @@ export function StickNudgeBanner({ onDismiss }: StickNudgeBannerProps) {
   }
 
   return (
-    <div className="relative border-2 border-primary bg-card doom-noise p-4 mb-4">
-      <button
-        type="button"
-        onClick={handleDismiss}
-        disabled={dismissing}
-        className="absolute top-3 right-3 p-1 text-muted-foreground hover:text-foreground transition-colors doom-focus-ring"
-        aria-label="Dismiss"
-      >
-        <X size={16} />
-      </button>
-
-      <div className="flex items-start gap-3 pr-6">
-        <div className="shrink-0 mt-0.5">
-          <BookOpen size={20} className="text-primary" />
-        </div>
-        <div>
-          <h3 className="text-sm font-bold text-foreground uppercase tracking-wider mb-1">
-            Making It Stick
-          </h3>
-          <p className="text-sm text-muted-foreground mb-2">
-            You&apos;ve got a few workouts under your belt. Want to make the habit easier to keep?
-          </p>
-          <Link
-            href="/learn"
-            className="text-sm text-primary hover:text-primary/80 font-semibold uppercase tracking-wider doom-focus-ring"
-          >
-            Read in the Learn tab
-          </Link>
-        </div>
+    <div className="relative border border-border border-t-[3px] border-t-primary bg-card doom-noise p-4 mb-4 animate-accent-sweep">
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <p className="text-base font-bold text-foreground doom-heading uppercase tracking-wider">
+          You&apos;re off to a great start
+        </p>
+        <button
+          type="button"
+          onClick={handleDismiss}
+          disabled={dismissing}
+          className="shrink-0 p-1 text-muted-foreground hover:text-foreground transition-colors doom-focus-ring"
+          aria-label="Dismiss"
+        >
+          <X size={16} />
+        </button>
       </div>
+      <p className="text-sm text-muted-foreground mb-3">
+        You&apos;ve got a few workouts under your belt. Want to make the habit easier to keep?
+      </p>
+      <Link
+        href="/learn/making-the-gym-easy"
+        onClick={handleDismiss}
+        className="inline-flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 font-semibold doom-focus-ring"
+      >
+        <BookOpen size={14} />
+        Read &ldquo;Making It Stick&rdquo;
+      </Link>
     </div>
   )
 }

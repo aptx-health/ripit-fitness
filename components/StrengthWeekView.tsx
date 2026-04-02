@@ -272,7 +272,8 @@ export default function StrengthWeekView({
     if (data) setModalMode('preview')
   }
 
-  // Warm-up interception state
+  // Interception state — primer and warm-up gate before logging modal
+  const [primerOpen, setPrimerOpen] = useState(false)
   const [warmupOpen, setWarmupOpen] = useState(false)
   const [pendingLoggingWorkoutId, setPendingLoggingWorkoutId] = useState<string | null>(null)
 
@@ -293,14 +294,32 @@ export default function StrengthWeekView({
     setModalMode('logging')
   }, [fetchWorkoutMetadata, fetchWorkoutData])
 
+  // After primer completes, check if warm-up is also needed before proceeding
+  const proceedAfterPrimer = () => {
+    setPrimerOpen(false)
+    if (showWarmup && pendingLoggingWorkoutId) {
+      setWarmupOpen(true)
+    } else if (pendingLoggingWorkoutId) {
+      proceedToLogging(pendingLoggingWorkoutId)
+      setPendingLoggingWorkoutId(null)
+    }
+  }
+
   // Opens logging modal with progressive loading (fast!)
-  // Intercepts with warm-up interstitial for early sessions
+  // Intercepts with primer (first ever) then warm-up (sessions 1-3)
   const handleOpenLogging = async (workoutId: string) => {
     // Prevent opening a different workout while a draft exists
     if (activeDraft && activeDraft.workoutId !== workoutId) {
       alert(
         `You have an in-progress workout ("${activeDraft.workoutName}"). Resume or discard it first.`
       )
+      return
+    }
+
+    // Primer interception — first ever workout
+    if (showPrimer && !primerOpen) {
+      setPendingLoggingWorkoutId(workoutId)
+      setPrimerOpen(true)
       return
     }
 
@@ -324,6 +343,7 @@ export default function StrengthWeekView({
 
   const handleWarmupDismissPermanently = () => {
     setWarmupOpen(false)
+    refetchSettings()
     if (pendingLoggingWorkoutId) {
       proceedToLogging(pendingLoggingWorkoutId)
       setPendingLoggingWorkoutId(null)
@@ -552,17 +572,21 @@ export default function StrengthWeekView({
         />
       )}
 
+      {/* Beginner Primer — shown on first-ever Log tap, before warm-up */}
+      <BeginnerPrimerWizard
+        open={primerOpen}
+        onDismiss={() => {
+          refetchSettings()
+          proceedAfterPrimer()
+        }}
+      />
+
       {/* Warm-up Interstitial — shown between Log tap and logging modal */}
       <WarmupInterstitial
         open={warmupOpen}
         onContinue={handleWarmupContinue}
         onDismissPermanently={handleWarmupDismissPermanently}
       />
-
-      {/* Beginner Primer Wizard */}
-      {showPrimer && (
-        <BeginnerPrimerWizard open onDismiss={refetchSettings} />
-      )}
 
       {/* Program Completion Modal */}
       <ProgramCompletionModal
