@@ -90,7 +90,7 @@ export function WeightKeypad({
   // Compact view
   if (!isExpanded) {
     return (
-      <div>
+      <div data-tour="weight-input">
         <span className="block text-xs text-muted-foreground mb-1 font-bold uppercase tracking-wider">
           WEIGHT ({weightUnit.toUpperCase()})
         </span>

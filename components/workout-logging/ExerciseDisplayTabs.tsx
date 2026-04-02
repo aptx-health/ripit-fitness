@@ -111,7 +111,7 @@ export default function ExerciseDisplayTabs({
         <TabsTrigger value="log-sets">
           <span>Log Sets</span>
         </TabsTrigger>
-        <TabsTrigger value="info">
+        <TabsTrigger value="info" data-tour="info-tab">
           <span>Info</span>
         </TabsTrigger>
         {hasNotes && (

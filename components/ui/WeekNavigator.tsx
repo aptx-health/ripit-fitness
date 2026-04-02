@@ -19,7 +19,7 @@ export default function WeekNavigator({
   const hasNext = currentWeek < totalWeeks
 
   return (
-    <div className="flex items-center justify-between gap-2">
+    <div data-tour="week-nav" className="flex items-center justify-between gap-2">
       {/* Prev button */}
       <Link
         href={hasPrev ? `${baseUrl}?week=${currentWeek - 1}` : '#'}

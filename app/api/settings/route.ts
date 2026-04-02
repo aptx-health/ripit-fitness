@@ -9,6 +9,7 @@ type UpdateSettingsRequest = {
   dismissedPrimer?: boolean
   dismissedWarmup?: boolean
   dismissedStickNudge?: boolean
+  completedTours?: string
 }
 
 export async function GET(_request: NextRequest) {
@@ -64,7 +65,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json() as UpdateSettingsRequest
-    const { displayName, defaultWeightUnit, defaultIntensityRating, dismissedPrimer, dismissedWarmup, dismissedStickNudge } = body
+    const { displayName, defaultWeightUnit, defaultIntensityRating, dismissedPrimer, dismissedWarmup, dismissedStickNudge, completedTours } = body
 
     // Validate weight unit
     if (defaultWeightUnit && !['lbs', 'kg'].includes(defaultWeightUnit)) {
@@ -92,6 +93,7 @@ export async function PUT(request: NextRequest) {
         ...(dismissedPrimer !== undefined && { dismissedPrimer }),
         ...(dismissedWarmup !== undefined && { dismissedWarmup }),
         ...(dismissedStickNudge !== undefined && { dismissedStickNudge }),
+        ...(completedTours !== undefined && { completedTours }),
         updatedAt: new Date()
       },
       create: {
