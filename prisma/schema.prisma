@@ -289,6 +289,9 @@ model UserSettings {
   displayName            String?
   defaultWeightUnit      String   @default("lbs")
   defaultIntensityRating String   @default("rir")
+  dismissedPrimer        Boolean  @default(false)
+  dismissedWarmup        Boolean  @default(false)
+  dismissedStickNudge    Boolean  @default(false)
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 

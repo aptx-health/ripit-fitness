@@ -4,6 +4,9 @@ export type UserSettings = {
   displayName: string | null
   defaultWeightUnit: 'lbs' | 'kg'
   defaultIntensityRating: 'rpe' | 'rir'
+  dismissedPrimer: boolean
+  dismissedWarmup: boolean
+  dismissedStickNudge: boolean
 }
 
 type UseUserSettingsReturn = {
