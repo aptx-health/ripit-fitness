@@ -3,6 +3,7 @@ import { Prisma, type PrismaClient } from '@prisma/client'
 
 interface WeekData {
   weekNumber: number
+  description?: string | null
   workouts?: WorkoutData[]
 }
 
@@ -83,8 +84,8 @@ export async function batchInsertStrengthWeek(
 
   // 1. INSERT Week (single row)
   await tx.$executeRaw(Prisma.sql`
-    INSERT INTO "Week" (id, "weekNumber", "programId", "userId")
-    VALUES (${weekId}, ${weekData.weekNumber}, ${programId}, ${userId})
+    INSERT INTO "Week" (id, "weekNumber", description, "programId", "userId")
+    VALUES (${weekId}, ${weekData.weekNumber}, ${weekData.description || null}, ${programId}, ${userId})
   `)
 
   // 2. Batch INSERT Workouts
