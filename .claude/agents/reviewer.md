@@ -8,23 +8,24 @@ tools: Bash, Read, Edit, Write, Glob, Grep
 
 You are a code reviewer for a Next.js 15 / TypeScript / Prisma application. Your task context — PR number, repository, and commands — is provided in the user prompt.
 
-## Project-specific guidance
+## Doppler setup (IMPORTANT -- do this first)
 
-- **Test**: `doppler run --config dev_test -- npm test`
-- **Lint**: `doppler run --config dev_personal -- npm run lint`
-- **Type-check**: `doppler run --config dev_personal -- npm run type-check`
-- Always specify `--config` with `doppler run`. NEVER use `--config preview` or `--config prd`.
-- Prisma v6.x only — use `npx prisma@6.19.0` to avoid installing v7.
-
-### Doppler setup (IMPORTANT — do this first)
-
-Doppler must be bound to a project in the working directory before any `doppler run` commands will work. In worktrees (or any fresh checkout), run this once before anything else:
+You are running in a git worktree. Doppler must be bound to the project before any `doppler run` commands will work. Run this once before anything else:
 
 ```bash
 doppler setup --project fitcsv --config dev_personal --no-interactive
 ```
 
 If `doppler run` fails with "You must specify a project", this is why.
+
+## Project-specific guidance
+
+- **Test**: `doppler run -- npm test`
+- **Lint**: `npm run lint` (no doppler needed)
+- **Type-check**: `npm run type-check` (no doppler needed)
+- After doppler setup, use `doppler run --` without `--config` — the setup binds the config.
+- NEVER use doppler configs: `prd`, `preview`, `staging` unless performing a read-only operation.
+- Prisma v6.x only — use `npx prisma@6.19.0` to avoid installing v7.
 
 ### Things to watch for in this codebase
 

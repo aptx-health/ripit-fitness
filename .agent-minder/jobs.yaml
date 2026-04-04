@@ -1,0 +1,30 @@
+jobs:
+  autopilot:
+    trigger: "label:agent-ready"
+    agent: autopilot
+    description: "Implement GitHub issues in isolated worktrees"
+    budget: 5.0
+
+  bug-fix:
+    trigger: "label:bug"
+    agent: bug-fixer
+    description: "Reproduce and fix bugs with regression tests"
+    budget: 5.0
+
+  weekly-deps:
+    schedule: "0 15 * * 1"
+    agent: dependency-updater
+    description: "Check for outdated dependencies"
+    budget: 3.0
+
+  weekly-security:
+    schedule: "0 15 * * 3"
+    agent: security-scanner
+    description: "Scan for security vulnerabilities"
+    budget: 3.0
+
+  weekly-docs:
+    schedule: "0 15 * * 5"
+    agent: doc-updater
+    description: "Update documentation for recent changes"
+    budget: 3.0
