@@ -5,6 +5,11 @@ on:
     branches:
       - dev
       - main
+    paths-ignore:
+      - '.claude/**'
+      - '.agent-minder/**'
+      - 'docs/**'
+      - '*.md'
 
 jobs:
   test:
