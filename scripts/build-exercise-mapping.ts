@@ -19,17 +19,17 @@ const fs = require('fs') as typeof import('fs')
 const path = require('path') as typeof import('path')
 
 import type {
+  MappingOutput,
+  Match,
   OurExercise,
   TheirExercise,
-  Match,
   UnmatchedExercise,
-  MappingOutput,
 } from './exercise-matching-utils'
 
 import {
-  normalize,
   deepNormalize,
   findBestMatch,
+  normalize,
 } from './exercise-matching-utils'
 
 // ---------------------------------------------------------------------------

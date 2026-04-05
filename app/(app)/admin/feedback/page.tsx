@@ -1,8 +1,8 @@
 'use client'
 
 import { Check, CheckCheck, ExternalLink, MessageSquarePlus, Tag } from 'lucide-react'
-import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 import type { FeedbackStatus } from '@/types/feedback'
 

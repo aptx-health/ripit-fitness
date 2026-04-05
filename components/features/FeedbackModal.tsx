@@ -7,8 +7,8 @@ import { useState } from 'react'
 
 import { useToast } from '@/components/ToastProvider'
 import { clientLogger } from '@/lib/client-logger'
-import { FEEDBACK_CATEGORIES } from '@/types/feedback'
 import type { FeedbackCategory } from '@/types/feedback'
+import { FEEDBACK_CATEGORIES } from '@/types/feedback'
 
 type FeedbackModalProps = {
   open: boolean

@@ -157,7 +157,7 @@ function downloadBuffer(
         // Server errors - retry
         if (!res.statusCode || res.statusCode >= 500) {
           if (attempt < MAX_RETRIES) {
-            const delay = BASE_RETRY_DELAY_MS * Math.pow(2, attempt - 1)
+            const delay = BASE_RETRY_DELAY_MS * 2 ** (attempt - 1)
             setTimeout(
               () => resolve(downloadBuffer(url, attempt + 1)),
               delay
@@ -180,7 +180,7 @@ function downloadBuffer(
       })
       .on('error', (err) => {
         if (attempt < MAX_RETRIES) {
-          const delay = BASE_RETRY_DELAY_MS * Math.pow(2, attempt - 1)
+          const delay = BASE_RETRY_DELAY_MS * 2 ** (attempt - 1)
           setTimeout(
             () => resolve(downloadBuffer(url, attempt + 1)),
             delay

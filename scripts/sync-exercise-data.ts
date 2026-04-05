@@ -17,7 +17,7 @@
  */
 
 import { type Prisma, PrismaClient } from '@prisma/client'
-import { readFileSync, readdirSync } from 'fs'
+import { readdirSync, readFileSync } from 'fs'
 import { join } from 'path'
 
 const prisma = new PrismaClient()
