@@ -34,10 +34,15 @@ export function WarmupInterstitial({ open, onContinue, onCancel, onDismissPerman
 
   return (
     <div
+      role="button"
+      tabIndex={-1}
       style={{ position: 'fixed', inset: 0, zIndex: 50 }}
       className="flex items-center justify-center backdrop-blur-md bg-black/40 dark:bg-black/60 p-4"
       onClick={onCancel}
+      onKeyDown={e => { if (e.key === 'Escape') onCancel() }}
+      aria-label="Close dialog"
     >
+      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
       <div
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}
         className="relative w-full max-w-md bg-card border-2 border-border doom-noise"
