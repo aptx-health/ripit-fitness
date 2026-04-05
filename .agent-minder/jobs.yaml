@@ -34,3 +34,9 @@ jobs:
     agent: doc-updater
     description: "Update documentation for recent changes"
     budget: 8.0
+
+  weekly-quality:
+    schedule: "0 7 * * 2"
+    agent: quality-check
+    description: "Review recently changed files for clarity and simplification"
+    budget: 8.0
