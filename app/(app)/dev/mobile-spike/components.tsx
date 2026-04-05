@@ -129,7 +129,7 @@ function LearnContent() {
       </p>
       <h2 className="text-base font-bold">Understanding Sets and Reps</h2>
       <p className="text-sm leading-relaxed">
-        A rep (repetition) is one complete movement of an exercise. A set is a group of consecutive reps. When you see "3x5 @ 135 lbs" it means 3 sets of 5 reps at 135 pounds. Rest periods between sets typically range from 2-5 minutes for heavy compound movements and 1-2 minutes for lighter accessory work.
+        A rep (repetition) is one complete movement of an exercise. A set is a group of consecutive reps. When you see &ldquo;3x5 @ 135 lbs&rdquo; it means 3 sets of 5 reps at 135 pounds. Rest periods between sets typically range from 2-5 minutes for heavy compound movements and 1-2 minutes for lighter accessory work.
       </p>
       <h2 className="text-base font-bold">RPE and Autoregulation</h2>
       <p className="text-sm leading-relaxed">
@@ -237,6 +237,7 @@ export function FullScreenModal({
   onMinimize: () => void
 }) {
   const [sets, setSets] = useState<string[]>([])
+  const [now] = useState(() => Date.now())
 
   return (
     <div
@@ -342,7 +343,7 @@ export function FullScreenModal({
               className="p-2 rounded border border-border text-xs text-muted-foreground"
             >
               {new Date(
-                Date.now() - (i + 1) * 7 * 24 * 60 * 60 * 1000
+                now - (i + 1) * 7 * 24 * 60 * 60 * 1000
               ).toLocaleDateString()}
               : 5x5 @ {175 + i * 2.5} lbs
             </div>
