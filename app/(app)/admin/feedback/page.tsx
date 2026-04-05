@@ -75,7 +75,7 @@ export default function AdminFeedbackPage() {
       .catch(() => { if (!cancelled) setLoading(false) })
 
     return () => { cancelled = true }
-  }, [activeStatus, searchParams.get])
+  }, [activeStatus])
 
   const updateFeedback = async (id: string, status: FeedbackStatus, note?: string) => {
     setUpdating(id)
