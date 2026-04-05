@@ -109,7 +109,9 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0', 10)
 
     const where: Record<string, unknown> = {}
-    if (status) {
+    if (status === 'unresolved') {
+      where.status = { in: ['new', 'reviewed'] }
+    } else if (status) {
       where.status = status
     }
 

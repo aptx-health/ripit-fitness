@@ -18,7 +18,7 @@ interface FeedbackItem {
   createdAt: string
 }
 
-const STATUS_TABS = ['all', 'new', 'reviewed', 'resolved'] as const
+const STATUS_TABS = ['unresolved', 'all', 'new', 'reviewed', 'resolved'] as const
 
 const CATEGORY_LABELS: Record<string, string> = {
   bug: 'bug',
@@ -31,7 +31,7 @@ export default function AdminFeedbackPage() {
   const [feedback, setFeedback] = useState<FeedbackItem[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
-  const [activeStatus, setActiveStatus] = useState<string>('new')
+  const [activeStatus, setActiveStatus] = useState<string>('unresolved')
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [adminNote, setAdminNote] = useState('')
   const [updating, setUpdating] = useState<string | null>(null)
@@ -54,6 +54,7 @@ export default function AdminFeedbackPage() {
 
     const params = new URLSearchParams()
     if (activeStatus !== 'all') params.set('status', activeStatus)
+    // 'unresolved' is passed to API which handles it as status IN ['new', 'reviewed']
     params.set('limit', '100')
 
     fetch(`/api/feedback?${params}`)
