@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server'
+import type { ArticleLevel, Prisma, TagCategory } from '@prisma/client'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { logger } from '@/lib/logger'
@@ -19,9 +20,7 @@ export async function GET(request: NextRequest) {
     const contexts = searchParams.getAll('context')
 
     // Build where clause for published articles only
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    // biome-ignore lint/suspicious/noExplicitAny: Prisma where clause built dynamically
-    const where: any = {
+    const where: Prisma.ArticleWhereInput = {
       status: 'published',
     }
 
@@ -43,16 +42,16 @@ export async function GET(request: NextRequest) {
 
     // Level filter (multi-select, OR within category)
     if (levels.length > 0) {
-      where.level = { in: levels }
+      where.level = { in: levels as ArticleLevel[] }
     }
 
     // Tag filters (AND across categories, OR within each category)
-    const tagFilters = []
+    const tagFilters: Prisma.ArticleWhereInput[] = []
     if (topics.length > 0) {
       tagFilters.push({
         tags: {
           some: {
-            tag: { category: 'topic', name: { in: topics } },
+            tag: { category: 'topic' as TagCategory, name: { in: topics } },
           },
         },
       })
@@ -61,7 +60,7 @@ export async function GET(request: NextRequest) {
       tagFilters.push({
         tags: {
           some: {
-            tag: { category: 'body_area', name: { in: bodyAreas } },
+            tag: { category: 'body_area' as TagCategory, name: { in: bodyAreas } },
           },
         },
       })
@@ -70,7 +69,7 @@ export async function GET(request: NextRequest) {
       tagFilters.push({
         tags: {
           some: {
-            tag: { category: 'context', name: { in: contexts } },
+            tag: { category: 'context' as TagCategory, name: { in: contexts } },
           },
         },
       })
