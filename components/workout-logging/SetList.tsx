@@ -71,14 +71,14 @@ export default function SetList({
 
     if (count > prevCountRef.current) {
       const newest = loggedSets[count - 1]
-      // Defer to avoid synchronous setState in useEffect; setTimeout
-      // also handles the flash-off after 650ms
-      const flashTimer = setTimeout(() => {
-        setFlashSetNumber(newest.setNumber)
-        setTimeout(() => setFlashSetNumber(null), 650)
-      }, 0)
+      // Defer to avoid synchronous setState in useEffect
+      const frame = requestAnimationFrame(() => setFlashSetNumber(newest.setNumber))
+      const flashOffTimer = setTimeout(() => setFlashSetNumber(null), 650)
       prevCountRef.current = count
-      return () => clearTimeout(flashTimer)
+      return () => {
+        cancelAnimationFrame(frame)
+        clearTimeout(flashOffTimer)
+      }
     }
     prevCountRef.current = count
   }, [loggedSets.length, exerciseId])
