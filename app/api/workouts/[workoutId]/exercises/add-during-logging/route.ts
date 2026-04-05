@@ -1,7 +1,8 @@
-import { type NextRequest, NextResponse } from 'next/server'
 import type { Prisma } from '@prisma/client'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { logger } from '@/lib/logger'
 
 type AddDuringLoggingRequest = {
   exerciseDefinitionId: string
@@ -271,7 +272,7 @@ export async function POST(
       addedToCount
     })
   } catch (error) {
-    console.error('Error adding exercise during logging:', error)
+    logger.error({ error, context: 'add-during-logging' }, 'Error adding exercise during logging')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

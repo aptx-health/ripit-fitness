@@ -43,7 +43,8 @@ export function WarmupInterstitial({ open, onContinue, onCancel, onDismissPerman
       aria-label="Close dialog"
     >
       <div
-        role="presentation"
+        role="dialog"
+        aria-label="Warm up information"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}
         className="relative w-full max-w-md bg-card border-2 border-border doom-noise"
         onClick={e => e.stopPropagation()}
