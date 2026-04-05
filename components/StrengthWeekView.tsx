@@ -333,15 +333,19 @@ export default function StrengthWeekView({
       return
     }
 
+    // Skip primer/warmup interception when resuming an existing draft —
+    // the user already started this workout and saw these screens
+    const isResumingDraft = activeDraft && activeDraft.workoutId === workoutId
+
     // Primer interception — first ever workout
-    if (showPrimer && !primerOpen) {
+    if (showPrimer && !primerOpen && !isResumingDraft) {
       setPendingLoggingWorkoutId(workoutId)
       setPrimerOpen(true)
       return
     }
 
     // Warm-up interception for early sessions
-    if (showWarmup && !warmupOpen) {
+    if (showWarmup && !warmupOpen && !isResumingDraft) {
       setPendingLoggingWorkoutId(workoutId)
       setWarmupOpen(true)
       return
