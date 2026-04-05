@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useMounted } from '@/hooks/useMounted'
 import { createPortal } from 'react-dom'
+import { useMounted } from '@/hooks/useMounted'
 
 interface TourOverlayProps {
   targetSelector: string | null

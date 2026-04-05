@@ -2,8 +2,8 @@
 
 import { Activity, BookOpen, Dumbbell, LayoutGrid, Settings } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { useMounted } from '@/hooks/useMounted'
 import { createPortal } from 'react-dom'
+import { useMounted } from '@/hooks/useMounted'
 import {
   DebugOverlay,
   FullScreenModal,
