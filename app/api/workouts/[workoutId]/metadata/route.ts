@@ -65,55 +65,93 @@ export async function GET(
       whereConditions.push({ workoutCompletionId: completionId, isOneOff: true })
     }
 
-    // Fetch first exercise with full data (same query we'd make separately)
-    const firstExercise = await prisma.exercise.findFirst({
-      where: { OR: whereConditions, userId: user.id },
-      orderBy: { order: 'asc' },
-      select: {
-        id: true,
-        name: true,
-        order: true,
-        exerciseGroup: true,
-        notes: true,
-        isOneOff: true,
-        exerciseDefinitionId: true,
-        exerciseDefinition: {
-          select: {
-            id: true,
-            name: true,
-            primaryFAUs: true,
-            secondaryFAUs: true,
-            equipment: true,
-            instructions: true,
-            imageUrls: true,
-            isSystem: true,
-            createdBy: true,
-          },
-        },
-        prescribedSets: {
-          orderBy: { setNumber: 'asc' },
-          select: {
-            id: true,
-            setNumber: true,
-            reps: true,
-            weight: true,
-            rpe: true,
-            rir: true,
-          },
+    const exerciseSelect = {
+      id: true,
+      name: true,
+      order: true,
+      exerciseGroup: true,
+      notes: true,
+      isOneOff: true,
+      exerciseDefinitionId: true,
+      exerciseDefinition: {
+        select: {
+          id: true,
+          name: true,
+          primaryFAUs: true,
+          secondaryFAUs: true,
+          equipment: true,
+          instructions: true,
+          imageUrls: true,
+          isSystem: true,
+          createdBy: true,
         },
       },
-    })
+      prescribedSets: {
+        orderBy: { setNumber: 'asc' as const },
+        select: {
+          id: true,
+          setNumber: true,
+          reps: true,
+          weight: true,
+          rpe: true,
+          rir: true,
+        },
+      },
+    }
 
     // Count total exercises (including one-offs)
     const exerciseCount = await prisma.exercise.count({
       where: { OR: whereConditions, userId: user.id },
     })
 
-    // Fetch history for first exercise in parallel with nothing (already done above)
-    let firstExerciseHistory = null
-    if (firstExercise) {
-      firstExerciseHistory = await getLastExercisePerformance(
-        firstExercise.exerciseDefinitionId,
+    // When resuming a draft, find the first exercise with incomplete sets
+    let resumeExerciseIndex = 0
+    if (completionId && completionStatus === 'draft') {
+      // Fetch all exercises (ordered) and logged set counts in parallel
+      const [allExercises, loggedSetCounts] = await Promise.all([
+        prisma.exercise.findMany({
+          where: { OR: whereConditions, userId: user.id },
+          orderBy: { order: 'asc' },
+          select: { id: true, _count: { select: { prescribedSets: true } } },
+        }),
+        prisma.loggedSet.groupBy({
+          by: ['exerciseId'],
+          where: { completionId },
+          _count: true,
+        }),
+      ])
+
+      const loggedCountMap = new Map(
+        loggedSetCounts.map((g) => [g.exerciseId, g._count])
+      )
+
+      for (let i = 0; i < allExercises.length; i++) {
+        const ex = allExercises[i]
+        const loggedCount = loggedCountMap.get(ex.id) ?? 0
+        if (loggedCount < ex._count.prescribedSets) {
+          resumeExerciseIndex = i
+          break
+        }
+        // If all exercises are complete, stay at last exercise
+        if (i === allExercises.length - 1) {
+          resumeExerciseIndex = i
+        }
+      }
+    }
+
+    // Fetch the target exercise (first incomplete for drafts, first overall otherwise)
+    const targetExercise = await prisma.exercise.findFirst({
+      where: { OR: whereConditions, userId: user.id },
+      orderBy: { order: 'asc' },
+      skip: resumeExerciseIndex,
+      select: exerciseSelect,
+    })
+
+    // Fetch history for the target exercise
+    let targetExerciseHistory = null
+    if (targetExercise) {
+      targetExerciseHistory = await getLastExercisePerformance(
+        targetExercise.exerciseDefinitionId,
         user.id,
         new Date()
       )
@@ -129,8 +167,9 @@ export async function GET(
       exerciseCount,
       completionId,
       completionStatus,
-      firstExercise,
-      firstExerciseHistory,
+      firstExercise: targetExercise,
+      firstExerciseHistory: targetExerciseHistory,
+      resumeExerciseIndex,
     })
   } catch (error) {
     logger.error({ error, context: 'workout-metadata' }, 'Error fetching workout metadata')

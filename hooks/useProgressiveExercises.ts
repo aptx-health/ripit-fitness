@@ -53,6 +53,7 @@ export type LoadState = 'pending' | 'loading' | 'loaded' | 'error'
 export interface UseProgressiveExercisesOptions {
   initialExercise?: Exercise | null
   initialHistory?: ExerciseHistory | null
+  initialIndex?: number
 }
 
 export interface UseProgressiveExercisesResult {
@@ -92,22 +93,22 @@ export function useProgressiveExercises(
   completionId?: string,
   options?: UseProgressiveExercisesOptions
 ): UseProgressiveExercisesResult {
-  const { initialExercise, initialHistory } = options || {}
+  const { initialExercise, initialHistory, initialIndex = 0 } = options || {}
 
   // Initialize state with initial data if provided
-  const [currentIndex, setCurrentIndex] = useState(0)
+  const [currentIndex, setCurrentIndex] = useState(initialIndex)
   const [totalExercises, setTotalExercises] = useState(exerciseCount)
 
   const [loadedExercises, setLoadedExercises] = useState<Map<number, Exercise>>(() => {
     if (initialExercise) {
-      return new Map([[0, initialExercise]])
+      return new Map([[initialIndex, initialExercise]])
     }
     return new Map()
   })
 
   const [exerciseLoadStates, setExerciseLoadStates] = useState<Map<number, LoadState>>(() => {
     if (initialExercise) {
-      return new Map([[0, 'loaded']])
+      return new Map([[initialIndex, 'loaded']])
     }
     return new Map()
   })
