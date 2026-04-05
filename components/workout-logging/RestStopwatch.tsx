@@ -28,6 +28,7 @@ export default function RestStopwatch({
   return (
     <div className="flex items-center justify-center py-4 select-none" aria-live="off">
       <span
+        role="timer"
         className="text-5xl font-bold tracking-wider text-muted-foreground/15 tabular-nums"
         aria-label={`Rest timer: ${formatted}`}
       >
