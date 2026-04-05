@@ -1,15 +1,17 @@
 'use client'
 
+import { X } from 'lucide-react'
 import { useState } from 'react'
 import { useUserSettings } from '@/hooks/useUserSettings'
 
 interface WarmupInterstitialProps {
   open: boolean
   onContinue: () => void
+  onCancel: () => void
   onDismissPermanently: () => void
 }
 
-export function WarmupInterstitial({ open, onContinue, onDismissPermanently }: WarmupInterstitialProps) {
+export function WarmupInterstitial({ open, onContinue, onCancel, onDismissPermanently }: WarmupInterstitialProps) {
   const { updateSettings } = useUserSettings()
   const [dontShowAgain, setDontShowAgain] = useState(false)
   const [dismissing, setDismissing] = useState(false)
@@ -40,10 +42,18 @@ export function WarmupInterstitial({ open, onContinue, onDismissPermanently }: W
         className="relative w-full max-w-md bg-card border-2 border-border doom-noise"
       >
         {/* Header */}
-        <div className="p-4 border-b border-border">
+        <div className="p-4 border-b border-border flex items-center justify-between">
           <h2 className="text-lg font-bold text-foreground doom-heading uppercase tracking-wider">
             Warm Up First
           </h2>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Close"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Body */}
