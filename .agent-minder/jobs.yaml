@@ -11,6 +11,12 @@ jobs:
     description: "Reproduce and fix bugs with regression tests"
     budget: 10.0
 
+  spike:
+    trigger: "label:spike"
+    agent: spike
+    description: "Research and discovery — investigate questions, post findings"
+    budget: 5.0
+
   weekly-deps:
     schedule: "0 7 * * 1"
     agent: dependency-updater
