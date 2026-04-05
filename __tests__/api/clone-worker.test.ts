@@ -155,12 +155,13 @@ describe('Program Cloning via BullMQ Worker', () => {
       expect(cloneResult.success).toBe(true);
       expect(cloneResult.programId).toBeDefined();
 
-      // Verify shell program was created with copyStatus='cloning'
+      // Verify shell program was created with copyStatus starting with 'cloning'
+      // (worker may have already progressed to 'cloning_week_1_of_N')
       const shellProgram = await prisma.program.findUnique({
         where: { id: cloneResult.programId },
       });
       expect(shellProgram).toBeTruthy();
-      expect(shellProgram!.copyStatus).toBe('cloning');
+      expect(shellProgram!.copyStatus).toMatch(/^cloning/);
       expect(shellProgram!.userId).toBe(otherUserId);
 
       // Wait for the BullMQ worker to process the job
