@@ -6,11 +6,15 @@ interface RepsStepperProps {
   value: string
   onChange: (value: string) => void
   placeholder?: string
+  prescribedReps?: string
 }
 
-export function RepsStepper({ value, onChange, placeholder }: RepsStepperProps) {
+export function RepsStepper({ value, onChange, placeholder, prescribedReps }: RepsStepperProps) {
   const numericValue = value ? parseInt(value, 10) : 0
   const hasValue = value !== ''
+
+  // Show prescribed range when it differs from the current value (e.g., "8-12" vs "12")
+  const showPrescribedRange = prescribedReps && hasValue && prescribedReps !== value
 
   const handleDecrement = () => {
     if (!hasValue) return
@@ -26,7 +30,9 @@ export function RepsStepper({ value, onChange, placeholder }: RepsStepperProps) 
   return (
     <div data-tour="reps-stepper">
       <span className="block text-xs text-muted-foreground mb-1 font-bold uppercase tracking-wider">
-        REPS
+        REPS{showPrescribedRange && (
+          <span className="text-primary/70 ml-1.5 normal-case font-medium">Rx: {prescribedReps}</span>
+        )}
       </span>
       <div className="flex items-center">
         <button

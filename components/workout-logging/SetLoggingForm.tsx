@@ -96,6 +96,7 @@ export default function SetLoggingForm({
             value={currentSet.reps}
             onChange={(val) => onSetChange({ ...currentSet, reps: val })}
             placeholder={prescribedSet?.reps?.toString()}
+            prescribedReps={prescribedSet?.reps?.toString()}
           />
         )}
 
