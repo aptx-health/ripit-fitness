@@ -40,8 +40,8 @@ Read each changed file before suggesting any edits.
 Run these before reading any files:
 
 ```bash
-doppler run --config dev_personal -- npm run type-check
-doppler run --config dev_personal -- npm run lint:all
+npm run type-check
+npm run lint:all
 ```
 
 Fix any errors or warnings surfaced by these tools. These are the ground truth for formatting, imports, and type safety.
@@ -112,6 +112,19 @@ For each file:
 2. Edits made (one logical change per edit)
 3. If no issues: note the file was reviewed and is clean
 
-After all files: run type-check and lint again to confirm no regressions.
+After all edits, run type-check and lint again to confirm no regressions:
+
+```bash
+npm run type-check
+npm run lint:all
+```
+
+Then run tests for all impacted files to verify no behavioral regressions. Use a 5-minute timeout wrapper since vitest can hang after completion:
+
+```bash
+perl -e 'alarm 300; exec @ARGV' doppler run --config dev_test -- npm test -- --run <test-file>
+```
+
+If any test fails, revert the edit that caused it and move on.
 
 Commit changes with a clear message describing what was simplified and why. Open a PR with the `quality` label.
