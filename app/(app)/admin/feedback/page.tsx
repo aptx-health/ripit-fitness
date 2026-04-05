@@ -1,8 +1,8 @@
 'use client'
 
 import { Check, CheckCheck, ExternalLink, MessageSquarePlus, Tag } from 'lucide-react'
-import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 import type { FeedbackStatus } from '@/types/feedback'
 
@@ -75,7 +75,7 @@ export default function AdminFeedbackPage() {
       .catch(() => { if (!cancelled) setLoading(false) })
 
     return () => { cancelled = true }
-  }, [activeStatus])
+  }, [activeStatus, searchParams])
 
   const updateFeedback = async (id: string, status: FeedbackStatus, note?: string) => {
     setUpdating(id)

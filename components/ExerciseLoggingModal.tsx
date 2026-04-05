@@ -1,7 +1,7 @@
 'use client'
 
 import { AlertTriangle } from 'lucide-react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTour } from '@/components/tour'
 import { LoadingFrog } from '@/components/ui/loading-frog'
@@ -134,9 +134,13 @@ export default function ExerciseLoggingModal({
     setTourPaused(expandedInput !== null)
   }, [expandedInput, setTourPaused])
 
-  const currentPrescribedSets = currentExercise?.prescribedSets || []
-  const currentExerciseLoggedSets = loggedSets.filter(
-    (s) => s.exerciseId === currentExercise?.id
+  const currentPrescribedSets = useMemo(
+    () => currentExercise?.prescribedSets || [],
+    [currentExercise?.prescribedSets]
+  )
+  const currentExerciseLoggedSets = useMemo(
+    () => loggedSets.filter((s) => s.exerciseId === currentExercise?.id),
+    [loggedSets, currentExercise?.id]
   )
   const nextSetNumber = currentExerciseLoggedSets.length + 1
   const prescribedSet = currentPrescribedSets.find(
