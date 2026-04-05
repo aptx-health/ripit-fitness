@@ -66,6 +66,7 @@ export function TourTooltip({
 
   return createPortal(
     <div
+      // eslint-disable-next-line react-hooks/refs -- refs.setFloating is a Floating UI callback ref, not a .current access
       ref={refs.setFloating}
       style={{
         ...floatingStyles,
