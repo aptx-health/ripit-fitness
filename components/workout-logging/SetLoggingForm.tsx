@@ -20,6 +20,7 @@ export type ExpandedInput = 'weight' | 'rpe' | 'rir' | null
 interface SetLoggingFormProps {
   prescribedSet: PrescribedSet | undefined
   hasLoggedAllPrescribed: boolean
+  extraSetsMode: boolean
   hasRpe: boolean
   hasRir: boolean
   currentSet: {
@@ -38,17 +39,24 @@ interface SetLoggingFormProps {
   }) => void
   expandedInput: ExpandedInput
   onExpandedInputChange: (input: ExpandedInput) => void
+  onExtraSets: () => void
+  onNextExercise: () => void
+  isLastExercise: boolean
 }
 
 export default function SetLoggingForm({
   prescribedSet,
   hasLoggedAllPrescribed,
+  extraSetsMode,
   hasRpe,
   hasRir,
   currentSet,
   onSetChange,
   expandedInput,
   onExpandedInputChange,
+  onExtraSets,
+  onNextExercise,
+  isLastExercise,
 }: SetLoggingFormProps) {
   const { settings } = useUserSettings()
 
@@ -62,15 +70,34 @@ export default function SetLoggingForm({
     }
   }, [settings?.defaultWeightUnit, currentSet, onSetChange])
 
-  if (hasLoggedAllPrescribed) {
+  if (hasLoggedAllPrescribed && !extraSetsMode) {
     return (
-      <div className="bg-success-muted border-2 border-success-border p-4 text-center flex-shrink-0">
-        <div className="text-success-text font-bold mb-2 uppercase tracking-wider">
+      <div className="bg-success-muted border-2 border-success-border p-4 flex-shrink-0">
+        <div className="text-success-text font-bold mb-3 uppercase tracking-wider text-center">
           All prescribed sets logged!
         </div>
-        <p className="text-sm text-success-text">
-          Continue to next exercise or complete workout
-        </p>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={onExtraSets}
+            className="flex-1 py-2.5 bg-accent text-accent-foreground text-sm font-bold uppercase tracking-wider transition-all hover:bg-accent/90 doom-button-3d doom-focus-ring"
+          >
+            Extra Sets
+          </button>
+          {!isLastExercise ? (
+            <button
+              type="button"
+              onClick={onNextExercise}
+              className="flex-1 py-2.5 bg-primary text-primary-foreground text-sm font-bold uppercase tracking-wider transition-all hover:bg-primary/90 doom-button-3d doom-focus-ring"
+            >
+              Next Exercise
+            </button>
+          ) : (
+            <div className="flex-1 py-2.5 text-center text-sm text-success-text font-bold uppercase tracking-wider">
+              Last exercise
+            </div>
+          )}
+        </div>
       </div>
     )
   }
