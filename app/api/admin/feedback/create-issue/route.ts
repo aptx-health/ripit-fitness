@@ -104,6 +104,7 @@ export async function POST(request: NextRequest) {
           effectiveAdminNote,
           `GitHub Issue: ${issue.html_url}`,
         ].filter(Boolean).join('\n'),
+        githubIssueUrl: issue.html_url,
       },
     })
 
