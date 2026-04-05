@@ -72,6 +72,9 @@ export default function ExerciseLoggingModal({
   // Input expansion state (lifted from SetLoggingForm for SetList visibility)
   const [expandedInput, setExpandedInput] = useState<ExpandedInput>(null)
 
+  // Extra sets mode: allows logging beyond prescribed sets
+  const [extraSetsMode, setExtraSetsMode] = useState(false)
+
   // Guided tour
   const { startTour, setTourPaused, isActive: tourActive } = useTour()
   const { settings: userSettings } = useUserSettings()
@@ -218,6 +221,7 @@ export default function ExerciseLoggingModal({
 
   const handleNextExercise = () => {
     lastPrefillKey.current = ''
+    setExtraSetsMode(false)
     goToNext()
     setCurrentSet(prev => ({
       reps: '',
@@ -230,6 +234,7 @@ export default function ExerciseLoggingModal({
 
   const handlePreviousExercise = () => {
     lastPrefillKey.current = ''
+    setExtraSetsMode(false)
     goToPrevious()
     setCurrentSet(prev => ({
       reps: '',
@@ -480,12 +485,16 @@ export default function ExerciseLoggingModal({
                   <SetLoggingForm
                     prescribedSet={prescribedSet}
                     hasLoggedAllPrescribed={hasLoggedAllPrescribed}
+                    extraSetsMode={extraSetsMode}
                     hasRpe={hasRpe}
                     hasRir={hasRir}
                     currentSet={currentSet}
                     onSetChange={setCurrentSet}
                     expandedInput={expandedInput}
                     onExpandedInputChange={setExpandedInput}
+                    onExtraSets={() => setExtraSetsMode(true)}
+                    onNextExercise={handleNextExercise}
+                    isLastExercise={currentIndex >= totalExercises - 1}
                   />
                 }
               />
@@ -499,6 +508,7 @@ export default function ExerciseLoggingModal({
             totalLoggedSets={totalLoggedSets}
             canLogSet={!!canLogSet}
             hasLoggedAllPrescribed={hasLoggedAllPrescribed}
+            extraSetsMode={extraSetsMode}
             isSubmitting={isSubmitting}
             onLogSet={handleLogSet}
             onCompleteWorkout={() => setIsConfirming(true)}

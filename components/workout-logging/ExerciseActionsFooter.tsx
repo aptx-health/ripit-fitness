@@ -9,6 +9,7 @@ interface ExerciseActionsFooterProps {
   totalLoggedSets: number
   canLogSet: boolean
   hasLoggedAllPrescribed: boolean
+  extraSetsMode: boolean
   isSubmitting: boolean
   onLogSet: () => void
   onCompleteWorkout: () => void
@@ -25,6 +26,7 @@ export default function ExerciseActionsFooter({
   totalLoggedSets,
   canLogSet,
   hasLoggedAllPrescribed,
+  extraSetsMode,
   isSubmitting,
   onLogSet,
   onCompleteWorkout,
@@ -79,7 +81,7 @@ export default function ExerciseActionsFooter({
         <button type="button"
           data-tour="log-set"
           onClick={onLogSet}
-          disabled={!canLogSet || hasLoggedAllPrescribed}
+          disabled={!canLogSet || (hasLoggedAllPrescribed && !extraSetsMode)}
           className="flex-1 py-2.5 bg-accent text-accent-foreground text-sm font-bold uppercase tracking-wider transition-all hover:bg-accent/90 disabled:opacity-40 disabled:cursor-not-allowed doom-button-3d doom-focus-ring"
         >
           LOG SET {nextSetNumber}
