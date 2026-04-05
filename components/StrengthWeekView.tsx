@@ -161,7 +161,7 @@ export default function StrengthWeekView({
 }: Props) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { activeDraft, refreshDraft } = useDraftWorkout()
+  const { activeDraft, refreshDraft, clearDraft } = useDraftWorkout()
   const { settings, isLoading: settingsLoading, refetch: refetchSettings } = useUserSettings()
   const [isPending, startTransition] = useTransition()
   const [updatingWorkoutId, setUpdatingWorkoutId] = useState<string | null>(null)
@@ -230,6 +230,15 @@ export default function StrengthWeekView({
       setUpdatingWorkoutId(null)
     }
   }, [isPending, updatingWorkoutId])
+
+  // Safety timeout: clear loading state if transition stalls (e.g. router.refresh() hangs)
+  useEffect(() => {
+    if (!updatingWorkoutId) return
+    const timeout = setTimeout(() => {
+      setUpdatingWorkoutId(null)
+    }, 5000)
+    return () => clearTimeout(timeout)
+  }, [updatingWorkoutId])
 
   const handleProgramRestart = useCallback(() => {
     // Set restarting flag to prevent completion checks
@@ -390,7 +399,9 @@ export default function StrengthWeekView({
     setWorkoutData(null)
     setWorkoutMetadata(null)
 
-    // Refresh draft context so floating button reflects current state
+    // Optimistically clear draft context so UI unblocks immediately,
+    // then refresh from server for authoritative state
+    clearDraft()
     refreshDraft()
 
     if (workoutUpdated && workoutId) {
