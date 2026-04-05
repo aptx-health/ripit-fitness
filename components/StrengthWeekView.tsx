@@ -354,6 +354,11 @@ export default function StrengthWeekView({
     await proceedToLogging(workoutId)
   }
 
+  const handleWarmupCancel = () => {
+    setWarmupOpen(false)
+    setPendingLoggingWorkoutId(null)
+  }
+
   const handleWarmupContinue = () => {
     setWarmupOpen(false)
     if (pendingLoggingWorkoutId) {
@@ -606,6 +611,7 @@ export default function StrengthWeekView({
       <WarmupInterstitial
         open={warmupOpen}
         onContinue={handleWarmupContinue}
+        onCancel={handleWarmupCancel}
         onDismissPermanently={handleWarmupDismissPermanently}
       />
 
