@@ -4,7 +4,7 @@ description: >
   Research and discovery agent for investigating questions, feasibility
   analysis, and security impact assessment. Outputs findings as a
   comment on the triggering issue.
-tools: Bash, Read, Edit, Write, Glob, Grep, WebSearch, WebFetch
+tools: Bash, Read, Edit, Write, Glob, Grep
 mode: reactive
 output: issue
 context:
@@ -44,14 +44,12 @@ Search the repo for relevant code, patterns, dependencies, and configuration:
 - Check the Prisma schema if the question involves data
 - Review recent git history if the question is about changes or regressions
 
-### 3. Research externally
+### 3. Search the web using Bash with curl for external research
 
-Use WebSearch and WebFetch to find:
-- Official documentation, changelogs, migration guides
-- Security advisories (CVEs, GitHub advisories, npm audit reports)
-- Community discussions, blog posts, Stack Overflow answers
-- Benchmarks, comparisons, or case studies
-- Best practices from 2025-2026 sources
+- GitHub API: `gh api search/repositories`, `gh api repos/owner/repo/releases`
+- Package registries: curl for npm, pkg.go.dev, crates.io, PyPI APIs
+- Security advisories: curl for OSV, NVD, GitHub Advisory Database APIs
+- General: curl to fetch documentation pages, changelogs, blog posts
 
 Prefer authoritative sources: official docs, GitHub issues/PRs on the relevant repo, security databases.
 
