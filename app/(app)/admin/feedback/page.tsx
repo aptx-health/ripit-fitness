@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, CheckCheck, ExternalLink, MessageSquarePlus, Tag } from 'lucide-react'
+import { Check, CheckCheck, ExternalLink, Github, MessageSquarePlus, Tag } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -15,6 +15,7 @@ interface FeedbackItem {
   userAgent: string | null
   status: string
   adminNote: string | null
+  githubIssueUrl: string | null
   createdAt: string
 }
 
@@ -119,7 +120,7 @@ export default function AdminFeedbackPage() {
 
       if (res.ok) {
         const { issueUrl } = await res.json()
-        // Update local state with the new admin note and status
+        // Update local state with the new admin note, status, and issue URL
         setFeedback((prev) =>
           prev.map((f) =>
             f.id === item.id
@@ -127,6 +128,7 @@ export default function AdminFeedbackPage() {
                   ...f,
                   status: f.status === 'new' ? 'reviewed' : f.status,
                   adminNote: [f.adminNote, `GitHub Issue: ${issueUrl}`].filter(Boolean).join('\n'),
+                  githubIssueUrl: issueUrl,
                 }
               : f
           )
@@ -233,6 +235,19 @@ export default function AdminFeedbackPage() {
                       <span className={`text-xs px-2 py-0.5 border font-semibold uppercase ${statusColor(item.status)}`}>
                         {item.status}
                       </span>
+                      {item.githubIssueUrl && (
+                        <a
+                          href={item.githubIssueUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-xs px-2 py-0.5 border font-semibold uppercase text-purple-800 bg-purple-100 border-purple-300 dark:text-purple-400 dark:bg-purple-900/30 dark:border-purple-700 flex items-center gap-1 hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors"
+                          aria-label="View GitHub issue"
+                        >
+                          <Github size={10} />
+                          issue
+                        </a>
+                      )}
                       <span className="text-xs text-muted-foreground">
                         {item.pageUrl}
                       </span>
@@ -290,42 +305,44 @@ export default function AdminFeedbackPage() {
                   </div>
 
                   {/* Labels for GitHub issue */}
-                  {!item.adminNote?.includes('GitHub Issue:') && (
-                    <div>
-                      <label
-                        htmlFor={`labels-${item.id}`}
-                        className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1"
-                      >
-                        <Tag size={12} />
-                        Issue Labels
-                      </label>
-                      <input
-                        id={`labels-${item.id}`}
-                        type="text"
-                        value={issueLabels}
-                        onChange={(e) => setIssueLabels(e.target.value)}
-                        placeholder="e.g. priority, agent-task (comma-separated)"
-                        className="w-full px-3 py-2 bg-input border-2 border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Category label ({CATEGORY_LABELS[item.category] || 'feedback'}) and user-feedback are added automatically
+                  <div>
+                    {item.githubIssueUrl && (
+                      <p className="text-xs text-yellow-700 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-700 px-3 py-2 mb-2 flex items-center gap-1.5">
+                        <Github size={12} />
+                        A GitHub issue already exists for this feedback. Creating another will not replace the existing one.
                       </p>
-                    </div>
-                  )}
+                    )}
+                    <label
+                      htmlFor={`labels-${item.id}`}
+                      className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1"
+                    >
+                      <Tag size={12} />
+                      Issue Labels
+                    </label>
+                    <input
+                      id={`labels-${item.id}`}
+                      type="text"
+                      value={issueLabels}
+                      onChange={(e) => setIssueLabels(e.target.value)}
+                      placeholder="e.g. priority, agent-task (comma-separated)"
+                      className="w-full px-3 py-2 bg-input border-2 border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Category label ({CATEGORY_LABELS[item.category] || 'feedback'}) and user-feedback are added automatically
+                    </p>
+                  </div>
 
                   {/* Action buttons */}
                   <div className="flex flex-wrap gap-2">
-                    {!item.adminNote?.includes('GitHub Issue:') && (
-                      <button
-                        type="button"
-                        onClick={() => createIssue(item)}
-                        disabled={creatingIssue === item.id}
-                        className="px-3 py-2 bg-zinc-700 text-white border-2 border-zinc-700 hover:bg-zinc-600 font-semibold uppercase tracking-wider text-xs flex items-center gap-1.5 transition-colors disabled:opacity-50"
-                      >
-                        <ExternalLink size={14} />
-                        {creatingIssue === item.id ? 'Creating...' : 'Create Issue'}
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => createIssue(item)}
+                      disabled={creatingIssue === item.id}
+                      className="px-3 py-2 bg-zinc-700 text-white border-2 border-zinc-700 hover:bg-zinc-600 font-semibold uppercase tracking-wider text-xs flex items-center gap-1.5 transition-colors disabled:opacity-50"
+                    >
+                      <ExternalLink size={14} />
+                      {creatingIssue === item.id ? 'Creating...' : item.githubIssueUrl ? 'Create Another Issue' : 'Create Issue'}
+                    </button>
                     {item.status !== 'reviewed' && (
                       <button
                         type="button"
