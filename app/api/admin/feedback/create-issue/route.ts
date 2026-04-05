@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { feedbackId, labels: extraLabels } = await request.json()
+    const { feedbackId, labels: extraLabels, adminNote } = await request.json()
     if (!feedbackId) {
       return NextResponse.json({ error: 'feedbackId is required' }, { status: 400 })
     }
@@ -37,6 +37,11 @@ export async function POST(request: NextRequest) {
     if (!feedback) {
       return NextResponse.json({ error: 'Feedback not found' }, { status: 404 })
     }
+
+    // Use admin note from the request (current UI state) if provided, otherwise fall back to DB value
+    const effectiveAdminNote = typeof adminNote === 'string' && adminNote.trim().length > 0
+      ? adminNote.trim()
+      : feedback.adminNote
 
     // Build issue title and body
     const categoryTitle = feedback.category.charAt(0).toUpperCase() + feedback.category.slice(1)
@@ -51,7 +56,7 @@ export async function POST(request: NextRequest) {
       `**Page:** ${feedback.pageUrl}`,
       `**Submitted:** ${feedback.createdAt.toISOString().split('T')[0]}`,
       feedback.userAgent ? `**Device:** ${feedback.userAgent}` : '',
-      feedback.adminNote ? `\n**Admin Note:** ${feedback.adminNote}` : '',
+      effectiveAdminNote ? `\n**Admin Note:** ${effectiveAdminNote}` : '',
       '',
       `---`,
       `*Created from in-app feedback (ID: ${feedback.id})*`,
@@ -90,13 +95,13 @@ export async function POST(request: NextRequest) {
 
     const issue = await res.json()
 
-    // Mark feedback as reviewed and store the issue URL
+    // Mark feedback as reviewed, persist the admin note, and store the issue URL
     await prisma.feedback.update({
       where: { id: feedbackId },
       data: {
         status: feedback.status === 'new' ? 'reviewed' : feedback.status,
         adminNote: [
-          feedback.adminNote,
+          effectiveAdminNote,
           `GitHub Issue: ${issue.html_url}`,
         ].filter(Boolean).join('\n'),
       },
