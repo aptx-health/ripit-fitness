@@ -20,7 +20,7 @@ If `doppler run` fails with "You must specify a project", this is why.
 
 ## Project-specific guidance
 
-- **Test**: `doppler run -- npm test`
+- **Test**: `timeout 120 doppler run -- npm test` (2 min timeout -- if it hangs, move on)
 - **Lint**: `npm run lint` (no doppler needed)
 - **Type-check**: `npm run type-check` (no doppler needed)
 - After doppler setup, use `doppler run --` without `--config` — the setup binds the config.
