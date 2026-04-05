@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server'
+import type { Prisma } from '@prisma/client'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 
@@ -90,9 +91,27 @@ export async function POST(
     // Calculate next order number for current workout
     const maxOrder = Math.max(0, ...workout.exercises.map(e => e.order))
     const nextOrder = maxOrder + 1
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    // biome-ignore lint/suspicious/noExplicitAny: complex Prisma return type varies by branch
-    let addedExercise: any
+    const exerciseInclude = {
+      prescribedSets: {
+        orderBy: { setNumber: 'asc' as const },
+      },
+      exerciseDefinition: {
+        select: {
+          id: true,
+          name: true,
+          primaryFAUs: true,
+          secondaryFAUs: true,
+          equipment: true,
+          instructions: true,
+        },
+      },
+    } satisfies Prisma.ExerciseInclude
+
+    type ExerciseWithDetails = Prisma.ExerciseGetPayload<{
+      include: typeof exerciseInclude
+    }>
+
+    let addedExercise: ExerciseWithDetails | null = null
     let addedToCount = 0
 
     if (!applyToFuture) {
@@ -166,21 +185,7 @@ export async function POST(
         // Return exercise with all relations
         return await tx.exercise.findUnique({
           where: { id: exercise.id },
-          include: {
-            prescribedSets: {
-              orderBy: { setNumber: 'asc' }
-            },
-            exerciseDefinition: {
-              select: {
-                id: true,
-                name: true,
-                primaryFAUs: true,
-                secondaryFAUs: true,
-                equipment: true,
-                instructions: true
-              }
-            }
-          }
+          include: exerciseInclude,
         })
       })
 
@@ -251,21 +256,7 @@ export async function POST(
           if (targetWorkout.id === workoutId) {
             addedExercise = await tx.exercise.findUnique({
               where: { id: exercise.id },
-              include: {
-                prescribedSets: {
-                  orderBy: { setNumber: 'asc' }
-                },
-                exerciseDefinition: {
-                  select: {
-                    id: true,
-                    name: true,
-                    primaryFAUs: true,
-                    secondaryFAUs: true,
-                    equipment: true,
-                    instructions: true
-                  }
-                }
-              }
+              include: exerciseInclude,
             })
           }
         }

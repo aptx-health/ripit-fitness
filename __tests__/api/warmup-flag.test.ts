@@ -1,5 +1,6 @@
 import type { PrismaClient } from '@prisma/client'
 import { beforeEach, describe, expect, it } from 'vitest'
+import { recordStrengthPerformance } from '@/lib/stats/exercise-performance'
 import { getTestDatabase } from '@/lib/test/database'
 import {
   createCompleteTestScenario,
@@ -8,7 +9,6 @@ import {
   createTestUser,
   createTestWorkoutCompletion,
 } from '@/lib/test/factories'
-import { recordStrengthPerformance } from '@/lib/stats/exercise-performance'
 import {
   simulateDraftLoad,
   simulateDraftSave,

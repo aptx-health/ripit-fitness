@@ -1,4 +1,4 @@
-import { ProgramSpec, makeSetsRpe } from '../helpers'
+import { makeSetsRpe, type ProgramSpec } from '../helpers'
 
 export const barbellBasics: ProgramSpec = {
   name: 'Barbell Basics 5x5',

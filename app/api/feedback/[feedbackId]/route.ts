@@ -2,8 +2,8 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { logger } from '@/lib/logger'
-import { VALID_STATUSES } from '@/types/feedback'
 import type { FeedbackStatus } from '@/types/feedback'
+import { VALID_STATUSES } from '@/types/feedback'
 
 export async function PATCH(
   request: NextRequest,

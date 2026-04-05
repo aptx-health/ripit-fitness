@@ -1,4 +1,4 @@
-import { ProgramSpec, makeSets } from '../helpers'
+import { makeSets, type ProgramSpec } from '../helpers'
 
 export const fullBodyStrength: ProgramSpec = {
   name: 'Full Body Strength',

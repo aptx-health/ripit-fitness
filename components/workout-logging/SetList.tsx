@@ -64,19 +64,24 @@ export default function SetList({
     if (exerciseId !== prevExerciseRef.current) {
       prevExerciseRef.current = exerciseId
       prevCountRef.current = count
-      setFlashSetNumber(null)
-      return
+      // Defer reset to avoid synchronous setState in useEffect
+      const frame = requestAnimationFrame(() => setFlashSetNumber(null))
+      return () => cancelAnimationFrame(frame)
     }
 
     if (count > prevCountRef.current) {
       const newest = loggedSets[count - 1]
-      setFlashSetNumber(newest.setNumber)
-      const timer = setTimeout(() => setFlashSetNumber(null), 650)
+      // Defer to avoid synchronous setState in useEffect
+      const frame = requestAnimationFrame(() => setFlashSetNumber(newest.setNumber))
+      const flashOffTimer = setTimeout(() => setFlashSetNumber(null), 650)
       prevCountRef.current = count
-      return () => clearTimeout(timer)
+      return () => {
+        cancelAnimationFrame(frame)
+        clearTimeout(flashOffTimer)
+      }
     }
     prevCountRef.current = count
-  }, [loggedSets.length, exerciseId])
+  }, [loggedSets, exerciseId])
 
   return (
     <div className="space-y-1">

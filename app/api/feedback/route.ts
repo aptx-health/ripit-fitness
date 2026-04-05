@@ -3,8 +3,8 @@ import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { sendDiscordNotification } from '@/lib/discord'
 import { logger } from '@/lib/logger'
-import { VALID_CATEGORIES } from '@/types/feedback'
 import type { FeedbackCategory } from '@/types/feedback'
+import { VALID_CATEGORIES } from '@/types/feedback'
 
 const MAX_MESSAGE_LENGTH = 2000
 const RATE_LIMIT_PER_HOUR = 5

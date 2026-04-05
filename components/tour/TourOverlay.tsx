@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useMounted } from '@/hooks/useMounted'
 
 interface TourOverlayProps {
   targetSelector: string | null
@@ -24,16 +25,13 @@ function getClipPath(rect: DOMRect, padding: number = 6): string {
 
 export function TourOverlay({ targetSelector, visible, onClickOverlay }: TourOverlayProps) {
   const [clipPath, setClipPath] = useState<string | null>(null)
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const mounted = useMounted()
 
   useEffect(() => {
     if (!targetSelector || !visible) {
-      setClipPath(null)
-      return
+      // Defer the reset to avoid synchronous setState in useEffect
+      const frame = requestAnimationFrame(() => setClipPath(null))
+      return () => cancelAnimationFrame(frame)
     }
 
     const updateClip = () => {

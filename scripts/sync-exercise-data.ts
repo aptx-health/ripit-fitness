@@ -16,9 +16,9 @@
  *   doppler run --config preview -- npx tsx scripts/sync-exercise-data.ts
  */
 
+import { readdirSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { type Prisma, PrismaClient } from '@prisma/client'
-import { readFileSync, readdirSync } from 'fs'
-import { join } from 'path'
 
 const prisma = new PrismaClient()
 

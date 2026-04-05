@@ -66,4 +66,4 @@ export async function uploadMedia(
   return { url, objectName }
 }
 
-export { MAX_FILE_SIZE, ALLOWED_TYPES }
+export { ALLOWED_TYPES, MAX_FILE_SIZE }
