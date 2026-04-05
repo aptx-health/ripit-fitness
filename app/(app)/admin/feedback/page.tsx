@@ -113,7 +113,7 @@ export default function AdminFeedbackPage() {
       const res = await fetch('/api/admin/feedback/create-issue', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ feedbackId: item.id, labels }),
+        body: JSON.stringify({ feedbackId: item.id, labels, adminNote }),
       })
 
       if (res.ok) {
