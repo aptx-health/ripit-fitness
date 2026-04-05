@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/radix/
 import type { LoadState } from '@/hooks/useProgressiveExercises'
 import { EQUIPMENT_LABELS } from '@/lib/constants/program-metadata'
 import type { LoggedSet } from '@/types/workout'
+import RestStopwatch from './RestStopwatch'
 import SetList from './SetList'
 
 interface PrescribedSet {
@@ -131,13 +132,20 @@ export default function ExerciseDisplayTabs({
       <TabsContent value="log-sets" className="flex-1 overflow-y-auto px-4 flex flex-col gap-2">
         {loggingForm}
         {!isInputExpanded && (
-          <SetList
-            prescribedSets={prescribedSets}
-            loggedSets={loggedSets}
-            exerciseHistory={null}
-            onDeleteSet={onDeleteSet}
-            exerciseId={exercise.id}
-          />
+          <>
+            <SetList
+              prescribedSets={prescribedSets}
+              loggedSets={loggedSets}
+              exerciseHistory={null}
+              onDeleteSet={onDeleteSet}
+              exerciseId={exercise.id}
+            />
+            <RestStopwatch
+              loggedSetCount={loggedSets.length}
+              prescribedSetCount={prescribedSets.length}
+              exerciseId={exercise.id}
+            />
+          </>
         )}
       </TabsContent>
 
