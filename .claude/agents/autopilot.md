@@ -23,7 +23,7 @@ If `doppler run` fails with "You must specify a project", this is why.
 ## Project-specific guidance
 
 - **Build**: `doppler run -- npm run build`
-- **Test**: `doppler run -- npm test`
+- **Test**: `timeout 120 doppler run -- npm test` (2 min timeout -- if it hangs, move on)
 - **Lint**: `npm run lint` (no doppler needed)
 - **Type-check**: `npm run type-check` (no doppler needed)
 - **Prisma generate**: `doppler run -- npx prisma@6.19.0 generate`
