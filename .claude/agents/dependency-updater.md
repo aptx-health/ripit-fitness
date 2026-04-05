@@ -76,7 +76,7 @@ Use `npx npm-check-updates --cooldown 3d` to avoid freshly-published packages th
 doppler run -- npx prisma@6.19.0 generate   # If Prisma packages changed
 npm run type-check                            # Type errors from breaking changes
 npm run lint                                  # Lint compliance
-timeout 120 doppler run -- npm test            # Full test suite (2 min timeout)
+perl -e 'alarm 120; exec @ARGV' doppler run -- npm test  # Full test suite (2 min timeout)
 doppler run -- npm run build                  # Build succeeds
 ```
 
