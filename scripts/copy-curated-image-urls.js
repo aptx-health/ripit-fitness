@@ -13,8 +13,8 @@
  * Usage: node scripts/copy-curated-image-urls.js
  */
 
-const fs = require('fs')
-const path = require('path')
+const fs = require('node:fs')
+const path = require('node:path')
 
 const mapping = JSON.parse(
   fs.readFileSync(path.join(__dirname, 'exercise-mapping.json'), 'utf8')

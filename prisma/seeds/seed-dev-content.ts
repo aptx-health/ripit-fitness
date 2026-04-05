@@ -235,7 +235,7 @@ async function seedWorkoutHistory() {
 
         for (const ps of exercise.prescribedSets) {
           // Simulate realistic logged data: slight variation from prescribed
-          const prescribedReps = parseInt(ps.reps) || 8
+          const prescribedReps = parseInt(ps.reps, 10) || 8
           const repsVariation = Math.random() > 0.3 ? 0 : -1
           const loggedReps = Math.max(1, prescribedReps + repsVariation)
 

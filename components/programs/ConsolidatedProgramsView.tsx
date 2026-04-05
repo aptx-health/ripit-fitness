@@ -181,7 +181,7 @@ export default function ConsolidatedProgramsView({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [cloningProgramId, completedClones.has, startPolling, strengthPrograms.filter])
 
   // Poll for cloning status from URL param (after adding from community)
   useEffect(() => {
@@ -201,7 +201,7 @@ export default function ConsolidatedProgramsView({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, cloningProgramId])
+  }, [searchParams, cloningProgramId, completedClones.has, startPolling])
 
   const handleTabChange = (tab: 'my' | 'browse') => {
     setActiveTab(tab)

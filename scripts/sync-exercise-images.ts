@@ -5,9 +5,9 @@
  */
 
 /* eslint-disable @typescript-eslint/no-require-imports */
-const https = require('https') as typeof import('https')
-const fs = require('fs') as typeof import('fs')
-const path = require('path') as typeof import('path')
+const https = require('node:https') as typeof import('https')
+const fs = require('node:fs') as typeof import('fs')
+const path = require('node:path') as typeof import('path')
 
 // Types
 

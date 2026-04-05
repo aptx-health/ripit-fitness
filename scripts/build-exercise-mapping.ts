@@ -15,8 +15,8 @@
  */
 
 /* eslint-disable @typescript-eslint/no-require-imports */
-const fs = require('fs') as typeof import('fs')
-const path = require('path') as typeof import('path')
+const fs = require('node:fs') as typeof import('fs')
+const path = require('node:path') as typeof import('path')
 
 import type {
   MappingOutput,
@@ -333,7 +333,7 @@ async function main() {
   }
 
   // 7. Write output
-  fs.writeFileSync(outputPath, JSON.stringify(output, null, 2) + '\n')
+  fs.writeFileSync(outputPath, `${JSON.stringify(output, null, 2)}\n`)
 
   // 8. Print summary
   console.log('\n=== Results ===')

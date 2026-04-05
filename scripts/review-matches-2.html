@@ -405,7 +405,7 @@ function render() {
   container.innerHTML = html;
 }
 
-function select(i, theirId) {
+function _select(i, theirId) {
   const ex = exercises[i];
   if (selections[ex.our_id] === theirId) {
     delete selections[ex.our_id]; // toggle off
@@ -416,7 +416,7 @@ function select(i, theirId) {
   updateCounts();
 }
 
-function autoSelectPicks() {
+function _autoSelectPicks() {
   for (let i = 0; i < exercises.length; i++) {
     const ex = exercises[i];
     if (selections[ex.our_id] === undefined) {
@@ -437,7 +437,7 @@ function updateCounts() {
   document.getElementById('remaining-count').textContent = exercises.length - resolved;
 }
 
-function exportResults() {
+function _exportResults() {
   const results = {
     reviewed_at: new Date().toISOString(),
     new_matches: [],

@@ -202,7 +202,7 @@ function render() {
 
   let html = '';
   for (const sec of sections) {
-    const items = matches.filter(m => m.verdict === sec.verdict);
+    const _items = matches.filter(m => m.verdict === sec.verdict);
     html += `<div class="section">`;
     html += `<div class="section-header ${sec.cls}">${sec.label}</div>`;
     for (let i = 0; i < matches.length; i++) {
@@ -226,7 +226,7 @@ function render() {
   container.innerHTML = html;
 }
 
-function toggleRow(i) {
+function _toggleRow(i) {
   const cb = document.getElementById(`cb-${i}`);
   const row = document.getElementById(`row-${i}`);
   row.classList.toggle('checked', cb.checked);
@@ -240,7 +240,7 @@ function updateCounts() {
   document.getElementById('remaining-count').textContent = total - checked;
 }
 
-function checkAllInSection(verdict) {
+function _checkAllInSection(verdict) {
   for (let i = 0; i < matches.length; i++) {
     if (matches[i].verdict === verdict) {
       const cb = document.getElementById(`cb-${i}`);
@@ -251,7 +251,7 @@ function checkAllInSection(verdict) {
   updateCounts();
 }
 
-function exportResults() {
+function _exportResults() {
   const results = {
     reviewed_at: new Date().toISOString(),
     validate: [],   // GOOD/OK that user agreed with -> set validated:true

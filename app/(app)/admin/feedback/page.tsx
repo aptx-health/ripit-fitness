@@ -75,7 +75,7 @@ export default function AdminFeedbackPage() {
       .catch(() => { if (!cancelled) setLoading(false) })
 
     return () => { cancelled = true }
-  }, [activeStatus])
+  }, [activeStatus, searchParams.get])
 
   const updateFeedback = async (id: string, status: FeedbackStatus, note?: string) => {
     setUpdating(id)
@@ -222,7 +222,7 @@ export default function AdminFeedbackPage() {
                   <div className="min-w-0 flex-1">
                     <p className="text-sm text-foreground whitespace-pre-wrap break-words">
                       {item.message.length > 150
-                        ? item.message.substring(0, 150) + '...'
+                        ? `${item.message.substring(0, 150)}...`
                         : item.message}
                     </p>
                     <div className="flex flex-wrap gap-2 mt-2">

@@ -76,7 +76,7 @@ export default function SetList({
       return () => clearTimeout(timer)
     }
     prevCountRef.current = count
-  }, [loggedSets.length, exerciseId])
+  }, [loggedSets.length, exerciseId, loggedSets])
 
   return (
     <div className="space-y-1">
