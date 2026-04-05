@@ -2,6 +2,7 @@
 
 import { Activity, BookOpen, Dumbbell, LayoutGrid, Settings } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { useMounted } from '@/hooks/useMounted'
 import { createPortal } from 'react-dom'
 import {
   DebugOverlay,
@@ -36,7 +37,7 @@ export default function MobileSpikePage() {
   const [hasDraft, setHasDraft] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [showDebug, setShowDebug] = useState(true)
-  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null)
+  const mounted = useMounted()
 
   const scrollPositions = useRef<Record<Tab, number>>({
     training: 0,
@@ -45,10 +46,6 @@ export default function MobileSpikePage() {
     settings: 0,
   })
   const contentRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    setPortalTarget(document.body)
-  }, [])
 
   useEffect(() => {
     if (contentRef.current) {
@@ -160,7 +157,7 @@ export default function MobileSpikePage() {
 
       {/* Full-screen workout logging modal — via portal */}
       {modalOpen &&
-        portalTarget &&
+        mounted &&
         createPortal(
           <FullScreenModal
             onClose={() => setModalOpen(false)}
@@ -169,7 +166,7 @@ export default function MobileSpikePage() {
               setHasDraft(true)
             }}
           />,
-          portalTarget
+          document.body
         )}
 
       {/* Toggle debug button — bottom right, above nav */}
