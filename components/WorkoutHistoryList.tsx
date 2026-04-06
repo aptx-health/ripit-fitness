@@ -217,7 +217,7 @@ export default function WorkoutHistoryList({ count, compact = false }: Props) {
                     {sets.map((set) => (
                       <div
                         key={set.id}
-                        className="bg-card border border-border p-2 text-sm"
+                        className="bg-muted/30 px-2.5 py-1.5 text-sm"
                       >
                         <span className="text-muted-foreground">Set {set.setNumber}:</span>{' '}
                         <span className="font-semibold text-foreground doom-stat">
