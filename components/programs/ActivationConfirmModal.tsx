@@ -162,22 +162,14 @@ export default function ActivationConfirmModal({
     return (
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
         <div className="bg-card border-2 border-primary p-6 max-w-md w-full doom-noise doom-card doom-corners shadow-2xl">
-          <h3 className="text-2xl font-bold text-foreground doom-heading mb-4">
-            ACTIVATE PROGRAM?
+          <h3 className="text-2xl font-bold text-foreground doom-heading mb-3">
+            ACTIVATE {programName.toUpperCase()}
           </h3>
 
-          <div className="bg-warning-muted border border-warning-border p-3 mb-4">
-            <p className="text-sm text-warning-text">
-              Could not check workout history. You can still activate.
-            </p>
-          </div>
-
           {existingActiveProgram && (
-            <div className="bg-warning-muted border border-warning-border p-3 mb-4">
-              <p className="text-sm text-warning-text">
-                <span className="font-semibold">Warning:</span> This will replace your current active program: <span className="font-bold">{existingActiveProgram.name}</span>
-              </p>
-            </div>
+            <p className="text-sm text-warning-text mb-3">
+              Replaces <span className="font-bold">{existingActiveProgram.name}</span> as active program
+            </p>
           )}
 
           {error && (
@@ -215,28 +207,20 @@ export default function ActivationConfirmModal({
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-card border-2 border-primary p-6 max-w-md w-full doom-noise doom-card doom-corners shadow-2xl">
-        <h3 className="text-2xl font-bold text-foreground doom-heading mb-4">
-          ACTIVATE PROGRAM?
+        <h3 className="text-2xl font-bold text-foreground doom-heading mb-3">
+          ACTIVATE {programName.toUpperCase()}
         </h3>
 
-        <p className="text-muted-foreground mb-4">
-          Activate <span className="font-bold text-foreground">{programName}</span>
-        </p>
-
         {existingActiveProgram && (
-          <div className="bg-warning-muted border border-warning-border p-3 mb-4">
-            <p className="text-sm text-warning-text">
-              <span className="font-semibold">Warning:</span> This will replace your current active program: <span className="font-bold">{existingActiveProgram.name}</span>
-            </p>
-          </div>
+          <p className="text-sm text-warning-text mb-3">
+            Replaces <span className="font-bold">{existingActiveProgram.name}</span> as active program
+          </p>
         )}
 
         {hasHistory && (
-          <div className="bg-muted border border-border p-3 mb-4">
-            <p className="text-sm text-foreground">
-              This program has <span className="font-bold">{historyState.completionCount}</span> completed workout{historyState.completionCount !== 1 ? 's' : ''}. Would you like to continue where you left off or start fresh?
-            </p>
-          </div>
+          <p className="text-sm text-muted-foreground mb-4">
+            {historyState.completionCount} workout{historyState.completionCount !== 1 ? 's' : ''} logged — continue or start fresh?
+          </p>
         )}
 
         {error && (
@@ -254,7 +238,7 @@ export default function ActivationConfirmModal({
                 disabled={activating}
                 className="w-full px-4 py-3 bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
               >
-                {activating ? 'ACTIVATING...' : 'CONTINUE WHERE I LEFT OFF'}
+                {activating ? 'ACTIVATING...' : 'CONTINUE'}
               </button>
               <button
                 type="button"
@@ -268,7 +252,7 @@ export default function ActivationConfirmModal({
                 type="button"
                 onClick={onClose}
                 disabled={activating}
-                className="w-full px-4 py-3 border-2 border-border text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
+                className="w-full py-2 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50 font-semibold uppercase tracking-wider"
               >
                 CANCEL
               </button>
