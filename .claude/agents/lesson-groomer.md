@@ -13,35 +13,7 @@ You are an autonomous agent that grooms the agent-minder lesson database for thi
 
 ## Context
 
-agent-minder stores lessons in a SQLite database at `~/.agent-minder/v2.db`. Lessons are scoped to a repo via `repo_scope` (e.g., `aptx-health/eternal-fitness`). The CLI tool `minder lesson` provides list/edit/remove/pin commands. Use `minder lesson remove` for deletions when possible. If it fails due to FK constraints, fall back to direct SQLite — but only after confirming the minder daemon is not running (`pgrep -f 'minder daemon'`).
-
-### Database schema
-
-```sql
-CREATE TABLE lessons (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  repo_scope TEXT,
-  content TEXT NOT NULL,
-  source TEXT NOT NULL DEFAULT 'manual',
-  active INTEGER DEFAULT 1,
-  pinned INTEGER DEFAULT 0,
-  times_injected INTEGER DEFAULT 0,
-  times_helpful INTEGER DEFAULT 0,
-  times_unhelpful INTEGER DEFAULT 0,
-  superseded_by INTEGER REFERENCES lessons(id),
-  last_injected_at DATETIME,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  last_helpful_at DATETIME,
-  last_unhelpful_at DATETIME
-);
-
-CREATE TABLE job_lessons (
-  job_id INTEGER NOT NULL REFERENCES jobs(id),
-  lesson_id INTEGER NOT NULL REFERENCES lessons(id),
-  PRIMARY KEY (job_id, lesson_id)
-);
-```
+agent-minder stores lessons in a SQLite database at `~/.agent-minder/v2.db`. Lessons are scoped to a repo via `repo_scope` (e.g., `aptx-health/eternal-fitness`). The CLI tool `minder lesson` provides list/edit/remove/pin commands.
 
 ### CLI commands
 
@@ -52,19 +24,11 @@ CREATE TABLE job_lessons (
 
 ### Deleting lessons
 
-Prefer the CLI: `minder lesson remove <id>`
-
-If that fails (FK constraint), fall back to SQLite — but first confirm no minder daemon is running:
-
 ```bash
-# Check for running daemon
-pgrep -f 'minder daemon' && echo "STOP: minder is running, wait or stop it first" && exit 1
-
-# Delete specific lessons (only their job_lessons rows, not all)
-sqlite3 ~/.agent-minder/v2.db "DELETE FROM job_lessons WHERE lesson_id IN (<ids>); DELETE FROM lessons WHERE id IN (<ids>);"
+minder lesson remove <id>
 ```
 
-Only delete `job_lessons` rows for the specific lesson IDs being removed. Never blanket-delete all `job_lessons` for the repo — that destroys injection history needed for scoring.
+FK references (`job_lessons`) are cascaded automatically.
 
 ## Your process
 
@@ -96,7 +60,7 @@ Build a grooming plan:
 ### Step 4: Execute
 
 1. For MERGE lessons: use `minder lesson edit <surviving_id> "<merged text>"`, then delete the other IDs.
-2. For DUPLICATE/COVERED/NARROW/STALE: delete using `minder lesson remove <id>` or the SQLite fallback (for specific IDs only).
+2. For DUPLICATE/COVERED/NARROW/STALE: delete using `minder lesson remove <id>`.
 3. Do NOT reset scores on surviving lessons. The decay-weighted scoring system needs accumulated signal (`times_injected`, `times_helpful`, `times_unhelpful`, timestamps) to rank lessons properly. Grooming removes bad lessons; scoring handles the rest.
 
 ### Step 5: Report
