@@ -506,8 +506,8 @@ export default function StrengthWeekView({
   const hasIncompleteWorkouts = week.workouts.some(w => w.completions.length === 0)
 
   return (
-    <div className="bg-card border-y sm:border border-border doom-noise doom-card doom-corners p-4 sm:p-6">
-      <div className="mb-4 sm:mb-6">
+    <div className="space-y-4">
+      <div>
         <WeekNavigator
           currentWeek={week.weekNumber}
           totalWeeks={totalWeeks}
@@ -527,9 +527,11 @@ export default function StrengthWeekView({
           }
         />
         {week.description && (
-          <p className="text-sm text-muted-foreground text-center mt-2 px-4 leading-relaxed">
-            {week.description}
-          </p>
+          <div className="mt-3 px-1">
+            <p className="text-base text-muted-foreground leading-relaxed">
+              {week.description}
+            </p>
+          </div>
         )}
       </div>
 
@@ -539,7 +541,7 @@ export default function StrengthWeekView({
         </div>
       )}
 
-      <div className="space-y-3">
+      <div className="bg-card border border-border doom-corners divide-y divide-border">
         {week.workouts.map(workout => (
           <WorkoutCard
             key={workout.id}
@@ -563,7 +565,7 @@ export default function StrengthWeekView({
               }
             }}
             disabled={completingWeek}
-            className="w-full py-3 border border-border text-muted-foreground hover:text-foreground hover:border-primary hover:bg-muted/50 transition-all text-sm font-semibold uppercase tracking-wider doom-focus-ring disabled:opacity-50"
+            className="w-full py-3 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all text-sm font-semibold uppercase tracking-wider doom-focus-ring disabled:opacity-50"
           >
             <div className="flex items-center justify-center gap-2">
               <CheckCircle size={16} />
@@ -575,9 +577,7 @@ export default function StrengthWeekView({
 
       {/* Recent History */}
       {historyCount > 0 && (
-        <div className="mt-6 pt-6 border-t border-border">
-          <WorkoutHistoryList count={historyCount} compact />
-        </div>
+        <WorkoutHistoryList count={historyCount} compact />
       )}
 
       {/* Preview Modal - uses full workout data */}

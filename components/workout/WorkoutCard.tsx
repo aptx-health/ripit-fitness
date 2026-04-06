@@ -68,14 +68,14 @@ export default function WorkoutCard({
         ? 'border-l-muted-foreground'
         : 'border-l-border'
 
-  // Card state class (DOOM gradient backgrounds)
+  // Card state class (subtle backgrounds for status)
   const stateClass = isCompleted
-    ? 'doom-workout-completed'
+    ? 'bg-success/5'
     : isDraft
-      ? 'doom-workout-progress'
+      ? 'bg-primary/5'
       : isSkipped
         ? 'bg-muted/30 opacity-75'
-        : 'bg-card doom-card'
+        : 'bg-card'
 
   // Primary action label for screen readers
   const actionLabel = isCompleted
@@ -115,7 +115,7 @@ export default function WorkoutCard({
         onClick={handleCardTap}
         disabled={isLoading || isSkipping || isUnskipping}
         aria-label={`${actionLabel}: Day ${workout.dayNumber} ${workout.name}`}
-        className={`w-full text-left border border-border border-l-4 ${borderColor} ${stateClass} doom-noise p-4 transition-all active:bg-muted/70 disabled:opacity-60 doom-focus-ring`}
+        className={`w-full text-left border-l-4 ${borderColor} ${stateClass} px-4 py-3 transition-all hover:bg-muted/50 active:bg-muted/70 disabled:opacity-60 doom-focus-ring`}
       >
         <div className="flex items-center gap-3">
           {/* Content */}
