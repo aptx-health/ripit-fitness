@@ -1,7 +1,7 @@
 'use client'
 
-import { Check, ChevronRight, Eye, MoreVertical, SkipForward } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { Check, ChevronDown, ChevronRight, Eye, SkipForward } from 'lucide-react'
+import { useState } from 'react'
 import SwipeableCard from '@/components/ui/SwipeableCard'
 
 type Workout = {
@@ -43,9 +43,8 @@ export default function WorkoutCard({
   const isCompleted = latestCompletion?.status === 'completed'
   const isDraft = latestCompletion?.status === 'draft'
   const isSkipped = latestCompletion?.status === 'skipped'
-
-  const [showMenu, setShowMenu] = useState(false)
-  const menuRef = useRef<HTMLDivElement>(null)
+  const hasActions = !isCompleted && !isSkipped
+  const [expanded, setExpanded] = useState(false)
 
   // Primary tap action based on state
   const handleCardTap = () => {
@@ -59,6 +58,12 @@ export default function WorkoutCard({
     }
   }
 
+  // Click chevron to expand action row
+  const handleChevronClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setExpanded(!expanded)
+  }
+
   // Status bar color (left border)
   const borderColor = isCompleted
     ? 'border-l-success'
@@ -68,14 +73,14 @@ export default function WorkoutCard({
         ? 'border-l-muted-foreground'
         : 'border-l-border'
 
-  // Card state class (DOOM gradient backgrounds)
+  // Card state class (subtle backgrounds for status)
   const stateClass = isCompleted
-    ? 'doom-workout-completed'
+    ? 'bg-success/5'
     : isDraft
-      ? 'doom-workout-progress'
+      ? 'bg-primary/5'
       : isSkipped
         ? 'bg-muted/30 opacity-75'
-        : 'bg-card doom-card'
+        : 'bg-card'
 
   // Primary action label for screen readers
   const actionLabel = isCompleted
@@ -115,7 +120,7 @@ export default function WorkoutCard({
         onClick={handleCardTap}
         disabled={isLoading || isSkipping || isUnskipping}
         aria-label={`${actionLabel}: Day ${workout.dayNumber} ${workout.name}`}
-        className={`w-full text-left border border-border border-l-4 ${borderColor} ${stateClass} doom-noise p-4 transition-all active:bg-muted/70 disabled:opacity-60 doom-focus-ring`}
+        className={`w-full text-left border-l-4 ${borderColor} ${stateClass} px-4 py-3 transition-all hover:bg-muted/50 active:bg-muted/70 disabled:opacity-60 doom-focus-ring`}
       >
         <div className="flex items-center gap-3">
           {/* Content */}
@@ -157,6 +162,16 @@ export default function WorkoutCard({
             )}
             {(isLoading || isSkipping || isUnskipping) ? (
               <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            ) : hasActions ? (
+              <button
+                type="button"
+                onClick={handleChevronClick}
+                className="p-1 text-muted-foreground hover:text-foreground transition-colors doom-focus-ring"
+                aria-label={expanded ? 'Collapse actions' : 'Expand actions'}
+                aria-expanded={expanded}
+              >
+                {expanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+              </button>
             ) : (
               <ChevronRight size={18} className="text-muted-foreground" />
             )}
@@ -164,48 +179,27 @@ export default function WorkoutCard({
         </div>
       </button>
 
-      {/* Desktop kebab menu fallback (hidden on mobile where swipe works) */}
-      {swipeActions.length > 0 && (
-        <div className="hidden md:block absolute top-2 right-2 z-20" ref={menuRef}>
+      {/* Expanded action row */}
+      {expanded && hasActions && (
+        <div className="flex items-center gap-3 px-4 py-2 border-t border-border bg-muted/30">
           <button
             type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              setShowMenu(!showMenu)
-            }}
-            className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors doom-focus-ring"
-            aria-label="More actions"
+            onClick={() => { onView(workout.id); setExpanded(false) }}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground font-medium transition-colors"
           >
-            <MoreVertical size={16} />
+            <Eye size={14} />
+            Preview
           </button>
-          {showMenu && (
-            <div className="absolute right-0 top-full mt-1 bg-card border border-border shadow-lg z-30 min-w-[140px] doom-noise">
-              <button
-                type="button"
-                onClick={() => {
-                  onView(workout.id)
-                  setShowMenu(false)
-                }}
-                className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors flex items-center gap-2"
-              >
-                <Eye size={14} />
-                Preview
-              </button>
-              {!latestCompletion && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    onSkip(workout.id)
-                    setShowMenu(false)
-                  }}
-                  disabled={isSkipping}
-                  className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors flex items-center gap-2 disabled:opacity-50"
-                >
-                  <SkipForward size={14} />
-                  Skip
-                </button>
-              )}
-            </div>
+          {!latestCompletion && (
+            <button
+              type="button"
+              onClick={() => { onSkip(workout.id); setExpanded(false) }}
+              disabled={isSkipping}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground font-medium transition-colors disabled:opacity-50"
+            >
+              <SkipForward size={14} />
+              Skip
+            </button>
           )}
         </div>
       )}
