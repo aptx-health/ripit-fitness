@@ -283,6 +283,7 @@ export default function ConsolidatedProgramsView({
                 localCopyStatuses={localCopyStatuses}
                 deletedPrograms={deletedPrograms}
                 hasActiveProgram={!!activeProgram}
+                activeProgram={activeProgram ? { id: activeProgram.id, name: activeProgram.name } : null}
               />
 
               {archivedStrengthCount > 0 && (
