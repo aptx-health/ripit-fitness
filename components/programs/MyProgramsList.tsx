@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useToast } from '@/components/ToastProvider'
 import { clientLogger } from '@/lib/client-logger'
+import ActivationConfirmModal from './ActivationConfirmModal'
 
 type Program = {
   id: string
@@ -24,6 +25,7 @@ type Props = {
   localCopyStatuses: Record<string, string>
   deletedPrograms: Set<string>
   hasActiveProgram: boolean
+  activeProgram?: { id: string; name: string } | null
 }
 
 const INITIAL_SHOW = 5
@@ -34,14 +36,15 @@ export default function MyProgramsList({
   localCopyStatuses,
   deletedPrograms,
   hasActiveProgram,
+  activeProgram,
 }: Props) {
   const router = useRouter()
   const toast = useToast()
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [showAll, setShowAll] = useState(false)
-  const [activating, setActivating] = useState<string | null>(null)
   const [archiving, setArchiving] = useState<string | null>(null)
   const [duplicating, setDuplicating] = useState<string | null>(null)
+  const [activationTarget, setActivationTarget] = useState<{ id: string; name: string } | null>(null)
 
   // Filter out active program (shown in strip) and deleted programs
   const inactivePrograms = programs
@@ -51,24 +54,8 @@ export default function MyProgramsList({
   const displayedPrograms = showAll ? inactivePrograms : inactivePrograms.slice(0, INITIAL_SHOW)
   const hasMore = inactivePrograms.length > INITIAL_SHOW
 
-  const handleActivate = async (programId: string, programName: string) => {
-    if (hasActiveProgram) {
-      if (!confirm(`This will replace your current active program. Activate "${programName}"?`)) return
-    }
-    setActivating(programId)
-    try {
-      const response = await fetch(`/api/programs/${programId}/activate`, { method: 'POST' })
-      if (response.ok) {
-        router.refresh()
-      } else {
-        toast.error('Failed to activate program')
-      }
-    } catch (error) {
-      clientLogger.error('Error activating program:', error)
-      toast.error('Failed to activate program')
-    } finally {
-      setActivating(null)
-    }
+  const handleActivate = (programId: string, programName: string) => {
+    setActivationTarget({ id: programId, name: programName })
   }
 
   const handleArchive = async (programId: string, programName: string) => {
@@ -134,7 +121,7 @@ export default function MyProgramsList({
           const isCloning = copyStatus === 'cloning' || copyStatus?.startsWith('cloning_week_')
           const progress = cloningProgress[program.id]
           const isExpanded = expandedId === program.id
-          const isLoading = activating === program.id || archiving === program.id || duplicating === program.id
+          const isLoading = archiving === program.id || duplicating === program.id
 
           return (
             <div key={program.id}>
@@ -191,11 +178,7 @@ export default function MyProgramsList({
                       disabled={isLoading}
                       className="flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground text-sm font-semibold uppercase tracking-wider doom-button-3d doom-focus-ring disabled:opacity-50"
                     >
-                      {activating === program.id ? (
-                        <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <Star size={14} />
-                      )}
+                      <Star size={14} />
                       ACTIVATE
                     </button>
                     <Link
@@ -251,6 +234,15 @@ export default function MyProgramsList({
       )}
 
       <CreateProgramRow />
+
+      {activationTarget && (
+        <ActivationConfirmModal
+          programId={activationTarget.id}
+          programName={activationTarget.name}
+          existingActiveProgram={activeProgram}
+          onClose={() => setActivationTarget(null)}
+        />
+      )}
     </div>
   )
 }

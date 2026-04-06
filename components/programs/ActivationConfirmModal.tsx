@@ -1,0 +1,321 @@
+'use client'
+
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { clientLogger } from '@/lib/client-logger'
+
+type ActivationConfirmModalProps = {
+  programId: string
+  programName: string
+  existingActiveProgram?: { id: string; name: string } | null
+  onClose: () => void
+}
+
+type HistoryState =
+  | { status: 'loading' }
+  | { status: 'no_history' }
+  | { status: 'has_history'; completionCount: number }
+  | { status: 'error'; message: string }
+
+export default function ActivationConfirmModal({
+  programId,
+  programName,
+  existingActiveProgram,
+  onClose,
+}: ActivationConfirmModalProps) {
+  const router = useRouter()
+  const [historyState, setHistoryState] = useState<HistoryState>({ status: 'loading' })
+  const [activating, setActivating] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  // Check workout history on mount
+  useEffect(() => {
+    const controller = new AbortController()
+
+    const checkHistory = async () => {
+      try {
+        const response = await fetch(`/api/programs/${programId}/workout-history`, {
+          signal: controller.signal,
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to check workout history')
+        }
+
+        const data = await response.json()
+
+        if (data.hasHistory) {
+          setHistoryState({ status: 'has_history', completionCount: data.completionCount })
+        } else {
+          setHistoryState({ status: 'no_history' })
+        }
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') return
+        clientLogger.error('Error checking workout history:', err)
+        setHistoryState({ status: 'error', message: 'Failed to check workout history' })
+      }
+    }
+
+    checkHistory()
+
+    return () => controller.abort()
+  }, [programId])
+
+  // Auto-activate if no history (just show the replace-active warning if needed)
+  useEffect(() => {
+    if (historyState.status === 'no_history' && !existingActiveProgram) {
+      activateAndRedirect()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [historyState.status])
+
+  const activateAndRedirect = async () => {
+    setActivating(true)
+    setError(null)
+
+    try {
+      const response = await fetch(`/api/programs/${programId}/activate`, {
+        method: 'POST',
+      })
+
+      const data = await response.json()
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to activate program')
+      }
+
+      router.push('/training')
+      router.refresh()
+      onClose()
+    } catch (err) {
+      clientLogger.error('Error activating program:', err)
+      setError(err instanceof Error ? err.message : 'Failed to activate program')
+      setActivating(false)
+    }
+  }
+
+  const handleResetAndActivate = async () => {
+    setActivating(true)
+    setError(null)
+
+    try {
+      // Reset first
+      const restartResponse = await fetch(`/api/programs/${programId}/restart`, {
+        method: 'POST',
+      })
+
+      if (!restartResponse.ok) {
+        throw new Error('Failed to reset program')
+      }
+
+      const restartData = await restartResponse.json()
+      clientLogger.info(`Archived ${restartData.archivedCompletions} completions before activation`)
+
+      // Then activate
+      await activateAndRedirect()
+    } catch (err) {
+      clientLogger.error('Error resetting and activating program:', err)
+      setError(err instanceof Error ? err.message : 'Failed to reset program')
+      setActivating(false)
+    }
+  }
+
+  // Loading state
+  if (historyState.status === 'loading') {
+    return (
+      <div
+        style={{ position: 'fixed', inset: 0, zIndex: 50 }}
+        className="bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+      >
+        <div className="bg-card border-2 border-primary p-6 max-w-md w-full doom-noise doom-card shadow-2xl">
+          <div className="flex justify-center py-4">
+            <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Auto-activating (no history, no active program conflict)
+  if (historyState.status === 'no_history' && !existingActiveProgram) {
+    return (
+      <div
+        style={{ position: 'fixed', inset: 0, zIndex: 50 }}
+        className="bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+      >
+        <div className="bg-card border-2 border-primary p-6 max-w-md w-full doom-noise doom-card shadow-2xl">
+          {error ? (
+            <>
+              <div className="bg-error-muted border border-error-border p-3 mb-4">
+                <p className="text-sm text-error">{error}</p>
+              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full px-4 py-3 border-2 border-border text-foreground hover:bg-muted doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
+              >
+                CLOSE
+              </button>
+            </>
+          ) : (
+            <div className="flex justify-center py-4">
+              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // Error checking history — show it but let user proceed
+  if (historyState.status === 'error') {
+    return (
+      <div
+        style={{ position: 'fixed', inset: 0, zIndex: 50 }}
+        className="bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+      >
+        <div className="bg-card border-2 border-primary p-6 max-w-md w-full doom-noise doom-card shadow-2xl">
+          <h3 className="text-2xl font-bold text-foreground doom-heading mb-4">
+            ACTIVATE PROGRAM?
+          </h3>
+
+          <div className="bg-warning-muted border border-warning-border p-3 mb-4">
+            <p className="text-sm text-warning-text">
+              Could not check workout history. You can still activate.
+            </p>
+          </div>
+
+          {existingActiveProgram && (
+            <div className="bg-warning-muted border border-warning-border p-3 mb-4">
+              <p className="text-sm text-warning-text">
+                <span className="font-semibold">Warning:</span> This will replace your current active program: <span className="font-bold">{existingActiveProgram.name}</span>
+              </p>
+            </div>
+          )}
+
+          {error && (
+            <div className="bg-error-muted border border-error-border p-3 mb-4">
+              <p className="text-sm text-error">{error}</p>
+            </div>
+          )}
+
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={activating}
+              className="flex-1 px-4 py-3 border-2 border-border text-foreground hover:bg-muted disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
+            >
+              CANCEL
+            </button>
+            <button
+              type="button"
+              onClick={activateAndRedirect}
+              disabled={activating}
+              className="flex-1 px-4 py-3 bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
+            >
+              {activating ? 'ACTIVATING...' : 'ACTIVATE'}
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Main modal: has history OR needs to confirm replacing active program
+  const hasHistory = historyState.status === 'has_history'
+
+  return (
+    <div
+      style={{ position: 'fixed', inset: 0, zIndex: 50 }}
+      className="bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+    >
+      <div className="bg-card border-2 border-primary p-6 max-w-md w-full doom-noise doom-card shadow-2xl">
+        <h3 className="text-2xl font-bold text-foreground doom-heading mb-4">
+          ACTIVATE PROGRAM?
+        </h3>
+
+        <p className="text-muted-foreground mb-4">
+          Activate <span className="font-bold text-foreground">{programName}</span>
+        </p>
+
+        {existingActiveProgram && (
+          <div className="bg-warning-muted border border-warning-border p-3 mb-4">
+            <p className="text-sm text-warning-text">
+              <span className="font-semibold">Warning:</span> This will replace your current active program: <span className="font-bold">{existingActiveProgram.name}</span>
+            </p>
+          </div>
+        )}
+
+        {hasHistory && (
+          <div className="bg-accent-muted border border-accent p-3 mb-4">
+            <p className="text-sm text-foreground">
+              This program has <span className="font-bold">{historyState.completionCount}</span> completed workout{historyState.completionCount !== 1 ? 's' : ''}. Would you like to continue where you left off or start fresh?
+            </p>
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-error-muted border border-error-border p-3 mb-4">
+            <p className="text-sm text-error">{error}</p>
+          </div>
+        )}
+
+        <div className="flex flex-col gap-3">
+          {hasHistory ? (
+            <>
+              <button
+                type="button"
+                onClick={activateAndRedirect}
+                disabled={activating}
+                className="w-full px-4 py-3 bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
+              >
+                {activating ? 'ACTIVATING...' : 'CONTINUE WHERE I LEFT OFF'}
+              </button>
+              <button
+                type="button"
+                onClick={handleResetAndActivate}
+                disabled={activating}
+                className="w-full px-4 py-3 bg-secondary text-secondary-foreground border-2 border-secondary hover:bg-secondary-hover disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
+              >
+                {activating ? 'RESETTING...' : 'START FRESH'}
+              </button>
+              <p className="text-xs text-muted-foreground text-center">
+                Starting fresh archives your progress but keeps your logged sets for history
+              </p>
+            </>
+          ) : (
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={activating}
+                className="flex-1 px-4 py-3 border-2 border-border text-foreground hover:bg-muted disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
+              >
+                CANCEL
+              </button>
+              <button
+                type="button"
+                onClick={activateAndRedirect}
+                disabled={activating}
+                className="flex-1 px-4 py-3 bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
+              >
+                {activating ? 'ACTIVATING...' : 'YES, ACTIVATE'}
+              </button>
+            </div>
+          )}
+
+          {hasHistory && (
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={activating}
+              className="w-full px-4 py-2 text-muted-foreground hover:text-foreground text-sm font-medium uppercase tracking-wider"
+            >
+              CANCEL
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
