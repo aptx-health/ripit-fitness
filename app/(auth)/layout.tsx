@@ -14,11 +14,14 @@ export default function AuthLayout({
               var isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
               root.dataset.mode = isDark ? 'dark' : 'light';
               if (isDark) { root.classList.add('dark'); } else { root.classList.remove('dark'); }
-              var mql = window.matchMedia('(prefers-color-scheme: dark)');
-              mql.addEventListener('change', function(e) {
-                root.dataset.mode = e.matches ? 'dark' : 'light';
-                if (e.matches) { root.classList.add('dark'); } else { root.classList.remove('dark'); }
-              });
+              if (!window.__authThemeListenerAttached) {
+                var mql = window.matchMedia('(prefers-color-scheme: dark)');
+                mql.addEventListener('change', function(e) {
+                  root.dataset.mode = e.matches ? 'dark' : 'light';
+                  if (e.matches) { root.classList.add('dark'); } else { root.classList.remove('dark'); }
+                });
+                window.__authThemeListenerAttached = true;
+              }
             })();
           `,
         }}
