@@ -142,7 +142,7 @@ export default function ActivationConfirmModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="w-full px-4 py-3 border-2 border-border text-foreground hover:bg-muted disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
+                className="w-full px-4 py-2.5 border-2 border-border text-foreground hover:bg-muted disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
               >
                 CLOSE
               </button>
@@ -162,12 +162,12 @@ export default function ActivationConfirmModal({
     return (
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
         <div className="bg-card border-2 border-primary p-8 max-w-md w-full doom-noise doom-card doom-corners shadow-2xl">
-          <h3 className="text-2xl font-bold text-foreground doom-heading mb-4">
+          <h3 className="text-xl font-bold text-foreground doom-heading mb-4">
             ACTIVATE {programName.toUpperCase()}
           </h3>
 
           {existingActiveProgram && (
-            <p className="text-sm text-warning-text mb-4">
+            <p className="text-base text-warning-text mb-4">
               Replaces <span className="font-bold">{existingActiveProgram.name}</span> as active program
             </p>
           )}
@@ -183,7 +183,7 @@ export default function ActivationConfirmModal({
               type="button"
               onClick={onClose}
               disabled={activating}
-              className="flex-1 px-4 py-3 border-2 border-border text-foreground hover:bg-muted disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
+              className="flex-1 px-4 py-2.5 border-2 border-border text-foreground hover:bg-muted disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
             >
               CANCEL
             </button>
@@ -191,7 +191,7 @@ export default function ActivationConfirmModal({
               type="button"
               onClick={activateAndRedirect}
               disabled={activating}
-              className="flex-1 px-4 py-3 bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
+              className="flex-1 px-4 py-2.5 bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
             >
               {activating ? 'ACTIVATING...' : 'ACTIVATE'}
             </button>
@@ -207,18 +207,18 @@ export default function ActivationConfirmModal({
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-card border-2 border-primary p-8 max-w-md w-full doom-noise doom-card doom-corners shadow-2xl">
-        <h3 className="text-2xl font-bold text-foreground doom-heading mb-4">
+        <h3 className="text-xl font-bold text-foreground doom-heading mb-4">
           ACTIVATE {programName.toUpperCase()}
         </h3>
 
         {existingActiveProgram && (
-          <p className="text-sm text-warning-text mb-4">
+          <p className="text-base text-warning-text mb-4">
             Replaces <span className="font-bold">{existingActiveProgram.name}</span> as active program
           </p>
         )}
 
         {hasHistory && (
-          <p className="text-sm text-muted-foreground mb-6">
+          <p className="text-base text-muted-foreground mb-6">
             {historyState.completionCount} workout{historyState.completionCount !== 1 ? 's' : ''} logged — continue or start fresh?
           </p>
         )}
@@ -236,7 +236,7 @@ export default function ActivationConfirmModal({
                 type="button"
                 onClick={activateAndRedirect}
                 disabled={activating}
-                className="w-full px-4 py-3 bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
+                className="w-full px-4 py-2.5 bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
               >
                 {activating ? 'ACTIVATING...' : 'CONTINUE'}
               </button>
@@ -244,7 +244,7 @@ export default function ActivationConfirmModal({
                 type="button"
                 onClick={handleResetAndActivate}
                 disabled={activating}
-                className="w-full px-4 py-3 border-2 border-border text-foreground hover:bg-muted disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
+                className="w-full px-4 py-2.5 border-2 border-border text-foreground hover:bg-muted disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
               >
                 {activating ? 'RESETTING...' : 'START FRESH'}
               </button>
@@ -263,7 +263,7 @@ export default function ActivationConfirmModal({
                 type="button"
                 onClick={activateAndRedirect}
                 disabled={activating}
-                className="w-full px-4 py-3 bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
+                className="w-full px-4 py-2.5 bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
               >
                 {activating ? 'ACTIVATING...' : 'YES, ACTIVATE'}
               </button>
