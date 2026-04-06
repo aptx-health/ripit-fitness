@@ -1,6 +1,7 @@
 'use client'
 
-import { Check, ChevronRight, Eye, SkipForward } from 'lucide-react'
+import { Check, ChevronDown, ChevronRight, Eye, SkipForward } from 'lucide-react'
+import { useState } from 'react'
 import SwipeableCard from '@/components/ui/SwipeableCard'
 
 type Workout = {
@@ -42,6 +43,8 @@ export default function WorkoutCard({
   const isCompleted = latestCompletion?.status === 'completed'
   const isDraft = latestCompletion?.status === 'draft'
   const isSkipped = latestCompletion?.status === 'skipped'
+  const hasActions = !isCompleted && !isSkipped
+  const [expanded, setExpanded] = useState(false)
 
   // Primary tap action based on state
   const handleCardTap = () => {
@@ -53,6 +56,12 @@ export default function WorkoutCard({
     } else {
       onLog(workout.id)
     }
+  }
+
+  // Desktop: click chevron to expand action row instead of navigating
+  const handleDesktopChevronClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setExpanded(!expanded)
   }
 
   // Status bar color (left border)
@@ -153,12 +162,52 @@ export default function WorkoutCard({
             )}
             {(isLoading || isSkipping || isUnskipping) ? (
               <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            ) : hasActions ? (
+              <>
+                {/* Mobile: static chevron (swipe reveals actions) */}
+                <ChevronRight size={18} className="text-muted-foreground md:hidden" />
+                {/* Desktop: clickable chevron toggles action row */}
+                <button
+                  type="button"
+                  onClick={handleDesktopChevronClick}
+                  className="hidden md:block p-1 text-muted-foreground hover:text-foreground transition-colors doom-focus-ring"
+                  aria-label={expanded ? 'Collapse actions' : 'Expand actions'}
+                  aria-expanded={expanded}
+                >
+                  {expanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                </button>
+              </>
             ) : (
               <ChevronRight size={18} className="text-muted-foreground" />
             )}
           </div>
         </div>
       </button>
+
+      {/* Desktop expanded action row */}
+      {expanded && hasActions && (
+        <div className="hidden md:flex items-center gap-3 px-4 py-2 border-t border-border bg-muted/30">
+          <button
+            type="button"
+            onClick={() => { onView(workout.id); setExpanded(false) }}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground font-medium transition-colors"
+          >
+            <Eye size={14} />
+            Preview
+          </button>
+          {!latestCompletion && (
+            <button
+              type="button"
+              onClick={() => { onSkip(workout.id); setExpanded(false) }}
+              disabled={isSkipping}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground font-medium transition-colors disabled:opacity-50"
+            >
+              <SkipForward size={14} />
+              Skip
+            </button>
+          )}
+        </div>
+      )}
     </SwipeableCard>
   )
 }
