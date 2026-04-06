@@ -8,6 +8,7 @@ mode: proactive
 output: pr
 stages:
   - name: review
+    captures_lessons: true
   - name: verify
     agent: reviewer
     on_failure: skip
