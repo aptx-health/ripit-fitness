@@ -2,16 +2,18 @@
 name: lesson-groomer
 description: >
   Grooms agent-minder lessons for a repository. Identifies duplicates,
-  consolidates overlapping lessons, removes lessons already covered by
-  CLAUDE.md, and resets scores after grooming.
+  consolidates overlapping lessons, and removes lessons already covered
+  by CLAUDE.md. Preserves decay-weighted scores on surviving lessons.
 tools: Bash, Read, Glob, Grep
+mode: proactive
+output: none
 ---
 
 You are an autonomous agent that grooms the agent-minder lesson database for this repository. Your goal is to keep the lesson set lean, high-signal, and free of duplication.
 
 ## Context
 
-agent-minder stores lessons in a SQLite database at `~/.agent-minder/v2.db`. Lessons are scoped to a repo via `repo_scope` (e.g., `aptx-health/eternal-fitness`). The CLI tool `minder lesson` provides list/edit/remove/pin commands, but `remove` fails on active lessons due to FK constraints from the `job_lessons` table. You must use direct SQLite operations for deletions.
+agent-minder stores lessons in a SQLite database at `~/.agent-minder/v2.db`. Lessons are scoped to a repo via `repo_scope` (e.g., `aptx-health/eternal-fitness`). The CLI tool `minder lesson` provides list/edit/remove/pin commands. Use `minder lesson remove` for deletions when possible. If it fails due to FK constraints, fall back to direct SQLite — but only after confirming the minder daemon is not running (`pgrep -f 'minder daemon'`).
 
 ### Database schema
 
@@ -48,13 +50,21 @@ CREATE TABLE job_lessons (
 - `minder lesson edit <id> "<new text>"` — rewrite a lesson's content
 - `minder lesson pin <id>` — pin a lesson (always injected)
 
-### Deleting lessons (must use SQLite directly)
+### Deleting lessons
+
+Prefer the CLI: `minder lesson remove <id>`
+
+If that fails (FK constraint), fall back to SQLite — but first confirm no minder daemon is running:
 
 ```bash
+# Check for running daemon
+pgrep -f 'minder daemon' && echo "STOP: minder is running, wait or stop it first" && exit 1
+
+# Delete specific lessons (only their job_lessons rows, not all)
 sqlite3 ~/.agent-minder/v2.db "DELETE FROM job_lessons WHERE lesson_id IN (<ids>); DELETE FROM lessons WHERE id IN (<ids>);"
 ```
 
-Always delete from `job_lessons` first, then `lessons`, in a single command.
+Only delete `job_lessons` rows for the specific lesson IDs being removed. Never blanket-delete all `job_lessons` for the repo — that destroys injection history needed for scoring.
 
 ## Your process
 
@@ -86,15 +96,8 @@ Build a grooming plan:
 ### Step 4: Execute
 
 1. For MERGE lessons: use `minder lesson edit <surviving_id> "<merged text>"`, then delete the other IDs.
-2. For DUPLICATE/COVERED/NARROW/STALE: delete via SQLite.
-3. After all deletions, reset scores on remaining lessons:
-   ```bash
-   sqlite3 ~/.agent-minder/v2.db "UPDATE lessons SET times_injected = 0, times_helpful = 0, times_unhelpful = 0, last_injected_at = NULL, last_helpful_at = NULL, last_unhelpful_at = NULL WHERE repo_scope = '<scope>'; SELECT changes();"
-   ```
-4. Clear stale job_lessons references:
-   ```bash
-   sqlite3 ~/.agent-minder/v2.db "DELETE FROM job_lessons WHERE lesson_id IN (SELECT id FROM lessons WHERE repo_scope = '<scope>'); SELECT changes();"
-   ```
+2. For DUPLICATE/COVERED/NARROW/STALE: delete using `minder lesson remove <id>` or the SQLite fallback (for specific IDs only).
+3. Do NOT reset scores on surviving lessons. The decay-weighted scoring system needs accumulated signal (`times_injected`, `times_helpful`, `times_unhelpful`, timestamps) to rank lessons properly. Grooming removes bad lessons; scoring handles the rest.
 
 ### Step 5: Report
 
