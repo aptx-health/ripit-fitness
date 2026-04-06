@@ -120,7 +120,7 @@ export default function ActivationConfirmModal({
   if (historyState.status === 'loading') {
     return (
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div className="bg-card border-2 border-primary p-6 max-w-md w-full doom-noise doom-card doom-corners shadow-2xl">
+        <div className="bg-card border-2 border-primary p-8 max-w-md w-full doom-noise doom-card doom-corners shadow-2xl">
           <div className="flex justify-center py-4">
             <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
           </div>
@@ -133,7 +133,7 @@ export default function ActivationConfirmModal({
   if (historyState.status === 'no_history' && !existingActiveProgram) {
     return (
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div className="bg-card border-2 border-primary p-6 max-w-md w-full doom-noise doom-card doom-corners shadow-2xl">
+        <div className="bg-card border-2 border-primary p-8 max-w-md w-full doom-noise doom-card doom-corners shadow-2xl">
           {error ? (
             <>
               <div className="bg-error-muted border border-error-border p-3 mb-4">
@@ -161,19 +161,19 @@ export default function ActivationConfirmModal({
   if (historyState.status === 'error') {
     return (
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div className="bg-card border-2 border-primary p-6 max-w-md w-full doom-noise doom-card doom-corners shadow-2xl">
-          <h3 className="text-2xl font-bold text-foreground doom-heading mb-3">
+        <div className="bg-card border-2 border-primary p-8 max-w-md w-full doom-noise doom-card doom-corners shadow-2xl">
+          <h3 className="text-2xl font-bold text-foreground doom-heading mb-4">
             ACTIVATE {programName.toUpperCase()}
           </h3>
 
           {existingActiveProgram && (
-            <p className="text-sm text-warning-text mb-3">
+            <p className="text-sm text-warning-text mb-4">
               Replaces <span className="font-bold">{existingActiveProgram.name}</span> as active program
             </p>
           )}
 
           {error && (
-            <div className="bg-error-muted border border-error-border p-3 mb-4">
+            <div className="bg-error-muted border border-error-border p-3 mb-6">
               <p className="text-sm text-error">{error}</p>
             </div>
           )}
@@ -206,28 +206,25 @@ export default function ActivationConfirmModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-card border-2 border-primary p-6 max-w-md w-full doom-noise doom-card doom-corners shadow-2xl">
-        <h3 className="text-xl font-bold text-foreground doom-heading mb-1">
-          ACTIVATE
+      <div className="bg-card border-2 border-primary p-8 max-w-md w-full doom-noise doom-card doom-corners shadow-2xl">
+        <h3 className="text-2xl font-bold text-foreground doom-heading mb-4">
+          ACTIVATE {programName.toUpperCase()}
         </h3>
-        <p className="text-lg font-semibold text-foreground mb-3">
-          {programName}
-        </p>
 
         {existingActiveProgram && (
-          <p className="text-sm text-warning-text mb-3">
+          <p className="text-sm text-warning-text mb-4">
             Replaces <span className="font-bold">{existingActiveProgram.name}</span> as active program
           </p>
         )}
 
         {hasHistory && (
-          <p className="text-sm text-muted-foreground mb-4">
+          <p className="text-sm text-muted-foreground mb-6">
             {historyState.completionCount} workout{historyState.completionCount !== 1 ? 's' : ''} logged — continue or start fresh?
           </p>
         )}
 
         {error && (
-          <div className="bg-error-muted border border-error-border p-3 mb-4">
+          <div className="bg-error-muted border border-error-border p-3 mb-6">
             <p className="text-sm text-error">{error}</p>
           </div>
         )}
