@@ -41,10 +41,10 @@ export default function WeekNavigator({
 
         {/* Center content */}
         <div className="text-center min-w-0 px-2">
-          <h2 className="text-lg sm:text-2xl font-bold text-foreground doom-heading">
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground doom-heading">
             WEEK {currentWeek} OF {totalWeeks}
           </h2>
-          <span className="inline-block px-3 py-0.5 bg-primary text-primary-foreground text-xs sm:text-sm font-bold uppercase tracking-wider mt-1">
+          <span className="inline-block px-3 py-0.5 bg-primary text-primary-foreground text-sm sm:text-base font-bold uppercase tracking-wider mt-1">
             {programName}
           </span>
         </div>
