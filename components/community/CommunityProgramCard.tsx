@@ -28,11 +28,13 @@ type CommunityProgram = {
 type CommunityProgramCardProps = {
   program: CommunityProgram
   currentUserId: string
+  'data-tour'?: string
 }
 
 export default function CommunityProgramCard({
   program,
   currentUserId,
+  'data-tour': dataTour,
 }: CommunityProgramCardProps) {
   const router = useRouter()
   const [isAdding, setIsAdding] = useState(false)
@@ -83,7 +85,7 @@ export default function CommunityProgramCard({
 
   return (
     <>
-      <div className="p-4 sm:p-6 bg-card border-2 border-border hover:border-primary transition-colors doom-corners doom-noise">
+      <div data-tour={dataTour} className="p-4 sm:p-6 bg-card border-2 border-border hover:border-primary transition-colors doom-corners doom-noise">
         {/* Header */}
         <div className="flex justify-between items-start gap-3 mb-3">
           <div className="flex-1 min-w-0">

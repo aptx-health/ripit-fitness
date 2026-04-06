@@ -219,12 +219,12 @@ export default function CommunityProgramsView({
             {/* Program Cards */}
             <div className="grid grid-cols-1 gap-4 mb-8">
               {paginatedPrograms.map((program, index) => (
-                <div key={program.id} {...(index === 0 ? { 'data-tour': 'program-card' } : {})}>
-                  <CommunityProgramCard
-                    program={program}
-                    currentUserId={currentUserId}
-                  />
-                </div>
+                <CommunityProgramCard
+                  key={program.id}
+                  program={program}
+                  currentUserId={currentUserId}
+                  {...(index === 0 ? { 'data-tour': 'program-card' } : {})}
+                />
               ))}
             </div>
 
