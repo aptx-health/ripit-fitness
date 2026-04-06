@@ -334,7 +334,7 @@ export default function StrengthWeekView({
 
   // Opens logging modal with progressive loading (fast!)
   // Intercepts with primer (first ever) then warm-up (sessions 1-3)
-  const handleOpenLogging = async (workoutId: string) => {
+  const handleOpenLogging = useCallback(async (workoutId: string) => {
     // Prevent opening a different workout while a draft exists
     if (activeDraft && activeDraft.workoutId !== workoutId) {
       alert(
@@ -362,7 +362,7 @@ export default function StrengthWeekView({
     }
 
     await proceedToLogging(workoutId)
-  }
+  }, [activeDraft, showPrimer, primerOpen, showWarmup, warmupOpen, proceedToLogging])
 
   const handleWarmupCancel = () => {
     setWarmupOpen(false)

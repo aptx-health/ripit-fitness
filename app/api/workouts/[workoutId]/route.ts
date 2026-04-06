@@ -161,7 +161,7 @@ export async function PATCH(
     const { name } = body
 
     // Validate required fields
-    if (!name || !name.trim()) {
+    if (!name?.trim()) {
       return NextResponse.json(
         { error: 'Workout name is required' },
         { status: 400 }

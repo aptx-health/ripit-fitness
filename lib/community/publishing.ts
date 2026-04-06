@@ -20,7 +20,7 @@ export async function getUserDisplayName(
   });
 
   // If no settings or displayName is null/empty, return fallback
-  if (!userSettings || !userSettings.displayName || userSettings.displayName.trim() === '') {
+  if (!userSettings?.displayName || userSettings.displayName.trim() === '') {
     return 'Anonymous User';
   }
 

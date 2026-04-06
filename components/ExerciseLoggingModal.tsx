@@ -367,7 +367,7 @@ export default function ExerciseLoggingModal({
     }
 
     performDeleteSet(exerciseId, setNumber)
-  }, [currentExercise?.id, loggedSets, currentExercise, performDeleteSet])
+  }, [currentExercise, loggedSets, performDeleteSet])
 
   const handleConfirmDelete = useCallback(() => {
     if (showDeleteConfirm.exerciseId && showDeleteConfirm.setNumber) {

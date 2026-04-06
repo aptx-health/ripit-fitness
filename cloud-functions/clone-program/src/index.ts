@@ -62,7 +62,7 @@ async function processCloneJob(job: Job<ProgramCloneJob>): Promise<void> {
     select: { programData: true },
   })
 
-  if (!communityProgram || !communityProgram.programData) {
+  if (!communityProgram?.programData) {
     throw new Error(`Community program not found or has no data: ${communityProgramId}`)
   }
 

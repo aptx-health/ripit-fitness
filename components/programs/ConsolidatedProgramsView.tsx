@@ -192,6 +192,7 @@ export default function ConsolidatedProgramsView({
   }
 
   // Resume polling for cloning programs on mount
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional mount-only effect
   useEffect(() => {
     const cloningPrograms = strengthPrograms.filter(p =>
       p.copyStatus === 'cloning' || p.copyStatus?.startsWith('cloning_week_')
@@ -207,6 +208,7 @@ export default function ConsolidatedProgramsView({
   }, [])
 
   // Poll for cloning status from URL param (after adding from community)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: deps intentionally limited to searchParams and cloningProgramId
   useEffect(() => {
     const cloningId = searchParams.get('cloning')
     if (cloningId && completedClones.has(cloningId)) return
