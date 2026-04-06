@@ -207,9 +207,12 @@ export default function ActivationConfirmModal({
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-card border-2 border-primary p-6 max-w-md w-full doom-noise doom-card doom-corners shadow-2xl">
-        <h3 className="text-2xl font-bold text-foreground doom-heading mb-3">
-          ACTIVATE {programName.toUpperCase()}
+        <h3 className="text-xl font-bold text-foreground doom-heading mb-1">
+          ACTIVATE
         </h3>
+        <p className="text-lg font-semibold text-foreground mb-3">
+          {programName}
+        </p>
 
         {existingActiveProgram && (
           <p className="text-sm text-warning-text mb-3">
