@@ -150,6 +150,7 @@ type WorkoutMetadata = {
       rir: number | null
     }>
   } | null
+  resumeExerciseIndex?: number
 }
 
 export default function StrengthWeekView({
@@ -604,6 +605,7 @@ export default function StrengthWeekView({
           workoutCompletionId={workoutMetadata.completionId}
           initialExercise={workoutMetadata.firstExercise}
           initialHistory={workoutMetadata.firstExerciseHistory}
+          initialExerciseIndex={workoutMetadata.resumeExerciseIndex ?? 0}
           onComplete={handleCompleteWorkout}
           onRefresh={handleRefreshMetadata}
         />

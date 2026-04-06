@@ -37,6 +37,7 @@ type Props = {
   workoutCompletionId?: string
   initialExercise?: Exercise | null
   initialHistory?: ExerciseHistory | null
+  initialExerciseIndex?: number
   onComplete: () => Promise<void>
   onRefresh?: () => Promise<void>
 }
@@ -49,6 +50,7 @@ export default function ExerciseLoggingModal({
   workoutCompletionId,
   initialExercise,
   initialHistory,
+  initialExerciseIndex = 0,
   onComplete,
   onRefresh,
 }: Props) {
@@ -101,6 +103,7 @@ export default function ExerciseLoggingModal({
   } = useProgressiveExercises(workoutId, exerciseCount, workoutCompletionId, {
     initialExercise: initialExercise ?? undefined,
     initialHistory: initialHistory ?? undefined,
+    initialIndex: initialExerciseIndex,
   })
 
   // Pre-fetch exercise images so Info tab loads instantly
