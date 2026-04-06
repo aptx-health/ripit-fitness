@@ -1,3 +1,4 @@
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 
 type Props = {
@@ -23,28 +24,17 @@ export default function WeekNavigator({
       {/* Prev button */}
       <Link
         href={hasPrev ? `${baseUrl}?week=${currentWeek - 1}` : '#'}
-        className={`p-2 border shrink-0 ${
+        className={`shrink-0 flex items-center justify-center h-11 px-3 rounded-full transition-colors doom-focus-ring ${
           hasPrev
-            ? 'border-border text-foreground hover:bg-muted doom-focus-ring'
-            : 'border-border/50 text-muted-foreground cursor-not-allowed opacity-50'
+            ? 'text-foreground hover:bg-muted/50 active:bg-muted'
+            : 'text-muted-foreground/20 pointer-events-none'
         }`}
         aria-disabled={!hasPrev}
+        aria-label="Previous week"
         tabIndex={hasPrev ? 0 : -1}
         onClick={e => !hasPrev && e.preventDefault()}
       >
-        <svg aria-hidden="true"
-          className="w-5 h-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 19l-7-7 7-7"
-          />
-        </svg>
+        <ChevronLeft size={24} strokeWidth={1.5} />
       </Link>
 
       {/* Center content */}
@@ -60,28 +50,17 @@ export default function WeekNavigator({
       {/* Next button */}
       <Link
         href={hasNext ? `${baseUrl}?week=${currentWeek + 1}` : '#'}
-        className={`p-2 border shrink-0 ${
+        className={`shrink-0 flex items-center justify-center h-11 px-3 rounded-full transition-colors doom-focus-ring ${
           hasNext
-            ? 'border-border text-foreground hover:bg-muted doom-focus-ring'
-            : 'border-border/50 text-muted-foreground cursor-not-allowed opacity-50'
+            ? 'text-foreground hover:bg-muted/50 active:bg-muted'
+            : 'text-muted-foreground/20 pointer-events-none'
         }`}
         aria-disabled={!hasNext}
+        aria-label="Next week"
         tabIndex={hasNext ? 0 : -1}
         onClick={e => !hasNext && e.preventDefault()}
       >
-        <svg aria-hidden="true"
-          className="w-5 h-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 5l7 7-7 7"
-          />
-        </svg>
+        <ChevronRight size={24} strokeWidth={1.5} />
       </Link>
 
       {/* Completion indicator badge */}
