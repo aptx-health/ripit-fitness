@@ -99,13 +99,9 @@ export async function GET(
       },
     }
 
-    // Count total exercises (including one-offs)
-    const exerciseCount = await prisma.exercise.count({
-      where: { OR: whereConditions, userId: user.id },
-    })
-
     // When resuming a draft, find the first exercise with incomplete sets
     let resumeExerciseIndex = 0
+    let exerciseCount: number
     if (completionId && completionStatus === 'draft') {
       // Fetch all exercises (ordered) and logged set counts in parallel
       const [allExercises, loggedSetCounts] = await Promise.all([
@@ -120,6 +116,9 @@ export async function GET(
           _count: true,
         }),
       ])
+
+      // Use allExercises.length instead of a separate count query
+      exerciseCount = allExercises.length
 
       const loggedCountMap = new Map(
         loggedSetCounts.map((g) => [g.exerciseId, g._count])
@@ -137,6 +136,11 @@ export async function GET(
           resumeExerciseIndex = i
         }
       }
+    } else {
+      // Non-draft: just count exercises
+      exerciseCount = await prisma.exercise.count({
+        where: { OR: whereConditions, userId: user.id },
+      })
     }
 
     // Fetch the target exercise (first incomplete for drafts, first overall otherwise)
