@@ -40,3 +40,9 @@ jobs:
     agent: quality-check
     description: "Review recently changed files for clarity and simplification"
     budget: 8.0
+
+  monthly-lesson-groom:
+    schedule: "0 8 1 * *"
+    agent: lesson-groomer
+    description: "Groom and consolidate agent-minder lessons"
+    budget: 5.0
