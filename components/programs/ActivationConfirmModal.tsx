@@ -258,24 +258,24 @@ export default function ActivationConfirmModal({
               </button>
             </>
           ) : (
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={onClose}
-                disabled={activating}
-                className="flex-1 px-4 py-3 border-2 border-border text-foreground hover:bg-muted disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
-              >
-                CANCEL
-              </button>
+            <>
               <button
                 type="button"
                 onClick={activateAndRedirect}
                 disabled={activating}
-                className="flex-1 px-4 py-3 bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
+                className="w-full px-4 py-3 bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
               >
                 {activating ? 'ACTIVATING...' : 'YES, ACTIVATE'}
               </button>
-            </div>
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={activating}
+                className="w-full py-2 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50 font-semibold uppercase tracking-wider"
+              >
+                CANCEL
+              </button>
+            </>
           )}
         </div>
       </div>
