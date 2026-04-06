@@ -81,7 +81,7 @@ export async function cloneCommunityProgram(
 
     const programData = communityProgram.programData as Record<string, unknown>;
 
-    if (!programData || !programData.weeks) {
+    if (!programData?.weeks) {
       return {
         success: false,
         error: 'Invalid program data',

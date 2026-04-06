@@ -42,6 +42,7 @@ export function WarmupInterstitial({ open, onContinue, onCancel, onDismissPerman
       onKeyDown={e => { if (e.key === 'Escape') onCancel() }}
       aria-label="Close dialog"
     >
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: presentation wrapper stops click propagation */}
       <div
         role="presentation"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}

@@ -85,7 +85,7 @@ export default function SwipeableCard({
   }, [revealWidth])
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (!touchRef.current || !touchRef.current.directionLocked) {
+    if (!touchRef.current?.directionLocked) {
       touchRef.current = null
       setIsDragging(false)
       return
