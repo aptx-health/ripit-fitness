@@ -3,6 +3,7 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { Heart, KeyRound, MessageSquarePlus, Moon, Palette, RotateCcw, Save, Shield, Sun } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import FeedbackModal from '@/components/features/FeedbackModal'
 import { useThemePreference } from '@/hooks/useThemePreference'
@@ -16,6 +17,7 @@ type ConnectedAccounts = {
 }
 
 export default function SettingsPage() {
+  const router = useRouter()
   const { data: session } = useSession()
   const { settings, isLoading, updateSettings } = useUserSettings()
   const { preference, updateTheme } = useThemePreference()
@@ -459,6 +461,7 @@ export default function SettingsPage() {
                   onClick={async () => {
                     await updateSettings({ completedTours: '[]' })
                     setSaved(false)
+                    router.refresh()
                   }}
                   className="px-4 py-2 border-2 border-border bg-muted text-foreground hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center gap-2"
                 >
