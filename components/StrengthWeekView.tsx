@@ -565,7 +565,7 @@ export default function StrengthWeekView({
               }
             }}
             disabled={completingWeek}
-            className="w-full py-3 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all text-sm font-semibold uppercase tracking-wider doom-focus-ring disabled:opacity-50"
+            className="w-full py-3.5 text-muted-foreground hover:text-foreground bg-muted/20 hover:bg-muted/40 active:bg-muted/60 transition-all text-sm font-semibold uppercase tracking-wider doom-focus-ring disabled:opacity-50"
           >
             <div className="flex items-center justify-center gap-2">
               <CheckCircle size={16} />
