@@ -4,6 +4,8 @@ import { ChevronDown, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 
+import { clientLogger } from '@/lib/client-logger'
+
 type Exercise = {
   name: string
   exerciseGroup: string | null
@@ -61,7 +63,7 @@ export default function WorkoutHistoryList({ count, compact = false }: Props) {
       const data = await response.json()
       setCompletions(data.completions)
     } catch (error) {
-      console.error('Error fetching workout history:', error)
+      clientLogger.error('Error fetching workout history:', error)
       alert('Failed to load workout history. Please try again.')
     } finally {
       setIsLoading(false)
@@ -126,44 +128,6 @@ export default function WorkoutHistoryList({ count, compact = false }: Props) {
       ))}
     </div>
   )
-
-  // Compact mode uses a collapsible section (like Archived Programs)
-  if (compact) {
-    return (
-      <div className="bg-card border border-border doom-corners">
-        <button
-          type="button"
-          onClick={() => setSectionExpanded(!sectionExpanded)}
-          className="w-full px-6 py-4 flex items-center justify-between hover:bg-muted transition-colors"
-        >
-          <div className="flex items-center gap-2">
-            {sectionExpanded ? (
-              <ChevronDown className="w-5 h-5 text-muted-foreground" />
-            ) : (
-              <ChevronRight className="w-5 h-5 text-muted-foreground" />
-            )}
-            <h3 className="text-lg font-semibold text-foreground uppercase tracking-wide">
-              Recent History
-            </h3>
-            <span className="px-2 py-0.5 bg-muted text-muted-foreground text-xs font-semibold">
-              {count}
-            </span>
-          </div>
-        </button>
-        {sectionExpanded && (
-          <div className="border-t border-border">
-            {isLoading ? (
-              <div className="p-4">{renderSkeleton()}</div>
-            ) : (
-              <div className="divide-y divide-border">
-                {completions.map((completion) => renderHistoryItem(completion))}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    )
-  }
 
   // Shared history item renderer
   const renderHistoryItem = (completion: WorkoutCompletion) => {
@@ -273,6 +237,44 @@ export default function WorkoutHistoryList({ count, compact = false }: Props) {
                 View Full Workout →
               </Link>
             </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // Compact mode uses a collapsible section (like Archived Programs)
+  if (compact) {
+    return (
+      <div className="bg-card border border-border doom-corners">
+        <button
+          type="button"
+          onClick={() => setSectionExpanded(!sectionExpanded)}
+          className="w-full px-6 py-4 flex items-center justify-between hover:bg-muted transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            {sectionExpanded ? (
+              <ChevronDown className="w-5 h-5 text-muted-foreground" />
+            ) : (
+              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+            )}
+            <h3 className="text-lg font-semibold text-foreground uppercase tracking-wide">
+              Recent History
+            </h3>
+            <span className="px-2 py-0.5 bg-muted text-muted-foreground text-xs font-semibold">
+              {count}
+            </span>
+          </div>
+        </button>
+        {sectionExpanded && (
+          <div className="border-t border-border">
+            {isLoading ? (
+              <div className="p-4">{renderSkeleton()}</div>
+            ) : (
+              <div className="divide-y divide-border">
+                {completions.map((completion) => renderHistoryItem(completion))}
+              </div>
+            )}
           </div>
         )}
       </div>
