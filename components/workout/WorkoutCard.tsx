@@ -1,7 +1,6 @@
 'use client'
 
-import { Check, ChevronRight, Eye, MoreVertical, SkipForward } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { Check, ChevronRight, Eye, SkipForward } from 'lucide-react'
 import SwipeableCard from '@/components/ui/SwipeableCard'
 
 type Workout = {
@@ -43,9 +42,6 @@ export default function WorkoutCard({
   const isCompleted = latestCompletion?.status === 'completed'
   const isDraft = latestCompletion?.status === 'draft'
   const isSkipped = latestCompletion?.status === 'skipped'
-
-  const [showMenu, setShowMenu] = useState(false)
-  const menuRef = useRef<HTMLDivElement>(null)
 
   // Primary tap action based on state
   const handleCardTap = () => {
@@ -163,52 +159,6 @@ export default function WorkoutCard({
           </div>
         </div>
       </button>
-
-      {/* Desktop kebab menu fallback (hidden on mobile where swipe works) */}
-      {swipeActions.length > 0 && (
-        <div className="hidden md:block absolute top-2 right-2 z-20" ref={menuRef}>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              setShowMenu(!showMenu)
-            }}
-            className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors doom-focus-ring"
-            aria-label="More actions"
-          >
-            <MoreVertical size={16} />
-          </button>
-          {showMenu && (
-            <div className="absolute right-0 top-full mt-1 bg-card border border-border shadow-lg z-30 min-w-[140px] doom-noise">
-              <button
-                type="button"
-                onClick={() => {
-                  onView(workout.id)
-                  setShowMenu(false)
-                }}
-                className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors flex items-center gap-2"
-              >
-                <Eye size={14} />
-                Preview
-              </button>
-              {!latestCompletion && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    onSkip(workout.id)
-                    setShowMenu(false)
-                  }}
-                  disabled={isSkipping}
-                  className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors flex items-center gap-2 disabled:opacity-50"
-                >
-                  <SkipForward size={14} />
-                  Skip
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-      )}
     </SwipeableCard>
   )
 }
