@@ -56,6 +56,7 @@ export default async function TrainingPage({ searchParams }: Props) {
         </div>
 
         {/* Content */}
+        <div className="px-4 sm:px-0">
         {weekData ? (
           <StrengthWeekView
             programId={weekData.program.id}
@@ -67,6 +68,7 @@ export default async function TrainingPage({ searchParams }: Props) {
         ) : (
           <NoActiveProgram />
         )}
+        </div>
       </div>
     </div>
   )

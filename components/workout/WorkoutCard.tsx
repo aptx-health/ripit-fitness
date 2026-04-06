@@ -58,8 +58,8 @@ export default function WorkoutCard({
     }
   }
 
-  // Desktop: click chevron to expand action row instead of navigating
-  const handleDesktopChevronClick = (e: React.MouseEvent) => {
+  // Click chevron to expand action row
+  const handleChevronClick = (e: React.MouseEvent) => {
     e.stopPropagation()
     setExpanded(!expanded)
   }
@@ -163,20 +163,15 @@ export default function WorkoutCard({
             {(isLoading || isSkipping || isUnskipping) ? (
               <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
             ) : hasActions ? (
-              <>
-                {/* Mobile: static chevron (swipe reveals actions) */}
-                <ChevronRight size={18} className="text-muted-foreground md:hidden" />
-                {/* Desktop: clickable chevron toggles action row */}
-                <button
-                  type="button"
-                  onClick={handleDesktopChevronClick}
-                  className="hidden md:block p-1 text-muted-foreground hover:text-foreground transition-colors doom-focus-ring"
-                  aria-label={expanded ? 'Collapse actions' : 'Expand actions'}
-                  aria-expanded={expanded}
-                >
-                  {expanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-                </button>
-              </>
+              <button
+                type="button"
+                onClick={handleChevronClick}
+                className="p-1 text-muted-foreground hover:text-foreground transition-colors doom-focus-ring"
+                aria-label={expanded ? 'Collapse actions' : 'Expand actions'}
+                aria-expanded={expanded}
+              >
+                {expanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+              </button>
             ) : (
               <ChevronRight size={18} className="text-muted-foreground" />
             )}
@@ -184,9 +179,9 @@ export default function WorkoutCard({
         </div>
       </button>
 
-      {/* Desktop expanded action row */}
+      {/* Expanded action row */}
       {expanded && hasActions && (
-        <div className="hidden md:flex items-center gap-3 px-4 py-2 border-t border-border bg-muted/30">
+        <div className="flex items-center gap-3 px-4 py-2 border-t border-border bg-muted/30">
           <button
             type="button"
             onClick={() => { onView(workout.id); setExpanded(false) }}
