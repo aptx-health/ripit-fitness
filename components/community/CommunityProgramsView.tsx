@@ -127,7 +127,7 @@ export default function CommunityProgramsView({
             {/* Level Filter Popover */}
             <Popover>
               <PopoverTrigger asChild>
-                <button type="button" className="px-4 py-2 border-2 border-border text-foreground hover:border-primary transition-colors uppercase tracking-wider font-semibold doom-focus-ring flex items-center gap-2 text-sm">
+                <button type="button" data-tour="level-filter" className="px-4 py-2 border-2 border-border text-foreground hover:border-primary transition-colors uppercase tracking-wider font-semibold doom-focus-ring flex items-center gap-2 text-sm">
                   Level: {selectedLevel ? LEVEL_LABELS[selectedLevel] : 'All'}
                   <ChevronDown size={16} />
                 </button>
@@ -158,7 +158,7 @@ export default function CommunityProgramsView({
             {/* Goals Filter Popover */}
             <Popover>
               <PopoverTrigger asChild>
-                <button type="button" className="px-4 py-2 border-2 border-border text-foreground hover:border-primary transition-colors uppercase tracking-wider font-semibold doom-focus-ring flex items-center gap-2 text-sm">
+                <button type="button" data-tour="goals-filter" className="px-4 py-2 border-2 border-border text-foreground hover:border-primary transition-colors uppercase tracking-wider font-semibold doom-focus-ring flex items-center gap-2 text-sm">
                   Goals: {selectedGoals.length > 0 ? `${selectedGoals.length} selected` : 'Any'}
                   <ChevronDown size={16} />
                 </button>
@@ -218,11 +218,12 @@ export default function CommunityProgramsView({
           <>
             {/* Program Cards */}
             <div className="grid grid-cols-1 gap-4 mb-8">
-              {paginatedPrograms.map((program) => (
+              {paginatedPrograms.map((program, index) => (
                 <CommunityProgramCard
                   key={program.id}
                   program={program}
                   currentUserId={currentUserId}
+                  {...(index === 0 ? { 'data-tour': 'program-card' } : {})}
                 />
               ))}
             </div>
