@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
 
 type ActivationConfirmModalProps = {
@@ -61,15 +61,7 @@ export default function ActivationConfirmModal({
     return () => controller.abort()
   }, [programId])
 
-  // Auto-activate if no history (just show the replace-active warning if needed)
-  useEffect(() => {
-    if (historyState.status === 'no_history' && !existingActiveProgram) {
-      activateAndRedirect()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [historyState.status])
-
-  const activateAndRedirect = async () => {
+  const activateAndRedirect = useCallback(async () => {
     setActivating(true)
     setError(null)
 
@@ -91,7 +83,14 @@ export default function ActivationConfirmModal({
       setError(err instanceof Error ? err.message : 'Failed to activate program')
       setActivating(false)
     }
-  }
+  }, [programId, router, onClose])
+
+  // Auto-activate if no history (just show the replace-active warning if needed)
+  useEffect(() => {
+    if (historyState.status === 'no_history' && !existingActiveProgram) {
+      activateAndRedirect()
+    }
+  }, [historyState.status, existingActiveProgram, activateAndRedirect])
 
   const handleResetAndActivate = async () => {
     setActivating(true)
