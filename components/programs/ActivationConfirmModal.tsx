@@ -27,6 +27,7 @@ export default function ActivationConfirmModal({
   const [historyState, setHistoryState] = useState<HistoryState>({ status: 'loading' })
   const [activating, setActivating] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [confirmingReset, setConfirmingReset] = useState(false)
 
   // Check workout history on mount
   useEffect(() => {
@@ -204,6 +205,48 @@ export default function ActivationConfirmModal({
   // Main modal: has history OR needs to confirm replacing active program
   const hasHistory = historyState.status === 'has_history'
 
+  // Reset confirmation view
+  if (confirmingReset) {
+    return (
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="bg-card border-2 border-primary p-8 max-w-md w-full doom-noise doom-card doom-corners shadow-2xl">
+          <h3 className="text-xl font-bold text-foreground doom-heading mb-4">
+            START FRESH?
+          </h3>
+
+          <p className="text-base text-warning-text mb-6">
+            Workout completion progress will be reset. Your logged sets are kept for history.
+          </p>
+
+          {error && (
+            <div className="bg-error-muted border border-error-border p-3 mb-6">
+              <p className="text-sm text-error">{error}</p>
+            </div>
+          )}
+
+          <div className="flex flex-col gap-3">
+            <button
+              type="button"
+              onClick={handleResetAndActivate}
+              disabled={activating}
+              className="w-full px-4 py-2.5 bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
+            >
+              {activating ? 'RESETTING...' : 'YES, START FRESH'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setConfirmingReset(false)}
+              disabled={activating}
+              className="w-full py-2 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50 font-semibold uppercase tracking-wider"
+            >
+              GO BACK
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-card border-2 border-primary p-8 max-w-md w-full doom-noise doom-card doom-corners shadow-2xl">
@@ -242,11 +285,11 @@ export default function ActivationConfirmModal({
               </button>
               <button
                 type="button"
-                onClick={handleResetAndActivate}
+                onClick={() => setConfirmingReset(true)}
                 disabled={activating}
                 className="w-full px-4 py-2.5 border-2 border-border text-foreground hover:bg-muted disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
               >
-                {activating ? 'RESETTING...' : 'START FRESH'}
+                START FRESH
               </button>
               <button
                 type="button"
