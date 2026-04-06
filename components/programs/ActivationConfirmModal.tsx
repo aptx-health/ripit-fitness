@@ -85,7 +85,7 @@ export default function ActivationConfirmModal({
     }
   }, [programId, router, onClose])
 
-  // Auto-activate if no history (just show the replace-active warning if needed)
+  // Auto-activate if no history and no active program conflict
   useEffect(() => {
     if (historyState.status === 'no_history' && !existingActiveProgram) {
       activateAndRedirect()
@@ -97,7 +97,6 @@ export default function ActivationConfirmModal({
     setError(null)
 
     try {
-      // Reset first
       const restartResponse = await fetch(`/api/programs/${programId}/restart`, {
         method: 'POST',
       })
@@ -109,7 +108,6 @@ export default function ActivationConfirmModal({
       const restartData = await restartResponse.json()
       clientLogger.info(`Archived ${restartData.archivedCompletions} completions before activation`)
 
-      // Then activate
       await activateAndRedirect()
     } catch (err) {
       clientLogger.error('Error resetting and activating program:', err)
@@ -121,10 +119,7 @@ export default function ActivationConfirmModal({
   // Loading state
   if (historyState.status === 'loading') {
     return (
-      <div
-        style={{ position: 'fixed', inset: 0, zIndex: 50 }}
-        className="bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
-      >
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
         <div className="bg-card border-2 border-primary p-6 max-w-md w-full doom-noise doom-card shadow-2xl">
           <div className="flex justify-center py-4">
             <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
@@ -137,10 +132,7 @@ export default function ActivationConfirmModal({
   // Auto-activating (no history, no active program conflict)
   if (historyState.status === 'no_history' && !existingActiveProgram) {
     return (
-      <div
-        style={{ position: 'fixed', inset: 0, zIndex: 50 }}
-        className="bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
-      >
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
         <div className="bg-card border-2 border-primary p-6 max-w-md w-full doom-noise doom-card shadow-2xl">
           {error ? (
             <>
@@ -150,7 +142,7 @@ export default function ActivationConfirmModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="w-full px-4 py-3 border-2 border-border text-foreground hover:bg-muted doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
+                className="w-full px-4 py-3 border-2 border-border text-foreground hover:bg-muted disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
               >
                 CLOSE
               </button>
@@ -165,13 +157,10 @@ export default function ActivationConfirmModal({
     )
   }
 
-  // Error checking history — show it but let user proceed
+  // Error checking history -- let user proceed anyway
   if (historyState.status === 'error') {
     return (
-      <div
-        style={{ position: 'fixed', inset: 0, zIndex: 50 }}
-        className="bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
-      >
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
         <div className="bg-card border-2 border-primary p-6 max-w-md w-full doom-noise doom-card shadow-2xl">
           <h3 className="text-2xl font-bold text-foreground doom-heading mb-4">
             ACTIVATE PROGRAM?
@@ -224,10 +213,7 @@ export default function ActivationConfirmModal({
   const hasHistory = historyState.status === 'has_history'
 
   return (
-    <div
-      style={{ position: 'fixed', inset: 0, zIndex: 50 }}
-      className="bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
-    >
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-card border-2 border-primary p-6 max-w-md w-full doom-noise doom-card shadow-2xl">
         <h3 className="text-2xl font-bold text-foreground doom-heading mb-4">
           ACTIVATE PROGRAM?
@@ -246,7 +232,7 @@ export default function ActivationConfirmModal({
         )}
 
         {hasHistory && (
-          <div className="bg-accent-muted border border-accent p-3 mb-4">
+          <div className="bg-muted border border-border p-3 mb-4">
             <p className="text-sm text-foreground">
               This program has <span className="font-bold">{historyState.completionCount}</span> completed workout{historyState.completionCount !== 1 ? 's' : ''}. Would you like to continue where you left off or start fresh?
             </p>
@@ -274,13 +260,21 @@ export default function ActivationConfirmModal({
                 type="button"
                 onClick={handleResetAndActivate}
                 disabled={activating}
-                className="w-full px-4 py-3 bg-secondary text-secondary-foreground border-2 border-secondary hover:bg-secondary-hover disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
+                className="w-full px-4 py-3 border-2 border-border text-foreground hover:bg-muted disabled:opacity-50 doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
               >
                 {activating ? 'RESETTING...' : 'START FRESH'}
               </button>
               <p className="text-xs text-muted-foreground text-center">
                 Starting fresh archives your progress but keeps your logged sets for history
               </p>
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={activating}
+                className="w-full px-4 py-2 text-muted-foreground hover:text-foreground text-sm font-medium uppercase tracking-wider"
+              >
+                CANCEL
+              </button>
             </>
           ) : (
             <div className="flex gap-3">
@@ -301,17 +295,6 @@ export default function ActivationConfirmModal({
                 {activating ? 'ACTIVATING...' : 'YES, ACTIVATE'}
               </button>
             </div>
-          )}
-
-          {hasHistory && (
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={activating}
-              className="w-full px-4 py-2 text-muted-foreground hover:text-foreground text-sm font-medium uppercase tracking-wider"
-            >
-              CANCEL
-            </button>
           )}
         </div>
       </div>
