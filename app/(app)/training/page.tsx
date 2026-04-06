@@ -46,8 +46,8 @@ export default async function TrainingPage({ searchParams }: Props) {
     : rawHistoryCount
 
   return (
-    <div className="min-h-screen bg-background sm:px-6 py-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-background">
+      <div className="max-w-2xl mx-auto sm:px-6 py-4">
         {/* Page Header */}
         <div className="px-4 sm:px-0 mb-4">
           <h1 className="text-4xl font-bold text-foreground doom-title uppercase tracking-wider">
