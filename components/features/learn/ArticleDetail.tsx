@@ -292,7 +292,10 @@ export default function ArticleDetail({
 
       {/* Mobile fixed bottom nav — collection prev/next */}
       {collectionContext && (
-        <div className="fixed bottom-16 left-0 right-0 sm:hidden bg-card border-t-2 border-border z-40">
+        <div
+          className="fixed left-0 right-0 sm:hidden bg-card border-t-2 border-border z-40"
+          style={{ bottom: 'calc(3.5rem + env(safe-area-inset-bottom, 0px))' }}
+        >
           <div className="grid grid-cols-3 items-stretch">
             {prevArticle ? (
               <Link
