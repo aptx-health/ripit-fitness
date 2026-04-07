@@ -1587,6 +1587,12 @@ body {
   letter-spacing: 0.02em;
 }
 
+/* Workaround: Next.js streaming SSR can orphan elements at body level.
+   Hide any training-scoped widgets that escape outside the React tree. */
+body > [data-training-widget] {
+  display: none !important;
+}
+
 /* ============================================
    DOOM THEME UTILITIES
    ============================================ */

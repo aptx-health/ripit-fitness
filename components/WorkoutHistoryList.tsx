@@ -246,7 +246,7 @@ export default function WorkoutHistoryList({ count, compact = false }: Props) {
   // Compact mode uses a collapsible section (like Archived Programs)
   if (compact) {
     return (
-      <div className="bg-card border border-border doom-corners">
+      <div data-training-widget className="bg-card border border-border doom-corners">
         <button
           type="button"
           onClick={() => setSectionExpanded(!sectionExpanded)}

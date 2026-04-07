@@ -559,6 +559,7 @@ export default function StrengthWeekView({
         {hasIncompleteWorkouts && (
           <button
             type="button"
+            data-training-widget
             onClick={() => {
               if (confirm('This will mark all remaining workouts as skipped. Are you sure?')) {
                 handleCompleteWeek()
