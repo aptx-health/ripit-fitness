@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { batchInsertWeekContent } from '@/lib/db/batch-insert'
+import { logger } from '@/lib/logger'
 
 export async function POST(
   _request: NextRequest,
@@ -108,16 +109,16 @@ export async function POST(
       })
     } catch (innerError) {
       // Cleanup: delete the shell week on failure
-      console.error('Error during week duplication, cleaning up:', innerError)
+      logger.error({ error: innerError, context: 'week-duplicate' }, 'Error during week duplication, cleaning up')
       await prisma.week.delete({
         where: { id: newWeek.id }
       }).catch(cleanupError => {
-        console.error('Failed to cleanup week:', cleanupError)
+        logger.error({ error: cleanupError, context: 'week-duplicate' }, 'Failed to cleanup week')
       })
       throw innerError
     }
   } catch (error) {
-    console.error('Error duplicating week:', error)
+    logger.error({ error, context: 'week-duplicate' }, 'Failed to duplicate week')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

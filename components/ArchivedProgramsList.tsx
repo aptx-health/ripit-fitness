@@ -4,6 +4,7 @@ import { ChevronDown, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { clientLogger } from '@/lib/client-logger'
 
 type Program = {
   id: string
@@ -40,7 +41,7 @@ export default function ArchivedProgramsList({ programs }: Props) {
       // Refresh the page to show updated state
       router.refresh()
     } catch (error) {
-      console.error('Error unarchiving program:', error)
+      clientLogger.error('Error unarchiving program:', error)
       alert('Failed to unarchive program. Please try again.')
     } finally {
       setUnarchivingId(null)

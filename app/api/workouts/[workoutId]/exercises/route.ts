@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { logger } from '@/lib/logger'
 
 type AddExerciseRequest = {
   exerciseDefinitionId: string
@@ -142,7 +143,7 @@ export async function POST(
       exercise: newExercise
     })
   } catch (error) {
-    console.error('Error adding exercise to workout:', error)
+    logger.error({ error, context: 'exercise-add' }, 'Failed to add exercise to workout')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -210,7 +211,7 @@ export async function GET(
       exercises
     })
   } catch (error) {
-    console.error('Error fetching workout exercises:', error)
+    logger.error({ error, context: 'exercises-fetch' }, 'Failed to fetch workout exercises')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

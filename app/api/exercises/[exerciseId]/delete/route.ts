@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { logger } from '@/lib/logger'
 
 type DeleteExerciseRequest = {
   applyToFuture: boolean
@@ -114,7 +115,7 @@ export async function POST(
       deletedCount
     })
   } catch (error) {
-    console.error('Error deleting exercise:', error)
+    logger.error({ error, context: 'exercise-delete' }, 'Failed to delete exercise')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -4,6 +4,7 @@ import { Plus, Trash } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/radix/popover'
 import { useUserSettings } from '@/hooks/useUserSettings'
+import { clientLogger } from '@/lib/client-logger'
 import { RIR_PRESETS, RPE_PRESETS } from '@/lib/constants/intensity-presets'
 import type { ExerciseDefinition } from './ExerciseSearchInterface'
 
@@ -208,7 +209,7 @@ export function SetConfigurationInterface({
     try {
       await onDuplicateSet(setId)
     } catch (error) {
-      console.error('Error duplicating set:', error)
+      clientLogger.error('Error duplicating set:', error)
     } finally {
       setDuplicatingSetId(null)
     }

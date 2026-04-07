@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { logger } from '@/lib/logger'
 import { getBatchExercisePerformance } from '@/lib/queries/exercise-history'
 
 export async function GET(
@@ -137,7 +138,7 @@ export async function GET(
       exerciseHistory,
     })
   } catch (error) {
-    console.error('Error fetching workout:', error)
+    logger.error({ error, context: 'workout-fetch' }, 'Failed to fetch workout')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -202,7 +203,7 @@ export async function PATCH(
       workout: updatedWorkout
     })
   } catch (error) {
-    console.error('Error updating workout:', error)
+    logger.error({ error, context: 'workout-update' }, 'Failed to update workout')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -286,7 +287,7 @@ export async function DELETE(
       message: 'Workout deleted successfully'
     })
   } catch (error) {
-    console.error('Error deleting workout:', error)
+    logger.error({ error, context: 'workout-delete' }, 'Failed to delete workout')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

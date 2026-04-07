@@ -1,5 +1,6 @@
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
+import { clientLogger } from '@/lib/client-logger'
 import type { Week } from '@/types/program-builder'
 
 type UseProgramActionsParams = {
@@ -71,9 +72,9 @@ export function useProgramActions({
       setProgramId(program.id)
       setWeeks(program.weeks || [])
 
-      console.log('Program created successfully:', program)
+      clientLogger.debug('Program created successfully:', program)
     } catch (error) {
-      console.error('Error creating program:', error)
+      clientLogger.error('Error creating program:', error)
       setError(error instanceof Error ? error.message : 'Failed to create program')
     } finally {
       setIsLoading(false)
@@ -98,7 +99,7 @@ export function useProgramActions({
         throw new Error(error.error || 'Failed to update program')
       }
     } catch (error) {
-      console.error('Error updating program details:', error)
+      clientLogger.error('Error updating program details:', error)
       setError(error instanceof Error ? error.message : 'Failed to update program')
     }
   }, [editMode, programId, programName, programDescription, setError])
@@ -152,7 +153,7 @@ export function useProgramActions({
         }
       }
     } catch (error) {
-      console.error('Error checking for active programs:', error)
+      clientLogger.error('Error checking for active programs:', error)
     }
 
     setShowActivationModal(true)
@@ -177,10 +178,10 @@ export function useProgramActions({
       }
 
       const { program: duplicatedProgram } = await response.json()
-      console.log('Program duplicated successfully:', duplicatedProgram)
+      clientLogger.debug('Program duplicated successfully:', duplicatedProgram)
       router.push(`/programs/${duplicatedProgram.id}/edit`)
     } catch (error) {
-      console.error('Error duplicating program:', error)
+      clientLogger.error('Error duplicating program:', error)
       setError(error instanceof Error ? error.message : 'Failed to duplicate program')
     } finally {
       setIsLoading(false)

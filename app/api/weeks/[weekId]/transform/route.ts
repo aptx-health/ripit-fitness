@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { logger } from '@/lib/logger'
 import { applyIntensityAdjustment, applyVolumeAdjustment } from '@/lib/transformations/week-transform'
 
 export async function POST(
@@ -128,7 +129,7 @@ export async function POST(
       stats
     })
   } catch (error) {
-    console.error('Week transform error:', error)
+    logger.error({ error, context: 'week-transform' }, 'Failed to transform week')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

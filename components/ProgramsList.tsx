@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { clientLogger } from '@/lib/client-logger'
 
 type Program = {
   id: string
@@ -37,7 +38,7 @@ export default function ProgramsList({ programs }: Props) {
       // Refresh the page to show updated state
       router.refresh()
     } catch (error) {
-      console.error('Error activating program:', error)
+      clientLogger.error('Error activating program:', error)
       alert('Failed to activate program. Please try again.')
     } finally {
       setActivatingId(null)
@@ -62,7 +63,7 @@ export default function ProgramsList({ programs }: Props) {
       // Refresh the page to show updated state
       router.refresh()
     } catch (error) {
-      console.error('Error archiving program:', error)
+      clientLogger.error('Error archiving program:', error)
       alert('Failed to archive program. Please try again.')
     } finally {
       setArchivingId(null)

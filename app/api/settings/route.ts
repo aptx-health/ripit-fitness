@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { logger } from '@/lib/logger'
 
 type UpdateSettingsRequest = {
   displayName?: string
@@ -48,7 +49,7 @@ export async function GET(_request: NextRequest) {
       settings
     })
   } catch (error) {
-    console.error('Error fetching user settings:', error)
+    logger.error({ error, context: 'settings-get' }, 'Failed to fetch user settings')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -109,7 +110,7 @@ export async function PUT(request: NextRequest) {
       settings
     })
   } catch (error) {
-    console.error('Error updating user settings:', error)
+    logger.error({ error, context: 'settings-update' }, 'Failed to update user settings')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

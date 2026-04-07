@@ -11,6 +11,7 @@ import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
 import { useUserSettings } from '@/hooks/useUserSettings'
 import { useWorkoutDraft } from '@/hooks/useWorkoutDraft'
 import { completeDraft, discardDraft } from '@/lib/api/workout-sets'
+import { clientLogger } from '@/lib/client-logger'
 import { parseRepsFromPrescribed } from '@/lib/constants/intensity-presets'
 import { WORKOUT_LOGGER_STEPS, WORKOUT_LOGGER_TOUR_ID } from '@/lib/tour/steps/workout-logger'
 import type { LoggedSet } from '@/types/workout'
@@ -335,7 +336,7 @@ export default function ExerciseLoggingModal({
       await onComplete()
       onClose()
     } catch (error) {
-      console.error('Error completing workout:', error)
+      clientLogger.error('Error completing workout:', error)
       setIsSubmitting(false)
       setIsConfirming(false)
       const message = !navigator.onLine
