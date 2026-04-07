@@ -95,7 +95,7 @@ export default function ArticleDetail({
         {collectionContext ? (
           <Link
             href={backHref}
-            className="sm:hidden fixed left-3 flex items-center gap-2 px-3 py-2
+            className="sm:hidden fixed left-3 flex items-center gap-2 px-3.5 py-2.5
               bg-card border-2 border-border text-foreground
               shadow-[2px_2px_0_rgba(0,0,0,0.3)]"
             style={{
@@ -104,11 +104,11 @@ export default function ArticleDetail({
             }}
             aria-label={`Back to ${collectionContext.name}`}
           >
-            <BookOpen className="h-4 w-4 text-primary flex-shrink-0" />
-            <span className="text-[10px] font-bold uppercase tracking-wider max-w-[120px] truncate">
+            <BookOpen className="h-5 w-5 text-primary flex-shrink-0" />
+            <span className="text-xs font-bold uppercase tracking-wider max-w-[140px] truncate">
               {collectionContext.name}
             </span>
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
               {collectionContext.currentIndex + 1}/{collectionContext.articles.length}
             </span>
           </Link>
@@ -300,21 +300,21 @@ export default function ArticleDetail({
             {prevArticle ? (
               <Link
                 href={`/learn/${prevArticle.slug}?collection=${collectionContext.id}`}
-                className="flex items-center gap-1.5 px-4 py-3 border-r border-border
+                className="flex items-center gap-2 px-4 py-4 border-r border-border
                   active:bg-muted transition-colors"
               >
-                <ChevronLeft className="h-4 w-4 flex-shrink-0 text-primary" />
-                <span className="text-xs text-foreground font-semibold uppercase tracking-wider">
+                <ChevronLeft className="h-5 w-5 flex-shrink-0 text-primary" />
+                <span className="text-sm text-foreground font-semibold uppercase tracking-wider">
                   Previous
                 </span>
               </Link>
             ) : (
-              <div className="px-4 py-3 border-r border-border" />
+              <div className="px-4 py-4 border-r border-border" />
             )}
 
             {/* Position indicator */}
             <div className="flex items-center justify-center px-2">
-              <span className="text-xs text-muted-foreground font-bold tracking-wider whitespace-nowrap">
+              <span className="text-sm text-muted-foreground font-bold tracking-wider whitespace-nowrap">
                 {collectionContext.currentIndex + 1}/{collectionContext.articles.length}
               </span>
             </div>
@@ -322,24 +322,24 @@ export default function ArticleDetail({
             {nextArticle ? (
               <Link
                 href={`/learn/${nextArticle.slug}?collection=${collectionContext.id}`}
-                className="flex items-center justify-end gap-1.5 px-4 py-3 border-l border-border
+                className="flex items-center justify-end gap-2 px-4 py-4 border-l border-border
                   active:bg-muted transition-colors"
               >
-                <span className="text-xs text-foreground font-semibold uppercase tracking-wider">
+                <span className="text-sm text-foreground font-semibold uppercase tracking-wider">
                   Next
                 </span>
-                <ChevronRight className="h-4 w-4 flex-shrink-0 text-primary" />
+                <ChevronRight className="h-5 w-5 flex-shrink-0 text-primary" />
               </Link>
             ) : (
               <Link
                 href={`/learn/collections/${collectionContext.id}`}
-                className="flex items-center justify-end gap-1.5 px-4 py-3 border-l border-border
+                className="flex items-center justify-end gap-2 px-4 py-4 border-l border-border
                   active:bg-muted transition-colors"
               >
-                <span className="text-xs text-green-400 font-semibold uppercase tracking-wider">
+                <span className="text-sm text-green-400 font-semibold uppercase tracking-wider">
                   Done
                 </span>
-                <ChevronRight className="h-4 w-4 flex-shrink-0 text-green-400" />
+                <ChevronRight className="h-5 w-5 flex-shrink-0 text-green-400" />
               </Link>
             )}
           </div>
