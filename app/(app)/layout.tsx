@@ -21,7 +21,7 @@ export default async function AppLayout({
   return (
     <DraftWorkoutProvider>
       <TourProvider>
-      <div className="min-h-screen bg-background">
+      <div className="bg-background">
         <Header userEmail={user.email || ''} />
         <FloatingDraftButton />
         <div className="pb-20 md:pb-0">
