@@ -3,7 +3,7 @@ name: quality-check
 description: >
   Reviews recently changed files for code clarity, consistency, and
   maintainability. Simplifies without changing behavior.
-tools: Bash, Read, Edit, Write, Glob, Grep
+tools: Bash, Read, Edit, Write, Glob, Grep, Task
 mode: proactive
 output: pr
 stages:
