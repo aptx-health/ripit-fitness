@@ -2,8 +2,8 @@
 
 import { Filter, Search } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
-import { clientLogger } from '@/lib/client-logger'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/radix/popover'
+import { clientLogger } from '@/lib/client-logger'
 import { EQUIPMENT_LABELS } from '@/lib/constants/program-metadata'
 
 export type ExerciseDefinition = {

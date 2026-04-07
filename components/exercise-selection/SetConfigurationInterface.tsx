@@ -2,9 +2,9 @@
 
 import { Plus, Trash } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
-import { clientLogger } from '@/lib/client-logger'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/radix/popover'
 import { useUserSettings } from '@/hooks/useUserSettings'
+import { clientLogger } from '@/lib/client-logger'
 import { RIR_PRESETS, RPE_PRESETS } from '@/lib/constants/intensity-presets'
 import type { ExerciseDefinition } from './ExerciseSearchInterface'
 

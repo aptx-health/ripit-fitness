@@ -2,8 +2,8 @@
 
 import { ChevronLeft } from 'lucide-react'
 import * as React from 'react'
-import { clientLogger } from '@/lib/client-logger'
 import { Button } from '@/components/ui/Button'
+import { clientLogger } from '@/lib/client-logger'
 import {
   Dialog,
   DialogBody,
