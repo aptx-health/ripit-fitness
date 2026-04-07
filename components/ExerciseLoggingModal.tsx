@@ -3,6 +3,7 @@
 import { AlertTriangle } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { clientLogger } from '@/lib/client-logger'
 import { useTour } from '@/components/tour'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import { useImagePrefetch } from '@/hooks/useImagePrefetch'
@@ -335,7 +336,7 @@ export default function ExerciseLoggingModal({
       await onComplete()
       onClose()
     } catch (error) {
-      console.error('Error completing workout:', error)
+      clientLogger.error('Error completing workout:', error)
       setIsSubmitting(false)
       setIsConfirming(false)
       const message = !navigator.onLine

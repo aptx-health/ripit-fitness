@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { logger } from '@/lib/logger'
 
 type LoggedSetInput = {
   exerciseId: string
@@ -33,7 +34,7 @@ export async function POST(
 
     // Enhanced input validation
     if (!loggedSets || !Array.isArray(loggedSets)) {
-      console.error('Draft API: Invalid input - loggedSets must be an array')
+      logger.error({ workoutId }, 'Draft API: Invalid input - loggedSets must be an array')
       return NextResponse.json(
         { error: 'loggedSets array is required' },
         { status: 400 }
@@ -42,15 +43,15 @@ export async function POST(
 
     // Log the operation type for safety monitoring
     if (loggedSets.length === 0) {
-      console.warn(`⚠️ Draft API: Deletion-only sync for workout ${workoutId} - will remove all existing sets`)
+      logger.warn({ workoutId }, 'Draft API: Deletion-only sync - will remove all existing sets')
     } else {
-      console.log(`📝 Draft API: Sync ${loggedSets.length} sets for workout ${workoutId}`)
+      logger.debug({ workoutId, setCount: loggedSets.length }, 'Draft API: Syncing sets')
     }
 
     // Validate set data structure
     for (const set of loggedSets) {
       if (!set.exerciseId || typeof set.setNumber !== 'number' || typeof set.reps !== 'number') {
-        console.error('Draft API: Invalid set data structure:', set)
+        logger.error({ workoutId, set }, 'Draft API: Invalid set data structure')
         return NextResponse.json(
           { error: 'Invalid set data structure' },
           { status: 422 }
@@ -84,7 +85,7 @@ export async function POST(
     const invalidSets = loggedSets.filter(set => !validExerciseIds.has(set.exerciseId))
 
     if (invalidSets.length > 0) {
-      console.error('Draft API: Invalid exercise IDs detected:', invalidSets.map(s => s.exerciseId))
+      logger.error({ workoutId, invalidExerciseIds: invalidSets.map(s => s.exerciseId) }, 'Draft API: Invalid exercise IDs detected')
       return NextResponse.json(
         {
           error: 'Some exercises no longer exist in this workout. Please refresh and try again.',
@@ -107,7 +108,7 @@ export async function POST(
       })
 
       if (existingCompletion) {
-        console.error(`Draft API: Attempted to save draft for already-completed workout ${workoutId}`)
+        logger.error({ workoutId }, 'Draft API: Attempted to save draft for already-completed workout')
         throw new Error('WORKOUT_ALREADY_COMPLETED')
       }
 
@@ -149,16 +150,16 @@ export async function POST(
       })
       
       // Enhanced safety logging with data transformation details
-      console.log(`Draft sync: Deleted ${deletedSets.count} existing sets, creating ${loggedSets.length} new sets`)
-      
+      logger.debug({ workoutId, deletedCount: deletedSets.count, newCount: loggedSets.length }, 'Draft sync: replacing sets')
+
       if (loggedSets.length === 0 && deletedSets.count > 0) {
-        console.log('🗑️ DELETION OPERATION: All sets deleted - this was a deletion-only sync')
+        logger.info({ workoutId, deletedCount: deletedSets.count }, 'Deletion-only sync: all sets deleted')
       } else if (currentSetCount > loggedSets.length) {
-        console.warn(`⚠️ PARTIAL DELETION: ${currentSetCount} → ${loggedSets.length} sets (${currentSetCount - loggedSets.length} sets removed)`)
+        logger.warn({ workoutId, previousCount: currentSetCount, newCount: loggedSets.length }, 'Partial deletion: sets removed')
       } else if (currentSetCount < loggedSets.length) {
-        console.log(`📈 ADDITION: ${currentSetCount} → ${loggedSets.length} sets (${loggedSets.length - currentSetCount} sets added)`)
+        logger.debug({ workoutId, previousCount: currentSetCount, newCount: loggedSets.length }, 'Sets added')
       } else {
-        console.log(`📝 UPDATE: ${loggedSets.length} sets modified (same count)`)
+        logger.debug({ workoutId, count: loggedSets.length }, 'Sets updated (same count)')
       }
 
       // Create all logged sets for the draft
@@ -200,7 +201,7 @@ export async function POST(
       )
     }
 
-    console.error('Error saving workout draft:', error)
+    logger.error({ error, context: 'draft-save' }, 'Error saving workout draft')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -292,7 +293,7 @@ export async function GET(
       },
     })
   } catch (error) {
-    console.error('Error retrieving workout draft:', error)
+    logger.error({ error, context: 'draft-get' }, 'Error retrieving workout draft')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

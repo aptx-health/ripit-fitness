@@ -2,6 +2,7 @@
 
 import { ChevronLeft } from 'lucide-react'
 import * as React from 'react'
+import { clientLogger } from '@/lib/client-logger'
 import { Button } from '@/components/ui/Button'
 import {
   Dialog,
@@ -62,7 +63,7 @@ export function WizardDialog({
           onStepChange(currentStep + 1)
         }
       } catch (error) {
-        console.error('Wizard step validation failed:', error)
+        clientLogger.error('Wizard step validation failed:', error)
       } finally {
         setIsProcessing(false)
       }

@@ -1,4 +1,5 @@
 import { Queue } from 'bullmq'
+import { logger } from '@/lib/logger'
 
 const QUEUE_NAME = 'program-clone-jobs'
 
@@ -52,6 +53,6 @@ export async function publishProgramCloneJob(job: ProgramCloneJob): Promise<stri
     removeOnFail: 500,
   })
 
-  console.log(`Published clone job for program ${job.programId}: jobId=${bullJob.id}`)
+  logger.info({ programId: job.programId, jobId: bullJob.id }, 'Published clone job')
   return bullJob.id!
 }

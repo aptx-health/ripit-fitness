@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { logger } from '@/lib/logger'
 
 /**
  * GET /api/programs/[programId]/weeks/[weekNumber]
@@ -74,7 +75,7 @@ export async function GET(
       week
     })
   } catch (error) {
-    console.error('Error fetching week:', error)
+    logger.error({ error, context: 'program-week-fetch' }, 'Failed to fetch week')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

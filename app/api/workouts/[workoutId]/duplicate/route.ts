@@ -184,7 +184,7 @@ export async function POST(
       workout: completeDuplicatedWorkout
     })
   } catch (error) {
-    console.error('Error duplicating workout:', error)
+    logger.error({ error, context: 'workout-duplicate' }, 'Failed to duplicate workout')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

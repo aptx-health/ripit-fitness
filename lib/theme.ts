@@ -10,6 +10,8 @@
 // Type Definitions
 // ============================================================================
 
+import { clientLogger } from '@/lib/client-logger';
+
 export type ThemeName = 'doom' | 'cyber' | 'forest' | 'synthwave' | 'dracula' | 'github' | 'ripit' | 'catppuccin' | 'clyde' | 'ninety';
 export type ThemeMode = 'light' | 'dark';
 
@@ -115,7 +117,7 @@ export function getThemePreference(): ThemePreference {
       }
     }
   } catch (error) {
-    console.error('Failed to parse theme preference:', error);
+    clientLogger.error('Failed to parse theme preference:', error);
   }
 
   // Fallback: Use system preference for mode
@@ -134,7 +136,7 @@ export function saveThemePreference(preference: ThemePreference): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(preference));
   } catch (error) {
-    console.error('Failed to save theme preference:', error);
+    clientLogger.error('Failed to save theme preference:', error);
   }
 }
 

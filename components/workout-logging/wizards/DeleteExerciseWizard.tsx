@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { WizardDialog, type WizardStep } from '@/components/ui/radix/wizard-dialog'
+import { clientLogger } from '@/lib/client-logger'
 import { LoadingSuccessStep } from '../wizard-steps/LoadingSuccessStep'
 import { ScopeSelectionStep } from '../wizard-steps/ScopeSelectionStep'
 
@@ -91,7 +92,7 @@ export function DeleteExerciseWizard({
         // Close wizard after refresh completes
         onOpenChange(false)
       } catch (error) {
-        console.error('Error deleting exercise:', error)
+        clientLogger.error('Error deleting exercise:', error)
         setIsLoading(false)
         setIsSuccess(false)
         setErrorMessage(error instanceof Error ? error.message : 'Failed to delete exercise')

@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/server';
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 export async function PATCH(
   request: NextRequest,
@@ -45,7 +46,7 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, program });
   } catch (error) {
-    console.error('Error updating program metadata:', error);
+    logger.error({ error, context: 'program-metadata' }, 'Failed to update program metadata');
     return NextResponse.json(
       { error: 'Failed to update program metadata' },
       { status: 500 }

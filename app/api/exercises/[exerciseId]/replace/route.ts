@@ -2,6 +2,7 @@ import type { Exercise } from '@prisma/client'
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { logger } from '@/lib/logger'
 
 type ReplaceExerciseRequest = {
   newExerciseDefinitionId: string
@@ -232,7 +233,7 @@ export async function POST(
       exercises: updatedExercises
     })
   } catch (error) {
-    console.error('Error replacing exercise:', error)
+    logger.error({ error, context: 'exercise-replace' }, 'Failed to replace exercise')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { logger } from '@/lib/logger'
 
 
 export async function POST(
@@ -65,7 +66,7 @@ export async function POST(
       message: 'Workout cleared successfully',
     })
   } catch (error) {
-    console.error('Error clearing workout:', error)
+    logger.error({ error, context: 'workout-clear' }, 'Failed to clear workout')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
