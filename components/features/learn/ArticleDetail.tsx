@@ -293,30 +293,25 @@ export default function ArticleDetail({
       {/* Mobile fixed bottom nav — collection prev/next */}
       {collectionContext && (
         <div className="fixed bottom-16 left-0 right-0 sm:hidden bg-card border-t-2 border-border z-40">
-          <div className="flex items-stretch">
+          <div className="grid grid-cols-3 items-stretch">
             {prevArticle ? (
               <Link
                 href={`/learn/${prevArticle.slug}?collection=${collectionContext.id}`}
-                className="flex-1 flex items-center gap-2 px-4 py-3 border-r border-border
+                className="flex items-center gap-1.5 px-4 py-3 border-r border-border
                   active:bg-muted transition-colors"
               >
                 <ChevronLeft className="h-4 w-4 flex-shrink-0 text-primary" />
-                <div className="min-w-0">
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold block">
-                    Prev
-                  </span>
-                  <span className="text-xs text-foreground truncate block">
-                    {prevArticle.title}
-                  </span>
-                </div>
+                <span className="text-xs text-foreground font-semibold uppercase tracking-wider">
+                  Previous
+                </span>
               </Link>
             ) : (
-              <div className="flex-1 px-4 py-3 border-r border-border" />
+              <div className="px-4 py-3 border-r border-border" />
             )}
 
             {/* Position indicator */}
-            <div className="flex items-center px-3">
-              <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider whitespace-nowrap">
+            <div className="flex items-center justify-center px-2">
+              <span className="text-xs text-muted-foreground font-bold tracking-wider whitespace-nowrap">
                 {collectionContext.currentIndex + 1}/{collectionContext.articles.length}
               </span>
             </div>
@@ -324,23 +319,18 @@ export default function ArticleDetail({
             {nextArticle ? (
               <Link
                 href={`/learn/${nextArticle.slug}?collection=${collectionContext.id}`}
-                className="flex-1 flex items-center justify-end gap-2 px-4 py-3 border-l border-border
+                className="flex items-center justify-end gap-1.5 px-4 py-3 border-l border-border
                   active:bg-muted transition-colors"
               >
-                <div className="min-w-0 text-right">
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold block">
-                    Next
-                  </span>
-                  <span className="text-xs text-foreground truncate block">
-                    {nextArticle.title}
-                  </span>
-                </div>
+                <span className="text-xs text-foreground font-semibold uppercase tracking-wider">
+                  Next
+                </span>
                 <ChevronRight className="h-4 w-4 flex-shrink-0 text-primary" />
               </Link>
             ) : (
               <Link
                 href={`/learn/collections/${collectionContext.id}`}
-                className="flex-1 flex items-center justify-end gap-2 px-4 py-3 border-l border-border
+                className="flex items-center justify-end gap-1.5 px-4 py-3 border-l border-border
                   active:bg-muted transition-colors"
               >
                 <span className="text-xs text-green-400 font-semibold uppercase tracking-wider">
