@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { logger } from '@/lib/logger'
 
 export async function GET(request: NextRequest) {
   try {
@@ -64,7 +65,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ completions })
   } catch (error) {
-    console.error('Error fetching workout history:', error)
+    logger.error({ error, context: 'workout-history' }, 'Failed to fetch workout history')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

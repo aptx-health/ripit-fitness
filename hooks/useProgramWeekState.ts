@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { clientLogger } from '@/lib/client-logger'
 import type { ExistingProgram, Week, WeekSummary } from '@/types/program-builder'
 
 type UseProgramWeekStateParams = {
@@ -75,7 +76,7 @@ export function useProgramWeekState({
       }
       return null
     } catch (error) {
-      console.error('Error fetching week:', error)
+      clientLogger.error('Error fetching week:', error)
       setError('Failed to load week data')
       return null
     } finally {
@@ -154,9 +155,9 @@ export function useProgramWeekState({
         })
       }
 
-      console.log('Week added successfully:', week)
+      clientLogger.debug('Week added successfully:', week)
     } catch (error) {
-      console.error('Error adding week:', error)
+      clientLogger.error('Error adding week:', error)
       setError(error instanceof Error ? error.message : 'Failed to add week')
     } finally {
       setIsLoading(false)
@@ -222,7 +223,7 @@ export function useProgramWeekState({
         })
       }
     } catch (error) {
-      console.error('Error deleting week:', error)
+      clientLogger.error('Error deleting week:', error)
       setError(error instanceof Error ? error.message : 'Failed to delete week')
     } finally {
       setDeletingWeekId(null)
@@ -258,9 +259,9 @@ export function useProgramWeekState({
         })
       }
 
-      console.log('Week duplicated successfully')
+      clientLogger.debug('Week duplicated successfully')
     } catch (error) {
-      console.error('Error duplicating week:', error)
+      clientLogger.error('Error duplicating week:', error)
       setError(error instanceof Error ? error.message : 'Failed to duplicate week')
     } finally {
       setDuplicatingWeekId(null)
@@ -280,9 +281,9 @@ export function useProgramWeekState({
       } else {
         setWeeks(prev => prev.map(w => w.id === updatedWeek.id ? updatedWeek : w))
       }
-      console.log('Week transformed successfully')
+      clientLogger.debug('Week transformed successfully')
     } catch (error) {
-      console.error('Error updating week after transform:', error)
+      clientLogger.error('Error updating week after transform:', error)
       throw error
     }
   }, [editMode])
@@ -344,7 +345,7 @@ export function useProgramWeekState({
       setEditingWeekName('')
       setEditingWeekDescription('')
     } catch (error) {
-      console.error('Error updating week name:', error)
+      clientLogger.error('Error updating week name:', error)
       setError(error instanceof Error ? error.message : 'Failed to update week name')
     }
   }, [editMode, editingWeekName, editingWeekDescription, setError])
@@ -381,7 +382,7 @@ export function useProgramWeekState({
             setWeeksCache(prev => new Map(prev).set(weekSummary.weekNumber, data.week))
           }
         } catch (error) {
-          console.error(`Failed to prefetch week ${weekSummary.weekNumber}:`, error)
+          clientLogger.error(`Failed to prefetch week ${weekSummary.weekNumber}:`, error)
         }
       }
     }

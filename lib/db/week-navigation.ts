@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/db'
+import { logger } from '@/lib/logger'
 import type { CurrentStrengthWeekData } from './current-week'
 
 /**
@@ -89,7 +90,7 @@ export async function getStrengthWeekByNumber(
       totalWeeks: Number(totalWeeks)
     }
   } catch (error) {
-    console.error('[getStrengthWeekByNumber] Error:', error)
+    logger.error({ error, context: 'week-navigation' }, 'Error fetching week by number')
     return null
   }
 }

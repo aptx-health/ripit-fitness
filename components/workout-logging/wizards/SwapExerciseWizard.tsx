@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { WizardDialog, type WizardStep } from '@/components/ui/radix/wizard-dialog'
+import { clientLogger } from '@/lib/client-logger'
 import {
   type ExerciseDefinition,
   ExerciseSearchStep,
@@ -119,7 +120,7 @@ export function SwapExerciseWizard({
         // Close wizard after refresh completes
         onOpenChange(false)
       } catch (error) {
-        console.error('Error replacing exercise:', error)
+        clientLogger.error('Error replacing exercise:', error)
         setIsLoading(false)
         setIsSuccess(false)
         setErrorMessage(error instanceof Error ? error.message : 'Failed to replace exercise')

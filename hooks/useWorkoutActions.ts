@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import { clientLogger } from '@/lib/client-logger'
 import type { Week } from '@/types/program-builder'
 
 type UseWorkoutActionsParams = {
@@ -62,9 +63,9 @@ export function useWorkoutActions({
         ))
       }
 
-      console.log('Workout added successfully:', workout)
+      clientLogger.debug('Workout added successfully:', workout)
     } catch (error) {
-      console.error('Error adding workout:', error)
+      clientLogger.error('Error adding workout:', error)
       setError(error instanceof Error ? error.message : 'Failed to add workout')
     } finally {
       setIsLoading(false)
@@ -116,9 +117,9 @@ export function useWorkoutActions({
       setEditingWorkoutId(null)
       setEditingWorkoutName('')
 
-      console.log('Workout name updated successfully:', updatedWorkout)
+      clientLogger.debug('Workout name updated successfully:', updatedWorkout)
     } catch (error) {
-      console.error('Error updating workout name:', error)
+      clientLogger.error('Error updating workout name:', error)
       setError(error instanceof Error ? error.message : 'Failed to update workout name')
     } finally {
       setIsLoading(false)
@@ -146,9 +147,9 @@ export function useWorkoutActions({
         workouts: week.workouts.filter(workout => workout.id !== workoutId)
       }))
 
-      console.log('Workout deleted successfully')
+      clientLogger.debug('Workout deleted successfully')
     } catch (error) {
-      console.error('Error deleting workout:', error)
+      clientLogger.error('Error deleting workout:', error)
       setError(error instanceof Error ? error.message : 'Failed to delete workout')
     } finally {
       setDeletingWorkoutId(null)

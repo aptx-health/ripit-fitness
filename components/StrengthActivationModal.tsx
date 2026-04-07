@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { clientLogger } from '@/lib/client-logger'
 
 type StrengthActivationModalProps = {
   programId: string
@@ -36,7 +37,7 @@ export default function StrengthActivationModal({
       router.push('/training')
       router.refresh()
     } catch (err) {
-      console.error('Error activating program:', err)
+      clientLogger.error('Error activating program:', err)
       setError(err instanceof Error ? err.message : 'Failed to activate program')
     } finally {
       setIsLoading(false)

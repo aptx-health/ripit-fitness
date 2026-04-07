@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { logger } from '@/lib/logger'
 
 export async function POST(
   _request: NextRequest,
@@ -43,7 +44,7 @@ export async function POST(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error activating program:', error)
+    logger.error({ error, context: 'program-activate' }, 'Error activating program')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

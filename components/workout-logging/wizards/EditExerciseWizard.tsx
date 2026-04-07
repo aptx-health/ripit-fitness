@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { WizardDialog, type WizardStep } from '@/components/ui/radix/wizard-dialog'
+import { clientLogger } from '@/lib/client-logger'
 import type { ExerciseDefinition } from '../wizard-steps/ExerciseSearchStep'
 import { LoadingSuccessStep } from '../wizard-steps/LoadingSuccessStep'
 import { ScopeSelectionStep } from '../wizard-steps/ScopeSelectionStep'
@@ -176,7 +177,7 @@ export function EditExerciseWizard({
         // Close wizard after refresh completes
         onOpenChange(false)
       } catch (error) {
-        console.error('Error updating exercise:', error)
+        clientLogger.error('Error updating exercise:', error)
         setIsLoading(false)
         setIsSuccess(false)
         setErrorMessage(error instanceof Error ? error.message : 'Failed to update exercise')

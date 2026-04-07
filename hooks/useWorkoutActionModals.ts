@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import { clientLogger } from '@/lib/client-logger'
 import type { Week, WeekSummary } from '@/types/program-builder'
 
 type UseWorkoutActionModalsParams = {
@@ -66,12 +67,12 @@ export function useWorkoutActionModals({
         ))
       }
 
-      console.log('Workout duplicated successfully')
+      clientLogger.debug('Workout duplicated successfully')
       setShowDuplicateWorkoutModal(false)
       setSelectedWorkoutForAction(null)
       setTargetWeekForDuplicate('')
     } catch (error) {
-      console.error('Error duplicating workout:', error)
+      clientLogger.error('Error duplicating workout:', error)
       setError(error instanceof Error ? error.message : 'Failed to duplicate workout')
     } finally {
       setIsLoading(false)
@@ -122,12 +123,12 @@ export function useWorkoutActionModals({
         })))
       }
 
-      console.log('Workout swapped successfully')
+      clientLogger.debug('Workout swapped successfully')
       setShowSwapWorkoutModal(false)
       setSelectedWorkoutForAction(null)
       setTargetWeekForSwap('')
     } catch (error) {
-      console.error('Error swapping workout:', error)
+      clientLogger.error('Error swapping workout:', error)
       setError(error instanceof Error ? error.message : 'Failed to swap workout')
     } finally {
       setIsLoading(false)
