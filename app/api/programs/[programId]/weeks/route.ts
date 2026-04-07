@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { logger } from '@/lib/logger'
 
 type CreateWeekRequest = {
   weekNumber: number
@@ -269,7 +270,7 @@ export async function POST(
       week: completeWeek
     })
   } catch (error) {
-    console.error('Error creating week:', error)
+    logger.error({ error, context: 'week-create' }, 'Failed to create week')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

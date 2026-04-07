@@ -4,6 +4,7 @@ import { Archive, Copy, Star } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { clientLogger } from '@/lib/client-logger'
 import ActivationConfirmModal from './ActivationConfirmModal'
 
 type StrengthActionsProps = {
@@ -86,7 +87,7 @@ export function StrengthUtilityActions({
 
       router.refresh()
     } catch (error) {
-      console.error('Error duplicating program:', error)
+      clientLogger.error('Error duplicating program:', error)
       alert('Failed to duplicate program. Please try again.')
     } finally {
       setDuplicating(false)
@@ -106,7 +107,7 @@ export function StrengthUtilityActions({
 
       router.refresh()
     } catch (error) {
-      console.error('Error archiving program:', error)
+      clientLogger.error('Error archiving program:', error)
       alert('Failed to archive program. Please try again.')
     } finally {
       setArchiving(false)

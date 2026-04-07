@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { clientLogger } from '@/lib/client-logger'
 
 export type PrescribedSet = {
   id: string
@@ -160,7 +161,7 @@ export function useProgressiveExercises(
 
       return data.exercise
     } catch (error) {
-      console.error(`Error fetching exercise at order ${order}:`, error)
+      clientLogger.error(`Error fetching exercise at order ${order}:`, error)
       return null
     }
   }, [workoutId, completionId, totalExercises])
@@ -173,7 +174,7 @@ export function useProgressiveExercises(
       const data: HistoryApiResponse = await response.json()
       return data.history
     } catch (error) {
-      console.error(`Error fetching history for exercise ${exerciseId}:`, error)
+      clientLogger.error(`Error fetching history for exercise ${exerciseId}:`, error)
       return null
     }
   }, [])

@@ -2,6 +2,7 @@ import type { Exercise } from '@prisma/client'
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { logger } from '@/lib/logger'
 
 interface PrescribedSetInput {
   setNumber: number
@@ -223,7 +224,7 @@ export async function PATCH(
       exercises: updatedExercises
     })
   } catch (error) {
-    console.error('Error updating exercise:', error)
+    logger.error({ error, context: 'exercise-update' }, 'Failed to update exercise')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -299,7 +300,7 @@ export async function DELETE(
       message: 'Exercise deleted successfully'
     })
   } catch (error) {
-    console.error('Error deleting exercise:', error)
+    logger.error({ error, context: 'exercise-delete' }, 'Failed to delete exercise')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/server';
 import { cloneCommunityProgram } from '@/lib/community/cloning';
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 export async function POST(
   _request: NextRequest,
@@ -35,7 +36,7 @@ export async function POST(
       status: 'cloning', // Indicates background cloning is in progress
     });
   } catch (error) {
-    console.error('Error adding community program:', error);
+    logger.error({ error, context: 'community-program-add' }, 'Failed to add community program');
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

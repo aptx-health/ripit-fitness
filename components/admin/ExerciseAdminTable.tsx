@@ -8,6 +8,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/radix/popover'
+import { clientLogger } from '@/lib/client-logger'
 import { EQUIPMENT_LABELS } from '@/lib/constants/program-metadata'
 import { FAU_DISPLAY_NAMES } from '@/lib/fau-volume'
 import DeleteExerciseDialog from './DeleteExerciseDialog'
@@ -95,7 +96,7 @@ export default function ExerciseAdminTable() {
       setExercises(data.data)
       setPagination(data.pagination)
     } catch (err) {
-      console.error('Error fetching exercises:', err)
+      clientLogger.error('Error fetching exercises:', err)
       setError(err instanceof Error ? err.message : 'Failed to fetch exercises')
     } finally {
       setIsLoading(false)

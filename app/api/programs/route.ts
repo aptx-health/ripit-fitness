@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { logger } from '@/lib/logger'
 
 type CreateProgramRequest = {
   name: string
@@ -58,7 +59,7 @@ export async function POST(request: NextRequest) {
       program
     })
   } catch (error) {
-    console.error('Error creating program:', error)
+    logger.error({ error, context: 'program-create' }, 'Failed to create program')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -106,7 +107,7 @@ export async function GET(request: NextRequest) {
       programs
     })
   } catch (error) {
-    console.error('Error fetching programs:', error)
+    logger.error({ error, context: 'programs-list' }, 'Failed to fetch programs')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

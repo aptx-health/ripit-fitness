@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import { clientLogger } from '@/lib/client-logger'
 import type { Exercise, Week } from '@/types/program-builder'
 
 type UseExerciseActionsParams = {
@@ -70,9 +71,9 @@ export function useExerciseActions({
         throw new Error('Failed to reorder exercises')
       }
 
-      console.log('Exercises reordered successfully')
+      clientLogger.debug('Exercises reordered successfully')
     } catch (error) {
-      console.error('Error reordering exercises:', error)
+      clientLogger.error('Error reordering exercises:', error)
       setError(error instanceof Error ? error.message : 'Failed to reorder exercises')
 
       // Rollback on failure
@@ -108,9 +109,9 @@ export function useExerciseActions({
         }))
       }))
 
-      console.log('Exercise deleted successfully')
+      clientLogger.debug('Exercise deleted successfully')
     } catch (error) {
-      console.error('Error deleting exercise:', error)
+      clientLogger.error('Error deleting exercise:', error)
       setError(error instanceof Error ? error.message : 'Failed to delete exercise')
     } finally {
       setDeletingExerciseId(null)
@@ -181,7 +182,7 @@ export function useExerciseActions({
           )
         }))
 
-        console.log('Exercise updated successfully:', updatedExercise)
+        clientLogger.debug('Exercise updated successfully:', updatedExercise)
       } else {
         const response = await fetch(`/api/workouts/${selectedWorkoutId}/exercises`, {
           method: 'POST',
@@ -215,10 +216,10 @@ export function useExerciseActions({
           )
         }))
 
-        console.log('Exercise added successfully:', newExercise)
+        clientLogger.debug('Exercise added successfully:', newExercise)
       }
     } catch (error) {
-      console.error('Error with exercise:', error)
+      clientLogger.error('Error with exercise:', error)
       setError(error instanceof Error ? error.message : `Failed to ${editingExercise ? 'update' : 'add'} exercise`)
     } finally {
       setIsLoading(false)

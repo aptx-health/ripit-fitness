@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { logger } from '@/lib/logger'
 
 export async function POST(
   _request: NextRequest,
@@ -70,7 +71,7 @@ export async function POST(
       skipped: skippedCompletions.count,
     })
   } catch (error) {
-    console.error('Error completing week:', error)
+    logger.error({ error, context: 'week-complete' }, 'Failed to complete week')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

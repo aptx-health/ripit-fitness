@@ -56,7 +56,7 @@ export async function POST(
       archivedCompletions: result.archivedCompletions,
     })
   } catch (error) {
-    logger.error({ error, programId: (await params).programId }, 'Error restarting program')
+    logger.error({ error, context: 'program-restart' }, 'Error restarting program')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

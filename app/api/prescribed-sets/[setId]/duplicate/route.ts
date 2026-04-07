@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { logger } from '@/lib/logger'
 
 export async function POST(
   _request: NextRequest,
@@ -114,7 +115,7 @@ export async function POST(
       exercise: exercise
     })
   } catch (error) {
-    console.error('Error duplicating prescribed set:', error)
+    logger.error({ error, context: 'prescribed-set-duplicate' }, 'Failed to duplicate prescribed set')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

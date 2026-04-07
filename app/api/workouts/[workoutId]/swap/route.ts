@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { logger } from '@/lib/logger'
 
 export async function POST(
   request: NextRequest,
@@ -135,7 +136,7 @@ export async function POST(
       workout: updatedWorkout
     })
   } catch (error) {
-    console.error('Error swapping workout:', error)
+    logger.error({ error, context: 'workout-swap' }, 'Failed to swap workout')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

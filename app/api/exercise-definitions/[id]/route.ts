@@ -94,7 +94,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    logger.error({ error, exerciseId: (await params).id }, 'Error fetching exercise definition');
+    logger.error({ error, context: 'exercise-definition-get' }, 'Error fetching exercise definition');
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -244,7 +244,7 @@ export async function PATCH(
       data: updated,
     });
   } catch (error) {
-    logger.error({ error, exerciseId: (await params).id }, 'Error updating exercise definition');
+    logger.error({ error, context: 'exercise-definition-update' }, 'Error updating exercise definition');
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

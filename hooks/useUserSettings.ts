@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { clientLogger } from '@/lib/client-logger'
 
 export type UserSettings = {
   displayName: string | null
@@ -38,7 +39,7 @@ export function useUserSettings(): UseUserSettingsReturn {
       setSettings(data.settings)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch settings')
-      console.error('Error fetching user settings:', err)
+      clientLogger.error('Error fetching user settings:', err)
     } finally {
       setIsLoading(false)
     }
@@ -66,7 +67,7 @@ export function useUserSettings(): UseUserSettingsReturn {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update settings'
       setError(errorMessage)
-      console.error('Error updating user settings:', err)
+      clientLogger.error('Error updating user settings:', err)
       throw new Error(errorMessage)
     }
   }, [])
