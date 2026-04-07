@@ -55,18 +55,77 @@ You may dispatch **parallel sub-agents (Task tool)** to skim the most-changed fi
 - **Lint/type fixes** — bounded by tool output, low risk
 - **Targeted simplifications** (early returns, derived state) — medium risk, per-file judgment
 - **Structural refactors** (file splits, prop reshaping) — high risk, debatable
+- **Security/auth concerns** — never auto-fix; always defer to humans
 
 Then write a short scope decision in your working notes explaining:
 
 1. **What you will fix this run** (one or two buckets, max)
 2. **Why** — the cost/benefit reasoning. Prefer the bucket with the highest `(coverage × confidence) / (risk × tokens)`.
-3. **What you are deferring** — everything else gets a follow-up issue (see Step 4).
+3. **What you are deferring** — everything else becomes a follow-up issue in Step 3.
 
 A sweep that touches 60 files mechanically is better than 4 debatable refactors. Pick the boring win.
 
-## Step 3 — Execute the chosen scope
+## Step 3 — File follow-up issues for everything you're deferring
 
-Apply the fixes. Stay strictly within the scope you committed to. If you discover something that should be fixed but is outside the scope, **do not fix it** — add it to your follow-up issue list instead.
+**Do this BEFORE you start editing.** If your implementation phase bails, runs out of budget, or hits an error halfway through, the deferred concerns must already be captured as issues. Filing them at the end is too late — they'll disappear with the failed run.
+
+For every concern you identified in Step 2 but won't fix this run, create a GitHub issue immediately. Group related findings into a single issue when it makes sense.
+
+### Urgency rating
+
+Apply exactly one urgency label to every issue:
+
+- **`urgency:critical`** — security/auth vulnerabilities, data exposure, broken invariants. Should be looked at within 24h.
+- **`urgency:high`** — bugs that affect users, regressions, likely-incorrect logic. This week.
+- **`urgency:medium`** — recurring quality patterns, structural debt with clear pain. This month.
+- **`urgency:low`** — cosmetic, nice-to-have, minor refactors. When convenient.
+
+Default to lower urgency when unsure. Never apply `urgency:critical` to a stylistic concern.
+
+### What information to include
+
+Each issue must give a future agent or human enough context to act without re-running the same investigation. Include:
+
+```bash
+gh issue create \
+  --title "<concise, action-oriented title>" \
+  --label "needs-review,quality-deferred,urgency:<level>" \
+  --body "$(cat <<'EOF'
+## Context
+Found during automated quality-check run on $(date +%Y-%m-%d).
+
+## What I observed
+<brief description with **specific file:line references** for every claim>
+<include short code snippets when they clarify the issue>
+
+## Evidence
+<what tools/searches/sub-agent reports led to this finding — so a follow-up agent can reproduce>
+<e.g.: "git grep -n 'console\\.error' app/api/ returned 47 hits across 18 files">
+
+## Why I didn't fix it this run
+<one of: out of scope (chose bucket X) / debatable per-file judgment / needs human judgment / risks behavior change / outside agent capability>
+
+## Suggested next step
+<concrete starting action for whoever picks this up>
+<list specific files/functions to examine first>
+
+## Related
+<links to related issues, PRs, or CLAUDE.md sections, if any>
+EOF
+)"
+```
+
+**Always** open an issue (not just a PR comment) for:
+- Potential security/auth issues you noticed but were told not to alter (e.g., unscoped queries that may be intentional) — `urgency:critical` unless clearly intentional
+- Structural refactors that need a design conversation — `urgency:medium`
+- Patterns that recur across many files but would expand the scope beyond your chosen bucket — `urgency:medium`
+- Test gaps you noticed in changed files — `urgency:high` if the gap covers user-facing logic, otherwise `urgency:low`
+
+After filing, list the issue numbers in your working notes — you'll link them from the PR description in Step 5.
+
+## Step 4 — Execute the chosen scope
+
+Apply the fixes. Stay strictly within the scope you committed to. If you discover something new mid-execution that should be fixed but is outside the scope, **do not fix it** — file another issue (Step 3 format) and keep moving.
 
 Re-run the ground-truth tools after your edits:
 
@@ -82,40 +141,6 @@ perl -e 'alarm 300; exec @ARGV' doppler run --config dev_test -- npm test -- --r
 ```
 
 If a test fails, revert the edit that caused it and move on.
-
-## Step 4 — File follow-up issues for deferred work
-
-For every concern you noticed but did not fix, create a GitHub issue. This is how the codebase improves over time without each weekly run becoming a debate.
-
-Group related findings into a single issue when it makes sense. Keep issues focused and actionable.
-
-```bash
-gh issue create \
-  --title "<concise title>" \
-  --label "needs-review,quality-deferred" \
-  --body "$(cat <<'EOF'
-## Context
-Found during automated quality-check run on $(date +%Y-%m-%d).
-
-## What I observed
-<brief description, with file:line references>
-
-## Why I didn't fix it
-<one of: out of scope this run / debatable / needs human judgment / risks behavior change>
-
-## Suggested next step
-<what a human should consider doing>
-EOF
-)"
-```
-
-**Always** open an issue (not just a PR comment) for things like:
-- Potential security/auth issues you noticed but were told not to alter (e.g., unscoped queries that may be intentional)
-- Structural refactors that need a design conversation
-- Patterns that recur across many files but would expand the scope beyond your chosen bucket
-- Test gaps you noticed in changed files
-
-Apply both `needs-review` and `quality-deferred` labels so they're easy to find.
 
 ## Code quality checks
 
@@ -185,6 +210,6 @@ The PR description should include:
 1. **Scope decision** — the bucket you chose and the cost/benefit reasoning (1-2 sentences)
 2. **What changed** — coverage numbers (e.g., "swapped 106 console.* calls across 32 files")
 3. **Verification** — type-check, lint, and test results
-4. **Deferred follow-ups** — links to the issues you opened in Step 4
+4. **Deferred follow-ups** — links to the issues you opened in Step 3, grouped by urgency
 
 A boring, obviously-correct PR is the goal. If your reviewer has to think hard about whether a change is safe, you picked the wrong scope.
