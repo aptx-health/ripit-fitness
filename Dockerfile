@@ -45,7 +45,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # Prisma migrations + exercise data sync (for k8s init container)
 COPY --from=builder /app/prisma ./prisma
-RUN npm install prisma@6.19.0 tsx@4.19.4 typescript@5.8.3 @types/node@22.15.3 --save-exact --no-audit --no-fund --ignore-scripts
+RUN npm install prisma@6.19.0 tsx@4.19.4 get-tsconfig@4.13.0 esbuild@0.25.10 typescript@5.8.3 @types/node@22.15.3 --save-exact --no-audit --no-fund --ignore-scripts
 # Copy Prisma engines from deps stage and fix ownership
 # npm install above creates @prisma/ owned by root; engines need to be writable by nextjs at runtime
 COPY --from=deps --chown=nextjs:nodejs /app/node_modules/@prisma/engines ./node_modules/@prisma/engines
