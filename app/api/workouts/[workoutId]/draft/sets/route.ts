@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { logger } from '@/lib/logger'
+import { checkRateLimit, setLoggingLimiter } from '@/lib/rate-limit'
 
 type SetInput = {
   exerciseId: string
@@ -25,6 +26,9 @@ export async function POST(
     if (error || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const limited = await checkRateLimit(setLoggingLimiter, user.id)
+    if (limited) return limited
 
     const body = await request.json()
     const set = body as SetInput

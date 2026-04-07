@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { logger } from '@/lib/logger'
+import { checkRateLimit, setLoggingLimiter } from '@/lib/rate-limit'
 
 export async function DELETE(
   _request: NextRequest,
@@ -14,6 +15,9 @@ export async function DELETE(
     if (error || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const limited = await checkRateLimit(setLoggingLimiter, user.id)
+    if (limited) return limited
 
     // Find the set and verify ownership through the completion -> workout -> program chain
     const loggedSet = await prisma.loggedSet.findUnique({

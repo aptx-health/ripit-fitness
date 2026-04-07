@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { logger } from '@/lib/logger'
+import { checkRateLimit, workoutActionLimiter } from '@/lib/rate-limit'
 
 
 export async function POST(
@@ -17,6 +18,9 @@ export async function POST(
     if (error || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const limited = await checkRateLimit(workoutActionLimiter, user.id)
+    if (limited) return limited
 
     // Verify workout exists and user owns it
     const workout = await prisma.workout.findUnique({
