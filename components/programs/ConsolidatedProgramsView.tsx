@@ -240,7 +240,7 @@ export default function ConsolidatedProgramsView({
   }
 
   return (
-    <div className="min-h-screen bg-background doom-page-enter">
+    <div className="bg-background doom-page-enter">
       <div className="max-w-2xl mx-auto sm:px-6 py-4">
         {/* Header */}
         <div className="px-4 sm:px-0 mb-4">

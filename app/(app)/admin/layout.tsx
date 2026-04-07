@@ -27,7 +27,7 @@ export default async function AdminLayout({
   ]
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background">
       <nav className="border-b-2 border-border bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center gap-6 h-12 overflow-x-auto">

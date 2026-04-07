@@ -50,7 +50,7 @@ export default function CollectionDetail({
   const nextUnread = articles.find((a) => !a.isRead)
 
   return (
-    <div className="min-h-screen bg-background doom-page-enter">
+    <div className="bg-background doom-page-enter">
       <div className="max-w-2xl mx-auto px-4 py-8">
         {/* Mobile: floating back button */}
         <Link
