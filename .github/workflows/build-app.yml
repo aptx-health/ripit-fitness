@@ -26,6 +26,8 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      image-tag: ${{ steps.tags.outputs.tags }}
     permissions:
       contents: read
       packages: write
@@ -86,3 +88,89 @@ jobs:
               ]
             }]
           }" "${{ secrets.DISCORD_WEBHOOK_URL }}"
+
+  smoke-test:
+    if: github.event_name == 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ripit_smoke
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ripit_smoke
+      IMAGE: ${{ needs.build.outputs.image-tag }}
+
+    steps:
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull PR image
+        run: docker pull "$IMAGE"
+
+      - name: Smoke test — prisma-migrate.sh (migrations + exercise sync)
+        run: |
+          docker run --rm \
+            --network host \
+            -e DATABASE_URL="$DATABASE_URL" \
+            "$IMAGE" \
+            sh -c "./scripts/prisma-migrate.sh"
+
+      - name: Smoke test — app boots and responds
+        run: |
+          # Start the app in the background
+          docker run --rm -d \
+            --name smoke-app \
+            --network host \
+            -e DATABASE_URL="$DATABASE_URL" \
+            -e BETTER_AUTH_SECRET=smoke-test-secret \
+            -e BETTER_AUTH_URL=http://localhost:3000 \
+            -e HOSTNAME=0.0.0.0 \
+            -e PORT=3000 \
+            "$IMAGE"
+
+          # Wait for the app to be ready (up to 30s)
+          echo "Waiting for app to start..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000/ > /dev/null 2>&1; then
+              echo "App responded on attempt $i"
+              break
+            fi
+            if [ "$i" = "30" ]; then
+              echo "App failed to start within 30s"
+              docker logs smoke-app
+              docker stop smoke-app || true
+              exit 1
+            fi
+            sleep 1
+          done
+
+          # Verify response
+          HTTP_STATUS=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/)
+          echo "HTTP status: $HTTP_STATUS"
+
+          docker stop smoke-app
+
+          if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 500 ]; then
+            echo "Unexpected HTTP status $HTTP_STATUS"
+            exit 1
+          fi
