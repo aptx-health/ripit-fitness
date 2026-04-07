@@ -24,6 +24,6 @@ echo ""
 echo "=== Exercise Data Sync ==="
 echo "Timestamp: $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 echo "==="
-./node_modules/.bin/tsx scripts/sync-exercise-data.ts
+node scripts/sync-exercise-data.cjs
 
 echo "Data sync completed successfully."

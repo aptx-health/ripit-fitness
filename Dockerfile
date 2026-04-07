@@ -25,6 +25,16 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
+# Pre-compile the exercise data sync script to plain JS so the runner
+# stage doesn't need tsx (and its fragile transitive dep tree) at runtime.
+RUN ./node_modules/.bin/esbuild scripts/sync-exercise-data.ts \
+      --bundle \
+      --platform=node \
+      --format=cjs \
+      --target=node20 \
+      --external:@prisma/client \
+      --outfile=scripts-dist/sync-exercise-data.cjs
+
 # --- Stage 3: runner ---
 FROM node:20-alpine AS runner
 WORKDIR /app
@@ -45,13 +55,13 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # Prisma migrations + exercise data sync (for k8s init container)
 COPY --from=builder /app/prisma ./prisma
-RUN npm install prisma@6.19.0 tsx@4.19.4 get-tsconfig@4.13.0 esbuild@0.25.10 typescript@5.8.3 @types/node@22.15.3 --save-exact --no-audit --no-fund --ignore-scripts
+RUN npm install prisma@6.19.0 --save-exact --no-audit --no-fund --ignore-scripts
 # Copy Prisma engines from deps stage and fix ownership
 # npm install above creates @prisma/ owned by root; engines need to be writable by nextjs at runtime
 COPY --from=deps --chown=nextjs:nodejs /app/node_modules/@prisma/engines ./node_modules/@prisma/engines
 RUN chown -R nextjs:nodejs ./node_modules/@prisma ./node_modules/prisma
 COPY scripts/prisma-migrate.sh ./scripts/prisma-migrate.sh
-COPY scripts/sync-exercise-data.ts ./scripts/sync-exercise-data.ts
+COPY --from=builder /app/scripts-dist/sync-exercise-data.cjs ./scripts/sync-exercise-data.cjs
 COPY scripts/exercise-mapping.json ./scripts/exercise-mapping.json
 COPY scripts/validated-exercise-ids.json ./scripts/validated-exercise-ids.json
 RUN chmod +x ./scripts/prisma-migrate.sh
