@@ -79,7 +79,7 @@ export default async function EditProgramPage({ params, searchParams }: Props) {
   })
 
   return (
-    <div className="min-h-screen bg-background doom-page-enter">
+    <div className="bg-background doom-page-enter">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-6">
           <div className="flex items-center gap-4 mb-4">

@@ -18,7 +18,7 @@ export default async function AdminExercisesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-safe doom-page-enter">
+    <div className="bg-background pb-safe doom-page-enter">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
         <div className="mb-6 sm:mb-8">

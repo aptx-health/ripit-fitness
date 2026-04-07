@@ -144,7 +144,7 @@ export default function LearnBrowser() {
     allTags.filter((t) => t.category === category)
 
   return (
-    <div className="min-h-screen bg-background doom-page-enter">
+    <div className="bg-background doom-page-enter">
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">

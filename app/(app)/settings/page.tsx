@@ -79,7 +79,7 @@ export default function SettingsPage() {
       intensityRating !== settings.defaultIntensityRating)
 
   return (
-    <div className="min-h-screen bg-background px-4 sm:px-6 py-8">
+    <div className="bg-background px-4 sm:px-6 py-8">
       <div className="max-w-md md:max-w-2xl mx-auto space-y-6">
         <h1 className="text-xl font-bold">Settings</h1>
 
