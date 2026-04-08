@@ -104,6 +104,18 @@ describe('assertPgBouncerConfig', () => {
       ).not.toThrow()
     })
   })
+
+  describe('next build phase', () => {
+    it('skips assertion during next build even in production', () => {
+      expect(() =>
+        assertPgBouncerConfig({
+          NODE_ENV: 'production',
+          NEXT_PHASE: 'phase-production-build',
+          // DATABASE_URL intentionally unset — would throw at runtime
+        })
+      ).not.toThrow()
+    })
+  })
 })
 
 describe('isPgBouncerConfigured', () => {

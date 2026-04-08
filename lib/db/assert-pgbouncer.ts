@@ -26,6 +26,7 @@ type EnvLike = {
   NODE_ENV?: string
   DATABASE_URL?: string
   DIRECT_URL?: string
+  NEXT_PHASE?: string
 }
 
 interface AssertOptions {
@@ -41,6 +42,11 @@ export function assertPgBouncerConfig(
   env: EnvLike = process.env,
   opts: AssertOptions = {}
 ): void {
+  // Skip during `next build` — route modules get imported to collect page
+  // data, but DATABASE_URL isn't set in the build image. The assertion should
+  // only run at actual runtime.
+  if (env.NEXT_PHASE === 'phase-production-build') return
+
   const isProd = env.NODE_ENV === 'production'
   const databaseUrl = env.DATABASE_URL
   const directUrl = env.DIRECT_URL
