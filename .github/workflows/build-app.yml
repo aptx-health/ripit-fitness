@@ -142,6 +142,18 @@ jobs:
           CREATE INDEX IF NOT EXISTS "session_userId_idx" ON "session" ("userId");
           CREATE INDEX IF NOT EXISTS "account_userId_idx" ON "account" ("userId");
           CREATE INDEX IF NOT EXISTS "verification_identifier_idx" ON "verification" ("identifier");
+          -- Create empty _prisma_migrations table so `prisma migrate deploy` does not
+          -- trip P3005 ("database schema is not empty") on our pre-seeded BetterAuth tables.
+          CREATE TABLE IF NOT EXISTS "_prisma_migrations" (
+            "id" varchar(36) PRIMARY KEY NOT NULL,
+            "checksum" varchar(64) NOT NULL,
+            "finished_at" timestamptz,
+            "migration_name" varchar(255) NOT NULL,
+            "logs" text,
+            "rolled_back_at" timestamptz,
+            "started_at" timestamptz NOT NULL DEFAULT now(),
+            "applied_steps_count" integer NOT NULL DEFAULT 0
+          );
           SQL
 
       - name: Smoke test — prisma-migrate.sh (migrations + exercise sync)
