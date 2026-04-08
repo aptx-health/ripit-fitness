@@ -118,6 +118,9 @@ jobs:
       IMAGE: ${{ needs.build.outputs.image-tag }}
 
     steps:
+      - name: Checkout (for seed SQL files)
+        uses: actions/checkout@v4
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -156,13 +159,42 @@ jobs:
           );
           SQL
 
-      - name: Smoke test — prisma-migrate.sh (migrations + exercise sync)
+      - name: Smoke test — prisma migrate deploy
         run: |
           docker run --rm \
             --network host \
             -e DATABASE_URL="$DATABASE_URL" \
             "$IMAGE" \
-            sh -c "./scripts/prisma-migrate.sh"
+            sh -c "./node_modules/.bin/prisma migrate deploy"
+
+      - name: Seed exercise definitions
+        # sync-exercise-data.cjs updates metadata/images on existing exercises —
+        # it does not create them. Staging/prod were originally seeded manually
+        # via the SQL files in prisma/seeds/ (see issues #245, #250). Apply them
+        # here so the sync script has exercises to update and the >=275 image
+        # threshold can be met.
+        run: |
+          for f in \
+            prisma/seeds/00_legacy_exercises.sql \
+            prisma/seeds/01_bodyweight_exercises.sql \
+            prisma/seeds/02_dumbbell_exercises.sql \
+            prisma/seeds/03_resistance_band_exercises.sql \
+            prisma/seeds/04_kettlebell_exercises.sql \
+            prisma/seeds/05_climbing_exercises.sql \
+            prisma/seeds/06_cable_machine_exercises.sql \
+            prisma/seeds/07_core_mobility_exercises.sql \
+            prisma/seeds/08_curated_exercises.sql; do
+            echo "Applying $f"
+            PGPASSWORD=postgres psql -h localhost -p 5432 -U postgres -d ripit_smoke -v ON_ERROR_STOP=1 -f "$f"
+          done
+
+      - name: Smoke test — sync-exercise-data (metadata + images + programs)
+        run: |
+          docker run --rm \
+            --network host \
+            -e DATABASE_URL="$DATABASE_URL" \
+            "$IMAGE" \
+            sh -c "node scripts/sync-exercise-data.cjs"
 
       - name: Smoke test — app boots and responds
         run: |
