@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { logger } from '@/lib/logger'
 
 type ReorderItem = {
   exerciseId: string
@@ -118,7 +119,7 @@ export async function POST(
       exercises: updatedExercises
     })
   } catch (error) {
-    console.error('Error reordering exercises:', error)
+    logger.error({ error, context: 'exercises-reorder' }, 'Failed to reorder exercises')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

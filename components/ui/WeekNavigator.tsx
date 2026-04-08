@@ -1,3 +1,4 @@
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 
 type Props = {
@@ -5,7 +6,6 @@ type Props = {
   totalWeeks: number
   baseUrl: string // '/training' or '/cardio'
   programName: string
-  actions?: React.ReactNode
   completionIndicator?: React.ReactNode
 }
 
@@ -14,87 +14,67 @@ export default function WeekNavigator({
   totalWeeks,
   baseUrl,
   programName,
-  actions,
   completionIndicator
 }: Props) {
   const hasPrev = currentWeek > 1
   const hasNext = currentWeek < totalWeeks
 
   return (
-    <div className="flex items-center justify-between gap-2">
-      {/* Prev button */}
-      <Link
-        href={hasPrev ? `${baseUrl}?week=${currentWeek - 1}` : '#'}
-        className={`p-2 border shrink-0 ${
-          hasPrev
-            ? 'border-border text-foreground hover:bg-muted doom-focus-ring'
-            : 'border-border/50 text-muted-foreground cursor-not-allowed opacity-50'
-        }`}
-        aria-disabled={!hasPrev}
-        tabIndex={hasPrev ? 0 : -1}
-        onClick={e => !hasPrev && e.preventDefault()}
-      >
-        <svg aria-hidden="true"
-          className="w-5 h-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
+    <div data-tour="week-nav">
+      {/* Week number row with arrows */}
+      <div className="flex items-center justify-center gap-1">
+        {/* Prev button */}
+        <Link
+          href={hasPrev ? `${baseUrl}?week=${currentWeek - 1}` : '#'}
+          className={`shrink-0 flex items-center justify-center w-10 h-10 rounded-full transition-colors doom-focus-ring ${
+            hasPrev
+              ? 'text-foreground hover:bg-muted/50 active:bg-muted'
+              : 'text-muted-foreground/20 pointer-events-none'
+          }`}
+          aria-disabled={!hasPrev}
+          aria-label="Previous week"
+          tabIndex={hasPrev ? 0 : -1}
+          onClick={e => !hasPrev && e.preventDefault()}
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 19l-7-7 7-7"
-          />
-        </svg>
-      </Link>
+          <ChevronLeft size={22} strokeWidth={1.5} />
+        </Link>
 
-      {/* Center content */}
-      <div className="flex-1 text-center min-w-0">
-        <h2 className="text-lg sm:text-2xl font-bold text-foreground doom-heading">
-          WEEK {currentWeek} OF {totalWeeks}
-        </h2>
-        <p className="text-xs sm:text-sm text-muted-foreground truncate">
-          {programName}
-        </p>
+        {/* Center content */}
+        <div className="text-center min-w-0 px-2">
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground doom-heading">
+            WEEK {currentWeek} OF {totalWeeks}
+          </h2>
+          <span className="inline-block px-3 py-0.5 bg-primary text-primary-foreground text-sm sm:text-base font-bold uppercase tracking-wider mt-1">
+            {programName}
+          </span>
+        </div>
+
+        {/* Next button */}
+        <Link
+          href={hasNext ? `${baseUrl}?week=${currentWeek + 1}` : '#'}
+          className={`shrink-0 flex items-center justify-center w-10 h-10 rounded-full transition-colors doom-focus-ring ${
+            hasNext
+              ? 'text-foreground hover:bg-muted/50 active:bg-muted'
+              : 'text-muted-foreground/20 pointer-events-none'
+          }`}
+          aria-disabled={!hasNext}
+          aria-label="Next week"
+          tabIndex={hasNext ? 0 : -1}
+          onClick={e => !hasNext && e.preventDefault()}
+        >
+          <ChevronRight size={22} strokeWidth={1.5} />
+        </Link>
+
+        {/* Completion indicator badge */}
+        {completionIndicator && (
+          <div className="shrink-0 ml-1">
+            {completionIndicator}
+          </div>
+        )}
       </div>
 
-      {/* Next button */}
-      <Link
-        href={hasNext ? `${baseUrl}?week=${currentWeek + 1}` : '#'}
-        className={`p-2 border shrink-0 ${
-          hasNext
-            ? 'border-border text-foreground hover:bg-muted doom-focus-ring'
-            : 'border-border/50 text-muted-foreground cursor-not-allowed opacity-50'
-        }`}
-        aria-disabled={!hasNext}
-        tabIndex={hasNext ? 0 : -1}
-        onClick={e => !hasNext && e.preventDefault()}
-      >
-        <svg aria-hidden="true"
-          className="w-5 h-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 5l7 7-7 7"
-          />
-        </svg>
-      </Link>
-
-      {/* Completion indicator badge */}
-      {completionIndicator && (
-        <div className="shrink-0">
-          {completionIndicator}
-        </div>
-      )}
-
-      {/* Actions slot */}
-      {actions && <div className="shrink-0">{actions}</div>}
+      {/* Horizontal rule separator */}
+      <div className="border-t border-primary/30 mt-3" />
     </div>
   )
 }

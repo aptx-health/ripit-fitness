@@ -1,15 +1,17 @@
 'use client'
 
-import { Archive, Copy, Star, Upload } from 'lucide-react'
+import { Archive, Copy, Star } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import PublishProgramDialog from '@/components/community/PublishProgramDialog'
+import { clientLogger } from '@/lib/client-logger'
+import ActivationConfirmModal from './ActivationConfirmModal'
 
 type StrengthActionsProps = {
   programId: string
   programName: string
   isActive: boolean
+  existingActiveProgram?: { id: string; name: string } | null
 }
 
 export function StrengthPrimaryActions({
@@ -56,13 +58,13 @@ export function StrengthUtilityActions({
   programId,
   programName,
   isActive,
+  existingActiveProgram,
   isMobile = false,
 }: StrengthActionsProps & { isMobile?: boolean }) {
   const router = useRouter()
   const [duplicating, setDuplicating] = useState(false)
-  const [activating, setActivating] = useState(false)
   const [archiving, setArchiving] = useState(false)
-  const [showPublishDialog, setShowPublishDialog] = useState(false)
+  const [showActivationModal, setShowActivationModal] = useState(false)
 
   const handleDuplicate = async () => {
     if (
@@ -85,30 +87,10 @@ export function StrengthUtilityActions({
 
       router.refresh()
     } catch (error) {
-      console.error('Error duplicating program:', error)
+      clientLogger.error('Error duplicating program:', error)
       alert('Failed to duplicate program. Please try again.')
     } finally {
       setDuplicating(false)
-    }
-  }
-
-  const handleSetActive = async () => {
-    setActivating(true)
-    try {
-      const response = await fetch(`/api/programs/${programId}/activate`, {
-        method: 'POST',
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to activate program')
-      }
-
-      router.refresh()
-    } catch (error) {
-      console.error('Error activating program:', error)
-      alert('Failed to activate program. Please try again.')
-    } finally {
-      setActivating(false)
     }
   }
 
@@ -125,7 +107,7 @@ export function StrengthUtilityActions({
 
       router.refresh()
     } catch (error) {
-      console.error('Error archiving program:', error)
+      clientLogger.error('Error archiving program:', error)
       alert('Failed to archive program. Please try again.')
     } finally {
       setArchiving(false)
@@ -147,8 +129,7 @@ export function StrengthUtilityActions({
               <Copy className="w-5 h-5" />
             </button>
             <button type="button"
-              onClick={handleSetActive}
-              disabled={activating}
+              onClick={() => setShowActivationModal(true)}
               className="p-2 text-muted-foreground hover:text-accent hover:bg-muted rounded transition-colors disabled:opacity-50"
               title="Set Active"
               aria-label="Set as active program"
@@ -158,14 +139,6 @@ export function StrengthUtilityActions({
           </>
         )}
         <button type="button"
-          onClick={() => setShowPublishDialog(true)}
-          className="p-2 text-muted-foreground hover:text-primary hover:bg-muted rounded transition-colors"
-          title="Publish to Community"
-          aria-label="Publish program to community"
-        >
-          <Upload className="w-5 h-5" />
-        </button>
-        <button type="button"
           onClick={handleArchive}
           disabled={archiving}
           className="p-2 text-muted-foreground hover:text-error hover:bg-muted rounded transition-colors disabled:opacity-50"
@@ -174,12 +147,14 @@ export function StrengthUtilityActions({
         >
           <Archive className="w-5 h-5" />
         </button>
-        <PublishProgramDialog
-          open={showPublishDialog}
-          onOpenChange={setShowPublishDialog}
-          programId={programId}
-          programName={programName}
-        />
+        {showActivationModal && (
+          <ActivationConfirmModal
+            programId={programId}
+            programName={programName}
+            existingActiveProgram={existingActiveProgram}
+            onClose={() => setShowActivationModal(false)}
+          />
+        )}
       </>
     )
   }
@@ -196,20 +171,13 @@ export function StrengthUtilityActions({
             {duplicating ? 'Duplicating...' : 'Duplicate'}
           </button>
           <button type="button"
-            onClick={handleSetActive}
-            disabled={activating}
-            className="px-3 py-1.5 text-sm text-muted-foreground hover:text-accent hover:bg-muted transition-colors font-medium disabled:opacity-50"
+            onClick={() => setShowActivationModal(true)}
+            className="px-3 py-1.5 text-sm text-muted-foreground hover:text-accent hover:bg-muted transition-colors font-medium"
           >
-            {activating ? 'Activating...' : 'Set Active'}
+            Set Active
           </button>
         </>
       )}
-      <button type="button"
-        onClick={() => setShowPublishDialog(true)}
-        className="px-3 py-1.5 text-sm text-muted-foreground hover:text-primary hover:bg-muted transition-colors font-medium"
-      >
-        Publish to Community
-      </button>
       <button type="button"
         onClick={handleArchive}
         disabled={archiving}
@@ -217,12 +185,14 @@ export function StrengthUtilityActions({
       >
         {archiving ? 'Archiving...' : 'Archive'}
       </button>
-      <PublishProgramDialog
-        open={showPublishDialog}
-        onOpenChange={setShowPublishDialog}
-        programId={programId}
-        programName={programName}
-      />
+      {showActivationModal && (
+        <ActivationConfirmModal
+          programId={programId}
+          programName={programName}
+          existingActiveProgram={existingActiveProgram}
+          onClose={() => setShowActivationModal(false)}
+        />
+      )}
     </>
   )
 }

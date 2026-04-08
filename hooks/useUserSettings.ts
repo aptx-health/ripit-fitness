@@ -1,9 +1,14 @@
 import { useCallback, useEffect, useState } from 'react'
+import { clientLogger } from '@/lib/client-logger'
 
 export type UserSettings = {
   displayName: string | null
   defaultWeightUnit: 'lbs' | 'kg'
   defaultIntensityRating: 'rpe' | 'rir'
+  dismissedPrimer: boolean
+  dismissedWarmup: boolean
+  dismissedStickNudge: boolean
+  completedTours: string
 }
 
 type UseUserSettingsReturn = {
@@ -11,7 +16,7 @@ type UseUserSettingsReturn = {
   isLoading: boolean
   error: string | null
   refetch: () => Promise<void>
-  updateSettings: (settings: UserSettings) => Promise<void>
+  updateSettings: (settings: Partial<UserSettings>) => Promise<void>
 }
 
 export function useUserSettings(): UseUserSettingsReturn {
@@ -34,13 +39,13 @@ export function useUserSettings(): UseUserSettingsReturn {
       setSettings(data.settings)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch settings')
-      console.error('Error fetching user settings:', err)
+      clientLogger.error('Error fetching user settings:', err)
     } finally {
       setIsLoading(false)
     }
   }, [])
 
-  const updateSettings = useCallback(async (newSettings: UserSettings) => {
+  const updateSettings = useCallback(async (newSettings: Partial<UserSettings>) => {
     try {
       setError(null)
 
@@ -62,7 +67,7 @@ export function useUserSettings(): UseUserSettingsReturn {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update settings'
       setError(errorMessage)
-      console.error('Error updating user settings:', err)
+      clientLogger.error('Error updating user settings:', err)
       throw new Error(errorMessage)
     }
   }, [])

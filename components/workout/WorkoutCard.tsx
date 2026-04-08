@@ -1,5 +1,9 @@
 'use client'
 
+import { Check, ChevronDown, ChevronRight, Eye, SkipForward } from 'lucide-react'
+import { useState } from 'react'
+import SwipeableCard from '@/components/ui/SwipeableCard'
+
 type Workout = {
   id: string
   dayNumber: number
@@ -39,130 +43,166 @@ export default function WorkoutCard({
   const isCompleted = latestCompletion?.status === 'completed'
   const isDraft = latestCompletion?.status === 'draft'
   const isSkipped = latestCompletion?.status === 'skipped'
+  const hasActions = !isCompleted && !isSkipped
+  const [expanded, setExpanded] = useState(false)
+
+  // Primary tap action based on state
+  const handleCardTap = () => {
+    if (isLoading || isSkipping || isUnskipping) return
+    if (isSkipped) {
+      onUnskip(workout.id)
+    } else if (isCompleted) {
+      onView(workout.id)
+    } else {
+      onLog(workout.id)
+    }
+  }
+
+  // Click chevron to expand action row
+  const handleChevronClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setExpanded(!expanded)
+  }
+
+  // Status bar color (left border)
+  const borderColor = isCompleted
+    ? 'border-l-success'
+    : isDraft
+      ? 'border-l-primary'
+      : isSkipped
+        ? 'border-l-muted-foreground'
+        : 'border-l-border'
+
+  // Card state class (subtle backgrounds for status)
+  const stateClass = isCompleted
+    ? 'bg-success/5'
+    : isDraft
+      ? 'bg-primary/5'
+      : isSkipped
+        ? 'bg-muted/30 opacity-75'
+        : 'bg-card'
+
+  // Primary action label for screen readers
+  const actionLabel = isCompleted
+    ? 'Review workout'
+    : isDraft
+      ? 'Continue workout'
+      : isSkipped
+        ? 'Unskip workout'
+        : 'Log workout'
+
+  // Swipe actions (mobile) - only for non-completed, non-skipped workouts
+  const swipeActions = []
+  if (!isCompleted && !isSkipped) {
+    swipeActions.push({
+      label: 'Preview',
+      icon: <Eye size={18} />,
+      onClick: () => onView(workout.id),
+      className: 'bg-accent/20 text-accent hover:bg-accent/30',
+    })
+    if (!latestCompletion) {
+      swipeActions.push({
+        label: 'Skip',
+        icon: <SkipForward size={18} />,
+        onClick: () => onSkip(workout.id),
+        className: 'bg-muted-foreground/20 text-muted-foreground hover:bg-muted-foreground/30',
+      })
+    }
+  }
+  // Completed workouts don't need swipe - tap goes to review
+  // Skipped workouts don't need swipe - tap unskips
 
   return (
-    <div
-      className={`border p-4 transition ${
-        isCompleted
-          ? 'border-success-border bg-success-muted/50 doom-workout-completed'
-          : isDraft
-            ? 'border-warning-border bg-warning-muted/50'
-            : isSkipped
-              ? 'border-muted-foreground/50 bg-muted/50'
-              : 'border-border bg-muted'
-      }`}
-    >
-      <div className="flex justify-between items-start">
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
-            <h3 className="text-lg font-bold text-foreground doom-heading">
-              DAY {workout.dayNumber}: {workout.name}
-            </h3>
+    <SwipeableCard actions={swipeActions}>
+      <button
+        type="button"
+        data-tour="workout-card"
+        onClick={handleCardTap}
+        disabled={isLoading || isSkipping || isUnskipping}
+        aria-label={`${actionLabel}: Day ${workout.dayNumber} ${workout.name}`}
+        className={`w-full text-left border-l-4 ${borderColor} ${stateClass} px-4 py-3 transition-all hover:bg-muted/50 active:bg-muted/70 disabled:opacity-60 doom-focus-ring`}
+      >
+        <div className="flex items-center gap-3">
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-0.5">
+              <h3 className={`text-lg font-bold text-foreground doom-heading truncate ${isSkipped ? 'line-through opacity-60' : ''}`}>
+                DAY {workout.dayNumber}: {workout.name}
+              </h3>
+            </div>
+            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+              <span>{workout._count.exercises} exercises</span>
+              {latestCompletion && !isSkipped && (
+                <span className="text-xs">
+                  {new Date(latestCompletion.completedAt).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                  })}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Status badge + chevron */}
+          <div className="flex items-center gap-2 shrink-0">
             {isCompleted && (
               <span className="doom-badge doom-badge-completed">
-                <svg aria-hidden="true" className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                  <path
-                    fillRule="evenodd"
-                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+                <Check size={12} />
               </span>
             )}
             {isDraft && (
-              <span className="doom-badge doom-badge-accent">
-                <svg aria-hidden="true" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                IN PROGRESS
+              <span className="doom-badge doom-badge-accent text-xs">
+                CONTINUE
               </span>
             )}
             {isSkipped && (
-              <span className="doom-badge bg-muted-foreground/30 text-foreground/70">
-                <svg aria-hidden="true" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 5l7 7-7 7M5 5l7 7-7 7"
-                  />
-                </svg>
+              <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">
                 SKIPPED
               </span>
             )}
-          </div>
-
-          <div className="flex gap-4 text-sm">
-            <div>
-              <span className="text-xs font-semibold text-muted-foreground doom-label">
-                EXERCISES
-              </span>
-              <p className="text-foreground doom-stat">{workout._count.exercises}</p>
-            </div>
-          </div>
-
-          {latestCompletion && (
-            <p className="text-xs text-muted-foreground mt-2">
-              Last logged: {new Date(latestCompletion.completedAt).toLocaleDateString()}
-            </p>
-          )}
-        </div>
-
-        <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
-          {/* Primary action button */}
-          {isSkipped ? (
-            <button type="button"
-              onClick={() => onUnskip(workout.id)}
-              disabled={isUnskipping}
-              className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider text-sm disabled:opacity-50"
-            >
-              {isUnskipping ? 'RESTORING...' : 'UNSKIP'}
-            </button>
-          ) : (
-            <button type="button"
-              onClick={() => isCompleted ? onView(workout.id) : onLog(workout.id)}
-              disabled={isLoading}
-              className={`px-4 py-2 ${
-                isDraft
-                  ? 'bg-accent text-accent-foreground hover:bg-accent-hover doom-button-3d-accent'
-                  : 'bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d'
-              } doom-focus-ring font-semibold uppercase tracking-wider text-sm disabled:opacity-50`}
-            >
-              {isCompleted ? 'REVIEW' : isDraft ? 'CONTINUE' : 'LOG WORKOUT'}
-            </button>
-          )}
-
-          {/* Secondary buttons row */}
-          {!isCompleted && (
-            <div className="flex items-center gap-2">
-              {/* View button - show for non-completed workouts */}
-              <button type="button"
-                onClick={() => onView(workout.id)}
-                disabled={isLoading}
-                className="px-3 py-2 border-2 border-border text-foreground bg-transparent hover:bg-muted hover:border-primary active:bg-muted/80 doom-focus-ring text-sm font-semibold uppercase tracking-wider disabled:opacity-50 transition-colors"
+            {(isLoading || isSkipping || isUnskipping) ? (
+              <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            ) : hasActions ? (
+              <button
+                type="button"
+                onClick={handleChevronClick}
+                className="p-1 text-muted-foreground hover:text-foreground transition-colors doom-focus-ring"
+                aria-label={expanded ? 'Collapse actions' : 'Expand actions'}
+                aria-expanded={expanded}
               >
-                {isLoading ? 'LOADING...' : 'VIEW'}
+                {expanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
               </button>
+            ) : (
+              <ChevronRight size={18} className="text-muted-foreground" />
+            )}
+          </div>
+        </div>
+      </button>
 
-              {/* Skip button - only show if no completion status */}
-              {!latestCompletion && (
-                <button type="button"
-                  onClick={() => onSkip(workout.id)}
-                  disabled={isSkipping}
-                  className="px-3 py-2 border-2 border-border text-foreground bg-transparent hover:bg-muted hover:border-primary active:bg-muted/80 doom-focus-ring text-sm font-semibold uppercase tracking-wider disabled:opacity-50 transition-colors"
-                >
-                  {isSkipping ? 'SKIPPING...' : 'SKIP'}
-                </button>
-              )}
-            </div>
+      {/* Expanded action row */}
+      {expanded && hasActions && (
+        <div className="flex items-center gap-3 px-4 py-2 border-t border-border bg-muted/30">
+          <button
+            type="button"
+            onClick={() => { onView(workout.id); setExpanded(false) }}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground font-medium transition-colors"
+          >
+            <Eye size={14} />
+            Preview
+          </button>
+          {!latestCompletion && (
+            <button
+              type="button"
+              onClick={() => { onSkip(workout.id); setExpanded(false) }}
+              disabled={isSkipping}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground font-medium transition-colors disabled:opacity-50"
+            >
+              <SkipForward size={14} />
+              Skip
+            </button>
           )}
         </div>
-      </div>
-    </div>
+      )}
+    </SwipeableCard>
   )
 }

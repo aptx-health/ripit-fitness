@@ -3,6 +3,7 @@ import { getCurrentUser } from '@/lib/auth/server'
 import { generateCopyName } from '@/lib/copy-name'
 import { prisma } from '@/lib/db'
 import { batchInsertWeek } from '@/lib/db/batch-insert'
+import { logger } from '@/lib/logger'
 
 export async function POST(
   _request: NextRequest,
@@ -125,16 +126,16 @@ export async function POST(
       })
     } catch (error) {
       // Cleanup: delete the partially created program on failure
-      console.error('Error during duplication, cleaning up:', error)
+      logger.error({ error, context: 'program-duplicate' }, 'Error during duplication, cleaning up')
       await prisma.program.delete({
         where: { id: newProgram.id }
       }).catch(cleanupError => {
-        console.error('Failed to cleanup program:', cleanupError)
+        logger.error({ error: cleanupError, context: 'program-duplicate' }, 'Failed to cleanup program')
       })
       throw error
     }
   } catch (error) {
-    console.error('Error duplicating program:', error)
+    logger.error({ error, context: 'program-duplicate' }, 'Failed to duplicate program')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

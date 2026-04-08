@@ -1,7 +1,8 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
-
+import { logger } from '@/lib/logger'
+import { checkRateLimit, workoutActionLimiter } from '@/lib/rate-limit'
 
 type LoggedSetInput = {
   exerciseId: string
@@ -21,106 +22,102 @@ export async function POST(
   try {
     const { workoutId } = await params
 
-    // Get authenticated user
     const { user, error } = await getCurrentUser()
-
     if (error || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Parse request body
-    const body = await request.json()
-    const { loggedSets } = body as { loggedSets: LoggedSetInput[] }
+    const limited = await checkRateLimit(workoutActionLimiter, user.id)
+    if (limited) return limited
 
-    if (!loggedSets || !Array.isArray(loggedSets) || loggedSets.length === 0) {
-      return NextResponse.json(
-        { error: 'loggedSets array is required and must not be empty' },
-        { status: 400 }
-      )
-    }
+    // Parse optional fallback sets (used when some per-set writes failed)
+    const body = await request.json()
+    const { fallbackSets } = body as { fallbackSets?: LoggedSetInput[] }
 
     // Verify workout exists and check existing completion in parallel
-    const [workout, existingCompletion] = await Promise.all([
+    const [workout, existingCompleted] = await Promise.all([
       prisma.workout.findUnique({
         where: { id: workoutId },
         select: {
           id: true,
-          week: {
-            select: {
-              program: {
-                select: { userId: true }
-              }
-            }
-          }
-        }
+          week: { select: { program: { select: { userId: true } } } },
+        },
       }),
       prisma.workoutCompletion.findFirst({
-        where: {
-          workoutId,
-          userId: user.id,
-          status: 'completed',
-          isArchived: false,
-        },
-      })
+        where: { workoutId, userId: user.id, status: 'completed', isArchived: false },
+      }),
     ])
 
     if (!workout) {
       return NextResponse.json({ error: 'Workout not found' }, { status: 404 })
     }
-
     if (workout.week.program.userId !== user.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
-
-    if (existingCompletion) {
+    if (existingCompleted) {
       return NextResponse.json(
         { error: 'Workout already completed. Clear it first to re-log.' },
         { status: 400 }
       )
     }
 
-    // Create or update completion and logged sets in a transaction
     const completion = await prisma.$transaction(async (tx) => {
-      // Check for existing non-archived draft completion
-      const existingDraft = await tx.workoutCompletion.findFirst({
-        where: {
-          workoutId,
-          userId: user.id,
-          status: 'draft',
-          isArchived: false,
-        },
+      // Find existing draft
+      const draft = await tx.workoutCompletion.findFirst({
+        where: { workoutId, userId: user.id, status: 'draft', isArchived: false },
+        include: { loggedSets: true },
       })
 
-      // Create or update workout completion
-      const completionRecord = existingDraft
-        ? await tx.workoutCompletion.update({
-            where: { id: existingDraft.id },
-            data: {
-              status: 'completed',
-              completedAt: new Date(),
-            },
-          })
-        : await tx.workoutCompletion.create({
-            data: {
-              workoutId,
-              userId: user.id,
-              status: 'completed',
-              completedAt: new Date(),
-            },
-          })
+      const draftSetCount = draft?.loggedSets?.length ?? 0
 
-      // Delete existing logged sets (if updating from draft)
-      if (existingDraft) {
-        await tx.loggedSet.deleteMany({
-          where: {
-            completionId: completionRecord.id,
-          },
+      // If we have a draft with sets, just flip the status
+      if (draft && draftSetCount > 0) {
+        // Safety fallback: if client reports more sets than DB has, use fallback
+        if (fallbackSets && fallbackSets.length > draftSetCount) {
+          logger.warn(
+            { workoutId, draftSets: draftSetCount, fallbackSets: fallbackSets.length },
+            'Using fallback sets — client has more sets than draft'
+          )
+          await tx.loggedSet.deleteMany({ where: { completionId: draft.id } })
+          await tx.loggedSet.createMany({
+            data: fallbackSets.map((set) => ({
+              exerciseId: set.exerciseId,
+              completionId: draft.id,
+              userId: user.id,
+              setNumber: set.setNumber,
+              reps: set.reps,
+              weight: set.weight,
+              weightUnit: set.weightUnit,
+              rpe: set.rpe,
+              rir: set.rir,
+              isWarmup: set.isWarmup ?? false,
+            })),
+          })
+        }
+
+        return tx.workoutCompletion.update({
+          where: { id: draft.id },
+          data: { status: 'completed', completedAt: new Date() },
         })
       }
 
-      // Create all logged sets
+      // No draft with sets — need fallback sets to complete
+      if (!fallbackSets || fallbackSets.length === 0) {
+        throw new Error('NO_SETS_TO_COMPLETE')
+      }
+
+      // Create completion from fallback (handles case where all per-set writes failed)
+      const completionRecord = draft
+        ? await tx.workoutCompletion.update({
+            where: { id: draft.id },
+            data: { status: 'completed', completedAt: new Date() },
+          })
+        : await tx.workoutCompletion.create({
+            data: { workoutId, userId: user.id, status: 'completed', completedAt: new Date() },
+          })
+
       await tx.loggedSet.createMany({
-        data: loggedSets.map((set) => ({
+        data: fallbackSets.map((set) => ({
           exerciseId: set.exerciseId,
           completionId: completionRecord.id,
           userId: user.id,
@@ -146,10 +143,14 @@ export async function POST(
       },
     })
   } catch (error) {
-    console.error('Error completing workout:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    if (error instanceof Error && error.message === 'NO_SETS_TO_COMPLETE') {
+      return NextResponse.json(
+        { error: 'No sets to complete. Log at least one set first.' },
+        { status: 400 }
+      )
+    }
+
+    logger.error({ error, context: 'workout-complete' }, 'Error completing workout')
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

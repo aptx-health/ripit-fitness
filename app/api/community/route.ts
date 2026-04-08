@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/server';
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 export async function GET(_request: NextRequest) {
   try {
@@ -32,7 +33,7 @@ export async function GET(_request: NextRequest) {
       programs: communityPrograms,
     });
   } catch (error) {
-    console.error('Error fetching community programs:', error);
+    logger.error({ error, context: 'community-programs-list' }, 'Failed to fetch community programs');
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

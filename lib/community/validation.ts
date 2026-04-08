@@ -158,8 +158,8 @@ export async function isProgramPublished(
  * Validates program metadata (level, goals, etc.)
  * This should only be called when actually publishing, not during initial validation
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function validateProgramMetadata(program: Record<string, any>): ValidationResult {
+// biome-ignore lint/suspicious/noExplicitAny: dynamic program metadata fields
+export function validateProgramMetadata(program: Record<string, any>): ValidationResult { // eslint-disable-line @typescript-eslint/no-explicit-any
   const errors: string[] = [];
 
   if (!program.level || program.level.trim() === '') {

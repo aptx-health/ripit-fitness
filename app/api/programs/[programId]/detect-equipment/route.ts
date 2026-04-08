@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/server';
 import { detectEquipmentNeeded } from '@/lib/community/equipment-detection';
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 export async function GET(
   _request: NextRequest,
@@ -33,7 +34,7 @@ export async function GET(
 
     return NextResponse.json({ equipment });
   } catch (error) {
-    console.error('Error detecting equipment:', error);
+    logger.error({ error, context: 'program-detect-equipment' }, 'Failed to detect equipment');
     return NextResponse.json(
       { error: 'Failed to detect equipment' },
       { status: 500 }

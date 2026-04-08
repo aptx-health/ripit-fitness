@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { logger } from '@/lib/logger'
 
 export async function GET(request: NextRequest) {
   try {
@@ -33,7 +34,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ programs })
   } catch (error) {
-    console.error('Error fetching archived programs:', error)
+    logger.error({ error, context: 'programs-archived' }, 'Failed to fetch archived programs')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

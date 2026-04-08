@@ -1,0 +1,48 @@
+jobs:
+  autopilot:
+    trigger: "label:agent-ready"
+    agent: autopilot
+    description: "Implement GitHub issues in isolated worktrees"
+    budget: 10.0
+
+  bug-fix:
+    trigger: "label:bug"
+    agent: bug-fixer
+    description: "Reproduce and fix bugs with regression tests"
+    budget: 10.0
+
+  spike:
+    trigger: "label:spike"
+    agent: spike
+    description: "Research and discovery — investigate questions, post findings"
+    budget: 5.0
+
+  weekly-deps:
+    schedule: "0 7 * * 1"
+    agent: dependency-updater
+    description: "Check for outdated dependencies"
+    budget: 8.0
+
+  weekly-security:
+    schedule: "0 7 * * 3"
+    agent: security-scanner
+    description: "Scan for security vulnerabilities"
+    budget: 8.0
+
+  weekly-docs:
+    schedule: "0 7 * * 5"
+    agent: doc-updater
+    description: "Update documentation for recent changes"
+    budget: 8.0
+
+  weekly-quality:
+    schedule: "0 7 * * 2"
+    agent: quality-check
+    description: "Review recently changed files for clarity and simplification"
+    budget: 8.0
+
+  monthly-lesson-groom:
+    schedule: "0 8 1 * *"
+    agent: lesson-groomer
+    description: "Groom and consolidate agent-minder lessons"
+    budget: 5.0

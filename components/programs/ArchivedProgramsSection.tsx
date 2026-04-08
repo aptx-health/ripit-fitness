@@ -3,6 +3,7 @@
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { clientLogger } from '@/lib/client-logger'
 
 type ArchivedProgram = {
   id: string
@@ -39,7 +40,7 @@ export default function ArchivedProgramsSection({
           const data = await response.json()
           setPrograms(data.programs)
         } catch (error) {
-          console.error('Error fetching archived programs:', error)
+          clientLogger.error('Error fetching archived programs:', error)
           alert('Failed to load archived programs. Please try again.')
         } finally {
           setIsLoading(false)
@@ -47,7 +48,7 @@ export default function ArchivedProgramsSection({
       }
       fetchArchivedPrograms()
     }
-  }, [isExpanded, programs.length, apiPath])
+  }, [isExpanded, programs.length])
 
   const handleUnarchive = async (programId: string, programName: string) => {
     if (
@@ -70,7 +71,7 @@ export default function ArchivedProgramsSection({
 
       router.refresh()
     } catch (error) {
-      console.error('Error unarchiving program:', error)
+      clientLogger.error('Error unarchiving program:', error)
       alert('Failed to unarchive program. Please try again.')
     } finally {
       setUnarchivingId(null)

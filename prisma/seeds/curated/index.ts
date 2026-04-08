@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client'
-import { createProgramFromSpec } from './helpers'
 import { seedCuratedExerciseDefinitions } from './exercise-defs'
+import { createProgramFromSpec } from './helpers'
 import { machineStarter } from './programs/01-machine-starter'
 import { confidenceBuilder } from './programs/02-confidence-builder'
 import { fullBodyStrength } from './programs/03-full-body-strength'

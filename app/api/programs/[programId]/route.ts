@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { logger } from '@/lib/logger'
 
 export async function PATCH(
   request: NextRequest,
@@ -21,7 +22,7 @@ export async function PATCH(
     const { name, description } = body
 
     // Validate required fields
-    if (!name || !name.trim()) {
+    if (!name?.trim()) {
       return NextResponse.json(
         { error: 'Program name is required' },
         { status: 400 }
@@ -56,7 +57,7 @@ export async function PATCH(
       program: updatedProgram
     })
   } catch (error) {
-    console.error('Error updating program:', error)
+    logger.error({ error, context: 'program-update' }, 'Failed to update program')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

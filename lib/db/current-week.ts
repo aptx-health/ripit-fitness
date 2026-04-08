@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/db'
+import { logger } from '@/lib/logger'
 
 /**
  * Result type for getCurrentStrengthWeek
@@ -11,6 +12,7 @@ export type CurrentStrengthWeekData = {
   week: {
     id: string
     weekNumber: number
+    description: string | null
     workouts: Array<{
       id: string
       name: string
@@ -113,6 +115,7 @@ export async function getCurrentStrengthWeek(
       select: {
         id: true,
         weekNumber: true,
+        description: true,
         workouts: {
           select: {
             id: true,
@@ -143,7 +146,7 @@ export async function getCurrentStrengthWeek(
       totalWeeks: Number(totalWeeks)
     }
   } catch (error) {
-    console.error('[getCurrentStrengthWeek] Error fetching current week:', error)
+    logger.error({ error, context: 'current-week' }, 'Error fetching current week')
     return null
   }
 }

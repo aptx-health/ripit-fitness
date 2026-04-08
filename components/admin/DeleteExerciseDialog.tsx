@@ -3,6 +3,7 @@
 import * as AlertDialog from '@radix-ui/react-alert-dialog'
 import { AlertTriangle } from 'lucide-react'
 import { useState } from 'react'
+import { clientLogger } from '@/lib/client-logger'
 
 type DeleteExerciseDialogProps = {
   open: boolean
@@ -55,7 +56,7 @@ export default function DeleteExerciseDialog({
       setConfirmed(false)
       onSuccess?.()
     } catch (err) {
-      console.error('Error deleting exercise:', err)
+      clientLogger.error('Error deleting exercise:', err)
       setError(err instanceof Error ? err.message : 'Failed to delete exercise')
     } finally {
       setIsDeleting(false)

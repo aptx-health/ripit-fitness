@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import ExerciseAdminTable from '@/components/admin/ExerciseAdminTable'
+import { isEditorRole } from '@/lib/admin/auth'
 import { getCurrentUser } from '@/lib/auth/server'
 
 // Don't cache this page - exercises should be fresh
@@ -12,12 +13,12 @@ export default async function AdminExercisesPage() {
     redirect('/login')
   }
 
-  // TODO: Add admin check when admin system is built
-  // const isAdmin = await checkUserIsAdmin(user.id)
-  // if (!isAdmin) redirect('/programs')
+  if (!isEditorRole(user.role)) {
+    redirect('/settings')
+  }
 
   return (
-    <div className="min-h-screen bg-background pb-safe doom-page-enter">
+    <div className="bg-background pb-safe doom-page-enter">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
         <div className="mb-6 sm:mb-8">

@@ -10,7 +10,9 @@
 // Type Definitions
 // ============================================================================
 
-export type ThemeName = 'doom' | 'cyber' | 'forest' | 'synthwave' | 'dracula' | 'github' | 'ripit' | 'catppuccin';
+import { clientLogger } from '@/lib/client-logger';
+
+export type ThemeName = 'doom' | 'cyber' | 'forest' | 'synthwave' | 'dracula' | 'github' | 'ripit' | 'catppuccin' | 'clyde' | 'ninety';
 export type ThemeMode = 'light' | 'dark';
 
 export interface ThemePreference {
@@ -22,7 +24,7 @@ export interface ThemePreference {
 // Constants
 // ============================================================================
 
-export const THEMES: ThemeName[] = ['ripit', 'doom', 'catppuccin', 'cyber', 'forest', 'synthwave', 'dracula', 'github'];
+export const THEMES: ThemeName[] = ['ripit', 'doom', 'catppuccin', 'cyber', 'forest', 'synthwave', 'dracula', 'github', 'clyde', 'ninety'];
 export const MODES: ThemeMode[] = ['light', 'dark'];
 
 export const DEFAULT_THEME: ThemePreference = {
@@ -39,6 +41,8 @@ export const THEME_LABELS: Record<ThemeName, string> = {
   synthwave: 'SYNTHWAVE \'84',
   dracula: 'DRACULA',
   github: 'GITHUB',
+  clyde: 'CLYDE',
+  ninety: '90s KID',
 };
 
 const STORAGE_KEY = 'themePreference';
@@ -113,7 +117,7 @@ export function getThemePreference(): ThemePreference {
       }
     }
   } catch (error) {
-    console.error('Failed to parse theme preference:', error);
+    clientLogger.error('Failed to parse theme preference:', error);
   }
 
   // Fallback: Use system preference for mode
@@ -132,7 +136,7 @@ export function saveThemePreference(preference: ThemePreference): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(preference));
   } catch (error) {
-    console.error('Failed to save theme preference:', error);
+    clientLogger.error('Failed to save theme preference:', error);
   }
 }
 

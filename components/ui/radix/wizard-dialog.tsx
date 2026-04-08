@@ -3,6 +3,7 @@
 import { ChevronLeft } from 'lucide-react'
 import * as React from 'react'
 import { Button } from '@/components/ui/Button'
+import { clientLogger } from '@/lib/client-logger'
 import {
   Dialog,
   DialogBody,
@@ -62,7 +63,7 @@ export function WizardDialog({
           onStepChange(currentStep + 1)
         }
       } catch (error) {
-        console.error('Wizard step validation failed:', error)
+        clientLogger.error('Wizard step validation failed:', error)
       } finally {
         setIsProcessing(false)
       }
@@ -81,14 +82,14 @@ export function WizardDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent showClose={false} fullScreenMobile={true} className="w-full h-full sm:w-[90vw] sm:max-w-3xl sm:h-auto sm:max-h-[85vh] rounded-none sm:rounded-none border-4 sm:border-4 border-border bg-card doom-card">
-        <DialogHeader className="border-b-2 border-border">
+      <DialogContent showClose={false} fullScreenMobile={true} className="w-full h-full sm:w-[90vw] sm:max-w-3xl sm:h-auto sm:max-h-[85vh] rounded-none sm:rounded-none border border-border bg-card">
+        <DialogHeader className="border-b border-border bg-primary py-2">
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <DialogTitle className="text-xl font-bold text-foreground tracking-wide uppercase">{step.title}</DialogTitle>
-              {step.description && <DialogDescription className="font-bold text-muted-foreground mt-1 uppercase tracking-wide">{step.description}</DialogDescription>}
+              <DialogTitle className="text-lg font-bold text-primary-foreground tracking-wider uppercase">{step.title}</DialogTitle>
+              {step.description && <DialogDescription className="text-base font-bold text-primary-foreground/70 uppercase tracking-wide">{step.description}</DialogDescription>}
             </div>
-            <div className="text-sm sm:text-base text-foreground font-bold tracking-wider ml-4 px-3 py-1 border-2 border-border bg-muted">
+            <div className="text-sm text-primary-foreground/80 font-bold tracking-wider ml-4 px-2.5 py-0.5 border border-primary-foreground/30">
               {currentStep + 1}/{steps.length}
             </div>
           </div>
@@ -96,7 +97,7 @@ export function WizardDialog({
 
         <DialogBody className="flex-1 min-h-0">{step.component}</DialogBody>
 
-        <DialogFooter className="border-t-2 border-border bg-muted/30">
+        <DialogFooter className="border-t border-border bg-card py-2">
           <div className="flex items-center justify-between w-full">
             <div>
               {showBackButton && (
@@ -107,7 +108,7 @@ export function WizardDialog({
               )}
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {!isLastStep && (
                 <Button variant="secondary" onClick={handleCancel} disabled={isProcessing} doom>
                   Cancel

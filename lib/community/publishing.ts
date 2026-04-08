@@ -1,4 +1,5 @@
 import type { Prisma, PrismaClient } from '@prisma/client';
+import { logger } from '@/lib/logger';
 import { calculateProgramStats, validateProgramMetadata } from './validation';
 
 export interface PublishResult {
@@ -20,7 +21,7 @@ export async function getUserDisplayName(
   });
 
   // If no settings or displayName is null/empty, return fallback
-  if (!userSettings || !userSettings.displayName || userSettings.displayName.trim() === '') {
+  if (!userSettings?.displayName || userSettings.displayName.trim() === '') {
     return 'Anonymous User';
   }
 
@@ -120,7 +121,7 @@ export async function publishProgramToCommunity(
       };
     }
 
-    console.error('Failed to publish program:', error);
+    logger.error({ error, context: 'publishing' }, 'Failed to publish program');
     return {
       success: false,
       error: 'Failed to publish program',

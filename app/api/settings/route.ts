@@ -1,11 +1,16 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { logger } from '@/lib/logger'
 
 type UpdateSettingsRequest = {
   displayName?: string
   defaultWeightUnit?: 'lbs' | 'kg'
   defaultIntensityRating?: 'rpe' | 'rir'
+  dismissedPrimer?: boolean
+  dismissedWarmup?: boolean
+  dismissedStickNudge?: boolean
+  completedTours?: string
 }
 
 export async function GET(_request: NextRequest) {
@@ -26,7 +31,7 @@ export async function GET(_request: NextRequest) {
           userId: user.id,
           displayName: null,
           defaultWeightUnit: 'lbs',
-          defaultIntensityRating: 'rpe'
+          defaultIntensityRating: 'rir'
         }
       })
     } catch (upsertError: unknown) {
@@ -44,7 +49,7 @@ export async function GET(_request: NextRequest) {
       settings
     })
   } catch (error) {
-    console.error('Error fetching user settings:', error)
+    logger.error({ error, context: 'settings-get' }, 'Failed to fetch user settings')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -61,7 +66,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json() as UpdateSettingsRequest
-    const { displayName, defaultWeightUnit, defaultIntensityRating } = body
+    const { displayName, defaultWeightUnit, defaultIntensityRating, dismissedPrimer, dismissedWarmup, dismissedStickNudge, completedTours } = body
 
     // Validate weight unit
     if (defaultWeightUnit && !['lbs', 'kg'].includes(defaultWeightUnit)) {
@@ -86,13 +91,17 @@ export async function PUT(request: NextRequest) {
         ...(displayName !== undefined && { displayName: displayName?.trim() || null }),
         ...(defaultWeightUnit && { defaultWeightUnit }),
         ...(defaultIntensityRating && { defaultIntensityRating }),
+        ...(dismissedPrimer !== undefined && { dismissedPrimer }),
+        ...(dismissedWarmup !== undefined && { dismissedWarmup }),
+        ...(dismissedStickNudge !== undefined && { dismissedStickNudge }),
+        ...(completedTours !== undefined && { completedTours }),
         updatedAt: new Date()
       },
       create: {
         userId: user.id,
         displayName: displayName?.trim() || null,
         defaultWeightUnit: defaultWeightUnit || 'lbs',
-        defaultIntensityRating: defaultIntensityRating || 'rpe'
+        defaultIntensityRating: defaultIntensityRating || 'rir'
       }
     })
 
@@ -101,7 +110,7 @@ export async function PUT(request: NextRequest) {
       settings
     })
   } catch (error) {
-    console.error('Error updating user settings:', error)
+    logger.error({ error, context: 'settings-update' }, 'Failed to update user settings')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

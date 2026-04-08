@@ -1,4 +1,4 @@
-import { ProgramSpec, makeSetsRpe } from '../helpers'
+import { makeSetsRpe, type ProgramSpec } from '../helpers'
 
 export const heavyUpperLower: ProgramSpec = {
   name: '3-Day Powerbuilder - Strength and Mass',

@@ -5,9 +5,37 @@ import { cloneStrengthProgramData, type ProgramCloneJob } from './cloning'
 
 const QUEUE_NAME = 'program-clone-jobs'
 
+// Clone worker bypasses PgBouncer and connects directly to Postgres (:5432).
+// Why: this worker uses a 30s `prisma.$transaction()` for week-batch inserts
+// and is exactly the kind of long-lived interactive transaction that gets
+// awkward under transaction-mode pooling. Direct connection avoids all
+// pgbouncer footguns (prepared statements, SET LOCAL, advisory locks). The
+// worker is single-replica with concurrency=1, so connection count is bounded.
+const workerDbUrl = process.env.DIRECT_URL ?? process.env.DATABASE_URL
+
+if (process.env.NODE_ENV === 'production') {
+  if (!workerDbUrl) {
+    console.error('Neither DIRECT_URL nor DATABASE_URL is set')
+    process.exit(1)
+  }
+  try {
+    const parsed = new URL(workerDbUrl)
+    if (parsed.port === '6432') {
+      console.error(
+        'Clone worker DB URL points at PgBouncer (:6432). It must use direct Postgres (:5432). ' +
+          'Set DIRECT_URL in the worker pod env.'
+      )
+      process.exit(1)
+    }
+  } catch {
+    console.error('Clone worker DB URL is not a valid URL')
+    process.exit(1)
+  }
+}
+
 const prisma = new PrismaClient({
   datasources: {
-    db: { url: process.env.DATABASE_URL },
+    db: { url: workerDbUrl },
   },
 })
 
@@ -41,12 +69,28 @@ async function processCloneJob(job: Job<ProgramCloneJob>): Promise<void> {
 
   console.log(`Processing clone job: communityProgramId=${communityProgramId} programId=${programId} type=${programType}`)
 
+  // Verify the shell program exists before proceeding
+  const shellProgram = await prisma.program.findUnique({
+    where: { id: programId },
+    select: { id: true, copyStatus: true },
+  })
+
+  if (!shellProgram) {
+    throw new Error(`Shell program not found: ${programId}. It may not be committed yet — will retry.`)
+  }
+
+  // Skip if already completed or failed (idempotency guard)
+  if (shellProgram.copyStatus === 'ready' || shellProgram.copyStatus === 'failed') {
+    console.log(`Program ${programId} already has copyStatus=${shellProgram.copyStatus}, skipping`)
+    return
+  }
+
   const communityProgram = await prisma.communityProgram.findUnique({
     where: { id: communityProgramId },
     select: { programData: true },
   })
 
-  if (!communityProgram || !communityProgram.programData) {
+  if (!communityProgram?.programData) {
     throw new Error(`Community program not found or has no data: ${communityProgramId}`)
   }
 

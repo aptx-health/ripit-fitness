@@ -1,7 +1,6 @@
 'use client'
 
-import { ArrowLeft, Check, ChevronDown, X } from 'lucide-react'
-import Link from 'next/link'
+import { Check, ChevronDown, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import {
   Popover,
@@ -114,28 +113,9 @@ export default function CommunityProgramsView({
   const hasActiveFilters = selectedLevel !== null || selectedGoals.length > 0
 
   return (
-    <div className="min-h-screen bg-background pb-safe doom-page-enter">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-        {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <Link
-            href="/programs"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-4 uppercase tracking-wider font-medium"
-          >
-            <ArrowLeft size={16} />
-            Back to My Programs
-          </Link>
-
-          <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2 doom-title uppercase tracking-wider">
-            COMMUNITY PROGRAMS
-          </h1>
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Discover and add training programs shared by the community
-          </p>
-        </div>
-
+    <div>
         {/* Filter Buttons */}
-        <div className="sticky top-0 bg-background z-10 pb-4 sm:pb-6">
+        <div className="sticky top-0 bg-background z-10 pb-4">
           <div className="flex flex-wrap gap-2">
             <span className="px-4 py-2 bg-primary text-primary-foreground doom-button-3d font-semibold text-sm sm:text-base uppercase tracking-wider">
               All ({communityPrograms.length})
@@ -147,7 +127,7 @@ export default function CommunityProgramsView({
             {/* Level Filter Popover */}
             <Popover>
               <PopoverTrigger asChild>
-                <button type="button" className="px-4 py-2 border-2 border-border text-foreground hover:border-primary transition-colors uppercase tracking-wider font-semibold doom-focus-ring flex items-center gap-2 text-sm">
+                <button type="button" data-tour="level-filter" className="px-4 py-2 border-2 border-border text-foreground hover:border-primary transition-colors uppercase tracking-wider font-semibold doom-focus-ring flex items-center gap-2 text-sm">
                   Level: {selectedLevel ? LEVEL_LABELS[selectedLevel] : 'All'}
                   <ChevronDown size={16} />
                 </button>
@@ -178,7 +158,7 @@ export default function CommunityProgramsView({
             {/* Goals Filter Popover */}
             <Popover>
               <PopoverTrigger asChild>
-                <button type="button" className="px-4 py-2 border-2 border-border text-foreground hover:border-primary transition-colors uppercase tracking-wider font-semibold doom-focus-ring flex items-center gap-2 text-sm">
+                <button type="button" data-tour="goals-filter" className="px-4 py-2 border-2 border-border text-foreground hover:border-primary transition-colors uppercase tracking-wider font-semibold doom-focus-ring flex items-center gap-2 text-sm">
                   Goals: {selectedGoals.length > 0 ? `${selectedGoals.length} selected` : 'Any'}
                   <ChevronDown size={16} />
                 </button>
@@ -236,13 +216,14 @@ export default function CommunityProgramsView({
           </div>
         ) : (
           <>
-            {/* Program Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-8">
-              {paginatedPrograms.map((program) => (
+            {/* Program Cards */}
+            <div className="grid grid-cols-1 gap-4 mb-8">
+              {paginatedPrograms.map((program, index) => (
                 <CommunityProgramCard
                   key={program.id}
                   program={program}
                   currentUserId={currentUserId}
+                  {...(index === 0 ? { 'data-tour': 'program-card' } : {})}
                 />
               ))}
             </div>
@@ -321,7 +302,6 @@ export default function CommunityProgramsView({
             )}
           </>
         )}
-      </div>
     </div>
   )
 }

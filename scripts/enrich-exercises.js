@@ -20,8 +20,8 @@
  * Usage: node scripts/enrich-exercises.js
  */
 
-const fs = require('fs')
-const path = require('path')
+const fs = require('node:fs')
+const path = require('node:path')
 
 const EXERCISE_DB_URL =
   'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json'

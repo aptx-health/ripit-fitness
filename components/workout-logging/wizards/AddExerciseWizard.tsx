@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { WizardDialog, type WizardStep } from '@/components/ui/radix/wizard-dialog'
+import { clientLogger } from '@/lib/client-logger'
 import {
   type ExerciseDefinition,
   ExerciseSearchStep,
@@ -120,7 +121,7 @@ export function AddExerciseWizard({
         // Close wizard after refresh completes
         onOpenChange(false)
       } catch (error) {
-        console.error('Error adding exercise:', error)
+        clientLogger.error('Error adding exercise:', error)
         setIsLoading(false)
         setIsSuccess(false)
         setErrorMessage(error instanceof Error ? error.message : 'Failed to add exercise')

@@ -172,7 +172,7 @@ export async function POST(
       workout: completeWorkout
     })
   } catch (error) {
-    console.error('Error creating workout:', error)
+    logger.error({ error, context: 'workout-create' }, 'Failed to create workout')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -250,7 +250,7 @@ export async function PATCH(
       workout: updatedWorkout
     })
   } catch (error) {
-    console.error('Error updating workout:', error)
+    logger.error({ error, context: 'workout-update' }, 'Failed to update workout')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

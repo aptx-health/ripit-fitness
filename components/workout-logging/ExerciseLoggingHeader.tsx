@@ -1,39 +1,56 @@
 'use client'
 
-import type { SyncStatus } from '@/hooks/useSyncState'
-import SyncStatusIcon from '../SyncStatusIcon'
+import { AlertCircle, ChevronDown, X } from 'lucide-react'
 
 interface ExerciseLoggingHeaderProps {
   currentExerciseIndex: number
   totalExercises: number
-  syncStatus: SyncStatus
-  pendingSetsCount: number
-  onSyncClick: () => void
+  failedSetCount?: number
+  onMinimize: () => void
+  onClose: () => void
 }
 
 export default function ExerciseLoggingHeader({
   currentExerciseIndex,
   totalExercises,
-  syncStatus,
-  pendingSetsCount,
-  onSyncClick,
+  failedSetCount = 0,
+  onMinimize,
+  onClose,
 }: ExerciseLoggingHeaderProps) {
   return (
     <div
-      className="bg-primary text-white px-4 py-3 border-b-2 border-primary-muted-dark flex-shrink-0"
-      style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.75rem)' }}
+      className="bg-primary text-white px-4 py-2 border-b border-primary-muted-dark flex-shrink-0"
+      style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.5rem)' }}
     >
       <div className="flex items-center justify-between gap-2">
-        <div className="text-base text-primary-foreground opacity-90 uppercase tracking-wider font-medium">
-          Exercise {currentExerciseIndex + 1} of {totalExercises}
+        <div className="text-sm text-primary-foreground/80 uppercase tracking-wider font-bold">
+          EXERCISE {currentExerciseIndex + 1} OF {totalExercises}
         </div>
 
-        {/* Sync Status Icon */}
-        <SyncStatusIcon
-          status={syncStatus}
-          pendingCount={pendingSetsCount}
-          onClick={onSyncClick}
-        />
+        <div className="flex items-center gap-1.5">
+          {failedSetCount > 0 && (
+            <div className="flex items-center gap-1 text-warning text-xs font-semibold">
+              <AlertCircle size={14} />
+              <span>{failedSetCount} unsaved</span>
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={onMinimize}
+            className="h-8 w-8 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/15 transition-colors doom-focus-ring"
+            aria-label="Minimize workout"
+          >
+            <ChevronDown className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="h-8 w-8 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/15 transition-colors doom-focus-ring"
+            aria-label="Close workout"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
       </div>
     </div>
   )

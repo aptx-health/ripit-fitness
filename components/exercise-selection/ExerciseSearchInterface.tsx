@@ -3,6 +3,7 @@
 import { Filter, Search } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/radix/popover'
+import { clientLogger } from '@/lib/client-logger'
 import { EQUIPMENT_LABELS } from '@/lib/constants/program-metadata'
 
 export type ExerciseDefinition = {
@@ -118,7 +119,7 @@ export function ExerciseSearchInterface({
       const { exercises } = await response.json()
       setExercises(exercises)
     } catch (error) {
-      console.error('Error searching exercises:', error)
+      clientLogger.error('Error searching exercises:', error)
       setError(error instanceof Error ? error.message : 'Failed to search exercises')
     } finally {
       setIsLoading(false)

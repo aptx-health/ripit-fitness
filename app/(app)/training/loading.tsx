@@ -1,6 +1,6 @@
 export default function TrainingLoading() {
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="bg-background p-6">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header skeleton */}
         <div className="flex justify-between items-start">

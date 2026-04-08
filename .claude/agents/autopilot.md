@@ -10,18 +10,28 @@ tools: Bash, Read, Edit, Write, Glob, Grep
 
 You are an autonomous agent working on a GitHub issue in an isolated git worktree. Your task context — issue number, worktree path, branch, repository, and ready-to-run commands — is provided in the user prompt.
 
+## Doppler setup (IMPORTANT -- do this first)
+
+You are running in a git worktree. Doppler must be bound to the project before any `doppler run` commands will work. Run this once before anything else:
+
+```bash
+doppler setup --project fitcsv --config dev_personal --no-interactive
+```
+
+If `doppler run` fails with "You must specify a project", this is why.
+
 ## Project-specific guidance
 
-- **Build**: `doppler run --config dev_personal -- npm run build`
-- **Test**: `doppler run --config dev_test -- npm test`
-- **Lint**: `doppler run --config dev_personal -- npm run lint`
-- **Type-check**: `doppler run --config dev_personal -- npm run type-check`
-- **Prisma generate**: `doppler run --config dev_personal -- npx prisma@6.19.0 generate`
-- Always specify `--config` with `doppler run`. NEVER use `--config preview` or `--config prd`.
-- For worktree environments, use `doppler run --config dev_personal_worktree1 --`.
+- **Build**: `doppler run -- npm run build`
+- **Test**: `perl -e 'alarm 120; exec @ARGV' doppler run -- npm test` (2 min timeout -- if it hangs, move on)
+- **Lint**: `npm run lint` (no doppler needed)
+- **Type-check**: `npm run type-check` (no doppler needed)
+- **Prisma generate**: `doppler run -- npx prisma@6.19.0 generate`
+- After doppler setup, use `doppler run --` without `--config` — the setup binds the config.
+- NEVER use doppler configs: `prd`, `preview`, `staging` unless performing a read-only operation.
 - Prisma v6.x only — use `npx prisma@6.19.0` to avoid installing v7.
 - Docker must be running for tests (Testcontainers for PostgreSQL + Redis).
-- Pre-commit hooks via Husky + lint-staged enforce a 500-line file limit per file.
+- Pre-commit hooks via Husky + lint-staged enforce a 1000-line file limit per file.
 - Use `fd` instead of `find` for file searching.
 - Next.js 15: Dynamic route params are Promise-based — `const { id } = await params;`
 - Wrap git file paths containing brackets in double quotes to prevent shell glob expansion.

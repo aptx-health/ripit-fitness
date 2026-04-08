@@ -29,42 +29,40 @@ export default function ExerciseNavigation({
   const supersetLabel = currentExercise.exerciseGroup
 
   return (
-    <div className="border-b-2 border-border px-4 py-3 flex items-center justify-between bg-muted flex-shrink-0">
+    <div data-tour="exercise-nav" className="border-b border-border px-3 py-2 flex items-center justify-between bg-card flex-shrink-0">
       <button type="button"
         onClick={onPrevious}
         disabled={currentExerciseIndex === 0}
-        className={`p-3 transition-all doom-focus-ring ${
+        className={`p-2 transition-all doom-focus-ring ${
           currentExerciseIndex === 0
-            ? 'bg-muted opacity-30 cursor-not-allowed'
-            : 'bg-primary-muted hover:bg-primary hover:text-white border-2 border-transparent hover:border-primary'
+            ? 'opacity-20 cursor-not-allowed'
+            : 'text-muted-foreground hover:text-foreground'
         }`}
         aria-label="Previous exercise"
       >
-        <ChevronLeft size={24} strokeWidth={2.5} />
+        <ChevronLeft size={20} strokeWidth={2.5} />
       </button>
 
-      <div className="text-center flex-1 px-2">
-        <div className="flex items-center justify-center gap-2">
-          {isSuperset && (
-            <span className="px-3 py-1 bg-accent-muted text-accent-text text-sm font-bold uppercase tracking-wider border border-accent">
-              Superset {supersetLabel}
-            </span>
-          )}
-          <h3 className="text-xl sm:text-2xl font-bold text-foreground uppercase tracking-wide">{currentExercise.name}</h3>
-        </div>
+      <div className="text-center flex-1 min-w-0 px-2">
+        {isSuperset && (
+          <span className="inline-block px-2 py-0.5 text-xs font-bold uppercase tracking-wider text-accent border border-accent mb-0.5">
+            Superset {supersetLabel}
+          </span>
+        )}
+        <h3 className="text-lg font-bold text-foreground uppercase tracking-wide truncate doom-heading">{currentExercise.name}</h3>
       </div>
 
       <button type="button"
         onClick={onNext}
         disabled={currentExerciseIndex === totalExercises - 1}
-        className={`p-3 transition-all doom-focus-ring ${
+        className={`p-2 transition-all doom-focus-ring ${
           currentExerciseIndex === totalExercises - 1
-            ? 'bg-muted opacity-30 cursor-not-allowed'
-            : 'bg-primary-muted hover:bg-primary hover:text-white border-2 border-transparent hover:border-primary'
+            ? 'opacity-20 cursor-not-allowed'
+            : 'text-muted-foreground hover:text-foreground'
         }`}
         aria-label="Next exercise"
       >
-        <ChevronRight size={24} strokeWidth={2.5} />
+        <ChevronRight size={20} strokeWidth={2.5} />
       </button>
     </div>
   )

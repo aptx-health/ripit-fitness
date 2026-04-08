@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/server';
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 export async function DELETE(
   _request: NextRequest,
@@ -46,7 +47,7 @@ export async function DELETE(
       success: true,
     });
   } catch (error) {
-    console.error('Error deleting community program:', error);
+    logger.error({ error, context: 'community-program-delete' }, 'Failed to delete community program');
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

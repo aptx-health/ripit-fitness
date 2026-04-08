@@ -1304,11 +1304,293 @@
   --accent-rgb: 148, 226, 213;
 }
 
+/* CLYDE Theme - Light Mode (Claude App) */
+[data-theme="clyde"] {
+  /* Base colors - warm cream canvas */
+  --background: #FAF9F7;  /* warm off-white */
+  --foreground: #1a1a1a;  /* near-black text */
+
+  /* Surface colors */
+  --card: #FFFFFF;
+  --card-foreground: #1a1a1a;
+  --muted: #F0EDE8;       /* warm light beige */
+  --muted-foreground: #6B6560;
+
+  /* Border colors */
+  --border: #E0DBD4;      /* warm light border */
+  --input: #E0DBD4;
+
+  /* Primary (Claude Terracotta/Coral) */
+  --primary: #D97757;     /* Claude signature warm coral */
+  --primary-foreground: #FFFFFF;
+  --primary-hover: #C4653F;
+  --primary-active: #B05A38;
+  --primary-muted: #FDF0EB;
+  --primary-muted-dark: #D97757;
+  --primary-rgb: 217, 119, 87;
+
+  /* Secondary (Warm Gray) */
+  --secondary: #8A8480;
+  --secondary-foreground: #FFFFFF;
+  --secondary-hover: #706B67;
+  --secondary-active: #5C5753;
+  --secondary-muted: #F0EDE8;
+
+  /* Success (Soft Teal) */
+  --success: #2D9C83;
+  --success-foreground: #FFFFFF;
+  --success-hover: #258270;
+  --success-muted: #E6F5F1;
+  --success-text: #2D9C83;
+  --success-border: #2D9C83;
+  --success-rgb: 45, 156, 131;
+
+  /* Warning (Warm Amber) */
+  --warning: #D4922A;
+  --warning-foreground: #FFFFFF;
+  --warning-hover: #B87D23;
+  --warning-muted: #FDF3E0;
+  --warning-text: #D4922A;
+  --warning-border: #D4922A;
+  --warning-rgb: 212, 146, 42;
+
+  /* Error (Soft Red) */
+  --error: #CC4E4E;
+  --error-foreground: #FFFFFF;
+  --error-hover: #B33E3E;
+  --error-muted: #FCE8E8;
+  --error-text: #CC4E4E;
+  --error-border: #CC4E4E;
+  --error-rgb: 204, 78, 78;
+
+  /* Accent (Claude Warm Blue) */
+  --accent: #5B8AC4;
+  --accent-foreground: #FFFFFF;
+  --accent-hover: #4A76AD;
+  --accent-active: #3D6599;
+  --accent-muted: #EBF1F8;
+  --accent-text: #5B8AC4;
+  --accent-rgb: 91, 138, 196;
+}
+
+/* CLYDE Theme - Dark Mode (Claude Dark) */
+[data-theme="clyde"][data-mode="dark"] {
+  /* Base colors - warm dark surface */
+  --background: #2B2522;  /* warm deep brown-black */
+  --foreground: #F0EBE4;  /* warm off-white */
+
+  /* Surface colors */
+  --card: #352F2B;        /* warm dark card */
+  --card-foreground: #F0EBE4;
+  --muted: #3F3833;       /* warm dark muted */
+  --muted-foreground: #A09890;
+
+  /* Border colors */
+  --border: #4A433D;      /* warm dark border */
+  --input: #4A433D;
+
+  /* Primary (Claude Terracotta/Coral - bright in dark) */
+  --primary: #E0845F;     /* brighter coral for dark bg */
+  --primary-foreground: #1a1a1a;
+  --primary-hover: #D97757;
+  --primary-active: #C4653F;
+  --primary-muted: #3D2A22;
+  --primary-muted-dark: #E0845F;
+  --primary-rgb: 224, 132, 95;
+
+  /* Secondary (Warm Gray) */
+  --secondary: #9A9490;
+  --secondary-foreground: #1a1a1a;
+  --secondary-hover: #8A8480;
+  --secondary-active: #706B67;
+  --secondary-muted: #3F3833;
+
+  /* Success (Soft Teal) */
+  --success: #3DB896;
+  --success-foreground: #1a1a1a;
+  --success-hover: #2D9C83;
+  --success-muted: #1E342E;
+  --success-text: #3DB896;
+  --success-border: #3DB896;
+  --success-rgb: 61, 184, 150;
+
+  /* Warning (Warm Amber) */
+  --warning: #E0A43A;
+  --warning-foreground: #1a1a1a;
+  --warning-hover: #D4922A;
+  --warning-muted: #3A3020;
+  --warning-text: #E0A43A;
+  --warning-border: #E0A43A;
+  --warning-rgb: 224, 164, 58;
+
+  /* Error (Soft Red) */
+  --error: #E06060;
+  --error-foreground: #FFFFFF;
+  --error-hover: #CC4E4E;
+  --error-muted: #3A2222;
+  --error-text: #E06060;
+  --error-border: #E06060;
+  --error-rgb: 224, 96, 96;
+
+  /* Accent (Claude Warm Blue) */
+  --accent: #6E9AD0;
+  --accent-foreground: #1a1a1a;
+  --accent-hover: #5B8AC4;
+  --accent-active: #4A76AD;
+  --accent-muted: #253040;
+  --accent-text: #6E9AD0;
+  --accent-rgb: 110, 154, 208;
+}
+
+/* 90s KID Theme - Light Mode (Nickelodeon) */
+[data-theme="ninety"] {
+  /* Base colors - bright white with teal tint */
+  --background: #F5FBF9;  /* very light teal tint */
+  --foreground: #0c344d;  /* deep teal-navy from palette */
+
+  /* Surface colors */
+  --card: #FFFFFF;
+  --card-foreground: #0c344d;
+  --muted: #E8F5F0;       /* light minty */
+  --muted-foreground: #4A6B5D;
+
+  /* Border colors */
+  --border: #C8E6DA;      /* light green-teal border */
+  --input: #C8E6DA;
+
+  /* Primary (Nick Orange) */
+  --primary: #f5782a;     /* orange from palette - iconic Nick */
+  --primary-foreground: #FFFFFF;
+  --primary-hover: #E06620;
+  --primary-active: #C7581A;
+  --primary-muted: #FEF0E7;
+  --primary-muted-dark: #f5782a;
+  --primary-rgb: 245, 120, 42;
+
+  /* Secondary (Deep Teal) */
+  --secondary: #0c344d;   /* deep navy-teal from palette */
+  --secondary-foreground: #FFFFFF;
+  --secondary-hover: #0A2B40;
+  --secondary-active: #082233;
+  --secondary-muted: #E0EEF4;
+
+  /* Success (Slime Green) */
+  --success: #6cc314;     /* lime green from palette */
+  --success-foreground: #FFFFFF;
+  --success-hover: #5BAA10;
+  --success-muted: #EBF7DE;
+  --success-text: #4DA812;
+  --success-border: #6cc314;
+  --success-rgb: 108, 195, 20;
+
+  /* Warning (Golden Yellow) */
+  --warning: #f5be2a;     /* golden yellow from palette */
+  --warning-foreground: #0c344d;
+  --warning-hover: #E0AC20;
+  --warning-muted: #FEF6E0;
+  --warning-text: #D4A020;
+  --warning-border: #f5be2a;
+  --warning-rgb: 245, 190, 42;
+
+  /* Error (Hot Red) */
+  --error: #E04520;
+  --error-foreground: #FFFFFF;
+  --error-hover: #C73B1A;
+  --error-muted: #FDE8E3;
+  --error-text: #E04520;
+  --error-border: #E04520;
+  --error-rgb: 224, 69, 32;
+
+  /* Accent (90s Purple) */
+  --accent: #9B30FF;      /* electric purple - 90s pop */
+  --accent-foreground: #FFFFFF;
+  --accent-hover: #8526E0;
+  --accent-active: #7020C7;
+  --accent-muted: #F0E4FF;
+  --accent-text: #7B20D4;
+  --accent-rgb: 155, 48, 255;
+}
+
+/* 90s KID Theme - Dark Mode (Midnight Nick) */
+[data-theme="ninety"][data-mode="dark"] {
+  /* Base colors - deep teal-navy */
+  --background: #071E2E;  /* very dark teal */
+  --foreground: #fbff90;  /* pale yellow from palette - neon feel */
+
+  /* Surface colors */
+  --card: #0c344d;        /* deep teal from palette */
+  --card-foreground: #F0F8F0;
+  --muted: #123D56;       /* slightly lighter teal */
+  --muted-foreground: #8AB8A0;
+
+  /* Border colors */
+  --border: #1A4D66;      /* medium teal border */
+  --input: #1A4D66;
+
+  /* Primary (Nick Orange - vivid in dark) */
+  --primary: #FF8A40;     /* bright orange for dark bg */
+  --primary-foreground: #071E2E;
+  --primary-hover: #f5782a;
+  --primary-active: #E06620;
+  --primary-muted: #3A2210;
+  --primary-muted-dark: #FF8A40;
+  --primary-rgb: 255, 138, 64;
+
+  /* Secondary (Pale Yellow) */
+  --secondary: #fbff90;   /* pale yellow from palette */
+  --secondary-foreground: #071E2E;
+  --secondary-hover: #E8EB80;
+  --secondary-active: #D4D770;
+  --secondary-muted: #2A2E18;
+
+  /* Success (Slime Green - bright) */
+  --success: #7CD424;
+  --success-foreground: #071E2E;
+  --success-hover: #6cc314;
+  --success-muted: #1A3318;
+  --success-text: #7CD424;
+  --success-border: #6cc314;
+  --success-rgb: 124, 212, 36;
+
+  /* Warning (Golden Yellow) */
+  --warning: #f5be2a;     /* golden yellow from palette */
+  --warning-foreground: #071E2E;
+  --warning-hover: #FFD040;
+  --warning-muted: #2E2A10;
+  --warning-text: #FFD040;
+  --warning-border: #f5be2a;
+  --warning-rgb: 245, 190, 42;
+
+  /* Error (Hot Red) */
+  --error: #FF5533;
+  --error-foreground: #FFFFFF;
+  --error-hover: #E04520;
+  --error-muted: #3A1A12;
+  --error-text: #FF5533;
+  --error-border: #FF5533;
+  --error-rgb: 255, 85, 51;
+
+  /* Accent (90s Purple - neon) */
+  --accent: #B44FFF;      /* bright electric purple */
+  --accent-foreground: #071E2E;
+  --accent-hover: #C870FF;
+  --accent-active: #9B30FF;
+  --accent-muted: #2A1840;
+  --accent-text: #C870FF;
+  --accent-rgb: 180, 79, 255;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-rajdhani), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   letter-spacing: 0.02em;
+}
+
+/* Workaround: Next.js streaming SSR can orphan elements at body level.
+   Hide any training-scoped widgets that escape outside the React tree. */
+body > [data-training-widget] {
+  display: none !important;
 }
 
 /* ============================================
@@ -1563,6 +1845,25 @@ body {
   animation: doom-badge-pulse 1.5s ease-in-out infinite;
 }
 
+@keyframes doom-set-logged {
+  0% {
+    box-shadow: 0 0 0 rgba(var(--success-rgb), 0);
+    background-color: transparent;
+  }
+  20% {
+    box-shadow: 0 0 12px rgba(var(--success-rgb), 0.6), inset 0 0 8px rgba(var(--success-rgb), 0.1);
+    background-color: rgba(var(--success-rgb), 0.12);
+  }
+  100% {
+    box-shadow: 0 0 0 rgba(var(--success-rgb), 0);
+    background-color: transparent;
+  }
+}
+
+.doom-set-logged {
+  animation: doom-set-logged 0.6s ease-out;
+}
+
 @keyframes doom-badge-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.8; }
@@ -1742,4 +2043,144 @@ body {
 
 .animate-shimmer {
   animation: shimmer 2s infinite;
+}
+
+@keyframes accent-sweep {
+  0% {
+    transform: translateX(-100%);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 1;
+  }
+}
+
+.animate-accent-sweep {
+  overflow: hidden;
+}
+
+.animate-accent-sweep::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--primary) 15%, transparent) 40%,
+    color-mix(in srgb, var(--primary) 15%, transparent) 60%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  animation: accent-sweep 0.8s ease-out 0.3s 1;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Prose styles for Learn article markdown content */
+.prose-learn {
+  color: var(--foreground);
+  font-size: 0.9375rem;
+  line-height: 1.7;
+}
+.prose-learn h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  color: var(--foreground);
+}
+.prose-learn h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1.75rem;
+  margin-bottom: 0.5rem;
+  color: var(--foreground);
+}
+.prose-learn h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--foreground);
+}
+.prose-learn p {
+  margin-bottom: 1rem;
+}
+.prose-learn a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+.prose-learn a:hover {
+  color: var(--warning-text);
+}
+.prose-learn strong {
+  font-weight: 600;
+  color: var(--foreground);
+}
+.prose-learn ul,
+.prose-learn ol {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+.prose-learn ul {
+  list-style-type: disc;
+}
+.prose-learn ol {
+  list-style-type: decimal;
+}
+.prose-learn li {
+  margin-bottom: 0.25rem;
+}
+.prose-learn blockquote {
+  border-left: 3px solid var(--primary);
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+.prose-learn code {
+  background: var(--muted);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.8125rem;
+}
+.prose-learn pre {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+.prose-learn pre code {
+  background: transparent;
+  padding: 0;
+}
+.prose-learn img {
+  max-width: 100%;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+.prose-learn hr {
+  border-color: var(--border);
+  margin: 2rem 0;
+}
+.prose-learn table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+.prose-learn th,
+.prose-learn td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+.prose-learn th {
+  background: var(--muted);
+  font-weight: 600;
 }

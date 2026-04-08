@@ -1,16 +1,22 @@
 'use client'
 
 import { CheckCircle } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState, useTransition } from 'react'
-import ActionsMenu from '@/components/ActionsMenu'
 import ExerciseLoggingModal from '@/components/ExerciseLoggingModal'
+import { BeginnerPrimerWizard } from '@/components/features/training/BeginnerPrimerWizard'
+import { StickNudgeBanner } from '@/components/features/training/StickNudgeBanner'
+import { WarmupInterstitial } from '@/components/features/training/WarmupInterstitial'
 import { ProgramCompletionModal } from '@/components/ProgramCompletionModal'
+import { useTour } from '@/components/tour'
 import WeekNavigator from '@/components/ui/WeekNavigator'
+import WorkoutHistoryList from '@/components/WorkoutHistoryList'
 import WorkoutPreviewModal from '@/components/WorkoutPreviewModal'
 import WorkoutCard from '@/components/workout/WorkoutCard'
-import { useWorkoutStorage } from '@/hooks/useWorkoutStorage'
+import { useUserSettings } from '@/hooks/useUserSettings'
 import { clientLogger } from '@/lib/client-logger'
+import { useDraftWorkout } from '@/lib/contexts/DraftWorkoutContext'
+import { TRAINING_PAGE_STEPS, TRAINING_PAGE_TOUR_ID } from '@/lib/tour/steps/training-page'
 
 type Workout = {
   id: string
@@ -29,6 +35,7 @@ type Workout = {
 type Week = {
   id: string
   weekNumber: number
+  description: string | null
   workouts: Workout[]
 }
 
@@ -37,6 +44,7 @@ type Props = {
   programName: string
   week: Week
   totalWeeks: number
+  historyCount: number
 }
 
 type ModalMode = 'preview' | 'logging' | null
@@ -142,15 +150,20 @@ type WorkoutMetadata = {
       rir: number | null
     }>
   } | null
+  resumeExerciseIndex?: number
 }
 
 export default function StrengthWeekView({
   programId,
   programName,
   week,
-  totalWeeks
+  totalWeeks,
+  historyCount,
 }: Props) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const { activeDraft, refreshDraft, clearDraft } = useDraftWorkout()
+  const { settings, isLoading: settingsLoading, refetch: refetchSettings } = useUserSettings()
   const [isPending, startTransition] = useTransition()
   const [updatingWorkoutId, setUpdatingWorkoutId] = useState<string | null>(null)
   const [skippingWorkout, setSkippingWorkout] = useState<string | null>(null)
@@ -166,8 +179,27 @@ export default function StrengthWeekView({
   const [isRestarting, setIsRestarting] = useState(false)
   const [isProgramComplete, setIsProgramComplete] = useState(false)
 
-  // For clearing localStorage when resetting workout
-  const { clearStoredWorkout } = useWorkoutStorage(selectedWorkoutId || '')
+  const resumeWorkoutId = searchParams.get('resume')
+
+  // Contextual content triggers
+  const showPrimer = historyCount === 0 && !settings?.dismissedPrimer && !settingsLoading
+  const showWarmup = historyCount < 4 && !settings?.dismissedWarmup
+  const showStickNudge = historyCount >= 3 && historyCount <= 8 && !settings?.dismissedStickNudge && !settingsLoading
+
+  // Training page guided tour
+  const { startTour: startPageTour, isActive: tourActive } = useTour()
+  useEffect(() => {
+    if (settingsLoading || !settings || tourActive) return
+    try {
+      const completed: string[] = JSON.parse(settings.completedTours || '[]')
+      if (!completed.includes(TRAINING_PAGE_TOUR_ID)) {
+        const timer = setTimeout(() => {
+          startPageTour(TRAINING_PAGE_TOUR_ID, TRAINING_PAGE_STEPS)
+        }, 300)
+        return () => clearTimeout(timer)
+      }
+    } catch { /* invalid JSON, skip */ }
+  }, [settingsLoading, settings, tourActive, startPageTour])
 
   const checkProgramCompletion = useCallback(async (openModal = false) => {
     // Skip check if we're currently restarting
@@ -199,6 +231,15 @@ export default function StrengthWeekView({
       setUpdatingWorkoutId(null)
     }
   }, [isPending, updatingWorkoutId])
+
+  // Safety timeout: clear loading state if transition stalls (e.g. router.refresh() hangs)
+  useEffect(() => {
+    if (!updatingWorkoutId) return
+    const timeout = setTimeout(() => {
+      setUpdatingWorkoutId(null)
+    }, 5000)
+    return () => clearTimeout(timeout)
+  }, [updatingWorkoutId])
 
   const handleProgramRestart = useCallback(() => {
     // Set restarting flag to prevent completion checks
@@ -258,8 +299,13 @@ export default function StrengthWeekView({
     if (data) setModalMode('preview')
   }
 
-  // Opens logging modal with progressive loading (fast!)
-  const handleOpenLogging = async (workoutId: string) => {
+  // Interception state — primer and warm-up gate before logging modal
+  const [primerOpen, setPrimerOpen] = useState(false)
+  const [warmupOpen, setWarmupOpen] = useState(false)
+  const [pendingLoggingWorkoutId, setPendingLoggingWorkoutId] = useState<string | null>(null)
+
+  // Core logging flow — fetches metadata and opens the logging modal
+  const proceedToLogging = useCallback(async (workoutId: string) => {
     setSelectedWorkoutId(workoutId)
     const metadata = await fetchWorkoutMetadata(workoutId)
     if (!metadata) return
@@ -273,7 +319,84 @@ export default function StrengthWeekView({
     }
 
     setModalMode('logging')
+  }, [fetchWorkoutMetadata, fetchWorkoutData])
+
+  // After primer completes, check if warm-up is also needed before proceeding
+  const proceedAfterPrimer = () => {
+    setPrimerOpen(false)
+    if (showWarmup && pendingLoggingWorkoutId) {
+      setWarmupOpen(true)
+    } else if (pendingLoggingWorkoutId) {
+      proceedToLogging(pendingLoggingWorkoutId)
+      setPendingLoggingWorkoutId(null)
+    }
   }
+
+  // Opens logging modal with progressive loading (fast!)
+  // Intercepts with primer (first ever) then warm-up (sessions 1-3)
+  const handleOpenLogging = useCallback(async (workoutId: string) => {
+    // Prevent opening a different workout while a draft exists
+    if (activeDraft && activeDraft.workoutId !== workoutId) {
+      alert(
+        `You have an in-progress workout ("${activeDraft.workoutName}"). Resume or discard it first.`
+      )
+      return
+    }
+
+    // Skip primer/warmup interception when resuming an existing draft —
+    // the user already started this workout and saw these screens
+    const isResumingDraft = activeDraft && activeDraft.workoutId === workoutId
+
+    // Primer interception — first ever workout
+    if (showPrimer && !primerOpen && !isResumingDraft) {
+      setPendingLoggingWorkoutId(workoutId)
+      setPrimerOpen(true)
+      return
+    }
+
+    // Warm-up interception for early sessions
+    if (showWarmup && !warmupOpen && !isResumingDraft) {
+      setPendingLoggingWorkoutId(workoutId)
+      setWarmupOpen(true)
+      return
+    }
+
+    await proceedToLogging(workoutId)
+  }, [activeDraft, showPrimer, primerOpen, showWarmup, warmupOpen, proceedToLogging])
+
+  const handleWarmupCancel = () => {
+    setWarmupOpen(false)
+    setPendingLoggingWorkoutId(null)
+  }
+
+  const handleWarmupContinue = () => {
+    setWarmupOpen(false)
+    if (pendingLoggingWorkoutId) {
+      proceedToLogging(pendingLoggingWorkoutId)
+      setPendingLoggingWorkoutId(null)
+    }
+  }
+
+  const handleWarmupDismissPermanently = () => {
+    setWarmupOpen(false)
+    refetchSettings()
+    if (pendingLoggingWorkoutId) {
+      proceedToLogging(pendingLoggingWorkoutId)
+      setPendingLoggingWorkoutId(null)
+    }
+  }
+
+  // Auto-resume draft workout when navigated with ?resume= param
+  useEffect(() => {
+    if (resumeWorkoutId && !modalMode) {
+      // Clear the param from URL without triggering a navigation
+      const url = new URL(window.location.href)
+      url.searchParams.delete('resume')
+      window.history.replaceState(null, '', url.toString())
+
+      handleOpenLogging(resumeWorkoutId)
+    }
+  }, [resumeWorkoutId, handleOpenLogging, modalMode])
 
   const handleCloseModal = (workoutUpdated = false) => {
     const workoutId = selectedWorkoutId
@@ -281,6 +404,11 @@ export default function StrengthWeekView({
     setSelectedWorkoutId(null)
     setWorkoutData(null)
     setWorkoutMetadata(null)
+
+    // Optimistically clear draft context so UI unblocks immediately,
+    // then refresh from server for authoritative state
+    clearDraft()
+    refreshDraft()
 
     if (workoutUpdated && workoutId) {
       // Track which workout is updating and use transition to show loading until refresh completes
@@ -308,23 +436,9 @@ export default function StrengthWeekView({
     setModalMode('logging')
   }
 
-  const handleCompleteWorkout = async (loggedSets: Array<{
-    exerciseId: string
-    setNumber: number
-    reps: number
-    weight: number
-    weightUnit: string
-    rpe: number | null
-    rir: number | null
-  }>) => {
-    if (!selectedWorkoutId) return
-    const response = await fetch(`/api/workouts/${selectedWorkoutId}/complete`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ loggedSets }),
-    })
-    if (!response.ok) throw new Error('Failed to complete workout')
-    handleCloseModal(true) // Pass true to indicate workout was updated
+  // Completion is handled inside ExerciseLoggingModal now (per-set writes + status flip)
+  const handleCompleteWorkout = async () => {
+    handleCloseModal(true)
     await checkProgramCompletion(true)
   }
 
@@ -332,7 +446,6 @@ export default function StrengthWeekView({
     if (!selectedWorkoutId) return
     const response = await fetch(`/api/workouts/${selectedWorkoutId}/clear`, { method: 'POST' })
     if (!response.ok) throw new Error('Failed to clear workout')
-    clearStoredWorkout()
     setModalKey(prev => prev + 1)
     // Refetch the workout data/metadata
     if (modalMode === 'preview') {
@@ -391,27 +504,15 @@ export default function StrengthWeekView({
   }, [selectedWorkoutId, fetchWorkoutMetadata])
 
   const hasIncompleteWorkouts = week.workouts.some(w => w.completions.length === 0)
-  const weekActions = hasIncompleteWorkouts
-    ? [{
-        label: 'Complete Week',
-        icon: CheckCircle,
-        onClick: handleCompleteWeek,
-        requiresConfirmation: true,
-        confirmationMessage: 'This will mark all remaining workouts as skipped. Are you sure?',
-        variant: 'warning' as const,
-        disabled: completingWeek
-      }]
-    : []
 
   return (
-    <div className="bg-card border-y sm:border border-border doom-noise doom-card p-4 sm:p-6">
-      <div className="mb-4 sm:mb-6">
+    <div className="space-y-4">
+      <div>
         <WeekNavigator
           currentWeek={week.weekNumber}
           totalWeeks={totalWeeks}
           baseUrl="/training"
           programName={programName}
-          actions={weekActions.length > 0 ? <ActionsMenu actions={weekActions} size="sm" /> : undefined}
           completionIndicator={
             isProgramComplete ? (
               <button type="button"
@@ -425,9 +526,22 @@ export default function StrengthWeekView({
             ) : undefined
           }
         />
+        {week.description && (
+          <div className="mt-3 px-1">
+            <p className="text-base text-muted-foreground leading-relaxed">
+              {week.description}
+            </p>
+          </div>
+        )}
       </div>
 
-      <div className="space-y-3">
+      {showStickNudge && (
+        <div className="mb-4">
+          <StickNudgeBanner onDismiss={refetchSettings} />
+        </div>
+      )}
+
+      <div className="bg-card border border-border doom-corners divide-y divide-border">
         {week.workouts.map(workout => (
           <WorkoutCard
             key={workout.id}
@@ -441,7 +555,31 @@ export default function StrengthWeekView({
             onLog={handleOpenLogging}
           />
         ))}
+
+        {hasIncompleteWorkouts && (
+          <button
+            type="button"
+            data-training-widget
+            onClick={() => {
+              if (confirm('This will mark all remaining workouts as skipped. Are you sure?')) {
+                handleCompleteWeek()
+              }
+            }}
+            disabled={completingWeek}
+            className="w-full py-3.5 text-muted-foreground hover:text-foreground bg-muted/20 hover:bg-muted/40 active:bg-muted/60 transition-all text-sm font-semibold uppercase tracking-wider doom-focus-ring disabled:opacity-50"
+          >
+            <div className="flex items-center justify-center gap-2">
+              <CheckCircle size={16} />
+              {completingWeek ? 'COMPLETING...' : 'COMPLETE WEEK'}
+            </div>
+          </button>
+        )}
       </div>
+
+      {/* Recent History */}
+      {historyCount > 0 && (
+        <WorkoutHistoryList count={historyCount} compact />
+      )}
 
       {/* Preview Modal - uses full workout data */}
       {workoutData && modalMode === 'preview' && (
@@ -468,10 +606,28 @@ export default function StrengthWeekView({
           workoutCompletionId={workoutMetadata.completionId}
           initialExercise={workoutMetadata.firstExercise}
           initialHistory={workoutMetadata.firstExerciseHistory}
+          initialExerciseIndex={workoutMetadata.resumeExerciseIndex ?? 0}
           onComplete={handleCompleteWorkout}
           onRefresh={handleRefreshMetadata}
         />
       )}
+
+      {/* Beginner Primer — shown on first-ever Log tap, before warm-up */}
+      <BeginnerPrimerWizard
+        open={primerOpen}
+        onDismiss={() => {
+          refetchSettings()
+          proceedAfterPrimer()
+        }}
+      />
+
+      {/* Warm-up Interstitial — shown between Log tap and logging modal */}
+      <WarmupInterstitial
+        open={warmupOpen}
+        onContinue={handleWarmupContinue}
+        onCancel={handleWarmupCancel}
+        onDismissPermanently={handleWarmupDismissPermanently}
+      />
 
       {/* Program Completion Modal */}
       <ProgramCompletionModal

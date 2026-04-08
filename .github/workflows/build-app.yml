@@ -5,6 +5,19 @@ on:
     branches:
       - dev
       - main
+    paths-ignore:
+      - '.claude/**'
+      - '.agent-minder/**'
+      - 'docs/**'
+      - '*.md'
+  pull_request:
+    branches:
+      - dev
+    paths-ignore:
+      - '.claude/**'
+      - '.agent-minder/**'
+      - 'docs/**'
+      - '*.md'
 
 env:
   REGISTRY: ghcr.io
@@ -13,6 +26,8 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      image-tag: ${{ steps.tags.outputs.tags }}
     permissions:
       contents: read
       packages: write
@@ -34,7 +49,10 @@ jobs:
       - name: Determine image tags
         id: tags
         run: |
-          if [ "${{ github.ref_name }}" = "main" ]; then
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            SHORT_SHA=$(echo "${{ github.event.pull_request.head.sha }}" | cut -c1-7)
+            echo "tags=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:pr-${{ github.event.pull_request.number }}-sha-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.ref_name }}" = "main" ]; then
             echo "tags=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}" >> "$GITHUB_OUTPUT"
           elif [ "${{ github.ref_name }}" = "dev" ]; then
             echo "tags=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:staging" >> "$GITHUB_OUTPUT"
@@ -50,7 +68,24 @@ jobs:
           push: true
           tags: ${{ steps.tags.outputs.tags }}
           build-args: |
-            NEXT_PUBLIC_APP_URL=${{ vars.NEXT_PUBLIC_APP_URL }}
+            NEXT_PUBLIC_APP_URL=${{ vars.NEXT_PUBLIC_APP_URL || 'https://staging.ripit.fit' }}
+            NEXT_PUBLIC_VENMO_HANDLE=${{ vars.NEXT_PUBLIC_VENMO_HANDLE }}
+          # OCI standard labels — GHCR reads these to populate the "Source" link
+          # on the package page, and `docker inspect` surfaces them for forensics
+          # on a running image. Plus custom ripit.* labels for workflow/PR traceback.
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.url=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+            org.opencontainers.image.ref.name=${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
+            org.opencontainers.image.created=${{ github.event.repository.updated_at }}
+            org.opencontainers.image.title=ripit-fitness
+            org.opencontainers.image.description=Ripit Fitness — strength training tracker
+            ripit.branch=${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
+            ripit.actor=${{ github.actor }}
+            ripit.workflow.run=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            ripit.pr.number=${{ github.event.pull_request.number || '' }}
+            ripit.pr.url=${{ github.event.pull_request.html_url || '' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -58,14 +93,155 @@ jobs:
         if: github.ref_name == 'main'
         run: |
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          COMMIT_MSG=$(git log -1 --pretty=%s "${{ github.sha }}" | sed 's/"/\\"/g')
           curl -s -H "Content-Type: application/json" -d "{
             \"embeds\": [{
               \"title\": \"Production image ready\",
               \"description\": \"Update infra repo with new image tag:\n\`\`\`\nsha-${{ github.sha }}\n\`\`\`\",
               \"color\": 5025616,
               \"fields\": [
-                {\"name\": \"Commit\", \"value\": \"[\`${SHORT_SHA}\`](https://github.com/${{ github.repository }}/commit/${{ github.sha }})\", \"inline\": true},
+                {\"name\": \"Commit\", \"value\": \"[\`${SHORT_SHA}\`](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) — ${COMMIT_MSG}\", \"inline\": false},
+                {\"name\": \"Workflow run\", \"value\": \"[#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\", \"inline\": true},
+                {\"name\": \"Actor\", \"value\": \"${{ github.actor }}\", \"inline\": true},
                 {\"name\": \"Image\", \"value\": \"\`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}\`\", \"inline\": false}
               ]
             }]
           }" "${{ secrets.DISCORD_WEBHOOK_URL }}"
+
+  smoke-test:
+    if: github.event_name == 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      packages: read
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ripit_smoke
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ripit_smoke
+      # Smoke test hits Postgres directly (no PgBouncer), so DIRECT_URL mirrors
+      # DATABASE_URL. The Prisma schema requires directUrl to be set since #408.
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/ripit_smoke
+      IMAGE: ${{ needs.build.outputs.image-tag }}
+
+    steps:
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull PR image
+        run: docker pull "$IMAGE"
+
+      - name: Seed BetterAuth tables
+        # BetterAuth tables (user, session, account, verification) are not managed
+        # by Prisma. They are created out-of-band in staging/prod and by
+        # scripts/start-postgres.sh locally. Migrations that ALTER the "user" table
+        # assume these already exist, so we must seed them before prisma migrate deploy.
+        run: |
+          PGPASSWORD=postgres psql -h localhost -p 5432 -U postgres -d ripit_smoke <<'SQL'
+          CREATE TABLE IF NOT EXISTS "user" ("id" text NOT NULL DEFAULT gen_random_uuid()::text PRIMARY KEY, "name" text NOT NULL, "email" text NOT NULL UNIQUE, "emailVerified" boolean NOT NULL, "image" text, "createdAt" timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL, "updatedAt" timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL);
+          CREATE TABLE IF NOT EXISTS "session" ("id" text NOT NULL DEFAULT gen_random_uuid()::text PRIMARY KEY, "expiresAt" timestamptz NOT NULL, "token" text NOT NULL UNIQUE, "createdAt" timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL, "updatedAt" timestamptz NOT NULL, "ipAddress" text, "userAgent" text, "userId" text NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE);
+          CREATE TABLE IF NOT EXISTS "account" ("id" text NOT NULL DEFAULT gen_random_uuid()::text PRIMARY KEY, "accountId" text NOT NULL, "providerId" text NOT NULL, "userId" text NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE, "accessToken" text, "refreshToken" text, "idToken" text, "accessTokenExpiresAt" timestamptz, "refreshTokenExpiresAt" timestamptz, "scope" text, "password" text, "createdAt" timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL, "updatedAt" timestamptz NOT NULL);
+          CREATE TABLE IF NOT EXISTS "verification" ("id" text NOT NULL DEFAULT gen_random_uuid()::text PRIMARY KEY, "identifier" text NOT NULL, "value" text NOT NULL, "expiresAt" timestamptz NOT NULL, "createdAt" timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL, "updatedAt" timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL);
+          CREATE INDEX IF NOT EXISTS "session_userId_idx" ON "session" ("userId");
+          CREATE INDEX IF NOT EXISTS "account_userId_idx" ON "account" ("userId");
+          CREATE INDEX IF NOT EXISTS "verification_identifier_idx" ON "verification" ("identifier");
+          -- Create empty _prisma_migrations table so `prisma migrate deploy` does not
+          -- trip P3005 ("database schema is not empty") on our pre-seeded BetterAuth tables.
+          CREATE TABLE IF NOT EXISTS "_prisma_migrations" (
+            "id" varchar(36) PRIMARY KEY NOT NULL,
+            "checksum" varchar(64) NOT NULL,
+            "finished_at" timestamptz,
+            "migration_name" varchar(255) NOT NULL,
+            "logs" text,
+            "rolled_back_at" timestamptz,
+            "started_at" timestamptz NOT NULL DEFAULT now(),
+            "applied_steps_count" integer NOT NULL DEFAULT 0
+          );
+          SQL
+
+      - name: Smoke test — prisma migrate deploy
+        run: |
+          docker run --rm \
+            --network host \
+            -e DATABASE_URL="$DATABASE_URL" \
+            -e DIRECT_URL="$DIRECT_URL" \
+            "$IMAGE" \
+            sh -c "./node_modules/.bin/prisma migrate deploy"
+
+      - name: Smoke test — sync-exercise-data (non-fatal)
+        # sync-exercise-data only updates metadata/images on existing rows and
+        # verifies production-like counts (>=275 images, etc). A fresh smoke-test
+        # DB will never hit those thresholds because the base exercises were
+        # originally seeded manually via prisma/seeds/*.sql in staging/prod
+        # (see issues #245, #250). We still run the script to catch runtime
+        # errors, but do not fail the job on verification thresholds.
+        continue-on-error: true
+        run: |
+          docker run --rm \
+            --network host \
+            -e DATABASE_URL="$DATABASE_URL" \
+            -e DIRECT_URL="$DIRECT_URL" \
+            "$IMAGE" \
+            sh -c "node scripts/sync-exercise-data.cjs"
+
+      - name: Smoke test — app boots and responds
+        run: |
+          # Start the app in the background
+          docker run --rm -d \
+            --name smoke-app \
+            --network host \
+            -e DATABASE_URL="$DATABASE_URL" \
+            -e DIRECT_URL="$DIRECT_URL" \
+            -e BETTER_AUTH_SECRET=smoke-test-secret \
+            -e BETTER_AUTH_URL=http://localhost:3000 \
+            -e HOSTNAME=0.0.0.0 \
+            -e PORT=3000 \
+            "$IMAGE"
+
+          # Wait for the app to be ready (up to 30s)
+          echo "Waiting for app to start..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000/ > /dev/null 2>&1; then
+              echo "App responded on attempt $i"
+              break
+            fi
+            if [ "$i" = "30" ]; then
+              echo "App failed to start within 30s"
+              docker logs smoke-app
+              docker stop smoke-app || true
+              exit 1
+            fi
+            sleep 1
+          done
+
+          # Verify response
+          HTTP_STATUS=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/)
+          echo "HTTP status: $HTTP_STATUS"
+
+          if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 500 ]; then
+            echo "Unexpected HTTP status $HTTP_STATUS"
+            docker logs smoke-app
+            docker stop smoke-app || true
+            exit 1
+          fi
+
+          docker stop smoke-app

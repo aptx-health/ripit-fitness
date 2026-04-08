@@ -10,9 +10,9 @@
  * Writes: prisma/seeds/exercise-definitions.json
  */
 
+import { writeFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { PrismaClient } from '@prisma/client'
-import { writeFileSync } from 'fs'
-import { join } from 'path'
 
 const prisma = new PrismaClient()
 
@@ -37,7 +37,7 @@ async function main() {
   })
 
   const outPath = join(__dirname, '..', 'prisma', 'seeds', 'exercise-definitions.json')
-  writeFileSync(outPath, JSON.stringify(exercises, null, 2) + '\n')
+  writeFileSync(outPath, `${JSON.stringify(exercises, null, 2)}\n`)
 
   console.log(`Exported ${exercises.length} exercise definitions to prisma/seeds/exercise-definitions.json`)
 }
