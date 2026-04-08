@@ -48,12 +48,23 @@ jobs:
             exit 1
           fi
 
-      - name: Build Docker image
-        run: |
-          docker build \
-            -t "$IMAGE_NAME:${{ steps.tags.outputs.tag }}" \
-            ./cloud-functions/clone-program
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Push Docker image to GHCR
-        run: |
-          docker push "$IMAGE_NAME:${{ steps.tags.outputs.tag }}"
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./cloud-functions/clone-program
+          push: true
+          tags: ${{ env.IMAGE_NAME }}:${{ steps.tags.outputs.tag }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.url=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.ref.name=${{ github.ref_name }}
+            org.opencontainers.image.created=${{ github.event.repository.updated_at }}
+            org.opencontainers.image.title=clone-program
+            org.opencontainers.image.description=Ripit clone worker (BullMQ)
+            ripit.branch=${{ github.ref_name }}
+            ripit.actor=${{ github.actor }}
+            ripit.workflow.run=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
