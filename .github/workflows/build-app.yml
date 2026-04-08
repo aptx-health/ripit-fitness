@@ -70,6 +70,22 @@ jobs:
           build-args: |
             NEXT_PUBLIC_APP_URL=${{ vars.NEXT_PUBLIC_APP_URL || 'https://staging.ripit.fit' }}
             NEXT_PUBLIC_VENMO_HANDLE=${{ vars.NEXT_PUBLIC_VENMO_HANDLE }}
+          # OCI standard labels — GHCR reads these to populate the "Source" link
+          # on the package page, and `docker inspect` surfaces them for forensics
+          # on a running image. Plus custom ripit.* labels for workflow/PR traceback.
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.url=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+            org.opencontainers.image.ref.name=${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
+            org.opencontainers.image.created=${{ github.event.repository.updated_at }}
+            org.opencontainers.image.title=ripit-fitness
+            org.opencontainers.image.description=Ripit Fitness — strength training tracker
+            ripit.branch=${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
+            ripit.actor=${{ github.actor }}
+            ripit.workflow.run=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            ripit.pr.number=${{ github.event.pull_request.number || '' }}
+            ripit.pr.url=${{ github.event.pull_request.html_url || '' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -77,13 +93,16 @@ jobs:
         if: github.ref_name == 'main'
         run: |
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          COMMIT_MSG=$(git log -1 --pretty=%s "${{ github.sha }}" | sed 's/"/\\"/g')
           curl -s -H "Content-Type: application/json" -d "{
             \"embeds\": [{
               \"title\": \"Production image ready\",
               \"description\": \"Update infra repo with new image tag:\n\`\`\`\nsha-${{ github.sha }}\n\`\`\`\",
               \"color\": 5025616,
               \"fields\": [
-                {\"name\": \"Commit\", \"value\": \"[\`${SHORT_SHA}\`](https://github.com/${{ github.repository }}/commit/${{ github.sha }})\", \"inline\": true},
+                {\"name\": \"Commit\", \"value\": \"[\`${SHORT_SHA}\`](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) — ${COMMIT_MSG}\", \"inline\": false},
+                {\"name\": \"Workflow run\", \"value\": \"[#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\", \"inline\": true},
+                {\"name\": \"Actor\", \"value\": \"${{ github.actor }}\", \"inline\": true},
                 {\"name\": \"Image\", \"value\": \"\`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}\`\", \"inline\": false}
               ]
             }]
