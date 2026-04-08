@@ -115,6 +115,9 @@ jobs:
 
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ripit_smoke
+      # Smoke test hits Postgres directly (no PgBouncer), so DIRECT_URL mirrors
+      # DATABASE_URL. The Prisma schema requires directUrl to be set since #408.
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/ripit_smoke
       IMAGE: ${{ needs.build.outputs.image-tag }}
 
     steps:
@@ -161,6 +164,7 @@ jobs:
           docker run --rm \
             --network host \
             -e DATABASE_URL="$DATABASE_URL" \
+            -e DIRECT_URL="$DIRECT_URL" \
             "$IMAGE" \
             sh -c "./node_modules/.bin/prisma migrate deploy"
 
@@ -176,6 +180,7 @@ jobs:
           docker run --rm \
             --network host \
             -e DATABASE_URL="$DATABASE_URL" \
+            -e DIRECT_URL="$DIRECT_URL" \
             "$IMAGE" \
             sh -c "node scripts/sync-exercise-data.cjs"
 
@@ -186,6 +191,7 @@ jobs:
             --name smoke-app \
             --network host \
             -e DATABASE_URL="$DATABASE_URL" \
+            -e DIRECT_URL="$DIRECT_URL" \
             -e BETTER_AUTH_SECRET=smoke-test-secret \
             -e BETTER_AUTH_URL=http://localhost:3000 \
             -e HOSTNAME=0.0.0.0 \
