@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState, useTransition } from 'react'
 import ExerciseLoggingModal from '@/components/ExerciseLoggingModal'
 import { BeginnerPrimerWizard } from '@/components/features/training/BeginnerPrimerWizard'
+import { PostSessionFeedback, pickPostSessionQuestion } from '@/components/features/training/PostSessionFeedback'
 import { StickNudgeBanner } from '@/components/features/training/StickNudgeBanner'
 import { WarmupInterstitial } from '@/components/features/training/WarmupInterstitial'
 import { ProgramCompletionModal } from '@/components/ProgramCompletionModal'
@@ -17,6 +18,7 @@ import { useUserSettings } from '@/hooks/useUserSettings'
 import { clientLogger } from '@/lib/client-logger'
 import { useDraftWorkout } from '@/lib/contexts/DraftWorkoutContext'
 import { TRAINING_PAGE_STEPS, TRAINING_PAGE_TOUR_ID } from '@/lib/tour/steps/training-page'
+import { POST_SESSION_COOLDOWN } from '@/types/feedback'
 
 type Workout = {
   id: string
@@ -163,7 +165,7 @@ export default function StrengthWeekView({
   const router = useRouter()
   const searchParams = useSearchParams()
   const { activeDraft, refreshDraft, clearDraft } = useDraftWorkout()
-  const { settings, isLoading: settingsLoading, refetch: refetchSettings } = useUserSettings()
+  const { settings, isLoading: settingsLoading, refetch: refetchSettings, updateSettings } = useUserSettings()
   const [isPending, startTransition] = useTransition()
   const [updatingWorkoutId, setUpdatingWorkoutId] = useState<string | null>(null)
   const [skippingWorkout, setSkippingWorkout] = useState<string | null>(null)
@@ -178,6 +180,8 @@ export default function StrengthWeekView({
   const [showCompletionModal, setShowCompletionModal] = useState(false)
   const [isRestarting, setIsRestarting] = useState(false)
   const [isProgramComplete, setIsProgramComplete] = useState(false)
+  const [postSessionQuestion, setPostSessionQuestion] = useState<string | null>(null)
+  const [pendingProgramCompletionCheck, setPendingProgramCompletionCheck] = useState(false)
 
   const resumeWorkoutId = searchParams.get('resume')
 
@@ -439,7 +443,35 @@ export default function StrengthWeekView({
   // Completion is handled inside ExerciseLoggingModal now (per-set writes + status flip)
   const handleCompleteWorkout = async () => {
     handleCloseModal(true)
-    await checkProgramCompletion(true)
+
+    // Check if we should show the post-session feedback prompt
+    const shouldPrompt = settings
+      && (settings.postSessionPromptCount % POST_SESSION_COOLDOWN === 0)
+    if (shouldPrompt) {
+      setPostSessionQuestion(pickPostSessionQuestion())
+      setPendingProgramCompletionCheck(true)
+      // Bump the prompt counter immediately so skip/send both count
+      updateSettings({
+        postSessionPromptCount: (settings.postSessionPromptCount ?? 0) + 1,
+        lastPostSessionPromptAt: new Date().toISOString(),
+      }).then(() => refetchSettings()).catch(() => {})
+    } else {
+      // Increment counter even when not showing to keep cadence
+      if (settings) {
+        updateSettings({
+          postSessionPromptCount: (settings.postSessionPromptCount ?? 0) + 1,
+        }).then(() => refetchSettings()).catch(() => {})
+      }
+      await checkProgramCompletion(true)
+    }
+  }
+
+  const handlePostSessionClose = async () => {
+    setPostSessionQuestion(null)
+    if (pendingProgramCompletionCheck) {
+      setPendingProgramCompletionCheck(false)
+      await checkProgramCompletion(true)
+    }
   }
 
   const _handleClearWorkout = async () => {
@@ -627,6 +659,14 @@ export default function StrengthWeekView({
         onContinue={handleWarmupContinue}
         onCancel={handleWarmupCancel}
         onDismissPermanently={handleWarmupDismissPermanently}
+      />
+
+      {/* Post-Session Feedback */}
+      <PostSessionFeedback
+        key={postSessionQuestion}
+        open={!!postSessionQuestion}
+        question={postSessionQuestion || ''}
+        onClose={handlePostSessionClose}
       />
 
       {/* Program Completion Modal */}

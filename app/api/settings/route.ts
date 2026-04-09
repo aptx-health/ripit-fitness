@@ -11,6 +11,8 @@ type UpdateSettingsRequest = {
   dismissedWarmup?: boolean
   dismissedStickNudge?: boolean
   completedTours?: string
+  postSessionPromptCount?: number
+  lastPostSessionPromptAt?: string
 }
 
 export async function GET(_request: NextRequest) {
@@ -66,7 +68,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json() as UpdateSettingsRequest
-    const { displayName, defaultWeightUnit, defaultIntensityRating, dismissedPrimer, dismissedWarmup, dismissedStickNudge, completedTours } = body
+    const { displayName, defaultWeightUnit, defaultIntensityRating, dismissedPrimer, dismissedWarmup, dismissedStickNudge, completedTours, postSessionPromptCount, lastPostSessionPromptAt } = body
 
     // Validate weight unit
     if (defaultWeightUnit && !['lbs', 'kg'].includes(defaultWeightUnit)) {
@@ -84,6 +86,14 @@ export async function PUT(request: NextRequest) {
       )
     }
 
+    // Validate postSessionPromptCount
+    if (postSessionPromptCount !== undefined && (typeof postSessionPromptCount !== 'number' || postSessionPromptCount < 0 || !Number.isInteger(postSessionPromptCount))) {
+      return NextResponse.json(
+        { error: 'Invalid postSessionPromptCount. Must be a non-negative integer' },
+        { status: 400 }
+      )
+    }
+
     // Update or create settings
     const settings = await prisma.userSettings.upsert({
       where: { userId: user.id },
@@ -95,6 +105,8 @@ export async function PUT(request: NextRequest) {
         ...(dismissedWarmup !== undefined && { dismissedWarmup }),
         ...(dismissedStickNudge !== undefined && { dismissedStickNudge }),
         ...(completedTours !== undefined && { completedTours }),
+        ...(postSessionPromptCount !== undefined && { postSessionPromptCount }),
+        ...(lastPostSessionPromptAt !== undefined && { lastPostSessionPromptAt: new Date(lastPostSessionPromptAt) }),
         updatedAt: new Date()
       },
       create: {
