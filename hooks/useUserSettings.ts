@@ -9,6 +9,8 @@ export type UserSettings = {
   dismissedWarmup: boolean
   dismissedStickNudge: boolean
   completedTours: string
+  postSessionPromptCount: number
+  lastPostSessionPromptAt: string | null
 }
 
 type UseUserSettingsReturn = {

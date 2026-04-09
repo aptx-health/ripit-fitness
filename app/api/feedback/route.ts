@@ -23,11 +23,12 @@ export async function POST(request: NextRequest) {
     if (limited) return limited
 
     const body = await request.json()
-    const { category, message, pageUrl, userAgent } = body as {
+    const { category, message, pageUrl, userAgent, properties } = body as {
       category: string
       message: string
       pageUrl: string
       userAgent?: string
+      properties?: Record<string, string>
     }
 
     // Validate category
@@ -54,6 +55,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Page URL is required' }, { status: 400 })
     }
 
+    // Validate properties if provided (must be a flat string-keyed object)
+    let propertiesJson: string | null = null
+    if (properties && typeof properties === 'object') {
+      propertiesJson = JSON.stringify(properties)
+      if (propertiesJson.length > 2000) {
+        return NextResponse.json(
+          { error: 'Properties too large' },
+          { status: 400 }
+        )
+      }
+    }
+
     const feedback = await prisma.feedback.create({
       data: {
         userId: user.id,
@@ -61,6 +74,7 @@ export async function POST(request: NextRequest) {
         message: message.trim(),
         pageUrl,
         userAgent: userAgent || null,
+        properties: propertiesJson,
       },
     })
 
@@ -68,15 +82,19 @@ export async function POST(request: NextRequest) {
 
     // Discord notification (fire and forget)
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ripit.fit'
+    const discordFields = [
+      { name: 'Page', value: pageUrl, inline: true },
+      { name: 'User', value: user.email || user.id, inline: true },
+    ]
+    if (category === 'post_session' && properties?.question) {
+      discordFields.unshift({ name: 'Question', value: properties.question, inline: false })
+    }
     sendDiscordNotification({
-      title: `Feedback: ${category.charAt(0).toUpperCase() + category.slice(1)}`,
+      title: `Feedback: ${category === 'post_session' ? 'Post-Session' : category.charAt(0).toUpperCase() + category.slice(1)}`,
       description: message.trim().substring(0, 200) + (message.trim().length > 200 ? '...' : ''),
-      color: 0xEA580C,
+      color: category === 'post_session' ? 0x8B5CF6 : 0xEA580C,
       url: `${appUrl}/admin/feedback?expand=${feedback.id}`,
-      fields: [
-        { name: 'Page', value: pageUrl, inline: true },
-        { name: 'User', value: user.email || user.id, inline: true },
-      ],
+      fields: discordFields,
     })
 
     return NextResponse.json({ success: true, id: feedback.id })
@@ -93,6 +111,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
+    const categoryFilter = searchParams.get('category')
     const limit = Math.min(parseInt(searchParams.get('limit') || '50', 10), 100)
     const offset = parseInt(searchParams.get('offset') || '0', 10)
 
@@ -101,6 +120,9 @@ export async function GET(request: NextRequest) {
       where.status = { in: ['new', 'reviewed'] }
     } else if (status) {
       where.status = status
+    }
+    if (categoryFilter) {
+      where.category = categoryFilter
     }
 
     const [feedback, total] = await Promise.all([

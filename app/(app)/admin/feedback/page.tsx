@@ -13,6 +13,7 @@ interface FeedbackItem {
   message: string
   pageUrl: string
   userAgent: string | null
+  properties: string | null
   status: string
   adminNote: string | null
   githubIssueUrl: string | null
@@ -26,6 +27,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   feature: 'enhancement',
   confusion: 'ux',
   general: 'feedback',
+  post_session: 'post-session',
 }
 
 export default function AdminFeedbackPage() {
@@ -160,6 +162,7 @@ export default function AdminFeedbackPage() {
       case 'bug': return 'text-red-800 bg-red-100 border-red-300 dark:text-red-400 dark:bg-red-900/30 dark:border-red-700'
       case 'feature': return 'text-blue-800 bg-blue-100 border-blue-300 dark:text-blue-400 dark:bg-blue-900/30 dark:border-blue-700'
       case 'confusion': return 'text-yellow-800 bg-yellow-100 border-yellow-300 dark:text-yellow-400 dark:bg-yellow-900/30 dark:border-yellow-700'
+      case 'post_session': return 'text-purple-800 bg-purple-100 border-purple-300 dark:text-purple-400 dark:bg-purple-900/30 dark:border-purple-700'
       default: return 'text-zinc-700 bg-zinc-100 border-zinc-300 dark:text-zinc-400 dark:bg-zinc-800 dark:border-zinc-600'
     }
   }
@@ -264,6 +267,23 @@ export default function AdminFeedbackPage() {
               {/* Expanded detail */}
               {expandedId === item.id && (
                 <div className="px-4 pb-4 border-t border-border pt-3 space-y-3">
+                  {/* Question prompt (post_session) */}
+                  {item.category === 'post_session' && item.properties && (() => {
+                    try {
+                      const props = JSON.parse(item.properties)
+                      return props.question ? (
+                        <div>
+                          <span className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                            Question Asked
+                          </span>
+                          <p className="text-sm text-foreground italic bg-muted p-3 border border-border">
+                            {props.question}
+                          </p>
+                        </div>
+                      ) : null
+                    } catch { return null }
+                  })()}
+
                   {/* Full message */}
                   <div>
                     <span className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
