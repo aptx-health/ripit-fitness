@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/server';
 import { cloneCommunityProgram } from '@/lib/community/cloning';
 import { prisma } from '@/lib/db';
+import { recordEvent } from '@/lib/events';
 import { logger } from '@/lib/logger';
 import {
   checkRateLimitWithHeaders,
@@ -41,6 +42,11 @@ export async function POST(
         { status: 500 }
       );
     }
+
+    recordEvent(user.id, 'program_cloned', {
+      communityProgramId,
+      programId: result.programId,
+    });
 
     return withRateLimitHeaders(
       NextResponse.json({

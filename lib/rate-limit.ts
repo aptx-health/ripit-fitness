@@ -138,6 +138,16 @@ export const feedbackSubmissionLimiter = lazyLimiter({
   duration: 3600,
 })
 
+/**
+ * Analytics event ingestion.
+ * Batched from the client: 30 req / 60s per user.
+ */
+export const eventIngestionLimiter = lazyLimiter({
+  keyPrefix: 'events',
+  points: 30,
+  duration: 60,
+})
+
 export type LimiterGetter = () => RateLimiterRedis | RateLimiterMemory
 
 /**

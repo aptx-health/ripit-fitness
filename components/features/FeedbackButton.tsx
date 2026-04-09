@@ -4,6 +4,7 @@ import { MessageSquarePlus } from 'lucide-react'
 import { useState } from 'react'
 
 import FeedbackModal from '@/components/features/FeedbackModal'
+import { trackEvent } from '@/lib/analytics'
 
 export default function FeedbackButton() {
   const [open, setOpen] = useState(false)
@@ -13,7 +14,7 @@ export default function FeedbackButton() {
       {/* Floating button — desktop only, hidden on mobile to avoid BottomNav overlap */}
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={() => { trackEvent('feedback_opened'); setOpen(true) }}
         style={{
           position: 'fixed',
           bottom: '1.5rem',

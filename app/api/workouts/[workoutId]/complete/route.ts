@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { recordEvent } from '@/lib/events'
 import { logger } from '@/lib/logger'
 import { checkRateLimit, workoutActionLimiter } from '@/lib/rate-limit'
 
@@ -133,6 +134,8 @@ export async function POST(
 
       return completionRecord
     })
+
+    recordEvent(user.id, 'workout_completed', { workoutId })
 
     return NextResponse.json({
       success: true,

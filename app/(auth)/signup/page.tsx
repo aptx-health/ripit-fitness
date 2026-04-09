@@ -7,6 +7,7 @@ import { AuthPageHeader } from '@/components/features/auth/AuthPageHeader'
 import { OAuthButtons } from '@/components/features/auth/OAuthButtons'
 import { OrDivider } from '@/components/features/auth/OrDivider'
 import { Button } from '@/components/ui/Button'
+import { trackEvent, flushEvents } from '@/lib/analytics'
 import { signUp } from '@/lib/auth-client'
 
 export default function SignupPage() {
@@ -63,7 +64,11 @@ export default function SignupPage() {
         }
       }
 
-      // BetterAuth signs in immediately after signup
+      // BetterAuth signs in immediately after signup.
+      // Use sendBeacon so the signup_completed event survives the
+      // navigation to '/' that happens right after.
+      trackEvent('signup_completed')
+      await flushEvents(true)
       window.location.href = '/'
     } catch {
       setError('An unexpected error occurred')

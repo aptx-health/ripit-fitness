@@ -487,6 +487,21 @@ model ArticleComment {
   @@index([articleId, createdAt])
 }
 
+// -- Analytics Events --
+
+model AppEvent {
+  id         String   @id @default(cuid())
+  userId     String
+  event      String
+  properties Json?
+  pageUrl    String?
+  sessionId  String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([event, createdAt])
+}
+
 // -- User Feedback --
 
 model Feedback {
