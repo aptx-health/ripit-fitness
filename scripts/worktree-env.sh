@@ -47,4 +47,15 @@ MINIO_CONTAINER_NAME="fitcsv-minio${WORKTREE_SLOT:+-wt$WORKTREE_SLOT}"
 MINIO_API_PORT=$((9000 + WORKTREE_SLOT))
 MINIO_CONSOLE_PORT=$((9001 + WORKTREE_SLOT))
 
-export WORKTREE_SLOT PG_CONTAINER_NAME PG_PORT REDIS_CONTAINER_NAME REDIS_PORT PG_VOLUME_NAME MINIO_CONTAINER_NAME MINIO_API_PORT MINIO_CONSOLE_PORT
+# Place overmind's control socket in /tmp rather than the project root.
+# Turbopack (Next 16) panics trying to read `.overmind.sock` as a regular
+# file during CSS dependency scanning — "Operation not supported on socket".
+# Moving the socket outside the project tree avoids the scan entirely.
+# Unique per worktree so multiple worktrees can run overmind concurrently.
+if [ "$WORKTREE_SLOT" -eq 0 ]; then
+  OVERMIND_SOCKET="/tmp/fitcsv-overmind.sock"
+else
+  OVERMIND_SOCKET="/tmp/fitcsv-overmind-wt${WORKTREE_SLOT}.sock"
+fi
+
+export WORKTREE_SLOT PG_CONTAINER_NAME PG_PORT REDIS_CONTAINER_NAME REDIS_PORT PG_VOLUME_NAME MINIO_CONTAINER_NAME MINIO_API_PORT MINIO_CONSOLE_PORT OVERMIND_SOCKET
