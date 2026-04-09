@@ -77,3 +77,18 @@
 | Modal backdrop | `bg-black/90` | rgba(0,0,0,0.9) |
 | Nav bar background | `bg-black` | #000000 |
 | Nav bar border | `border-zinc-900` | #18181B |
+
+---
+
+## Credits
+
+Several themes are ports or adaptations of popular community color schemes. Original authors and upstream sources:
+
+| Theme | Creator | Source | License |
+|-------|---------|--------|---------|
+| Dracula | Zeno Rocha | [draculatheme.com](https://draculatheme.com) | MIT |
+| Synthwave '84 | Robb Owen | [synthwave-vscode](https://github.com/robb0wen/synthwave-vscode) | MIT |
+| Catppuccin | Catppuccin org | [catppuccin](https://github.com/catppuccin/catppuccin) | MIT |
+| GitHub | GitHub Inc. | [Primer](https://primer.style) | MIT |
+
+The remaining themes (DOOM, Cyber, Forest, Clyde, 90s Kid, RIPIT) are original to this project.
