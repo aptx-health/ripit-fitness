@@ -12,7 +12,7 @@
 
 import { clientLogger } from '@/lib/client-logger';
 
-export type ThemeName = 'doom' | 'cyber' | 'forest' | 'synthwave' | 'dracula' | 'github' | 'ripit' | 'catppuccin' | 'clyde' | 'ninety';
+export type ThemeName = 'doom' | 'cyber' | 'forest' | 'synthwave' | 'dracula' | 'github' | 'ripit' | 'catppuccin' | 'clyde' | 'ninety' | 'blossom' | 'okabe';
 export type ThemeMode = 'light' | 'dark';
 
 export interface ThemePreference {
@@ -24,7 +24,7 @@ export interface ThemePreference {
 // Constants
 // ============================================================================
 
-export const THEMES: ThemeName[] = ['ripit', 'doom', 'catppuccin', 'cyber', 'forest', 'synthwave', 'dracula', 'github', 'clyde', 'ninety'];
+export const THEMES: ThemeName[] = ['ripit', 'doom', 'catppuccin', 'cyber', 'forest', 'synthwave', 'dracula', 'github', 'clyde', 'ninety', 'blossom', 'okabe'];
 export const MODES: ThemeMode[] = ['light', 'dark'];
 
 export const DEFAULT_THEME: ThemePreference = {
@@ -43,6 +43,8 @@ export const THEME_LABELS: Record<ThemeName, string> = {
   github: 'GITHUB',
   clyde: 'CLYDE',
   ninety: '90s KID',
+  blossom: 'BLOSSOM',
+  okabe: 'OKABE',
 };
 
 const STORAGE_KEY = 'themePreference';
