@@ -3,11 +3,11 @@ import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { sendDiscordNotification } from '@/lib/discord'
 import { logger } from '@/lib/logger'
+import { checkRateLimit, feedbackSubmissionLimiter } from '@/lib/rate-limit'
 import type { FeedbackCategory } from '@/types/feedback'
 import { VALID_CATEGORIES } from '@/types/feedback'
 
 const MAX_MESSAGE_LENGTH = 2000
-const RATE_LIMIT_PER_HOUR = 5
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,6 +15,11 @@ export async function POST(request: NextRequest) {
     if (error || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    // Rate limit: 5 submissions / hour / user. Replaces a prior DB-count
+    // check that hit Postgres on every POST.
+    const limited = await checkRateLimit(feedbackSubmissionLimiter, user.id)
+    if (limited) return limited
 
     const body = await request.json()
     const { category, message, pageUrl, userAgent } = body as {
@@ -46,22 +51,6 @@ export async function POST(request: NextRequest) {
     // Validate pageUrl
     if (!pageUrl || pageUrl.trim().length === 0) {
       return NextResponse.json({ error: 'Page URL is required' }, { status: 400 })
-    }
-
-    // Rate limit: max submissions per hour
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000)
-    const recentCount = await prisma.feedback.count({
-      where: {
-        userId: user.id,
-        createdAt: { gt: oneHourAgo },
-      },
-    })
-
-    if (recentCount >= RATE_LIMIT_PER_HOUR) {
-      return NextResponse.json(
-        { error: 'Too many submissions. Please try again later.' },
-        { status: 429 }
-      )
     }
 
     const feedback = await prisma.feedback.create({

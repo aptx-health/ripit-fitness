@@ -3,6 +3,7 @@ import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { restartProgram } from '@/lib/db/program-restart'
 import { logger } from '@/lib/logger'
+import { checkRateLimit, programManagementLimiter } from '@/lib/rate-limit'
 
 /**
  * POST /api/programs/[programId]/restart
@@ -24,6 +25,9 @@ export async function POST(
       logger.debug('Unauthorized - no user found')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const limited = await checkRateLimit(programManagementLimiter, user.id)
+    if (limited) return limited
 
     logger.debug({ userId: user.id, programId }, 'User authenticated')
 
