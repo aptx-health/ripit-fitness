@@ -83,19 +83,15 @@ async function getUsageMetrics(): Promise<UsageMetrics> {
   const weekStart = startOfWeek()
   const lastWeekStart = weeksAgo(1)
 
-  // Total users
-  const totalUsers = await prisma.$queryRaw<[{ count: bigint }]>`
-    SELECT COUNT(*)::bigint as count FROM "user"
-  `
-
-  // New signups this week
-  const newSignups = await prisma.$queryRaw<[{ count: bigint }]>`
-    SELECT COUNT(*)::bigint as count FROM "user"
-    WHERE "createdAt" >= ${weekStart}
-  `
-
-  // Workouts completed by period
-  const [thisWeek, lastWeek, allTime] = await Promise.all([
+  // Parallel: user counts + workout counts
+  const [totalUsers, newSignups, thisWeek, lastWeek, allTime] = await Promise.all([
+    prisma.$queryRaw<[{ count: bigint }]>`
+      SELECT COUNT(*)::bigint as count FROM "user"
+    `,
+    prisma.$queryRaw<[{ count: bigint }]>`
+      SELECT COUNT(*)::bigint as count FROM "user"
+      WHERE "createdAt" >= ${weekStart}
+    `,
     prisma.workoutCompletion.count({
       where: { status: 'completed', completedAt: { gte: weekStart } },
     }),
@@ -114,10 +110,7 @@ async function getUsageMetrics(): Promise<UsageMetrics> {
   const totalStarted = await prisma.workoutCompletion.count({
     where: { status: { in: ['completed', 'abandoned'] } },
   })
-  const totalCompleted = await prisma.workoutCompletion.count({
-    where: { status: 'completed' },
-  })
-  const completionRate = totalStarted > 0 ? totalCompleted / totalStarted : 0
+  const completionRate = totalStarted > 0 ? allTime / totalStarted : 0
 
   // Avg workouts per user per week (over last 4 weeks)
   const fourWeeksAgo = weeksAgo(4)
@@ -149,23 +142,21 @@ async function getRetentionMetrics(): Promise<RetentionMetrics> {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
-  // DAU - users who completed a workout today
-  const dau = await prisma.workoutCompletion.groupBy({
-    by: ['userId'],
-    where: { status: 'completed', completedAt: { gte: daysAgo(0) } },
-  })
-
-  // WAU - users who completed a workout this week
-  const wau = await prisma.workoutCompletion.groupBy({
-    by: ['userId'],
-    where: { status: 'completed', completedAt: { gte: daysAgo(7) } },
-  })
-
-  // MAU - users who completed a workout last 30 days
-  const mau = await prisma.workoutCompletion.groupBy({
-    by: ['userId'],
-    where: { status: 'completed', completedAt: { gte: daysAgo(30) } },
-  })
+  // DAU / WAU / MAU in parallel
+  const [dau, wau, mau] = await Promise.all([
+    prisma.workoutCompletion.groupBy({
+      by: ['userId'],
+      where: { status: 'completed', completedAt: { gte: daysAgo(0) } },
+    }),
+    prisma.workoutCompletion.groupBy({
+      by: ['userId'],
+      where: { status: 'completed', completedAt: { gte: daysAgo(7) } },
+    }),
+    prisma.workoutCompletion.groupBy({
+      by: ['userId'],
+      where: { status: 'completed', completedAt: { gte: daysAgo(30) } },
+    }),
+  ])
 
   // 7-day retention cohorts: for each of the last 8 weeks, what % are still active
   const cohorts: RetentionCohort[] = []
