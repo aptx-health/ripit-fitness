@@ -103,12 +103,14 @@ export default function AdminAnalyticsPage() {
             value={data.usage.workoutsCompletedAllTime}
           />
           <MetricCard
-            label="Avg/User/Week"
+            label="Avg Workouts / User / Week"
             value={data.usage.avgWorkoutsPerUserPerWeek}
+            info="Average workouts each active user finished per week over the last 4 weeks. A casual lifter hits 2–3. Don't panic at low numbers early on — a handful of committed beta users is a win."
           />
           <MetricCard
             label="Completion Rate"
             value={`${data.usage.completionRate}%`}
+            info="Of all the workouts people started, what percent did they finish (vs. abandoned mid-session)? Higher is better. If this dips, the session UX might be getting in the way."
           />
         </div>
       </Section>
@@ -116,9 +118,21 @@ export default function AdminAnalyticsPage() {
       {/* Retention Section */}
       <Section title="Retention">
         <div className="grid grid-cols-3 gap-4 mb-6">
-          <MetricCard label="DAU" value={data.retention.dau} />
-          <MetricCard label="WAU" value={data.retention.wau} />
-          <MetricCard label="MAU" value={data.retention.mau} />
+          <MetricCard
+            label="Daily Active"
+            value={data.retention.dau}
+            info="DAU = Daily Active Users. How many different users finished a workout today. With a small beta, this will often be 0 or 1 — that's normal. Watch the trend over weeks, not day to day."
+          />
+          <MetricCard
+            label="Weekly Active"
+            value={data.retention.wau}
+            info="WAU = Weekly Active Users. How many different users finished at least one workout in the last 7 days. This is the most useful number for a strength app — most people lift 2–4x/week, not daily."
+          />
+          <MetricCard
+            label="Monthly Active"
+            value={data.retention.mau}
+            info="MAU = Monthly Active Users. How many different users finished at least one workout in the last 30 days. A good rough measure of 'people who are still around'."
+          />
         </div>
 
         {/* Time to First Workout */}
@@ -129,16 +143,19 @@ export default function AdminAnalyticsPage() {
             </h3>
             <div className="grid grid-cols-3 gap-4">
               <MetricCard
-                label="p25"
+                label="Fast 25%"
                 value={data.retention.timeToFirstWorkout.p25}
+                info="p25 = '25th percentile.' The fastest quarter of users logged their first workout within this many hours of signing up. Think of it as 'the eager beavers got started this fast.'"
               />
               <MetricCard
-                label="Median"
+                label="Typical (Median)"
                 value={data.retention.timeToFirstWorkout.median}
+                info="The middle of the pack. Half of users logged their first workout faster than this, half slower. More useful than an average because it isn't thrown off by one person who signed up six months ago and finally logged today."
               />
               <MetricCard
-                label="p75"
+                label="Slow 25%"
                 value={data.retention.timeToFirstWorkout.p75}
+                info="p75 = '75th percentile.' Three quarters of users were faster than this. If this number is huge, a lot of people are signing up and then stalling before they ever lift — onboarding may need work."
               />
             </div>
           </div>
@@ -146,9 +163,15 @@ export default function AdminAnalyticsPage() {
 
         {/* Retention Cohorts */}
         <div className="mb-6">
-          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-1">
             7-Day Retention by Signup Cohort
           </h3>
+          <p className="text-xs text-muted-foreground mb-3 max-w-2xl">
+            A "cohort" is a group of users who signed up in the same week. This
+            shows: of the people who signed up N weeks ago, what percent are
+            still lifting today? Retention in fitness apps is notoriously hard
+            — 10–20% is respectable, 30%+ is great.
+          </p>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -312,17 +335,58 @@ function Section({
 function MetricCard({
   label,
   value,
+  info,
 }: {
   label: string
   value: string | number
+  /** Optional plain-language explanation shown when the card is clicked. */
+  info?: string
 }) {
-  return (
-    <div className="bg-background border border-border rounded-lg p-3">
-      <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
-        {label}
+  const [open, setOpen] = useState(false)
+  const interactive = Boolean(info)
+
+  const content = (
+    <>
+      <div className="flex items-center justify-between gap-2 mb-1">
+        <div className="text-xs text-muted-foreground uppercase tracking-wider">
+          {label}
+        </div>
+        {interactive && (
+          <span
+            aria-hidden="true"
+            className="text-xs text-muted-foreground border border-border rounded-full w-4 h-4 flex items-center justify-center leading-none"
+          >
+            ?
+          </span>
+        )}
       </div>
       <div className="text-2xl font-bold text-foreground">{value}</div>
-    </div>
+      {interactive && open && (
+        <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
+          {info}
+        </p>
+      )}
+    </>
+  )
+
+  if (!interactive) {
+    return (
+      <div className="bg-background border border-border rounded-lg p-3">
+        {content}
+      </div>
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => setOpen((v) => !v)}
+      aria-expanded={open}
+      aria-label={`${label}: tap for explanation`}
+      className="bg-background border border-border rounded-lg p-3 text-left hover:border-orange-500/50 transition-colors w-full"
+    >
+      {content}
+    </button>
   )
 }
 
