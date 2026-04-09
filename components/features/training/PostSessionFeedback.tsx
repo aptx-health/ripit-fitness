@@ -1,7 +1,7 @@
 'use client'
 
 import { X } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
 import { POST_SESSION_QUESTIONS } from '@/types/feedback'
 
@@ -15,6 +15,14 @@ export function PostSessionFeedback({ open, question, onClose }: PostSessionFeed
   const [message, setMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Cleanup auto-close timer on unmount
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current)
+    }
+  }, [])
 
   if (!open) return null
 
@@ -35,7 +43,7 @@ export function PostSessionFeedback({ open, question, onClose }: PostSessionFeed
       })
       if (res.ok) {
         setSubmitted(true)
-        setTimeout(onClose, 1200)
+        closeTimerRef.current = setTimeout(onClose, 1200)
       } else {
         clientLogger.error('Failed to submit post-session feedback')
       }

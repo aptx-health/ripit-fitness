@@ -86,6 +86,14 @@ export async function PUT(request: NextRequest) {
       )
     }
 
+    // Validate postSessionPromptCount
+    if (postSessionPromptCount !== undefined && (typeof postSessionPromptCount !== 'number' || postSessionPromptCount < 0 || !Number.isInteger(postSessionPromptCount))) {
+      return NextResponse.json(
+        { error: 'Invalid postSessionPromptCount. Must be a non-negative integer' },
+        { status: 400 }
+      )
+    }
+
     // Update or create settings
     const settings = await prisma.userSettings.upsert({
       where: { userId: user.id },

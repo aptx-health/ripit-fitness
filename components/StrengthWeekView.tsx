@@ -663,6 +663,7 @@ export default function StrengthWeekView({
 
       {/* Post-Session Feedback */}
       <PostSessionFeedback
+        key={postSessionQuestion}
         open={!!postSessionQuestion}
         question={postSessionQuestion || ''}
         onClose={handlePostSessionClose}
