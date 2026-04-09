@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth/server'
+import { requireEditor } from '@/lib/admin/auth'
 import { prisma } from '@/lib/db'
 import { logger } from '@/lib/logger'
 import type { FeedbackStatus } from '@/types/feedback'
@@ -10,10 +10,8 @@ export async function PATCH(
   { params }: { params: Promise<{ feedbackId: string }> }
 ) {
   try {
-    const { user, error } = await getCurrentUser()
-    if (error || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    const { response } = await requireEditor()
+    if (response) return response
 
     const { feedbackId } = await params
 
