@@ -148,10 +148,6 @@ export async function POST(
             },
           })
 
-      if (isNewDraft) {
-        recordEvent(user.id, 'workout_started', { workoutId })
-      }
-
       // Remove existing logged sets for this draft (we'll replace them)
       const deletedSets = await tx.loggedSet.deleteMany({
         where: {
@@ -190,15 +186,19 @@ export async function POST(
         })
       }
 
-      return draftCompletion
+      return { draftCompletion, isNewDraft }
     })
+
+    if (result.isNewDraft) {
+      recordEvent(user.id, 'workout_started', { workoutId })
+    }
 
     return NextResponse.json({
       success: true,
       draft: {
-        id: result.id,
-        lastUpdated: result.completedAt,
-        status: result.status,
+        id: result.draftCompletion.id,
+        lastUpdated: result.draftCompletion.completedAt,
+        status: result.draftCompletion.status,
         setsCount: loggedSets.length,
       },
     })
