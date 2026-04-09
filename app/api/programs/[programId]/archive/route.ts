@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { logger } from '@/lib/logger'
+import { checkRateLimit, destructiveOpLimiter } from '@/lib/rate-limit'
 
 export async function POST(
   _request: NextRequest,
@@ -16,6 +17,9 @@ export async function POST(
     if (error || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const limited = await checkRateLimit(destructiveOpLimiter, user.id)
+    if (limited) return limited
 
     // Verify program exists and user owns it
     const program = await prisma.program.findUnique({

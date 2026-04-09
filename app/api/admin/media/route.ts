@@ -12,7 +12,7 @@ import { logger } from '@/lib/logger'
  */
 export async function POST(request: Request) {
   try {
-    const auth = await requireEditor()
+    const auth = await requireEditor({ rateLimit: true })
     if (auth.response) return auth.response
 
     const formData = await request.formData()

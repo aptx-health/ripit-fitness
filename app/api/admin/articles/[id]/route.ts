@@ -13,7 +13,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const auth = await requireEditor()
+    const auth = await requireEditor({ rateLimit: true })
     if (auth.response) return auth.response
 
     const { id } = await params
@@ -57,7 +57,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const auth = await requireEditor()
+    const auth = await requireEditor({ rateLimit: true })
     if (auth.response) return auth.response
 
     const { id } = await params
@@ -149,7 +149,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const auth = await requireEditor()
+    const auth = await requireEditor({ rateLimit: true })
     if (auth.response) return auth.response
 
     const { id } = await params
