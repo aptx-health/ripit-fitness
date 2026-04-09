@@ -77,3 +77,77 @@
 | Modal backdrop | `bg-black/90` | rgba(0,0,0,0.9) |
 | Nav bar background | `bg-black` | #000000 |
 | Nav bar border | `border-zinc-900` | #18181B |
+
+---
+
+## BLOSSOM Theme Color Tables
+
+### LIGHT MODE (Soft Pink/Floral)
+
+| Token | Hex | Notes |
+|-------|-----|-------|
+| `--background` | #FFF5F7 | cream pink |
+| `--foreground` | #4A1D2E | deep rose text |
+| `--card` | #FFFFFF | |
+| `--muted` | #FCE7F3 | pale pink |
+| `--border` | #F9A8D4 | |
+| `--primary` | #EC4899 | hot pink |
+| `--secondary` | #F9A8D4 | |
+| `--accent` | #A855F7 | mauve/violet |
+| `--success` | #10B981 | |
+| `--warning` | #F59E0B | |
+| `--error` | #E11D48 | rose |
+
+### DARK MODE (Deep Plum)
+
+| Token | Hex | Notes |
+|-------|-----|-------|
+| `--background` | #1F0A1A | deep plum |
+| `--foreground` | #FCE7F3 | blush |
+| `--card` | #2D1120 | |
+| `--muted` | #3B1829 | |
+| `--border` | #6B2745 | |
+| `--primary` | #F472B6 | softer pink for dark bg |
+| `--secondary` | #C084FC | violet |
+| `--accent` | #C084FC | violet |
+| `--success` | #34D399 | |
+| `--warning` | #FBBF24 | |
+| `--error` | #FB7185 | |
+
+---
+
+## OKABE Theme Color Tables
+
+Color-blind friendly palette based on the [Okabe-Ito palette](https://jfly.uni-koeln.de/color/). All semantic colors remain distinguishable under deuteranopia, protanopia, and tritanopia simulation.
+
+### LIGHT MODE
+
+| Token | Hex | Okabe-Ito role |
+|-------|-----|----------------|
+| `--background` | #FFFFFF | |
+| `--foreground` | #000000 | WCAG AAA |
+| `--card` | #F7F7F7 | |
+| `--muted` | #EDEDED | |
+| `--border` | #BDBDBD | |
+| `--primary` | #0072B2 | blue |
+| `--secondary` | #56B4E9 | sky blue |
+| `--accent` | #CC79A7 | reddish-purple |
+| `--success` | #009E73 | bluish-green |
+| `--warning` | #E69F00 | orange |
+| `--error` | #D55E00 | vermilion |
+
+### DARK MODE
+
+| Token | Hex | Notes |
+|-------|-----|-------|
+| `--background` | #0A0A0A | |
+| `--foreground` | #F5F5F5 | |
+| `--card` | #1A1A1A | |
+| `--muted` | #262626 | |
+| `--border` | #3D3D3D | |
+| `--primary` | #56B4E9 | brighter blue for dark bg |
+| `--secondary` | #0072B2 | |
+| `--accent` | #CC79A7 | |
+| `--success` | #00D49A | brightened bluish-green |
+| `--warning` | #F0B040 | brightened orange |
+| `--error` | #FF7033 | brightened vermilion |

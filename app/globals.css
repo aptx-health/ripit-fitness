@@ -1580,6 +1580,282 @@
   --accent-rgb: 180, 79, 255;
 }
 
+/* BLOSSOM Theme - Light Mode (Soft Pink/Floral) */
+[data-theme="blossom"] {
+  /* Base colors */
+  --background: #FFF5F7;  /* cream pink */
+  --foreground: #4A1D2E;  /* deep rose text */
+
+  /* Surface colors */
+  --card: #FFFFFF;
+  --card-foreground: #4A1D2E;
+  --muted: #FCE7F3;       /* pale pink */
+  --muted-foreground: #9D4865;
+
+  /* Border colors */
+  --border: #F9A8D4;
+  --input: #FBCFE8;
+
+  /* Primary (Hot Pink) */
+  --primary: #EC4899;
+  --primary-foreground: #FFFFFF;
+  --primary-hover: #DB2777;
+  --primary-active: #BE185D;
+  --primary-muted: #FCE7F3;
+  --primary-muted-dark: #EC4899;
+  --primary-rgb: 236, 72, 153;
+
+  /* Secondary (Soft Pink) */
+  --secondary: #F9A8D4;
+  --secondary-foreground: #4A1D2E;
+  --secondary-hover: #F472B6;
+  --secondary-active: #EC4899;
+  --secondary-muted: #FCE7F3;
+
+  /* Success */
+  --success: #10B981;
+  --success-foreground: #FFFFFF;
+  --success-hover: #059669;
+  --success-muted: #D1FAE5;
+  --success-text: #059669;
+  --success-border: #10B981;
+  --success-rgb: 16, 185, 129;
+
+  /* Warning */
+  --warning: #F59E0B;
+  --warning-foreground: #FFFFFF;
+  --warning-hover: #D97706;
+  --warning-muted: #FEF3C7;
+  --warning-text: #D97706;
+  --warning-border: #F59E0B;
+  --warning-rgb: 245, 158, 11;
+
+  /* Error (Rose) */
+  --error: #E11D48;
+  --error-foreground: #FFFFFF;
+  --error-hover: #BE123C;
+  --error-muted: #FFE4E6;
+  --error-text: #BE123C;
+  --error-border: #E11D48;
+  --error-rgb: 225, 29, 72;
+
+  /* Accent (Mauve/Violet) */
+  --accent: #A855F7;
+  --accent-foreground: #FFFFFF;
+  --accent-hover: #9333EA;
+  --accent-active: #7E22CE;
+  --accent-muted: #F3E8FF;
+  --accent-text: #7E22CE;
+  --accent-rgb: 168, 85, 247;
+}
+
+/* BLOSSOM Theme - Dark Mode (Deep Plum) */
+[data-theme="blossom"][data-mode="dark"] {
+  /* Base colors */
+  --background: #1F0A1A;  /* deep plum */
+  --foreground: #FCE7F3;  /* blush */
+
+  /* Surface colors */
+  --card: #2D1120;
+  --card-foreground: #FCE7F3;
+  --muted: #3B1829;
+  --muted-foreground: #E9A8C4;
+
+  /* Border colors */
+  --border: #6B2745;
+  --input: #4A1A30;
+
+  /* Primary (Softer Pink) */
+  --primary: #F472B6;
+  --primary-foreground: #1F0A1A;
+  --primary-hover: #EC4899;
+  --primary-active: #DB2777;
+  --primary-muted: #3B1829;
+  --primary-muted-dark: #F472B6;
+  --primary-rgb: 244, 114, 182;
+
+  /* Secondary (Violet) */
+  --secondary: #C084FC;
+  --secondary-foreground: #1F0A1A;
+  --secondary-hover: #A855F7;
+  --secondary-active: #9333EA;
+  --secondary-muted: #3B1829;
+
+  /* Success */
+  --success: #34D399;
+  --success-foreground: #1F0A1A;
+  --success-hover: #10B981;
+  --success-muted: #1A2E26;
+  --success-text: #34D399;
+  --success-border: #34D399;
+  --success-rgb: 52, 211, 153;
+
+  /* Warning */
+  --warning: #FBBF24;
+  --warning-foreground: #1F0A1A;
+  --warning-hover: #F59E0B;
+  --warning-muted: #2E2410;
+  --warning-text: #FBBF24;
+  --warning-border: #FBBF24;
+  --warning-rgb: 251, 191, 36;
+
+  /* Error */
+  --error: #FB7185;
+  --error-foreground: #1F0A1A;
+  --error-hover: #F43F5E;
+  --error-muted: #2E1018;
+  --error-text: #FB7185;
+  --error-border: #FB7185;
+  --error-rgb: 251, 113, 133;
+
+  /* Accent (Violet) */
+  --accent: #C084FC;
+  --accent-foreground: #1F0A1A;
+  --accent-hover: #A855F7;
+  --accent-active: #9333EA;
+  --accent-muted: #2A1840;
+  --accent-text: #C084FC;
+  --accent-rgb: 192, 132, 252;
+}
+
+/* OKABE Theme - Light Mode (Color-Blind Friendly, Okabe-Ito palette) */
+[data-theme="okabe"] {
+  /* Base colors */
+  --background: #FFFFFF;
+  --foreground: #000000;  /* WCAG AAA */
+
+  /* Surface colors */
+  --card: #F7F7F7;
+  --card-foreground: #000000;
+  --muted: #EDEDED;
+  --muted-foreground: #4A4A4A;
+
+  /* Border colors */
+  --border: #BDBDBD;
+  --input: #E0E0E0;
+
+  /* Primary (Blue) */
+  --primary: #0072B2;
+  --primary-foreground: #FFFFFF;
+  --primary-hover: #005A8F;
+  --primary-active: #004570;
+  --primary-muted: #E0F0FA;
+  --primary-muted-dark: #0072B2;
+  --primary-rgb: 0, 114, 178;
+
+  /* Secondary (Sky Blue) */
+  --secondary: #56B4E9;
+  --secondary-foreground: #000000;
+  --secondary-hover: #3AA0D8;
+  --secondary-active: #2090C8;
+  --secondary-muted: #E0F0FA;
+
+  /* Success (Bluish-Green) */
+  --success: #009E73;
+  --success-foreground: #FFFFFF;
+  --success-hover: #008060;
+  --success-muted: #D4F5EB;
+  --success-text: #007A5A;
+  --success-border: #009E73;
+  --success-rgb: 0, 158, 115;
+
+  /* Warning (Orange) */
+  --warning: #E69F00;
+  --warning-foreground: #000000;
+  --warning-hover: #CC8D00;
+  --warning-muted: #FFF3D4;
+  --warning-text: #B37D00;
+  --warning-border: #E69F00;
+  --warning-rgb: 230, 159, 0;
+
+  /* Error (Vermilion) */
+  --error: #D55E00;
+  --error-foreground: #FFFFFF;
+  --error-hover: #B84F00;
+  --error-muted: #FFE8D4;
+  --error-text: #B84F00;
+  --error-border: #D55E00;
+  --error-rgb: 213, 94, 0;
+
+  /* Accent (Reddish-Purple) */
+  --accent: #CC79A7;
+  --accent-foreground: #000000;
+  --accent-hover: #B8608E;
+  --accent-active: #A04878;
+  --accent-muted: #F8E8F0;
+  --accent-text: #A04878;
+  --accent-rgb: 204, 121, 167;
+}
+
+/* OKABE Theme - Dark Mode (Color-Blind Friendly) */
+[data-theme="okabe"][data-mode="dark"] {
+  /* Base colors */
+  --background: #0A0A0A;
+  --foreground: #F5F5F5;
+
+  /* Surface colors */
+  --card: #1A1A1A;
+  --card-foreground: #F5F5F5;
+  --muted: #262626;
+  --muted-foreground: #B8B8B8;
+
+  /* Border colors */
+  --border: #3D3D3D;
+  --input: #2A2A2A;
+
+  /* Primary (Brighter Blue) */
+  --primary: #56B4E9;
+  --primary-foreground: #0A0A0A;
+  --primary-hover: #7BC5ED;
+  --primary-active: #3AA0D8;
+  --primary-muted: #0D2A3D;
+  --primary-muted-dark: #56B4E9;
+  --primary-rgb: 86, 180, 233;
+
+  /* Secondary (Blue) */
+  --secondary: #0072B2;
+  --secondary-foreground: #F5F5F5;
+  --secondary-hover: #0088D4;
+  --secondary-active: #005A8F;
+  --secondary-muted: #0D2A3D;
+
+  /* Success (Brightened Bluish-Green) */
+  --success: #00D49A;
+  --success-foreground: #0A0A0A;
+  --success-hover: #009E73;
+  --success-muted: #0A2E22;
+  --success-text: #00D49A;
+  --success-border: #00D49A;
+  --success-rgb: 0, 212, 154;
+
+  /* Warning (Brightened Orange) */
+  --warning: #F0B040;
+  --warning-foreground: #0A0A0A;
+  --warning-hover: #E69F00;
+  --warning-muted: #2E2410;
+  --warning-text: #F0B040;
+  --warning-border: #F0B040;
+  --warning-rgb: 240, 176, 64;
+
+  /* Error (Brightened Vermilion) */
+  --error: #FF7033;
+  --error-foreground: #0A0A0A;
+  --error-hover: #D55E00;
+  --error-muted: #2E1A0A;
+  --error-text: #FF7033;
+  --error-border: #FF7033;
+  --error-rgb: 255, 112, 51;
+
+  /* Accent (Reddish-Purple) */
+  --accent: #CC79A7;
+  --accent-foreground: #0A0A0A;
+  --accent-hover: #D98FBA;
+  --accent-active: #B8608E;
+  --accent-muted: #2E1A24;
+  --accent-text: #CC79A7;
+  --accent-rgb: 204, 121, 167;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
