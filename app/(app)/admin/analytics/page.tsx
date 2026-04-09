@@ -185,7 +185,7 @@ export default function AdminAnalyticsPage() {
             7-Day Retention by Signup Cohort
           </h3>
           <p className="text-xs text-muted-foreground mb-3 max-w-2xl">
-            A "cohort" is a group of users who signed up in the same week. This
+            A &ldquo;cohort&rdquo; is a group of users who signed up in the same week. This
             shows: of the people who signed up N weeks ago, what percent are
             still lifting today? Retention in fitness apps is notoriously hard
             — 10–20% is respectable, 30%+ is great.
