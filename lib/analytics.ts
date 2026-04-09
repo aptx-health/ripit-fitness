@@ -34,17 +34,40 @@ function scheduleFlush() {
   }, FLUSH_INTERVAL_MS)
 }
 
-async function flush() {
+async function flush(useBeacon = false): Promise<void> {
   if (buffer.length === 0) return
 
   const events = buffer
   buffer = []
 
+  const payload = JSON.stringify({ events })
+
+  // Prefer sendBeacon for unload/navigation — it survives page transitions
+  // where in-flight fetch() calls would be cancelled by the browser.
+  if (
+    useBeacon &&
+    typeof navigator !== 'undefined' &&
+    typeof navigator.sendBeacon === 'function'
+  ) {
+    try {
+      const blob = new Blob([payload], { type: 'application/json' })
+      const ok = navigator.sendBeacon('/api/events', blob)
+      if (!ok) {
+        clientLogger.error('sendBeacon returned false for analytics flush')
+      }
+      return
+    } catch (error) {
+      clientLogger.error('sendBeacon failed for analytics flush:', error)
+      // Fall through to fetch as a best-effort fallback.
+    }
+  }
+
   try {
     const response = await fetch('/api/events', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ events }),
+      body: payload,
+      keepalive: true,
     })
 
     if (!response.ok) {
@@ -93,20 +116,24 @@ export function trackEvent(
 /**
  * Force-flush any buffered events. Call this before navigation
  * or page unload when you need delivery guarantees.
+ *
+ * Pass `useBeacon: true` when called in an unload/navigation path —
+ * this uses `navigator.sendBeacon` which survives page transitions
+ * where in-flight fetch() calls would be cancelled.
  */
-export function flushEvents(): void {
+export function flushEvents(useBeacon = false): Promise<void> {
   if (flushTimer) {
     clearTimeout(flushTimer)
     flushTimer = null
   }
-  flush()
+  return flush(useBeacon)
 }
 
 // Flush on page hide (covers tab close, navigation, etc.)
 if (typeof window !== 'undefined') {
   window.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') {
-      flushEvents()
+      flushEvents(true)
     }
   })
 }

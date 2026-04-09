@@ -64,9 +64,11 @@ export default function SignupPage() {
         }
       }
 
-      // BetterAuth signs in immediately after signup
+      // BetterAuth signs in immediately after signup.
+      // Use sendBeacon so the signup_completed event survives the
+      // navigation to '/' that happens right after.
       trackEvent('signup_completed')
-      flushEvents()
+      await flushEvents(true)
       window.location.href = '/'
     } catch {
       setError('An unexpected error occurred')
