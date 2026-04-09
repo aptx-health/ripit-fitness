@@ -24,6 +24,7 @@ export default async function AdminLayout({
     { href: '/admin/collections', label: 'Collections' },
     { href: '/admin/exercises', label: 'Exercises' },
     { href: '/admin/feedback', label: 'Feedback' },
+    { href: '/admin/analytics', label: 'Analytics' },
   ]
 
   return (
