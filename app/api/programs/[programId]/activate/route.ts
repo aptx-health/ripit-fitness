@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { recordEvent } from '@/lib/events'
 import { logger } from '@/lib/logger'
 import { checkRateLimit, programManagementLimiter } from '@/lib/rate-limit'
 
@@ -45,6 +46,8 @@ export async function POST(
         data: { isActive: true },
       }),
     ])
+
+    recordEvent(user.id, 'program_activated', { programId })
 
     return NextResponse.json({ success: true })
   } catch (error) {

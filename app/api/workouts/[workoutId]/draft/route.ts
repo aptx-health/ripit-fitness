@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { recordEvent } from '@/lib/events'
 import { logger } from '@/lib/logger'
 import { checkRateLimit, setLoggingLimiter } from '@/lib/rate-limit'
 
@@ -132,7 +133,8 @@ export async function POST(
       const currentSetCount = existingDraft?.loggedSets?.length || 0
       
       // Create or update draft completion
-      const draftCompletion = existingDraft 
+      const isNewDraft = !existingDraft
+      const draftCompletion = existingDraft
         ? await tx.workoutCompletion.update({
             where: { id: existingDraft.id },
             data: { completedAt: new Date() }
@@ -145,6 +147,10 @@ export async function POST(
               completedAt: new Date(),
             },
           })
+
+      if (isNewDraft) {
+        recordEvent(user.id, 'workout_started', { workoutId })
+      }
 
       // Remove existing logged sets for this draft (we'll replace them)
       const deletedSets = await tx.loggedSet.deleteMany({
