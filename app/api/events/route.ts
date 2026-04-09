@@ -26,7 +26,6 @@ interface EventPayload {
   properties?: Record<string, unknown>
   pageUrl?: string
   sessionId?: string
-  timestamp?: string
 }
 
 export async function POST(request: NextRequest) {
