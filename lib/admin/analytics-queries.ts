@@ -142,21 +142,35 @@ async function getUsageMetrics(): Promise<UsageMetrics> {
 }
 
 async function getRetentionMetrics(): Promise<RetentionMetrics> {
-  // DAU / WAU / MAU in parallel
-  const [dau, wau, mau] = await Promise.all([
-    prisma.workoutCompletion.groupBy({
-      by: ['userId'],
-      where: { status: 'completed', completedAt: { gte: daysAgo(0) } },
-    }),
-    prisma.workoutCompletion.groupBy({
-      by: ['userId'],
-      where: { status: 'completed', completedAt: { gte: daysAgo(7) } },
-    }),
-    prisma.workoutCompletion.groupBy({
-      by: ['userId'],
-      where: { status: 'completed', completedAt: { gte: daysAgo(30) } },
-    }),
+  // DAU / WAU / MAU in parallel.
+  // INNER JOIN on "user" so we only count users that still exist
+  // (guards against orphaned WorkoutCompletion rows from deleted/recreated users).
+  const dayStart = daysAgo(0)
+  const weekStart = daysAgo(7)
+  const monthStart = daysAgo(30)
+  const [dauRows, wauRows, mauRows] = await Promise.all([
+    prisma.$queryRaw<[{ count: bigint }]>`
+      SELECT COUNT(DISTINCT wc."userId")::bigint as count
+      FROM "WorkoutCompletion" wc
+      INNER JOIN "user" u ON u.id = wc."userId"
+      WHERE wc.status = 'completed' AND wc."completedAt" >= ${dayStart}
+    `,
+    prisma.$queryRaw<[{ count: bigint }]>`
+      SELECT COUNT(DISTINCT wc."userId")::bigint as count
+      FROM "WorkoutCompletion" wc
+      INNER JOIN "user" u ON u.id = wc."userId"
+      WHERE wc.status = 'completed' AND wc."completedAt" >= ${weekStart}
+    `,
+    prisma.$queryRaw<[{ count: bigint }]>`
+      SELECT COUNT(DISTINCT wc."userId")::bigint as count
+      FROM "WorkoutCompletion" wc
+      INNER JOIN "user" u ON u.id = wc."userId"
+      WHERE wc.status = 'completed' AND wc."completedAt" >= ${monthStart}
+    `,
   ])
+  const dau = Number(dauRows[0].count)
+  const wau = Number(wauRows[0].count)
+  const mau = Number(mauRows[0].count)
 
   // 7-day retention cohorts: for each of the last 8 weeks, what % are still active
   const cohorts: RetentionCohort[] = []
@@ -200,7 +214,9 @@ async function getRetentionMetrics(): Promise<RetentionMetrics> {
     })
   }
 
-  // Time-to-first-workout distribution
+  // Time-to-first-workout distribution.
+  // Filter out rows where first completion predates user createdAt
+  // (can happen when a user is recreated / BetterAuth migration).
   const timeToFirst = await prisma.$queryRaw<
     Array<{ hours: number }>
   >`
@@ -210,6 +226,7 @@ async function getRetentionMetrics(): Promise<RetentionMetrics> {
     FROM "user" u
     INNER JOIN "WorkoutCompletion" wc ON wc."userId" = u.id
     WHERE wc.status = 'completed'
+      AND wc."completedAt" >= u."createdAt"
     GROUP BY u.id, u."createdAt"
     ORDER BY hours
   `
@@ -244,9 +261,9 @@ async function getRetentionMetrics(): Promise<RetentionMetrics> {
   `
 
   return {
-    dau: dau.length,
-    wau: wau.length,
-    mau: mau.length,
+    dau,
+    wau,
+    mau,
     retentionCohorts: cohorts,
     timeToFirstWorkout,
     dropoutWatchlist: dropouts,
@@ -257,24 +274,31 @@ async function getFunnelMetrics(): Promise<FunnelStep[]> {
   // Funnel: signup -> program_activated -> workout_started -> workout_completed
   // Use AppEvent for funnel stages, with User.createdAt as fallback for signups
 
+  // All downstream steps INNER JOIN "user" so we only count existing users
+  // (prevents orphaned events/completions from inflating the funnel above 100%).
   const [signups, programActivated, workoutStarted, workoutCompleted] =
     await Promise.all([
-      // Signups: count from user table (more reliable than AppEvent)
       prisma.$queryRaw<[{ count: bigint }]>`
       SELECT COUNT(DISTINCT id)::bigint as count FROM "user"
     `,
       prisma.$queryRaw<[{ count: bigint }]>`
-      SELECT COUNT(DISTINCT "userId")::bigint as count
-      FROM "AppEvent" WHERE event = 'program_activated'
+      SELECT COUNT(DISTINCT e."userId")::bigint as count
+      FROM "AppEvent" e
+      INNER JOIN "user" u ON u.id = e."userId"
+      WHERE e.event = 'program_activated'
     `,
       prisma.$queryRaw<[{ count: bigint }]>`
-      SELECT COUNT(DISTINCT "userId")::bigint as count
-      FROM "AppEvent" WHERE event = 'workout_started'
+      SELECT COUNT(DISTINCT e."userId")::bigint as count
+      FROM "AppEvent" e
+      INNER JOIN "user" u ON u.id = e."userId"
+      WHERE e.event = 'workout_started'
     `,
       // Use WorkoutCompletion as source of truth for completed
       prisma.$queryRaw<[{ count: bigint }]>`
-      SELECT COUNT(DISTINCT "userId")::bigint as count
-      FROM "WorkoutCompletion" WHERE status = 'completed'
+      SELECT COUNT(DISTINCT wc."userId")::bigint as count
+      FROM "WorkoutCompletion" wc
+      INNER JOIN "user" u ON u.id = wc."userId"
+      WHERE wc.status = 'completed'
     `,
     ])
 

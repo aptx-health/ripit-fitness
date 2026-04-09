@@ -356,7 +356,7 @@ function FunnelRow({
         <div
           className="h-full bg-orange-600/60 rounded-full flex items-center justify-end pr-2"
           style={{
-            width: `${Math.max(step.overallPct, 5)}%`,
+            width: `${Math.min(100, Math.max(step.overallPct, 5))}%`,
           }}
         >
           <span className="text-xs font-semibold text-foreground">
