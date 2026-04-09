@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server'
+import { requireEditor } from '@/lib/admin/auth'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { sendDiscordNotification } from '@/lib/discord'
@@ -98,10 +99,8 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const { user, error } = await getCurrentUser()
-    if (error || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    const { response } = await requireEditor()
+    if (response) return response
 
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
