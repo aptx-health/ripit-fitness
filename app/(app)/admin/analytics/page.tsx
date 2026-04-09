@@ -10,11 +10,12 @@ export default function AdminAnalyticsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (bust = false) => {
     try {
       setLoading(true)
       setError(null)
-      const res = await fetch('/api/admin/analytics')
+      const url = bust ? '/api/admin/analytics?bust=1' : '/api/admin/analytics'
+      const res = await fetch(url)
       if (!res.ok) throw new Error('Failed to fetch analytics')
       const json = await res.json()
       setData(json.data)
@@ -43,7 +44,8 @@ export default function AdminAnalyticsPage() {
         <p className="text-red-400 mb-4">{error}</p>
         <button
           type="button"
-          onClick={fetchData}
+          onClick={() => fetchData(true)}
+          aria-label="Retry loading analytics"
           className="text-sm text-orange-500 hover:text-orange-400 underline"
         >
           Retry
@@ -69,7 +71,8 @@ export default function AdminAnalyticsPage() {
         </div>
         <button
           type="button"
-          onClick={fetchData}
+          onClick={() => fetchData(true)}
+          aria-label="Refresh analytics data"
           className="text-sm text-orange-500 hover:text-orange-400 transition-colors"
         >
           Refresh
@@ -236,6 +239,16 @@ export default function AdminAnalyticsPage() {
 
       {/* Onboarding Funnel */}
       <Section title="Onboarding Funnel">
+        <div className="flex items-center gap-3 mb-2 text-xs text-muted-foreground uppercase tracking-wider">
+          <div className="w-40 sm:w-48">Step</div>
+          <div className="flex-1">Users</div>
+          <div className="w-14 text-right" title="Step-to-step conversion">
+            Step %
+          </div>
+          <div className="w-16 text-right" title="End-to-end conversion (vs signups)">
+            Overall
+          </div>
+        </div>
         <div className="space-y-2">
           {data.funnel.map((step, i) => (
             <FunnelRow key={step.step} step={step} isFirst={i === 0} />
@@ -326,7 +339,12 @@ function FunnelRow({
   step,
   isFirst,
 }: {
-  step: { step: string; count: number; conversionPct: number }
+  step: {
+    step: string
+    count: number
+    conversionPct: number
+    overallPct: number
+  }
   isFirst: boolean
 }) {
   return (
@@ -338,7 +356,7 @@ function FunnelRow({
         <div
           className="h-full bg-orange-600/60 rounded-full flex items-center justify-end pr-2"
           style={{
-            width: `${Math.max(step.conversionPct, 5)}%`,
+            width: `${Math.max(step.overallPct, 5)}%`,
           }}
         >
           <span className="text-xs font-semibold text-foreground">
@@ -354,6 +372,9 @@ function FunnelRow({
             {step.conversionPct}%
           </span>
         )}
+      </div>
+      <div className="w-16 text-right text-sm">
+        <span className="text-foreground font-semibold">{step.overallPct}%</span>
       </div>
     </div>
   )

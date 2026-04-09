@@ -61,7 +61,10 @@ export interface DropoutEntry {
 export interface FunnelStep {
   step: string
   count: number
+  /** Step-to-step conversion: this step vs. previous step */
   conversionPct: number
+  /** End-to-end conversion: this step vs. total signups (first step) */
+  overallPct: number
 }
 
 export interface FeedbackVolume {
@@ -139,9 +142,6 @@ async function getUsageMetrics(): Promise<UsageMetrics> {
 }
 
 async function getRetentionMetrics(): Promise<RetentionMetrics> {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-
   // DAU / WAU / MAU in parallel
   const [dau, wau, mau] = await Promise.all([
     prisma.workoutCompletion.groupBy({
@@ -285,6 +285,7 @@ async function getFunnelMetrics(): Promise<FunnelStep[]> {
     { step: 'Completed Workout', count: Number(workoutCompleted[0].count) },
   ]
 
+  const totalSignups = steps[0].count
   return steps.map((s, i) => ({
     ...s,
     conversionPct:
@@ -293,6 +294,8 @@ async function getFunnelMetrics(): Promise<FunnelStep[]> {
         : steps[i - 1].count > 0
           ? Math.round((s.count / steps[i - 1].count) * 100)
           : 0,
+    overallPct:
+      totalSignups > 0 ? Math.round((s.count / totalSignups) * 100) : 0,
   }))
 }
 
