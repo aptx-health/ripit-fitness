@@ -532,8 +532,11 @@ Self-hosted k8s infrastructure is operational (staging + production). PostgreSQL
 
 ### Active Documentation
 - `/docs/DATABASE_MIGRATIONS.md` - Database migration workflow with Prisma
+- `/docs/DATABASE_CONNECTIONS.md` - PgBouncer pooling, `DATABASE_URL` vs `DIRECT_URL`, health endpoints
 - `/docs/LOGGING.md` - Logging configuration and usage with Pino
+- `/docs/RATE_LIMITING.md` - Rate limiting tiers, patterns, and tuning guidance
 - `/docs/STYLING.md` - DOOM theme color system and styling guide
+- `/docs/IMAGE_TRACEABILITY.md` - Docker image SHA traceability
 - `/docs/features/PROGRAM_MANAGEMENT_IMPROVEMENTS.md` - Program management enhancements
 - `/docs/features/PERFORMANCE_ANALYSIS.md` - Performance analysis and optimizations
 - `/docs/archive/gcp/` - Archived GCP Pub/Sub documentation (historical reference)

@@ -1,230 +1,103 @@
 # Database Migration Workflow
 
-This document describes how to manage database schema changes using Prisma + Supabase CLI.
+Schema changes require BOTH a local `db push` AND a migration file. CI blocks PRs that modify `schema.prisma` without a corresponding migration (`migration-check.yml`).
 
-## Overview
+## Why both?
 
-We use a hybrid approach:
-- **Prisma** as the source of truth for schema (ORM, type safety)
-- **Supabase migrations** for applying changes (local and production)
+`db push` gives fast local iteration with no migration files to manage. The migration file is what `prisma migrate deploy` runs in staging and production during deploy (via init container / ArgoCD pre-sync Job).
 
-## Local Development
+## Making Schema Changes
 
-### Initial Setup (New Worktree)
+### 1. Edit the schema
 
-```bash
-# 1. Start Supabase
-supabase start
-
-# 2. Apply all migrations and seeds
-supabase db reset
-
-# 3. Generate Prisma client
-doppler run -- npx prisma generate
+```
+prisma/schema.prisma
 ```
 
-### Making Schema Changes
-
-**Step 1: Update Prisma Schema**
-
-Edit `prisma/schema.prisma` with your changes.
-
-**Step 2: Create Migration File**
+### 2. Apply to local DB
 
 ```bash
-# Create a new timestamped migration file
-supabase migration new describe_your_change
-
-# Example: supabase migration new add_exercise_categories
-# Creates: supabase/migrations/20260202123456_add_exercise_categories.sql
+doppler run --config dev_personal -- npx prisma db push
 ```
 
-**Step 3: Generate Migration SQL**
+### 3. Generate Prisma Client
 
 ```bash
-# Generate SQL diff from current local DB to new Prisma schema
-doppler run -- npx prisma migrate diff \
-  --from-url "$DATABASE_URL" \
-  --to-schema-datamodel ./prisma/schema.prisma \
-  --script > supabase/migrations/[TIMESTAMP]_describe_your_change.sql
-
-# Replace [TIMESTAMP] with the actual timestamp from step 2
+doppler run --config dev_personal -- npx prisma generate
 ```
 
-**Step 4: Test Locally**
+### 4. Create the migration file
+
+Timestamp format: `YYYYMMDDHHMMSS`.
 
 ```bash
-# Apply the new migration to local Supabase
-supabase db reset
-
-# Verify it works
-doppler run -- npx prisma generate
-doppler run -- npm run dev
+TIMESTAMP=$(date -u +"%Y%m%d%H%M%S")
+mkdir -p prisma/migrations/${TIMESTAMP}_describe_your_change
 ```
 
-**Step 5: Commit Migration**
+Write the SQL in `migration.sql`. Example for adding a column:
+
+```sql
+ALTER TABLE "PrescribedSet" ADD COLUMN "isWarmup" BOOLEAN NOT NULL DEFAULT false;
+```
+
+### 5. Mark migration as already applied locally
+
+`db push` already applied the change, so tell Prisma not to re-run it:
 
 ```bash
-git add prisma/schema.prisma
-git add supabase/migrations/[TIMESTAMP]_describe_your_change.sql
-git commit -m "feat: add exercise categories"
+DATABASE_URL="postgresql://postgres:postgres@localhost:<PG_PORT>/ripit" \
+  npx prisma migrate resolve --applied ${TIMESTAMP}_describe_your_change
 ```
 
-## Production Deployment
+Replace `<PG_PORT>` with your actual port (5433 for primary repo, check `scripts/worktree-env.sh` for worktrees).
 
-**IMPORTANT**: Production pushes should ONLY be done manually by the developer, never automated.
-
-### Option 1: Via Supabase CLI (Recommended)
+### 6. Commit both files
 
 ```bash
-# 1. Verify you're linked to production
-supabase link --project-ref [YOUR_PROJECT_REF]
-
-# 2. Review pending migrations
-supabase db diff
-
-# 3. Push to production
-supabase db push
+git add prisma/schema.prisma prisma/migrations/${TIMESTAMP}_describe_your_change/
+git commit -m "feat: describe your change"
 ```
 
-### Option 2: Via Supabase Dashboard
+## How Migrations Deploy
 
-1. Go to Supabase Dashboard → SQL Editor
-2. Copy migration file contents from `supabase/migrations/[TIMESTAMP]_*.sql`
-3. Paste and execute
-4. Verify changes in Table Editor
+### Staging (merge to `dev`)
 
-### Post-Deployment
+An init container runs `prisma migrate deploy` before the app pod starts. Migrations auto-apply on every deploy.
 
-```bash
-# Update Prisma client in production (Vercel auto-deploys on git push)
-git push origin main
-```
+### Production (merge to `main`)
 
-## Pulling Changes from Production
+An ArgoCD pre-sync Job runs `prisma migrate deploy`. The app image is tagged with `sha-<commit>` (pinned, never overwritten). The SHA is manually updated in the infra repo's helm values.
 
-If changes were made directly in production (via SQL Editor), pull them down:
+Both environments use `DIRECT_URL` (bypasses PgBouncer) for migrations. See `/docs/DATABASE_CONNECTIONS.md` for connection details.
 
-```bash
-# Pull schema changes from production and create a migration file
-supabase db remote commit
+## CI Guardrails
 
-# This creates a new migration file with the diff
-# Review the file, then commit it
-git add supabase/migrations/[NEW_TIMESTAMP]_*.sql
-git commit -m "chore: pull production schema changes"
-```
+`migration-check.yml` runs on PRs and flags:
+- Schema changes without a matching migration file (blocks merge)
+- Destructive migrations (requires `destructive-migration-approved` label to merge to `main`)
 
 ## Troubleshooting
 
 ### "Migration already applied"
 
-If you see errors about migrations already being applied:
+If `prisma migrate resolve` says the migration is already applied, it's fine -- that's the expected state after `db push`.
+
+### "Column already exists" during migrate deploy
+
+The migration SQL is trying to add something that `db push` already created. Use `migrate resolve --applied` to mark it (step 5 above).
+
+### Full local DB reset
 
 ```bash
-# Check migration status
-supabase migration list
-
-# Repair if needed
-supabase migration repair [VERSION] --status applied
+source scripts/worktree-env.sh
+docker stop $PG_CONTAINER_NAME && docker rm $PG_CONTAINER_NAME
+docker volume rm $PG_VOLUME_NAME
+# Restart via dev.sh -- schema will be re-applied automatically
 ```
 
-### "Relation already exists"
+## What NOT to do
 
-This usually means you're trying to apply a migration that was already manually applied via SQL Editor.
-
-Options:
-1. **Skip it**: Mark migration as applied without running it
-   ```bash
-   supabase migration repair [VERSION] --status applied
-   ```
-
-2. **Remove it**: Delete the redundant migration file and regenerate from current state
-
-### Seed Data Missing After Reset
-
-Seeds are applied automatically during `supabase db reset`. If exercises are missing:
-
-```bash
-cd prisma/seeds
-./reseed_supabase_local.sh
-```
-
-## Best Practices
-
-### DO:
-- ✅ Always update `prisma/schema.prisma` first
-- ✅ Test migrations locally with `supabase db reset` before production
-- ✅ Commit migration files with schema changes
-- ✅ Use descriptive migration names
-- ✅ Review generated SQL before applying
-
-### DON'T:
-- ❌ Never manually edit production database without creating a migration
-- ❌ Don't skip migration files in sequence
-- ❌ Don't use `prisma db push` in production (only for local prototyping)
-- ❌ Don't apply migrations via SQL Editor without pulling them down with `supabase db remote commit`
-
-## Migration File Naming
-
-Supabase uses timestamp-based naming:
-
-```
-[TIMESTAMP]_[description].sql
-
-Examples:
-20260202123456_add_exercise_categories.sql
-20260202134512_create_workout_templates.sql
-```
-
-The timestamp ensures migrations are applied in order.
-
-## RLS Policies
-
-When creating new tables, always add RLS policies in the same migration:
-
-```sql
--- Enable RLS
-ALTER TABLE "NewTable" ENABLE ROW LEVEL SECURITY;
-
--- User can only access their own data
-CREATE POLICY "users_own_data" ON "NewTable"
-  FOR ALL USING (auth.uid() = "userId");
-```
-
-## Indexes
-
-For local development, omit `CONCURRENTLY`:
-
-```sql
--- Local/Migration
-CREATE INDEX "table_column_idx" ON "Table"("column");
-
--- Production (manual via SQL Editor)
-CREATE INDEX CONCURRENTLY "table_column_idx" ON "Table"("column");
-```
-
-`CONCURRENTLY` prevents table locking but can't run in transactions (migrations are transactional).
-
-## Emergency Rollback
-
-If a production migration fails:
-
-```bash
-# 1. Check migration status
-supabase migration list
-
-# 2. Revert to previous version (if possible)
-supabase db reset --version [PREVIOUS_VERSION]
-
-# 3. Fix the migration file locally
-# 4. Test with supabase db reset
-# 5. Push corrected version
-supabase db push
-```
-
-## References
-
-- [Supabase CLI Migrations](https://supabase.com/docs/guides/local-development)
-- [Prisma Migrate Diff](https://www.prisma.io/docs/reference/api-reference/command-reference#migrate-diff)
-- Seed documentation: `prisma/seeds/README.md`
+- Do not run `prisma migrate deploy` locally. Use `db push` for local dev.
+- Do not run `prisma migrate dev`. We create migration files manually to keep full control over the SQL.
+- Do not apply migrations directly to production via psql. Script everything, test on staging first.
