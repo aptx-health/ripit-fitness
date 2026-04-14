@@ -3,4 +3,4 @@
  * external monitors don't break during the k8s probe split. New probes should
  * target /api/health/live (liveness) and /api/health/ready (readiness).
  */
-export { GET, dynamic } from './ready/route'
+export { dynamic, GET } from './ready/route'

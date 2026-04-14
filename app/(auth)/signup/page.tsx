@@ -7,7 +7,7 @@ import { AuthPageHeader } from '@/components/features/auth/AuthPageHeader'
 import { OAuthButtons } from '@/components/features/auth/OAuthButtons'
 import { OrDivider } from '@/components/features/auth/OrDivider'
 import { Button } from '@/components/ui/Button'
-import { trackEvent, flushEvents } from '@/lib/analytics'
+import { flushEvents, trackEvent } from '@/lib/analytics'
 import { signUp } from '@/lib/auth-client'
 
 export default function SignupPage() {
