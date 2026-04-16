@@ -2,12 +2,27 @@ import type { TourStep } from '@/components/tour/tour-types'
 
 export const WORKOUT_LOGGER_TOUR_ID = 'workout-logger'
 
+// Steps are ordered top-to-bottom by spatial position on screen so the
+// tour flows with the user's natural reading/interaction order:
+//   1. exercise nav header (top)
+//   2. info tab (just below the header)
+//   3. reps stepper (first form input)
+//   4. weight input (next form row, alongside optional RIR)
+//   5. log set button (footer)
+//   6. complete button (footer)
 export const WORKOUT_LOGGER_STEPS: TourStep[] = [
   {
     id: 'exercise-nav',
     targetSelector: '[data-tour="exercise-nav"]',
     title: 'NAVIGATE EXERCISES',
     body: 'Swipe left/right or use the arrows to move between exercises.',
+    placement: 'bottom',
+  },
+  {
+    id: 'info-tab',
+    targetSelector: '[data-tour="info-tab"]',
+    title: 'NEED HELP WITH FORM?',
+    body: 'The Info tab shows how to do the exercise and which muscles it works.',
     placement: 'bottom',
   },
   {
@@ -20,17 +35,9 @@ export const WORKOUT_LOGGER_STEPS: TourStep[] = [
   {
     id: 'weight-input',
     targetSelector: '[data-tour="weight-input"]',
-    title: 'ENTER WEIGHT',
-    body: 'Tap to open the keypad. Start lighter than you think.',
+    title: 'ENTER WEIGHT & EFFORT',
+    body: 'Tap to open the keypad for weight. If your program tracks effort (RIR), use the selector next to it — leave blank if unsure.',
     placement: 'top',
-  },
-  {
-    id: 'intensity-input',
-    targetSelector: '[data-tour="intensity-input"]',
-    title: 'RATE YOUR EFFORT (RIR)',
-    body: 'After your set, ask yourself: how many more reps could I have done? That number is your RIR. Leave blank if unsure.',
-    placement: 'top',
-    optional: true,
   },
   {
     id: 'log-set',
@@ -38,13 +45,6 @@ export const WORKOUT_LOGGER_STEPS: TourStep[] = [
     title: 'LOG YOUR SET',
     body: 'Tap after each set to save your reps, weight, and effort. Your program tells you how many sets to do.',
     placement: 'top',
-  },
-  {
-    id: 'info-tab',
-    targetSelector: '[data-tour="info-tab"]',
-    title: 'NEED HELP WITH FORM?',
-    body: 'The Info tab shows how to do the exercise and which muscles it works.',
-    placement: 'bottom',
   },
   {
     id: 'complete',
