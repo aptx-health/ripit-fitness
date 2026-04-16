@@ -99,7 +99,7 @@ export function WeightKeypad({
           onClick={handleExpand}
           className="w-full h-12 px-4 flex items-center justify-center
             bg-card border border-border
-            text-2xl font-bold text-foreground tabular-nums
+            text-4xl font-bold text-foreground tabular-nums leading-none
             hover:border-primary
             transition-all duration-75"
         >
@@ -123,7 +123,7 @@ export function WeightKeypad({
       <div
         className="w-full h-12 px-4 flex items-center justify-center
           bg-card border-2 border-primary
-          text-2xl font-bold text-foreground tabular-nums
+          text-4xl font-bold text-foreground tabular-nums leading-none
           shadow-[0_0_8px_rgba(var(--primary-rgb),0.2)]"
       >
         {value || '0'}
