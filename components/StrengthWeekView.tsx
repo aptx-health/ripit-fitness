@@ -17,6 +17,7 @@ import WorkoutCard from '@/components/workout/WorkoutCard'
 import { useUserSettings } from '@/hooks/useUserSettings'
 import { clientLogger } from '@/lib/client-logger'
 import { useDraftWorkout } from '@/lib/contexts/DraftWorkoutContext'
+import { shouldShowPrimer } from '@/lib/training/primer'
 import { TRAINING_PAGE_STEPS, TRAINING_PAGE_TOUR_ID } from '@/lib/tour/steps/training-page'
 import { POST_SESSION_COOLDOWN } from '@/types/feedback'
 
@@ -186,7 +187,13 @@ export default function StrengthWeekView({
   const resumeWorkoutId = searchParams.get('resume')
 
   // Contextual content triggers
-  const showPrimer = historyCount === 0 && !settings?.dismissedPrimer && !settingsLoading
+  // Primer gating lives in lib/training/primer.ts with its own unit tests to
+  // guard against accidental removal during tutorial reworks (see issue #485).
+  const showPrimer = shouldShowPrimer({
+    historyCount,
+    dismissedPrimer: settings?.dismissedPrimer ?? false,
+    settingsLoading,
+  })
   const showWarmup = historyCount < 4 && !settings?.dismissedWarmup
   const showStickNudge = historyCount >= 3 && historyCount <= 8 && !settings?.dismissedStickNudge && !settingsLoading
 
