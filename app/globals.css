@@ -2460,32 +2460,3 @@ body > [data-training-widget] {
   background: var(--muted);
   font-weight: 600;
 }
-
-/* ============================================
-   iOS PWA SAFE-AREA UTILITIES
-   ============================================
-   Apply env(safe-area-inset-bottom) only when running as an installed PWA
-   (display-mode: standalone). In a regular browser tab, the browser chrome
-   (URL bar / toolbar) sits above the home-indicator area, so no extra
-   padding is needed. In standalone mode the home indicator overlaps any
-   bottom-fixed/sticky UI, so we add the inset on top of the existing pb-N.
-
-   Usage: keep your existing `pb-N` (or `py-N`) class and add `pwa-pb-safe-N`
-   matching the same value. In browser mode the `pb-N` rule wins; in
-   standalone mode the `pwa-pb-safe-N` rule (defined later in the cascade)
-   wins and adds env(safe-area-inset-bottom) on top of the base.
-*/
-@media (display-mode: standalone) {
-  .pwa-pb-safe-0 {
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-  .pwa-pb-safe-2 {
-    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
-  }
-  .pwa-pb-safe-3 {
-    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
-  }
-  .pwa-pb-safe-4 {
-    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
-  }
-}

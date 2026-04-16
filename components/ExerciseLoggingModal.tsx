@@ -422,7 +422,7 @@ export default function ExerciseLoggingModal({
     <>
       <div className="fixed inset-0 z-50 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center">
         {/* Modal - Full screen on mobile, centered on desktop */}
-        <div className="bg-card w-full h-[100dvh] sm:h-[85vh] sm:max-h-[85vh] sm:max-w-2xl sm:border-2 sm:border-border sm:rounded-lg flex flex-col shadow-xl">
+        <div className="bg-card w-full h-[100dvh] sm:h-[85vh] sm:max-h-[85vh] sm:max-w-2xl sm:border-2 sm:border-border sm:rounded-lg flex flex-col shadow-xl pb-[env(safe-area-inset-bottom)]">
           {/* Header */}
           <ExerciseLoggingHeader
             currentExerciseIndex={currentIndex}
