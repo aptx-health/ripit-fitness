@@ -310,11 +310,11 @@ Seeing a professional isn't a sign you've done something wrong. It's what people
 
 If you're not sure whether something warrants a visit, it probably does. The cost of going is an hour of your time. The cost of not going is training through something that gets worse.
 
-## A note on soreness
+In the meantime, train the parts of your body that aren't complaining, and give the ones that are a session or two off.
 
-Regular soreness is not in the "see a doctor" category. A muscle that's sore from yesterday's workout and loosens up during your warm-up is fine to train. Soreness that feels sharp, localized to a joint, or that gets worse once you start moving is something else. The distinction takes a few weeks to feel out.
+---
 
-When in doubt, train the parts of your body that aren't complaining, and give the ones that are a session or two off.`,
+*This article is general guidance for training safely. It isn't medical advice. If something feels wrong and doesn't go away, see someone qualified who can actually examine what's going on.*`,
 }
 
 const gymEtiquette: ArticleDef = {
