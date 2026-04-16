@@ -75,10 +75,7 @@ export default function ExerciseActionsFooter({
   ]
 
   return (
-    // pwa-pb-safe-2 keeps `pb-2` in browser mode and adds env(safe-area-inset-bottom)
-    // in iOS PWA standalone mode so the home indicator doesn't overlap the buttons.
-    // See globals.css for the utility definition.
-    <div className="border-t border-border px-3 pt-2 pb-2 bg-card flex-shrink-0 pwa-pb-safe-2">
+    <div className="border-t border-border px-3 py-2 bg-card flex-shrink-0">
       <div className="flex items-center gap-2">
         {/* Log Set Button */}
         <button type="button"

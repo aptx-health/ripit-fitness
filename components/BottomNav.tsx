@@ -19,7 +19,7 @@ export default function BottomNav() {
       className="md:hidden fixed bottom-0 left-0 right-0 border-t-2 border-border bg-muted/95 backdrop-blur-sm"
       style={{
         zIndex: 40,
-        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 2px)',
       }}
       aria-label="Main navigation"
     >
@@ -38,7 +38,7 @@ export default function BottomNav() {
               aria-current={isActive ? 'page' : undefined}
             >
               <Icon className="h-5 w-5" />
-              <span className="text-[10px] font-medium">{label}</span>
+              <span className="text-[11px] font-medium">{label}</span>
             </Link>
           )
         })}
