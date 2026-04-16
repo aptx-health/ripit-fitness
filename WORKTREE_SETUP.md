@@ -28,7 +28,7 @@ cd cloud-functions/clone-program && npm install && cd ../..
 doppler run --config dev_personal -- npx prisma generate
 
 # 3. Start DB + app (skip redis/worker unless needed)
-DOPPLER_CONFIG=dev_personal_worktree1 overmind start -l postgres,app
+DOPPLER_CONFIG=dev_personal_worktree1 ./scripts/dev.sh start -l postgres,app
 ```
 
 The startup automatically:
@@ -40,8 +40,8 @@ The startup automatically:
 ### Primary Repo (no worktree)
 
 ```bash
-overmind start              # All services
-overmind start -l postgres,app   # Just DB + app
+./scripts/dev.sh                     # All services
+./scripts/dev.sh start -l postgres,app   # Just DB + app
 ```
 
 No `DOPPLER_CONFIG` needed — defaults to `dev_personal`.
@@ -57,9 +57,9 @@ No `DOPPLER_CONFIG` needed — defaults to `dev_personal`.
 
 ```bash
 # If you changed prisma/schema.prisma:
-doppler run --config dev_personal -- npx prisma db push   # or let overmind restart handle it
+doppler run --config dev_personal -- npx prisma db push   # or let dev.sh restart handle it
 doppler run --config dev_personal -- npx prisma generate
-overmind restart app
+overmind restart app   # if already running via dev.sh
 ```
 
 ## Running Multiple Worktrees Simultaneously
