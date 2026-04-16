@@ -2,7 +2,6 @@
 
 import { Check, ChevronDown, ChevronRight, Eye, SkipForward } from 'lucide-react'
 import { useState } from 'react'
-import SwipeableCard from '@/components/ui/SwipeableCard'
 
 type Workout = {
   id: string
@@ -91,29 +90,8 @@ export default function WorkoutCard({
         ? 'Unskip workout'
         : 'Log workout'
 
-  // Swipe actions (mobile) - only for non-completed, non-skipped workouts
-  const swipeActions = []
-  if (!isCompleted && !isSkipped) {
-    swipeActions.push({
-      label: 'Preview',
-      icon: <Eye size={18} />,
-      onClick: () => onView(workout.id),
-      className: 'bg-accent/20 text-accent hover:bg-accent/30',
-    })
-    if (!latestCompletion) {
-      swipeActions.push({
-        label: 'Skip',
-        icon: <SkipForward size={18} />,
-        onClick: () => onSkip(workout.id),
-        className: 'bg-muted-foreground/20 text-muted-foreground hover:bg-muted-foreground/30',
-      })
-    }
-  }
-  // Completed workouts don't need swipe - tap goes to review
-  // Skipped workouts don't need swipe - tap unskips
-
   return (
-    <SwipeableCard actions={swipeActions}>
+    <div>
       <button
         type="button"
         data-tour="workout-card"
@@ -203,6 +181,6 @@ export default function WorkoutCard({
           )}
         </div>
       )}
-    </SwipeableCard>
+    </div>
   )
 }
