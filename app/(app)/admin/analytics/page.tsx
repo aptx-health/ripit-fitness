@@ -138,26 +138,44 @@ export default function AdminAnalyticsPage() {
         {/* Time to First Workout */}
         {data.retention.timeToFirstWorkout && (
           <div className="mb-6">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-1">
               Time to First Workout (hours)
             </h3>
-            <div className="grid grid-cols-3 gap-4">
-              <MetricCard
-                label="Fast 25%"
-                value={data.retention.timeToFirstWorkout.p25}
-                info="p25 = '25th percentile.' The fastest quarter of users logged their first workout within this many hours of signing up. Think of it as 'the eager beavers got started this fast.'"
-              />
-              <MetricCard
-                label="Typical (Median)"
-                value={data.retention.timeToFirstWorkout.median}
-                info="The middle of the pack. Half of users logged their first workout faster than this, half slower. More useful than an average because it isn't thrown off by one person who signed up six months ago and finally logged today."
-              />
-              <MetricCard
-                label="Slow 25%"
-                value={data.retention.timeToFirstWorkout.p75}
-                info="p75 = '75th percentile.' Three quarters of users were faster than this. If this number is huge, a lot of people are signing up and then stalling before they ever lift — onboarding may need work."
-              />
-            </div>
+            <p className="text-xs text-muted-foreground mb-3">
+              Based on users who signed up in the last 90 days.
+              {' '}
+              <span className={
+                data.retention.timeToFirstWorkout.sampleSize < 5
+                  ? 'text-yellow-400 font-semibold'
+                  : ''
+              }>
+                n={data.retention.timeToFirstWorkout.sampleSize}
+              </span>
+            </p>
+            {data.retention.timeToFirstWorkout.sampleSize < 5 ? (
+              <p className="text-sm text-muted-foreground italic">
+                Insufficient data (n&lt;5). Percentiles are unreliable at this
+                sample size.
+              </p>
+            ) : (
+              <div className="grid grid-cols-3 gap-4">
+                <MetricCard
+                  label="Fast 25%"
+                  value={data.retention.timeToFirstWorkout.p25}
+                  info="p25 = '25th percentile.' The fastest quarter of users logged their first workout within this many hours of signing up. Think of it as 'the eager beavers got started this fast.'"
+                />
+                <MetricCard
+                  label="Typical (Median)"
+                  value={data.retention.timeToFirstWorkout.median}
+                  info="The middle of the pack. Half of users logged their first workout faster than this, half slower. More useful than an average because it isn't thrown off by one person who signed up six months ago and finally logged today."
+                />
+                <MetricCard
+                  label="Slow 25%"
+                  value={data.retention.timeToFirstWorkout.p75}
+                  info="p75 = '75th percentile.' Three quarters of users were faster than this. If this number is huge, a lot of people are signing up and then stalling before they ever lift — onboarding may need work."
+                />
+              </div>
+            )}
           </div>
         )}
 
@@ -167,7 +185,7 @@ export default function AdminAnalyticsPage() {
             7-Day Retention by Signup Cohort
           </h3>
           <p className="text-xs text-muted-foreground mb-3 max-w-2xl">
-            A "cohort" is a group of users who signed up in the same week. This
+            A &ldquo;cohort&rdquo; is a group of users who signed up in the same week. This
             shows: of the people who signed up N weeks ago, what percent are
             still lifting today? Retention in fitness apps is notoriously hard
             — 10–20% is respectable, 30%+ is great.

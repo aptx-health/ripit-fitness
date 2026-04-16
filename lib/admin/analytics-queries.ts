@@ -1,5 +1,14 @@
-import { prisma } from '@/lib/db'
+import { Prisma, type PrismaClient } from '@prisma/client'
+
+import { prisma as defaultPrisma } from '@/lib/db'
 import { logger } from '@/lib/logger'
+
+/**
+ * Alias so tests can pass a Testcontainers-bound PrismaClient without
+ * going through the `@/lib/db` singleton (which can't be rebound once
+ * its module has loaded).
+ */
+type Db = PrismaClient
 
 // ---- Helpers ----
 
@@ -23,6 +32,27 @@ function weeksAgo(n: number): Date {
   return d
 }
 
+// ---- Internal account filtering ----
+// Exclude staff accounts (admin/editor/author) from analytics to prevent
+// skewed metrics from dev, seed, and content-team accounts. Only role='user'
+// represents real end users.
+//
+// Note: The BetterAuth "user" table is not modeled in schema.prisma, so we
+// can't filter via Prisma ORM relations. All analytics queries therefore use
+// raw SQL with an INNER JOIN on "user" (or a subquery for tables with no
+// direct user relation) to apply the role filter.
+
+const END_USER_ROLE = 'user'
+
+/** SQL fragment: WHERE clause to restrict to end users on "user" aliased as u */
+const ONLY_END_USERS_ON_U = Prisma.sql`AND u.role = ${END_USER_ROLE}`
+
+/** SQL fragment: WHERE clause to restrict to end users on "user" table directly */
+const ONLY_END_USERS = Prisma.sql`AND role = ${END_USER_ROLE}`
+
+/** Only consider users who signed up within the last N days for time-to-first-workout */
+const SIGNUP_LOOKBACK_DAYS = 90
+
 // ---- Types ----
 
 export interface UsageMetrics {
@@ -40,7 +70,12 @@ export interface RetentionMetrics {
   wau: number
   mau: number
   retentionCohorts: RetentionCohort[]
-  timeToFirstWorkout: { median: number; p25: number; p75: number } | null
+  timeToFirstWorkout: {
+    median: number
+    p25: number
+    p75: number
+    sampleSize: number
+  } | null
   dropoutWatchlist: DropoutEntry[]
 }
 
@@ -82,49 +117,80 @@ export interface AnalyticsData {
 
 // ---- Queries ----
 
-async function getUsageMetrics(): Promise<UsageMetrics> {
+async function getUsageMetrics(db: Db): Promise<UsageMetrics> {
   const weekStart = startOfWeek()
   const lastWeekStart = weeksAgo(1)
 
-  // Parallel: user counts + workout counts
-  const [totalUsers, newSignups, thisWeek, lastWeek, allTime] = await Promise.all([
-    prisma.$queryRaw<[{ count: bigint }]>`
+  const fourWeeksAgo = weeksAgo(4)
+
+  // Parallel: user counts + workout counts (end users only; staff excluded).
+  // WorkoutCompletion queries use INNER JOIN on "user" to filter by role.
+  const [
+    totalUsers,
+    newSignups,
+    thisWeek,
+    lastWeek,
+    allTime,
+    totalStartedRows,
+    recentRows,
+  ] = await Promise.all([
+    db.$queryRaw<[{ count: bigint }]>`
       SELECT COUNT(*)::bigint as count FROM "user"
+      WHERE 1=1 ${ONLY_END_USERS}
     `,
-    prisma.$queryRaw<[{ count: bigint }]>`
+    db.$queryRaw<[{ count: bigint }]>`
       SELECT COUNT(*)::bigint as count FROM "user"
-      WHERE "createdAt" >= ${weekStart}
+      WHERE "createdAt" >= ${weekStart} ${ONLY_END_USERS}
     `,
-    prisma.workoutCompletion.count({
-      where: { status: 'completed', completedAt: { gte: weekStart } },
-    }),
-    prisma.workoutCompletion.count({
-      where: {
-        status: 'completed',
-        completedAt: { gte: lastWeekStart, lt: weekStart },
-      },
-    }),
-    prisma.workoutCompletion.count({
-      where: { status: 'completed' },
-    }),
+    db.$queryRaw<[{ count: bigint }]>`
+      SELECT COUNT(*)::bigint as count
+      FROM "WorkoutCompletion" wc
+      INNER JOIN "user" u ON u.id = wc."userId"
+      WHERE wc.status = 'completed' AND wc."completedAt" >= ${weekStart}
+      ${ONLY_END_USERS_ON_U}
+    `,
+    db.$queryRaw<[{ count: bigint }]>`
+      SELECT COUNT(*)::bigint as count
+      FROM "WorkoutCompletion" wc
+      INNER JOIN "user" u ON u.id = wc."userId"
+      WHERE wc.status = 'completed'
+        AND wc."completedAt" >= ${lastWeekStart}
+        AND wc."completedAt" < ${weekStart}
+      ${ONLY_END_USERS_ON_U}
+    `,
+    db.$queryRaw<[{ count: bigint }]>`
+      SELECT COUNT(*)::bigint as count
+      FROM "WorkoutCompletion" wc
+      INNER JOIN "user" u ON u.id = wc."userId"
+      WHERE wc.status = 'completed'
+      ${ONLY_END_USERS_ON_U}
+    `,
+    db.$queryRaw<[{ count: bigint }]>`
+      SELECT COUNT(*)::bigint as count
+      FROM "WorkoutCompletion" wc
+      INNER JOIN "user" u ON u.id = wc."userId"
+      WHERE wc.status IN ('completed', 'abandoned')
+      ${ONLY_END_USERS_ON_U}
+    `,
+    // Avg workouts per user per week (over last 4 weeks):
+    // rows are per-user completion counts.
+    db.$queryRaw<Array<{ userId: string; cnt: bigint }>>`
+      SELECT wc."userId" as "userId", COUNT(*)::bigint as cnt
+      FROM "WorkoutCompletion" wc
+      INNER JOIN "user" u ON u.id = wc."userId"
+      WHERE wc.status = 'completed' AND wc."completedAt" >= ${fourWeeksAgo}
+      ${ONLY_END_USERS_ON_U}
+      GROUP BY wc."userId"
+    `,
   ])
 
-  // Completion rate: completed / (completed + abandoned)
-  const totalStarted = await prisma.workoutCompletion.count({
-    where: { status: { in: ['completed', 'abandoned'] } },
-  })
-  const completionRate = totalStarted > 0 ? allTime / totalStarted : 0
+  const allTimeCount = Number(allTime[0].count)
+  const totalStarted = Number(totalStartedRows[0].count)
+  const completionRate = totalStarted > 0 ? allTimeCount / totalStarted : 0
 
-  // Avg workouts per user per week (over last 4 weeks)
-  const fourWeeksAgo = weeksAgo(4)
-  const recentCompletions = await prisma.workoutCompletion.groupBy({
-    by: ['userId'],
-    where: { status: 'completed', completedAt: { gte: fourWeeksAgo } },
-    _count: true,
-  })
-  const activeUserCount = recentCompletions.length
-  const totalRecentWorkouts = recentCompletions.reduce(
-    (sum, r) => sum + r._count,
+  const activeUserCount = recentRows.length
+  const totalRecentWorkouts = recentRows.reduce(
+    (sum, r) => sum + Number(r.cnt),
     0
   )
   const avgWorkoutsPerUserPerWeek =
@@ -133,15 +199,15 @@ async function getUsageMetrics(): Promise<UsageMetrics> {
   return {
     totalUsers: Number(totalUsers[0].count),
     newSignupsThisWeek: Number(newSignups[0].count),
-    workoutsCompletedThisWeek: thisWeek,
-    workoutsCompletedLastWeek: lastWeek,
-    workoutsCompletedAllTime: allTime,
+    workoutsCompletedThisWeek: Number(thisWeek[0].count),
+    workoutsCompletedLastWeek: Number(lastWeek[0].count),
+    workoutsCompletedAllTime: allTimeCount,
     avgWorkoutsPerUserPerWeek: Math.round(avgWorkoutsPerUserPerWeek * 10) / 10,
     completionRate: Math.round(completionRate * 100),
   }
 }
 
-async function getRetentionMetrics(): Promise<RetentionMetrics> {
+async function getRetentionMetrics(db: Db): Promise<RetentionMetrics> {
   // DAU / WAU / MAU in parallel.
   // INNER JOIN on "user" so we only count users that still exist
   // (guards against orphaned WorkoutCompletion rows from deleted/recreated users).
@@ -149,23 +215,26 @@ async function getRetentionMetrics(): Promise<RetentionMetrics> {
   const weekStart = daysAgo(7)
   const monthStart = daysAgo(30)
   const [dauRows, wauRows, mauRows] = await Promise.all([
-    prisma.$queryRaw<[{ count: bigint }]>`
+    db.$queryRaw<[{ count: bigint }]>`
       SELECT COUNT(DISTINCT wc."userId")::bigint as count
       FROM "WorkoutCompletion" wc
       INNER JOIN "user" u ON u.id = wc."userId"
       WHERE wc.status = 'completed' AND wc."completedAt" >= ${dayStart}
+      ${ONLY_END_USERS_ON_U}
     `,
-    prisma.$queryRaw<[{ count: bigint }]>`
+    db.$queryRaw<[{ count: bigint }]>`
       SELECT COUNT(DISTINCT wc."userId")::bigint as count
       FROM "WorkoutCompletion" wc
       INNER JOIN "user" u ON u.id = wc."userId"
       WHERE wc.status = 'completed' AND wc."completedAt" >= ${weekStart}
+      ${ONLY_END_USERS_ON_U}
     `,
-    prisma.$queryRaw<[{ count: bigint }]>`
+    db.$queryRaw<[{ count: bigint }]>`
       SELECT COUNT(DISTINCT wc."userId")::bigint as count
       FROM "WorkoutCompletion" wc
       INNER JOIN "user" u ON u.id = wc."userId"
       WHERE wc.status = 'completed' AND wc."completedAt" >= ${monthStart}
+      ${ONLY_END_USERS_ON_U}
     `,
   ])
   const dau = Number(dauRows[0].count)
@@ -178,9 +247,10 @@ async function getRetentionMetrics(): Promise<RetentionMetrics> {
     const cohortStart = weeksAgo(w)
     const cohortEnd = weeksAgo(w - 1)
 
-    const signups = await prisma.$queryRaw<[{ count: bigint }]>`
+    const signups = await db.$queryRaw<[{ count: bigint }]>`
       SELECT COUNT(*)::bigint as count FROM "user"
       WHERE "createdAt" >= ${cohortStart} AND "createdAt" < ${cohortEnd}
+      ${ONLY_END_USERS}
     `
     const signupCount = Number(signups[0].count)
     if (signupCount === 0) {
@@ -194,7 +264,7 @@ async function getRetentionMetrics(): Promise<RetentionMetrics> {
     }
 
     // Users from that cohort who completed a workout in the last 7 days
-    const activeFromCohort = await prisma.$queryRaw<[{ count: bigint }]>`
+    const activeFromCohort = await db.$queryRaw<[{ count: bigint }]>`
       SELECT COUNT(DISTINCT wc."userId")::bigint as count
       FROM "WorkoutCompletion" wc
       INNER JOIN "user" u ON u.id = wc."userId"
@@ -202,6 +272,7 @@ async function getRetentionMetrics(): Promise<RetentionMetrics> {
         AND u."createdAt" < ${cohortEnd}
         AND wc.status = 'completed'
         AND wc."completedAt" >= ${daysAgo(7)}
+        ${ONLY_END_USERS_ON_U}
     `
     const activeCount = Number(activeFromCohort[0].count)
 
@@ -215,9 +286,13 @@ async function getRetentionMetrics(): Promise<RetentionMetrics> {
   }
 
   // Time-to-first-workout distribution.
-  // Filter out rows where first completion predates user createdAt
-  // (can happen when a user is recreated / BetterAuth migration).
-  const timeToFirst = await prisma.$queryRaw<
+  // - Restrict to end-user accounts (exclude staff)
+  // - Only consider users who signed up in the last SIGNUP_LOOKBACK_DAYS days
+  //   (older accounts have already converted or churned)
+  // - Filter out rows where first completion predates user createdAt
+  //   (can happen when a user is recreated / BetterAuth migration)
+  const signupCutoff = daysAgo(SIGNUP_LOOKBACK_DAYS)
+  const timeToFirst = await db.$queryRaw<
     Array<{ hours: number }>
   >`
     SELECT EXTRACT(EPOCH FROM (
@@ -227,12 +302,15 @@ async function getRetentionMetrics(): Promise<RetentionMetrics> {
     INNER JOIN "WorkoutCompletion" wc ON wc."userId" = u.id
     WHERE wc.status = 'completed'
       AND wc."completedAt" >= u."createdAt"
+      AND u."createdAt" >= ${signupCutoff}
+      ${ONLY_END_USERS_ON_U}
     GROUP BY u.id, u."createdAt"
     ORDER BY hours
   `
 
   let timeToFirstWorkout: RetentionMetrics['timeToFirstWorkout'] = null
-  if (timeToFirst.length > 0) {
+  const sampleSize = timeToFirst.length
+  if (sampleSize > 0) {
     const hours = timeToFirst.map((r) => Number(r.hours))
     const p25Idx = Math.floor(hours.length * 0.25)
     const medIdx = Math.floor(hours.length * 0.5)
@@ -241,11 +319,12 @@ async function getRetentionMetrics(): Promise<RetentionMetrics> {
       p25: Math.round(hours[p25Idx] * 10) / 10,
       median: Math.round(hours[medIdx] * 10) / 10,
       p75: Math.round(hours[p75Idx] * 10) / 10,
+      sampleSize,
     }
   }
 
   // Dropout watchlist: users sorted by days since last workout (desc)
-  const dropouts = await prisma.$queryRaw<DropoutEntry[]>`
+  const dropouts = await db.$queryRaw<DropoutEntry[]>`
     SELECT
       u.id as "userId",
       u.email,
@@ -254,6 +333,7 @@ async function getRetentionMetrics(): Promise<RetentionMetrics> {
     FROM "user" u
     INNER JOIN "WorkoutCompletion" wc ON wc."userId" = u.id
     WHERE wc.status = 'completed'
+      ${ONLY_END_USERS_ON_U}
     GROUP BY u.id, u.email
     HAVING MAX(wc."completedAt") < ${daysAgo(3)}
     ORDER BY MAX(wc."completedAt") ASC
@@ -270,7 +350,7 @@ async function getRetentionMetrics(): Promise<RetentionMetrics> {
   }
 }
 
-async function getFunnelMetrics(): Promise<FunnelStep[]> {
+async function getFunnelMetrics(db: Db): Promise<FunnelStep[]> {
   // Funnel: signup -> program_activated -> workout_started -> workout_completed
   // Use AppEvent for funnel stages, with User.createdAt as fallback for signups
 
@@ -278,27 +358,31 @@ async function getFunnelMetrics(): Promise<FunnelStep[]> {
   // (prevents orphaned events/completions from inflating the funnel above 100%).
   const [signups, programActivated, workoutStarted, workoutCompleted] =
     await Promise.all([
-      prisma.$queryRaw<[{ count: bigint }]>`
+      db.$queryRaw<[{ count: bigint }]>`
       SELECT COUNT(DISTINCT id)::bigint as count FROM "user"
+      WHERE 1=1 ${ONLY_END_USERS}
     `,
-      prisma.$queryRaw<[{ count: bigint }]>`
+      db.$queryRaw<[{ count: bigint }]>`
       SELECT COUNT(DISTINCT e."userId")::bigint as count
       FROM "AppEvent" e
       INNER JOIN "user" u ON u.id = e."userId"
       WHERE e.event = 'program_activated'
+      ${ONLY_END_USERS_ON_U}
     `,
-      prisma.$queryRaw<[{ count: bigint }]>`
+      db.$queryRaw<[{ count: bigint }]>`
       SELECT COUNT(DISTINCT e."userId")::bigint as count
       FROM "AppEvent" e
       INNER JOIN "user" u ON u.id = e."userId"
       WHERE e.event = 'workout_started'
+      ${ONLY_END_USERS_ON_U}
     `,
       // Use WorkoutCompletion as source of truth for completed
-      prisma.$queryRaw<[{ count: bigint }]>`
+      db.$queryRaw<[{ count: bigint }]>`
       SELECT COUNT(DISTINCT wc."userId")::bigint as count
       FROM "WorkoutCompletion" wc
       INNER JOIN "user" u ON u.id = wc."userId"
       WHERE wc.status = 'completed'
+      ${ONLY_END_USERS_ON_U}
     `,
     ])
 
@@ -323,31 +407,36 @@ async function getFunnelMetrics(): Promise<FunnelStep[]> {
   }))
 }
 
-async function getFeedbackVolume(): Promise<FeedbackVolume[]> {
+async function getFeedbackVolume(db: Db): Promise<FeedbackVolume[]> {
   const weekStart = startOfWeek()
 
-  const feedback = await prisma.feedback.groupBy({
-    by: ['category'],
-    where: { createdAt: { gte: weekStart } },
-    _count: true,
-    orderBy: { _count: { category: 'desc' } },
-  })
+  // Use raw query to restrict to end-user feedback via subquery
+  // (Feedback model has no user relation for Prisma-level filtering)
+  const feedback = await db.$queryRaw<FeedbackVolume[]>`
+    SELECT f.category, COUNT(*)::int as count
+    FROM "Feedback" f
+    WHERE f."createdAt" >= ${weekStart}
+      AND f."userId" IN (
+        SELECT id FROM "user" WHERE role = ${END_USER_ROLE}
+      )
+    GROUP BY f.category
+    ORDER BY count DESC
+  `
 
-  return feedback.map((f) => ({
-    category: f.category,
-    count: f._count,
-  }))
+  return feedback
 }
 
 // ---- Main ----
 
-export async function getAnalyticsData(): Promise<AnalyticsData> {
+export async function getAnalyticsData(
+  db: Db = defaultPrisma,
+): Promise<AnalyticsData> {
   try {
     const [usage, retention, funnel, feedbackVolume] = await Promise.all([
-      getUsageMetrics(),
-      getRetentionMetrics(),
-      getFunnelMetrics(),
-      getFeedbackVolume(),
+      getUsageMetrics(db),
+      getRetentionMetrics(db),
+      getFunnelMetrics(db),
+      getFeedbackVolume(db),
     ])
 
     return {
