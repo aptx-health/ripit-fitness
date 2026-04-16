@@ -2,6 +2,8 @@
 
 Reference for writing and formatting articles in the Learn tab. Articles are stored as markdown in the database and rendered with `react-markdown` + `remark-gfm` + `rehype-raw`.
 
+For the mechanics of shipping a new article to staging and production (seed file + data migration pattern), see [`ADDING_LEARN_ARTICLES.md`](./ADDING_LEARN_ARTICLES.md).
+
 ## Markdown Features
 
 Standard markdown plus GitHub-Flavored Markdown (tables, strikethrough, task lists) is supported. Raw HTML is also supported via `rehype-raw`, which enables layout control beyond what plain markdown offers.

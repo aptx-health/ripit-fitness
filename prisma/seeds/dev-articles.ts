@@ -243,6 +243,80 @@ If your program includes dumbbells:
 - Breathe. Holding your breath through an entire set raises your blood pressure unnecessarily. Exhale during the hard part (pushing or pulling), inhale during the easy part (lowering)`,
 }
 
+const whenToStop: ArticleDef = {
+  title: 'When to Stop and When to Ask for Help',
+  slug: 'when-to-stop',
+  level: 'beginner',
+  readTimeMinutes: 4,
+  tags: ['Beginner Basics'],
+  body: `# When to Stop and When to Ask for Help
+
+"Staying Safe in the Gym" covered the basic distinction between pain and discomfort. This article goes one step further: when should you actually stop an exercise, stop the workout, or go see a professional?
+
+Most of what's below will never apply to you. Knowing the difference between something you can push through and something that needs attention is a skill worth having before you need it.
+
+## Things that feel weird but are fine
+
+Your first few weeks will include sensations you haven't felt before. Most of them are normal:
+
+- Soreness 24-48 hours after a workout, especially after new exercises
+- Muscles burning during the last few reps of a set
+- Arms or legs feeling shaky after a hard set
+- Feeling out of breath, sweaty, warm
+- Mild joint stiffness that loosens up during your warm-up
+- A muscle that feels pumped or tight after training it
+
+None of these need any action. Drink water, move around, eat something. By your next session it's gone.
+
+## Stop the exercise
+
+Some sensations are your body telling you that the specific movement isn't working today. When you feel any of these, stop the set, rack the weight, and move on to something else:
+
+**Sharp or sudden pain.** A sting, a pinch, or a jolt that wasn't there on the previous rep. This is different from muscle burn — it's sharper and it grabs your attention.
+
+**Pain in a joint.** Shoulders, knees, elbows, lower back. Muscles should work during an exercise. Joints should feel stable and quiet. If your shoulder aches every time you press overhead, that's your shoulder asking you to stop.
+
+**Numbness or tingling.** Hands or feet going numb, pins and needles down an arm or leg. This can be a nerve being pinched by your position. Adjust the machine or skip that exercise for the day.
+
+**An instinct to pull away.** Sometimes you feel a movement is wrong before you can describe why. Trust that. Stop the set.
+
+You don't need to diagnose what happened. Do the other exercises in your program, then try that one again next session with lighter weight or a different variation. If the same thing happens twice, leave it alone for a week and see how it feels later.
+
+## Stop the workout
+
+A few signals mean the whole session is over, not just the one exercise:
+
+**Chest tightness, pressure, or pain.** Especially if it spreads to your arm, jaw, or back. Stop training, sit down, and tell someone. If it doesn't pass in a few minutes, call for help. This isn't common in gyms but it's not zero.
+
+**Dizziness that doesn't pass.** A brief head rush when you stand up from a machine is normal. Dizziness that sticks around, or gets worse after you sit down, is not. Sit, drink water, and give yourself a few minutes. If it doesn't clear up, go home — and don't drive if you still feel off.
+
+**Nausea or feeling faint.** Cold sweat, tunnel vision, nausea that comes on suddenly. Same protocol: sit down, drink water, wait it out, head home if it doesn't resolve.
+
+**A sudden severe headache.** Especially one that comes on during a heavy set. Stop and give yourself time. If it's the worst headache you've ever had, that's an emergency room situation.
+
+Wrapping up early when something feels off is the right call. You'll train again tomorrow or the next day.
+
+## See a professional
+
+A few patterns are worth getting checked out by a doctor, physical therapist, or sports medicine provider:
+
+- Pain from an exercise that's still there a week later, outside the gym
+- Joint pain that gets worse session to session instead of better
+- A recurring issue — the same knee, the same shoulder — flaring up every time you train it
+- Any pain that changes how you walk, sleep, or move through normal daily things
+- Chest-related symptoms, even mild ones, if they keep showing up during training
+
+Seeing a professional isn't a sign you've done something wrong. It's what people who train seriously for decades do. A physical therapist can usually identify what's going on in a visit or two — often a mobility or form issue that's fixable, sometimes something that needs a different approach for a few weeks.
+
+If you're not sure whether something warrants a visit, it probably does. The cost of going is an hour of your time. The cost of not going is training through something that gets worse.
+
+In the meantime, train the parts of your body that aren't complaining, and give the ones that are a session or two off.
+
+---
+
+*This article is general guidance for training safely. It isn't medical advice. If something feels wrong and doesn't go away, see someone qualified who can actually examine what's going on.*`,
+}
+
 const gymEtiquette: ArticleDef = {
   title: 'Gym Etiquette: The Short Version',
   slug: 'gym-etiquette',
@@ -642,6 +716,7 @@ export const GETTING_STARTED_ARTICLES: ArticleDef[] = [
   choosingTheRightWeight,
   warmingUp,
   stayingSafe,
+  whenToStop,
   gymEtiquette,
 ]
 

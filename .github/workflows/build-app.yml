@@ -140,6 +140,12 @@ jobs:
       IMAGE: ${{ needs.build.outputs.image-tag }}
 
     steps:
+      - name: Checkout code
+        # Needed so the smoke test can read the migration SQL files and the
+        # scripts/smoke-test-learn-content.sh helper. The rest of the job
+        # runs against the built Docker image.
+        uses: actions/checkout@v4
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -186,6 +192,20 @@ jobs:
             -e DIRECT_URL="$DIRECT_URL" \
             "$IMAGE" \
             sh -c "./node_modules/.bin/prisma migrate deploy"
+
+      - name: Smoke test — learn-content article migration
+        # The previous `prisma migrate deploy` step ran all migrations against
+        # a fresh DB, which exercises the data migration's "skip when collection
+        # missing" branch. This step verifies the happy path: given minimal
+        # fixtures (collection, tag, baseline articles), the migration places
+        # the new article at the correct position, shifts successors, and is
+        # idempotent across repeated runs.
+        #
+        # See docs/ADDING_LEARN_ARTICLES.md for when to extend this for new
+        # article migrations.
+        env:
+          PGPASSWORD: postgres
+        run: ./scripts/smoke-test-learn-content.sh
 
       - name: Smoke test — sync-exercise-data (non-fatal)
         # sync-exercise-data only updates metadata/images on existing rows and
