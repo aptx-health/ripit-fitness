@@ -83,7 +83,7 @@ describe('Admin analytics — role-based filtering', () => {
     await seedFeedback(prisma, 'user-1', 'bug', 1)
 
     // Act
-    const data = await getAnalyticsData()
+    const data = await getAnalyticsData(prisma)
 
     // Assert: totalUsers counts only the 2 real users (not 5)
     expect(data.usage.totalUsers).toBe(2)
@@ -131,7 +131,7 @@ describe('Admin analytics — role-based filtering', () => {
     }
 
     // Act
-    const data = await getAnalyticsData()
+    const data = await getAnalyticsData(prisma)
 
     // Assert: timeToFirstWorkout is present with sampleSize=3, but the
     // frontend will show "insufficient data" because n<5.
@@ -158,7 +158,7 @@ describe('Admin analytics — role-based filtering', () => {
     }
 
     // Act
-    const data = await getAnalyticsData()
+    const data = await getAnalyticsData(prisma)
 
     // Assert: old user excluded. sampleSize = 5 (only new users).
     expect(data.retention.timeToFirstWorkout?.sampleSize).toBe(5)
