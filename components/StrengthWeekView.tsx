@@ -17,8 +17,8 @@ import WorkoutCard from '@/components/workout/WorkoutCard'
 import { useUserSettings } from '@/hooks/useUserSettings'
 import { clientLogger } from '@/lib/client-logger'
 import { useDraftWorkout } from '@/lib/contexts/DraftWorkoutContext'
-import { shouldShowPrimer } from '@/lib/training/primer'
 import { TRAINING_PAGE_STEPS, TRAINING_PAGE_TOUR_ID } from '@/lib/tour/steps/training-page'
+import { shouldShowPrimer } from '@/lib/training/primer'
 import { POST_SESSION_COOLDOWN } from '@/types/feedback'
 
 type Workout = {
