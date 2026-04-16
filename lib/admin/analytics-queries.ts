@@ -107,11 +107,42 @@ export interface FeedbackVolume {
   count: number
 }
 
+export interface SignupSourceBreakdown {
+  /** 'organic' | 'qr' | 'oauth' | 'unknown' (legacy signups w/o source prop) */
+  source: string
+  count: number
+}
+
+export interface PerGymSignup {
+  gymSlug: string
+  signupCount: number
+  /** Of the signups attributed to this gym, how many completed a workout */
+  firstWorkoutCount: number
+  /** firstWorkoutCount / signupCount as a 0–100 percent */
+  firstWorkoutPct: number
+}
+
+export interface QrFunnelStep {
+  step: string
+  count: number
+  /** Step-to-step conversion: this step vs. previous step (0 for first step) */
+  conversionPct: number
+}
+
+export interface SignupAttributionMetrics {
+  sourceBreakdown: SignupSourceBreakdown[]
+  perGym: PerGymSignup[]
+  qrFunnel: QrFunnelStep[]
+  /** Number of days the breakdown covers (currently the most recent 30 days). */
+  windowDays: number
+}
+
 export interface AnalyticsData {
   usage: UsageMetrics
   retention: RetentionMetrics
   funnel: FunnelStep[]
   feedbackVolume: FeedbackVolume[]
+  signupAttribution: SignupAttributionMetrics
   generatedAt: string
 }
 
@@ -426,24 +457,151 @@ async function getFeedbackVolume(db: Db): Promise<FeedbackVolume[]> {
   return feedback
 }
 
+async function getSignupAttributionMetrics(
+  db: Db
+): Promise<SignupAttributionMetrics> {
+  const windowDays = 30
+  const windowStart = daysAgo(windowDays)
+
+  // 1. Source breakdown over the window. Legacy signup_completed events
+  //    pre-#490 will have null properties — we coalesce them to 'unknown'
+  //    so the breakdown still totals up.
+  const sourceRows = await db.$queryRaw<
+    Array<{ source: string; count: bigint }>
+  >`
+    SELECT
+      COALESCE(NULLIF(e.properties->>'source', ''), 'unknown') as source,
+      COUNT(DISTINCT e."userId")::bigint as count
+    FROM "AppEvent" e
+    INNER JOIN "user" u ON u.id = e."userId"
+    WHERE e.event = 'signup_completed'
+      AND e."createdAt" >= ${windowStart}
+      ${ONLY_END_USERS_ON_U}
+    GROUP BY 1
+    ORDER BY count DESC
+  `
+  const sourceBreakdown: SignupSourceBreakdown[] = sourceRows.map((r) => ({
+    source: r.source,
+    count: Number(r.count),
+  }))
+
+  // 2. Per-gym signups + conversion to first workout. Joins back to
+  //    WorkoutCompletion to compute the conversion %.
+  const gymRows = await db.$queryRaw<
+    Array<{
+      gymSlug: string
+      signupCount: bigint
+      firstWorkoutCount: bigint
+    }>
+  >`
+    WITH gym_signups AS (
+      SELECT
+        e.properties->>'gymSlug' as "gymSlug",
+        e."userId" as "userId"
+      FROM "AppEvent" e
+      INNER JOIN "user" u ON u.id = e."userId"
+      WHERE e.event = 'signup_completed'
+        AND e."createdAt" >= ${windowStart}
+        AND e.properties->>'gymSlug' IS NOT NULL
+        AND e.properties->>'gymSlug' <> ''
+        ${ONLY_END_USERS_ON_U}
+    )
+    SELECT
+      gs."gymSlug" as "gymSlug",
+      COUNT(DISTINCT gs."userId")::bigint as "signupCount",
+      COUNT(DISTINCT wc."userId")::bigint as "firstWorkoutCount"
+    FROM gym_signups gs
+    LEFT JOIN "WorkoutCompletion" wc
+      ON wc."userId" = gs."userId"
+      AND wc.status = 'completed'
+    GROUP BY gs."gymSlug"
+    ORDER BY "signupCount" DESC, gs."gymSlug" ASC
+  `
+  const perGym: PerGymSignup[] = gymRows.map((r) => {
+    const signupCount = Number(r.signupCount)
+    const firstWorkoutCount = Number(r.firstWorkoutCount)
+    return {
+      gymSlug: r.gymSlug,
+      signupCount,
+      firstWorkoutCount,
+      firstWorkoutPct:
+        signupCount > 0
+          ? Math.round((firstWorkoutCount / signupCount) * 100)
+          : 0,
+    }
+  })
+
+  // 3. QR funnel: qr_landing_viewed → signup_started (source='qr') → signup_completed (source='qr')
+  //    Landing views can be from non-authenticated users if /go/[slug] is ever public —
+  //    today every event is auth-gated by /api/events, so we still INNER JOIN user.
+  const [landingViewed, signupStarted, signupCompleted] = await Promise.all([
+    db.$queryRaw<[{ count: bigint }]>`
+      SELECT COUNT(DISTINCT e."userId")::bigint as count
+      FROM "AppEvent" e
+      INNER JOIN "user" u ON u.id = e."userId"
+      WHERE e.event = 'qr_landing_viewed'
+        AND e."createdAt" >= ${windowStart}
+        ${ONLY_END_USERS_ON_U}
+    `,
+    db.$queryRaw<[{ count: bigint }]>`
+      SELECT COUNT(DISTINCT e."userId")::bigint as count
+      FROM "AppEvent" e
+      INNER JOIN "user" u ON u.id = e."userId"
+      WHERE e.event = 'signup_started'
+        AND e.properties->>'source' = 'qr'
+        AND e."createdAt" >= ${windowStart}
+        ${ONLY_END_USERS_ON_U}
+    `,
+    db.$queryRaw<[{ count: bigint }]>`
+      SELECT COUNT(DISTINCT e."userId")::bigint as count
+      FROM "AppEvent" e
+      INNER JOIN "user" u ON u.id = e."userId"
+      WHERE e.event = 'signup_completed'
+        AND e.properties->>'source' = 'qr'
+        AND e."createdAt" >= ${windowStart}
+        ${ONLY_END_USERS_ON_U}
+    `,
+  ])
+
+  const qrSteps = [
+    { step: 'QR Landing Viewed', count: Number(landingViewed[0].count) },
+    { step: 'Signup Started', count: Number(signupStarted[0].count) },
+    { step: 'Signup Completed', count: Number(signupCompleted[0].count) },
+  ]
+  const qrFunnel: QrFunnelStep[] = qrSteps.map((s, i) => ({
+    ...s,
+    conversionPct:
+      i === 0
+        ? 0
+        : qrSteps[i - 1].count > 0
+          ? Math.round((s.count / qrSteps[i - 1].count) * 100)
+          : 0,
+  }))
+
+  return { sourceBreakdown, perGym, qrFunnel, windowDays }
+}
+
 // ---- Main ----
 
 export async function getAnalyticsData(
   db: Db = defaultPrisma,
 ): Promise<AnalyticsData> {
   try {
-    const [usage, retention, funnel, feedbackVolume] = await Promise.all([
-      getUsageMetrics(db),
-      getRetentionMetrics(db),
-      getFunnelMetrics(db),
-      getFeedbackVolume(db),
-    ])
+    const [usage, retention, funnel, feedbackVolume, signupAttribution] =
+      await Promise.all([
+        getUsageMetrics(db),
+        getRetentionMetrics(db),
+        getFunnelMetrics(db),
+        getFeedbackVolume(db),
+        getSignupAttributionMetrics(db),
+      ])
 
     return {
       usage,
       retention,
       funnel,
       feedbackVolume,
+      signupAttribution,
       generatedAt: new Date().toISOString(),
     }
   } catch (error) {

@@ -139,6 +139,129 @@ describe('Admin analytics — role-based filtering', () => {
     expect(data.retention.timeToFirstWorkout?.sampleSize).toBe(3)
   })
 
+  describe('signup attribution metrics (#490)', () => {
+    it('breaks down signup_completed events by source', async () => {
+      const tenDaysAgo = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000)
+
+      // 2 organic signups, 1 qr signup, 1 oauth signup, 1 legacy (no source)
+      await seedUser(prisma, 'u-org-1', 'org1@test.com', 'user', tenDaysAgo)
+      await seedUser(prisma, 'u-org-2', 'org2@test.com', 'user', tenDaysAgo)
+      await seedUser(prisma, 'u-qr-1', 'qr1@test.com', 'user', tenDaysAgo)
+      await seedUser(prisma, 'u-oauth-1', 'oauth1@test.com', 'user', tenDaysAgo)
+      await seedUser(prisma, 'u-legacy-1', 'legacy@test.com', 'user', tenDaysAgo)
+      // Staff account — must be excluded even with valid source attribution
+      await seedUser(prisma, 'staff-1', 'staff@test.com', 'admin', tenDaysAgo)
+
+      await seedSignupEvent(prisma, 'u-org-1', { source: 'organic', method: 'email' })
+      await seedSignupEvent(prisma, 'u-org-2', { source: 'organic', method: 'email' })
+      await seedSignupEvent(prisma, 'u-qr-1', {
+        source: 'qr',
+        method: 'email',
+        gymSlug: 'iron-works',
+      })
+      await seedSignupEvent(prisma, 'u-oauth-1', { source: 'oauth', method: 'google' })
+      await seedSignupEvent(prisma, 'u-legacy-1', null)
+      await seedSignupEvent(prisma, 'staff-1', { source: 'qr', method: 'email', gymSlug: 'iron-works' })
+
+      const data = await getAnalyticsData(prisma)
+
+      const map = new Map(
+        data.signupAttribution.sourceBreakdown.map((s) => [s.source, s.count])
+      )
+      expect(map.get('organic')).toBe(2)
+      expect(map.get('qr')).toBe(1)
+      expect(map.get('oauth')).toBe(1)
+      expect(map.get('unknown')).toBe(1)
+      // Staff signup must NOT inflate any bucket
+      const total = data.signupAttribution.sourceBreakdown.reduce(
+        (sum, s) => sum + s.count,
+        0
+      )
+      expect(total).toBe(5)
+    })
+
+    it('rolls up per-gym signups with first-workout conversion', async () => {
+      const tenDaysAgo = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000)
+
+      // gymA: 3 signups, 2 completed a workout
+      // gymB: 1 signup, 0 completed
+      await seedUser(prisma, 'a1', 'a1@test.com', 'user', tenDaysAgo)
+      await seedUser(prisma, 'a2', 'a2@test.com', 'user', tenDaysAgo)
+      await seedUser(prisma, 'a3', 'a3@test.com', 'user', tenDaysAgo)
+      await seedUser(prisma, 'b1', 'b1@test.com', 'user', tenDaysAgo)
+
+      await seedSignupEvent(prisma, 'a1', { source: 'qr', method: 'email', gymSlug: 'gym-a' })
+      await seedSignupEvent(prisma, 'a2', { source: 'qr', method: 'email', gymSlug: 'gym-a' })
+      await seedSignupEvent(prisma, 'a3', { source: 'qr', method: 'email', gymSlug: 'gym-a' })
+      await seedSignupEvent(prisma, 'b1', { source: 'qr', method: 'email', gymSlug: 'gym-b' })
+
+      await seedCompletions(prisma, 'a1', 1, 'completed')
+      await seedCompletions(prisma, 'a2', 1, 'completed')
+      // a3 and b1 have not completed any workouts
+
+      const data = await getAnalyticsData(prisma)
+
+      const gymA = data.signupAttribution.perGym.find((g) => g.gymSlug === 'gym-a')
+      const gymB = data.signupAttribution.perGym.find((g) => g.gymSlug === 'gym-b')
+      expect(gymA?.signupCount).toBe(3)
+      expect(gymA?.firstWorkoutCount).toBe(2)
+      expect(gymA?.firstWorkoutPct).toBe(67)
+      expect(gymB?.signupCount).toBe(1)
+      expect(gymB?.firstWorkoutCount).toBe(0)
+      expect(gymB?.firstWorkoutPct).toBe(0)
+    })
+
+    it('renders cleanly with a single gym slug', async () => {
+      const tenDaysAgo = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000)
+      await seedUser(prisma, 'solo-1', 'solo@test.com', 'user', tenDaysAgo)
+      await seedSignupEvent(prisma, 'solo-1', {
+        source: 'qr',
+        method: 'email',
+        gymSlug: 'only-gym',
+      })
+
+      const data = await getAnalyticsData(prisma)
+      expect(data.signupAttribution.perGym).toHaveLength(1)
+      expect(data.signupAttribution.perGym[0].gymSlug).toBe('only-gym')
+    })
+
+    it('builds the QR funnel from landing → started → completed', async () => {
+      const tenDaysAgo = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000)
+
+      // 4 users hit the landing page; 3 click signup; 2 complete signup
+      for (let i = 1; i <= 4; i++) {
+        await seedUser(prisma, `qr-${i}`, `qr${i}@test.com`, 'user', tenDaysAgo)
+        await seedEventWithProps(prisma, `qr-${i}`, 'qr_landing_viewed', {
+          gymSlug: 'iron-works',
+        })
+      }
+      for (let i = 1; i <= 3; i++) {
+        await seedEventWithProps(prisma, `qr-${i}`, 'signup_started', {
+          source: 'qr',
+          method: 'email',
+          gymSlug: 'iron-works',
+        })
+      }
+      for (let i = 1; i <= 2; i++) {
+        await seedSignupEvent(prisma, `qr-${i}`, {
+          source: 'qr',
+          method: 'email',
+          gymSlug: 'iron-works',
+        })
+      }
+
+      const data = await getAnalyticsData(prisma)
+      const funnel = data.signupAttribution.qrFunnel
+      expect(funnel).toHaveLength(3)
+      expect(funnel[0].count).toBe(4)
+      expect(funnel[1].count).toBe(3)
+      expect(funnel[2].count).toBe(2)
+      // step-to-step
+      expect(funnel[1].conversionPct).toBe(75) // 3/4
+      expect(funnel[2].conversionPct).toBe(67) // 2/3
+    })
+  })
+
   it('caps time-to-first-workout to signups within the last 90 days', async () => {
     // Arrange: 1 old user (signed up 200 days ago, first workout 1 day ago)
     // and 5 recent users (signed up 10 days ago, first workout shortly after).
@@ -248,6 +371,35 @@ async function seedEvent(
 ): Promise<void> {
   await prisma.appEvent.create({
     data: { userId, event },
+  })
+}
+
+async function seedSignupEvent(
+  prisma: PrismaClient,
+  userId: string,
+  properties: Record<string, unknown> | null
+): Promise<void> {
+  await prisma.appEvent.create({
+    data: {
+      userId,
+      event: 'signup_completed',
+      properties: properties === null ? undefined : (properties as never),
+    },
+  })
+}
+
+async function seedEventWithProps(
+  prisma: PrismaClient,
+  userId: string,
+  event: string,
+  properties: Record<string, unknown>
+): Promise<void> {
+  await prisma.appEvent.create({
+    data: {
+      userId,
+      event,
+      properties: properties as never,
+    },
   })
 }
 

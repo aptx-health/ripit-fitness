@@ -9,6 +9,11 @@ import { OrDivider } from '@/components/features/auth/OrDivider'
 import { Button } from '@/components/ui/Button'
 import { flushEvents, trackEvent } from '@/lib/analytics'
 import { signUp } from '@/lib/auth-client'
+import {
+  clearAttribution,
+  getAttribution,
+  resolveSource,
+} from '@/lib/signup-attribution'
 
 export default function SignupPage() {
   const _router = useRouter()
@@ -34,6 +39,13 @@ export default function SignupPage() {
       setError('Password must be at least 6 characters')
       return
     }
+
+    // Capture attribution at submit time so QR/organic source is preserved
+    const attribution = getAttribution()
+    const source = resolveSource('email', attribution)
+    const startedProps: Record<string, unknown> = { source, method: 'email' }
+    if (attribution.gymSlug) startedProps.gymSlug = attribution.gymSlug
+    trackEvent('signup_started', startedProps)
 
     setLoading(true)
 
@@ -67,7 +79,13 @@ export default function SignupPage() {
       // BetterAuth signs in immediately after signup.
       // Use sendBeacon so the signup_completed event survives the
       // navigation to '/' that happens right after.
-      trackEvent('signup_completed')
+      const completedProps: Record<string, unknown> = {
+        source,
+        method: 'email',
+      }
+      if (attribution.gymSlug) completedProps.gymSlug = attribution.gymSlug
+      trackEvent('signup_completed', completedProps)
+      clearAttribution()
       await flushEvents(true)
       window.location.href = '/'
     } catch {
@@ -81,7 +99,7 @@ export default function SignupPage() {
       <div className="max-w-md w-full space-y-8 p-6 sm:p-8 bg-card rounded-lg shadow-lg border border-border">
         <AuthPageHeader />
 
-        <OAuthButtons />
+        <OAuthButtons intent="signup" />
 
         <OrDivider />
 
