@@ -53,6 +53,20 @@ function LoginForm() {
       <div className="max-w-md w-full space-y-8 p-6 sm:p-8 bg-card rounded-lg shadow-lg border border-border">
         <AuthPageHeader />
 
+        {/* Primary CTA for new users — most arrivals (especially via gym QR code) don't have an account yet */}
+        <div className="space-y-3">
+          <p className="text-center text-sm font-medium text-foreground">
+            New to Ripit?
+          </p>
+          <Link href="/signup" className="block">
+            <Button variant="primary" doom className="w-full" type="button">
+              Create Account
+            </Button>
+          </Link>
+        </div>
+
+        <OrDivider label="already have an account?" />
+
         <OAuthButtons />
 
         <OrDivider />
@@ -105,19 +119,12 @@ function LoginForm() {
             type="submit"
             disabled={loading}
             loading={loading}
-            variant="primary"
+            variant="outline"
             doom
             className="w-full"
           >
             Sign in
           </Button>
-
-          <p className="text-center text-sm text-muted-foreground">
-            Don&apos;t have an account?{' '}
-            <Link href="/signup" className="font-medium text-primary hover:text-primary-hover">
-              Sign up
-            </Link>
-          </p>
         </form>
       </div>
     </div>
