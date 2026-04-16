@@ -99,10 +99,6 @@ export default function SignupPage() {
       <div className="max-w-md w-full space-y-8 p-6 sm:p-8 bg-card rounded-lg shadow-lg border border-border">
         <AuthPageHeader />
 
-        <OAuthButtons intent="signup" />
-
-        <OrDivider />
-
         <form onSubmit={handleSignup} className="space-y-6">
           {error && (
             <div className="bg-error-muted border border-error-border text-error-text px-4 py-3 rounded">
@@ -181,14 +177,18 @@ export default function SignupPage() {
           >
             Sign up
           </Button>
-
-          <p className="text-center text-sm text-muted-foreground">
-            Already have an account?{' '}
-            <Link href="/login" className="font-medium text-primary hover:text-primary-hover">
-              Sign in
-            </Link>
-          </p>
         </form>
+
+        <OrDivider text="or sign up with" />
+
+        <OAuthButtons />
+
+        <p className="text-center text-sm text-muted-foreground">
+          Already have an account?{' '}
+          <Link href="/login" className="font-medium text-primary hover:text-primary-hover">
+            Sign in
+          </Link>
+        </p>
       </div>
     </div>
   )

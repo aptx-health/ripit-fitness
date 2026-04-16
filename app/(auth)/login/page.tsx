@@ -53,10 +53,6 @@ function LoginForm() {
       <div className="max-w-md w-full space-y-8 p-6 sm:p-8 bg-card rounded-lg shadow-lg border border-border">
         <AuthPageHeader />
 
-        <OAuthButtons />
-
-        <OrDivider />
-
         <form onSubmit={handleLogin} className="space-y-6">
           {error && (
             <div className="bg-error-muted border border-error-border text-error-text px-4 py-3 rounded">
@@ -111,14 +107,18 @@ function LoginForm() {
           >
             Sign in
           </Button>
-
-          <p className="text-center text-sm text-muted-foreground">
-            Don&apos;t have an account?{' '}
-            <Link href="/signup" className="font-medium text-primary hover:text-primary-hover">
-              Sign up
-            </Link>
-          </p>
         </form>
+
+        <OrDivider text="or sign in with" />
+
+        <OAuthButtons />
+
+        <p className="text-center text-sm text-muted-foreground">
+          Don&apos;t have an account?{' '}
+          <Link href="/signup" className="font-medium text-primary hover:text-primary-hover">
+            Sign up
+          </Link>
+        </p>
       </div>
     </div>
   )
