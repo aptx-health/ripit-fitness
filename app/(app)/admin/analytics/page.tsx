@@ -3,7 +3,10 @@
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 
-import type { AnalyticsData } from '@/lib/admin/analytics-queries'
+import type {
+  AnalyticsData,
+  SignupAttributionMetrics,
+} from '@/lib/admin/analytics-queries'
 
 export default function AdminAnalyticsPage() {
   const [data, setData] = useState<AnalyticsData | null>(null)
@@ -297,6 +300,11 @@ export default function AdminAnalyticsPage() {
         </div>
       </Section>
 
+      {/* Signup Attribution */}
+      <Section title={`Signup Sources (last ${data.signupAttribution.windowDays}d)`}>
+        <SignupAttributionPanel attribution={data.signupAttribution} />
+      </Section>
+
       {/* Feedback Volume */}
       <Section title="Feedback This Week">
         {data.feedbackVolume.length === 0 ? (
@@ -415,6 +423,168 @@ function RetentionBadge({ pct }: { pct: number }) {
   else if (pct >= 10) color = 'text-orange-400'
 
   return <span className={`font-semibold ${color}`}>{pct}%</span>
+}
+
+function SignupAttributionPanel({
+  attribution,
+}: {
+  attribution: SignupAttributionMetrics
+}) {
+  const totalAttributed = attribution.sourceBreakdown.reduce(
+    (sum, s) => sum + s.count,
+    0
+  )
+
+  return (
+    <div className="space-y-6">
+      {/* Source breakdown */}
+      <div>
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+          Source Breakdown
+        </h3>
+        <p className="text-xs text-muted-foreground mb-3">
+          Where signups came from. <code>qr</code> = scanned a gym code,{' '}
+          <code>oauth</code> = social provider, <code>organic</code> = direct
+          arrival, <code>unknown</code> = pre-#490 signups (no attribution
+          recorded).
+        </p>
+        {attribution.sourceBreakdown.length === 0 ? (
+          <p className="text-sm text-muted-foreground italic">
+            No signups in the window yet.
+          </p>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {attribution.sourceBreakdown.map((s) => (
+              <div
+                key={s.source}
+                className="bg-background border border-border rounded-lg p-3"
+              >
+                <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                  {s.source}
+                </div>
+                <div className="text-2xl font-bold text-foreground">
+                  {s.count}
+                </div>
+                {totalAttributed > 0 && (
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {Math.round((s.count / totalAttributed) * 100)}% of total
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Per-gym rollup */}
+      <div>
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+          Per-Gym Signups
+        </h3>
+        <p className="text-xs text-muted-foreground mb-3">
+          Signups attributed to a gym slug (via <code>/go/[slug]</code>) and how
+          many of those users completed at least one workout.
+        </p>
+        {attribution.perGym.length === 0 ? (
+          <p className="text-sm text-muted-foreground italic">
+            No gym-attributed signups yet.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left py-2 px-3 text-muted-foreground font-medium">
+                    Gym Slug
+                  </th>
+                  <th className="text-right py-2 px-3 text-muted-foreground font-medium">
+                    Signups
+                  </th>
+                  <th className="text-right py-2 px-3 text-muted-foreground font-medium">
+                    First Workout
+                  </th>
+                  <th className="text-right py-2 px-3 text-muted-foreground font-medium">
+                    Conversion
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {attribution.perGym.map((g) => (
+                  <tr
+                    key={g.gymSlug}
+                    className="border-b border-border/50"
+                  >
+                    <td className="py-2 px-3 text-foreground">{g.gymSlug}</td>
+                    <td className="py-2 px-3 text-right text-foreground">
+                      {g.signupCount}
+                    </td>
+                    <td className="py-2 px-3 text-right text-foreground">
+                      {g.firstWorkoutCount}
+                    </td>
+                    <td className="py-2 px-3 text-right">
+                      <RetentionBadge pct={g.firstWorkoutPct} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* QR funnel */}
+      <div>
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+          QR Landing Drop-off
+        </h3>
+        <p className="text-xs text-muted-foreground mb-3">
+          Of users who hit a <code>/go/[slug]</code> page, how many clicked
+          signup, and how many actually completed it.
+        </p>
+        <div className="space-y-2">
+          {attribution.qrFunnel.map((step, i) => (
+            <div key={step.step} className="flex items-center gap-3">
+              <div className="w-44 sm:w-52 text-sm text-foreground truncate">
+                {step.step}
+              </div>
+              <div className="flex-1 bg-background rounded-full h-6 overflow-hidden border border-border">
+                <div
+                  className="h-full bg-orange-600/60 rounded-full flex items-center justify-end pr-2"
+                  style={{
+                    width: `${
+                      attribution.qrFunnel[0].count > 0
+                        ? Math.min(
+                            100,
+                            Math.max(
+                              (step.count / attribution.qrFunnel[0].count) *
+                                100,
+                              5
+                            )
+                          )
+                        : 5
+                    }%`,
+                  }}
+                >
+                  <span className="text-xs font-semibold text-foreground">
+                    {step.count}
+                  </span>
+                </div>
+              </div>
+              <div className="w-14 text-right text-sm">
+                {i === 0 ? (
+                  <span className="text-muted-foreground">--</span>
+                ) : (
+                  <span className="text-orange-400 font-semibold">
+                    {step.conversionPct}%
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
 }
 
 function FunnelRow({

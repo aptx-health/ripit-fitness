@@ -1,15 +1,42 @@
 'use client'
 
 import { useState } from 'react'
+import { trackEvent } from '@/lib/analytics'
 import { signIn } from '@/lib/auth-client'
+import {
+  getAttribution,
+  resolveSource,
+  setPendingOAuthSignup,
+} from '@/lib/signup-attribution'
 
-export function OAuthButtons() {
+interface OAuthButtonsProps {
+  /**
+   * Distinguishes signup vs login surfaces. When `intent === 'signup'`
+   * we record a pending OAuth signup so the in-app tracker can fire
+   * `signup_completed` once BetterAuth establishes a session.
+   */
+  intent?: 'signup' | 'login'
+}
+
+export function OAuthButtons({ intent = 'login' }: OAuthButtonsProps = {}) {
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const handleOAuth = async (provider: 'google' | 'discord') => {
     setError(null)
     setLoadingProvider(provider)
+
+    if (intent === 'signup') {
+      const attribution = getAttribution()
+      const source = resolveSource(provider, attribution)
+      const startedProps: Record<string, unknown> = {
+        source,
+        method: provider,
+      }
+      if (attribution.gymSlug) startedProps.gymSlug = attribution.gymSlug
+      trackEvent('signup_started', startedProps)
+      setPendingOAuthSignup(provider, attribution)
+    }
 
     try {
       await signIn.social({
