@@ -128,7 +128,17 @@ $mig$;
 
 ### 3. Test the migration locally
 
-Against a seeded worktree DB (Collections must exist):
+The smoke test script `scripts/smoke-test-learn-content.sh` exercises the happy path, idempotency, and reorder correctness against minimal fixtures. It's the same script CI runs post-build. Quickest local check:
+
+```bash
+source scripts/worktree-env.sh
+DATABASE_URL="postgresql://postgres:postgres@localhost:${PG_PORT}/ripit" \
+  ./scripts/smoke-test-learn-content.sh
+```
+
+When you add a new article migration, update the script to also cover your new migration — either by extending the assertions (for position-specific checks) or by parameterizing `MIGRATION_SQL` and running it for both.
+
+For a manual check against a seeded worktree DB (Collections must exist):
 
 ```bash
 source scripts/worktree-env.sh
@@ -202,5 +212,7 @@ Use the migration pattern above only for **initial creation** of new articles. F
 | `prisma/schema.prisma` | `Article`, `Tag`, `ArticleTag`, `Collection`, `CollectionArticle` models |
 | `app/api/admin/articles/route.ts` | Admin API for creating articles via UI |
 | `app/(app)/admin/collections/page.tsx` | Admin UI for managing collection membership and order |
+| `scripts/smoke-test-learn-content.sh` | Smoke test for article migrations (runs in CI post-build and locally) |
+| `.github/workflows/build-app.yml` | CI smoke-test job that invokes the smoke-test script |
 | `docs/ARTICLE_AUTHORING.md` | Writing style, markdown features, AI-tropes to avoid |
 | `docs/article-review-feedback.md` | Review feedback on the existing 13 articles |
