@@ -29,6 +29,11 @@ function weeksAgo(n: number): Date {
 // Exclude staff accounts (admin/editor/author) from analytics to prevent
 // skewed metrics from dev, seed, and content-team accounts. Only role='user'
 // represents real end users.
+//
+// Note: The BetterAuth "user" table is not modeled in schema.prisma, so we
+// can't filter via Prisma ORM relations. All analytics queries therefore use
+// raw SQL with an INNER JOIN on "user" (or a subquery for tables with no
+// direct user relation) to apply the role filter.
 
 const END_USER_ROLE = 'user'
 
@@ -37,9 +42,6 @@ const ONLY_END_USERS_ON_U = Prisma.sql`AND u.role = ${END_USER_ROLE}`
 
 /** SQL fragment: WHERE clause to restrict to end users on "user" table directly */
 const ONLY_END_USERS = Prisma.sql`AND role = ${END_USER_ROLE}`
-
-/** Prisma where clause for filtering to end users only via ORM queries */
-const END_USER_FILTER = { user: { role: END_USER_ROLE } }
 
 /** Only consider users who signed up within the last N days for time-to-first-workout */
 const SIGNUP_LOOKBACK_DAYS = 90
@@ -112,8 +114,19 @@ async function getUsageMetrics(): Promise<UsageMetrics> {
   const weekStart = startOfWeek()
   const lastWeekStart = weeksAgo(1)
 
-  // Parallel: user counts + workout counts (end users only; staff excluded)
-  const [totalUsers, newSignups, thisWeek, lastWeek, allTime] = await Promise.all([
+  const fourWeeksAgo = weeksAgo(4)
+
+  // Parallel: user counts + workout counts (end users only; staff excluded).
+  // WorkoutCompletion queries use INNER JOIN on "user" to filter by role.
+  const [
+    totalUsers,
+    newSignups,
+    thisWeek,
+    lastWeek,
+    allTime,
+    totalStartedRows,
+    recentRows,
+  ] = await Promise.all([
     prisma.$queryRaw<[{ count: bigint }]>`
       SELECT COUNT(*)::bigint as count FROM "user"
       WHERE 1=1 ${ONLY_END_USERS}
@@ -122,37 +135,55 @@ async function getUsageMetrics(): Promise<UsageMetrics> {
       SELECT COUNT(*)::bigint as count FROM "user"
       WHERE "createdAt" >= ${weekStart} ${ONLY_END_USERS}
     `,
-    prisma.workoutCompletion.count({
-      where: { status: 'completed', completedAt: { gte: weekStart }, ...END_USER_FILTER },
-    }),
-    prisma.workoutCompletion.count({
-      where: {
-        status: 'completed',
-        completedAt: { gte: lastWeekStart, lt: weekStart },
-        ...END_USER_FILTER,
-      },
-    }),
-    prisma.workoutCompletion.count({
-      where: { status: 'completed', ...END_USER_FILTER },
-    }),
+    prisma.$queryRaw<[{ count: bigint }]>`
+      SELECT COUNT(*)::bigint as count
+      FROM "WorkoutCompletion" wc
+      INNER JOIN "user" u ON u.id = wc."userId"
+      WHERE wc.status = 'completed' AND wc."completedAt" >= ${weekStart}
+      ${ONLY_END_USERS_ON_U}
+    `,
+    prisma.$queryRaw<[{ count: bigint }]>`
+      SELECT COUNT(*)::bigint as count
+      FROM "WorkoutCompletion" wc
+      INNER JOIN "user" u ON u.id = wc."userId"
+      WHERE wc.status = 'completed'
+        AND wc."completedAt" >= ${lastWeekStart}
+        AND wc."completedAt" < ${weekStart}
+      ${ONLY_END_USERS_ON_U}
+    `,
+    prisma.$queryRaw<[{ count: bigint }]>`
+      SELECT COUNT(*)::bigint as count
+      FROM "WorkoutCompletion" wc
+      INNER JOIN "user" u ON u.id = wc."userId"
+      WHERE wc.status = 'completed'
+      ${ONLY_END_USERS_ON_U}
+    `,
+    prisma.$queryRaw<[{ count: bigint }]>`
+      SELECT COUNT(*)::bigint as count
+      FROM "WorkoutCompletion" wc
+      INNER JOIN "user" u ON u.id = wc."userId"
+      WHERE wc.status IN ('completed', 'abandoned')
+      ${ONLY_END_USERS_ON_U}
+    `,
+    // Avg workouts per user per week (over last 4 weeks):
+    // rows are per-user completion counts.
+    prisma.$queryRaw<Array<{ userId: string; cnt: bigint }>>`
+      SELECT wc."userId" as "userId", COUNT(*)::bigint as cnt
+      FROM "WorkoutCompletion" wc
+      INNER JOIN "user" u ON u.id = wc."userId"
+      WHERE wc.status = 'completed' AND wc."completedAt" >= ${fourWeeksAgo}
+      ${ONLY_END_USERS_ON_U}
+      GROUP BY wc."userId"
+    `,
   ])
 
-  // Completion rate: completed / (completed + abandoned)
-  const totalStarted = await prisma.workoutCompletion.count({
-    where: { status: { in: ['completed', 'abandoned'] }, ...END_USER_FILTER },
-  })
-  const completionRate = totalStarted > 0 ? allTime / totalStarted : 0
+  const allTimeCount = Number(allTime[0].count)
+  const totalStarted = Number(totalStartedRows[0].count)
+  const completionRate = totalStarted > 0 ? allTimeCount / totalStarted : 0
 
-  // Avg workouts per user per week (over last 4 weeks)
-  const fourWeeksAgo = weeksAgo(4)
-  const recentCompletions = await prisma.workoutCompletion.groupBy({
-    by: ['userId'],
-    where: { status: 'completed', completedAt: { gte: fourWeeksAgo }, ...END_USER_FILTER },
-    _count: true,
-  })
-  const activeUserCount = recentCompletions.length
-  const totalRecentWorkouts = recentCompletions.reduce(
-    (sum, r) => sum + r._count,
+  const activeUserCount = recentRows.length
+  const totalRecentWorkouts = recentRows.reduce(
+    (sum, r) => sum + Number(r.cnt),
     0
   )
   const avgWorkoutsPerUserPerWeek =
@@ -161,9 +192,9 @@ async function getUsageMetrics(): Promise<UsageMetrics> {
   return {
     totalUsers: Number(totalUsers[0].count),
     newSignupsThisWeek: Number(newSignups[0].count),
-    workoutsCompletedThisWeek: thisWeek,
-    workoutsCompletedLastWeek: lastWeek,
-    workoutsCompletedAllTime: allTime,
+    workoutsCompletedThisWeek: Number(thisWeek[0].count),
+    workoutsCompletedLastWeek: Number(lastWeek[0].count),
+    workoutsCompletedAllTime: allTimeCount,
     avgWorkoutsPerUserPerWeek: Math.round(avgWorkoutsPerUserPerWeek * 10) / 10,
     completionRate: Math.round(completionRate * 100),
   }
