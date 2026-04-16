@@ -1,12 +1,12 @@
 import { execSync } from 'node:child_process'
+import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql'
 import {
   GenericContainer,
   Network,
-  Wait,
   type StartedNetwork,
   type StartedTestContainer,
+  Wait,
 } from 'testcontainers'
-import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql'
 
 /**
  * Spins up Postgres + PgBouncer (transaction mode) in a shared Docker network.

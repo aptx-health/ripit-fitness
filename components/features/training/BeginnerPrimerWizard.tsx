@@ -3,8 +3,8 @@
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
-import { trackEvent } from '@/lib/analytics'
 import { useUserSettings } from '@/hooks/useUserSettings'
+import { trackEvent } from '@/lib/analytics'
 
 interface BeginnerPrimerWizardProps {
   open: boolean

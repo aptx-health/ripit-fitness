@@ -1,10 +1,10 @@
+import Redis from 'ioredis'
+import { NextResponse } from 'next/server'
 import {
-  RateLimiterRedis,
   RateLimiterMemory,
+  RateLimiterRedis,
   type RateLimiterRes,
 } from 'rate-limiter-flexible'
-import { NextResponse } from 'next/server'
-import Redis from 'ioredis'
 import { logger } from '@/lib/logger'
 
 // Lazy singleton Redis connection for rate limiting
