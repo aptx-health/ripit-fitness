@@ -4,6 +4,12 @@
 -- collection placement at position 6 (between "Staying Safe" and
 -- "Gym Etiquette"). Bumps subsequent articles by one position.
 --
+-- Article status: pending_review. Public /api/articles filters to status =
+-- 'published', so the article will not be user-visible until an admin
+-- reviews and publishes it via /admin/articles. This mirrors the
+-- editor-submitted workflow in app/api/admin/articles/route.ts and acts
+-- as a review gate for content reaching users.
+--
 -- Idempotent: safe to re-run. The reorder step only fires when the article
 -- is not yet in the collection, preventing repeated runs from shifting
 -- positions.
@@ -109,10 +115,10 @@ In the meantime, train the parts of your body that aren't complaining, and give 
 
 *This article is general guidance for training safely. It isn't medical advice. If something feels wrong and doesn't go away, see someone qualified who can actually examine what's going on.*$body$,
     'beginner'::"ArticleLevel",
-    'published'::"ArticleStatus",
+    'pending_review'::"ArticleStatus",
     'system',
     4,
-    NOW(),
+    NULL,  -- publishedAt: NULL while pending review; set by admin on approval
     NOW(),
     NOW()
   )

@@ -11,6 +11,23 @@ Adding an article to an environment that hasn't been seeded is one problem. Addi
 
 Every article PR should touch both. They're complementary, not redundant.
 
+## Publishing policy
+
+**Migration-inserted articles land as `pending_review`, not `published`.**
+
+The public `/api/articles` endpoint filters to `status = 'published'`. By inserting as `pending_review`, a new article shows up in the admin review queue at `/admin/articles` but stays invisible to users until an admin clicks Publish. This prevents automatically-added content from reaching end users without a human approval step.
+
+This is deliberate and should apply to every article migration going forward. The seed file (`dev-articles.ts`, used only in fresh dev/test/CI environments) uses `'published'` for developer convenience — the review gate is a staging/prod-only concern because the seed never reaches those environments.
+
+Practical flow after a migration deploys:
+
+1. Merge PR → CI builds image → staging deploys → migration runs → article lands as `pending_review`
+2. An admin opens `/admin/articles`, filters by status = pending_review, reviews the new article
+3. Admin clicks Publish; the admin PUT route sets `publishedAt = NOW()` and `status = 'published'`
+4. Article becomes visible to users
+
+If you need the article live immediately on deploy (bypassing review), escalate — don't change the migration to `'published'`. The review gate has value even for content you wrote yourself.
+
 ## Step-by-step
 
 ### 1. Write the article in `dev-articles.ts`
@@ -84,10 +101,11 @@ BEGIN
 
 Markdown body here.$body$,
     'beginner'::"ArticleLevel",
-    'published'::"ArticleStatus",
+    'pending_review'::"ArticleStatus",  -- review gate — see Publishing policy above
     'system',
     4,
-    NOW(), NOW(), NOW()
+    NULL,  -- publishedAt: NULL until admin reviews and publishes
+    NOW(), NOW()
   )
   ON CONFLICT (slug) DO NOTHING;
 
@@ -120,7 +138,7 @@ $mig$;
 | Field | Source | Notes |
 |-------|--------|-------|
 | `level` | enum `ArticleLevel` | `beginner` \| `intermediate` \| `advanced`. Cast as `'beginner'::"ArticleLevel"` |
-| `status` | enum `ArticleStatus` | `draft` \| `pending_review` \| `published` \| `rejected`. Use `'published'` for seed/migration inserts |
+| `status` | enum `ArticleStatus` | `draft` \| `pending_review` \| `published` \| `rejected`. Seed uses `'published'` (dev convenience). Migrations use `'pending_review'` (review gate — see Publishing policy) |
 | `authorId` | text | Use `'system'` for seeded content. Admin-UI content uses a real user ID |
 | `category` (Tag) | enum `TagCategory` | Seeds use `'topic'`. Match when looking up tag IDs |
 | `Collection.displayOrder` | int | Position of the collection itself on the Learn tab |

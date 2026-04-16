@@ -121,6 +121,15 @@ RESULT=$(query "
 ")
 assert_eq "$RESULT" "1" "Beginner Basics tag linked to when-to-stop"
 
+# Enforce review-gate policy: migration-inserted articles must land in
+# pending_review so an admin approves them before they reach users. The
+# public /api/articles endpoint filters to status = 'published'.
+RESULT=$(query "SELECT status FROM \"Article\" WHERE slug = 'when-to-stop';")
+assert_eq "$RESULT" "pending_review" "when-to-stop inserted as pending_review (review gate)"
+
+RESULT=$(query "SELECT \"publishedAt\" IS NULL FROM \"Article\" WHERE slug = 'when-to-stop';")
+assert_eq "$RESULT" "t" "publishedAt is NULL while pending review"
+
 echo "=== Running migration (second pass, idempotency) ==="
 run_sql -f "$MIGRATION_SQL" > /dev/null
 run_sql -f "$MIGRATION_SQL" > /dev/null
