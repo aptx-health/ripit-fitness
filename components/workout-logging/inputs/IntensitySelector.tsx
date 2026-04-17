@@ -34,7 +34,7 @@ export function IntensitySelector({
   if (!isExpanded) {
     return (
       <div data-tour="intensity-input">
-        <span className="block text-xs text-muted-foreground mb-1 font-bold uppercase tracking-wider">
+        <span className="block text-sm text-muted-foreground mb-1 font-bold uppercase tracking-wider">
           {label}
         </span>
         <button
@@ -45,7 +45,7 @@ export function IntensitySelector({
             hover:border-primary
             transition-all duration-75"
         >
-          <span className="text-4xl font-bold text-foreground tabular-nums leading-none">
+          <span className="text-2xl font-bold text-foreground tabular-nums">
             {value || '--'}
           </span>
         </button>
@@ -56,7 +56,7 @@ export function IntensitySelector({
   // Expanded view with preset grid
   return (
     <div>
-      <span className="block text-xs text-muted-foreground mb-1 font-bold uppercase tracking-wider">
+      <span className="block text-sm text-muted-foreground mb-1 font-bold uppercase tracking-wider">
         {label}
       </span>
 

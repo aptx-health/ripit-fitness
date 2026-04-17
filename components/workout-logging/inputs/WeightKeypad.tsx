@@ -91,7 +91,7 @@ export function WeightKeypad({
   if (!isExpanded) {
     return (
       <div data-tour="weight-input">
-        <span className="block text-xs text-muted-foreground mb-1 font-bold uppercase tracking-wider">
+        <span className="block text-sm text-muted-foreground mb-1 font-bold uppercase tracking-wider">
           WEIGHT ({weightUnit.toUpperCase()})
         </span>
         <button
@@ -99,7 +99,7 @@ export function WeightKeypad({
           onClick={handleExpand}
           className="w-full h-12 px-4 flex items-center justify-center
             bg-card border border-border
-            text-4xl font-bold text-foreground tabular-nums leading-none
+            text-2xl font-bold text-foreground tabular-nums
             hover:border-primary
             transition-all duration-75"
         >
@@ -115,7 +115,7 @@ export function WeightKeypad({
   // Expanded view with keypad - mt-auto pushes to bottom of flex container
   return (
     <div className="mt-auto">
-      <span className="block text-xs text-muted-foreground mb-1 font-bold uppercase tracking-wider">
+      <span className="block text-sm text-muted-foreground mb-1 font-bold uppercase tracking-wider">
         WEIGHT ({weightUnit.toUpperCase()})
       </span>
 
@@ -123,7 +123,7 @@ export function WeightKeypad({
       <div
         className="w-full h-12 px-4 flex items-center justify-center
           bg-card border-2 border-primary
-          text-4xl font-bold text-foreground tabular-nums leading-none
+          text-2xl font-bold text-foreground tabular-nums
           shadow-[0_0_8px_rgba(var(--primary-rgb),0.2)]"
       >
         {value || '0'}

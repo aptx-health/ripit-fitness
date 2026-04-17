@@ -25,7 +25,7 @@ export function RepsStepper({ value, onChange, placeholder }: RepsStepperProps) 
 
   return (
     <div data-tour="reps-stepper">
-      <span className="block text-xs text-muted-foreground mb-1 font-bold uppercase tracking-wider">
+      <span className="block text-sm text-muted-foreground mb-1 font-bold uppercase tracking-wider">
         REPS
       </span>
       <div className="flex items-center">
@@ -47,10 +47,10 @@ export function RepsStepper({ value, onChange, placeholder }: RepsStepperProps) 
         <div
           className="flex-1 h-12 flex items-center justify-center
             bg-card border-y border-border
-            text-4xl font-bold text-foreground tabular-nums leading-none min-w-[60px]"
+            text-2xl font-bold text-foreground tabular-nums min-w-[60px]"
         >
           {hasValue ? numericValue : (
-            <span className="text-muted-foreground text-3xl">
+            <span className="text-muted-foreground text-lg">
               {placeholder || '0'}
             </span>
           )}
