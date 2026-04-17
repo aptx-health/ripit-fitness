@@ -106,6 +106,12 @@ for f in "$SEEDS_DIR"/0[0-8]_*.sql; do
 done
 echo "Exercise definitions seeded"
 
+# Seed curated community programs (idempotent — skips if already present)
+echo "Seeding community programs..."
+DATABASE_URL="$LOCAL_DB_URL" DIRECT_URL="$LOCAL_DB_URL" \
+  npx ts-node --compiler-options '{"module":"CommonJS","types":["node"]}' "$SEEDS_DIR/curated/seed-community-programs.ts" 2>&1
+echo "Community programs seeded"
+
 # Seed dev content (program, workout history, learning articles)
 echo "Seeding dev content..."
 DATABASE_URL="$LOCAL_DB_URL" DIRECT_URL="$LOCAL_DB_URL" \
