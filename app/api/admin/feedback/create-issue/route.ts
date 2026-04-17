@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { logger } from '@/lib/logger'
+import { adminLimiter, checkRateLimit } from '@/lib/rate-limit'
 
 const GITHUB_REPO = 'aptx-health/ripit-fitness'
 
@@ -18,6 +19,9 @@ export async function POST(request: NextRequest) {
     if (error || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const limited = await checkRateLimit(adminLimiter, user.id)
+    if (limited) return limited
 
     const token = process.env.GH_ISSUE_TOKEN
     if (!token) {

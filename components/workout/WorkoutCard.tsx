@@ -1,8 +1,6 @@
 'use client'
 
-import { Check, ChevronDown, ChevronRight, Eye, SkipForward } from 'lucide-react'
-import { useState } from 'react'
-import SwipeableCard from '@/components/ui/SwipeableCard'
+import { Check, ChevronDown, ChevronRight, Play, SkipForward } from 'lucide-react'
 
 type Workout = {
   id: string
@@ -20,23 +18,25 @@ type Workout = {
 
 type Props = {
   workout: Workout
+  expanded: boolean
   isSkipping: boolean
   isLoading: boolean
   isUnskipping: boolean
+  onToggle: (workoutId: string) => void
   onSkip: (workoutId: string) => void
   onUnskip: (workoutId: string) => void
-  onView: (workoutId: string) => void
   onLog: (workoutId: string) => void
 }
 
 export default function WorkoutCard({
   workout,
+  expanded,
   isSkipping,
   isLoading,
   isUnskipping,
+  onToggle,
   onSkip,
   onUnskip,
-  onView,
   onLog,
 }: Props) {
   const latestCompletion = workout.completions[0]
@@ -44,25 +44,18 @@ export default function WorkoutCard({
   const isDraft = latestCompletion?.status === 'draft'
   const isSkipped = latestCompletion?.status === 'skipped'
   const hasActions = !isCompleted && !isSkipped
-  const [expanded, setExpanded] = useState(false)
 
-  // Primary tap action based on state
+  // Tap row to expand/collapse for actionable workouts, or unskip
   const handleCardTap = () => {
     if (isLoading || isSkipping || isUnskipping) return
     if (isSkipped) {
       onUnskip(workout.id)
-    } else if (isCompleted) {
-      onView(workout.id)
-    } else {
-      onLog(workout.id)
+    } else if (hasActions) {
+      onToggle(workout.id)
     }
   }
 
-  // Click chevron to expand action row
-  const handleChevronClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    setExpanded(!expanded)
-  }
+  const isInteractive = hasActions || isSkipped
 
   // Status bar color (left border)
   const borderColor = isCompleted
@@ -84,43 +77,23 @@ export default function WorkoutCard({
 
   // Primary action label for screen readers
   const actionLabel = isCompleted
-    ? 'Review workout'
+    ? 'Completed workout'
     : isDraft
-      ? 'Continue workout'
+      ? expanded ? 'Collapse actions' : 'Expand actions to continue workout'
       : isSkipped
         ? 'Unskip workout'
-        : 'Log workout'
-
-  // Swipe actions (mobile) - only for non-completed, non-skipped workouts
-  const swipeActions = []
-  if (!isCompleted && !isSkipped) {
-    swipeActions.push({
-      label: 'Preview',
-      icon: <Eye size={18} />,
-      onClick: () => onView(workout.id),
-      className: 'bg-accent/20 text-accent hover:bg-accent/30',
-    })
-    if (!latestCompletion) {
-      swipeActions.push({
-        label: 'Skip',
-        icon: <SkipForward size={18} />,
-        onClick: () => onSkip(workout.id),
-        className: 'bg-muted-foreground/20 text-muted-foreground hover:bg-muted-foreground/30',
-      })
-    }
-  }
-  // Completed workouts don't need swipe - tap goes to review
-  // Skipped workouts don't need swipe - tap unskips
+        : expanded ? 'Collapse actions' : 'Expand actions'
 
   return (
-    <SwipeableCard actions={swipeActions}>
+    <div>
       <button
         type="button"
         data-tour="workout-card"
         onClick={handleCardTap}
         disabled={isLoading || isSkipping || isUnskipping}
         aria-label={`${actionLabel}: Day ${workout.dayNumber} ${workout.name}`}
-        className={`w-full text-left border-l-4 ${borderColor} ${stateClass} px-4 py-3 transition-all hover:bg-muted/50 active:bg-muted/70 disabled:opacity-60 doom-focus-ring`}
+        aria-expanded={hasActions ? expanded : undefined}
+        className={`w-full text-left border-l-4 ${borderColor} ${stateClass} px-4 py-3 transition-all ${isInteractive ? 'hover:bg-muted/50 active:bg-muted/70 cursor-pointer' : 'cursor-default'} disabled:opacity-60 doom-focus-ring`}
       >
         <div className="flex items-center gap-3">
           {/* Content */}
@@ -163,15 +136,9 @@ export default function WorkoutCard({
             {(isLoading || isSkipping || isUnskipping) ? (
               <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
             ) : hasActions ? (
-              <button
-                type="button"
-                onClick={handleChevronClick}
-                className="p-1 text-muted-foreground hover:text-foreground transition-colors doom-focus-ring"
-                aria-label={expanded ? 'Collapse actions' : 'Expand actions'}
-                aria-expanded={expanded}
-              >
+              <span className="p-1 text-muted-foreground">
                 {expanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-              </button>
+              </span>
             ) : (
               <ChevronRight size={18} className="text-muted-foreground" />
             )}
@@ -181,21 +148,21 @@ export default function WorkoutCard({
 
       {/* Expanded action row */}
       {expanded && hasActions && (
-        <div className="flex items-center gap-3 px-4 py-2 border-t border-border bg-muted/30">
+        <div className="flex flex-col gap-2 px-4 py-3 border-t border-border bg-muted/30">
           <button
             type="button"
-            onClick={() => { onView(workout.id); setExpanded(false) }}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground font-medium transition-colors"
+            onClick={() => onLog(workout.id)}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary text-primary-foreground hover:bg-primary-hover font-bold uppercase tracking-wider text-sm transition-colors doom-focus-ring"
           >
-            <Eye size={14} />
-            Preview
+            <Play size={16} />
+            {isDraft ? 'Continue Workout' : 'Start Workout'}
           </button>
           {!latestCompletion && (
             <button
               type="button"
-              onClick={() => { onSkip(workout.id); setExpanded(false) }}
+              onClick={() => onSkip(workout.id)}
               disabled={isSkipping}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground font-medium transition-colors disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-secondary text-secondary-foreground hover:bg-secondary-hover font-semibold uppercase tracking-wider text-sm transition-colors doom-focus-ring disabled:opacity-50"
             >
               <SkipForward size={14} />
               Skip
@@ -203,6 +170,6 @@ export default function WorkoutCard({
           )}
         </div>
       )}
-    </SwipeableCard>
+    </div>
   )
 }

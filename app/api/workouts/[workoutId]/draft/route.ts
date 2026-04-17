@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { recordEvent } from '@/lib/events'
 import { logger } from '@/lib/logger'
 import { checkRateLimit, setLoggingLimiter } from '@/lib/rate-limit'
 
@@ -132,7 +133,8 @@ export async function POST(
       const currentSetCount = existingDraft?.loggedSets?.length || 0
       
       // Create or update draft completion
-      const draftCompletion = existingDraft 
+      const isNewDraft = !existingDraft
+      const draftCompletion = existingDraft
         ? await tx.workoutCompletion.update({
             where: { id: existingDraft.id },
             data: { completedAt: new Date() }
@@ -184,15 +186,19 @@ export async function POST(
         })
       }
 
-      return draftCompletion
+      return { draftCompletion, isNewDraft }
     })
+
+    if (result.isNewDraft) {
+      recordEvent(user.id, 'workout_started', { workoutId })
+    }
 
     return NextResponse.json({
       success: true,
       draft: {
-        id: result.id,
-        lastUpdated: result.completedAt,
-        status: result.status,
+        id: result.draftCompletion.id,
+        lastUpdated: result.draftCompletion.completedAt,
+        status: result.draftCompletion.status,
         setsCount: loggedSets.length,
       },
     })

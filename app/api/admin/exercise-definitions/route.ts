@@ -23,7 +23,7 @@ import {
  */
 export async function GET(request: NextRequest) {
   try {
-    const auth = await requireEditor()
+    const auth = await requireEditor({ rateLimit: true })
     if (auth.response) return auth.response
 
     const { searchParams } = new URL(request.url)
@@ -181,7 +181,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const auth = await requireEditor()
+    const auth = await requireEditor({ rateLimit: true })
     if (auth.response) return auth.response
     const user = auth.user
 

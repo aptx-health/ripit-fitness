@@ -91,7 +91,7 @@ export function WeightKeypad({
   if (!isExpanded) {
     return (
       <div data-tour="weight-input">
-        <span className="block text-xs text-muted-foreground mb-1 font-bold uppercase tracking-wider">
+        <span className="block text-sm text-muted-foreground mb-1 font-bold uppercase tracking-wider">
           WEIGHT ({weightUnit.toUpperCase()})
         </span>
         <button
@@ -115,7 +115,7 @@ export function WeightKeypad({
   // Expanded view with keypad - mt-auto pushes to bottom of flex container
   return (
     <div className="mt-auto">
-      <span className="block text-xs text-muted-foreground mb-1 font-bold uppercase tracking-wider">
+      <span className="block text-sm text-muted-foreground mb-1 font-bold uppercase tracking-wider">
         WEIGHT ({weightUnit.toUpperCase()})
       </span>
 

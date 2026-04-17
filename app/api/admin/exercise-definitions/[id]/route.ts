@@ -18,7 +18,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const auth = await requireEditor()
+    const auth = await requireEditor({ rateLimit: true })
     if (auth.response) return auth.response
     const user = auth.user
 
@@ -88,7 +88,7 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params
-    const auth = await requireEditor()
+    const auth = await requireEditor({ rateLimit: true })
     if (auth.response) return auth.response
     const user = auth.user
 
@@ -218,7 +218,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
-    const auth = await requireEditor()
+    const auth = await requireEditor({ rateLimit: true })
     if (auth.response) return auth.response
     const user = auth.user
 

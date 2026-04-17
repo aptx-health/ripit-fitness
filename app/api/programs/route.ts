@@ -2,6 +2,11 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { logger } from '@/lib/logger'
+import {
+  checkRateLimitWithHeaders,
+  programManagementLimiter,
+  withRateLimitHeaders,
+} from '@/lib/rate-limit'
 
 type CreateProgramRequest = {
   name: string
@@ -17,6 +22,11 @@ export async function POST(request: NextRequest) {
     if (error || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const rl = await checkRateLimitWithHeaders(programManagementLimiter, user.id, {
+      endpoint: 'POST /api/programs',
+    })
+    if (rl.response) return rl.response
 
     // Parse request body
     const body = await request.json() as CreateProgramRequest
@@ -54,10 +64,13 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    return NextResponse.json({
-      success: true,
-      program
-    })
+    return withRateLimitHeaders(
+      NextResponse.json({
+        success: true,
+        program,
+      }),
+      rl
+    )
   } catch (error) {
     logger.error({ error, context: 'program-create' }, 'Failed to create program')
     return NextResponse.json(

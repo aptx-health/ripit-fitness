@@ -4,6 +4,7 @@ import { generateCopyName } from '@/lib/copy-name'
 import { prisma } from '@/lib/db'
 import { batchInsertWeek } from '@/lib/db/batch-insert'
 import { logger } from '@/lib/logger'
+import { checkRateLimit, programManagementLimiter } from '@/lib/rate-limit'
 
 export async function POST(
   _request: NextRequest,
@@ -18,6 +19,9 @@ export async function POST(
     if (error || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const limited = await checkRateLimit(programManagementLimiter, user.id)
+    if (limited) return limited
 
     // Fetch the complete program with all nested relations
     const originalProgram = await prisma.program.findUnique({

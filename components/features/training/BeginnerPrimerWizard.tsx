@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
 import { useUserSettings } from '@/hooks/useUserSettings'
+import { trackEvent } from '@/lib/analytics'
 
 interface BeginnerPrimerWizardProps {
   open: boolean
@@ -102,6 +103,7 @@ export function BeginnerPrimerWizard({ open, onDismiss }: BeginnerPrimerWizardPr
     setDismissing(true)
     try {
       await updateSettings({ dismissedPrimer: true })
+      trackEvent('primer_dismissed', { page_reached: currentPage + 1 })
       onDismiss()
     } catch {
       setDismissing(false)

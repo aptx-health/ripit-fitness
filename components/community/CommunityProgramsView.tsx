@@ -41,6 +41,22 @@ type CommunityProgramsViewProps = {
 
 const ITEMS_PER_PAGE = 20
 
+// Sort priority: Beginner → Intermediate → Advanced → unspecified
+// Beginner programs (especially Machine Starter) should surface first for
+// new users coming in from the gym beta. Unknown/null levels sort last so
+// they don't push curated beginner content down.
+const LEVEL_SORT_PRIORITY: Record<string, number> = {
+  beginner: 0,
+  intermediate: 1,
+  advanced: 2,
+}
+const UNKNOWN_LEVEL_PRIORITY = 3
+
+function getLevelPriority(level: string | null): number {
+  if (!level) return UNKNOWN_LEVEL_PRIORITY
+  return LEVEL_SORT_PRIORITY[level] ?? UNKNOWN_LEVEL_PRIORITY
+}
+
 export default function CommunityProgramsView({
   communityPrograms,
   currentUserId,
@@ -71,7 +87,13 @@ export default function CommunityProgramsView({
       )
     }
 
-    return filtered
+    // Sort by level priority (beginner → intermediate → advanced) so gym-beta
+    // newcomers land on beginner content first. JS's Array.sort is stable
+    // (ES2019+), which preserves the server-side publishedAt DESC order
+    // within each level bucket.
+    return [...filtered].sort(
+      (a, b) => getLevelPriority(a.level) - getLevelPriority(b.level)
+    )
   }, [communityPrograms, selectedType, selectedLevel, selectedGoals])
 
   // Paginate filtered programs

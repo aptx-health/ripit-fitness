@@ -52,8 +52,11 @@ for i in {1..30}; do
 done
 
 # Apply Prisma schema (push, no migration files needed for local dev)
+# Local Postgres is direct (no PgBouncer), so DIRECT_URL mirrors DATABASE_URL.
+# The Prisma schema requires directUrl to be set since #408.
+LOCAL_DB_URL="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:$PORT/$POSTGRES_DB"
 echo "Applying Prisma schema..."
-DATABASE_URL="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:$PORT/$POSTGRES_DB" npx prisma db push --accept-data-loss --skip-generate 2>&1
+DATABASE_URL="$LOCAL_DB_URL" DIRECT_URL="$LOCAL_DB_URL" npx prisma db push --accept-data-loss --skip-generate 2>&1
 echo "Schema applied"
 
 # Apply BetterAuth tables (not managed by Prisma, so db push drops them)
@@ -105,7 +108,7 @@ echo "Exercise definitions seeded"
 
 # Seed dev content (program, workout history, learning articles)
 echo "Seeding dev content..."
-DATABASE_URL="postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:$PORT/$POSTGRES_DB" \
+DATABASE_URL="$LOCAL_DB_URL" DIRECT_URL="$LOCAL_DB_URL" \
   npx ts-node --compiler-options '{"module":"CommonJS","types":["node"]}' "$SEEDS_DIR/seed-dev-content.ts" 2>&1
 echo "Dev content seeded"
 
