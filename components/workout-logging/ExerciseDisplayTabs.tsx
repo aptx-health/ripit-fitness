@@ -188,7 +188,7 @@ export default function ExerciseDisplayTabs({
 
           {exercise.exerciseDefinition?.primaryFAUs && exercise.exerciseDefinition.primaryFAUs.length > 0 && (
             <div>
-              <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">PRIMARY MUSCLES</h4>
+              <h4 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-2">PRIMARY MUSCLES</h4>
               <div className="flex flex-wrap gap-1.5">
                 {exercise.exerciseDefinition.primaryFAUs.map((fau) => (
                   <span
@@ -204,7 +204,7 @@ export default function ExerciseDisplayTabs({
 
           {exercise.exerciseDefinition?.secondaryFAUs && exercise.exerciseDefinition.secondaryFAUs.length > 0 && (
             <div>
-              <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">SECONDARY MUSCLES</h4>
+              <h4 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-2">SECONDARY MUSCLES</h4>
               <div className="flex flex-wrap gap-1.5">
                 {exercise.exerciseDefinition.secondaryFAUs.map((fau) => (
                   <span
@@ -220,7 +220,7 @@ export default function ExerciseDisplayTabs({
 
           {exercise.exerciseDefinition?.equipment && exercise.exerciseDefinition.equipment.length > 0 && (
             <div>
-              <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">EQUIPMENT</h4>
+              <h4 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-2">EQUIPMENT</h4>
               <div className="flex flex-wrap gap-1.5">
                 {exercise.exerciseDefinition.equipment.map((item) => (
                   <span
