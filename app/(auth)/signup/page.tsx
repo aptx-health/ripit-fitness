@@ -89,7 +89,7 @@ export default function SignupPage() {
       trackEvent('signup_completed', completedProps)
       clearAttribution()
       await flushEvents(true)
-      window.location.href = '/'
+      window.location.href = '/onboarding'
     } catch {
       setError('An unexpected error occurred')
       setLoading(false)

@@ -13,6 +13,9 @@ type UpdateSettingsRequest = {
   completedTours?: string
   postSessionPromptCount?: number
   lastPostSessionPromptAt?: string
+  experienceLevel?: 'beginner' | 'experienced'
+  equipmentPreference?: 'machines' | 'free_weights_cables'
+  onboardingCompleted?: boolean
 }
 
 export async function GET(_request: NextRequest) {
@@ -68,7 +71,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json() as UpdateSettingsRequest
-    const { displayName, defaultWeightUnit, defaultIntensityRating, dismissedPrimer, dismissedWarmup, dismissedStickNudge, completedTours, postSessionPromptCount, lastPostSessionPromptAt } = body
+    const { displayName, defaultWeightUnit, defaultIntensityRating, dismissedPrimer, dismissedWarmup, dismissedStickNudge, completedTours, postSessionPromptCount, lastPostSessionPromptAt, experienceLevel, equipmentPreference, onboardingCompleted } = body
 
     // Validate weight unit
     if (defaultWeightUnit && !['lbs', 'kg'].includes(defaultWeightUnit)) {
@@ -94,6 +97,22 @@ export async function PUT(request: NextRequest) {
       )
     }
 
+    // Validate experience level
+    if (experienceLevel && !['beginner', 'experienced'].includes(experienceLevel)) {
+      return NextResponse.json(
+        { error: 'Invalid experience level. Must be "beginner" or "experienced"' },
+        { status: 400 }
+      )
+    }
+
+    // Validate equipment preference
+    if (equipmentPreference && !['machines', 'free_weights_cables'].includes(equipmentPreference)) {
+      return NextResponse.json(
+        { error: 'Invalid equipment preference. Must be "machines" or "free_weights_cables"' },
+        { status: 400 }
+      )
+    }
+
     // Update or create settings
     const settings = await prisma.userSettings.upsert({
       where: { userId: user.id },
@@ -107,6 +126,9 @@ export async function PUT(request: NextRequest) {
         ...(completedTours !== undefined && { completedTours }),
         ...(postSessionPromptCount !== undefined && { postSessionPromptCount }),
         ...(lastPostSessionPromptAt !== undefined && { lastPostSessionPromptAt: new Date(lastPostSessionPromptAt) }),
+        ...(experienceLevel !== undefined && { experienceLevel }),
+        ...(equipmentPreference !== undefined && { equipmentPreference }),
+        ...(onboardingCompleted !== undefined && { onboardingCompleted }),
         updatedAt: new Date()
       },
       create: {
