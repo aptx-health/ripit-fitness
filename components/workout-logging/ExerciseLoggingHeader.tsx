@@ -19,7 +19,7 @@ export default function ExerciseLoggingHeader({
 }: ExerciseLoggingHeaderProps) {
   return (
     <div
-      className="bg-primary text-white px-4 py-2 border-b border-primary-muted-dark flex-shrink-0"
+      className="bg-primary text-primary-foreground px-4 py-2 border-b border-primary-muted-dark flex-shrink-0"
       style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.5rem)' }}
     >
       <div className="flex items-center justify-between gap-2">
@@ -37,7 +37,7 @@ export default function ExerciseLoggingHeader({
           <button
             type="button"
             onClick={onMinimize}
-            className="min-h-12 min-w-12 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/15 transition-colors doom-focus-ring"
+            className="min-h-12 min-w-12 flex items-center justify-center text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/15 transition-colors doom-focus-ring"
             aria-label="Minimize workout"
           >
             <ChevronDown className="h-5 w-5" />
@@ -45,7 +45,7 @@ export default function ExerciseLoggingHeader({
           <button
             type="button"
             onClick={onClose}
-            className="min-h-12 min-w-12 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/15 transition-colors doom-focus-ring"
+            className="min-h-12 min-w-12 flex items-center justify-center text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/15 transition-colors doom-focus-ring"
             aria-label="Close workout"
           >
             <X className="h-5 w-5" />

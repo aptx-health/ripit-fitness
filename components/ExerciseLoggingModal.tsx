@@ -539,7 +539,7 @@ export default function ExerciseLoggingModal({
                       </button>
                       <button type="button"
                         onClick={handleCompleteWorkout}
-                        className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-success text-white hover:bg-success/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
+                        className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-success text-success-foreground hover:bg-success/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
                       >
                         Confirm
                       </button>
@@ -579,7 +579,7 @@ export default function ExerciseLoggingModal({
                   </button>
                   <button type="button"
                     onClick={handleConfirmDelete}
-                    className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-error text-white hover:bg-error/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
+                    className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-error text-error-foreground hover:bg-error/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
                   >
                     Delete Set
                   </button>
