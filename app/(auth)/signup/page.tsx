@@ -206,7 +206,7 @@ export default function SignupPage() {
 
         <OrDivider />
 
-        <OAuthButtons />
+        <OAuthButtons intent="signup" />
 
         <div className="border-t border-border pt-4">
           <p className="text-center text-[15px] text-muted-foreground">
