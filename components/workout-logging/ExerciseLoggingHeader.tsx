@@ -37,18 +37,18 @@ export default function ExerciseLoggingHeader({
           <button
             type="button"
             onClick={onMinimize}
-            className="h-8 w-8 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/15 transition-colors doom-focus-ring"
+            className="min-h-12 min-w-12 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/15 transition-colors doom-focus-ring"
             aria-label="Minimize workout"
           >
-            <ChevronDown className="h-4 w-4" />
+            <ChevronDown className="h-5 w-5" />
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="h-8 w-8 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/15 transition-colors doom-focus-ring"
+            className="min-h-12 min-w-12 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/15 transition-colors doom-focus-ring"
             aria-label="Close workout"
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </button>
         </div>
       </div>
