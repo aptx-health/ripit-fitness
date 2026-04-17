@@ -28,8 +28,9 @@ doppler run --config dev_personal -- [command]
 
 # Primary repo: start all services (wraps overmind with OVERMIND_SOCKET in /tmp
 # so Turbopack doesn't panic trying to scan .overmind.sock in the project root)
-./scripts/dev.sh                              # Starts PostgreSQL, Redis, worker, Next.js
-./scripts/dev.sh start -l postgres,app        # Just DB + app (skip redis/worker)
+./scripts/dev.sh                              # Default: just PostgreSQL + Next.js app
+./scripts/dev.sh start                        # ALL services (postgres, redis, worker, minio, app)
+./scripts/dev.sh start -l postgres,app        # Just DB + app (explicit subset)
 
 # Worktree: port and auth URLs are auto-derived from worktree slot
 DOPPLER_CONFIG=dev_personal_worktree1 ./scripts/dev.sh start -l postgres,app
@@ -160,6 +161,7 @@ Program
 - **PrescribedSet**: Template/plan (what program prescribes)
 - **LoggedSet**: Actual performance (what user logged)
 - **WorkoutCompletion**: Tracks completed/incomplete/abandoned workouts
+- **AppEvent**: Client-side analytics events (signup source, page views)
 
 **Important**: We store BOTH prescribed and logged sets to enable plan vs reality comparison.
 
@@ -536,6 +538,7 @@ Self-hosted k8s infrastructure is operational (staging + production). PostgreSQL
 - `/docs/LOGGING.md` - Logging configuration and usage with Pino
 - `/docs/RATE_LIMITING.md` - Rate limiting tiers, patterns, and tuning guidance
 - `/docs/STYLING.md` - DOOM theme color system and styling guide
+- `/docs/ADDING_LEARN_ARTICLES.md` - Adding articles to the Learn tab (seed file + data migration pattern)
 - `/docs/IMAGE_TRACEABILITY.md` - Docker image SHA traceability
 - `/docs/features/PROGRAM_MANAGEMENT_IMPROVEMENTS.md` - Program management enhancements
 - `/docs/features/PERFORMANCE_ANALYSIS.md` - Performance analysis and optimizations
