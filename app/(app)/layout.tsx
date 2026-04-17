@@ -25,6 +25,7 @@ export default async function AppLayout({
   // the current version. Authoritative DB check (middleware is edge-only).
   const latestAcceptance = await prisma.waiverAcceptance.findFirst({
     where: { userId: user.id, waiverVersion: CURRENT_WAIVER_VERSION },
+    select: { id: true },
   })
 
   if (!latestAcceptance) {
