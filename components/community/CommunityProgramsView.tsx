@@ -2,6 +2,8 @@
 
 import { Check, ChevronDown, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
+
+import FeedbackModal from '@/components/features/FeedbackModal'
 import {
   Popover,
   PopoverContent,
@@ -65,6 +67,7 @@ export default function CommunityProgramsView({
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null)
   const [selectedGoals, setSelectedGoals] = useState<string[]>([])
   const [currentPage, setCurrentPage] = useState(1)
+  const [feedbackOpen, setFeedbackOpen] = useState(false)
 
   // Filter programs by type, level, and goals
   const filteredPrograms = useMemo(() => {
@@ -224,18 +227,37 @@ export default function CommunityProgramsView({
 
         {/* Empty State */}
         {filteredPrograms.length === 0 ? (
-          <div className="bg-card border border-border p-12 text-center doom-noise doom-corners">
-            <h2 className="text-xl font-semibold text-foreground mb-2 doom-heading uppercase tracking-wider">
-              {selectedType === 'all'
-                ? 'NO COMMUNITY PROGRAMS YET'
-                : `NO ${selectedType.toUpperCase()} PROGRAMS YET`}
-            </h2>
-            <p className="text-muted-foreground mb-6">
-              {selectedType === 'all'
-                ? 'Be the first to publish a program!'
-                : `No ${selectedType} programs have been published yet.`}
-            </p>
-          </div>
+          <>
+            <div className="bg-card border border-border p-12 text-center doom-noise doom-corners">
+              <h2 className="text-xl font-semibold text-foreground mb-2 doom-heading uppercase tracking-wider">
+                NO MATCHING PROGRAMS
+              </h2>
+              <p className="text-muted-foreground mb-6">
+                {hasActiveFilters
+                  ? 'Try changing your filters. '
+                  : ''}
+                We&apos;re adding new programs regularly and would love your suggestions &mdash;{' '}
+                <button
+                  type="button"
+                  onClick={() => setFeedbackOpen(true)}
+                  className="text-primary hover:text-primary-hover underline underline-offset-2 transition-colors font-semibold"
+                  aria-label="Suggest a program"
+                >
+                  tell us what you want to see
+                </button>.
+              </p>
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="px-4 py-2 bg-primary text-primary-foreground border-2 border-primary hover:bg-primary-hover transition-colors font-semibold uppercase tracking-wider text-sm doom-focus-ring"
+                >
+                  Clear Filters
+                </button>
+              )}
+            </div>
+            <FeedbackModal open={feedbackOpen} onOpenChange={setFeedbackOpen} />
+          </>
         ) : (
           <>
             {/* Program Cards */}
