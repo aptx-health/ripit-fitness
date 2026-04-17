@@ -41,7 +41,7 @@ export function OAuthButtons({ intent = 'login' }: OAuthButtonsProps = {}) {
     try {
       await signIn.social({
         provider,
-        callbackURL: '/',
+        callbackURL: '/onboarding',
         errorCallbackURL: '/login',
       })
     } catch {

@@ -296,6 +296,9 @@ model UserSettings {
   completedTours            String    @default("[]")
   postSessionPromptCount    Int       @default(0)
   lastPostSessionPromptAt   DateTime?
+  experienceLevel           String?
+  equipmentPreference       String?
+  onboardingCompleted       Boolean   @default(false)
   createdAt                 DateTime  @default(now())
   updatedAt                 DateTime  @updatedAt
 
