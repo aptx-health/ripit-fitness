@@ -51,7 +51,7 @@ No `DOPPLER_CONFIG` needed — defaults to `dev_personal`.
 - `scripts/worktree-env.sh` — Detects worktree slot, exports `PG_PORT`, `REDIS_PORT`, container names
 - `scripts/start-postgres.sh` — Starts Docker postgres, applies schema, seeds test user
 - `scripts/start-redis.sh` — Starts Docker redis with worktree-aware names/ports
-- `Procfile` — Sources `worktree-env.sh`, overrides `DATABASE_URL`/`REDIS_URL` after Doppler
+- `Procfile` — Sources `worktree-env.sh`, overrides `DATABASE_URL`/`DIRECT_URL`/`REDIS_URL` after Doppler
 
 ## After Schema Changes
 
@@ -59,7 +59,7 @@ No `DOPPLER_CONFIG` needed — defaults to `dev_personal`.
 # If you changed prisma/schema.prisma:
 doppler run --config dev_personal -- npx prisma db push   # or let dev.sh restart handle it
 doppler run --config dev_personal -- npx prisma generate
-overmind restart app   # if already running via dev.sh
+./scripts/dev.sh restart app   # if already running via dev.sh
 ```
 
 ## Running Multiple Worktrees Simultaneously
