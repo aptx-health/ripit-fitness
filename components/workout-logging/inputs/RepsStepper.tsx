@@ -25,7 +25,7 @@ export function RepsStepper({ value, onChange, placeholder }: RepsStepperProps) 
 
   return (
     <div data-tour="reps-stepper">
-      <span className="block text-xs text-muted-foreground mb-1 font-bold uppercase tracking-wider">
+      <span className="block text-sm text-muted-foreground mb-1 font-bold uppercase tracking-wider">
         REPS
       </span>
       <div className="flex items-center">

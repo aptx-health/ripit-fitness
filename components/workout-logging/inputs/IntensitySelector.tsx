@@ -34,7 +34,7 @@ export function IntensitySelector({
   if (!isExpanded) {
     return (
       <div data-tour="intensity-input">
-        <span className="block text-xs text-muted-foreground mb-1 font-bold uppercase tracking-wider">
+        <span className="block text-sm text-muted-foreground mb-1 font-bold uppercase tracking-wider">
           {label}
         </span>
         <button
@@ -56,7 +56,7 @@ export function IntensitySelector({
   // Expanded view with preset grid
   return (
     <div>
-      <span className="block text-xs text-muted-foreground mb-1 font-bold uppercase tracking-wider">
+      <span className="block text-sm text-muted-foreground mb-1 font-bold uppercase tracking-wider">
         {label}
       </span>
 
