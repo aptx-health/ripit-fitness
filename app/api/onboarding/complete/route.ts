@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     if (experienceLevel === 'beginner') {
       settingsUpdate.equipmentPreference = equipmentPreference || 'machines'
       settingsUpdate.dismissedPrimer = true // they saw it during onboarding
-      settingsUpdate.completedTours = JSON.stringify(['training-page']) // skip training tour
+      settingsUpdate.completedTours = JSON.stringify(['training-page', 'workout-logger']) // skip tutorials
     }
 
     await prisma.userSettings.upsert({
