@@ -101,11 +101,9 @@ export default function OnboardingPage() {
 
       const data = await res.json()
 
-      // Show the program name briefly before redirecting
-      if (data.programName) {
-        setCompletingProgramName(data.programName)
-        await new Promise(resolve => setTimeout(resolve, 2000))
-      }
+      // Show a brief transition screen before redirecting
+      setCompletingProgramName(data.programName || null)
+      await new Promise(resolve => setTimeout(resolve, 2500))
 
       window.location.href = data.redirect || '/'
     } catch {
@@ -188,16 +186,25 @@ export default function OnboardingPage() {
   if (step === 'completing') {
     return (
       <Shell>
-        <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6">
+        <div className="flex flex-1 flex-col items-center justify-center gap-8 px-6">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-primary" />
           {completingProgramName ? (
-            <FadeIn key="completing-name" className="text-center">
+            <FadeIn key="completing-beginner" className="text-center">
               <p className="text-lg text-foreground">
                 Copying <span className="font-semibold text-primary">{completingProgramName}</span> to your profile
               </p>
             </FadeIn>
+          ) : experienceLevel === 'experienced' ? (
+            <FadeIn key="completing-experienced" className="text-center max-w-sm">
+              <p className="text-lg text-foreground mb-3">
+                Taking you to <span className="font-semibold text-primary">Programs</span>
+              </p>
+              <p className="text-base text-muted-foreground">
+                Browse the library and find a program that fits your goals. Use filters to narrow by equipment, level, or focus area.
+              </p>
+            </FadeIn>
           ) : (
-            <p className="text-lg text-muted-foreground">Setting up your program...</p>
+            <p className="text-lg text-muted-foreground">Getting things ready...</p>
           )}
         </div>
       </Shell>
