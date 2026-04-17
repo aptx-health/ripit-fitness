@@ -55,6 +55,8 @@ export default function WorkoutCard({
     }
   }
 
+  const isInteractive = hasActions || isSkipped
+
   // Status bar color (left border)
   const borderColor = isCompleted
     ? 'border-l-success'
@@ -91,7 +93,7 @@ export default function WorkoutCard({
         disabled={isLoading || isSkipping || isUnskipping}
         aria-label={`${actionLabel}: Day ${workout.dayNumber} ${workout.name}`}
         aria-expanded={hasActions ? expanded : undefined}
-        className={`w-full text-left border-l-4 ${borderColor} ${stateClass} px-4 py-3 transition-all hover:bg-muted/50 active:bg-muted/70 disabled:opacity-60 doom-focus-ring`}
+        className={`w-full text-left border-l-4 ${borderColor} ${stateClass} px-4 py-3 transition-all ${isInteractive ? 'hover:bg-muted/50 active:bg-muted/70 cursor-pointer' : 'cursor-default'} disabled:opacity-60 doom-focus-ring`}
       >
         <div className="flex items-center gap-3">
           {/* Content */}
@@ -160,7 +162,7 @@ export default function WorkoutCard({
               type="button"
               onClick={() => onSkip(workout.id)}
               disabled={isSkipping}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-amber-900/30 text-amber-400 hover:bg-amber-900/50 border border-amber-700/50 font-semibold uppercase tracking-wider text-sm transition-colors doom-focus-ring disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-warning-muted text-warning-text hover:bg-warning-hover/20 border border-warning-border/50 font-semibold uppercase tracking-wider text-sm transition-colors doom-focus-ring disabled:opacity-50"
             >
               <SkipForward size={14} />
               Skip
