@@ -45,7 +45,7 @@ export function IntensitySelector({
             hover:border-primary
             transition-all duration-75"
         >
-          <span className="text-2xl font-bold text-foreground tabular-nums">
+          <span className="text-4xl font-bold text-foreground tabular-nums leading-none">
             {value || '--'}
           </span>
         </button>
