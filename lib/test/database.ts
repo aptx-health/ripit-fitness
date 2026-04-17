@@ -141,7 +141,8 @@ export class TestDatabase {
       'Week',
       'Program',
       'CommunityProgram',
-      'UserSettings'
+      'UserSettings',
+      'WaiverAcceptance'
     ]
 
     for (const table of tablesToClear) {

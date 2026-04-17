@@ -502,6 +502,20 @@ model AppEvent {
   @@index([event, createdAt])
 }
 
+// -- Waiver Acceptance --
+
+model WaiverAcceptance {
+  id            String   @id @default(cuid())
+  userId        String
+  waiverVersion String
+  acceptedAt    DateTime @default(now())
+  ipAddress     String?
+  userAgent     String?
+
+  @@index([userId, waiverVersion])
+  @@index([userId, acceptedAt])
+}
+
 // -- User Feedback --
 
 model Feedback {
