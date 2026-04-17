@@ -57,6 +57,7 @@ export async function POST(request: NextRequest) {
     if (experienceLevel === 'beginner') {
       settingsUpdate.equipmentPreference = equipmentPreference || 'machines'
       settingsUpdate.dismissedPrimer = true // they saw it during onboarding
+      settingsUpdate.completedTours = JSON.stringify(['training-page']) // skip training tour
     }
 
     await prisma.userSettings.upsert({
@@ -70,9 +71,10 @@ export async function POST(request: NextRequest) {
 
     // For beginners, clone and activate the appropriate community program
     let programId: string | undefined
+    let programName: string | undefined
     if (experienceLevel === 'beginner') {
       const preference = equipmentPreference || 'machines'
-      const programName = PROGRAM_MAP[preference]
+      programName = PROGRAM_MAP[preference]
 
       const communityProgram = await prisma.communityProgram.findFirst({
         where: { name: programName, curated: true },
@@ -110,7 +112,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const redirect = experienceLevel === 'beginner' ? '/training' : '/programs'
+    const redirect = experienceLevel === 'beginner' ? '/training?expand=first' : '/programs'
 
     logger.info(
       { userId: user.id, experienceLevel, equipmentPreference, programId },
@@ -120,6 +122,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       programId,
+      programName,
       redirect,
     })
   } catch (error) {

@@ -43,6 +43,7 @@ export default function OnboardingPage() {
   const [experienceLevel, setExperienceLevel] = useState<ExperienceLevel | null>(null)
   const [equipmentPreference, setEquipmentPreference] = useState<EquipmentPreference | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [completingProgramName, setCompletingProgramName] = useState<string | null>(null)
 
   // Fade-in key: changes on every step/page transition
   const [fadeKey, setFadeKey] = useState(0)
@@ -99,6 +100,13 @@ export default function OnboardingPage() {
       }
 
       const data = await res.json()
+
+      // Show the program name briefly before redirecting
+      if (data.programName) {
+        setCompletingProgramName(data.programName)
+        await new Promise(resolve => setTimeout(resolve, 2000))
+      }
+
       window.location.href = data.redirect || '/'
     } catch {
       setError('Network error. Please try again.')
@@ -180,9 +188,17 @@ export default function OnboardingPage() {
   if (step === 'completing') {
     return (
       <Shell>
-        <div className="flex flex-1 flex-col items-center justify-center gap-6">
+        <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-primary" />
-          <p className="text-lg text-muted-foreground">Setting up your program...</p>
+          {completingProgramName ? (
+            <FadeIn key="completing-name" className="text-center">
+              <p className="text-lg text-foreground">
+                Copying <span className="font-semibold text-primary">{completingProgramName}</span> to your profile
+              </p>
+            </FadeIn>
+          ) : (
+            <p className="text-lg text-muted-foreground">Setting up your program...</p>
+          )}
         </div>
       </Shell>
     )
@@ -257,11 +273,22 @@ export default function OnboardingPage() {
                 <p className="py-3.5 text-center text-sm text-muted-foreground">Pick one above</p>
               )}
               {step === 'primer' && (
-                <PrimerAction
-                  isLast={primerPage === PRIMER_PAGES.length - 1}
-                  onNext={handlePrimerNext}
-                  onFinish={handlePrimerFinish}
-                />
+                <div className="flex flex-col gap-2">
+                  <PrimerAction
+                    isLast={primerPage === PRIMER_PAGES.length - 1}
+                    onNext={handlePrimerNext}
+                    onFinish={handlePrimerFinish}
+                  />
+                  {primerPage < PRIMER_PAGES.length - 1 && (
+                    <button
+                      type="button"
+                      onClick={handlePrimerFinish}
+                      className="w-full py-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      Skip tips
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           </div>
