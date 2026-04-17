@@ -48,16 +48,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Update user settings
+    const allTours = ['training-page', 'workout-logger', 'programs-page']
     const settingsUpdate: Record<string, unknown> = {
       experienceLevel,
       onboardingCompleted: true,
+      completedTours: JSON.stringify(allTours), // skip all tutorials
       updatedAt: new Date(),
     }
 
     if (experienceLevel === 'beginner') {
       settingsUpdate.equipmentPreference = equipmentPreference || 'machines'
       settingsUpdate.dismissedPrimer = true // they saw it during onboarding
-      settingsUpdate.completedTours = JSON.stringify(['training-page', 'workout-logger']) // skip tutorials
     }
 
     await prisma.userSettings.upsert({
