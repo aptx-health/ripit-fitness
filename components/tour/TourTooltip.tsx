@@ -80,10 +80,10 @@ export function TourTooltip({
         {/* Tutorial banner: always-visible label, progress, and Skip */}
         <div className="flex items-center justify-between gap-2 mb-3 pb-2 border-b border-primary/30">
           <div className="flex items-center gap-2 min-w-0">
-            <span className="text-xs font-bold text-primary doom-heading uppercase tracking-wider">
+            <span className="text-sm font-bold text-primary uppercase tracking-wider">
               Tutorial
             </span>
-            <span className="text-xs text-muted-foreground tabular-nums uppercase tracking-wider">
+            <span className="text-sm text-muted-foreground tabular-nums uppercase tracking-wider">
               Step {stepIndex + 1} of {totalSteps}
             </span>
           </div>
