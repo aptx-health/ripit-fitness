@@ -334,7 +334,11 @@ export default function ExerciseLoggingModal({
       await completeDraft(workoutId, fallback)
       clearCache()
       await onComplete()
-      onClose()
+      // Do not call onClose() here — onComplete() already closes the modal
+      // via handleCloseModal(true) with router.refresh() inside startTransition.
+      // Calling onClose() again triggers a second router.refresh() outside
+      // startTransition, which activates the Suspense boundary (loading.tsx),
+      // unmounting the parent and losing post-session feedback state.
     } catch (error) {
       clientLogger.error('Error completing workout:', error)
       setIsSubmitting(false)
