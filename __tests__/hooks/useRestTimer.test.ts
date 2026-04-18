@@ -1,4 +1,4 @@
-import { act, renderHook } from '@testing-library/react'
+import { renderHook } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { useRestTimer } from '@/hooks/useRestTimer'
 
@@ -103,9 +103,6 @@ describe('useRestTimer', () => {
     expect(result.current.isRunning).toBe(false) // Initial mount, no increase
 
     // Switch exercise
-    act(() => {
-      // Need to rerender with new exercise
-    })
     rerender({ count: 0, exId: 'ex-2' })
     expect(result.current.isRunning).toBe(false)
     expect(result.current.elapsed).toBe(0)
