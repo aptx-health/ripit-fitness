@@ -8,11 +8,12 @@ import { useCallback, useEffect, useRef, useState } from 'react'
  * Uses Date.now() difference instead of counting intervals, so elapsed time
  * is always accurate regardless of tab throttling or suspension.
  *
- * Resets when a non-final set is logged. Stops when all sets are complete.
+ * Resets whenever a new set is logged — including extra sets beyond the
+ * prescribed count and re-logged sets after deletion.
  */
 export function useRestTimer(
   loggedSetCount: number,
-  prescribedSetCount: number,
+  _prescribedSetCount: number,
   exerciseId: string
 ) {
   const [elapsed, setElapsed] = useState(0)
@@ -20,9 +21,6 @@ export function useRestTimer(
   const startRef = useRef<number | null>(null)
   const prevExerciseRef = useRef(exerciseId)
   const prevCountRef = useRef(loggedSetCount)
-
-  // Determine if the timer should be running
-  const isComplete = loggedSetCount >= prescribedSetCount && prescribedSetCount > 0
 
   // Reset when exercise changes or sets change
   useEffect(() => {
@@ -39,8 +37,8 @@ export function useRestTimer(
       return () => cancelAnimationFrame(frame)
     }
 
-    // New set logged (and not all sets complete) — reset the timer
-    if (loggedSetCount > prevCountRef.current && !isComplete) {
+    // New set logged — reset the timer
+    if (loggedSetCount > prevCountRef.current) {
       startRef.current = Date.now()
       const frame = requestAnimationFrame(() => {
         setElapsed(0)
@@ -61,16 +59,8 @@ export function useRestTimer(
       return () => cancelAnimationFrame(frame)
     }
 
-    // All sets complete — stop the timer
-    if (isComplete && startRef.current !== null) {
-      startRef.current = null
-      const frame = requestAnimationFrame(() => setIsRunning(false))
-      prevCountRef.current = loggedSetCount
-      return () => cancelAnimationFrame(frame)
-    }
-
     prevCountRef.current = loggedSetCount
-  }, [loggedSetCount, exerciseId, isComplete])
+  }, [loggedSetCount, exerciseId])
 
   // Tick the display every second
   useEffect(() => {

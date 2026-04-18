@@ -10,7 +10,8 @@ interface RestStopwatchProps {
 
 /**
  * Subtle watermark-style rest stopwatch displayed below the set list.
- * Resets on each logged set. Hides when no sets are logged or all sets are complete.
+ * Resets on each logged set (including extra sets and re-logged sets after deletion).
+ * Hides when no sets are logged.
  */
 export default function RestStopwatch({
   loggedSetCount,
