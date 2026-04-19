@@ -148,7 +148,6 @@ export default function StrengthWeekView({
   const showWarmup = historyCount < 4 && !settings?.dismissedWarmup
   const showStickNudge = historyCount >= 3 && historyCount <= 8 && !settings?.dismissedStickNudge && !settingsLoading
 
-
   const checkProgramCompletion = useCallback(async (openModal = false) => {
     // Skip check if we're currently restarting
     if (isRestarting) return

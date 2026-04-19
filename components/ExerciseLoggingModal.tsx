@@ -75,7 +75,6 @@ export default function ExerciseLoggingModal({
   // Extra sets mode: allows logging beyond prescribed sets
   const [extraSetsMode, setExtraSetsMode] = useState(false)
 
-
   // Wizard state
   const [activeWizard, setActiveWizard] = useState<'add' | 'swap' | 'edit' | 'delete' | null>(null)
   const [navigateToLastExercise, setNavigateToLastExercise] = useState(false)
@@ -114,7 +113,6 @@ export default function ExerciseLoggingModal({
     flushFailedSets,
     clearCache,
   } = useWorkoutDraft(workoutId)
-
 
   const currentPrescribedSets = useMemo(
     () => currentExercise?.prescribedSets || [],

@@ -265,7 +265,6 @@ export default function ConsolidatedProgramsView({
             </button>
             <button
               type="button"
-             
               onClick={() => handleTabChange('browse')}
               className={`flex-1 py-2.5 text-sm font-bold uppercase tracking-wider transition-colors doom-focus-ring ${
                 activeTab === 'browse'
