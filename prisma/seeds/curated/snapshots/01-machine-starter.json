@@ -23,13 +23,13 @@
       "id": "cmmw7ypbu0005vrcxtltw06zd",
       "weekNumber": 1,
       "name": null,
-      "description": "This is an introductory week with lower intensity so you can acclimate to strength training and familiarize yourself with the equipment.",
+      "description": "Your first week. Everything is light on purpose so you can learn each machine and find weights that work for you. Focus on smooth, controlled reps.",
       "programId": "cmmw7ypbs0003vrcxpp70r99f",
       "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
       "workouts": [
         {
           "id": "cmmw7ypbv0007vrcx5ooo6c2n",
-          "name": "Machine Full Body A",
+          "name": "Your First Workout",
           "dayNumber": 1,
           "weekId": "cmmw7ypbu0005vrcxtltw06zd",
           "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
@@ -276,7 +276,7 @@
         },
         {
           "id": "cmmw7ypc90011vrcxfrmqhoxg",
-          "name": "Machine Full Body B",
+          "name": "Getting Comfortable",
           "dayNumber": 2,
           "weekId": "cmmw7ypbu0005vrcxtltw06zd",
           "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
@@ -527,13 +527,13 @@
       "id": "cmmweqby0002hvr7wrs6lrpfm",
       "weekNumber": 2,
       "name": null,
-      "description": "Now we're increasing the intensity slightly. Just challenging ourselves a little bit more with less reps-in-reserve.",
+      "description": "Same exercises, a bit more effort. You know the machines now, so push a little harder on each set.",
       "programId": "cmmw7ypbs0003vrcxpp70r99f",
       "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
       "workouts": [
         {
           "id": "i2nc6o7awesqtli1sxxqp46k",
-          "name": "Machine Full Body A",
+          "name": "Pushing a Bit More",
           "dayNumber": 1,
           "weekId": "cmmweqby0002hvr7wrs6lrpfm",
           "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
@@ -780,7 +780,7 @@
         },
         {
           "id": "g2yxywpaf8p6v35gf8x9zej3",
-          "name": "Machine Full Body B",
+          "name": "Finding Your Groove",
           "dayNumber": 2,
           "weekId": "cmmweqby0002hvr7wrs6lrpfm",
           "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
@@ -1031,13 +1031,13 @@
       "id": "cmmwesiau002lvr7wck85vtgk",
       "weekNumber": 3,
       "name": null,
-      "description": "Holding steady. Building strength and preparing for next week's higher-intensity.",
+      "description": "Staying at this intensity to let your body adapt. Consistency matters more than going heavy right now.",
       "programId": "cmmw7ypbs0003vrcxpp70r99f",
       "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
       "workouts": [
         {
           "id": "pt1unrhftw1lcdi3xxjkv3z8",
-          "name": "Machine Full Body A",
+          "name": "Building a Routine",
           "dayNumber": 1,
           "weekId": "cmmwesiau002lvr7wck85vtgk",
           "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
@@ -1284,7 +1284,7 @@
         },
         {
           "id": "jc1q3olofvo2jrotrgqkgijy",
-          "name": "Machine Full Body B",
+          "name": "Staying Consistent",
           "dayNumber": 2,
           "weekId": "cmmwesiau002lvr7wck85vtgk",
           "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
@@ -1535,13 +1535,13 @@
       "id": "cmmweu5ws002nvr7w7ih1vx3l",
       "weekNumber": 4,
       "name": null,
-      "description": "More intense sets. Less reps held back. Keep working hard!",
+      "description": "Your hardest week. Leave less in the tank on each set and see what you can do.",
       "programId": "cmmw7ypbs0003vrcxpp70r99f",
       "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
       "workouts": [
         {
           "id": "pa4tecicm9t0tei7k4kwj2uq",
-          "name": "Machine Full Body A",
+          "name": "Testing Yourself",
           "dayNumber": 1,
           "weekId": "cmmweu5ws002nvr7w7ih1vx3l",
           "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
@@ -1788,7 +1788,7 @@
         },
         {
           "id": "dy5nggcnls6td7y1hg4qo5ow",
-          "name": "Machine Full Body B",
+          "name": "Strong Finish",
           "dayNumber": 2,
           "weekId": "cmmweu5ws002nvr7w7ih1vx3l",
           "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
@@ -2039,13 +2039,13 @@
       "id": "cmmwew0jz002xvr7wm959bfsy",
       "weekNumber": 5,
       "name": "Deload Week",
-      "description": "Now that you've hit peak intensity, let's give your body time to recover.",
+      "description": "Recovery week. Lighter effort to let your muscles catch up to the work you put in.",
       "programId": "cmmw7ypbs0003vrcxpp70r99f",
       "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
       "workouts": [
         {
           "id": "gzwc5xzop7pkow87852qgyjm",
-          "name": "Machine Full Body A",
+          "name": "Easy Day",
           "dayNumber": 1,
           "weekId": "cmmwew0jz002xvr7wm959bfsy",
           "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",
@@ -2292,7 +2292,7 @@
         },
         {
           "id": "a5wr8d8vkjdbfejya8mbvttq",
-          "name": "Machine Full Body B",
+          "name": "Winding Down",
           "dayNumber": 2,
           "weekId": "cmmwew0jz002xvr7wm959bfsy",
           "userId": "7ba96aa3-8a18-43a2-951d-62774a8a2f28",

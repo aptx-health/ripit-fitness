@@ -7,7 +7,7 @@ export const machineStarter: ProgramSpec = {
 
   workouts: [
     {
-      name: 'Machine Full Body A',
+      name: 'Your First Workout',
       dayNumber: 1,
       exercises: [
         { name: 'Chest Press', sets: makeSets(2, '12', 5) },
@@ -20,7 +20,7 @@ export const machineStarter: ProgramSpec = {
       ],
     },
     {
-      name: 'Machine Full Body B',
+      name: 'Getting Comfortable',
       dayNumber: 2,
       exercises: [
         { name: 'Chest Supported Row', sets: makeSets(2, '12', 5) },
