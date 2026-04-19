@@ -4,7 +4,6 @@ import FloatingDraftButton from '@/components/FloatingDraftButton'
 import FeedbackButton from '@/components/features/FeedbackButton'
 import { SignupCompletedTracker } from '@/components/features/SignupCompletedTracker'
 import Header from '@/components/Header'
-import { TourProvider } from '@/components/tour'
 import { getCurrentUser } from '@/lib/auth/server'
 import { CURRENT_WAIVER_VERSION } from '@/lib/constants/waiver'
 import { DraftWorkoutProvider } from '@/lib/contexts/DraftWorkoutContext'
@@ -34,7 +33,6 @@ export default async function AppLayout({
 
   return (
     <DraftWorkoutProvider>
-      <TourProvider>
       <div className="min-h-screen bg-background">
         <SignupCompletedTracker />
         <Header userEmail={user.email || ''} />
@@ -49,7 +47,6 @@ export default async function AppLayout({
         <BottomNav />
         <FeedbackButton />
       </div>
-    </TourProvider>
     </DraftWorkoutProvider>
   )
 }

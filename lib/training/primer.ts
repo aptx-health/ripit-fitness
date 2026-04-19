@@ -7,12 +7,7 @@
  * Gym-owner demo feedback (item 5.6, issue #485) specifically called this primer
  * out as making newcomers feel prepared. This helper exists as a regression
  * safety net: the rules for showing the primer are centralized here and covered
- * by unit tests so they survive tutorial-system reworks.
- *
- * Note: the primer is intentionally kept OUTSIDE the tour/tutorial system
- * (lib/tour/*). It triggers from StrengthWeekView based on UserSettings, not
- * from the tour scheduler. If the tour system is rewritten, the primer should
- * continue to work unchanged.
+ * by unit tests so they survive reworks.
  */
 
 export type PrimerGateInput = {

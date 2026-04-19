@@ -1,9 +1,8 @@
 'use client'
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { Heart, KeyRound, MessageSquarePlus, Moon, Palette, RotateCcw, Save, Shield, Sun } from 'lucide-react'
+import { Heart, KeyRound, MessageSquarePlus, Moon, Palette, Save, Shield, Sun } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import FeedbackModal from '@/components/features/FeedbackModal'
 import { useThemePreference } from '@/hooks/useThemePreference'
@@ -17,7 +16,6 @@ type ConnectedAccounts = {
 }
 
 export default function SettingsPage() {
-  const router = useRouter()
   const { data: session } = useSession()
   const { settings, isLoading, updateSettings } = useUserSettings()
   const { preference, updateTheme } = useThemePreference()
@@ -445,34 +443,6 @@ export default function SettingsPage() {
               </div>
               <FeedbackModal open={feedbackOpen} onOpenChange={setFeedbackOpen} />
             </div>
-
-            {/* Replay Tours */}
-            {settings && (() => {
-              let hasCompleted = false
-              try { hasCompleted = JSON.parse(settings.completedTours || '[]').length > 0 } catch {}
-              return hasCompleted
-            })() && (
-              <div className="pt-4 border-t border-border">
-                <span className="block text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
-                  Guided Tours
-                </span>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    await updateSettings({ completedTours: '[]' })
-                    setSaved(false)
-                    router.refresh()
-                  }}
-                  className="px-4 py-2 border-2 border-border bg-muted text-foreground hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center gap-2"
-                >
-                  <RotateCcw size={16} />
-                  Replay Tours
-                </button>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Re-enables guided hints on the training and workout screens.
-                </p>
-              </div>
-            )}
 
             {/* Sign Out */}
             <div className="pt-4 border-t border-border">

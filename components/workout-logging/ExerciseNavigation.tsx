@@ -29,7 +29,7 @@ export default function ExerciseNavigation({
   const supersetLabel = currentExercise.exerciseGroup
 
   return (
-    <div data-tour="exercise-nav" className="border-b border-border px-3 py-2 flex items-center justify-between bg-card flex-shrink-0">
+    <div className="border-b border-border px-3 py-2 flex items-center justify-between bg-card flex-shrink-0">
       <button type="button"
         onClick={onPrevious}
         disabled={currentExerciseIndex === 0}
