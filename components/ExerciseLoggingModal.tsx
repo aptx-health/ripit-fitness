@@ -80,7 +80,58 @@ export default function ExerciseLoggingModal({
 
   // Guided tour
   const { startTour, setTourPaused, isActive: tourActive } = useTour()
-  const { settings: userSettings } = useUserSettings()
+  const { settings: userSettings, updateSettings } = useUserSettings()
+
+  // Subtle pulse cues for first-time users (Info -> Log Sets flow)
+  const LOGGER_CUES_ID = 'logger-cues'
+  const [pulseInfoTab, setPulseInfoTab] = useState(false)
+  const [pulseLogSetsTab, setPulseLogSetsTab] = useState(false)
+  const cuesInitializedRef = useRef(false)
+  const cueTimersRef = useRef<ReturnType<typeof setTimeout>[]>([])
+
+  const clearCueTimers = useCallback(() => {
+    for (const t of cueTimersRef.current) clearTimeout(t)
+    cueTimersRef.current = []
+  }, [])
+
+  const markCuesComplete = useCallback(() => {
+    if (!userSettings) return
+    try {
+      const completed: string[] = JSON.parse(userSettings.completedTours || '[]')
+      if (!completed.includes(LOGGER_CUES_ID)) {
+        const updated = JSON.stringify([...completed, LOGGER_CUES_ID])
+        updateSettings({ completedTours: updated })
+      }
+    } catch { /* invalid JSON, skip */ }
+  }, [userSettings, updateSettings])
+
+  // Handle tab changes for cue flow
+  const handleCueTabChange = useCallback((value: string) => {
+    if (value === 'info' && pulseInfoTab) {
+      // Step 2: User tapped Info — stop Info pulse, start Log Sets pulse after delay
+      setPulseInfoTab(false)
+      clearCueTimers()
+      const delayTimer = setTimeout(() => {
+        setPulseLogSetsTab(true)
+        const stopTimer = setTimeout(() => {
+          setPulseLogSetsTab(false)
+          markCuesComplete()
+        }, 8000)
+        cueTimersRef.current.push(stopTimer)
+      }, 2500)
+      cueTimersRef.current.push(delayTimer)
+    } else if (value === 'log-sets' && pulseLogSetsTab) {
+      // Step 3: User tapped Log Sets — stop pulse, mark complete
+      setPulseLogSetsTab(false)
+      clearCueTimers()
+      markCuesComplete()
+    }
+  }, [pulseInfoTab, pulseLogSetsTab, clearCueTimers, markCuesComplete])
+
+  // Cleanup cue timers on unmount
+  useEffect(() => {
+    return () => clearCueTimers()
+  }, [clearCueTimers])
 
   // Wizard state
   const [activeWizard, setActiveWizard] = useState<'add' | 'swap' | 'edit' | 'delete' | null>(null)
@@ -135,6 +186,25 @@ export default function ExerciseLoggingModal({
       }
     } catch { /* invalid JSON, skip */ }
   }, [currentExercise, userSettings, tourActive, startTour])
+
+  // Step 1: Pulse Info tab when logger first opens for a new user
+  useEffect(() => {
+    if (!currentExercise || !userSettings || cuesInitializedRef.current) return
+    cuesInitializedRef.current = true
+
+    try {
+      const completed: string[] = JSON.parse(userSettings.completedTours || '[]')
+      if (completed.includes(LOGGER_CUES_ID)) return
+    } catch { return }
+
+    // Pulse Info tab for ~8 seconds
+    setPulseInfoTab(true)
+    const stopTimer = setTimeout(() => {
+      setPulseInfoTab(false)
+      markCuesComplete()
+    }, 8000)
+    cueTimersRef.current.push(stopTimer)
+  }, [currentExercise, userSettings, markCuesComplete])
 
   // Pause tour when inputs expand (layout shifts)
   useEffect(() => {
@@ -485,6 +555,9 @@ export default function ExerciseLoggingModal({
                 hasHistoryIndicator={hasHistoryForCurrentExercise}
                 onDeleteSet={handleDeleteSet}
                 isInputExpanded={expandedInput !== null}
+                pulseInfoTab={pulseInfoTab}
+                pulseLogSetsTab={pulseLogSetsTab}
+                onTabChange={handleCueTabChange}
                 loggingForm={
                   <SetLoggingForm
                     prescribedSet={prescribedSet}

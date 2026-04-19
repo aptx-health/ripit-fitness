@@ -57,6 +57,9 @@ interface ExerciseDisplayTabsProps {
   onDeleteSet: (setNumber: number) => void
   loggingForm: React.ReactNode
   isInputExpanded?: boolean
+  pulseInfoTab?: boolean
+  pulseLogSetsTab?: boolean
+  onTabChange?: (value: string) => void
 }
 
 const FAU_DISPLAY_NAMES: Record<string, string> = {
@@ -102,17 +105,20 @@ export default function ExerciseDisplayTabs({
   onDeleteSet,
   loggingForm,
   isInputExpanded = false,
+  pulseInfoTab = false,
+  pulseLogSetsTab = false,
+  onTabChange,
 }: ExerciseDisplayTabsProps) {
   const [expandedImage, setExpandedImage] = useState<string | null>(null)
   const hasNotes = !!exercise.notes
 
   return (
-    <Tabs defaultValue="log-sets" className="w-full h-full flex flex-col">
+    <Tabs defaultValue="log-sets" className="w-full h-full flex flex-col" onValueChange={onTabChange}>
       <TabsList className="flex-shrink-0 sticky top-0 z-10 overflow-hidden">
-        <TabsTrigger value="log-sets">
+        <TabsTrigger value="log-sets" className={pulseLogSetsTab ? 'animate-pulse text-primary' : ''}>
           <span>Log Sets</span>
         </TabsTrigger>
-        <TabsTrigger value="info" data-tour="info-tab">
+        <TabsTrigger value="info" data-tour="info-tab" className={pulseInfoTab ? 'animate-pulse text-primary' : ''}>
           <span>Info</span>
         </TabsTrigger>
         {hasNotes && (
