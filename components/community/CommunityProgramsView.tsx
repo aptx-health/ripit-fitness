@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, ChevronDown, X } from 'lucide-react'
+import { Check, ChevronDown, MessageSquarePlus, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import ProgramRequestModal from '@/components/features/ProgramRequestModal'
@@ -11,9 +11,7 @@ import {
 } from '@/components/ui/radix/popover'
 import {
   FITNESS_LEVELS,
-  GOAL_LABELS,
   LEVEL_LABELS,
-  PROGRAM_GOALS,
 } from '@/lib/constants/program-metadata'
 import CommunityProgramCard from './CommunityProgramCard'
 
@@ -117,8 +115,8 @@ export default function CommunityProgramsView({
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  // Handle goal toggle
-  const handleGoalToggle = (goal: string) => {
+  // Handle goal toggle (kept for when goals filter is re-enabled)
+  const _handleGoalToggle = (goal: string) => {
     setSelectedGoals((prev) =>
       prev.includes(goal) ? prev.filter((g) => g !== goal) : [...prev, goal]
     )
@@ -184,29 +182,7 @@ export default function CommunityProgramsView({
               </PopoverContent>
             </Popover>
 
-            {/* Goals Filter Popover */}
-            <Popover>
-              <PopoverTrigger asChild>
-                <button type="button" className="px-4 py-2 border-2 border-border text-foreground hover:border-primary transition-colors uppercase tracking-wider font-semibold doom-focus-ring flex items-center gap-2 text-sm">
-                  Goals: {selectedGoals.length > 0 ? `${selectedGoals.length} selected` : 'Any'}
-                  <ChevronDown size={16} />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-64 p-2" align="start">
-                <div className="space-y-1 max-h-64 overflow-y-auto">
-                  {Object.values(PROGRAM_GOALS).map((goal) => (
-                    <button type="button"
-                      key={goal}
-                      onClick={() => handleGoalToggle(goal)}
-                      className="w-full px-3 py-2 text-left text-sm hover:bg-primary/10 transition-colors doom-focus-ring flex items-center justify-between uppercase tracking-wider font-medium"
-                    >
-                      {GOAL_LABELS[goal]}
-                      {selectedGoals.includes(goal) && <Check size={16} className="text-primary" />}
-                    </button>
-                  ))}
-                </div>
-              </PopoverContent>
-            </Popover>
+            {/* TODO: Re-enable goals filter when program library grows */}
 
             {/* Clear Filters Button */}
             {hasActiveFilters && (
@@ -260,7 +236,6 @@ export default function CommunityProgramsView({
                 </button>
               )}
             </div>
-            <ProgramRequestModal open={feedbackOpen} onOpenChange={setFeedbackOpen} />
           </>
         ) : (
           <>
@@ -273,6 +248,22 @@ export default function CommunityProgramsView({
                   currentUserId={currentUserId}
                 />
               ))}
+            </div>
+
+            {/* Request a Program prompt */}
+            <div className="border-2 border-dashed border-border bg-card/50 p-6 sm:p-8 text-center mb-8">
+              <p className="text-sm sm:text-base text-muted-foreground mb-4">
+                Looking for something specific?
+              </p>
+              <button
+                type="button"
+                onClick={() => setFeedbackOpen(true)}
+                className="px-4 py-3 min-h-12 bg-muted text-foreground border-2 border-border hover:border-primary hover:text-primary transition-colors font-semibold uppercase tracking-wider text-sm doom-focus-ring inline-flex items-center gap-2"
+                aria-label="Request a program"
+              >
+                <MessageSquarePlus size={18} />
+                Request a Program
+              </button>
             </div>
 
             {/* Pagination */}
@@ -349,6 +340,8 @@ export default function CommunityProgramsView({
             )}
           </>
         )}
+
+        <ProgramRequestModal open={feedbackOpen} onOpenChange={setFeedbackOpen} />
     </div>
   )
 }
