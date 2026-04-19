@@ -118,13 +118,13 @@ export default function ExerciseDisplayTabs({
         {hasNotes && (
           <TabsTrigger value="notes" className="relative">
             <span>Notes</span>
-            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500"></span>
+            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary"></span>
           </TabsTrigger>
         )}
         <TabsTrigger value="history" className="relative">
           <span>History</span>
           {hasHistoryIndicator && (
-            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500"></span>
+            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary"></span>
           )}
         </TabsTrigger>
       </TabsList>
@@ -179,7 +179,7 @@ export default function ExerciseDisplayTabs({
 
           {exercise.exerciseDefinition?.instructions && (
             <div>
-              <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">INSTRUCTIONS</h4>
+              <h4 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-2">INSTRUCTIONS</h4>
               <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line">
                 {exercise.exerciseDefinition.instructions}
               </p>
