@@ -48,11 +48,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Update user settings
-    const allTours = ['training-page', 'workout-logger', 'programs-page']
     const settingsUpdate: Record<string, unknown> = {
       experienceLevel,
       onboardingCompleted: true,
-      completedTours: JSON.stringify(allTours), // skip all tutorials
       updatedAt: new Date(),
     }
 
