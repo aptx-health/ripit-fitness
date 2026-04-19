@@ -3,7 +3,7 @@
 import { Check, ChevronDown, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
-import FeedbackModal from '@/components/features/FeedbackModal'
+import ProgramRequestModal from '@/components/features/ProgramRequestModal'
 import {
   Popover,
   PopoverContent,
@@ -256,7 +256,7 @@ export default function CommunityProgramsView({
                 </button>
               )}
             </div>
-            <FeedbackModal open={feedbackOpen} onOpenChange={setFeedbackOpen} />
+            <ProgramRequestModal open={feedbackOpen} onOpenChange={setFeedbackOpen} />
           </>
         ) : (
           <>
