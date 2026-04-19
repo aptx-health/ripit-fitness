@@ -57,6 +57,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="preload" href="/green-frog-squat-1.png" as="image" type="image/png" />
+        <link rel="preload" href="/green-frog-squat-1-light.png" as="image" type="image/png" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
