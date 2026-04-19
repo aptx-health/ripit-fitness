@@ -3,7 +3,7 @@
 import { X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
-import { POST_SESSION_QUESTIONS, POST_SESSION_REFINEMENTS } from '@/types/feedback'
+import { POST_SESSION_REFINEMENTS } from '@/types/feedback'
 
 interface PostSessionFeedbackProps {
   open: boolean
@@ -18,12 +18,19 @@ export function PostSessionFeedback({ open, onClose }: PostSessionFeedbackProps)
   const [submitted, setSubmitted] = useState(false)
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Cleanup auto-close timer on unmount
+  // Reset state when reopened & cleanup auto-close timer on unmount
   useEffect(() => {
+    if (open) {
+      setRating(null)
+      setSelectedRefinements([])
+      setMessage('')
+      setSubmitting(false)
+      setSubmitted(false)
+    }
     return () => {
       if (closeTimerRef.current) clearTimeout(closeTimerRef.current)
     }
-  }, [])
+  }, [open])
 
   if (!open) return null
 
@@ -214,9 +221,4 @@ export function PostSessionFeedback({ open, onClose }: PostSessionFeedbackProps)
       </div>
     </div>
   )
-}
-
-/** Pick a random question from the bank */
-export function pickPostSessionQuestion(): string {
-  return POST_SESSION_QUESTIONS[Math.floor(Math.random() * POST_SESSION_QUESTIONS.length)]
 }
