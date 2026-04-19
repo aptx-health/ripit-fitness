@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react'
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useRestTimer } from '@/hooks/useRestTimer'
 
 // Mock requestAnimationFrame to execute synchronously in tests
@@ -17,7 +17,7 @@ afterEach(() => {
 describe('useRestTimer', () => {
   it('starts the timer when a prescribed set is logged', () => {
     const { result, rerender } = renderHook(
-      ({ count }) => useRestTimer(count, 3, 'ex-1'),
+      ({ count }) => useRestTimer(count, 'ex-1'),
       { initialProps: { count: 0 } }
     )
 
@@ -30,7 +30,7 @@ describe('useRestTimer', () => {
 
   it('restarts the timer on each new set including the final prescribed set', () => {
     const { result, rerender } = renderHook(
-      ({ count }) => useRestTimer(count, 3, 'ex-1'),
+      ({ count }) => useRestTimer(count, 'ex-1'),
       { initialProps: { count: 0 } }
     )
 
@@ -48,7 +48,7 @@ describe('useRestTimer', () => {
 
   it('starts the timer for extra sets beyond prescribed count', () => {
     const { result, rerender } = renderHook(
-      ({ count }) => useRestTimer(count, 3, 'ex-1'),
+      ({ count }) => useRestTimer(count, 'ex-1'),
       { initialProps: { count: 3 } }
     )
 
@@ -66,7 +66,7 @@ describe('useRestTimer', () => {
 
   it('starts the timer when a deleted set is re-logged', () => {
     const { result, rerender } = renderHook(
-      ({ count }) => useRestTimer(count, 3, 'ex-1'),
+      ({ count }) => useRestTimer(count, 'ex-1'),
       { initialProps: { count: 3 } }
     )
 
@@ -81,7 +81,7 @@ describe('useRestTimer', () => {
 
   it('stops the timer when all sets are deleted', () => {
     const { result, rerender } = renderHook(
-      ({ count }) => useRestTimer(count, 3, 'ex-1'),
+      ({ count }) => useRestTimer(count, 'ex-1'),
       { initialProps: { count: 0 } }
     )
 
@@ -96,7 +96,7 @@ describe('useRestTimer', () => {
 
   it('resets when exercise changes', () => {
     const { result, rerender } = renderHook(
-      ({ count, exId }) => useRestTimer(count, 3, exId),
+      ({ count, exId }) => useRestTimer(count, exId),
       { initialProps: { count: 1, exId: 'ex-1' } }
     )
 
@@ -108,13 +108,12 @@ describe('useRestTimer', () => {
     expect(result.current.elapsed).toBe(0)
   })
 
-  it('works with zero prescribed sets (extra-only scenario)', () => {
+  it('starts the timer when logging a set from zero', () => {
     const { result, rerender } = renderHook(
-      ({ count }) => useRestTimer(count, 0, 'ex-1'),
+      ({ count }) => useRestTimer(count, 'ex-1'),
       { initialProps: { count: 0 } }
     )
 
-    // Log a set even though there are 0 prescribed
     rerender({ count: 1 })
     expect(result.current.isRunning).toBe(true)
   })

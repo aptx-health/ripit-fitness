@@ -13,7 +13,6 @@ import { useCallback, useEffect, useRef, useState } from 'react'
  */
 export function useRestTimer(
   loggedSetCount: number,
-  _prescribedSetCount: number,
   exerciseId: string
 ) {
   const [elapsed, setElapsed] = useState(0)

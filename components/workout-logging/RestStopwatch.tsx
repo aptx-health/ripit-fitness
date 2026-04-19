@@ -4,7 +4,6 @@ import { useRestTimer } from '@/hooks/useRestTimer'
 
 interface RestStopwatchProps {
   loggedSetCount: number
-  prescribedSetCount: number
   exerciseId: string
 }
 
@@ -15,12 +14,10 @@ interface RestStopwatchProps {
  */
 export default function RestStopwatch({
   loggedSetCount,
-  prescribedSetCount,
   exerciseId,
 }: RestStopwatchProps) {
   const { formatted, isRunning } = useRestTimer(
     loggedSetCount,
-    prescribedSetCount,
     exerciseId
   )
 

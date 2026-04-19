@@ -142,7 +142,6 @@ export default function ExerciseDisplayTabs({
             />
             <RestStopwatch
               loggedSetCount={loggedSets.length}
-              prescribedSetCount={prescribedSets.length}
               exerciseId={exercise.id}
             />
           </>
