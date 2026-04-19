@@ -298,7 +298,6 @@ export default function ConsolidatedProgramsView({
             <CommunityProgramsView
               communityPrograms={communityPrograms}
               currentUserId={currentUserId}
-              defaultLevel={settings?.experienceLevel === 'beginner' ? 'beginner' : null}
             />
           )}
         </div>

@@ -4,7 +4,6 @@ import { CheckCircle } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState, useTransition } from 'react'
 import ExerciseLoggingModal from '@/components/ExerciseLoggingModal'
-import { BeginnerPrimerWizard } from '@/components/features/training/BeginnerPrimerWizard'
 import { PostSessionFeedback, pickPostSessionQuestion } from '@/components/features/training/PostSessionFeedback'
 import { StickNudgeBanner } from '@/components/features/training/StickNudgeBanner'
 import { WarmupInterstitial } from '@/components/features/training/WarmupInterstitial'
@@ -15,7 +14,6 @@ import WorkoutCard from '@/components/workout/WorkoutCard'
 import { useUserSettings } from '@/hooks/useUserSettings'
 import { clientLogger } from '@/lib/client-logger'
 import { useDraftWorkout } from '@/lib/contexts/DraftWorkoutContext'
-import { shouldShowPrimer } from '@/lib/training/primer'
 import { POST_SESSION_COOLDOWN } from '@/types/feedback'
 
 type Workout = {
@@ -138,13 +136,6 @@ export default function StrengthWeekView({
   const resumeWorkoutId = searchParams.get('resume')
 
   // Contextual content triggers
-  // Primer gating lives in lib/training/primer.ts with its own unit tests to
-  // guard against accidental removal during tutorial reworks (see issue #485).
-  const showPrimer = shouldShowPrimer({
-    historyCount,
-    dismissedPrimer: settings?.dismissedPrimer ?? false,
-    settingsLoading,
-  })
   const showWarmup = historyCount < 4 && !settings?.dismissedWarmup
   const showStickNudge = historyCount >= 3 && historyCount <= 8 && !settings?.dismissedStickNudge && !settingsLoading
 
@@ -227,8 +218,7 @@ export default function StrengthWeekView({
     setExpandedWorkoutId(prev => prev === workoutId ? null : workoutId)
   }, [])
 
-  // Interception state — primer and warm-up gate before logging modal
-  const [primerOpen, setPrimerOpen] = useState(false)
+  // Interception state — warm-up gate before logging modal
   const [warmupOpen, setWarmupOpen] = useState(false)
   const [pendingLoggingWorkoutId, setPendingLoggingWorkoutId] = useState<string | null>(null)
 
@@ -248,19 +238,8 @@ export default function StrengthWeekView({
     setModalMode('logging')
   }, [fetchWorkoutMetadata])
 
-  // After primer completes, check if warm-up is also needed before proceeding
-  const proceedAfterPrimer = () => {
-    setPrimerOpen(false)
-    if (showWarmup && pendingLoggingWorkoutId) {
-      setWarmupOpen(true)
-    } else if (pendingLoggingWorkoutId) {
-      proceedToLogging(pendingLoggingWorkoutId)
-      setPendingLoggingWorkoutId(null)
-    }
-  }
-
   // Opens logging modal with progressive loading (fast!)
-  // Intercepts with primer (first ever) then warm-up (sessions 1-3)
+  // Intercepts with warm-up for early sessions (1-3)
   const handleOpenLogging = useCallback(async (workoutId: string) => {
     // Prevent opening a different workout while a draft exists
     if (activeDraft && activeDraft.workoutId !== workoutId) {
@@ -270,16 +249,9 @@ export default function StrengthWeekView({
       return
     }
 
-    // Skip primer/warmup interception when resuming an existing draft —
+    // Skip warmup interception when resuming an existing draft —
     // the user already started this workout and saw these screens
     const isResumingDraft = activeDraft && activeDraft.workoutId === workoutId
-
-    // Primer interception — first ever workout
-    if (showPrimer && !primerOpen && !isResumingDraft) {
-      setPendingLoggingWorkoutId(workoutId)
-      setPrimerOpen(true)
-      return
-    }
 
     // Warm-up interception for early sessions
     if (showWarmup && !warmupOpen && !isResumingDraft) {
@@ -289,7 +261,7 @@ export default function StrengthWeekView({
     }
 
     await proceedToLogging(workoutId)
-  }, [activeDraft, showPrimer, primerOpen, showWarmup, warmupOpen, proceedToLogging])
+  }, [activeDraft, showWarmup, warmupOpen, proceedToLogging])
 
   const handleWarmupCancel = () => {
     setWarmupOpen(false)
@@ -535,15 +507,6 @@ export default function StrengthWeekView({
           onRefresh={handleRefreshMetadata}
         />
       )}
-
-      {/* Beginner Primer — shown on first-ever Log tap, before warm-up */}
-      <BeginnerPrimerWizard
-        open={primerOpen}
-        onDismiss={() => {
-          refetchSettings()
-          proceedAfterPrimer()
-        }}
-      />
 
       {/* Warm-up Interstitial — shown between Log tap and logging modal */}
       <WarmupInterstitial
