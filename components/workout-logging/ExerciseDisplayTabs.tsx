@@ -57,9 +57,6 @@ interface ExerciseDisplayTabsProps {
   onDeleteSet: (setNumber: number) => void
   loggingForm: React.ReactNode
   isInputExpanded?: boolean
-  pulseInfoTab?: boolean
-  pulseLogSetsTab?: boolean
-  onTabChange?: (value: string) => void
 }
 
 const FAU_DISPLAY_NAMES: Record<string, string> = {
@@ -105,32 +102,29 @@ export default function ExerciseDisplayTabs({
   onDeleteSet,
   loggingForm,
   isInputExpanded = false,
-  pulseInfoTab = false,
-  pulseLogSetsTab = false,
-  onTabChange,
 }: ExerciseDisplayTabsProps) {
   const [expandedImage, setExpandedImage] = useState<string | null>(null)
   const hasNotes = !!exercise.notes
 
   return (
-    <Tabs defaultValue="log-sets" className="w-full h-full flex flex-col" onValueChange={onTabChange}>
+    <Tabs defaultValue="log-sets" className="w-full h-full flex flex-col">
       <TabsList className="flex-shrink-0 sticky top-0 z-10 overflow-hidden">
-        <TabsTrigger value="log-sets" className={pulseLogSetsTab ? 'animate-pulse text-primary' : ''}>
+        <TabsTrigger value="log-sets">
           <span>Log Sets</span>
         </TabsTrigger>
-        <TabsTrigger value="info" data-tour="info-tab" className={pulseInfoTab ? 'animate-pulse text-primary' : ''}>
+        <TabsTrigger value="info">
           <span>Info</span>
         </TabsTrigger>
         {hasNotes && (
           <TabsTrigger value="notes" className="relative">
             <span>Notes</span>
-            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500"></span>
+            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary"></span>
           </TabsTrigger>
         )}
         <TabsTrigger value="history" className="relative">
           <span>History</span>
           {hasHistoryIndicator && (
-            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500"></span>
+            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary"></span>
           )}
         </TabsTrigger>
       </TabsList>
@@ -148,7 +142,6 @@ export default function ExerciseDisplayTabs({
             />
             <RestStopwatch
               loggedSetCount={loggedSets.length}
-              prescribedSetCount={prescribedSets.length}
               exerciseId={exercise.id}
             />
           </>
@@ -185,7 +178,7 @@ export default function ExerciseDisplayTabs({
 
           {exercise.exerciseDefinition?.instructions && (
             <div>
-              <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">INSTRUCTIONS</h4>
+              <h4 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-2">INSTRUCTIONS</h4>
               <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line">
                 {exercise.exerciseDefinition.instructions}
               </p>

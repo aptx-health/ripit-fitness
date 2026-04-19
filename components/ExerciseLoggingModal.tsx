@@ -3,17 +3,14 @@
 import { AlertTriangle } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { useTour } from '@/components/tour'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import { useImagePrefetch } from '@/hooks/useImagePrefetch'
 import { type Exercise, type ExerciseHistory, useProgressiveExercises } from '@/hooks/useProgressiveExercises'
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
-import { useUserSettings } from '@/hooks/useUserSettings'
 import { useWorkoutDraft } from '@/hooks/useWorkoutDraft'
 import { completeDraft, discardDraft } from '@/lib/api/workout-sets'
 import { clientLogger } from '@/lib/client-logger'
 import { parseRepsFromPrescribed } from '@/lib/constants/intensity-presets'
-import { WORKOUT_LOGGER_STEPS, WORKOUT_LOGGER_TOUR_ID } from '@/lib/tour/steps/workout-logger'
 import type { LoggedSet } from '@/types/workout'
 import ExerciseDefinitionEditorModal from './features/exercise-definition/ExerciseDefinitionEditorModal'
 import ExerciseActionsFooter from './workout-logging/ExerciseActionsFooter'
@@ -78,61 +75,6 @@ export default function ExerciseLoggingModal({
   // Extra sets mode: allows logging beyond prescribed sets
   const [extraSetsMode, setExtraSetsMode] = useState(false)
 
-  // Guided tour
-  const { startTour, setTourPaused, isActive: tourActive } = useTour()
-  const { settings: userSettings, updateSettings } = useUserSettings()
-
-  // Subtle pulse cues for first-time users (Info -> Log Sets flow)
-  const LOGGER_CUES_ID = 'logger-cues'
-  const [pulseInfoTab, setPulseInfoTab] = useState(false)
-  const [pulseLogSetsTab, setPulseLogSetsTab] = useState(false)
-  const cuesInitializedRef = useRef(false)
-  const cueTimersRef = useRef<ReturnType<typeof setTimeout>[]>([])
-
-  const clearCueTimers = useCallback(() => {
-    for (const t of cueTimersRef.current) clearTimeout(t)
-    cueTimersRef.current = []
-  }, [])
-
-  const markCuesComplete = useCallback(() => {
-    if (!userSettings) return
-    try {
-      const completed: string[] = JSON.parse(userSettings.completedTours || '[]')
-      if (!completed.includes(LOGGER_CUES_ID)) {
-        const updated = JSON.stringify([...completed, LOGGER_CUES_ID])
-        updateSettings({ completedTours: updated })
-      }
-    } catch { /* invalid JSON, skip */ }
-  }, [userSettings, updateSettings])
-
-  // Handle tab changes for cue flow
-  const handleCueTabChange = useCallback((value: string) => {
-    if (value === 'info' && pulseInfoTab) {
-      // Step 2: User tapped Info — stop Info pulse, start Log Sets pulse after delay
-      setPulseInfoTab(false)
-      clearCueTimers()
-      const delayTimer = setTimeout(() => {
-        setPulseLogSetsTab(true)
-        const stopTimer = setTimeout(() => {
-          setPulseLogSetsTab(false)
-          markCuesComplete()
-        }, 8000)
-        cueTimersRef.current.push(stopTimer)
-      }, 2500)
-      cueTimersRef.current.push(delayTimer)
-    } else if (value === 'log-sets' && pulseLogSetsTab) {
-      // Step 3: User tapped Log Sets — stop pulse, mark complete
-      setPulseLogSetsTab(false)
-      clearCueTimers()
-      markCuesComplete()
-    }
-  }, [pulseInfoTab, pulseLogSetsTab, clearCueTimers, markCuesComplete])
-
-  // Cleanup cue timers on unmount
-  useEffect(() => {
-    return () => clearCueTimers()
-  }, [clearCueTimers])
-
   // Wizard state
   const [activeWizard, setActiveWizard] = useState<'add' | 'swap' | 'edit' | 'delete' | null>(null)
   const [navigateToLastExercise, setNavigateToLastExercise] = useState(false)
@@ -171,45 +113,6 @@ export default function ExerciseLoggingModal({
     flushFailedSets,
     clearCache,
   } = useWorkoutDraft(workoutId)
-
-  // Start logger tour for first-time users once the exercise loads
-  useEffect(() => {
-    if (!currentExercise || !userSettings || tourActive) return
-    try {
-      const completed: string[] = JSON.parse(userSettings.completedTours || '[]')
-      if (!completed.includes(WORKOUT_LOGGER_TOUR_ID)) {
-        // Small delay so the UI renders before the tour overlay appears
-        const timer = setTimeout(() => {
-          startTour(WORKOUT_LOGGER_TOUR_ID, WORKOUT_LOGGER_STEPS)
-        }, 500)
-        return () => clearTimeout(timer)
-      }
-    } catch { /* invalid JSON, skip */ }
-  }, [currentExercise, userSettings, tourActive, startTour])
-
-  // Step 1: Pulse Info tab when logger first opens for a new user
-  useEffect(() => {
-    if (!currentExercise || !userSettings || cuesInitializedRef.current) return
-    cuesInitializedRef.current = true
-
-    try {
-      const completed: string[] = JSON.parse(userSettings.completedTours || '[]')
-      if (completed.includes(LOGGER_CUES_ID)) return
-    } catch { return }
-
-    // Pulse Info tab for ~8 seconds
-    setPulseInfoTab(true)
-    const stopTimer = setTimeout(() => {
-      setPulseInfoTab(false)
-      markCuesComplete()
-    }, 8000)
-    cueTimersRef.current.push(stopTimer)
-  }, [currentExercise, userSettings, markCuesComplete])
-
-  // Pause tour when inputs expand (layout shifts)
-  useEffect(() => {
-    setTourPaused(expandedInput !== null)
-  }, [expandedInput, setTourPaused])
 
   const currentPrescribedSets = useMemo(
     () => currentExercise?.prescribedSets || [],
@@ -404,7 +307,11 @@ export default function ExerciseLoggingModal({
       await completeDraft(workoutId, fallback)
       clearCache()
       await onComplete()
-      onClose()
+      // Do not call onClose() here — onComplete() already closes the modal
+      // via handleCloseModal(true) with router.refresh() inside startTransition.
+      // Calling onClose() again triggers a second router.refresh() outside
+      // startTransition, which activates the Suspense boundary (loading.tsx),
+      // unmounting the parent and losing post-session feedback state.
     } catch (error) {
       clientLogger.error('Error completing workout:', error)
       setIsSubmitting(false)
@@ -555,9 +462,6 @@ export default function ExerciseLoggingModal({
                 hasHistoryIndicator={hasHistoryForCurrentExercise}
                 onDeleteSet={handleDeleteSet}
                 isInputExpanded={expandedInput !== null}
-                pulseInfoTab={pulseInfoTab}
-                pulseLogSetsTab={pulseLogSetsTab}
-                onTabChange={handleCueTabChange}
                 loggingForm={
                   <SetLoggingForm
                     prescribedSet={prescribedSet}
@@ -612,7 +516,7 @@ export default function ExerciseLoggingModal({
                       </button>
                       <button type="button"
                         onClick={handleCompleteWorkout}
-                        className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-success text-white hover:bg-success/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
+                        className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-success text-success-foreground hover:bg-success/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
                       >
                         Confirm
                       </button>
@@ -652,7 +556,7 @@ export default function ExerciseLoggingModal({
                   </button>
                   <button type="button"
                     onClick={handleConfirmDelete}
-                    className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-error text-white hover:bg-error/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
+                    className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-error text-error-foreground hover:bg-error/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
                   >
                     Delete Set
                   </button>
