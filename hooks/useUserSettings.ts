@@ -11,6 +11,7 @@ export type UserSettings = {
   completedTours: string
   postSessionPromptCount: number
   lastPostSessionPromptAt: string | null
+  experienceLevel: string | null
 }
 
 type UseUserSettingsReturn = {

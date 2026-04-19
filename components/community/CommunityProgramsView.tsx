@@ -37,6 +37,7 @@ type CommunityProgram = {
 type CommunityProgramsViewProps = {
   communityPrograms: CommunityProgram[]
   currentUserId: string
+  defaultLevel?: string | null
 }
 
 const ITEMS_PER_PAGE = 20
@@ -60,9 +61,12 @@ function getLevelPriority(level: string | null): number {
 export default function CommunityProgramsView({
   communityPrograms,
   currentUserId,
+  defaultLevel = null,
 }: CommunityProgramsViewProps) {
   const [selectedType] = useState<'all' | 'strength'>('all')
-  const [selectedLevel, setSelectedLevel] = useState<string | null>(null)
+  // undefined = user hasn't interacted, use defaultLevel; null = user chose "All"
+  const [userSelectedLevel, setUserSelectedLevel] = useState<string | null | undefined>(undefined)
+  const selectedLevel = userSelectedLevel === undefined ? (defaultLevel ?? null) : userSelectedLevel
   const [selectedGoals, setSelectedGoals] = useState<string[]>([])
   const [currentPage, setCurrentPage] = useState(1)
 
@@ -120,13 +124,13 @@ export default function CommunityProgramsView({
 
   // Handle level change
   const handleLevelChange = (level: string | null) => {
-    setSelectedLevel(level)
+    setUserSelectedLevel(level)
     setCurrentPage(1)
   }
 
   // Clear all filters
   const clearFilters = () => {
-    setSelectedLevel(null)
+    setUserSelectedLevel(null)
     setSelectedGoals([])
     setCurrentPage(1)
   }
