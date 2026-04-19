@@ -525,10 +525,12 @@ model Feedback {
   id        String   @id @default(cuid())
   userId    String
   category  String   // "bug" | "feature" | "confusion" | "general" | "post_session"
-  message   String
+  message   String   @default("")
   pageUrl   String
   userAgent String?
   properties     String?  // JSON blob for extra context (e.g. question shown for post_session)
+  rating         Int?     // 1-5 experience rating (post_session)
+  refinements    String[] // ["confusing", "buggy", etc.] (post_session)
   status         String   @default("new") // "new" | "reviewed" | "resolved"
   adminNote      String?
   githubIssueUrl String?

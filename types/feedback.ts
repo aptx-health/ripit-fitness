@@ -3,10 +3,12 @@ export type FeedbackStatus = 'new' | 'reviewed' | 'resolved'
 
 export type FeedbackSubmission = {
   category: FeedbackCategory
-  message: string
+  message?: string
   pageUrl: string
   userAgent?: string
   properties?: Record<string, string>
+  rating?: number
+  refinements?: string[]
 }
 
 export const FEEDBACK_CATEGORIES: Array<{
@@ -31,6 +33,20 @@ export const POST_SESSION_QUESTIONS = [
   'What almost made you skip today?',
   'Was there an exercise you weren\'t sure how to do?',
 ] as const
+
+/** Refinement categories for post-session feedback (rating < 5) */
+export const POST_SESSION_REFINEMENTS = [
+  { value: 'confusing', label: 'Confusing to use' },
+  { value: 'cant_find', label: 'Couldn\'t find something' },
+  { value: 'buggy', label: 'Something felt buggy' },
+  { value: 'exercise_info', label: 'Exercise info was wrong/missing' },
+  { value: 'too_many_steps', label: 'Too many steps' },
+  { value: 'other', label: 'Something else' },
+] as const
+
+export type PostSessionRefinement = typeof POST_SESSION_REFINEMENTS[number]['value']
+
+export const VALID_REFINEMENTS: string[] = POST_SESSION_REFINEMENTS.map(r => r.value)
 
 /** Number of completed workouts between post-session prompts */
 export const POST_SESSION_COOLDOWN = 3

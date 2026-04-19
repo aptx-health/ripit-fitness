@@ -6,7 +6,7 @@ import { sendDiscordNotification } from '@/lib/discord'
 import { logger } from '@/lib/logger'
 import { checkRateLimit, feedbackSubmissionLimiter } from '@/lib/rate-limit'
 import type { FeedbackCategory } from '@/types/feedback'
-import { VALID_CATEGORIES } from '@/types/feedback'
+import { VALID_CATEGORIES, VALID_REFINEMENTS } from '@/types/feedback'
 
 const MAX_MESSAGE_LENGTH = 2000
 
@@ -23,12 +23,14 @@ export async function POST(request: NextRequest) {
     if (limited) return limited
 
     const body = await request.json()
-    const { category, message, pageUrl, userAgent, properties } = body as {
+    const { category, message, pageUrl, userAgent, properties, rating, refinements } = body as {
       category: string
-      message: string
+      message?: string
       pageUrl: string
       userAgent?: string
       properties?: Record<string, string>
+      rating?: number
+      refinements?: string[]
     }
 
     // Validate category
@@ -39,11 +41,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate message
-    if (!message || message.trim().length === 0) {
+    // For post_session, message is optional (rating is the primary data)
+    const isPostSession = category === 'post_session'
+    const trimmedMessage = message?.trim() || ''
+
+    // Validate message (required for non-post_session categories)
+    if (!isPostSession && trimmedMessage.length === 0) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 })
     }
-    if (message.length > MAX_MESSAGE_LENGTH) {
+    if (trimmedMessage.length > MAX_MESSAGE_LENGTH) {
       return NextResponse.json(
         { error: `Message must be ${MAX_MESSAGE_LENGTH} characters or less` },
         { status: 400 }
@@ -53,6 +59,32 @@ export async function POST(request: NextRequest) {
     // Validate pageUrl
     if (!pageUrl || pageUrl.trim().length === 0) {
       return NextResponse.json({ error: 'Page URL is required' }, { status: 400 })
+    }
+
+    // Validate rating if provided (1-5)
+    if (rating !== undefined && rating !== null) {
+      if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+        return NextResponse.json({ error: 'Rating must be an integer between 1 and 5' }, { status: 400 })
+      }
+    }
+
+    // Post-session requires rating
+    if (isPostSession && (rating === undefined || rating === null)) {
+      return NextResponse.json({ error: 'Rating is required for post-session feedback' }, { status: 400 })
+    }
+
+    // Validate refinements if provided
+    const validatedRefinements: string[] = []
+    if (refinements && Array.isArray(refinements)) {
+      for (const r of refinements) {
+        if (!VALID_REFINEMENTS.includes(r)) {
+          return NextResponse.json(
+            { error: `Invalid refinement: ${r}` },
+            { status: 400 }
+          )
+        }
+        validatedRefinements.push(r)
+      }
     }
 
     // Validate properties if provided (must be a flat string-keyed object)
@@ -71,14 +103,16 @@ export async function POST(request: NextRequest) {
       data: {
         userId: user.id,
         category,
-        message: message.trim(),
+        message: trimmedMessage,
         pageUrl,
         userAgent: userAgent || null,
         properties: propertiesJson,
+        rating: rating ?? null,
+        refinements: validatedRefinements,
       },
     })
 
-    logger.info({ feedbackId: feedback.id, category, userId: user.id }, 'Feedback submitted')
+    logger.info({ feedbackId: feedback.id, category, rating, userId: user.id }, 'Feedback submitted')
 
     // Discord notification (fire and forget)
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ripit.fit'
@@ -86,13 +120,21 @@ export async function POST(request: NextRequest) {
       { name: 'Page', value: pageUrl, inline: true },
       { name: 'User', value: user.email || user.id, inline: true },
     ]
-    if (category === 'post_session' && properties?.question) {
-      discordFields.unshift({ name: 'Question', value: properties.question, inline: false })
+    if (isPostSession && rating) {
+      discordFields.unshift({ name: 'Rating', value: `${rating}/5`, inline: true })
     }
+    if (validatedRefinements.length > 0) {
+      discordFields.push({ name: 'Issues', value: validatedRefinements.join(', '), inline: false })
+    }
+
+    const discordDescription = trimmedMessage
+      ? trimmedMessage.substring(0, 200) + (trimmedMessage.length > 200 ? '...' : '')
+      : isPostSession ? `Rating: ${rating}/5` : '(no message)'
+
     sendDiscordNotification({
-      title: `Feedback: ${category === 'post_session' ? 'Post-Session' : category.charAt(0).toUpperCase() + category.slice(1)}`,
-      description: message.trim().substring(0, 200) + (message.trim().length > 200 ? '...' : ''),
-      color: category === 'post_session' ? 0x8B5CF6 : 0xEA580C,
+      title: `Feedback: ${isPostSession ? 'Post-Session' : category.charAt(0).toUpperCase() + category.slice(1)}`,
+      description: discordDescription,
+      color: isPostSession ? 0x8B5CF6 : 0xEA580C,
       url: `${appUrl}/admin/feedback?expand=${feedback.id}`,
       fields: discordFields,
     })
