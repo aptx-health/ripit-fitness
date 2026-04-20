@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/radix/
 import type { LoadState } from '@/hooks/useProgressiveExercises'
 import { EQUIPMENT_LABELS } from '@/lib/constants/program-metadata'
 import type { LoggedSet } from '@/types/workout'
-import RestStopwatch from './RestStopwatch'
+import BeginnerTipCard from './BeginnerTipCard'
 import SetList from './SetList'
 
 interface PrescribedSet {
@@ -57,6 +57,7 @@ interface ExerciseDisplayTabsProps {
   onDeleteSet: (setNumber: number) => void
   loggingForm: React.ReactNode
   isInputExpanded?: boolean
+  tip?: string
 }
 
 const FAU_DISPLAY_NAMES: Record<string, string> = {
@@ -102,6 +103,7 @@ export default function ExerciseDisplayTabs({
   onDeleteSet,
   loggingForm,
   isInputExpanded = false,
+  tip,
 }: ExerciseDisplayTabsProps) {
   const [expandedImage, setExpandedImage] = useState<string | null>(null)
   const hasNotes = !!exercise.notes
@@ -140,10 +142,7 @@ export default function ExerciseDisplayTabs({
               onDeleteSet={onDeleteSet}
               exerciseId={exercise.id}
             />
-            <RestStopwatch
-              loggedSetCount={loggedSets.length}
-              exerciseId={exercise.id}
-            />
+            {tip && <BeginnerTipCard tip={tip} />}
           </>
         )}
       </TabsContent>

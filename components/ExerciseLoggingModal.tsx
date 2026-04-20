@@ -11,6 +11,7 @@ import { useWorkoutDraft } from '@/hooks/useWorkoutDraft'
 import { completeDraft, discardDraft } from '@/lib/api/workout-sets'
 import { clientLogger } from '@/lib/client-logger'
 import { parseRepsFromPrescribed } from '@/lib/constants/intensity-presets'
+import { TIP_LIBRARY } from '@/lib/data/tip-library'
 import type { LoggedSet } from '@/types/workout'
 import ExerciseDefinitionEditorModal from './features/exercise-definition/ExerciseDefinitionEditorModal'
 import ExerciseActionsFooter from './workout-logging/ExerciseActionsFooter'
@@ -36,6 +37,7 @@ type Props = {
   initialExercise?: Exercise | null
   initialHistory?: ExerciseHistory | null
   initialExerciseIndex?: number
+  showTips?: boolean
   onComplete: () => Promise<void>
   onRefresh?: () => Promise<void>
 }
@@ -49,6 +51,7 @@ export default function ExerciseLoggingModal({
   initialExercise,
   initialHistory,
   initialExerciseIndex = 0,
+  showTips = false,
   onComplete,
   onRefresh,
 }: Props) {
@@ -74,6 +77,31 @@ export default function ExerciseLoggingModal({
 
   // Extra sets mode: allows logging beyond prescribed sets
   const [extraSetsMode, setExtraSetsMode] = useState(false)
+
+  // Tip rotation — sequential through array order, then random
+  const tierTips = useMemo(
+    () => showTips ? TIP_LIBRARY.filter(t => t.tier === 'beginner') : [],
+    [showTips]
+  )
+  const [currentTipIndex, setCurrentTipIndex] = useState(0)
+  const seenAllRef = useRef(false)
+  const currentTip = tierTips[currentTipIndex]?.text ?? ''
+
+  const rotateTip = useCallback(() => {
+    if (tierTips.length <= 1) return
+    setCurrentTipIndex(prev => {
+      const nextSequential = prev + 1
+      if (nextSequential < tierTips.length && !seenAllRef.current) {
+        if (nextSequential === tierTips.length - 1) seenAllRef.current = true
+        return nextSequential
+      }
+      // All shown — pick random, excluding current
+      seenAllRef.current = true
+      let next = Math.floor(Math.random() * (tierTips.length - 1))
+      if (next >= prev) next += 1
+      return next
+    })
+  }, [tierTips.length])
 
   // Wizard state
   const [activeWizard, setActiveWizard] = useState<'add' | 'swap' | 'edit' | 'delete' | null>(null)
@@ -177,6 +205,8 @@ export default function ExerciseLoggingModal({
       rir: currentSet.rir ? parseInt(currentSet.rir, 10) : null,
     })
 
+    rotateTip()
+
     // Pre-fill for next set: reps from next prescribed, weight carried forward
     const nextNextSetNumber = nextSetNumber + 1
     const nextPrescribed = currentPrescribedSets.find(s => s.setNumber === nextNextSetNumber)
@@ -194,7 +224,7 @@ export default function ExerciseLoggingModal({
       rpe: nextRpe,
       rir: nextRir,
     })
-  }, [currentSet, currentExercise, nextSetNumber, currentPrescribedSets, prescribedSet, logSet])
+  }, [currentSet, currentExercise, nextSetNumber, currentPrescribedSets, prescribedSet, logSet, rotateTip])
 
   const handleNextExercise = () => {
     lastPrefillKey.current = ''
@@ -462,6 +492,7 @@ export default function ExerciseLoggingModal({
                 hasHistoryIndicator={hasHistoryForCurrentExercise}
                 onDeleteSet={handleDeleteSet}
                 isInputExpanded={expandedInput !== null}
+                tip={currentTip}
                 loggingForm={
                   <SetLoggingForm
                     prescribedSet={prescribedSet}
