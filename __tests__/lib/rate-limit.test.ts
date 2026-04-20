@@ -1,12 +1,12 @@
+import { NextResponse } from 'next/server'
 import { RateLimiterMemory } from 'rate-limiter-flexible'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   checkRateLimit,
   checkRateLimitWithHeaders,
   getClientIp,
   withRateLimitHeaders,
 } from '@/lib/rate-limit'
-import { NextResponse } from 'next/server'
 
 /**
  * Tests for lib/rate-limit.

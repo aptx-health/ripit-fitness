@@ -1,10 +1,10 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import CommunityProgramBuilderWrapper from '@/components/admin/CommunityProgramBuilderWrapper'
-import { getCurrentUser } from '@/lib/auth/server'
 import { isEditorRole } from '@/lib/admin/auth'
-import { prisma } from '@/lib/db'
 import { hydrateCommunityProgram } from '@/lib/admin/community-program-hydration'
+import { getCurrentUser } from '@/lib/auth/server'
+import { prisma } from '@/lib/db'
 
 type Props = {
   params: Promise<{ id: string }>
