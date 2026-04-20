@@ -7,7 +7,6 @@ import ExerciseLoggingModal from '@/components/ExerciseLoggingModal'
 import { BeginnerPrimerWizard } from '@/components/features/training/BeginnerPrimerWizard'
 import { PostSessionFeedback } from '@/components/features/training/PostSessionFeedback'
 import { StickNudgeBanner } from '@/components/features/training/StickNudgeBanner'
-import { WarmupInterstitial } from '@/components/features/training/WarmupInterstitial'
 import { ProgramCompletionModal } from '@/components/ProgramCompletionModal'
 import WeekNavigator from '@/components/ui/WeekNavigator'
 import WorkoutHistoryList from '@/components/WorkoutHistoryList'
@@ -137,7 +136,6 @@ export default function StrengthWeekView({
   const resumeWorkoutId = searchParams.get('resume')
 
   // Contextual content triggers
-  const showWarmup = historyCount < 4 && !settings?.dismissedWarmup
   const showStickNudge = historyCount >= 3 && historyCount <= 8 && !settings?.dismissedStickNudge && !settingsLoading
   const showTips = historyCount <= 3 && settings?.experienceLevel === 'beginner'
 
@@ -220,10 +218,6 @@ export default function StrengthWeekView({
     setExpandedWorkoutId(prev => prev === workoutId ? null : workoutId)
   }, [])
 
-  // Interception state — warm-up gate before logging modal
-  const [warmupOpen, setWarmupOpen] = useState(false)
-  const [pendingLoggingWorkoutId, setPendingLoggingWorkoutId] = useState<string | null>(null)
-
   // Core logging flow — fetches metadata and opens the logging modal
   const proceedToLogging = useCallback(async (workoutId: string) => {
     setSelectedWorkoutId(workoutId)
@@ -241,7 +235,6 @@ export default function StrengthWeekView({
   }, [fetchWorkoutMetadata])
 
   // Opens logging modal with progressive loading (fast!)
-  // Intercepts with warm-up for early sessions (1-3)
   const handleOpenLogging = useCallback(async (workoutId: string) => {
     // Prevent opening a different workout while a draft exists
     if (activeDraft && activeDraft.workoutId !== workoutId) {
@@ -251,41 +244,8 @@ export default function StrengthWeekView({
       return
     }
 
-    // Skip warmup interception when resuming an existing draft —
-    // the user already started this workout and saw these screens
-    const isResumingDraft = activeDraft && activeDraft.workoutId === workoutId
-
-    // Warm-up interception for early sessions
-    if (showWarmup && !warmupOpen && !isResumingDraft) {
-      setPendingLoggingWorkoutId(workoutId)
-      setWarmupOpen(true)
-      return
-    }
-
     await proceedToLogging(workoutId)
-  }, [activeDraft, showWarmup, warmupOpen, proceedToLogging])
-
-  const handleWarmupCancel = () => {
-    setWarmupOpen(false)
-    setPendingLoggingWorkoutId(null)
-  }
-
-  const handleWarmupContinue = () => {
-    setWarmupOpen(false)
-    if (pendingLoggingWorkoutId) {
-      proceedToLogging(pendingLoggingWorkoutId)
-      setPendingLoggingWorkoutId(null)
-    }
-  }
-
-  const handleWarmupDismissPermanently = () => {
-    setWarmupOpen(false)
-    refetchSettings()
-    if (pendingLoggingWorkoutId) {
-      proceedToLogging(pendingLoggingWorkoutId)
-      setPendingLoggingWorkoutId(null)
-    }
-  }
+  }, [activeDraft, proceedToLogging])
 
   // Auto-resume draft workout when navigated with ?resume= param
   useEffect(() => {
@@ -510,14 +470,6 @@ export default function StrengthWeekView({
           onRefresh={handleRefreshMetadata}
         />
       )}
-
-      {/* Warm-up Interstitial — shown between Log tap and logging modal */}
-      <WarmupInterstitial
-        open={warmupOpen}
-        onContinue={handleWarmupContinue}
-        onCancel={handleWarmupCancel}
-        onDismissPermanently={handleWarmupDismissPermanently}
-      />
 
       {/* Post-Session Feedback */}
       <PostSessionFeedback
