@@ -21,16 +21,7 @@ export default function BeginnerTipCard({ tip, visible = true }: BeginnerTipCard
   return (
     <div
       role="note"
-      style={{
-        padding: '14px 14px',
-        marginTop: 12,
-        border: '0.5px dashed rgba(138,111,74,0.4)',
-        background: 'rgba(243,234,217,0.35)',
-        borderRadius: 0,
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: 10,
-      }}
+      className="flex items-start gap-2.5 mt-3 p-3.5 border border-dashed border-border/40 bg-muted/35"
     >
       <svg
         aria-hidden="true"
@@ -38,11 +29,10 @@ export default function BeginnerTipCard({ tip, visible = true }: BeginnerTipCard
         height="18"
         viewBox="0 0 24 24"
         fill="none"
-        stroke="#8a6f4a"
+        className="shrink-0 mt-[5px] stroke-muted-foreground"
         strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
-        style={{ flexShrink: 0, marginTop: 5 }}
       >
         <path d="M9 18h6" />
         <path d="M10 22h4" />
@@ -50,12 +40,7 @@ export default function BeginnerTipCard({ tip, visible = true }: BeginnerTipCard
       </svg>
       <span
         aria-live="polite"
-        style={{
-          fontSize: 18,
-          lineHeight: 1.55,
-          color: '#8a6f4a',
-          fontWeight: 400,
-        }}
+        className="text-lg leading-relaxed text-muted-foreground"
       >
         {displayText}
       </span>
