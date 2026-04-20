@@ -100,6 +100,10 @@ export function SetConfigurationInterface({
 
   // Update intensity type when settings load (only for new exercises, not when editing)
   useEffect(() => {
+    if (!hasIntensityAccess) {
+      setExerciseIntensityType('NONE')
+      return
+    }
     if (!initialConfig && settings?.defaultIntensityRating) {
       const newIntensityType = settings.defaultIntensityRating === 'rpe'
         ? 'RPE'
@@ -109,7 +113,7 @@ export function SetConfigurationInterface({
 
       setExerciseIntensityType(newIntensityType)
     }
-  }, [settings?.defaultIntensityRating, initialConfig])
+  }, [settings?.defaultIntensityRating, initialConfig, hasIntensityAccess])
 
   // Update parent whenever form state changes
   useEffect(() => {
@@ -305,7 +309,7 @@ export function SetConfigurationInterface({
                 <div className="flex items-center px-3 py-1.5 bg-muted/50">
                   <span className="w-12 text-sm font-bold text-muted-foreground uppercase tracking-wider">#</span>
                   <span className="flex-1 text-sm font-bold text-muted-foreground uppercase tracking-wider">REPS</span>
-                  {exerciseIntensityType !== 'NONE' && (
+                  {hasIntensityAccess && exerciseIntensityType !== 'NONE' && (
                     <span className="flex-1 text-sm font-bold text-muted-foreground uppercase tracking-wider">{exerciseIntensityType}</span>
                   )}
                   <span className="w-10" />
@@ -395,7 +399,7 @@ export function SetConfigurationInterface({
                     </div>
 
                     {/* Intensity Value */}
-                    {exerciseIntensityType !== 'NONE' && (
+                    {hasIntensityAccess && exerciseIntensityType !== 'NONE' && (
                       <div className="flex-1">
                         <Popover>
                           <PopoverTrigger asChild>

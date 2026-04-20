@@ -227,7 +227,7 @@ function SetDefinitionForm({
                   />
                 </div>
 
-                {exerciseIntensityType !== 'NONE' && (
+                {hasIntensityAccess && exerciseIntensityType !== 'NONE' && (
                   <div className="flex-1">
                     <label htmlFor={`set-${set.setNumber}-intensity`} className="block text-xs text-muted-foreground mb-1">
                       {exerciseIntensityType} Value
