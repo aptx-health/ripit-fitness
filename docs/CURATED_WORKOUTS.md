@@ -54,12 +54,12 @@ Weight is left blank — user fills in based on their ability.
 
 **Level**: Beginner | **Frequency**: 2-3x/week | **Weeks**: 5 | **Equipment**: Machines only
 
-Day-one program. All machines, fixed movement paths, low cognitive load. Alternating A/B full body workouts. Starts with lower volume and intensity, gradually ramps up.
+Day-one program. All machines, fixed movement paths, low cognitive load. Two rotating full body workouts. Starts with lower volume and intensity, gradually ramps up.
 
 | Day | Workout | Exercises |
 |-----|---------|-----------|
-| 1 | Machine Full Body A | Chest Press, Shoulder Press, Lat Pulldown, Leg Press, Leg Extensions, Seated Leg Curl, Back Extension |
-| 2 | Machine Full Body B | Chest Supported Row, Dip Machine, Leg Press, Thigh Adductor, Thigh Abductor, Ab Crunch Machine, Back Extension |
+| 1 | Your First Workout | Chest Press, Shoulder Press, Lat Pulldown, Leg Press, Leg Extensions, Seated Leg Curl, Back Extension |
+| 2 | Getting Comfortable | Chest Supported Row, Dip Machine, Leg Press, Thigh Adductor, Thigh Abductor, Ab Crunch Machine, Back Extension |
 
 ---
 

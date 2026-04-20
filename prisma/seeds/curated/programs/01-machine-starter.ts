@@ -3,7 +3,7 @@ import { makeSets, type ProgramSpec } from '../helpers'
 export const machineStarter: ProgramSpec = {
   name: 'Machine Starter',
   description:
-    'Day-one program for true beginners and older adults. All machines, fixed movement paths, low cognitive load. Alternating A/B full body workouts, 2-3x/week.',
+    'Day-one program for true beginners and older adults. All machines, fixed movement paths, low cognitive load. Two rotating full body workouts, 2-3x/week.',
 
   workouts: [
     {
