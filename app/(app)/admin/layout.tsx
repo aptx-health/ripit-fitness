@@ -23,6 +23,7 @@ export default async function AdminLayout({
     { href: '/admin/tags', label: 'Tags' },
     { href: '/admin/collections', label: 'Collections' },
     { href: '/admin/exercises', label: 'Exercises' },
+    { href: '/admin/community-programs', label: 'Programs' },
     { href: '/admin/feedback', label: 'Feedback' },
     { href: '/admin/analytics', label: 'Analytics' },
   ]
