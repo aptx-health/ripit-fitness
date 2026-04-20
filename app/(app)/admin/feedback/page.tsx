@@ -18,6 +18,8 @@ interface FeedbackItem {
   adminNote: string | null
   githubIssueUrl: string | null
   createdAt: string
+  rating: number | null
+  refinements: string[]
 }
 
 const STATUS_TABS = ['unresolved', 'all', 'new', 'reviewed', 'resolved'] as const
@@ -226,11 +228,25 @@ export default function AdminFeedbackPage() {
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm text-foreground whitespace-pre-wrap break-words">
-                      {item.message.length > 150
-                        ? `${item.message.substring(0, 150)}...`
-                        : item.message}
-                    </p>
+                    {item.rating !== null && (
+                      <span className="text-sm font-semibold text-foreground mr-2">
+                        Rating: {item.rating}/5
+                      </span>
+                    )}
+                    {item.refinements?.length > 0 && (
+                      <span className="text-sm text-muted-foreground">
+                        — {item.refinements.join(', ')}
+                      </span>
+                    )}
+                    {item.message ? (
+                      <p className="text-sm text-foreground whitespace-pre-wrap break-words mt-1">
+                        {item.message.length > 150
+                          ? `${item.message.substring(0, 150)}...`
+                          : item.message}
+                      </p>
+                    ) : !item.rating && (
+                      <p className="text-sm text-muted-foreground italic">No message</p>
+                    )}
                     <div className="flex flex-wrap gap-2 mt-2">
                       <span className={`text-xs px-2 py-0.5 border font-semibold uppercase ${categoryColor(item.category)}`}>
                         {item.category}
@@ -284,13 +300,39 @@ export default function AdminFeedbackPage() {
                     } catch { return null }
                   })()}
 
+                  {/* Rating & refinements (post-session) */}
+                  {item.rating !== null && (
+                    <div>
+                      <span className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                        Rating
+                      </span>
+                      <p className="text-sm text-foreground bg-muted p-3 border border-border">
+                        {item.rating}/5
+                      </p>
+                    </div>
+                  )}
+                  {item.refinements?.length > 0 && (
+                    <div>
+                      <span className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                        Issues Selected
+                      </span>
+                      <div className="flex flex-wrap gap-1.5 bg-muted p-3 border border-border">
+                        {item.refinements.map((r) => (
+                          <span key={r} className="text-xs px-2 py-1 border font-semibold uppercase bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-700">
+                            {r.replace(/_/g, ' ')}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Full message */}
                   <div>
                     <span className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
                       Full Message
                     </span>
                     <p className="text-sm text-foreground whitespace-pre-wrap break-words bg-muted p-3 border border-border">
-                      {item.message}
+                      {item.message || '(no message)'}
                     </p>
                   </div>
 

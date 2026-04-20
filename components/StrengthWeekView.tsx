@@ -4,7 +4,8 @@ import { CheckCircle } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState, useTransition } from 'react'
 import ExerciseLoggingModal from '@/components/ExerciseLoggingModal'
-import { PostSessionFeedback, pickPostSessionQuestion } from '@/components/features/training/PostSessionFeedback'
+import { BeginnerPrimerWizard } from '@/components/features/training/BeginnerPrimerWizard'
+import { PostSessionFeedback } from '@/components/features/training/PostSessionFeedback'
 import { StickNudgeBanner } from '@/components/features/training/StickNudgeBanner'
 import { WarmupInterstitial } from '@/components/features/training/WarmupInterstitial'
 import { ProgramCompletionModal } from '@/components/ProgramCompletionModal'
@@ -130,7 +131,7 @@ export default function StrengthWeekView({
   const [showCompletionModal, setShowCompletionModal] = useState(false)
   const [isRestarting, setIsRestarting] = useState(false)
   const [isProgramComplete, setIsProgramComplete] = useState(false)
-  const [postSessionQuestion, setPostSessionQuestion] = useState<string | null>(null)
+  const [showPostSession, setShowPostSession] = useState(false)
   const [pendingProgramCompletionCheck, setPendingProgramCompletionCheck] = useState(false)
 
   const resumeWorkoutId = searchParams.get('resume')
@@ -327,7 +328,7 @@ export default function StrengthWeekView({
     const shouldPrompt = settings
       && (settings.postSessionPromptCount % POST_SESSION_COOLDOWN === 0)
     if (shouldPrompt) {
-      setPostSessionQuestion(pickPostSessionQuestion())
+      setShowPostSession(true)
       setPendingProgramCompletionCheck(true)
       // Bump the prompt counter immediately so skip/send both count
       updateSettings({
@@ -346,7 +347,7 @@ export default function StrengthWeekView({
   }
 
   const handlePostSessionClose = async () => {
-    setPostSessionQuestion(null)
+    setShowPostSession(false)
     if (pendingProgramCompletionCheck) {
       setPendingProgramCompletionCheck(false)
       await checkProgramCompletion(true)
@@ -518,9 +519,7 @@ export default function StrengthWeekView({
 
       {/* Post-Session Feedback */}
       <PostSessionFeedback
-        key={postSessionQuestion}
-        open={!!postSessionQuestion}
-        question={postSessionQuestion || ''}
+        open={showPostSession}
         onClose={handlePostSessionClose}
       />
 
