@@ -1,8 +1,8 @@
-import type { Prisma, PrismaClient } from '@prisma/client'
 import { createId } from '@paralleldrive/cuid2'
+import type { Prisma, PrismaClient } from '@prisma/client'
+import { calculateProgramStats } from '@/lib/community/validation'
 import { logger } from '@/lib/logger'
 import { batchInsertStrengthWeek, type WeekData } from './batch-insert-week'
-import { calculateProgramStats } from '@/lib/community/validation'
 
 const ADMIN_DRAFT_STATUS = 'admin_draft'
 const STALE_DRAFT_HOURS = 24

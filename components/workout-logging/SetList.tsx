@@ -2,6 +2,7 @@
 
 import { AlertCircle, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { useRestTimer } from '@/hooks/useRestTimer'
 import type { LoggedSet } from '@/types/workout'
 
 interface PrescribedSet {
@@ -53,6 +54,11 @@ export default function SetList({
 }: SetListProps) {
   const loggedSetNumbers = new Set(loggedSets.map(s => s.setNumber))
   const remainingSets = prescribedSets.filter(s => !loggedSetNumbers.has(s.setNumber))
+
+  const { formatted: restFormatted, isRunning: restRunning } = useRestTimer(
+    loggedSets.length,
+    exerciseId || ''
+  )
 
   // Track which set was just logged for the power-up flash animation
   const prevExerciseRef = useRef(exerciseId)
@@ -143,8 +149,20 @@ export default function SetList({
       {/* Remaining prescribed sets */}
       {remainingSets.length > 0 && (
         <div className="mt-1">
-          <span className="block text-xs font-bold text-muted-foreground uppercase tracking-wider px-1 mb-0.5">
-            PRESCRIBED
+          <span className="flex items-baseline justify-between px-1 mb-0.5">
+            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+              PRESCRIBED
+            </span>
+            {restRunning && (
+              <span
+                role="timer"
+                className="text-sm font-bold tracking-wider text-muted-foreground/30 tabular-nums"
+                aria-label={`Rest timer: ${restFormatted}`}
+                aria-live="off"
+              >
+                {restFormatted}
+              </span>
+            )}
           </span>
           <div className="border border-border/50 divide-y divide-border/30">
             {remainingSets.map((set) => (

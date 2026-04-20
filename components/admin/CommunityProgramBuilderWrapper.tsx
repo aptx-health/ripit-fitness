@@ -3,8 +3,8 @@
 import { useRouter } from 'next/navigation'
 import { useCallback, useState } from 'react'
 import ProgramBuilder from '@/components/ProgramBuilder'
-import type { ExistingProgram } from '@/types/program-builder'
 import { clientLogger } from '@/lib/client-logger'
+import type { ExistingProgram } from '@/types/program-builder'
 
 interface CommunityProgramBuilderWrapperProps {
   communityProgramId: string

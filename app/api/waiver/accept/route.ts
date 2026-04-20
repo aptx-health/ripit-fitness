@@ -4,9 +4,9 @@ import { CURRENT_WAIVER_VERSION } from '@/lib/constants/waiver'
 import { prisma } from '@/lib/db'
 import { logger } from '@/lib/logger'
 import {
+  authSensitiveLimiter,
   checkRateLimitWithHeaders,
   getClientIp,
-  authSensitiveLimiter,
   withRateLimitHeaders,
 } from '@/lib/rate-limit'
 
