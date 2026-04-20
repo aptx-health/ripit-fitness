@@ -296,7 +296,7 @@ export function SetConfigurationInterface({
               ) : (
                 <div className="w-full px-3 py-2.5 border border-border bg-card text-muted-foreground opacity-60 flex items-center gap-2">
                   <Lock size={14} />
-                  <span className="text-sm">Premium feature</span>
+                  <span className="text-sm">Premium Feature Coming Soon</span>
                 </div>
               )}
             </div>

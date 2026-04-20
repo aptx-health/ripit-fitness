@@ -209,7 +209,7 @@ export default function SettingsPage() {
               </span>
               {!hasIntensityAccess ? (
                 <div className="px-4 py-3 border-2 border-border bg-muted text-muted-foreground text-sm">
-                  Coming soon as a premium feature
+                  Premium Feature Coming Soon
                 </div>
               ) : (
                 <>

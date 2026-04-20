@@ -198,7 +198,7 @@ function SetDefinitionForm({
             ) : (
               <div className="w-full px-3 py-2 border border-input rounded-lg bg-muted text-muted-foreground opacity-60 flex items-center gap-2">
                 <Lock size={14} />
-                <span className="text-sm">Premium</span>
+                <span className="text-sm">Premium Feature Coming Soon</span>
               </div>
             )}
           </div>

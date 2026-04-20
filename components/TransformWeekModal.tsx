@@ -173,7 +173,7 @@ export default function TransformWeekModal({
             {!hasIntensityAccess ? (
               <div className="px-3 py-2.5 border-2 border-border bg-muted text-muted-foreground opacity-60 flex items-center gap-2">
                 <Lock size={14} />
-                <span className="text-sm">Premium feature</span>
+                <span className="text-sm">Premium Feature Coming Soon</span>
               </div>
             ) : (
               <>
