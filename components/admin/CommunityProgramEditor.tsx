@@ -1,6 +1,7 @@
 'use client'
 
 import { ChevronDown, ChevronRight, Save } from 'lucide-react'
+import Link from 'next/link'
 import { useState } from 'react'
 
 interface ProgramExercise {
@@ -274,7 +275,17 @@ export default function CommunityProgramEditor({ program, onSave, onCancel }: Pr
 
       {/* Weeks section */}
       <div>
-        <h2 className="text-lg font-bold uppercase tracking-wider mb-3">Program Structure</h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-bold uppercase tracking-wider">Program Structure</h2>
+          {program.curated && (
+            <Link
+              href={`/admin/community-programs/${program.id}/edit-structure`}
+              className="px-3 py-1.5 bg-primary text-primary-foreground text-xs font-semibold uppercase tracking-wider border-2 border-primary hover:bg-primary-hover transition-colors"
+            >
+              Edit in Program Builder
+            </Link>
+          )}
+        </div>
         <div className="space-y-2">
           {weeks.map((week, weekIndex) => (
             <div key={weekIndex} className="border-2 border-border bg-card">

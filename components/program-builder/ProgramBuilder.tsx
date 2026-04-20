@@ -17,7 +17,7 @@ import ProgramDetailsForm from './ProgramDetailsForm'
 import WeekCard from './WeekCard'
 import WeekNavigation from './WeekNavigation'
 
-export default function ProgramBuilder({ editMode = false, existingProgram }: ProgramBuilderProps) {
+export default function ProgramBuilder({ editMode = false, existingProgram, onComplete }: ProgramBuilderProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [programId, setProgramId] = useState<string | null>(
@@ -44,6 +44,7 @@ export default function ProgramBuilder({ editMode = false, existingProgram }: Pr
     setWeeks: weekState.setWeeks,
     setIsLoading,
     setError,
+    onComplete,
   })
 
   const workoutActions = useWorkoutActions({

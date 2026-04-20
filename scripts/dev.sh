@@ -16,8 +16,8 @@ set -e
 source "$(dirname "$0")/worktree-env.sh"
 
 if [ $# -eq 0 ]; then
-  # Default: common minimal subset
-  exec overmind start -l postgres,app
+  # Default: postgres + redis + worker + app
+  exec overmind start -l postgres,redis,worker,app
 elif [[ "$1" == -* ]]; then
   # First arg is a flag (e.g. -l) — treat as `start` with those flags
   exec overmind start "$@"

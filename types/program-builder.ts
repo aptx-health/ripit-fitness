@@ -58,4 +58,5 @@ export type ExistingProgram = {
 export type ProgramBuilderProps = {
   editMode?: boolean
   existingProgram?: ExistingProgram
+  onComplete?: () => void
 }
