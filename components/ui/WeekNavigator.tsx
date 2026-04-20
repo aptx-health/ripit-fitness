@@ -20,7 +20,7 @@ export default function WeekNavigator({
   const hasNext = currentWeek < totalWeeks
 
   return (
-    <div data-tour="week-nav">
+    <div>
       {/* Week number row with arrows */}
       <div className="flex items-center justify-center gap-1">
         {/* Prev button */}

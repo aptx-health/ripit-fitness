@@ -79,7 +79,6 @@ export default function ExerciseActionsFooter({
       <div className="flex items-center gap-2">
         {/* Log Set Button */}
         <button type="button"
-          data-tour="log-set"
           onClick={onLogSet}
           disabled={!canLogSet || (hasLoggedAllPrescribed && !extraSetsMode)}
           className="flex-1 py-2.5 bg-accent text-accent-foreground text-sm font-bold uppercase tracking-wider transition-all hover:bg-accent/90 disabled:opacity-40 disabled:cursor-not-allowed doom-button-3d doom-focus-ring"
@@ -89,7 +88,6 @@ export default function ExerciseActionsFooter({
 
         {/* Complete Workout Button */}
         <button type="button"
-          data-tour="complete"
           disabled={isSubmitting || totalLoggedSets === 0}
           className="py-2.5 px-4 border border-success text-success text-sm font-bold uppercase tracking-wider transition-all hover:bg-success hover:text-success-foreground disabled:opacity-30 disabled:cursor-not-allowed doom-button-3d doom-focus-ring"
           onMouseDown={(e) => {

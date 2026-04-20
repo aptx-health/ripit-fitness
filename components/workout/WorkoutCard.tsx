@@ -88,7 +88,6 @@ export default function WorkoutCard({
     <div>
       <button
         type="button"
-        data-tour="workout-card"
         onClick={handleCardTap}
         disabled={isLoading || isSkipping || isUnskipping}
         aria-label={`${actionLabel}: Day ${workout.dayNumber} ${workout.name}`}

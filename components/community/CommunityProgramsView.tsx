@@ -2,6 +2,8 @@
 
 import { Check, ChevronDown, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
+
+import ProgramRequestModal from '@/components/features/ProgramRequestModal'
 import {
   Popover,
   PopoverContent,
@@ -37,6 +39,7 @@ type CommunityProgram = {
 type CommunityProgramsViewProps = {
   communityPrograms: CommunityProgram[]
   currentUserId: string
+  defaultLevel?: string | null
 }
 
 const ITEMS_PER_PAGE = 20
@@ -60,11 +63,15 @@ function getLevelPriority(level: string | null): number {
 export default function CommunityProgramsView({
   communityPrograms,
   currentUserId,
+  defaultLevel = null,
 }: CommunityProgramsViewProps) {
   const [selectedType] = useState<'all' | 'strength'>('all')
-  const [selectedLevel, setSelectedLevel] = useState<string | null>(null)
+  // undefined = user hasn't interacted, use defaultLevel; null = user chose "All"
+  const [userSelectedLevel, setUserSelectedLevel] = useState<string | null | undefined>(undefined)
+  const selectedLevel = userSelectedLevel === undefined ? (defaultLevel ?? null) : userSelectedLevel
   const [selectedGoals, setSelectedGoals] = useState<string[]>([])
   const [currentPage, setCurrentPage] = useState(1)
+  const [feedbackOpen, setFeedbackOpen] = useState(false)
 
   // Filter programs by type, level, and goals
   const filteredPrograms = useMemo(() => {
@@ -120,13 +127,13 @@ export default function CommunityProgramsView({
 
   // Handle level change
   const handleLevelChange = (level: string | null) => {
-    setSelectedLevel(level)
+    setUserSelectedLevel(level)
     setCurrentPage(1)
   }
 
   // Clear all filters
   const clearFilters = () => {
-    setSelectedLevel(null)
+    setUserSelectedLevel(null)
     setSelectedGoals([])
     setCurrentPage(1)
   }
@@ -149,7 +156,7 @@ export default function CommunityProgramsView({
             {/* Level Filter Popover */}
             <Popover>
               <PopoverTrigger asChild>
-                <button type="button" data-tour="level-filter" className="px-4 py-2 border-2 border-border text-foreground hover:border-primary transition-colors uppercase tracking-wider font-semibold doom-focus-ring flex items-center gap-2 text-sm">
+                <button type="button" className="px-4 py-2 border-2 border-border text-foreground hover:border-primary transition-colors uppercase tracking-wider font-semibold doom-focus-ring flex items-center gap-2 text-sm">
                   Level: {selectedLevel ? LEVEL_LABELS[selectedLevel] : 'All'}
                   <ChevronDown size={16} />
                 </button>
@@ -180,7 +187,7 @@ export default function CommunityProgramsView({
             {/* Goals Filter Popover */}
             <Popover>
               <PopoverTrigger asChild>
-                <button type="button" data-tour="goals-filter" className="px-4 py-2 border-2 border-border text-foreground hover:border-primary transition-colors uppercase tracking-wider font-semibold doom-focus-ring flex items-center gap-2 text-sm">
+                <button type="button" className="px-4 py-2 border-2 border-border text-foreground hover:border-primary transition-colors uppercase tracking-wider font-semibold doom-focus-ring flex items-center gap-2 text-sm">
                   Goals: {selectedGoals.length > 0 ? `${selectedGoals.length} selected` : 'Any'}
                   <ChevronDown size={16} />
                 </button>
@@ -224,28 +231,46 @@ export default function CommunityProgramsView({
 
         {/* Empty State */}
         {filteredPrograms.length === 0 ? (
-          <div className="bg-card border border-border p-12 text-center doom-noise doom-corners">
-            <h2 className="text-xl font-semibold text-foreground mb-2 doom-heading uppercase tracking-wider">
-              {selectedType === 'all'
-                ? 'NO COMMUNITY PROGRAMS YET'
-                : `NO ${selectedType.toUpperCase()} PROGRAMS YET`}
-            </h2>
-            <p className="text-muted-foreground mb-6">
-              {selectedType === 'all'
-                ? 'Be the first to publish a program!'
-                : `No ${selectedType} programs have been published yet.`}
-            </p>
-          </div>
+          <>
+            <div className="bg-card border border-border p-12 text-center doom-noise doom-corners">
+              <h2 className="text-xl font-semibold text-foreground mb-2 doom-heading uppercase tracking-wider">
+                NO MATCHING PROGRAMS
+              </h2>
+              <p className="text-muted-foreground mb-6">
+                {hasActiveFilters
+                  ? 'Try changing your filters. '
+                  : ''}
+                We&apos;re adding new programs regularly and would love your suggestions &mdash;{' '}
+                <button
+                  type="button"
+                  onClick={() => setFeedbackOpen(true)}
+                  className="text-primary hover:text-primary-hover underline underline-offset-2 transition-colors font-semibold"
+                  aria-label="Suggest a program"
+                >
+                  tell us what you want to see
+                </button>.
+              </p>
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="px-4 py-2 bg-primary text-primary-foreground border-2 border-primary hover:bg-primary-hover transition-colors font-semibold uppercase tracking-wider text-sm doom-focus-ring"
+                >
+                  Clear Filters
+                </button>
+              )}
+            </div>
+            <ProgramRequestModal open={feedbackOpen} onOpenChange={setFeedbackOpen} />
+          </>
         ) : (
           <>
             {/* Program Cards */}
             <div className="grid grid-cols-1 gap-4 mb-8">
-              {paginatedPrograms.map((program, index) => (
+              {paginatedPrograms.map((program) => (
                 <CommunityProgramCard
                   key={program.id}
                   program={program}
                   currentUserId={currentUserId}
-                  {...(index === 0 ? { 'data-tour': 'program-card' } : {})}
                 />
               ))}
             </div>

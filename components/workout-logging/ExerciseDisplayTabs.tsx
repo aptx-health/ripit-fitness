@@ -112,7 +112,7 @@ export default function ExerciseDisplayTabs({
         <TabsTrigger value="log-sets">
           <span>Log Sets</span>
         </TabsTrigger>
-        <TabsTrigger value="info" data-tour="info-tab">
+        <TabsTrigger value="info">
           <span>Info</span>
         </TabsTrigger>
         {hasNotes && (
@@ -142,7 +142,6 @@ export default function ExerciseDisplayTabs({
             />
             <RestStopwatch
               loggedSetCount={loggedSets.length}
-              prescribedSetCount={prescribedSets.length}
               exerciseId={exercise.id}
             />
           </>
