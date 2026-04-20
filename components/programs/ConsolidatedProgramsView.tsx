@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import CommunityProgramsView from '@/components/community/CommunityProgramsView'
 import { useToast } from '@/components/ToastProvider'
+import { useUserSettings } from '@/hooks/useUserSettings'
 import { clientLogger } from '@/lib/client-logger'
 import StrengthActivationModal from '../StrengthActivationModal'
 import ActiveProgramStrip from './ActiveProgramStrip'
@@ -58,6 +59,7 @@ export default function ConsolidatedProgramsView({
   const searchParams = useSearchParams()
   const router = useRouter()
   const toast = useToast()
+  const { settings } = useUserSettings()
   // Default to Browse tab for first-time users (no programs yet) or when URL param says so
   const tabParam = searchParams.get('tab')
   const isNewUser = strengthPrograms.length === 0

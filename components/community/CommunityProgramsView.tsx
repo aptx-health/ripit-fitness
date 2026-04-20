@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, ChevronDown, X } from 'lucide-react'
+import { Check, ChevronDown, MessageSquarePlus, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import ProgramRequestModal from '@/components/features/ProgramRequestModal'
@@ -11,9 +11,7 @@ import {
 } from '@/components/ui/radix/popover'
 import {
   FITNESS_LEVELS,
-  GOAL_LABELS,
   LEVEL_LABELS,
-  PROGRAM_GOALS,
 } from '@/lib/constants/program-metadata'
 import CommunityProgramCard from './CommunityProgramCard'
 
@@ -65,11 +63,9 @@ export default function CommunityProgramsView({
   currentUserId,
   defaultLevel = null,
 }: CommunityProgramsViewProps) {
-  const [selectedType] = useState<'all' | 'strength'>('all')
   // undefined = user hasn't interacted, use defaultLevel; null = user chose "All"
   const [userSelectedLevel, setUserSelectedLevel] = useState<string | null | undefined>(undefined)
   const selectedLevel = userSelectedLevel === undefined ? (defaultLevel ?? null) : userSelectedLevel
-  const [selectedGoals, setSelectedGoals] = useState<string[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
 
@@ -77,31 +73,22 @@ export default function CommunityProgramsView({
   const filteredPrograms = useMemo(() => {
     let filtered = communityPrograms
 
-    // Filter by type
-    if (selectedType !== 'all') {
-      filtered = filtered.filter((p) => p.programType === selectedType)
-    }
-
     // Filter by level
     if (selectedLevel) {
       filtered = filtered.filter((p) => p.level === selectedLevel)
     }
 
-    // Filter by goals (program has ANY of selected goals)
-    if (selectedGoals.length > 0) {
-      filtered = filtered.filter((p) =>
-        p.goals.some((goal) => selectedGoals.includes(goal))
-      )
-    }
-
     // Sort by level priority (beginner → intermediate → advanced) so gym-beta
     // newcomers land on beginner content first. JS's Array.sort is stable
     // (ES2019+), which preserves the server-side publishedAt DESC order
-    // within each level bucket.
-    return [...filtered].sort(
-      (a, b) => getLevelPriority(a.level) - getLevelPriority(b.level)
-    )
-  }, [communityPrograms, selectedType, selectedLevel, selectedGoals])
+    // within each level bucket. Secondary sort by publishedAt ASC so
+    // earlier-seeded programs (Machine Starter) surface first.
+    return [...filtered].sort((a, b) => {
+      const levelDiff = getLevelPriority(a.level) - getLevelPriority(b.level)
+      if (levelDiff !== 0) return levelDiff
+      return new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime()
+    })
+  }, [communityPrograms, selectedLevel])
 
   // Paginate filtered programs
   const totalPages = Math.ceil(filteredPrograms.length / ITEMS_PER_PAGE)
@@ -117,14 +104,6 @@ export default function CommunityProgramsView({
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  // Handle goal toggle
-  const handleGoalToggle = (goal: string) => {
-    setSelectedGoals((prev) =>
-      prev.includes(goal) ? prev.filter((g) => g !== goal) : [...prev, goal]
-    )
-    setCurrentPage(1) // Reset to first page when filter changes
-  }
-
   // Handle level change
   const handleLevelChange = (level: string | null) => {
     setUserSelectedLevel(level)
@@ -134,12 +113,11 @@ export default function CommunityProgramsView({
   // Clear all filters
   const clearFilters = () => {
     setUserSelectedLevel(null)
-    setSelectedGoals([])
     setCurrentPage(1)
   }
 
   // Check if any filters are active
-  const hasActiveFilters = selectedLevel !== null || selectedGoals.length > 0
+  const hasActiveFilters = selectedLevel !== null
 
   return (
     <div>
@@ -184,29 +162,7 @@ export default function CommunityProgramsView({
               </PopoverContent>
             </Popover>
 
-            {/* Goals Filter Popover */}
-            <Popover>
-              <PopoverTrigger asChild>
-                <button type="button" className="px-4 py-2 border-2 border-border text-foreground hover:border-primary transition-colors uppercase tracking-wider font-semibold doom-focus-ring flex items-center gap-2 text-sm">
-                  Goals: {selectedGoals.length > 0 ? `${selectedGoals.length} selected` : 'Any'}
-                  <ChevronDown size={16} />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-64 p-2" align="start">
-                <div className="space-y-1 max-h-64 overflow-y-auto">
-                  {Object.values(PROGRAM_GOALS).map((goal) => (
-                    <button type="button"
-                      key={goal}
-                      onClick={() => handleGoalToggle(goal)}
-                      className="w-full px-3 py-2 text-left text-sm hover:bg-primary/10 transition-colors doom-focus-ring flex items-center justify-between uppercase tracking-wider font-medium"
-                    >
-                      {GOAL_LABELS[goal]}
-                      {selectedGoals.includes(goal) && <Check size={16} className="text-primary" />}
-                    </button>
-                  ))}
-                </div>
-              </PopoverContent>
-            </Popover>
+            {/* TODO: Re-enable goals filter when program library grows */}
 
             {/* Clear Filters Button */}
             {hasActiveFilters && (
@@ -260,7 +216,6 @@ export default function CommunityProgramsView({
                 </button>
               )}
             </div>
-            <ProgramRequestModal open={feedbackOpen} onOpenChange={setFeedbackOpen} />
           </>
         ) : (
           <>
@@ -273,6 +228,22 @@ export default function CommunityProgramsView({
                   currentUserId={currentUserId}
                 />
               ))}
+            </div>
+
+            {/* Request a Program prompt */}
+            <div className="border-2 border-dashed border-border bg-card/50 p-6 sm:p-8 text-center mb-8">
+              <p className="text-sm sm:text-base text-muted-foreground mb-4">
+                Looking for something specific?
+              </p>
+              <button
+                type="button"
+                onClick={() => setFeedbackOpen(true)}
+                className="px-4 py-3 min-h-12 bg-muted text-foreground border-2 border-border hover:border-primary hover:text-primary transition-colors font-semibold uppercase tracking-wider text-sm doom-focus-ring inline-flex items-center gap-2"
+                aria-label="Request a program"
+              >
+                <MessageSquarePlus size={18} />
+                Request a Program
+              </button>
             </div>
 
             {/* Pagination */}
@@ -349,6 +320,8 @@ export default function CommunityProgramsView({
             )}
           </>
         )}
+
+        <ProgramRequestModal open={feedbackOpen} onOpenChange={setFeedbackOpen} />
     </div>
   )
 }
