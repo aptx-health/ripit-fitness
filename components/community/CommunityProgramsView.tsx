@@ -63,11 +63,9 @@ export default function CommunityProgramsView({
   currentUserId,
   defaultLevel = null,
 }: CommunityProgramsViewProps) {
-  const [selectedType] = useState<'all' | 'strength'>('all')
   // undefined = user hasn't interacted, use defaultLevel; null = user chose "All"
   const [userSelectedLevel, setUserSelectedLevel] = useState<string | null | undefined>(undefined)
   const selectedLevel = userSelectedLevel === undefined ? (defaultLevel ?? null) : userSelectedLevel
-  const [selectedGoals, setSelectedGoals] = useState<string[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
 
@@ -75,31 +73,22 @@ export default function CommunityProgramsView({
   const filteredPrograms = useMemo(() => {
     let filtered = communityPrograms
 
-    // Filter by type
-    if (selectedType !== 'all') {
-      filtered = filtered.filter((p) => p.programType === selectedType)
-    }
-
     // Filter by level
     if (selectedLevel) {
       filtered = filtered.filter((p) => p.level === selectedLevel)
     }
 
-    // Filter by goals (program has ANY of selected goals)
-    if (selectedGoals.length > 0) {
-      filtered = filtered.filter((p) =>
-        p.goals.some((goal) => selectedGoals.includes(goal))
-      )
-    }
-
     // Sort by level priority (beginner → intermediate → advanced) so gym-beta
     // newcomers land on beginner content first. JS's Array.sort is stable
     // (ES2019+), which preserves the server-side publishedAt DESC order
-    // within each level bucket.
-    return [...filtered].sort(
-      (a, b) => getLevelPriority(a.level) - getLevelPriority(b.level)
-    )
-  }, [communityPrograms, selectedType, selectedLevel, selectedGoals])
+    // within each level bucket. Secondary sort by publishedAt ASC so
+    // earlier-seeded programs (Machine Starter) surface first.
+    return [...filtered].sort((a, b) => {
+      const levelDiff = getLevelPriority(a.level) - getLevelPriority(b.level)
+      if (levelDiff !== 0) return levelDiff
+      return new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime()
+    })
+  }, [communityPrograms, selectedLevel])
 
   // Paginate filtered programs
   const totalPages = Math.ceil(filteredPrograms.length / ITEMS_PER_PAGE)
@@ -115,14 +104,6 @@ export default function CommunityProgramsView({
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  // Handle goal toggle (kept for when goals filter is re-enabled)
-  const _handleGoalToggle = (goal: string) => {
-    setSelectedGoals((prev) =>
-      prev.includes(goal) ? prev.filter((g) => g !== goal) : [...prev, goal]
-    )
-    setCurrentPage(1) // Reset to first page when filter changes
-  }
-
   // Handle level change
   const handleLevelChange = (level: string | null) => {
     setUserSelectedLevel(level)
@@ -132,12 +113,11 @@ export default function CommunityProgramsView({
   // Clear all filters
   const clearFilters = () => {
     setUserSelectedLevel(null)
-    setSelectedGoals([])
     setCurrentPage(1)
   }
 
   // Check if any filters are active
-  const hasActiveFilters = selectedLevel !== null || selectedGoals.length > 0
+  const hasActiveFilters = selectedLevel !== null
 
   return (
     <div>
