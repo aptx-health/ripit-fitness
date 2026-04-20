@@ -34,20 +34,36 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
-    // Archive program instead of deleting (preserves historical workout data)
-    // If program was active, deactivate it
-    const archivedProgram = await prisma.program.update({
+    // Cannot delete an active program
+    if (program.isActive) {
+      return NextResponse.json(
+        { error: 'Deactivate this program before deleting it.' },
+        { status: 400 }
+      )
+    }
+
+    // Already deleted
+    if (program.deletedAt) {
+      return NextResponse.json(
+        { error: 'Program is already deleted' },
+        { status: 400 }
+      )
+    }
+
+    // Soft delete: set deletedAt timestamp, also mark archived for backwards compat
+    const deletedProgram = await prisma.program.update({
       where: { id: programId },
       data: {
+        deletedAt: new Date(),
         isArchived: true,
         archivedAt: new Date(),
-        isActive: false, // Deactivate when archiving
+        isActive: false,
       },
     })
 
     return NextResponse.json({
       success: true,
-      program: archivedProgram,
+      program: deletedProgram,
     })
   } catch (error) {
     logger.error({ error, context: 'program-delete' }, 'Failed to delete program')

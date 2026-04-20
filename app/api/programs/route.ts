@@ -8,6 +8,8 @@ import {
   withRateLimitHeaders,
 } from '@/lib/rate-limit'
 
+const MAX_CUSTOM_PROGRAMS = 3
+
 type CreateProgramRequest = {
   name: string
   description?: string
@@ -27,6 +29,40 @@ export async function POST(request: NextRequest) {
       endpoint: 'POST /api/programs',
     })
     if (rl.response) return rl.response
+
+    // Check custom program limit (unless admin or bypass enabled)
+    const isAdmin = user.role === 'admin'
+    let bypassLimit = isAdmin
+
+    if (!bypassLimit) {
+      const settings = await prisma.userSettings.findUnique({
+        where: { userId: user.id },
+        select: { customProgramLimitBypass: true },
+      })
+      bypassLimit = settings?.customProgramLimitBypass ?? false
+    }
+
+    if (!bypassLimit) {
+      const customProgramCount = await prisma.program.count({
+        where: {
+          userId: user.id,
+          isUserCreated: true,
+          deletedAt: null,
+        },
+      })
+
+      if (customProgramCount >= MAX_CUSTOM_PROGRAMS) {
+        return NextResponse.json(
+          {
+            error: 'Custom program limit reached',
+            code: 'PROGRAM_LIMIT_REACHED',
+            limit: MAX_CUSTOM_PROGRAMS,
+            current: customProgramCount,
+          },
+          { status: 403 }
+        )
+      }
+    }
 
     // Parse request body
     const body = await request.json() as CreateProgramRequest
@@ -93,12 +129,12 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const userCreatedOnly = searchParams.get('userCreated') === 'true'
 
-    // Fetch user's programs (exclude archived)
-    // Returns minimal data for listing - use /api/programs/[id] for full details
+    // Fetch user's programs (exclude archived and soft-deleted)
     const programs = await prisma.program.findMany({
       where: {
         userId: user.id,
         isArchived: false,
+        deletedAt: null,
         ...(userCreatedOnly && { isUserCreated: true })
       },
       select: {

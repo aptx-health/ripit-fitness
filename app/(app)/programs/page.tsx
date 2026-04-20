@@ -13,11 +13,11 @@ export default async function ProgramsPage() {
     redirect('/login')
   }
 
-  const [strengthPrograms, archivedStrengthCount, communityPrograms, activeWeekInfo] = await Promise.all([
+  const [strengthPrograms, communityPrograms, activeWeekInfo, customProgramCount, userSettings] = await Promise.all([
     prisma.program.findMany({
       where: {
         userId: user.id,
-        isArchived: false,
+        deletedAt: null,
       },
       orderBy: { createdAt: 'desc' },
       select: {
@@ -25,18 +25,13 @@ export default async function ProgramsPage() {
         name: true,
         description: true,
         isActive: true,
+        isUserCreated: true,
         createdAt: true,
         copyStatus: true,
         targetDaysPerWeek: true,
         _count: {
           select: { weeks: true },
         },
-      },
-    }),
-    prisma.program.count({
-      where: {
-        userId: user.id,
-        isArchived: true,
       },
     }),
     prisma.communityProgram.findMany({
@@ -70,7 +65,7 @@ export default async function ProgramsPage() {
         FROM "Program" p
         WHERE p."userId" = ${user.id}
           AND p."isActive" = true
-          AND p."isArchived" = false
+          AND p."deletedAt" IS NULL
         LIMIT 1
       ),
       incomplete_week AS (
@@ -108,6 +103,18 @@ export default async function ProgramsPage() {
       LEFT JOIN last_week lw ON true
       WHERE ap.id IS NOT NULL
     `.catch(() => []),
+    // Count custom (user-created, non-deleted) programs for limit display
+    prisma.program.count({
+      where: {
+        userId: user.id,
+        isUserCreated: true,
+        deletedAt: null,
+      },
+    }),
+    prisma.userSettings.findUnique({
+      where: { userId: user.id },
+      select: { customProgramLimitBypass: true },
+    }),
   ])
 
   const currentWeek = activeWeekInfo.length > 0
@@ -117,10 +124,12 @@ export default async function ProgramsPage() {
   return (
     <ConsolidatedProgramsView
       strengthPrograms={strengthPrograms}
-      archivedStrengthCount={archivedStrengthCount}
       communityPrograms={communityPrograms}
       currentUserId={user.id}
       activeWeekInfo={currentWeek}
+      customProgramCount={customProgramCount}
+      isAdmin={user.role === 'admin'}
+      customProgramLimitBypass={userSettings?.customProgramLimitBypass ?? false}
     />
   )
 }
