@@ -504,6 +504,7 @@ export default function StrengthWeekView({
           initialExercise={workoutMetadata.firstExercise}
           initialHistory={workoutMetadata.firstExerciseHistory}
           initialExerciseIndex={workoutMetadata.resumeExerciseIndex ?? 0}
+          historyCount={historyCount}
           onComplete={handleCompleteWorkout}
           onRefresh={handleRefreshMetadata}
         />
