@@ -1,8 +1,9 @@
 'use client'
 
-import { Plus, Trash } from 'lucide-react'
+import { Lock, Plus, Trash } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/radix/popover'
+import { useIntensityAccess } from '@/hooks/useIntensityAccess'
 import { useUserSettings } from '@/hooks/useUserSettings'
 import { clientLogger } from '@/lib/client-logger'
 import { RIR_PRESETS, RPE_PRESETS } from '@/lib/constants/intensity-presets'
@@ -62,9 +63,11 @@ export function SetConfigurationInterface({
   onEditExercise
 }: SetConfigurationInterfaceProps) {
   const { settings } = useUserSettings()
+  const { hasAccess: hasIntensityAccess } = useIntensityAccess()
 
-  // Determine default intensity type
+  // Determine default intensity type (forced to NONE for non-premium users)
   const getDefaultIntensityType = (): 'RIR' | 'RPE' | 'NONE' => {
+    if (!hasIntensityAccess) return 'NONE'
     if (initialConfig) return initialConfig.intensityType
 
     if (!settings?.defaultIntensityRating) {
@@ -275,16 +278,23 @@ export function SetConfigurationInterface({
               <label htmlFor="exercise-intensity-type" className="block text-sm font-bold text-muted-foreground mb-1.5 uppercase tracking-wider">
                 INTENSITY TYPE
               </label>
-              <select
-                id="exercise-intensity-type"
-                value={exerciseIntensityType}
-                onChange={(e) => setExerciseIntensityType(e.target.value as 'RIR' | 'RPE' | 'NONE')}
-                className="w-full px-3 py-2.5 border border-border focus:outline-none focus:border-primary bg-card text-foreground text-base"
-              >
-                <option value="NONE">None</option>
-                <option value="RIR">RIR (Reps in Reserve)</option>
-                <option value="RPE">RPE (Rate of Perceived Exertion)</option>
-              </select>
+              {hasIntensityAccess ? (
+                <select
+                  id="exercise-intensity-type"
+                  value={exerciseIntensityType}
+                  onChange={(e) => setExerciseIntensityType(e.target.value as 'RIR' | 'RPE' | 'NONE')}
+                  className="w-full px-3 py-2.5 border border-border focus:outline-none focus:border-primary bg-card text-foreground text-base"
+                >
+                  <option value="NONE">None</option>
+                  <option value="RIR">RIR (Reps in Reserve)</option>
+                  <option value="RPE">RPE (Rate of Perceived Exertion)</option>
+                </select>
+              ) : (
+                <div className="w-full px-3 py-2.5 border border-border bg-card text-muted-foreground opacity-60 flex items-center gap-2">
+                  <Lock size={14} />
+                  <span className="text-sm">Premium feature</span>
+                </div>
+              )}
             </div>
 
             {/* Individual Set Configuration - Table Layout */}

@@ -34,6 +34,7 @@ interface SetListProps {
   exerciseHistory: ExerciseHistory | null
   onDeleteSet: (setNumber: number) => void
   exerciseId?: string
+  showIntensity?: boolean
 }
 
 function formatIntensity(set: { rpe: number | null; rir: number | null }) {
@@ -48,6 +49,7 @@ export default function SetList({
   exerciseHistory,
   onDeleteSet,
   exerciseId,
+  showIntensity = true,
 }: SetListProps) {
   const loggedSetNumbers = new Set(loggedSets.map(s => s.setNumber))
   const remainingSets = prescribedSets.filter(s => !loggedSetNumbers.has(s.setNumber))
@@ -94,7 +96,7 @@ export default function SetList({
             <span key={set.setNumber}>
               {i > 0 && ' · '}
               {set.reps}×{set.weight}{set.weightUnit}
-              {formatIntensity(set) ? ` ${formatIntensity(set)}` : ''}
+              {showIntensity && formatIntensity(set) ? ` ${formatIntensity(set)}` : ''}
             </span>
           ))}
         </div>
@@ -122,7 +124,7 @@ export default function SetList({
                   {isFailed && <AlertCircle size={14} className="flex-shrink-0" />}
                   <span className="font-bold">{set.setNumber}.</span>
                   {set.reps}×{set.weight}{set.weightUnit}
-                  {formatIntensity(set) ? ` · ${formatIntensity(set)}` : ''}
+                  {showIntensity && formatIntensity(set) ? ` · ${formatIntensity(set)}` : ''}
                   {isPending && <span className="text-xs text-muted-foreground">saving...</span>}
                 </span>
                 <button
@@ -153,7 +155,7 @@ export default function SetList({
                 <span className="font-bold w-6">{set.setNumber}.</span>
                 <span>
                   {set.reps} reps @ {set.weight || '—'}
-                  {formatIntensity(set) ? ` · ${formatIntensity(set)}` : ''}
+                  {showIntensity && formatIntensity(set) ? ` · ${formatIntensity(set)}` : ''}
                 </span>
               </div>
             ))}

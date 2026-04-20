@@ -57,6 +57,7 @@ interface ExerciseDisplayTabsProps {
   onDeleteSet: (setNumber: number) => void
   loggingForm: React.ReactNode
   isInputExpanded?: boolean
+  showIntensity?: boolean
 }
 
 const FAU_DISPLAY_NAMES: Record<string, string> = {
@@ -102,6 +103,7 @@ export default function ExerciseDisplayTabs({
   onDeleteSet,
   loggingForm,
   isInputExpanded = false,
+  showIntensity = true,
 }: ExerciseDisplayTabsProps) {
   const [expandedImage, setExpandedImage] = useState<string | null>(null)
   const hasNotes = !!exercise.notes
@@ -139,6 +141,7 @@ export default function ExerciseDisplayTabs({
               exerciseHistory={null}
               onDeleteSet={onDeleteSet}
               exerciseId={exercise.id}
+              showIntensity={showIntensity}
             />
             <RestStopwatch
               loggedSetCount={loggedSets.length}

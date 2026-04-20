@@ -5,6 +5,7 @@ import { Heart, KeyRound, MessageSquarePlus, Moon, Palette, Save, Shield, Sun } 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import FeedbackModal from '@/components/features/FeedbackModal'
+import { useIntensityAccess } from '@/hooks/useIntensityAccess'
 import { useThemePreference } from '@/hooks/useThemePreference'
 import { useUserSettings } from '@/hooks/useUserSettings'
 import { authClient, useSession } from '@/lib/auth-client'
@@ -19,6 +20,7 @@ export default function SettingsPage() {
   const { data: session } = useSession()
   const { settings, isLoading, updateSettings } = useUserSettings()
   const { preference, updateTheme } = useThemePreference()
+  const { hasAccess: hasIntensityAccess } = useIntensityAccess()
   const userRole = (session?.user as Record<string, unknown>)?.role as string | undefined
   const isAdmin = userRole === 'admin' || userRole === 'editor'
   const [weightUnit, setWeightUnit] = useState<'lbs' | 'kg'>('lbs')
@@ -74,7 +76,7 @@ export default function SettingsPage() {
   const isDirty =
     settings &&
     (weightUnit !== settings.defaultWeightUnit ||
-      intensityRating !== settings.defaultIntensityRating)
+      (hasIntensityAccess && intensityRating !== settings.defaultIntensityRating))
 
   return (
     <div className="bg-background px-4 sm:px-6 py-8">
@@ -198,43 +200,51 @@ export default function SettingsPage() {
             </div>
 
             {/* Intensity Rating */}
-            <div>
+            <div className={!hasIntensityAccess ? 'opacity-60' : ''}>
               <span
                 id="intensity-rating-label"
                 className="block text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wider"
               >
-                Default Intensity Rating
+                Intensity Rating (RPE / RIR)
               </span>
-              <fieldset
-                className="flex gap-2"
-                aria-labelledby="intensity-rating-label"
-              >
-                <button
-                  type="button"
-                  onClick={() => setIntensityRating('rpe')}
-                  className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
-                    intensityRating === 'rpe'
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-muted text-foreground border-border hover:bg-secondary'
-                  }`}
-                >
-                  RPE
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIntensityRating('rir')}
-                  className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
-                    intensityRating === 'rir'
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-muted text-foreground border-border hover:bg-secondary'
-                  }`}
-                >
-                  RIR
-                </button>
-              </fieldset>
-              <p className="text-sm text-muted-foreground mt-1">
-                RPE = Rate of Perceived Exertion, RIR = Reps in Reserve
-              </p>
+              {!hasIntensityAccess ? (
+                <div className="px-4 py-3 border-2 border-border bg-muted text-muted-foreground text-sm">
+                  Coming soon as a premium feature
+                </div>
+              ) : (
+                <>
+                  <fieldset
+                    className="flex gap-2"
+                    aria-labelledby="intensity-rating-label"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setIntensityRating('rpe')}
+                      className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
+                        intensityRating === 'rpe'
+                          ? 'bg-primary text-primary-foreground border-primary'
+                          : 'bg-muted text-foreground border-border hover:bg-secondary'
+                      }`}
+                    >
+                      RPE
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIntensityRating('rir')}
+                      className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
+                        intensityRating === 'rir'
+                          ? 'bg-primary text-primary-foreground border-primary'
+                          : 'bg-muted text-foreground border-border hover:bg-secondary'
+                      }`}
+                    >
+                      RIR
+                    </button>
+                  </fieldset>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    RPE = Rate of Perceived Exertion, RIR = Reps in Reserve
+                  </p>
+                </>
+              )}
             </div>
 
             {/* Save Button */}

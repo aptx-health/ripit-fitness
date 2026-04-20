@@ -1,7 +1,8 @@
 'use client'
 
-import { X } from 'lucide-react'
+import { Lock, X } from 'lucide-react'
 import { useState } from 'react'
+import { useIntensityAccess } from '@/hooks/useIntensityAccess'
 
 interface SetDefinitionModalProps {
   isOpen: boolean
@@ -79,6 +80,7 @@ function SetDefinitionForm({
   initialNotes,
   mode = 'add'
 }: SetDefinitionFormProps) {
+  const { hasAccess: hasIntensityAccess } = useIntensityAccess()
   const initialIntensity = deriveIntensityType(initialSets)
   const [setCount, setSetCount] = useState(initialSets?.length || 3)
   const [exerciseIntensityType, setExerciseIntensityType] = useState(initialIntensity)
@@ -182,16 +184,23 @@ function SetDefinitionForm({
             <label htmlFor="intensity-type" className="block text-sm font-medium text-foreground mb-2">
               Intensity Type
             </label>
-            <select
-              id="intensity-type"
-              value={exerciseIntensityType}
-              onChange={(e) => handleIntensityTypeChange(e.target.value as 'RIR' | 'RPE' | 'NONE')}
-              className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-muted text-foreground"
-            >
-              <option value="NONE">None</option>
-              <option value="RIR">RIR (Reps in Reserve)</option>
-              <option value="RPE">RPE (Rate of Perceived Exertion)</option>
-            </select>
+            {hasIntensityAccess ? (
+              <select
+                id="intensity-type"
+                value={exerciseIntensityType}
+                onChange={(e) => handleIntensityTypeChange(e.target.value as 'RIR' | 'RPE' | 'NONE')}
+                className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-muted text-foreground"
+              >
+                <option value="NONE">None</option>
+                <option value="RIR">RIR (Reps in Reserve)</option>
+                <option value="RPE">RPE (Rate of Perceived Exertion)</option>
+              </select>
+            ) : (
+              <div className="w-full px-3 py-2 border border-input rounded-lg bg-muted text-muted-foreground opacity-60 flex items-center gap-2">
+                <Lock size={14} />
+                <span className="text-sm">Premium</span>
+              </div>
+            )}
           </div>
         </div>
 
