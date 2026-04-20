@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { RateLimiterMemory } from 'rate-limiter-flexible'
-import { afterEach, beforeEach, describe, expect, it, } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   checkRateLimit,
   checkRateLimitWithHeaders,
