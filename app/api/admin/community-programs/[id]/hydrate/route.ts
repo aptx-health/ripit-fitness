@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
 import { requireEditor } from '@/lib/admin/auth'
+import { hydrateCommunityProgram } from '@/lib/admin/community-program-hydration'
 import { prisma } from '@/lib/db'
 import { logger } from '@/lib/logger'
-import { hydrateCommunityProgram } from '@/lib/admin/community-program-hydration'
 
 /**
  * POST /api/admin/community-programs/[id]/hydrate

@@ -1,5 +1,5 @@
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { PrismaClient } from '@prisma/client'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { PgBouncerHarness } from '@/lib/test/pgbouncer-container'
 
 /**

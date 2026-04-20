@@ -187,8 +187,7 @@ export default function CommunityProgramsView({
 
         {/* Empty State */}
         {filteredPrograms.length === 0 ? (
-          <>
-            <div className="bg-card border border-border p-12 text-center doom-noise doom-corners">
+          <div className="bg-card border border-border p-12 text-center doom-noise doom-corners">
               <h2 className="text-xl font-semibold text-foreground mb-2 doom-heading uppercase tracking-wider">
                 NO MATCHING PROGRAMS
               </h2>
@@ -216,7 +215,6 @@ export default function CommunityProgramsView({
                 </button>
               )}
             </div>
-          </>
         ) : (
           <>
             {/* Program Cards */}
