@@ -27,13 +27,6 @@ export const FEEDBACK_CATEGORIES: Array<{
 export const VALID_CATEGORIES: FeedbackCategory[] = ['bug', 'feature', 'confusion', 'general', 'post_session']
 export const VALID_STATUSES: FeedbackStatus[] = ['new', 'reviewed', 'resolved']
 
-export const POST_SESSION_QUESTIONS = [
-  'How did that feel?',
-  'Anything confusing about logging today?',
-  'What almost made you skip today?',
-  'Was there an exercise you weren\'t sure how to do?',
-] as const
-
 /** Refinement categories for post-session feedback (rating < 5) */
 export const POST_SESSION_REFINEMENTS = [
   { value: 'confusing', label: 'Confusing to use' },
