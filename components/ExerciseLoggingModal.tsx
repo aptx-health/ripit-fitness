@@ -37,7 +37,7 @@ type Props = {
   initialExercise?: Exercise | null
   initialHistory?: ExerciseHistory | null
   initialExerciseIndex?: number
-  historyCount?: number
+  showTips?: boolean
   onComplete: () => Promise<void>
   onRefresh?: () => Promise<void>
 }
@@ -51,7 +51,7 @@ export default function ExerciseLoggingModal({
   initialExercise,
   initialHistory,
   initialExerciseIndex = 0,
-  historyCount = 0,
+  showTips = false,
   onComplete,
   onRefresh,
 }: Props) {
@@ -79,10 +79,9 @@ export default function ExerciseLoggingModal({
   const [extraSetsMode, setExtraSetsMode] = useState(false)
 
   // Tip rotation — sequential through array order, then random
-  const activeTier = historyCount <= 3 ? 'beginner' : 'ongoing'
   const tierTips = useMemo(
-    () => TIP_LIBRARY.filter(t => t.tier === activeTier),
-    [activeTier]
+    () => showTips ? TIP_LIBRARY.filter(t => t.tier === 'beginner') : [],
+    [showTips]
   )
   const [currentTipIndex, setCurrentTipIndex] = useState(0)
   const seenAllRef = useRef(false)

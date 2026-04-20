@@ -139,6 +139,7 @@ export default function StrengthWeekView({
   // Contextual content triggers
   const showWarmup = historyCount < 4 && !settings?.dismissedWarmup
   const showStickNudge = historyCount >= 3 && historyCount <= 8 && !settings?.dismissedStickNudge && !settingsLoading
+  const showTips = historyCount <= 3 && settings?.experienceLevel === 'beginner'
 
   const checkProgramCompletion = useCallback(async (openModal = false) => {
     // Skip check if we're currently restarting
@@ -504,7 +505,7 @@ export default function StrengthWeekView({
           initialExercise={workoutMetadata.firstExercise}
           initialHistory={workoutMetadata.firstExerciseHistory}
           initialExerciseIndex={workoutMetadata.resumeExerciseIndex ?? 0}
-          historyCount={historyCount}
+          showTips={showTips}
           onComplete={handleCompleteWorkout}
           onRefresh={handleRefreshMetadata}
         />
