@@ -117,15 +117,15 @@ export function PostSessionFeedback({ open, onClose }: PostSessionFeedbackProps)
         {/* Body */}
         <div className="p-6 space-y-5">
           {submitted ? (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              Thanks for the feedback.
+            <p className="text-lg text-muted-foreground text-center py-4">
+              🙏 Thanks for the feedback.
             </p>
           ) : (
             <>
               {/* Step 1: Rating */}
               <div>
                 <p className="text-sm font-semibold text-foreground uppercase tracking-wider mb-3">
-                  How was your experience?
+                  How are you liking the app?
                 </p>
                 <div className="flex gap-2">
                   {[1, 2, 3, 4, 5].map(value => (
