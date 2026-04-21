@@ -299,6 +299,7 @@ model UserSettings {
   experienceLevel           String?
   equipmentPreference       String?
   onboardingCompleted       Boolean   @default(false)
+  intensityEnabled          Boolean   @default(false)
   createdAt                 DateTime  @default(now())
   updatedAt                 DateTime  @updatedAt
 
