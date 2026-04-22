@@ -19,6 +19,8 @@ function parseRedisUrl(url: string) {
     port: parseInt(parsed.port || '6379', 10),
     password: parsed.password || undefined,
     maxRetriesPerRequest: null as null,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 30_000,
   }
 }
 

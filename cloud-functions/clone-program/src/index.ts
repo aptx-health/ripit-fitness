@@ -39,6 +39,12 @@ const prisma = new PrismaClient({
   },
 })
 
+// Log DB target on startup (redact password)
+try {
+  const dbParsed = new URL(workerDbUrl!)
+  console.log(`DB target: ${dbParsed.hostname}:${dbParsed.port}${dbParsed.pathname} (source: ${process.env.DIRECT_URL ? 'DIRECT_URL' : 'DATABASE_URL'})`)
+} catch { /* startup logging only */ }
+
 const redisUrl = process.env.REDIS_URL
 if (!redisUrl) {
   console.error('REDIS_URL is not set')
@@ -52,6 +58,8 @@ function parseRedisUrl(url: string) {
     port: parseInt(parsed.port || '6379', 10),
     password: parsed.password || undefined,
     maxRetriesPerRequest: null as null,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 30_000,
   }
 }
 
@@ -85,10 +93,12 @@ async function processCloneJob(job: Job<ProgramCloneJob>): Promise<void> {
     return
   }
 
+  console.log(`Looking up community program: ${communityProgramId}`)
   const communityProgram = await prisma.communityProgram.findUnique({
     where: { id: communityProgramId },
-    select: { programData: true },
+    select: { id: true, programData: true },
   })
+  console.log(`Community program lookup: id=${communityProgramId} found=${!!communityProgram} hasData=${!!communityProgram?.programData}`)
 
   if (!communityProgram?.programData) {
     throw new Error(`Community program not found or has no data: ${communityProgramId}`)
@@ -142,8 +152,27 @@ worker.on('error', (error) => {
   workerReady = false
 })
 
+worker.on('closed', () => {
+  workerReady = false
+  console.warn('Worker disconnected from Redis')
+})
+
+// Active readiness check: verify the worker can actually reach Redis,
+// not just that the flag is set. This lets k8s restart the pod if the
+// connection silently drops.
+async function isWorkerHealthy(): Promise<boolean> {
+  if (!workerReady) return false
+  try {
+    const client = await worker.client
+    const pong = await client.ping()
+    return pong === 'PONG'
+  } catch {
+    return false
+  }
+}
+
 // Health server for k8s probes
-const healthServer = http.createServer((req, res) => {
+const healthServer = http.createServer(async (req, res) => {
   if (req.url === '/healthz') {
     res.writeHead(200)
     res.end('OK')
@@ -151,7 +180,8 @@ const healthServer = http.createServer((req, res) => {
   }
 
   if (req.url === '/readyz') {
-    if (workerReady) {
+    const healthy = await isWorkerHealthy()
+    if (healthy) {
       res.writeHead(200)
       res.end('OK')
     } else {
