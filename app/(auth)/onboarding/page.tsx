@@ -74,7 +74,6 @@ export default function OnboardingPage() {
       }
     }
     check()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router])
 
   const completeOnboarding = useCallback(async (
