@@ -39,6 +39,12 @@ const prisma = new PrismaClient({
   },
 })
 
+// Log DB target on startup (redact password)
+try {
+  const dbParsed = new URL(workerDbUrl!)
+  console.log(`DB target: ${dbParsed.hostname}:${dbParsed.port}${dbParsed.pathname} (source: ${process.env.DIRECT_URL ? 'DIRECT_URL' : 'DATABASE_URL'})`)
+} catch { /* startup logging only */ }
+
 const redisUrl = process.env.REDIS_URL
 if (!redisUrl) {
   console.error('REDIS_URL is not set')
@@ -87,10 +93,12 @@ async function processCloneJob(job: Job<ProgramCloneJob>): Promise<void> {
     return
   }
 
+  console.log(`Looking up community program: ${communityProgramId}`)
   const communityProgram = await prisma.communityProgram.findUnique({
     where: { id: communityProgramId },
-    select: { programData: true },
+    select: { id: true, programData: true },
   })
+  console.log(`Community program lookup: id=${communityProgramId} found=${!!communityProgram} hasData=${!!communityProgram?.programData}`)
 
   if (!communityProgram?.programData) {
     throw new Error(`Community program not found or has no data: ${communityProgramId}`)
