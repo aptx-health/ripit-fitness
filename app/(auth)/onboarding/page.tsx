@@ -107,7 +107,7 @@ export default function OnboardingPage() {
 
       // For beginners with a program being cloned, poll for completion
       if (level === 'beginner' && data.programId) {
-        const TIMEOUT_MS = 15000
+        const TIMEOUT_MS = 20000
         const POLL_INTERVAL_MS = 1500
         const start = Date.now()
         let ready = false
@@ -152,8 +152,12 @@ export default function OnboardingPage() {
           setCopyFailed(true)
           return
         }
+      } else if (level === 'beginner') {
+        // Beginner but clone failed to enqueue (e.g. Redis down) — show failure
+        setCopyFailed(true)
+        return
       } else {
-        // Experienced users or no program - brief transition
+        // Experienced users — brief transition
         await new Promise(resolve => setTimeout(resolve, 2500))
       }
 
