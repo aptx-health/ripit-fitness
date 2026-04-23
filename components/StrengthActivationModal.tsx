@@ -13,7 +13,7 @@ type StrengthActivationModalProps = {
 export default function StrengthActivationModal({
   programId,
   existingActiveProgram,
-  onClose: _onClose
+  onClose
 }: StrengthActivationModalProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
@@ -45,7 +45,7 @@ export default function StrengthActivationModal({
   }
 
   const handleSkipActivation = () => {
-    // Redirect to programs list
+    onClose()
     router.push('/programs?tab=strength')
     router.refresh()
   }
