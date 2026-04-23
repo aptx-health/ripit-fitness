@@ -3,10 +3,6 @@ import { PrismaClient } from '@prisma/client'
 import { type Job, Worker } from 'bullmq'
 import { cloneStrengthProgramData, type ProgramCloneJob } from './cloning'
 
-// Use ioredis from BullMQ's own dependency to avoid version mismatch
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const IORedis = require('ioredis')
-
 const QUEUE_NAME = 'program-clone-jobs'
 
 // Clone worker bypasses PgBouncer and connects directly to Postgres (:5432).
@@ -69,19 +65,8 @@ function parseRedisUrl(url: string) {
 
 const connectionOpts = parseRedisUrl(redisUrl)
 
-// Create a shared Redis connection so we can observe its lifecycle events.
-// BullMQ will use this instead of creating its own internal connection.
-const redisConnection = new IORedis({
-  ...connectionOpts,
-  lazyConnect: false,
-})
-
-redisConnection.on('connect', () => console.log('[redis] connected'))
-redisConnection.on('ready', () => console.log('[redis] ready'))
-redisConnection.on('error', (err: Error) => console.error('[redis] error:', err.message))
-redisConnection.on('close', () => console.warn('[redis] connection closed'))
-redisConnection.on('reconnecting', (ms: number) => console.warn(`[redis] reconnecting in ${ms}ms`))
-redisConnection.on('end', () => console.error('[redis] connection ended (will not reconnect)'))
+// Redis connection event logging is attached after worker creation (see below)
+// so we can observe BullMQ's own ioredis connection without importing ioredis directly.
 
 /**
  * Process a program clone job from the BullMQ queue.
@@ -131,11 +116,24 @@ async function processCloneJob(job: Job<ProgramCloneJob>): Promise<void> {
 }
 
 const worker = new Worker(QUEUE_NAME, processCloneJob, {
-  connection: redisConnection,
+  connection: connectionOpts,
   concurrency: 1,
 })
 
 let workerReady = false
+
+// Attach Redis connection lifecycle logging via BullMQ's internal client
+worker.client.then((client) => {
+  console.log('[redis] attached lifecycle listeners to BullMQ connection')
+  client.on('connect', () => console.log('[redis] connected'))
+  client.on('ready', () => console.log('[redis] ready'))
+  client.on('error', (err: Error) => console.error('[redis] error:', err.message))
+  client.on('close', () => console.warn('[redis] connection closed'))
+  client.on('reconnecting', () => console.warn('[redis] reconnecting'))
+  client.on('end', () => console.error('[redis] connection ended (will not reconnect)'))
+}).catch((err) => {
+  console.error('[redis] failed to get client for lifecycle logging:', err)
+})
 
 worker.on('ready', () => {
   workerReady = true
@@ -211,7 +209,8 @@ setInterval(async () => {
   const isPaused = worker.isPaused()
   let redisPing = 'unknown'
   try {
-    redisPing = await redisConnection.ping()
+    const client = await worker.client
+    redisPing = await client.ping()
   } catch (err) {
     redisPing = `error: ${(err as Error).message}`
   }
@@ -225,7 +224,8 @@ async function isWorkerHealthy(): Promise<boolean> {
   if (!workerReady) return false
   if (!worker.isRunning()) return false
   try {
-    const pong = await redisConnection.ping()
+    const client = await worker.client
+    const pong = await client.ping()
     return pong === 'PONG'
   } catch {
     return false
@@ -267,7 +267,6 @@ async function shutdown() {
   await worker.close()
   healthServer.close()
   await prisma.$disconnect()
-  redisConnection.disconnect()
   process.exit(0)
 }
 
