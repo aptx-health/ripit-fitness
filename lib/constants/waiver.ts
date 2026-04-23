@@ -3,34 +3,26 @@
  *
  * Bump CURRENT_WAIVER_VERSION when legal copy changes — the routing guard
  * will force existing users to re-accept before they can proceed.
- *
- * Real legal copy will be provided by #463; this file holds the placeholder
- * text from the UI stub (#472).
  */
 
 export const CURRENT_WAIVER_VERSION = '1.0'
 
 export const WAIVER_TEXT = `
-ASSUMPTION OF RISK AND WAIVER OF LIABILITY
+ASSUMPTION OF RISK AND RELEASE OF LIABILITY
 
-By using this application, you acknowledge and agree to the following:
+By using Ripit Fitness ("the App"), you acknowledge and agree to the following:
 
-1. Physical activity carries inherent risks of injury. You voluntarily assume
-   all risks associated with any exercise program you undertake using this app.
+Physical Activity Risks. Exercise carries inherent risks, including but not limited to muscle strain, joint injury, cardiovascular events, and other physical harm. You voluntarily assume all such risks when following any workout program, exercise guidance, or fitness content provided through the App.
 
-2. This application is not a substitute for professional medical advice,
-   diagnosis, or treatment. Consult your physician before beginning any
-   exercise program.
+Not Medical Advice. The App is not a substitute for professional medical advice, diagnosis, or treatment. You should consult a qualified healthcare provider before beginning any exercise program, especially if you have a pre-existing medical condition, are recovering from injury, or have been physically inactive.
 
-3. You are solely responsible for determining whether any exercise or workout
-   is appropriate for your fitness level and physical condition.
+Your Responsibility. You are solely responsible for determining whether any exercise, weight, set, or rep scheme is appropriate for your current fitness level and physical condition. You agree to stop any exercise that causes sharp pain or unusual discomfort.
 
-4. The developers and operators of this application shall not be liable for
-   any injury, damage, or loss resulting from your use of the app or
-   participation in any exercise program.
+Release of Liability. To the fullest extent permitted by law, you release and hold harmless Ripit Fitness, its developers, operators, and any partner facilities (including gym locations where you may access or use the App) from any and all claims, damages, losses, or liability arising from your use of the App or participation in any exercise activity.
 
-5. You agree to use the application in accordance with all applicable laws
-   and regulations.
+Voluntary Participation. Your use of the App is entirely voluntary. No one is requiring you to perform any exercise or follow any program.
 
-[Placeholder waiver text -- replaced by #463]
+Age Requirement. You confirm that you are at least 18 years of age, or have the consent of a parent or legal guardian.
+
+Governing Law. This agreement is governed by the laws of the State of Colorado.
 `.trim()
