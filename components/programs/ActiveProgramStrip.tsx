@@ -26,7 +26,7 @@ export default function ActiveProgramStrip({
   const [isExpanded, setIsExpanded] = useState(false)
 
   return (
-    <div className="border border-border bg-card doom-noise">
+    <div className="border border-primary/40 border-l-4 border-l-primary bg-primary/5 doom-noise">
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
@@ -34,9 +34,14 @@ export default function ActiveProgramStrip({
       >
         <Star size={18} className="text-success shrink-0" fill="currentColor" />
         <div className="flex-1 min-w-0">
-          <h3 className="text-base font-bold text-foreground doom-heading uppercase truncate">
-            {programName}
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-base font-bold text-foreground doom-heading uppercase truncate">
+              {programName}
+            </h3>
+            <span className="text-xs font-bold text-primary uppercase tracking-wider shrink-0">
+              ACTIVE
+            </span>
+          </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             {currentWeek && totalWeeks && (
               <span>Week {currentWeek} of {totalWeeks}</span>
