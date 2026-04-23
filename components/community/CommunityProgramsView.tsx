@@ -38,6 +38,8 @@ type CommunityProgramsViewProps = {
   communityPrograms: CommunityProgram[]
   currentUserId: string
   defaultLevel?: string | null
+  hasAccess: boolean
+  maxPrograms: number
 }
 
 const ITEMS_PER_PAGE = 20
@@ -62,6 +64,8 @@ export default function CommunityProgramsView({
   communityPrograms,
   currentUserId,
   defaultLevel = null,
+  hasAccess,
+  maxPrograms,
 }: CommunityProgramsViewProps) {
   // undefined = user hasn't interacted, use defaultLevel; null = user chose "All"
   const [userSelectedLevel, setUserSelectedLevel] = useState<string | null | undefined>(undefined)
@@ -224,6 +228,8 @@ export default function CommunityProgramsView({
                   key={program.id}
                   program={program}
                   currentUserId={currentUserId}
+                  hasAccess={hasAccess}
+                  maxPrograms={maxPrograms}
                 />
               ))}
             </div>

@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
+import { MAX_PROGRAMS } from '@/lib/constants/programs'
 import { prisma } from '@/lib/db'
 import { logger } from '@/lib/logger'
 import {
@@ -7,7 +8,6 @@ import {
   programManagementLimiter,
   withRateLimitHeaders,
 } from '@/lib/rate-limit'
-import { MAX_CUSTOM_PROGRAMS } from '@/lib/constants/programs'
 
 type CreateProgramRequest = {
   name: string
@@ -42,21 +42,20 @@ export async function POST(request: NextRequest) {
     }
 
     if (!bypassLimit) {
-      const customProgramCount = await prisma.program.count({
+      const programCount = await prisma.program.count({
         where: {
           userId: user.id,
-          isUserCreated: true,
           deletedAt: null,
         },
       })
 
-      if (customProgramCount >= MAX_CUSTOM_PROGRAMS) {
+      if (programCount >= MAX_PROGRAMS) {
         return NextResponse.json(
           {
-            error: 'Custom program limit reached',
+            error: 'Program limit reached',
             code: 'PROGRAM_LIMIT_REACHED',
-            limit: MAX_CUSTOM_PROGRAMS,
-            current: customProgramCount,
+            limit: MAX_PROGRAMS,
+            current: programCount,
           },
           { status: 403 }
         )

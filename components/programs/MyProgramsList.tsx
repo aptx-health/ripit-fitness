@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useToast } from '@/components/ToastProvider'
-import { useCustomProgramAccess } from '@/hooks/useCustomProgramAccess'
 import { clientLogger } from '@/lib/client-logger'
 import ActivationConfirmModal from './ActivationConfirmModal'
 
@@ -28,9 +27,10 @@ type Props = {
   deletedPrograms: Set<string>
   hasActiveProgram: boolean
   activeProgram?: { id: string; name: string } | null
-  customProgramCount: number
-  isAdmin: boolean
-  customProgramLimitBypass: boolean
+  programCount: number
+  hasAccess: boolean
+  bypassLimit: boolean
+  maxPrograms: number
 }
 
 const INITIAL_SHOW = 5
@@ -42,9 +42,10 @@ export default function MyProgramsList({
   deletedPrograms,
   hasActiveProgram,
   activeProgram,
-  customProgramCount,
-  isAdmin,
-  customProgramLimitBypass,
+  programCount,
+  hasAccess,
+  bypassLimit,
+  maxPrograms,
 }: Props) {
   const router = useRouter()
   const toast = useToast()
@@ -55,12 +56,6 @@ export default function MyProgramsList({
   const [activationTarget, setActivationTarget] = useState<{ id: string; name: string } | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null)
   const [showPremiumModal, setShowPremiumModal] = useState(false)
-
-  const { hasAccess, maxPrograms } = useCustomProgramAccess({
-    customProgramCount,
-    isAdmin,
-    customProgramLimitBypass,
-  })
 
   // Filter out active program (shown in strip) and deleted programs
   const inactivePrograms = programs
@@ -104,7 +99,12 @@ export default function MyProgramsList({
         toast.success('Program duplicated')
         router.refresh()
       } else {
-        toast.error('Failed to duplicate program')
+        const data = await response.json().catch(() => ({}))
+        if (data.code === 'PROGRAM_LIMIT_REACHED') {
+          setShowPremiumModal(true)
+        } else {
+          toast.error(data.error || 'Failed to duplicate program')
+        }
       }
     } catch (error) {
       clientLogger.error('Error duplicating program:', error)
@@ -129,12 +129,13 @@ export default function MyProgramsList({
         </div>
         <CreateProgramRow
           hasAccess={hasAccess}
-          customProgramCount={customProgramCount}
+          bypassLimit={bypassLimit}
+          programCount={programCount}
           maxPrograms={maxPrograms}
           onPremiumGate={() => setShowPremiumModal(true)}
         />
         {showPremiumModal && (
-          <PremiumGateModal onClose={() => setShowPremiumModal(false)} />
+          <PremiumGateModal maxPrograms={maxPrograms} onClose={() => setShowPremiumModal(false)} />
         )}
       </div>
     )
@@ -264,7 +265,8 @@ export default function MyProgramsList({
 
       <CreateProgramRow
         hasAccess={hasAccess}
-        customProgramCount={customProgramCount}
+        bypassLimit={bypassLimit}
+        programCount={programCount}
         maxPrograms={maxPrograms}
         onPremiumGate={() => setShowPremiumModal(true)}
       />
@@ -290,7 +292,7 @@ export default function MyProgramsList({
 
       {/* Premium Gate Modal */}
       {showPremiumModal && (
-        <PremiumGateModal onClose={() => setShowPremiumModal(false)} />
+        <PremiumGateModal maxPrograms={maxPrograms} onClose={() => setShowPremiumModal(false)} />
       )}
     </div>
   )
@@ -298,12 +300,14 @@ export default function MyProgramsList({
 
 function CreateProgramRow({
   hasAccess,
-  customProgramCount,
+  bypassLimit,
+  programCount,
   maxPrograms,
   onPremiumGate,
 }: {
   hasAccess: boolean
-  customProgramCount: number
+  bypassLimit: boolean
+  programCount: number
   maxPrograms: number
   onPremiumGate: () => void
 }) {
@@ -317,9 +321,11 @@ function CreateProgramRow({
           <Plus size={16} />
           CREATE NEW PROGRAM
         </Link>
-        <p className="text-xs text-muted-foreground text-center">
-          {customProgramCount} of {maxPrograms} custom programs used
-        </p>
+        {!bypassLimit && (
+          <p className="text-sm text-muted-foreground text-center">
+            {programCount} of {maxPrograms} program slots used
+          </p>
+        )}
       </div>
     )
   }
@@ -334,8 +340,8 @@ function CreateProgramRow({
         <Lock size={16} />
         CREATE NEW PROGRAM
       </button>
-      <p className="text-xs text-muted-foreground text-center">
-        {customProgramCount} of {maxPrograms} custom programs used
+      <p className="text-sm text-muted-foreground text-center">
+        {programCount} of {maxPrograms} program slots used
       </p>
     </div>
   )
@@ -395,7 +401,7 @@ function DeleteConfirmModal({
   )
 }
 
-function PremiumGateModal({ onClose }: { onClose: () => void }) {
+function PremiumGateModal({ maxPrograms, onClose }: { maxPrograms: number; onClose: () => void }) {
   return (
     <div
       className="fixed inset-0 backdrop-blur-md bg-background/80 flex items-center justify-center z-[60] p-4"
@@ -407,14 +413,11 @@ function PremiumGateModal({ onClose }: { onClose: () => void }) {
             <Lock size={24} className="text-warning" />
           </div>
         </div>
-        <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2 uppercase tracking-wider">
-          Premium Feature
-        </h3>
-        <p className="text-sm text-muted-foreground mb-2">
-          Coming Soon
+        <p className="text-base text-foreground mb-2 leading-relaxed">
+          You&apos;ve used up your available program slots ({maxPrograms}). Please delete one to make room.
         </p>
-        <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-          Delete a custom program to make room, or upgrade when premium is available.
+        <p className="text-sm text-muted-foreground mb-6">
+          Additional program slots coming soon
         </p>
         <button
           type="button"

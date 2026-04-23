@@ -34,14 +34,6 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
-    // Cannot delete an active program
-    if (program.isActive) {
-      return NextResponse.json(
-        { error: 'Deactivate this program before deleting it.' },
-        { status: 400 }
-      )
-    }
-
     // Already deleted
     if (program.deletedAt) {
       return NextResponse.json(

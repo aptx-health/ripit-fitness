@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import CommunityProgramsView from '@/components/community/CommunityProgramsView'
 import { useToast } from '@/components/ToastProvider'
+import { useProgramAccess } from '@/hooks/useCustomProgramAccess'
 import { clientLogger } from '@/lib/client-logger'
 import StrengthActivationModal from '../StrengthActivationModal'
 import ActiveProgramStrip from './ActiveProgramStrip'
@@ -45,7 +46,7 @@ type Props = {
   communityPrograms: CommunityProgram[]
   currentUserId: string
   activeWeekInfo: { weekNumber: number; totalWeeks: number } | null
-  customProgramCount: number
+  programCount: number
   isAdmin: boolean
   customProgramLimitBypass: boolean
 }
@@ -55,7 +56,7 @@ export default function ConsolidatedProgramsView({
   communityPrograms,
   currentUserId,
   activeWeekInfo,
-  customProgramCount,
+  programCount,
   isAdmin,
   customProgramLimitBypass,
 }: Props) {
@@ -84,6 +85,12 @@ export default function ConsolidatedProgramsView({
   const [existingActiveProgram, setExistingActiveProgram] = useState<{ id: string; name: string } | null>(null)
 
   const activeProgram = strengthPrograms.find(p => p.isActive)
+
+  const { hasAccess, bypassLimit, maxPrograms } = useProgramAccess({
+    programCount,
+    isAdmin,
+    customProgramLimitBypass,
+  })
 
   const cleanupCloningState = () => {
     if (pollingIntervalRef.current) {
@@ -291,14 +298,17 @@ export default function ConsolidatedProgramsView({
               deletedPrograms={deletedPrograms}
               hasActiveProgram={!!activeProgram}
               activeProgram={activeProgram ? { id: activeProgram.id, name: activeProgram.name } : null}
-              customProgramCount={customProgramCount}
-              isAdmin={isAdmin}
-              customProgramLimitBypass={customProgramLimitBypass}
+              programCount={programCount}
+              hasAccess={hasAccess}
+              bypassLimit={bypassLimit}
+              maxPrograms={maxPrograms}
             />
           ) : (
             <CommunityProgramsView
               communityPrograms={communityPrograms}
               currentUserId={currentUserId}
+              hasAccess={hasAccess}
+              maxPrograms={maxPrograms}
             />
           )}
         </div>

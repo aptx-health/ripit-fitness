@@ -13,7 +13,7 @@ export default async function ProgramsPage() {
     redirect('/login')
   }
 
-  const [strengthPrograms, communityPrograms, activeWeekInfo, customProgramCount, userSettings] = await Promise.all([
+  const [strengthPrograms, communityPrograms, activeWeekInfo, programCount, userSettings] = await Promise.all([
     prisma.program.findMany({
       where: {
         userId: user.id,
@@ -103,11 +103,10 @@ export default async function ProgramsPage() {
       LEFT JOIN last_week lw ON true
       WHERE ap.id IS NOT NULL
     `.catch(() => []),
-    // Count custom (user-created, non-deleted) programs for limit display
+    // Count all non-deleted programs for limit display
     prisma.program.count({
       where: {
         userId: user.id,
-        isUserCreated: true,
         deletedAt: null,
       },
     }),
@@ -127,7 +126,7 @@ export default async function ProgramsPage() {
       communityPrograms={communityPrograms}
       currentUserId={user.id}
       activeWeekInfo={currentWeek}
-      customProgramCount={customProgramCount}
+      programCount={programCount}
       isAdmin={user.role === 'admin'}
       customProgramLimitBypass={userSettings?.customProgramLimitBypass ?? false}
     />

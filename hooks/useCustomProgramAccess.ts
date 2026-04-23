@@ -1,44 +1,48 @@
-import { MAX_CUSTOM_PROGRAMS } from '@/lib/constants/programs'
+import { MAX_PROGRAMS } from '@/lib/constants/programs'
 
-type CustomProgramAccessProps = {
-  customProgramCount: number
+type ProgramAccessProps = {
+  programCount: number
   isAdmin: boolean
   customProgramLimitBypass: boolean
 }
 
-type CustomProgramAccess = {
+type ProgramAccess = {
   hasAccess: boolean
+  bypassLimit: boolean
   remainingSlots: number
-  customProgramCount: number
+  programCount: number
   maxPrograms: number
 }
 
 /**
- * Determines whether the user can create new custom programs.
+ * Determines whether the user can create new programs.
+ * Counts all non-deleted programs (custom + cloned).
  * Admin users and users with customProgramLimitBypass always have access.
  */
-export function useCustomProgramAccess({
-  customProgramCount,
+export function useProgramAccess({
+  programCount,
   isAdmin,
   customProgramLimitBypass,
-}: CustomProgramAccessProps): CustomProgramAccess {
+}: ProgramAccessProps): ProgramAccess {
   const bypassLimit = isAdmin || customProgramLimitBypass
 
   if (bypassLimit) {
     return {
       hasAccess: true,
+      bypassLimit: true,
       remainingSlots: Infinity,
-      customProgramCount,
-      maxPrograms: MAX_CUSTOM_PROGRAMS,
+      programCount,
+      maxPrograms: MAX_PROGRAMS,
     }
   }
 
-  const remaining = Math.max(0, MAX_CUSTOM_PROGRAMS - customProgramCount)
+  const remaining = Math.max(0, MAX_PROGRAMS - programCount)
 
   return {
     hasAccess: remaining > 0,
+    bypassLimit: false,
     remainingSlots: remaining,
-    customProgramCount,
-    maxPrograms: MAX_CUSTOM_PROGRAMS,
+    programCount,
+    maxPrograms: MAX_PROGRAMS,
   }
 }
