@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import { useImagePrefetch } from '@/hooks/useImagePrefetch'
+import { useIntensityAccess } from '@/hooks/useIntensityAccess'
 import { type Exercise, type ExerciseHistory, useProgressiveExercises } from '@/hooks/useProgressiveExercises'
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
 import { useWorkoutDraft } from '@/hooks/useWorkoutDraft'
@@ -155,9 +156,12 @@ export default function ExerciseLoggingModal({
     (s) => s.setNumber === nextSetNumber
   )
 
-  // Check if current exercise has any prescribed RPE/RIR
-  const hasRpe = currentPrescribedSets.some((s) => s.rpe !== null)
-  const hasRir = currentPrescribedSets.some((s) => s.rir !== null)
+  // Premium intensity gate: admins always have access, others need intensityEnabled
+  const { hasAccess: hasIntensityAccess } = useIntensityAccess()
+
+  // Check if current exercise has any prescribed RPE/RIR (gated by premium)
+  const hasRpe = hasIntensityAccess && currentPrescribedSets.some((s) => s.rpe !== null)
+  const hasRir = hasIntensityAccess && currentPrescribedSets.some((s) => s.rir !== null)
 
   // Pre-fill form when exercise loads or set number changes
   const lastPrefillKey = useRef<string>('')
@@ -201,8 +205,8 @@ export default function ExerciseLoggingModal({
       reps: parseInt(currentSet.reps, 10),
       weight: parseFloat(currentSet.weight),
       weightUnit: currentSet.weightUnit,
-      rpe: currentSet.rpe ? parseFloat(currentSet.rpe) : null,
-      rir: currentSet.rir ? parseInt(currentSet.rir, 10) : null,
+      rpe: hasIntensityAccess && currentSet.rpe ? parseFloat(currentSet.rpe) : null,
+      rir: hasIntensityAccess && currentSet.rir ? parseInt(currentSet.rir, 10) : null,
     })
 
     rotateTip()
@@ -492,6 +496,7 @@ export default function ExerciseLoggingModal({
                 hasHistoryIndicator={hasHistoryForCurrentExercise}
                 onDeleteSet={handleDeleteSet}
                 isInputExpanded={expandedInput !== null}
+                showIntensity={hasIntensityAccess}
                 tip={currentTip}
                 loggingForm={
                   <SetLoggingForm

@@ -12,6 +12,7 @@ export type UserSettings = {
   postSessionPromptCount: number
   lastPostSessionPromptAt: string | null
   experienceLevel: string | null
+  intensityEnabled: boolean
 }
 
 type UseUserSettingsReturn = {

@@ -16,6 +16,7 @@ type UpdateSettingsRequest = {
   experienceLevel?: 'beginner' | 'experienced'
   equipmentPreference?: 'machines' | 'free_weights_cables'
   onboardingCompleted?: boolean
+  intensityEnabled?: boolean
 }
 
 export async function GET(_request: NextRequest) {
@@ -71,7 +72,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json() as UpdateSettingsRequest
-    const { displayName, defaultWeightUnit, defaultIntensityRating, dismissedPrimer, dismissedWarmup, dismissedStickNudge, completedTours, postSessionPromptCount, lastPostSessionPromptAt, experienceLevel, equipmentPreference, onboardingCompleted } = body
+    const { displayName, defaultWeightUnit, defaultIntensityRating, dismissedPrimer, dismissedWarmup, dismissedStickNudge, completedTours, postSessionPromptCount, lastPostSessionPromptAt, experienceLevel, equipmentPreference, onboardingCompleted, intensityEnabled } = body
 
     // Validate weight unit
     if (defaultWeightUnit && !['lbs', 'kg'].includes(defaultWeightUnit)) {
@@ -129,6 +130,7 @@ export async function PUT(request: NextRequest) {
         ...(experienceLevel !== undefined && { experienceLevel }),
         ...(equipmentPreference !== undefined && { equipmentPreference }),
         ...(onboardingCompleted !== undefined && { onboardingCompleted }),
+        ...(intensityEnabled !== undefined && { intensityEnabled }),
         updatedAt: new Date()
       },
       create: {

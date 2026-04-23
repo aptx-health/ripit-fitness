@@ -302,6 +302,7 @@ model UserSettings {
   equipmentPreference       String?
   onboardingCompleted       Boolean   @default(false)
   customProgramLimitBypass  Boolean   @default(false)
+  intensityEnabled          Boolean   @default(false)
   createdAt                 DateTime  @default(now())
   updatedAt                 DateTime  @updatedAt
 

@@ -57,6 +57,7 @@ interface ExerciseDisplayTabsProps {
   onDeleteSet: (setNumber: number) => void
   loggingForm: React.ReactNode
   isInputExpanded?: boolean
+  showIntensity?: boolean
   tip?: string
 }
 
@@ -103,6 +104,7 @@ export default function ExerciseDisplayTabs({
   onDeleteSet,
   loggingForm,
   isInputExpanded = false,
+  showIntensity = true,
   tip,
 }: ExerciseDisplayTabsProps) {
   const [expandedImage, setExpandedImage] = useState<string | null>(null)
@@ -141,6 +143,7 @@ export default function ExerciseDisplayTabs({
               exerciseHistory={null}
               onDeleteSet={onDeleteSet}
               exerciseId={exercise.id}
+              showIntensity={showIntensity}
             />
             {tip && <BeginnerTipCard tip={tip} />}
           </>
