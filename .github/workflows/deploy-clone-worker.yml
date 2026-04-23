@@ -9,6 +9,11 @@ on:
       - 'cloud-functions/clone-program/**'
       - 'prisma/schema.prisma'
       - '.github/workflows/deploy-clone-worker.yml'
+  pull_request:
+    paths:
+      - 'cloud-functions/clone-program/**'
+      - 'prisma/schema.prisma'
+      - '.github/workflows/deploy-clone-worker.yml'
 
 jobs:
   build-and-push:
@@ -17,6 +22,8 @@ jobs:
       contents: read
       packages: write
     environment: ${{ github.ref_name == 'main' && 'production' || github.ref_name == 'dev' && 'staging' || '' }}
+    # Only push images on merge to dev/main, not on PRs
+    if: github.event_name == 'push'
 
     env:
       IMAGE_NAME: ghcr.io/aptx-health/clone-program
@@ -68,3 +75,92 @@ jobs:
             ripit.branch=${{ github.ref_name }}
             ripit.actor=${{ github.actor }}
             ripit.workflow.run=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+  smoke-test:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ripit_smoke
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ripit_smoke
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/ripit_smoke
+      REDIS_URL: redis://localhost:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy Prisma schema into worker build context
+        run: |
+          mkdir -p cloud-functions/clone-program/prisma
+          cp prisma/schema.prisma cloud-functions/clone-program/prisma/schema.prisma
+
+      - name: Build clone worker image
+        run: |
+          docker build -t clone-worker-smoke \
+            ./cloud-functions/clone-program
+
+      - name: Smoke test — worker boots and health endpoint responds
+        run: |
+          docker run --rm -d \
+            --name smoke-worker \
+            --network host \
+            -e DATABASE_URL="$DATABASE_URL" \
+            -e DIRECT_URL="$DIRECT_URL" \
+            -e REDIS_URL="$REDIS_URL" \
+            clone-worker-smoke
+
+          echo "Waiting for worker health endpoint..."
+          for i in $(seq 1 15); do
+            if curl -sf http://localhost:8080/healthz > /dev/null 2>&1; then
+              echo "Health endpoint responded on attempt $i"
+              break
+            fi
+            if [ "$i" = "15" ]; then
+              echo "Worker failed to start within 15s"
+              docker logs smoke-worker
+              docker stop smoke-worker || true
+              exit 1
+            fi
+            sleep 1
+          done
+
+          # Verify readiness (connected to Redis)
+          READY_STATUS=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/readyz)
+          echo "Readiness status: $READY_STATUS"
+
+          if [ "$READY_STATUS" != "200" ]; then
+            echo "Worker not ready (expected 200, got $READY_STATUS)"
+            docker logs smoke-worker
+            docker stop smoke-worker || true
+            exit 1
+          fi
+
+          echo "Smoke test passed"
+          docker logs smoke-worker
+          docker stop smoke-worker
