@@ -1,4 +1,4 @@
-const MAX_CUSTOM_PROGRAMS = 3
+import { MAX_CUSTOM_PROGRAMS } from '@/lib/constants/programs'
 
 type CustomProgramAccessProps = {
   customProgramCount: number

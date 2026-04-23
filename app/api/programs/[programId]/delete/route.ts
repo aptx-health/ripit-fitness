@@ -50,6 +50,22 @@ export async function DELETE(
       )
     }
 
+    // Block deletion if there's an in-progress draft workout for this program
+    const activeDraft = await prisma.workoutCompletion.findFirst({
+      where: {
+        userId: user.id,
+        status: 'draft',
+        isArchived: false,
+        workout: { week: { programId } },
+      },
+    })
+    if (activeDraft) {
+      return NextResponse.json(
+        { error: 'Complete or discard your in-progress workout before deleting this program.' },
+        { status: 400 }
+      )
+    }
+
     // Soft delete: set deletedAt timestamp, also mark archived for backwards compat
     const deletedProgram = await prisma.program.update({
       where: { id: programId },

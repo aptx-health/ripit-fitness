@@ -7,8 +7,7 @@ import {
   programManagementLimiter,
   withRateLimitHeaders,
 } from '@/lib/rate-limit'
-
-const MAX_CUSTOM_PROGRAMS = 3
+import { MAX_CUSTOM_PROGRAMS } from '@/lib/constants/programs'
 
 type CreateProgramRequest = {
   name: string
