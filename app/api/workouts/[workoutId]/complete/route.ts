@@ -35,19 +35,14 @@ export async function POST(
     const body = await request.json()
     const { fallbackSets } = body as { fallbackSets?: LoggedSetInput[] }
 
-    // Verify workout exists and check existing completion in parallel
-    const [workout, existingCompleted] = await Promise.all([
-      prisma.workout.findUnique({
-        where: { id: workoutId },
-        select: {
-          id: true,
-          week: { select: { program: { select: { userId: true } } } },
-        },
-      }),
-      prisma.workoutCompletion.findFirst({
-        where: { workoutId, userId: user.id, status: 'completed', isArchived: false },
-      }),
-    ])
+    // Verify workout exists
+    const workout = await prisma.workout.findUnique({
+      where: { id: workoutId },
+      select: {
+        id: true,
+        week: { select: { program: { select: { userId: true } } } },
+      },
+    })
 
     if (!workout) {
       return NextResponse.json({ error: 'Workout not found' }, { status: 404 })
@@ -55,14 +50,18 @@ export async function POST(
     if (workout.week.program.userId !== user.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
-    if (existingCompleted) {
-      return NextResponse.json(
-        { error: 'Workout already completed. Clear it first to re-log.' },
-        { status: 400 }
-      )
-    }
 
     const completion = await prisma.$transaction(async (tx) => {
+      // Check for existing completed record INSIDE the transaction to prevent
+      // TOCTOU race conditions with concurrent requests (e.g. fetchWithRetry)
+      const existingCompleted = await tx.workoutCompletion.findFirst({
+        where: { workoutId, userId: user.id, status: 'completed', isArchived: false },
+      })
+
+      if (existingCompleted) {
+        throw new Error('ALREADY_COMPLETED')
+      }
+
       // Find existing draft
       const draft = await tx.workoutCompletion.findFirst({
         where: { workoutId, userId: user.id, status: 'draft', isArchived: false },
@@ -132,6 +131,18 @@ export async function POST(
         })),
       })
 
+      // Clean up any remaining draft records for this workout+user to prevent
+      // orphaned drafts from blocking future workouts (fixes #568)
+      await tx.workoutCompletion.deleteMany({
+        where: {
+          workoutId,
+          userId: user.id,
+          status: 'draft',
+          isArchived: false,
+          id: { not: completionRecord.id },
+        },
+      })
+
       return completionRecord
     })
 
@@ -146,6 +157,13 @@ export async function POST(
       },
     })
   } catch (error) {
+    if (error instanceof Error && error.message === 'ALREADY_COMPLETED') {
+      return NextResponse.json(
+        { error: 'Workout already completed. Clear it first to re-log.' },
+        { status: 400 }
+      )
+    }
+
     if (error instanceof Error && error.message === 'NO_SETS_TO_COMPLETE') {
       return NextResponse.json(
         { error: 'No sets to complete. Log at least one set first.' },
