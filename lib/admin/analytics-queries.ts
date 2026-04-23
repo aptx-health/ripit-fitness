@@ -137,12 +137,24 @@ export interface SignupAttributionMetrics {
   windowDays: number
 }
 
+export interface PostSessionMetrics {
+  avgRatingThisWeek: number | null
+  avgRatingLastWeek: number | null
+  sampleSizeThisWeek: number
+  sampleSizeLastWeek: number
+  ratingDistribution: Record<number, number>
+  topRefinements: Array<{ refinement: string; count: number }>
+  fiveStarPct: number
+  totalRated: number
+}
+
 export interface AnalyticsData {
   usage: UsageMetrics
   retention: RetentionMetrics
   funnel: FunnelStep[]
   feedbackVolume: FeedbackVolume[]
   signupAttribution: SignupAttributionMetrics
+  postSession: PostSessionMetrics
   generatedAt: string
 }
 
@@ -581,19 +593,81 @@ async function getSignupAttributionMetrics(
   return { sourceBreakdown, perGym, qrFunnel, windowDays }
 }
 
+async function getPostSessionMetrics(db: Db): Promise<PostSessionMetrics> {
+  const weekStart = startOfWeek()
+  const lastWeekStart = weeksAgo(1)
+
+  const [thisWeekAvg, lastWeekAvg, distribution, refinements] = await Promise.all([
+    db.$queryRaw<[{ avg: number | null; count: bigint }]>`
+      SELECT AVG(rating) as avg, COUNT(*)::bigint as count
+      FROM "Feedback"
+      WHERE category = 'post_session' AND rating IS NOT NULL
+        AND "createdAt" >= ${weekStart}
+    `,
+    db.$queryRaw<[{ avg: number | null; count: bigint }]>`
+      SELECT AVG(rating) as avg, COUNT(*)::bigint as count
+      FROM "Feedback"
+      WHERE category = 'post_session' AND rating IS NOT NULL
+        AND "createdAt" >= ${lastWeekStart} AND "createdAt" < ${weekStart}
+    `,
+    db.$queryRaw<Array<{ rating: number; count: bigint }>>`
+      SELECT rating, COUNT(*)::bigint as count
+      FROM "Feedback"
+      WHERE category = 'post_session' AND rating IS NOT NULL
+      GROUP BY rating
+      ORDER BY rating ASC
+    `,
+    db.$queryRaw<Array<{ refinement: string; count: bigint }>>`
+      SELECT unnest(refinements) as refinement, COUNT(*)::bigint as count
+      FROM "Feedback"
+      WHERE category = 'post_session' AND array_length(refinements, 1) > 0
+      GROUP BY refinement
+      ORDER BY count DESC
+    `,
+  ])
+
+  const ratingDistribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+  let totalRated = 0
+  for (const row of distribution) {
+    if (row.rating >= 1 && row.rating <= 5) {
+      const cnt = Number(row.count)
+      ratingDistribution[row.rating] = cnt
+      totalRated += cnt
+    }
+  }
+
+  const fiveStarCount = ratingDistribution[5]
+  const fiveStarPct = totalRated > 0 ? Math.round((fiveStarCount / totalRated) * 100) : 0
+
+  return {
+    avgRatingThisWeek: thisWeekAvg[0].avg ? Math.round(Number(thisWeekAvg[0].avg) * 10) / 10 : null,
+    avgRatingLastWeek: lastWeekAvg[0].avg ? Math.round(Number(lastWeekAvg[0].avg) * 10) / 10 : null,
+    sampleSizeThisWeek: Number(thisWeekAvg[0].count),
+    sampleSizeLastWeek: Number(lastWeekAvg[0].count),
+    ratingDistribution,
+    topRefinements: refinements.map((r) => ({
+      refinement: r.refinement,
+      count: Number(r.count),
+    })),
+    fiveStarPct,
+    totalRated,
+  }
+}
+
 // ---- Main ----
 
 export async function getAnalyticsData(
   db: Db = defaultPrisma,
 ): Promise<AnalyticsData> {
   try {
-    const [usage, retention, funnel, feedbackVolume, signupAttribution] =
+    const [usage, retention, funnel, feedbackVolume, signupAttribution, postSession] =
       await Promise.all([
         getUsageMetrics(db),
         getRetentionMetrics(db),
         getFunnelMetrics(db),
         getFeedbackVolume(db),
         getSignupAttributionMetrics(db),
+        getPostSessionMetrics(db),
       ])
 
     return {
@@ -602,6 +676,7 @@ export async function getAnalyticsData(
       funnel,
       feedbackVolume,
       signupAttribution,
+      postSession,
       generatedAt: new Date().toISOString(),
     }
   } catch (error) {
