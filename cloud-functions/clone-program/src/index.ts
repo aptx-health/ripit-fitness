@@ -4,6 +4,8 @@ import { type Job, Worker } from 'bullmq'
 import { cloneStrengthProgramData, type ProgramCloneJob } from './cloning'
 
 const QUEUE_NAME = 'program-clone-jobs'
+const LOG_LEVEL = process.env.CLONE_WORKER_LOG_LEVEL || 'info' // 'debug' for heartbeat + redis lifecycle
+const HEARTBEAT_INTERVAL = LOG_LEVEL === 'debug' ? 30_000 : 300_000 // 30s debug, 5min otherwise
 
 // Clone worker bypasses PgBouncer and connects directly to Postgres (:5432).
 // Why: this worker uses a 30s `prisma.$transaction()` for week-batch inserts
@@ -57,6 +59,7 @@ function parseRedisUrl(url: string) {
     host: parsed.hostname,
     port: parseInt(parsed.port || '6379', 10),
     password: parsed.password || undefined,
+    db: parseInt(parsed.pathname.slice(1) || '0', 10),
     maxRetriesPerRequest: null as null,
     enableKeepAlive: true,
     keepAliveInitialDelay: 30_000,
@@ -64,9 +67,7 @@ function parseRedisUrl(url: string) {
 }
 
 const connectionOpts = parseRedisUrl(redisUrl)
-
-// Redis connection event logging is attached after worker creation (see below)
-// so we can observe BullMQ's own ioredis connection without importing ioredis directly.
+console.log(`Redis target: ${connectionOpts.host}:${connectionOpts.port} db=${connectionOpts.db}`)
 
 /**
  * Process a program clone job from the BullMQ queue.
@@ -96,12 +97,10 @@ async function processCloneJob(job: Job<ProgramCloneJob>): Promise<void> {
     return
   }
 
-  console.log(`[job ${job.id}] Looking up community program: ${communityProgramId}`)
   const communityProgram = await prisma.communityProgram.findUnique({
     where: { id: communityProgramId },
     select: { id: true, programData: true },
   })
-  console.log(`[job ${job.id}] Community program lookup: found=${!!communityProgram} hasData=${!!communityProgram?.programData}`)
 
   if (!communityProgram?.programData) {
     throw new Error(`Community program not found or has no data: ${communityProgramId}`)
@@ -122,15 +121,16 @@ const worker = new Worker(QUEUE_NAME, processCloneJob, {
 
 let workerReady = false
 
-// Attach Redis connection lifecycle logging via BullMQ's internal client
+// Redis connection lifecycle logging
 worker.client.then((client) => {
-  console.log('[redis] attached lifecycle listeners to BullMQ connection')
-  client.on('connect', () => console.log('[redis] connected'))
-  client.on('ready', () => console.log('[redis] ready'))
   client.on('error', (err: Error) => console.error('[redis] error:', err.message))
   client.on('close', () => console.warn('[redis] connection closed'))
   client.on('reconnecting', () => console.warn('[redis] reconnecting'))
   client.on('end', () => console.error('[redis] connection ended (will not reconnect)'))
+  if (LOG_LEVEL === 'debug') {
+    client.on('connect', () => console.log('[redis] connected'))
+    client.on('ready', () => console.log('[redis] ready'))
+  }
 }).catch((err) => {
   console.error('[redis] failed to get client for lifecycle logging:', err)
 })
@@ -141,7 +141,7 @@ worker.on('ready', () => {
 })
 
 worker.on('active', (job) => {
-  console.log(`[worker] job ${job.id} became active (program=${job.data.programId})`)
+  console.log(`[worker] job ${job.id} active (program=${job.data.programId})`)
 })
 
 worker.on('completed', (job) => {
@@ -155,7 +155,6 @@ worker.on('failed', async (job, error) => {
   }
 
   console.error(`[worker] job ${job.id} failed (attempt ${job.attemptsMade}/${job.opts.attempts}): ${error.message}`)
-  console.error(`[worker] job ${job.id} stack:`, error.stack)
 
   // Only mark as failed when all retries are exhausted
   if (job.attemptsMade >= (job.opts.attempts ?? 1)) {
@@ -173,7 +172,6 @@ worker.on('failed', async (job, error) => {
 
 worker.on('error', (error) => {
   console.error('[worker] error:', error.message)
-  console.error('[worker] error stack:', error.stack)
   workerReady = false
 })
 
@@ -183,12 +181,14 @@ worker.on('closed', () => {
 })
 
 worker.on('stalled', (jobId) => {
-  console.warn(`[worker] job ${jobId} stalled (took too long, BullMQ may re-queue it)`)
+  console.warn(`[worker] job ${jobId} stalled (BullMQ may re-queue it)`)
 })
 
-worker.on('drained', () => {
-  console.log('[worker] queue drained, waiting for new jobs')
-})
+if (LOG_LEVEL === 'debug') {
+  worker.on('drained', () => {
+    console.log('[worker] queue drained, waiting for new jobs')
+  })
+}
 
 // Catch unhandled errors that could silently kill the worker loop
 process.on('unhandledRejection', (reason) => {
@@ -197,13 +197,11 @@ process.on('unhandledRejection', (reason) => {
 
 process.on('uncaughtException', (error) => {
   console.error('[process] uncaughtException:', error.message, error.stack)
-  // Exit so k8s restarts us — continuing after uncaught exception is unsafe
   process.exit(1)
 })
 
-// Periodic heartbeat: log worker + Redis state every 30s.
-// This creates a timeline so we can pinpoint exactly when the worker stops polling.
-const HEARTBEAT_INTERVAL = 30_000
+// Periodic heartbeat: verify worker + Redis health.
+// Default: every 5min. Set CLONE_WORKER_LOG_LEVEL=debug for 30s intervals.
 setInterval(async () => {
   const running = worker.isRunning()
   const isPaused = worker.isPaused()
@@ -214,12 +212,16 @@ setInterval(async () => {
   } catch (err) {
     redisPing = `error: ${(err as Error).message}`
   }
-  console.log(`[heartbeat] running=${running} paused=${isPaused} workerReady=${workerReady} redis=${redisPing}`)
+
+  // Always log if unhealthy, otherwise only in debug mode
+  if (!running || isPaused || redisPing !== 'PONG') {
+    console.error(`[heartbeat] running=${running} paused=${isPaused} workerReady=${workerReady} redis=${redisPing}`)
+  } else if (LOG_LEVEL === 'debug') {
+    console.log(`[heartbeat] running=${running} paused=${isPaused} workerReady=${workerReady} redis=${redisPing}`)
+  }
 }, HEARTBEAT_INTERVAL)
 
-// Active readiness check: verify the worker can actually reach Redis,
-// not just that the flag is set. This lets k8s restart the pod if the
-// connection silently drops.
+// Active readiness check
 async function isWorkerHealthy(): Promise<boolean> {
   if (!workerReady) return false
   if (!worker.isRunning()) return false
