@@ -1,8 +1,11 @@
 'use client'
 
-import { ChevronDown, ChevronRight, Dumbbell, Pencil, Star } from 'lucide-react'
+import { ChevronDown, ChevronRight, Dumbbell, Pencil, Star, Trash2 } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { useToast } from '@/components/ToastProvider'
+import { clientLogger } from '@/lib/client-logger'
 
 type Props = {
   programId: string
@@ -23,7 +26,31 @@ export default function ActiveProgramStrip({
   weekCount,
   targetDaysPerWeek,
 }: Props) {
+  const router = useRouter()
+  const toast = useToast()
   const [isExpanded, setIsExpanded] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const handleDelete = async () => {
+    setIsDeleting(true)
+    try {
+      const res = await fetch(`/api/programs/${programId}/delete`, { method: 'DELETE' })
+      if (res.ok) {
+        toast.success('Program deleted')
+        router.refresh()
+      } else {
+        const data = await res.json()
+        toast.error(data.error || 'Failed to delete program')
+      }
+    } catch (error) {
+      clientLogger.error('Error deleting active program:', error)
+      toast.error('Failed to delete program')
+    } finally {
+      setIsDeleting(false)
+      setDeleteTarget(false)
+    }
+  }
 
   return (
     <div className="border border-border bg-card doom-noise">
@@ -83,6 +110,56 @@ export default function ActiveProgramStrip({
               <Pencil size={14} />
               EDIT
             </Link>
+            <button
+              type="button"
+              onClick={() => setDeleteTarget(true)}
+              className="flex items-center gap-1.5 px-3 py-2 border border-error/50 text-error text-sm font-semibold uppercase tracking-wider hover:bg-error/10 transition-colors doom-focus-ring"
+            >
+              <Trash2 size={14} />
+              DELETE
+            </button>
+          </div>
+        </div>
+      )}
+
+      {deleteTarget && (
+        <div
+          className="fixed inset-0 backdrop-blur-md bg-background/80 flex items-center justify-center z-[60] p-4"
+          style={{ position: 'fixed', inset: 0, zIndex: 60 }}
+        >
+          <div className="bg-card border-2 border-error p-6 sm:p-8 text-center max-w-sm w-full shadow-xl doom-corners">
+            <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2 uppercase tracking-wider">
+              Delete Program?
+            </h3>
+            <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
+              This will deactivate and remove <span className="font-semibold text-foreground">{programName}</span> from
+              your programs. Your workout history will be kept.
+            </p>
+            <div className="flex gap-3 justify-center">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(false)}
+                disabled={isDeleting}
+                className="px-4 py-2 border border-border text-foreground text-sm font-semibold uppercase tracking-wider hover:bg-muted transition-colors doom-focus-ring disabled:opacity-50 min-h-12"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="px-4 py-2 bg-error text-error-foreground text-sm font-semibold uppercase tracking-wider hover:bg-error/90 transition-colors doom-focus-ring disabled:opacity-50 min-h-12"
+              >
+                {isDeleting ? (
+                  <span className="flex items-center gap-2">
+                    <span className="w-4 h-4 border-2 border-error-foreground border-t-transparent rounded-full animate-spin" />
+                    Deleting...
+                  </span>
+                ) : (
+                  'Delete'
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

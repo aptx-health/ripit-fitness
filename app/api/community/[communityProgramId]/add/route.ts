@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/server';
 import { cloneCommunityProgram } from '@/lib/community/cloning';
+import { MAX_PROGRAMS } from '@/lib/constants/programs';
 import { prisma } from '@/lib/db';
 import { recordEvent } from '@/lib/events';
 import { logger } from '@/lib/logger';
@@ -30,6 +31,30 @@ export async function POST(
       endpoint: 'POST /api/community/[id]/add',
     });
     if (rl.response) return rl.response;
+
+    // Check program limit (admin and bypass users skip)
+    let bypassLimit = user.role === 'admin';
+    if (!bypassLimit) {
+      const settings = await prisma.userSettings.findUnique({
+        where: { userId: user.id },
+        select: { customProgramLimitBypass: true },
+      });
+      bypassLimit = settings?.customProgramLimitBypass ?? false;
+    }
+    if (!bypassLimit) {
+      const programCount = await prisma.program.count({
+        where: { userId: user.id, deletedAt: null },
+      });
+      if (programCount >= MAX_PROGRAMS) {
+        return withRateLimitHeaders(
+          NextResponse.json(
+            { error: 'Program limit reached', code: 'PROGRAM_LIMIT_REACHED', limit: MAX_PROGRAMS, current: programCount },
+            { status: 403 }
+          ),
+          rl
+        );
+      }
+    }
 
     // Clone the community program to user's collection
     // This returns immediately with a shell program (copyStatus='cloning')

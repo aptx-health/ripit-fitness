@@ -1,6 +1,6 @@
 'use client'
 
-import { Dumbbell } from 'lucide-react'
+import { Dumbbell, Lock } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
@@ -29,15 +29,20 @@ type CommunityProgram = {
 type CommunityProgramCardProps = {
   program: CommunityProgram
   currentUserId: string
+  hasAccess: boolean
+  maxPrograms: number
 }
 
 export default function CommunityProgramCard({
   program,
   currentUserId,
+  hasAccess,
+  maxPrograms,
 }: CommunityProgramCardProps) {
   const router = useRouter()
   const [isAdding, setIsAdding] = useState(false)
   const [showUnpublishDialog, setShowUnpublishDialog] = useState(false)
+  const [showLimitModal, setShowLimitModal] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const isAuthor = program.authorUserId === currentUserId
@@ -68,6 +73,11 @@ export default function CommunityProgramCard({
 
       if (!response.ok) {
         const errorData = await response.json()
+        if (errorData.code === 'PROGRAM_LIMIT_REACHED') {
+          setShowLimitModal(true)
+          setIsAdding(false)
+          return
+        }
         throw new Error(errorData.error || 'Failed to add program')
       }
 
@@ -193,13 +203,23 @@ export default function CommunityProgramCard({
         {/* Actions */}
         <div className="flex gap-2">
           {!isAuthor ? (
-            <button type="button"
-              onClick={handleAddProgram}
-              disabled={isAdding}
-              className="flex-1 px-4 py-2.5 sm:py-3 bg-primary text-primary-foreground hover:bg-primary-hover transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base uppercase tracking-wider doom-button-3d doom-focus-ring"
-            >
-              {isAdding ? 'ADDING...' : 'ADD TO MY PROGRAMS'}
-            </button>
+            hasAccess ? (
+              <button type="button"
+                onClick={handleAddProgram}
+                disabled={isAdding}
+                className="flex-1 px-4 py-2.5 sm:py-3 bg-primary text-primary-foreground hover:bg-primary-hover transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base uppercase tracking-wider doom-button-3d doom-focus-ring"
+              >
+                {isAdding ? 'ADDING...' : 'ADD TO MY PROGRAMS'}
+              </button>
+            ) : (
+              <button type="button"
+                onClick={() => setShowLimitModal(true)}
+                className="flex-1 px-4 py-2.5 sm:py-3 border-2 border-border text-muted-foreground transition-colors font-semibold text-sm sm:text-base uppercase tracking-wider doom-focus-ring cursor-not-allowed opacity-70 flex items-center justify-center gap-2"
+              >
+                <Lock size={16} />
+                ADD TO MY PROGRAMS
+              </button>
+            )
           ) : (
             <button type="button"
               onClick={() => setShowUnpublishDialog(true)}
@@ -210,6 +230,35 @@ export default function CommunityProgramCard({
           )}
         </div>
       </div>
+
+      {/* Program Limit Modal */}
+      {showLimitModal && (
+        <div
+          className="fixed inset-0 backdrop-blur-md bg-background/80 flex items-center justify-center z-[60] p-4"
+          style={{ position: 'fixed', inset: 0, zIndex: 60 }}
+        >
+          <div className="bg-card border-2 border-warning p-6 sm:p-8 text-center max-w-sm w-full shadow-xl doom-corners">
+            <div className="flex justify-center mb-4">
+              <div className="w-12 h-12 rounded-full bg-warning/20 flex items-center justify-center">
+                <Lock size={24} className="text-warning" />
+              </div>
+            </div>
+            <p className="text-base text-foreground mb-2 leading-relaxed">
+              You&apos;ve used up your available program slots ({maxPrograms}). Please delete one to make room.
+            </p>
+            <p className="text-sm text-muted-foreground mb-6">
+              Additional program slots coming soon
+            </p>
+            <button
+              type="button"
+              onClick={() => setShowLimitModal(false)}
+              className="px-6 py-2 bg-primary text-primary-foreground text-sm font-semibold uppercase tracking-wider hover:bg-primary-hover transition-colors doom-focus-ring min-h-12"
+            >
+              Got It
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Unpublish Dialog */}
       {isAuthor && (

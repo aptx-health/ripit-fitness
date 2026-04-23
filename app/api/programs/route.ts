@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
+import { MAX_PROGRAMS } from '@/lib/constants/programs'
 import { prisma } from '@/lib/db'
 import { logger } from '@/lib/logger'
 import {
@@ -27,6 +28,39 @@ export async function POST(request: NextRequest) {
       endpoint: 'POST /api/programs',
     })
     if (rl.response) return rl.response
+
+    // Check custom program limit (unless admin or bypass enabled)
+    const isAdmin = user.role === 'admin'
+    let bypassLimit = isAdmin
+
+    if (!bypassLimit) {
+      const settings = await prisma.userSettings.findUnique({
+        where: { userId: user.id },
+        select: { customProgramLimitBypass: true },
+      })
+      bypassLimit = settings?.customProgramLimitBypass ?? false
+    }
+
+    if (!bypassLimit) {
+      const programCount = await prisma.program.count({
+        where: {
+          userId: user.id,
+          deletedAt: null,
+        },
+      })
+
+      if (programCount >= MAX_PROGRAMS) {
+        return NextResponse.json(
+          {
+            error: 'Program limit reached',
+            code: 'PROGRAM_LIMIT_REACHED',
+            limit: MAX_PROGRAMS,
+            current: programCount,
+          },
+          { status: 403 }
+        )
+      }
+    }
 
     // Parse request body
     const body = await request.json() as CreateProgramRequest
@@ -93,12 +127,12 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const userCreatedOnly = searchParams.get('userCreated') === 'true'
 
-    // Fetch user's programs (exclude archived)
-    // Returns minimal data for listing - use /api/programs/[id] for full details
+    // Fetch user's programs (exclude archived and soft-deleted)
     const programs = await prisma.program.findMany({
       where: {
         userId: user.id,
         isArchived: false,
+        deletedAt: null,
         ...(userCreatedOnly && { isUserCreated: true })
       },
       select: {

@@ -1,5 +1,5 @@
-import { useSession } from '@/lib/auth-client'
 import { useUserSettings } from '@/hooks/useUserSettings'
+import { useSession } from '@/lib/auth-client'
 
 /**
  * Returns whether the current user has access to intensity features (RIR/RPE).

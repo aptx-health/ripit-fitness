@@ -36,7 +36,7 @@ export function DraftWorkoutProvider({ children }: { children: ReactNode }) {
 
   const fetchDraft = useCallback(async () => {
     try {
-      const res = await fetch('/api/workouts/active-draft')
+      const res = await fetch('/api/workouts/active-draft', { cache: 'no-store' })
       if (!res.ok) return
       const data = await res.json()
       setActiveDraft(data.draft)

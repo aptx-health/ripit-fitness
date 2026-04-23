@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
+import { MAX_PROGRAMS } from '@/lib/constants/programs'
 import { generateCopyName } from '@/lib/copy-name'
 import { prisma } from '@/lib/db'
 import { batchInsertWeek } from '@/lib/db/batch-insert'
@@ -22,6 +23,27 @@ export async function POST(
 
     const limited = await checkRateLimit(programManagementLimiter, user.id)
     if (limited) return limited
+
+    // Check program limit
+    let bypassLimit = user.role === 'admin'
+    if (!bypassLimit) {
+      const settings = await prisma.userSettings.findUnique({
+        where: { userId: user.id },
+        select: { customProgramLimitBypass: true },
+      })
+      bypassLimit = settings?.customProgramLimitBypass ?? false
+    }
+    if (!bypassLimit) {
+      const programCount = await prisma.program.count({
+        where: { userId: user.id, deletedAt: null },
+      })
+      if (programCount >= MAX_PROGRAMS) {
+        return NextResponse.json(
+          { error: 'Program limit reached', code: 'PROGRAM_LIMIT_REACHED', limit: MAX_PROGRAMS, current: programCount },
+          { status: 403 }
+        )
+      }
+    }
 
     // Fetch the complete program with all nested relations
     const originalProgram = await prisma.program.findUnique({
