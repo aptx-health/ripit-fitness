@@ -3,6 +3,10 @@ import { PrismaClient } from '@prisma/client'
 import { type Job, Worker } from 'bullmq'
 import { cloneStrengthProgramData, type ProgramCloneJob } from './cloning'
 
+// Use ioredis from BullMQ's own dependency to avoid version mismatch
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const IORedis = require('ioredis')
+
 const QUEUE_NAME = 'program-clone-jobs'
 
 // Clone worker bypasses PgBouncer and connects directly to Postgres (:5432).
@@ -65,6 +69,20 @@ function parseRedisUrl(url: string) {
 
 const connectionOpts = parseRedisUrl(redisUrl)
 
+// Create a shared Redis connection so we can observe its lifecycle events.
+// BullMQ will use this instead of creating its own internal connection.
+const redisConnection = new IORedis({
+  ...connectionOpts,
+  lazyConnect: false,
+})
+
+redisConnection.on('connect', () => console.log('[redis] connected'))
+redisConnection.on('ready', () => console.log('[redis] ready'))
+redisConnection.on('error', (err: Error) => console.error('[redis] error:', err.message))
+redisConnection.on('close', () => console.warn('[redis] connection closed'))
+redisConnection.on('reconnecting', (ms: number) => console.warn(`[redis] reconnecting in ${ms}ms`))
+redisConnection.on('end', () => console.error('[redis] connection ended (will not reconnect)'))
+
 /**
  * Process a program clone job from the BullMQ queue.
  */
@@ -75,7 +93,7 @@ async function processCloneJob(job: Job<ProgramCloneJob>): Promise<void> {
     throw new Error(`Invalid job payload: missing required fields`)
   }
 
-  console.log(`Processing clone job: communityProgramId=${communityProgramId} programId=${programId} type=${programType}`)
+  console.log(`[job ${job.id}] Processing: communityProgramId=${communityProgramId} programId=${programId} type=${programType}`)
 
   // Verify the shell program exists before proceeding
   const shellProgram = await prisma.program.findUnique({
@@ -89,16 +107,16 @@ async function processCloneJob(job: Job<ProgramCloneJob>): Promise<void> {
 
   // Skip if already completed or failed (idempotency guard)
   if (shellProgram.copyStatus === 'ready' || shellProgram.copyStatus === 'failed') {
-    console.log(`Program ${programId} already has copyStatus=${shellProgram.copyStatus}, skipping`)
+    console.log(`[job ${job.id}] Program ${programId} already has copyStatus=${shellProgram.copyStatus}, skipping`)
     return
   }
 
-  console.log(`Looking up community program: ${communityProgramId}`)
+  console.log(`[job ${job.id}] Looking up community program: ${communityProgramId}`)
   const communityProgram = await prisma.communityProgram.findUnique({
     where: { id: communityProgramId },
     select: { id: true, programData: true },
   })
-  console.log(`Community program lookup: id=${communityProgramId} found=${!!communityProgram} hasData=${!!communityProgram?.programData}`)
+  console.log(`[job ${job.id}] Community program lookup: found=${!!communityProgram} hasData=${!!communityProgram?.programData}`)
 
   if (!communityProgram?.programData) {
     throw new Error(`Community program not found or has no data: ${communityProgramId}`)
@@ -109,11 +127,11 @@ async function processCloneJob(job: Job<ProgramCloneJob>): Promise<void> {
 
   await cloneStrengthProgramData(prisma, programId, programData as Parameters<typeof cloneStrengthProgramData>[2], userId)
 
-  console.log(`Clone job completed: programId=${programId}`)
+  console.log(`[job ${job.id}] Clone completed: programId=${programId}`)
 }
 
 const worker = new Worker(QUEUE_NAME, processCloneJob, {
-  connection: connectionOpts,
+  connection: redisConnection,
   concurrency: 1,
 })
 
@@ -121,50 +139,93 @@ let workerReady = false
 
 worker.on('ready', () => {
   workerReady = true
-  console.log('Worker connected to Redis')
+  console.log('[worker] connected to Redis, polling for jobs')
+})
+
+worker.on('active', (job) => {
+  console.log(`[worker] job ${job.id} became active (program=${job.data.programId})`)
 })
 
 worker.on('completed', (job) => {
-  console.log(`Job ${job.id} completed for program ${job.data.programId}`)
+  console.log(`[worker] job ${job.id} completed (program=${job.data.programId})`)
 })
 
 worker.on('failed', async (job, error) => {
-  if (!job) return
+  if (!job) {
+    console.error('[worker] job failed but job reference is null:', error.message)
+    return
+  }
 
-  console.error(`Job ${job.id} failed (attempt ${job.attemptsMade}/${job.opts.attempts}):`, error.message)
+  console.error(`[worker] job ${job.id} failed (attempt ${job.attemptsMade}/${job.opts.attempts}): ${error.message}`)
+  console.error(`[worker] job ${job.id} stack:`, error.stack)
 
   // Only mark as failed when all retries are exhausted
   if (job.attemptsMade >= (job.opts.attempts ?? 1)) {
-    console.error(`All retries exhausted for program ${job.data.programId}, marking as failed`)
+    console.error(`[worker] job ${job.id} all retries exhausted, marking program ${job.data.programId} as failed`)
     try {
       await prisma.program.update({
         where: { id: job.data.programId },
         data: { copyStatus: 'failed' },
       })
     } catch (statusError) {
-      console.error('Failed to update copyStatus to failed:', statusError)
+      console.error('[worker] failed to update copyStatus:', statusError)
     }
   }
 })
 
 worker.on('error', (error) => {
-  console.error('Worker error:', error.message)
+  console.error('[worker] error:', error.message)
+  console.error('[worker] error stack:', error.stack)
   workerReady = false
 })
 
 worker.on('closed', () => {
   workerReady = false
-  console.warn('Worker disconnected from Redis')
+  console.warn('[worker] closed — no longer polling for jobs')
 })
+
+worker.on('stalled', (jobId) => {
+  console.warn(`[worker] job ${jobId} stalled (took too long, BullMQ may re-queue it)`)
+})
+
+worker.on('drained', () => {
+  console.log('[worker] queue drained, waiting for new jobs')
+})
+
+// Catch unhandled errors that could silently kill the worker loop
+process.on('unhandledRejection', (reason) => {
+  console.error('[process] unhandledRejection:', reason)
+})
+
+process.on('uncaughtException', (error) => {
+  console.error('[process] uncaughtException:', error.message, error.stack)
+  // Exit so k8s restarts us — continuing after uncaught exception is unsafe
+  process.exit(1)
+})
+
+// Periodic heartbeat: log worker + Redis state every 30s.
+// This creates a timeline so we can pinpoint exactly when the worker stops polling.
+const HEARTBEAT_INTERVAL = 30_000
+setInterval(async () => {
+  const running = worker.isRunning()
+  const isPaused = worker.isPaused()
+  let redisPing = 'unknown'
+  try {
+    redisPing = await redisConnection.ping()
+  } catch (err) {
+    redisPing = `error: ${(err as Error).message}`
+  }
+  console.log(`[heartbeat] running=${running} paused=${isPaused} workerReady=${workerReady} redis=${redisPing}`)
+}, HEARTBEAT_INTERVAL)
 
 // Active readiness check: verify the worker can actually reach Redis,
 // not just that the flag is set. This lets k8s restart the pod if the
 // connection silently drops.
 async function isWorkerHealthy(): Promise<boolean> {
   if (!workerReady) return false
+  if (!worker.isRunning()) return false
   try {
-    const client = await worker.client
-    const pong = await client.ping()
+    const pong = await redisConnection.ping()
     return pong === 'PONG'
   } catch {
     return false
@@ -202,10 +263,11 @@ healthServer.listen(port, () => {
 
 // Graceful shutdown
 async function shutdown() {
-  console.log('Shutting down clone worker...')
+  console.log('[shutdown] shutting down clone worker...')
   await worker.close()
   healthServer.close()
   await prisma.$disconnect()
+  redisConnection.disconnect()
   process.exit(0)
 }
 
