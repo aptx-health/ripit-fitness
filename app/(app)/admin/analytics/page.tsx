@@ -5,8 +5,10 @@ import { useCallback, useEffect, useState } from 'react'
 
 import type {
   AnalyticsData,
+  PostSessionMetrics,
   SignupAttributionMetrics,
 } from '@/lib/admin/analytics-queries'
+import { POST_SESSION_REFINEMENTS } from '@/types/feedback'
 
 export default function AdminAnalyticsPage() {
   const [data, setData] = useState<AnalyticsData | null>(null)
@@ -303,6 +305,11 @@ export default function AdminAnalyticsPage() {
       {/* Signup Attribution */}
       <Section title={`Signup Sources (last ${data.signupAttribution.windowDays}d)`}>
         <SignupAttributionPanel attribution={data.signupAttribution} />
+      </Section>
+
+      {/* Post-Session Feedback */}
+      <Section title="Post-Session Feedback">
+        <PostSessionPanel postSession={data.postSession} />
       </Section>
 
       {/* Feedback Volume */}
@@ -628,6 +635,155 @@ function FunnelRow({
       <div className="w-16 text-right text-sm">
         <span className="text-foreground font-semibold">{step.overallPct}%</span>
       </div>
+    </div>
+  )
+}
+
+function TrendArrow({ current, previous }: { current: number | null; previous: number | null }) {
+  if (current === null || previous === null) return null
+  const diff = Math.round((current - previous) * 10) / 10
+  if (diff === 0) return <span className="text-muted-foreground text-xs ml-1">--</span>
+  const isUp = diff > 0
+  return (
+    <span className={`text-xs ml-1 font-semibold ${isUp ? 'text-green-400' : 'text-red-400'}`}>
+      {isUp ? '\u2191' : '\u2193'} {Math.abs(diff)}
+    </span>
+  )
+}
+
+function PostSessionPanel({ postSession }: { postSession: PostSessionMetrics }) {
+  const refinementLabels: Record<string, string> = {}
+  for (const r of POST_SESSION_REFINEMENTS) {
+    refinementLabels[r.value] = r.label
+  }
+
+  const totalDistribution = Object.values(postSession.ratingDistribution).reduce(
+    (sum: number, c: number) => sum + c,
+    0
+  )
+
+  return (
+    <div className="space-y-6">
+      {/* Average ratings */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <MetricCard
+          label="Avg Rating (This Week)"
+          value={
+            postSession.avgRatingThisWeek !== null
+              ? `${postSession.avgRatingThisWeek}/5`
+              : '--'
+          }
+          info={`Based on ${postSession.sampleSizeThisWeek} ratings this week. Compare to last week to spot trends.`}
+        />
+        <div className="bg-background border border-border rounded-lg p-3">
+          <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+            vs. Last Week
+          </div>
+          <div className="text-2xl font-bold text-foreground">
+            {postSession.avgRatingLastWeek !== null
+              ? `${postSession.avgRatingLastWeek}/5`
+              : '--'}
+            <TrendArrow
+              current={postSession.avgRatingThisWeek}
+              previous={postSession.avgRatingLastWeek}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            n={postSession.sampleSizeLastWeek}
+          </p>
+        </div>
+        <MetricCard
+          label="5-Star Rate"
+          value={`${postSession.fiveStarPct}%`}
+          info="Percentage of all post-session ratings that are 5/5. A high number means users are consistently happy after workouts."
+        />
+        <MetricCard
+          label="Total Rated"
+          value={postSession.totalRated}
+          info="Total number of post-session feedback submissions with a rating, all time."
+        />
+      </div>
+
+      {/* Rating Distribution */}
+      <div>
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+          Rating Distribution
+        </h3>
+        <div className="space-y-2">
+          {[5, 4, 3, 2, 1].map((rating) => {
+            const count = postSession.ratingDistribution[rating] || 0
+            const pct = totalDistribution > 0 ? (count / totalDistribution) * 100 : 0
+            return (
+              <div key={rating} className="flex items-center gap-3">
+                <div className="w-8 text-sm text-foreground font-semibold text-right">
+                  {rating}
+                </div>
+                <div className="flex-1 bg-background rounded-full h-5 overflow-hidden border border-border">
+                  <div
+                    className={`h-full rounded-full flex items-center justify-end pr-2 ${
+                      rating >= 4
+                        ? 'bg-green-600/60'
+                        : rating === 3
+                          ? 'bg-yellow-600/60'
+                          : 'bg-red-600/60'
+                    }`}
+                    style={{ width: `${Math.max(pct, 3)}%` }}
+                  >
+                    <span className="text-xs font-semibold text-foreground">
+                      {count}
+                    </span>
+                  </div>
+                </div>
+                <div className="w-12 text-right text-xs text-muted-foreground">
+                  {Math.round(pct)}%
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Top Refinements */}
+      {postSession.topRefinements.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+            Top Refinement Categories
+          </h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left py-2 px-3 text-muted-foreground font-medium">
+                    Category
+                  </th>
+                  <th className="text-right py-2 px-3 text-muted-foreground font-medium">
+                    Count
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {postSession.topRefinements.map((r) => (
+                  <tr key={r.refinement} className="border-b border-border/50">
+                    <td className="py-2 px-3 text-foreground">
+                      {refinementLabels[r.refinement] || r.refinement.replace(/_/g, ' ')}
+                    </td>
+                    <td className="py-2 px-3 text-right text-foreground font-semibold">
+                      {r.count}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      <Link
+        href="/admin/feedback?tab=post_session"
+        className="inline-block text-sm text-orange-500 hover:text-orange-400 transition-colors"
+      >
+        View all post-session feedback
+      </Link>
     </div>
   )
 }

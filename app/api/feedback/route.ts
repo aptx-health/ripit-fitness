@@ -154,6 +154,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
     const categoryFilter = searchParams.get('category')
+    const sort = searchParams.get('sort') // 'rating_asc' or 'rating_desc'
     const limit = Math.min(parseInt(searchParams.get('limit') || '50', 10), 100)
     const offset = parseInt(searchParams.get('offset') || '0', 10)
 
@@ -167,19 +168,105 @@ export async function GET(request: NextRequest) {
       where.category = categoryFilter
     }
 
-    const [feedback, total] = await Promise.all([
+    // Determine sort order
+    type OrderByClause = Record<string, 'asc' | 'desc'>
+    let orderBy: OrderByClause | OrderByClause[] = { createdAt: 'desc' as const }
+    if (sort === 'rating_asc') {
+      orderBy = [{ rating: 'asc' as const }, { createdAt: 'desc' as const }]
+    } else if (sort === 'rating_desc') {
+      orderBy = [{ rating: 'desc' as const }, { createdAt: 'desc' as const }]
+    }
+
+    const queries: [Promise<unknown[]>, Promise<number>, ...Promise<unknown>[]] = [
       prisma.feedback.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy,
         take: limit,
         skip: offset,
       }),
       prisma.feedback.count({ where }),
-    ])
+    ]
 
-    return NextResponse.json({ feedback, total, limit, offset })
+    // When filtering by post_session, include aggregation stats
+    const isPostSession = categoryFilter === 'post_session'
+    if (isPostSession) {
+      queries.push(
+        prisma.feedback.aggregate({
+          where: { category: 'post_session' },
+          _avg: { rating: true },
+          _count: { rating: true },
+        }),
+        prisma.feedback.aggregate({
+          where: {
+            category: 'post_session',
+            createdAt: { gte: startOfWeek() },
+          },
+          _avg: { rating: true },
+          _count: { rating: true },
+        }),
+        prisma.feedback.groupBy({
+          by: ['rating'],
+          where: { category: 'post_session', rating: { not: null } },
+          _count: { rating: true },
+          orderBy: { rating: 'asc' },
+        }),
+        // Refinement counts via raw query (Prisma can't group by array elements)
+        prisma.$queryRaw`
+          SELECT unnest(refinements) as refinement, COUNT(*)::int as count
+          FROM "Feedback"
+          WHERE category = 'post_session' AND array_length(refinements, 1) > 0
+          GROUP BY refinement
+          ORDER BY count DESC
+        `,
+      )
+    }
+
+    const results = await Promise.all(queries)
+    const feedback = results[0]
+    const total = results[1] as number
+
+    const responseBody: Record<string, unknown> = { feedback, total, limit, offset }
+
+    if (isPostSession) {
+      const overallAgg = results[2] as { _avg: { rating: number | null }; _count: { rating: number } }
+      const weekAgg = results[3] as { _avg: { rating: number | null }; _count: { rating: number } }
+      const ratingGroups = results[4] as Array<{ rating: number; _count: { rating: number } }>
+      const refinementCounts = results[5] as Array<{ refinement: string; count: number }>
+
+      // Build rating distribution (1-5)
+      const ratingDistribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+      for (const g of ratingGroups) {
+        if (g.rating >= 1 && g.rating <= 5) {
+          ratingDistribution[g.rating] = g._count.rating
+        }
+      }
+
+      const totalRated = overallAgg._count.rating
+      const fiveStarCount = ratingDistribution[5]
+      const fiveStarPct = totalRated > 0 ? Math.round((fiveStarCount / totalRated) * 100) : 0
+
+      responseBody.postSessionStats = {
+        avgRatingOverall: overallAgg._avg.rating ? Math.round(overallAgg._avg.rating * 10) / 10 : null,
+        avgRatingThisWeek: weekAgg._avg.rating ? Math.round(weekAgg._avg.rating * 10) / 10 : null,
+        sampleSizeOverall: totalRated,
+        sampleSizeThisWeek: weekAgg._count.rating,
+        ratingDistribution,
+        fiveStarPct,
+        refinementCounts,
+      }
+    }
+
+    return NextResponse.json(responseBody)
   } catch (error) {
     logger.error({ error, context: 'feedback-list' }, 'Failed to list feedback')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
+}
+
+/** Returns the start of the current week (Sunday 00:00:00) */
+function startOfWeek(): Date {
+  const d = new Date()
+  d.setDate(d.getDate() - d.getDay())
+  d.setHours(0, 0, 0, 0)
+  return d
 }
