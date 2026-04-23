@@ -44,6 +44,8 @@ export default function OnboardingPage() {
   const [equipmentPreference, setEquipmentPreference] = useState<EquipmentPreference | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [completingProgramName, setCompletingProgramName] = useState<string | null>(null)
+  const [copyFailed, setCopyFailed] = useState(false)
+  const [copyProgress, setCopyProgress] = useState<string | null>(null)
 
   // Fade-in key: changes on every step/page transition
   const [fadeKey, setFadeKey] = useState(0)
@@ -72,7 +74,6 @@ export default function OnboardingPage() {
       }
     }
     check()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router])
 
   const completeOnboarding = useCallback(async (
@@ -81,6 +82,8 @@ export default function OnboardingPage() {
   ) => {
     setStep('completing')
     setError(null)
+    setCopyFailed(false)
+    setCopyProgress(null)
 
     try {
       const res = await fetch('/api/onboarding/complete', {
@@ -100,17 +103,69 @@ export default function OnboardingPage() {
       }
 
       const data = await res.json()
-
-      // Show a brief transition screen before redirecting
       setCompletingProgramName(data.programName || null)
-      await new Promise(resolve => setTimeout(resolve, 2500))
+
+      // For beginners with a program being cloned, poll for completion
+      if (level === 'beginner' && data.programId) {
+        const TIMEOUT_MS = 20000
+        const POLL_INTERVAL_MS = 1500
+        const start = Date.now()
+        let ready = false
+
+        while (Date.now() - start < TIMEOUT_MS) {
+          await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL_MS))
+
+          try {
+            const statusRes = await fetch(`/api/programs/${data.programId}/copy-status`)
+            if (!statusRes.ok) continue
+
+            const statusData = await statusRes.json()
+
+            if (statusData.status === 'ready') {
+              ready = true
+              break
+            }
+
+            if (statusData.status === 'failed') {
+              setCopyFailed(true)
+              return
+            }
+
+            // Week 1 is done when the worker moves to week 2+
+            if (statusData.progress?.currentWeek >= 2) {
+              ready = true
+              break
+            }
+
+            // Show progress to the user
+            if (statusData.progress) {
+              setCopyProgress(
+                `Week ${statusData.progress.currentWeek} of ${statusData.progress.totalWeeks}`
+              )
+            }
+          } catch {
+            // Network error on poll, keep trying
+          }
+        }
+
+        if (!ready) {
+          setCopyFailed(true)
+          return
+        }
+      } else if (level === 'beginner') {
+        // Beginner but clone failed to enqueue (e.g. Redis down) — show failure
+        setCopyFailed(true)
+        return
+      } else {
+        // Experienced users — brief transition
+        await new Promise(resolve => setTimeout(resolve, 2500))
+      }
 
       window.location.href = data.redirect || '/'
     } catch {
       setError('Network error. Please try again.')
       changeStep(level === 'beginner' ? 'primer' : 'experience')
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleWaiverAccept = async () => {
@@ -187,24 +242,47 @@ export default function OnboardingPage() {
     return (
       <Shell>
         <div className="flex flex-1 flex-col items-center justify-center gap-8 px-6">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-primary" />
-          {completingProgramName ? (
-            <FadeIn key="completing-beginner" className="text-center">
-              <p className="text-lg text-foreground">
-                Copying <span className="font-semibold text-primary">{completingProgramName}</span> to your profile
-              </p>
-            </FadeIn>
-          ) : experienceLevel === 'experienced' ? (
-            <FadeIn key="completing-experienced" className="text-center max-w-sm">
+          {copyFailed ? (
+            <FadeIn key="completing-failed" className="text-center max-w-sm">
               <p className="text-lg text-foreground mb-3">
-                Taking you to <span className="font-semibold text-primary">Programs</span>
+                Failed to load the program
               </p>
-              <p className="text-base text-muted-foreground">
-                Browse the library and find a program that fits your goals. Use filters to narrow by equipment, level, or focus area.
+              <p className="text-base text-muted-foreground mb-6">
+                Go to the Programs tab and browse available programs.
               </p>
+              <button
+                type="button"
+                onClick={() => { window.location.href = '/programs' }}
+                className="rounded-lg bg-primary px-6 py-3 text-base font-semibold text-primary-foreground transition-colors hover:bg-primary-hover active:bg-primary-active"
+              >
+                Go to Programs
+              </button>
             </FadeIn>
           ) : (
-            <p className="text-lg text-muted-foreground">Getting things ready...</p>
+            <>
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-primary" />
+              {completingProgramName ? (
+                <FadeIn key="completing-beginner" className="text-center">
+                  <p className="text-lg text-foreground">
+                    Copying <span className="font-semibold text-primary">{completingProgramName}</span> to your profile
+                  </p>
+                  {copyProgress && (
+                    <p className="mt-2 text-sm text-muted-foreground">{copyProgress}</p>
+                  )}
+                </FadeIn>
+              ) : experienceLevel === 'experienced' ? (
+                <FadeIn key="completing-experienced" className="text-center max-w-sm">
+                  <p className="text-lg text-foreground mb-3">
+                    Taking you to <span className="font-semibold text-primary">Programs</span>
+                  </p>
+                  <p className="text-base text-muted-foreground">
+                    Browse the library and find a program that fits your goals. Use filters to narrow by equipment, level, or focus area.
+                  </p>
+                </FadeIn>
+              ) : (
+                <p className="text-lg text-muted-foreground">Getting things ready...</p>
+              )}
+            </>
           )}
         </div>
       </Shell>

@@ -46,7 +46,11 @@ function getQueue(): Queue {
 export async function publishProgramCloneJob(job: ProgramCloneJob): Promise<string> {
   const q = getQueue()
 
-  const bullJob = await q.add('clone', job, {
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error('Redis connection timeout — queue unavailable')), 5000)
+  )
+
+  const bullJob = await Promise.race([q.add('clone', job, {
     attempts: 3,
     backoff: {
       type: 'exponential',
@@ -54,7 +58,7 @@ export async function publishProgramCloneJob(job: ProgramCloneJob): Promise<stri
     },
     removeOnComplete: 100,
     removeOnFail: 500,
-  })
+  }), timeout])
 
   logger.info({ programId: job.programId, jobId: bullJob.id }, 'Published clone job')
   return bullJob.id!
