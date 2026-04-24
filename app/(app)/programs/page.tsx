@@ -18,6 +18,7 @@ export default async function ProgramsPage() {
       where: {
         userId: user.id,
         deletedAt: null,
+        copyStatus: { not: 'failed' },
       },
       orderBy: { createdAt: 'desc' },
       select: {
@@ -108,6 +109,7 @@ export default async function ProgramsPage() {
       where: {
         userId: user.id,
         deletedAt: null,
+        copyStatus: { not: 'failed' },
       },
     }),
     prisma.userSettings.findUnique({
