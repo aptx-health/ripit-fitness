@@ -44,7 +44,7 @@ export default function ExerciseActionsFooter({
           type="button"
           onClick={onPrevious}
           disabled={isFirst}
-          className="w-10 h-11 flex items-center justify-center text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed doom-focus-ring"
+          className="w-10 h-11 flex items-center justify-center text-secondary-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed doom-focus-ring"
           style={{ backgroundColor: 'rgba(0,0,0,0.35)', boxShadow: RECESSED_SHADOW }}
           aria-label="Previous exercise"
         >
@@ -65,7 +65,7 @@ export default function ExerciseActionsFooter({
           type="button"
           onClick={onNext}
           disabled={isLast}
-          className="w-10 h-11 flex items-center justify-center text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed doom-focus-ring"
+          className="w-10 h-11 flex items-center justify-center text-secondary-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed doom-focus-ring"
           style={{ backgroundColor: 'rgba(0,0,0,0.35)', boxShadow: RECESSED_SHADOW }}
           aria-label="Next exercise"
         >

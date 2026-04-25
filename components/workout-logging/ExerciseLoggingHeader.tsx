@@ -75,7 +75,7 @@ export default function ExerciseLoggingHeader({
         </div>
 
         {/* Center: elapsed time */}
-        <span className="text-lg font-medium text-foreground tabular-nums" style={{ minWidth: '5ch' }}>
+        <span className="text-lg font-medium text-secondary-foreground tabular-nums" style={{ minWidth: '5ch' }}>
           {elapsedTime}
         </span>
 
@@ -85,7 +85,7 @@ export default function ExerciseLoggingHeader({
             actions={menuActions}
             size="sm"
             variant="ghost"
-            className="text-foreground/80 hover:text-foreground"
+            className="text-secondary-foreground/80 hover:text-secondary-foreground"
           />
           <button
             type="button"
@@ -98,7 +98,7 @@ export default function ExerciseLoggingHeader({
           <button
             type="button"
             onClick={onClose}
-            className="p-1 text-foreground/80 hover:text-foreground transition-colors doom-focus-ring"
+            className="p-1 text-secondary-foreground/80 hover:text-secondary-foreground transition-colors doom-focus-ring"
             aria-label="Exit workout"
           >
             <X size={18} strokeWidth={2.5} />

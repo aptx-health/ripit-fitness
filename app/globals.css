@@ -1987,15 +1987,6 @@ body > [data-training-widget] {
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
-/* Active tab — accent color with depth shadows */
-.doom-tab-active {
-  background-color: var(--accent, var(--primary));
-  color: var(--accent-foreground, var(--primary-foreground));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.15),
-    inset 0 -2px 0 rgba(0, 0, 0, 0.35);
-}
-
 /* Card Enhancements */
 .doom-card {
   background: var(--card);

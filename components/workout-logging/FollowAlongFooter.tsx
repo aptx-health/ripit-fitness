@@ -2,6 +2,9 @@
 
 import { CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react'
 
+const RAISED_SHADOW = 'inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)'
+const RECESSED_SHADOW = 'inset 0 1px 2px rgba(0,0,0,0.50), inset 0 0 0 1px rgba(254,243,199,0.06)'
+
 interface FollowAlongFooterProps {
   currentIndex: number
   totalExercises: number
@@ -23,15 +26,19 @@ export default function FollowAlongFooter({
   const isLast = currentIndex >= totalExercises - 1
 
   return (
-    <div className="flex-shrink-0 border-t border-border px-3 py-2 bg-card flex gap-2">
+    <div
+      className="flex-shrink-0 bg-secondary px-4 py-3 flex gap-2.5"
+      style={{ boxShadow: 'inset 0 1px 0 rgba(0,0,0,0.25)' }}
+    >
       <button
         type="button"
         disabled={isFirst}
         onClick={onPrevious}
-        className="flex-1 min-h-[48px] flex items-center justify-center gap-1.5 px-4 py-2 bg-muted text-foreground font-bold uppercase tracking-wider border-2 border-border transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:bg-secondary doom-focus-ring"
+        className="w-10 h-11 flex items-center justify-center text-secondary-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed doom-focus-ring"
+        style={{ backgroundColor: 'rgba(0,0,0,0.35)', boxShadow: RECESSED_SHADOW }}
+        aria-label="Previous exercise"
       >
-        <ChevronLeft size={18} />
-        Previous
+        <ChevronLeft size={18} strokeWidth={2.5} />
       </button>
 
       {isLast ? (
@@ -39,19 +46,21 @@ export default function FollowAlongFooter({
           type="button"
           disabled={isSubmitting}
           onClick={onFinish}
-          className="flex-1 min-h-[48px] flex items-center justify-center gap-1.5 px-4 py-2 bg-success text-success-foreground font-bold uppercase tracking-wider transition-colors disabled:opacity-50 doom-button-3d doom-focus-ring"
+          className="flex-1 h-11 flex items-center justify-center gap-1.5 bg-primary text-primary-foreground font-medium uppercase tracking-widest text-sm transition-colors disabled:opacity-50 doom-focus-ring"
+          style={{ boxShadow: RAISED_SHADOW }}
         >
-          <CheckCircle size={18} />
+          <CheckCircle size={16} />
           Finish Workout
         </button>
       ) : (
         <button
           type="button"
           onClick={onNext}
-          className="flex-1 min-h-[48px] flex items-center justify-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground font-bold uppercase tracking-wider transition-colors hover:bg-primary/90 doom-button-3d doom-focus-ring"
+          className="flex-1 h-11 flex items-center justify-center gap-1.5 bg-accent text-accent-foreground font-medium uppercase tracking-widest text-sm transition-colors doom-focus-ring"
+          style={{ boxShadow: RAISED_SHADOW }}
         >
           Next Exercise
-          <ChevronRight size={18} />
+          <ChevronRight size={16} />
         </button>
       )}
     </div>
