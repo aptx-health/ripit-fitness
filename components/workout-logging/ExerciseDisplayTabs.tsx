@@ -90,22 +90,22 @@ export default function ExerciseDisplayTabs({
   return (
     <Tabs defaultValue="log-sets" className="w-full h-full flex flex-col">
       <TabsList className="flex-shrink-0 sticky top-0 z-10 overflow-hidden">
-        <TabsTrigger value="log-sets">
+        <TabsTrigger value="log-sets" className="flex-1">
           <span>Log Sets</span>
         </TabsTrigger>
-        <TabsTrigger value="info">
+        <TabsTrigger value="info" className="flex-1">
           <span>Info</span>
         </TabsTrigger>
         {hasNotes && (
-          <TabsTrigger value="notes" className="relative">
+          <TabsTrigger value="notes" className="relative flex-1">
             <span>Notes</span>
-            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary"></span>
+            <span className="absolute top-1 right-1 w-2 h-2 bg-primary"></span>
           </TabsTrigger>
         )}
-        <TabsTrigger value="history" className="relative">
+        <TabsTrigger value="history" className="relative flex-1">
           <span>History</span>
           {hasHistoryIndicator && (
-            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary"></span>
+            <span className="absolute top-1 right-1 w-2 h-2 bg-primary"></span>
           )}
         </TabsTrigger>
       </TabsList>

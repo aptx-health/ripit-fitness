@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, LogOut, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { LoadingFrog } from '@/components/ui/loading-frog'
@@ -14,6 +14,7 @@ import { clientLogger } from '@/lib/client-logger'
 import { parseRepsFromPrescribed } from '@/lib/constants/intensity-presets'
 import { TIP_LIBRARY } from '@/lib/data/tip-library'
 import type { LoggedSet } from '@/types/workout'
+import type { ActionItem } from './ActionsMenu'
 import ExerciseDefinitionEditorModal from './features/exercise-definition/ExerciseDefinitionEditorModal'
 import ExerciseActionsFooter from './workout-logging/ExerciseActionsFooter'
 import ExerciseDisplayTabs from './workout-logging/ExerciseDisplayTabs'
@@ -497,12 +498,19 @@ export default function ExerciseLoggingModal({
               currentExerciseIndex={currentIndex}
               totalExercises={totalExercises}
               failedSetCount={failedSetCount}
-              onMinimize={handleExitSaveAsDraft}
+              onCompleteWorkout={() => setIsConfirming(true)}
               onClose={handleExitWorkout}
+              menuActions={[
+                { label: 'Edit this exercise', icon: Pencil, onClick: handleEditExercise },
+                { label: 'Add an exercise', icon: Plus, onClick: handleAddExercise },
+                { label: 'Swap this exercise', icon: RefreshCw, onClick: handleReplaceExercise },
+                { label: 'Delete this exercise', icon: Trash2, onClick: handleDeleteExercise, variant: 'danger' as const, requiresConfirmation: true, confirmationMessage: `Are you sure you want to delete "${currentExercise?.name || 'this exercise'}"?` },
+                { label: 'Exit workout', icon: LogOut, onClick: handleExitWorkout, variant: 'danger' as const },
+              ] satisfies ActionItem[]}
             />
           )}
 
-          {/* Exercise Navigation — hidden in follow-along (title block shows name) */}
+          {/* Exercise title — hidden in follow-along (title block shows name) */}
           {!isFollowAlong && (
             currentExercise ? (
               <ExerciseNavigation
@@ -511,10 +519,11 @@ export default function ExerciseLoggingModal({
                 totalExercises={totalExercises}
                 onPrevious={handlePreviousExercise}
                 onNext={handleNextExercise}
+                hideChevrons
               />
             ) : (
               <div className="px-4 py-3 border-b border-border">
-                <div className="h-8 bg-muted rounded animate-pulse" />
+                <div className="h-8 bg-muted animate-pulse" />
               </div>
             )
           )}
@@ -579,6 +588,7 @@ export default function ExerciseLoggingModal({
                       onExpandedInputChange={setExpandedInput}
                       onExtraSets={() => setExtraSetsMode(true)}
                       onNextExercise={handleNextExercise}
+                      onCompleteWorkout={() => setIsConfirming(true)}
                       isLastExercise={currentIndex >= totalExercises - 1}
                     />
                   }
@@ -599,20 +609,15 @@ export default function ExerciseLoggingModal({
             />
           ) : (
             expandedInput === null && <ExerciseActionsFooter
-              currentExerciseName={currentExercise?.name || 'Exercise'}
+              currentExerciseIndex={currentIndex}
+              totalExercises={totalExercises}
               nextSetNumber={nextSetNumber}
-              totalLoggedSets={totalLoggedSets}
               canLogSet={!!canLogSet}
               hasLoggedAllPrescribed={hasLoggedAllPrescribed}
               extraSetsMode={extraSetsMode}
-              isSubmitting={isSubmitting}
               onLogSet={handleLogSet}
-              onCompleteWorkout={() => setIsConfirming(true)}
-              onAddExercise={handleAddExercise}
-              onEditExercise={handleEditExercise}
-              onReplaceExercise={handleReplaceExercise}
-              onDeleteExercise={handleDeleteExercise}
-              onExitWorkout={handleExitWorkout}
+              onPrevious={handlePreviousExercise}
+              onNext={handleNextExercise}
             />
           )}
 

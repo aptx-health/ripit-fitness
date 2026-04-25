@@ -29,12 +29,26 @@ export default function RestStopwatch({
   if (!isRunning || dismissed) return null
 
   return (
-    <div className="border-2 border-primary/40 bg-primary/5 p-3 my-1">
-      <div className="flex items-center justify-between mb-1">
-        <span className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-widest">
-          <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-          Resting
-        </span>
+    <div
+      className="px-2.5 py-3"
+      style={{
+        backgroundColor: 'color-mix(in srgb, var(--success) 8%, transparent)',
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04), inset 0 -1px 0 rgba(0,0,0,0.30)',
+      }}
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 bg-primary rounded-full animate-pulse flex-shrink-0" />
+          <span className="text-[10px] font-bold text-primary uppercase tracking-widest">Resting</span>
+          <span
+            role="timer"
+            className="text-2xl font-medium text-foreground tabular-nums select-none leading-none"
+            aria-label={`Rest timer: ${formatted}`}
+            aria-live="off"
+          >
+            {formatted}
+          </span>
+        </div>
         {onDismiss && (
           <button
             type="button"
@@ -46,14 +60,6 @@ export default function RestStopwatch({
           </button>
         )}
       </div>
-      <span
-        role="timer"
-        className="block text-4xl font-bold tracking-wider text-foreground tabular-nums select-none"
-        aria-label={`Rest timer: ${formatted}`}
-        aria-live="off"
-      >
-        {formatted}
-      </span>
     </div>
   )
 }

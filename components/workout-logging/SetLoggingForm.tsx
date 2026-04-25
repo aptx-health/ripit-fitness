@@ -41,6 +41,7 @@ interface SetLoggingFormProps {
   onExpandedInputChange: (input: ExpandedInput) => void
   onExtraSets: () => void
   onNextExercise: () => void
+  onCompleteWorkout?: () => void
   isLastExercise: boolean
 }
 
@@ -56,6 +57,7 @@ export default function SetLoggingForm({
   onExpandedInputChange,
   onExtraSets,
   onNextExercise,
+  onCompleteWorkout,
   isLastExercise,
 }: SetLoggingFormProps) {
   const { settings } = useUserSettings()
@@ -84,18 +86,22 @@ export default function SetLoggingForm({
           >
             Extra Sets
           </button>
-          {!isLastExercise ? (
+          {isLastExercise ? (
+            <button
+              type="button"
+              onClick={onCompleteWorkout}
+              className="flex-1 py-2.5 bg-primary text-primary-foreground text-sm font-bold uppercase tracking-wider transition-all hover:bg-primary/90 doom-focus-ring"
+            >
+              Complete Workout
+            </button>
+          ) : (
             <button
               type="button"
               onClick={onNextExercise}
-              className="flex-1 py-2.5 bg-primary text-primary-foreground text-sm font-bold uppercase tracking-wider transition-all hover:bg-primary/90 doom-button-3d doom-focus-ring"
+              className="flex-1 py-2.5 bg-primary text-primary-foreground text-sm font-bold uppercase tracking-wider transition-all hover:bg-primary/90 doom-focus-ring"
             >
               Next Exercise
             </button>
-          ) : (
-            <div className="flex-1 py-2.5 text-center text-sm text-success-text font-bold uppercase tracking-wider">
-              Last exercise
-            </div>
           )}
         </div>
       </div>

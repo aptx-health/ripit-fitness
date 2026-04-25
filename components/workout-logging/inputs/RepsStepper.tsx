@@ -2,6 +2,9 @@
 
 import { Minus, Plus } from 'lucide-react'
 
+const RAISED_SHADOW = 'inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)'
+const RECESSED_SHADOW = 'inset 0 1px 2px rgba(0,0,0,0.50), inset 0 0 0 1px rgba(254,243,199,0.06)'
+
 interface RepsStepperProps {
   value: string
   onChange: (value: string) => void
@@ -33,21 +36,20 @@ export function RepsStepper({ value, onChange, placeholder }: RepsStepperProps) 
           type="button"
           onClick={handleDecrement}
           disabled={!hasValue || numericValue <= 0}
-          className="flex-shrink-0 min-w-[56px] min-h-[56px] flex items-center justify-center
-            border-2 border-border bg-muted text-foreground
-            hover:bg-secondary hover:text-foreground
-            active:bg-secondary active:text-foreground
+          className="flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center
+            text-foreground
             disabled:opacity-30
             transition-all duration-75"
+          style={{ backgroundColor: 'rgba(0,0,0,0.3)', boxShadow: RAISED_SHADOW }}
           aria-label="Decrease reps"
         >
           <Minus size={24} strokeWidth={3} />
         </button>
 
         <div
-          className="flex-1 min-h-[56px] flex items-center justify-center
-            bg-card border-y-2 border-border
+          className="flex-1 min-h-[44px] flex items-center justify-center
             text-2xl font-bold text-foreground tabular-nums min-w-[60px]"
+          style={{ backgroundColor: 'rgba(0,0,0,0.3)', boxShadow: RECESSED_SHADOW }}
         >
           {hasValue ? numericValue : (
             <span className="text-muted-foreground text-lg">
@@ -59,11 +61,12 @@ export function RepsStepper({ value, onChange, placeholder }: RepsStepperProps) 
         <button
           type="button"
           onClick={handleIncrement}
-          className="flex-shrink-0 min-w-[56px] min-h-[56px] flex items-center justify-center
-            border-2 border-success-border bg-success-muted text-success-text
+          className="flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center
+            bg-success-muted text-success-text
             hover:bg-success hover:text-success-foreground
             active:bg-success-hover active:text-success-foreground
             transition-all duration-75"
+          style={{ boxShadow: RAISED_SHADOW }}
           aria-label="Increase reps"
         >
           <Plus size={24} strokeWidth={3} />

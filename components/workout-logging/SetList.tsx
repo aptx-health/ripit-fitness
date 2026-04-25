@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertCircle, Check, Circle, Trash2 } from 'lucide-react'
+import { AlertCircle, Check, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import type { LoggedSet } from '@/types/workout'
 import RestStopwatch from './RestStopwatch'
@@ -150,7 +150,7 @@ export default function SetList({
 
       {/* Per-row view: logged + rest timer + prescribed */}
       {!showCollapsedSummary && (
-        <div className="divide-y divide-border/30">
+        <div>
           {/* Logged sets */}
           {loggedSets.map((set) => {
             const isFailed = set._syncStatus === 'error'
@@ -158,16 +158,20 @@ export default function SetList({
             return (
               <div
                 key={`logged-${set.exerciseId}-${set.setNumber}`}
-                className={`px-2 py-2 ${flashSetNumber === set.setNumber ? 'doom-set-logged' : ''}`}
+                className={`px-2.5 py-3 ${flashSetNumber === set.setNumber ? 'doom-set-logged' : ''}`}
+                style={{
+                  backgroundColor: 'color-mix(in srgb, var(--success) 8%, transparent)',
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04), inset 0 -1px 0 rgba(0,0,0,0.30)',
+                }}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-start gap-2 flex-1 min-w-0">
-                    {/* State indicator */}
-                    <span className="flex-shrink-0 mt-0.5">
+                    {/* State indicator — filled circle */}
+                    <span className="flex-shrink-0 mt-0.5 w-[22px] h-[22px] flex items-center justify-center" style={{ backgroundColor: isFailed ? 'var(--warning)' : 'var(--success)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -1px 0 rgba(0,0,0,0.20)' }}>
                       {isFailed ? (
-                        <AlertCircle size={16} className="text-warning" />
+                        <AlertCircle size={12} className="text-white" />
                       ) : (
-                        <Check size={16} className="text-success" />
+                        <Check size={12} className="text-white" strokeWidth={3} />
                       )}
                     </span>
                     <div className="min-w-0">
@@ -181,11 +185,11 @@ export default function SetList({
                       {isPending && <span className="text-xs text-muted-foreground">saving...</span>}
                     </div>
                   </div>
-                  {/* Delete — subtle, only visible on hover/focus */}
+                  {/* Delete — hidden by default, visible on hover */}
                   <button
                     type="button"
                     onClick={() => onDeleteSet(set.setNumber)}
-                    className="text-muted-foreground/30 hover:text-error p-1 transition-colors doom-focus-ring"
+                    className="opacity-0 hover:opacity-100 focus:opacity-100 text-muted-foreground/30 hover:text-error p-1 transition-all doom-focus-ring"
                     aria-label={`Delete set ${set.setNumber}`}
                   >
                     <Trash2 size={14} />
@@ -209,18 +213,15 @@ export default function SetList({
           {remainingSets.map((set) => (
             <div
               key={`prescribed-${set.id}`}
-              className="px-2 py-2"
+              className="px-2.5 py-3 opacity-55"
             >
               <div className="flex items-start gap-2">
-                <span className="flex-shrink-0 mt-0.5">
-                  <Circle size={16} className="text-muted-foreground/40" />
+                <span className="flex-shrink-0 mt-0.5 w-[22px] h-[22px] flex items-center justify-center text-xs font-bold text-muted-foreground" style={{ backgroundColor: 'rgba(0,0,0,0.3)', boxShadow: 'inset 0 1px 1px rgba(0,0,0,0.30)' }}>
+                  {set.setNumber}
                 </span>
                 <div>
-                  <span className="block text-xs font-bold text-muted-foreground/60 uppercase tracking-wider">
-                    Set {set.setNumber}
-                  </span>
-                  <span className="block text-sm text-muted-foreground/70">
-                    {set.reps} reps @ {set.weight || '—'}
+                  <span className="block text-[13px] text-muted-foreground">
+                    {set.reps} reps{set.weight ? ` @ ${set.weight}` : ''}
                     {showIntensity && formatIntensity(set) ? ` · ${formatIntensity(set)}` : ''}
                   </span>
                 </div>
