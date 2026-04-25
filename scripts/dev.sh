@@ -2,8 +2,8 @@
 # Entry point for local dev: sources worktree-env.sh (so OVERMIND_SOCKET,
 # PG_PORT, etc. are exported) and then execs overmind.
 #
-# Default (no args) starts just postgres + app — the common subset.
-# Worker and minio are opt-in.
+# Default (no args) starts postgres + redis + worker + app.
+# Minio is opt-in.
 #
 # Usage:
 #   ./scripts/dev.sh                            # postgres + app
