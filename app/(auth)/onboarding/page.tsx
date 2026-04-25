@@ -9,6 +9,9 @@ type Step = 'loading' | 'waiver' | 'experience' | 'equipment' | 'primer' | 'comp
 type ExperienceLevel = 'beginner' | 'experienced'
 type EquipmentPreference = 'machines' | 'free_weights_cables'
 
+const RAISED_SHADOW = 'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)'
+const RAISED_SHADOW_SECONDARY = 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.25), 0 1px 0 rgba(0,0,0,0.30)'
+
 const PRIMER_PAGES = [
   {
     title: 'Just follow along',
@@ -253,7 +256,8 @@ export default function OnboardingPage() {
               <button
                 type="button"
                 onClick={() => { window.location.href = '/programs' }}
-                className="rounded-lg bg-primary px-6 py-3 text-base font-semibold text-primary-foreground transition-colors hover:bg-primary-hover active:bg-primary-active"
+                className="bg-primary px-6 h-11 text-sm font-medium uppercase tracking-widest text-primary-foreground transition-colors hover:bg-primary-hover active:bg-primary-active doom-focus-ring"
+                style={{ boxShadow: RAISED_SHADOW }}
               >
                 Go to Programs
               </button>
@@ -304,9 +308,15 @@ export default function OnboardingPage() {
           {Array.from({ length: totalDots }).map((_, i) => (
             <div
               key={i}
-              className={`h-1 flex-1 rounded-full transition-all duration-500 ${
-                i <= currentDot ? 'bg-primary' : 'bg-muted'
-              }`}
+              className={`h-[5px] flex-1 transition-all duration-500`}
+              style={{
+                backgroundColor: i <= currentDot
+                  ? 'var(--primary)'
+                  : 'rgba(0,0,0,0.25)',
+                boxShadow: i <= currentDot
+                  ? undefined
+                  : 'inset 0 1px 0 rgba(0,0,0,0.20)',
+              }}
             />
           ))}
         </div>
@@ -315,7 +325,7 @@ export default function OnboardingPage() {
       {/* Error toast */}
       {error && (
         <div className="mx-auto mt-4 max-w-lg px-6">
-          <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+          <div className="border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
             {error}
           </div>
         </div>
@@ -333,16 +343,20 @@ export default function OnboardingPage() {
 
       {/* Bottom action bar — fixed to bottom, PWA safe */}
       <div
-        className="border-t border-border/30 bg-background/80 px-6 backdrop-blur-sm"
-        style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+        className="bg-secondary px-6"
+        style={{
+          paddingBottom: 'max(1rem, env(safe-area-inset-bottom))',
+          boxShadow: 'inset 0 1px 0 rgba(0,0,0,0.25)',
+        }}
       >
-        <div className="mx-auto max-w-lg py-4">
-          <div className="flex items-center gap-3">
+        <div className="mx-auto max-w-lg py-3">
+          <div className="flex items-center gap-2.5">
             {canGoBack && (
               <button
                 type="button"
                 onClick={handleBack}
-                className="rounded-lg border border-border px-5 py-3.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:border-foreground/20"
+                className="px-5 h-11 text-sm font-medium uppercase tracking-wider text-secondary-foreground transition-colors doom-focus-ring"
+                style={{ backgroundColor: 'rgba(0,0,0,0.35)', boxShadow: RAISED_SHADOW_SECONDARY }}
               >
                 Back
               </button>
@@ -355,10 +369,10 @@ export default function OnboardingPage() {
                 <ExperienceActions onSelect={handleExperience} />
               )}
               {step === 'equipment' && (
-                <p className="py-3.5 text-center text-sm text-muted-foreground">Pick one above</p>
+                <p className="h-11 flex items-center justify-center text-sm uppercase tracking-wider text-secondary-foreground/60">Pick one above</p>
               )}
               {step === 'primer' && (
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2.5">
                   <PrimerAction
                     isLast={primerPage === PRIMER_PAGES.length - 1}
                     onNext={handlePrimerNext}
@@ -368,7 +382,7 @@ export default function OnboardingPage() {
                     <button
                       type="button"
                       onClick={handlePrimerFinish}
-                      className="w-full py-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      className="w-full h-11 text-sm font-medium uppercase tracking-wider text-secondary-foreground/60 transition-colors hover:text-secondary-foreground doom-focus-ring"
                     >
                       Skip tips
                     </button>
@@ -441,7 +455,7 @@ function WaiverContent() {
       <p className="mb-6 text-sm text-muted-foreground">
         Version {CURRENT_WAIVER_VERSION}
       </p>
-      <div className="max-h-[50vh] overflow-y-auto rounded-lg border border-border/40 bg-card/60 p-5 text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
+      <div className="max-h-[50vh] overflow-y-auto border border-border/40 bg-card/60 p-5 text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
         {WAIVER_TEXT}
       </div>
     </>
@@ -530,7 +544,8 @@ function WaiverAction({ onAccept }: { onAccept: () => void }) {
       type="button"
       onClick={handleAccept}
       disabled={accepting}
-      className="w-full rounded-lg bg-primary py-4 text-base font-semibold text-primary-foreground transition-colors hover:bg-primary-hover active:bg-primary-active disabled:opacity-50"
+      className="w-full h-11 bg-primary text-sm font-medium uppercase tracking-widest text-primary-foreground transition-colors hover:bg-primary-hover active:bg-primary-active disabled:opacity-50 doom-focus-ring"
+      style={{ boxShadow: RAISED_SHADOW }}
     >
       {accepting ? 'Submitting...' : 'I Agree'}
     </button>
@@ -539,20 +554,22 @@ function WaiverAction({ onAccept }: { onAccept: () => void }) {
 
 function ExperienceActions({ onSelect }: { onSelect: (level: ExperienceLevel) => void }) {
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2.5">
       <button
         type="button"
         onClick={() => onSelect('beginner')}
-        className="w-full rounded-lg bg-primary py-4 text-base font-semibold text-primary-foreground transition-colors hover:bg-primary-hover active:bg-primary-active"
+        className="w-full h-11 bg-primary text-sm font-medium uppercase tracking-widest text-primary-foreground transition-colors hover:bg-primary-hover active:bg-primary-active doom-focus-ring"
+        style={{ boxShadow: RAISED_SHADOW }}
       >
-        Yes, I&apos;m new to this
+        Yes, I&apos;m new
       </button>
       <button
         type="button"
         onClick={() => onSelect('experienced')}
-        className="w-full rounded-lg border border-border py-4 text-base font-medium text-foreground transition-colors hover:bg-card"
+        className="w-full h-11 bg-secondary text-sm font-medium uppercase tracking-wider text-secondary-foreground transition-colors doom-focus-ring"
+        style={{ boxShadow: RAISED_SHADOW_SECONDARY }}
       >
-        I have some experience
+        I have experience
       </button>
     </div>
   )
@@ -571,7 +588,8 @@ function PrimerAction({
     <button
       type="button"
       onClick={isLast ? onFinish : onNext}
-      className="w-full rounded-lg bg-primary py-3.5 text-base font-semibold text-primary-foreground transition-colors hover:bg-primary-hover active:bg-primary-active"
+      className="w-full h-11 bg-primary text-sm font-medium uppercase tracking-widest text-primary-foreground transition-colors hover:bg-primary-hover active:bg-primary-active doom-focus-ring"
+      style={{ boxShadow: RAISED_SHADOW }}
     >
       {isLast ? "Let's go" : 'Next'}
     </button>
@@ -593,13 +611,18 @@ function ChoiceCard({
     <button
       type="button"
       onClick={onClick}
-      className={`group w-full rounded-lg border p-5 text-left transition-all ${
+      className={`group w-full border p-5 text-left transition-all ${
         subtle
           ? 'border-border/30 hover:border-border hover:bg-card/50'
           : 'border-border bg-card hover:border-primary/40'
       }`}
+      style={{
+        boxShadow: subtle
+          ? undefined
+          : 'inset 0 1px 0 rgba(255,255,255,0.05), 0 1px 0 rgba(0,0,0,0.30)',
+      }}
     >
-      <p className={`text-lg font-semibold transition-colors ${
+      <p className={`text-base font-semibold uppercase tracking-wider transition-colors ${
         subtle
           ? 'text-muted-foreground group-hover:text-foreground'
           : 'text-foreground group-hover:text-primary'

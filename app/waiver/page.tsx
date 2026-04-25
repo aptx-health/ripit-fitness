@@ -44,15 +44,17 @@ export default function WaiverPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <div className="w-full max-w-lg rounded-lg border border-border bg-card p-6 shadow-lg">
-        <h1 className="mb-4 text-xl font-bold text-foreground">
+    <div className="flex min-h-[100dvh] items-center justify-center bg-background p-4">
+      <div className="w-full max-w-lg border border-border bg-card p-6"
+        style={{ boxShadow: '0 2px 0 rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.05)' }}
+      >
+        <h1 className="mb-4 text-xl font-bold uppercase tracking-wider text-foreground">
           Waiver &amp; Assumption of Risk
         </h1>
         <p className="mb-2 text-xs text-muted-foreground">
           Version {CURRENT_WAIVER_VERSION}
         </p>
-        <div className="mb-6 max-h-64 overflow-y-auto rounded border border-border bg-muted p-4 text-sm text-foreground whitespace-pre-wrap">
+        <div className="mb-6 max-h-64 overflow-y-auto border border-border bg-muted p-4 text-sm text-foreground whitespace-pre-wrap">
           {WAIVER_TEXT}
         </div>
         {error && (
@@ -62,7 +64,8 @@ export default function WaiverPage() {
           type="button"
           onClick={handleAccept}
           disabled={accepting}
-          className="w-full rounded bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+          className="w-full h-11 bg-primary text-sm font-medium uppercase tracking-widest text-primary-foreground transition-colors hover:bg-primary-hover disabled:opacity-50 doom-focus-ring"
+          style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)' }}
         >
           {accepting ? 'Submitting...' : 'I Agree'}
         </button>
