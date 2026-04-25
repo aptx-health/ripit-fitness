@@ -1,21 +1,14 @@
 import { useUserSettings } from '@/hooks/useUserSettings'
-import { useSession } from '@/lib/auth-client'
 
 /**
  * Returns whether the current user has access to intensity features (RIR/RPE).
- * Access is granted if:
- * - intensityEnabled is true in their settings, OR
- * - the user has an admin role (automatic premium access)
+ * Access requires intensityEnabled in settings. Admins can toggle this on/off
+ * in settings — admin role grants the ability to toggle, not automatic access.
  */
 export function useIntensityAccess() {
-  const { settings, isLoading: settingsLoading } = useUserSettings()
-  const { data: session, isPending: sessionLoading } = useSession()
+  const { settings, isLoading } = useUserSettings()
 
-  const userRole = (session?.user as Record<string, unknown>)?.role as string | undefined
-  const isAdmin = userRole === 'admin'
-
-  const hasAccess = isAdmin || (settings?.intensityEnabled ?? false)
-  const isLoading = settingsLoading || sessionLoading
+  const hasAccess = settings?.intensityEnabled ?? false
 
   return { hasAccess, isLoading }
 }
