@@ -62,7 +62,7 @@ export function OAuthButtons({ intent = 'login' }: OAuthButtonsProps = {}) {
         type="button"
         onClick={() => handleOAuth('google')}
         disabled={loadingProvider !== null}
-        className="flex w-full items-center justify-center gap-2 px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium text-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="flex w-full items-center justify-center gap-2 px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium text-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors doom-raised-subtle"
       >
         {loadingProvider === 'google' ? (
           <LoadingSpinner />

@@ -1961,6 +1961,34 @@ body > [data-training-widget] {
   z-index: 3;
 }
 
+/* Raised Shadow — primary/filled buttons */
+.doom-raised {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.20),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.30),
+    0 1px 0 rgba(0, 0, 0, 0.40);
+}
+
+.doom-raised:active:not(:disabled) {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.10),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.20);
+}
+
+/* Raised Shadow — outline/secondary buttons */
+.doom-raised-subtle {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.10),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.20),
+    0 1px 0 rgba(0, 0, 0, 0.30);
+}
+
+.doom-raised-subtle:active:not(:disabled) {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.10);
+}
+
 /* 3D Button Effect */
 .doom-button-3d {
   position: relative;

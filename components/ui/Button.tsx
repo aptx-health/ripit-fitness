@@ -23,13 +23,13 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const baseStyles = 'inline-flex items-center justify-center font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed'
 
     const variantStyles = {
-      primary: 'bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-active focus:ring-primary',
-      secondary: 'bg-muted text-foreground hover:bg-secondary-hover hover:text-foreground focus:ring-border',
-      accent: 'bg-accent text-accent-foreground hover:bg-accent-hover active:bg-accent-active focus:ring-accent',
-      success: 'bg-success text-success-foreground hover:bg-success-hover focus:ring-success',
-      danger: 'bg-error text-error-foreground hover:bg-error-hover focus:ring-error',
+      primary: 'bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-active focus:ring-primary doom-raised',
+      secondary: 'bg-muted text-foreground hover:bg-secondary-hover hover:text-foreground focus:ring-border doom-raised-subtle',
+      accent: 'bg-accent text-accent-foreground hover:bg-accent-hover active:bg-accent-active focus:ring-accent doom-raised',
+      success: 'bg-success text-success-foreground hover:bg-success-hover focus:ring-success doom-raised',
+      danger: 'bg-error text-error-foreground hover:bg-error-hover focus:ring-error doom-raised',
       ghost: 'bg-transparent hover:bg-muted text-foreground',
-      outline: 'border-2 border-border bg-transparent hover:bg-muted text-foreground'
+      outline: 'border-2 border-border bg-transparent hover:bg-muted text-foreground doom-raised-subtle'
     }
 
     const sizeStyles = {

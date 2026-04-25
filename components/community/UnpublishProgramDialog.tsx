@@ -94,7 +94,7 @@ export default function UnpublishProgramDialog({
             <AlertDialog.Cancel asChild>
               <button type="button"
                 disabled={isDeleting}
-                className="px-4 py-2 border-2 border-border text-foreground hover:border-primary hover:text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider font-semibold text-sm doom-focus-ring"
+                className="px-4 py-2 border-2 border-border text-foreground hover:border-primary hover:text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider font-semibold text-sm doom-focus-ring doom-raised-subtle"
               >
                 Cancel
               </button>
@@ -103,7 +103,7 @@ export default function UnpublishProgramDialog({
               <button type="button"
                 onClick={handleUnpublish}
                 disabled={isDeleting}
-                className="px-4 py-2 bg-error text-error-foreground hover:bg-error-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider font-semibold text-sm doom-button-3d doom-focus-ring"
+                className="px-4 py-2 bg-error text-error-foreground hover:bg-error-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider font-semibold text-sm doom-raised doom-focus-ring"
               >
                 {isDeleting ? 'UNPUBLISHING...' : 'UNPUBLISH'}
               </button>
