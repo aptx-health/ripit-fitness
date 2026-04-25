@@ -57,6 +57,7 @@ export async function POST(request: NextRequest) {
     if (experienceLevel === 'beginner') {
       settingsUpdate.equipmentPreference = equipmentPreference || 'machines'
       settingsUpdate.dismissedPrimer = true // they saw it during onboarding
+      settingsUpdate.loggingMode = 'follow_along'
     }
 
     await prisma.userSettings.upsert({

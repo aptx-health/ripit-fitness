@@ -1,13 +1,11 @@
 'use client'
 
-import Image from 'next/image'
-import { useState } from 'react'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/radix/tabs'
 import type { LoadState } from '@/hooks/useProgressiveExercises'
-import { EQUIPMENT_LABELS } from '@/lib/constants/program-metadata'
 import type { LoggedSet } from '@/types/workout'
 import BeginnerTipCard from './BeginnerTipCard'
+import ExerciseInfoContent from './ExerciseInfoContent'
 import SetList from './SetList'
 
 interface PrescribedSet {
@@ -61,27 +59,6 @@ interface ExerciseDisplayTabsProps {
   tip?: string
 }
 
-const FAU_DISPLAY_NAMES: Record<string, string> = {
-  chest: 'Chest',
-  'mid-back': 'Mid Back',
-  'lower-back': 'Lower Back',
-  'front-delts': 'Front Delts',
-  'side-delts': 'Side Delts',
-  'rear-delts': 'Rear Delts',
-  lats: 'Lats',
-  traps: 'Traps',
-  biceps: 'Biceps',
-  triceps: 'Triceps',
-  forearms: 'Forearms',
-  quads: 'Quads',
-  adductors: 'Adductors',
-  hamstrings: 'Hamstrings',
-  glutes: 'Glutes',
-  calves: 'Calves',
-  abs: 'Abs',
-  obliques: 'Obliques',
-}
-
 // Loading skeleton for history tab
 function HistoryLoadingSkeleton() {
   return (
@@ -107,7 +84,6 @@ export default function ExerciseDisplayTabs({
   showIntensity = true,
   tip,
 }: ExerciseDisplayTabsProps) {
-  const [expandedImage, setExpandedImage] = useState<string | null>(null)
   const hasNotes = !!exercise.notes
 
   return (
@@ -151,100 +127,10 @@ export default function ExerciseDisplayTabs({
       </TabsContent>
 
       <TabsContent value="info" className="flex-1 overflow-y-auto px-4">
-        <div className="space-y-6">
-          {exercise.exerciseDefinition?.imageUrls && exercise.exerciseDefinition.imageUrls.length > 0 && (
-            <div>
-              <div className="grid grid-cols-2 gap-3">
-                {exercise.exerciseDefinition.imageUrls.map((url, i) => {
-                  const src = url.startsWith('http') ? url : `https://cdn.ripit.fit/exercise-images/${url}`
-                  return (
-                    <button
-                      key={url}
-                      type="button"
-                      onClick={() => setExpandedImage(src)}
-                      className="relative aspect-square rounded-lg overflow-hidden bg-muted cursor-pointer"
-                    >
-                      <Image
-                        src={src}
-                        alt={`${exercise.name} - ${i === 0 ? 'start' : 'end'} position`}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 640px) 45vw, 300px"
-                      />
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
-          {exercise.exerciseDefinition?.instructions && (
-            <div>
-              <h4 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-2">INSTRUCTIONS</h4>
-              <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line">
-                {exercise.exerciseDefinition.instructions}
-              </p>
-            </div>
-          )}
-
-          {exercise.exerciseDefinition?.primaryFAUs && exercise.exerciseDefinition.primaryFAUs.length > 0 && (
-            <div>
-              <h4 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-2">PRIMARY MUSCLES</h4>
-              <div className="flex flex-wrap gap-1.5">
-                {exercise.exerciseDefinition.primaryFAUs.map((fau) => (
-                  <span
-                    key={fau}
-                    className="px-2.5 py-1 text-sm font-bold uppercase tracking-wider border-2 border-primary text-primary bg-primary/10"
-                  >
-                    {FAU_DISPLAY_NAMES[fau] || fau}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {exercise.exerciseDefinition?.secondaryFAUs && exercise.exerciseDefinition.secondaryFAUs.length > 0 && (
-            <div>
-              <h4 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-2">SECONDARY MUSCLES</h4>
-              <div className="flex flex-wrap gap-1.5">
-                {exercise.exerciseDefinition.secondaryFAUs.map((fau) => (
-                  <span
-                    key={fau}
-                    className="px-2.5 py-1 text-sm font-bold uppercase tracking-wider border border-border text-foreground bg-muted/50"
-                  >
-                    {FAU_DISPLAY_NAMES[fau] || fau}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {exercise.exerciseDefinition?.equipment && exercise.exerciseDefinition.equipment.length > 0 && (
-            <div>
-              <h4 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-2">EQUIPMENT</h4>
-              <div className="flex flex-wrap gap-1.5">
-                {exercise.exerciseDefinition.equipment.map((item) => (
-                  <span
-                    key={item}
-                    className="px-2.5 py-1 text-sm font-bold uppercase tracking-wider border border-border text-muted-foreground bg-card"
-                  >
-                    {EQUIPMENT_LABELS[item] || item.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {!exercise.exerciseDefinition?.imageUrls?.length &&
-            !exercise.exerciseDefinition?.instructions &&
-            !exercise.exerciseDefinition?.primaryFAUs?.length &&
-            !exercise.exerciseDefinition?.secondaryFAUs?.length &&
-            !exercise.exerciseDefinition?.equipment?.length && (
-            <div className="flex items-center justify-center h-full py-12">
-              <p className="text-base sm:text-lg text-muted-foreground">No info available for this exercise</p>
-            </div>
-          )}
-        </div>
+        <ExerciseInfoContent
+          exerciseName={exercise.name}
+          exerciseDefinition={exercise.exerciseDefinition}
+        />
       </TabsContent>
 
       {hasNotes && (
@@ -321,27 +207,6 @@ export default function ExerciseDisplayTabs({
           </div>
         )}
       </TabsContent>
-
-      {expandedImage && (
-        <div
-          role="button"
-          tabIndex={0}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
-          style={{ position: 'fixed', inset: 0, zIndex: 50 }}
-          onClick={() => setExpandedImage(null)}
-          onKeyDown={(e) => { if (e.key === 'Escape' || e.key === 'Enter') setExpandedImage(null) }}
-        >
-          <div className="relative w-[90vw] max-w-lg aspect-square">
-            <Image
-              src={expandedImage}
-              alt={exercise.name}
-              fill
-              className="object-contain"
-              sizes="90vw"
-            />
-          </div>
-        </div>
-      )}
     </Tabs>
   )
 }

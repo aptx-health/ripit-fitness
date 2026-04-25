@@ -8,6 +8,7 @@ interface ExerciseLoggingHeaderProps {
   failedSetCount?: number
   onMinimize: () => void
   onClose: () => void
+  modeToggle?: React.ReactNode
 }
 
 export default function ExerciseLoggingHeader({
@@ -16,6 +17,7 @@ export default function ExerciseLoggingHeader({
   failedSetCount = 0,
   onMinimize,
   onClose,
+  modeToggle,
 }: ExerciseLoggingHeaderProps) {
   return (
     <div
@@ -52,6 +54,11 @@ export default function ExerciseLoggingHeader({
           </button>
         </div>
       </div>
+      {modeToggle && (
+        <div className="text-center pb-1">
+          {modeToggle}
+        </div>
+      )}
     </div>
   )
 }

@@ -33,7 +33,7 @@ export async function POST(
 
     // Parse optional fallback sets (used when some per-set writes failed)
     const body = await request.json()
-    const { fallbackSets } = body as { fallbackSets?: LoggedSetInput[] }
+    const { fallbackSets, guidedCompletion } = body as { fallbackSets?: LoggedSetInput[]; guidedCompletion?: boolean }
 
     // Verify workout exists
     const workout = await prisma.workout.findUnique({
@@ -99,6 +99,20 @@ export async function POST(
           where: { id: draft.id },
           data: { status: 'completed', completedAt: new Date() },
         })
+      }
+
+      // Guided completion (Follow Along mode) — allow zero-set completion
+      if (guidedCompletion) {
+        logger.info({ workoutId, guided: true }, 'Guided workout completed')
+        const completionRecord = draft
+          ? await tx.workoutCompletion.update({
+              where: { id: draft.id },
+              data: { status: 'completed', completedAt: new Date() },
+            })
+          : await tx.workoutCompletion.create({
+              data: { workoutId, userId: user.id, status: 'completed', completedAt: new Date() },
+            })
+        return completionRecord
       }
 
       // No draft with sets — need fallback sets to complete

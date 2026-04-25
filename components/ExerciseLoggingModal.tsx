@@ -19,6 +19,9 @@ import ExerciseActionsFooter from './workout-logging/ExerciseActionsFooter'
 import ExerciseDisplayTabs from './workout-logging/ExerciseDisplayTabs'
 import ExerciseLoggingHeader from './workout-logging/ExerciseLoggingHeader'
 import ExerciseNavigation from './workout-logging/ExerciseNavigation'
+import FollowAlongFooter from './workout-logging/FollowAlongFooter'
+import FollowAlongHeader from './workout-logging/FollowAlongHeader'
+import FollowAlongTabs from './workout-logging/FollowAlongTabs'
 import SetLoggingForm, { type ExpandedInput } from './workout-logging/SetLoggingForm'
 import { AddExerciseWizard } from './workout-logging/wizards/AddExerciseWizard'
 import { DeleteExerciseWizard } from './workout-logging/wizards/DeleteExerciseWizard'
@@ -39,6 +42,7 @@ type Props = {
   initialHistory?: ExerciseHistory | null
   initialExerciseIndex?: number
   showTips?: boolean
+  loggingMode?: 'full' | 'follow_along'
   onComplete: () => Promise<void>
   onRefresh?: () => Promise<void>
 }
@@ -53,6 +57,7 @@ export default function ExerciseLoggingModal({
   initialHistory,
   initialExerciseIndex = 0,
   showTips = false,
+  loggingMode: loggingModeProp = 'full',
   onComplete,
   onRefresh,
 }: Props) {
@@ -78,6 +83,20 @@ export default function ExerciseLoggingModal({
 
   // Extra sets mode: allows logging beyond prescribed sets
   const [extraSetsMode, setExtraSetsMode] = useState(false)
+
+  // Follow Along mode — local state allows in-session switching
+  const [mode, setMode] = useState<'full' | 'follow_along'>(loggingModeProp)
+  const isFollowAlong = mode === 'follow_along'
+
+  const handleSwitchToLogging = useCallback(() => {
+    setMode('full')
+    // Persist immediately
+    fetch('/api/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ loggingMode: 'full' }),
+    }).catch(() => {})
+  }, [])
 
   // Tip rotation — sequential through array order, then random
   const tierTips = useMemo(
@@ -211,6 +230,15 @@ export default function ExerciseLoggingModal({
 
     rotateTip()
 
+    // Auto-persist loggingMode if user was originally in follow_along and logged a set
+    if (loggingModeProp === 'follow_along') {
+      fetch('/api/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ loggingMode: 'full' }),
+      }).catch(() => {}) // fire-and-forget
+    }
+
     // Pre-fill for next set: reps from next prescribed, weight carried forward
     const nextNextSetNumber = nextSetNumber + 1
     const nextPrescribed = currentPrescribedSets.find(s => s.setNumber === nextNextSetNumber)
@@ -228,12 +256,13 @@ export default function ExerciseLoggingModal({
       rpe: nextRpe,
       rir: nextRir,
     })
-  }, [currentSet, currentExercise, nextSetNumber, currentPrescribedSets, prescribedSet, logSet, rotateTip])
+  }, [currentSet, currentExercise, nextSetNumber, currentPrescribedSets, prescribedSet, logSet, rotateTip, hasIntensityAccess, loggingModeProp])
 
   const handleNextExercise = () => {
     lastPrefillKey.current = ''
     setExtraSetsMode(false)
     goToNext()
+    rotateTip()
     setCurrentSet(prev => ({
       reps: '',
       weight: '',
@@ -247,6 +276,7 @@ export default function ExerciseLoggingModal({
     lastPrefillKey.current = ''
     setExtraSetsMode(false)
     goToPrevious()
+    rotateTip()
     setCurrentSet(prev => ({
       reps: '',
       weight: '',
@@ -360,6 +390,26 @@ export default function ExerciseLoggingModal({
     }
   }
 
+  const handleGuidedComplete = async () => {
+    setIsSubmitting(true)
+    try {
+      await completeDraft(workoutId, undefined, true)
+      clearCache()
+      await onComplete()
+    } catch (error) {
+      clientLogger.error('Error completing guided workout:', error)
+      setIsSubmitting(false)
+      setIsConfirming(false)
+      const message = !navigator.onLine
+        ? 'You\'re offline. Please try again when you have a connection.'
+        : 'Failed to save workout. Please try again.'
+      alert(message)
+      return
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   const performDeleteSet = useCallback((exerciseId: string, setNumber: number) => {
     const set = loggedSets.find(
       s => s.exerciseId === exerciseId && s.setNumber === setNumber
@@ -435,27 +485,38 @@ export default function ExerciseLoggingModal({
         {/* Modal - Full screen on mobile, centered on desktop */}
         <div className="bg-card w-full h-[100dvh] sm:h-[85vh] sm:max-h-[85vh] sm:max-w-2xl sm:border-2 sm:border-border sm:rounded-lg flex flex-col shadow-xl pb-[env(safe-area-inset-bottom)]">
           {/* Header */}
-          <ExerciseLoggingHeader
-            currentExerciseIndex={currentIndex}
-            totalExercises={totalExercises}
-            failedSetCount={failedSetCount}
-            onMinimize={handleExitSaveAsDraft}
-            onClose={handleExitWorkout}
-          />
-
-          {/* Exercise Navigation */}
-          {currentExercise ? (
-            <ExerciseNavigation
-              currentExercise={currentExercise}
+          {isFollowAlong ? (
+            <FollowAlongHeader
               currentExerciseIndex={currentIndex}
               totalExercises={totalExercises}
-              onPrevious={handlePreviousExercise}
-              onNext={handleNextExercise}
+              onClose={handleExitWorkout}
+              onSwitchToLogging={handleSwitchToLogging}
             />
           ) : (
-            <div className="px-4 py-3 border-b border-border">
-              <div className="h-8 bg-muted rounded animate-pulse" />
-            </div>
+            <ExerciseLoggingHeader
+              currentExerciseIndex={currentIndex}
+              totalExercises={totalExercises}
+              failedSetCount={failedSetCount}
+              onMinimize={handleExitSaveAsDraft}
+              onClose={handleExitWorkout}
+            />
+          )}
+
+          {/* Exercise Navigation — hidden in follow-along (title block shows name) */}
+          {!isFollowAlong && (
+            currentExercise ? (
+              <ExerciseNavigation
+                currentExercise={currentExercise}
+                currentExerciseIndex={currentIndex}
+                totalExercises={totalExercises}
+                onPrevious={handlePreviousExercise}
+                onNext={handleNextExercise}
+              />
+            ) : (
+              <div className="px-4 py-3 border-b border-border">
+                <div className="h-8 bg-muted rounded animate-pulse" />
+              </div>
+            )
           )}
 
           {/* Content area with tabs — swipeable */}
@@ -487,54 +548,73 @@ export default function ExerciseLoggingModal({
                 </button>
               </div>
             ) : currentExercise ? (
-              <ExerciseDisplayTabs
-                exercise={currentExercise}
-                prescribedSets={currentPrescribedSets}
-                loggedSets={currentExerciseLoggedSets}
-                exerciseHistory={currentExerciseHistory}
-                historyState={currentHistoryState}
-                hasHistoryIndicator={hasHistoryForCurrentExercise}
-                onDeleteSet={handleDeleteSet}
-                isInputExpanded={expandedInput !== null}
-                showIntensity={hasIntensityAccess}
-                tip={currentTip}
-                loggingForm={
-                  <SetLoggingForm
-                    prescribedSet={prescribedSet}
-                    hasLoggedAllPrescribed={hasLoggedAllPrescribed}
-                    extraSetsMode={extraSetsMode}
-                    hasRpe={hasRpe}
-                    hasRir={hasRir}
-                    currentSet={currentSet}
-                    onSetChange={setCurrentSet}
-                    expandedInput={expandedInput}
-                    onExpandedInputChange={setExpandedInput}
-                    onExtraSets={() => setExtraSetsMode(true)}
-                    onNextExercise={handleNextExercise}
-                    isLastExercise={currentIndex >= totalExercises - 1}
-                  />
-                }
-              />
+              isFollowAlong ? (
+                <FollowAlongTabs
+                  exercise={currentExercise}
+                  prescribedSets={currentPrescribedSets}
+                  tip={currentTip}
+                />
+              ) : (
+                <ExerciseDisplayTabs
+                  exercise={currentExercise}
+                  prescribedSets={currentPrescribedSets}
+                  loggedSets={currentExerciseLoggedSets}
+                  exerciseHistory={currentExerciseHistory}
+                  historyState={currentHistoryState}
+                  hasHistoryIndicator={hasHistoryForCurrentExercise}
+                  onDeleteSet={handleDeleteSet}
+                  isInputExpanded={expandedInput !== null}
+                  showIntensity={hasIntensityAccess}
+                  tip={currentTip}
+                  loggingForm={
+                    <SetLoggingForm
+                      prescribedSet={prescribedSet}
+                      hasLoggedAllPrescribed={hasLoggedAllPrescribed}
+                      extraSetsMode={extraSetsMode}
+                      hasRpe={hasRpe}
+                      hasRir={hasRir}
+                      currentSet={currentSet}
+                      onSetChange={setCurrentSet}
+                      expandedInput={expandedInput}
+                      onExpandedInputChange={setExpandedInput}
+                      onExtraSets={() => setExtraSetsMode(true)}
+                      onNextExercise={handleNextExercise}
+                      isLastExercise={currentIndex >= totalExercises - 1}
+                    />
+                  }
+                />
+              )
             ) : null}
           </div>
 
-          {/* Actions Footer - hidden when an input is expanded */}
-          {expandedInput === null && <ExerciseActionsFooter
-            currentExerciseName={currentExercise?.name || 'Exercise'}
-            nextSetNumber={nextSetNumber}
-            totalLoggedSets={totalLoggedSets}
-            canLogSet={!!canLogSet}
-            hasLoggedAllPrescribed={hasLoggedAllPrescribed}
-            extraSetsMode={extraSetsMode}
-            isSubmitting={isSubmitting}
-            onLogSet={handleLogSet}
-            onCompleteWorkout={() => setIsConfirming(true)}
-            onAddExercise={handleAddExercise}
-            onEditExercise={handleEditExercise}
-            onReplaceExercise={handleReplaceExercise}
-            onDeleteExercise={handleDeleteExercise}
-            onExitWorkout={handleExitWorkout}
-          />}
+          {/* Actions Footer */}
+          {isFollowAlong ? (
+            <FollowAlongFooter
+              currentIndex={currentIndex}
+              totalExercises={totalExercises}
+              isSubmitting={isSubmitting}
+              onPrevious={handlePreviousExercise}
+              onNext={handleNextExercise}
+              onFinish={() => setIsConfirming(true)}
+            />
+          ) : (
+            expandedInput === null && <ExerciseActionsFooter
+              currentExerciseName={currentExercise?.name || 'Exercise'}
+              nextSetNumber={nextSetNumber}
+              totalLoggedSets={totalLoggedSets}
+              canLogSet={!!canLogSet}
+              hasLoggedAllPrescribed={hasLoggedAllPrescribed}
+              extraSetsMode={extraSetsMode}
+              isSubmitting={isSubmitting}
+              onLogSet={handleLogSet}
+              onCompleteWorkout={() => setIsConfirming(true)}
+              onAddExercise={handleAddExercise}
+              onEditExercise={handleEditExercise}
+              onReplaceExercise={handleReplaceExercise}
+              onDeleteExercise={handleDeleteExercise}
+              onExitWorkout={handleExitWorkout}
+            />
+          )}
 
           {/* Workout completion confirmation */}
           {isConfirming && (
@@ -542,7 +622,9 @@ export default function ExerciseLoggingModal({
               <div className="bg-card border-2 border-border p-6 sm:p-8 text-center min-w-[300px] shadow-xl doom-corners">
                 {!isSubmitting ? (
                   <>
-                    <p className="text-lg sm:text-xl mb-6 text-foreground font-bold uppercase tracking-wider">Complete this workout?</p>
+                    <p className="text-lg sm:text-xl mb-6 text-foreground font-bold uppercase tracking-wider">
+                      {isFollowAlong ? 'Nice work! Mark this workout as done?' : 'Complete this workout?'}
+                    </p>
                     <div className="flex justify-center gap-3">
                       <button type="button"
                         onClick={() => setIsConfirming(false)}
@@ -551,10 +633,10 @@ export default function ExerciseLoggingModal({
                         Cancel
                       </button>
                       <button type="button"
-                        onClick={handleCompleteWorkout}
+                        onClick={isFollowAlong ? handleGuidedComplete : handleCompleteWorkout}
                         className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-success text-success-foreground hover:bg-success/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
                       >
-                        Confirm
+                        {isFollowAlong ? 'Finish' : 'Confirm'}
                       </button>
                     </div>
                   </>
