@@ -64,7 +64,7 @@ export default function WaiverPage() {
           type="button"
           onClick={handleAccept}
           disabled={accepting}
-          className="w-full h-11 bg-primary text-sm font-medium uppercase tracking-widest text-primary-foreground transition-colors hover:bg-primary-hover disabled:opacity-50 doom-focus-ring"
+          className="w-full h-11 bg-primary text-sm font-medium uppercase tracking-widest text-primary-foreground transition-colors hover:bg-primary-hover active:bg-primary-active disabled:opacity-50 doom-focus-ring"
           style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)' }}
         >
           {accepting ? 'Submitting...' : 'I Agree'}
