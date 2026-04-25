@@ -634,12 +634,14 @@ export default function ExerciseLoggingModal({
                       <button type="button"
                         onClick={() => setIsConfirming(false)}
                         className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-muted text-foreground hover:bg-secondary transition-colors font-bold uppercase tracking-wider border-2 border-border hover:border-primary doom-focus-ring"
+                        style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.20), 0 1px 0 rgba(0,0,0,0.30)' }}
                       >
                         Cancel
                       </button>
                       <button type="button"
                         onClick={isFollowAlong ? handleGuidedComplete : handleCompleteWorkout}
-                        className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-success text-success-foreground hover:bg-success/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
+                        className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-success text-success-foreground hover:bg-success/90 transition-colors font-bold uppercase tracking-wider doom-focus-ring"
+                        style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)' }}
                       >
                         {isFollowAlong ? 'Finish' : 'Confirm'}
                       </button>
@@ -763,19 +765,22 @@ export default function ExerciseLoggingModal({
               <div className="flex flex-col gap-3">
                 <button type="button"
                   onClick={handleExitSaveAsDraft}
-                  className="w-full px-4 py-3 text-base sm:text-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
+                  className="w-full px-4 py-3 text-base sm:text-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-bold uppercase tracking-wider doom-focus-ring"
+                  style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)' }}
                 >
                   Save as Draft
                 </button>
                 <button type="button"
                   onClick={handleExitDiscard}
-                  className="w-full px-4 py-3 text-base sm:text-lg bg-error text-error-foreground hover:bg-error/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
+                  className="w-full px-4 py-3 text-base sm:text-lg bg-error text-error-foreground hover:bg-error/90 transition-colors font-bold uppercase tracking-wider doom-focus-ring"
+                  style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)' }}
                 >
                   Discard All
                 </button>
                 <button type="button"
                   onClick={() => setShowExitConfirm(false)}
                   className="w-full px-4 py-3 text-base sm:text-lg bg-muted text-foreground hover:bg-secondary transition-colors font-bold uppercase tracking-wider border-2 border-border hover:border-primary doom-focus-ring"
+                  style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.20), 0 1px 0 rgba(0,0,0,0.30)' }}
                 >
                   Cancel
                 </button>
@@ -785,12 +790,14 @@ export default function ExerciseLoggingModal({
                 <button type="button"
                   onClick={() => setShowExitConfirm(false)}
                   className="flex-1 px-4 py-3 text-base sm:text-lg bg-muted text-foreground hover:bg-secondary transition-colors font-bold uppercase tracking-wider border-2 border-border hover:border-primary doom-focus-ring"
+                  style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.20), 0 1px 0 rgba(0,0,0,0.30)' }}
                 >
                   Cancel
                 </button>
                 <button type="button"
                   onClick={handleExitDiscard}
-                  className="flex-1 px-4 py-3 text-base sm:text-lg bg-error text-error-foreground hover:bg-error/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
+                  className="flex-1 px-4 py-3 text-base sm:text-lg bg-error text-error-foreground hover:bg-error/90 transition-colors font-bold uppercase tracking-wider doom-focus-ring"
+                  style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)' }}
                 >
                   Exit
                 </button>

@@ -152,6 +152,7 @@ export default function WorkoutCard({
             type="button"
             onClick={() => onLog(workout.id)}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary text-primary-foreground hover:bg-primary-hover font-bold uppercase tracking-wider text-sm transition-colors doom-focus-ring"
+            style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)' }}
           >
             <Play size={16} />
             {isDraft ? 'Continue Workout' : 'Start Workout'}
@@ -162,6 +163,7 @@ export default function WorkoutCard({
               onClick={() => onSkip(workout.id)}
               disabled={isSkipping}
               className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-secondary text-secondary-foreground hover:bg-secondary-hover font-semibold uppercase tracking-wider text-sm transition-colors doom-focus-ring disabled:opacity-50"
+              style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)' }}
             >
               <SkipForward size={14} />
               Skip

@@ -103,7 +103,8 @@ export default function ActiveProgramStrip({
           <div className="flex flex-wrap gap-2 pt-2">
             <Link
               href="/training"
-              className="flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground text-sm font-semibold uppercase tracking-wider doom-button-3d doom-focus-ring"
+              className="flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground text-sm font-semibold uppercase tracking-wider doom-focus-ring"
+              style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)' }}
             >
               <Dumbbell size={14} />
               TRAIN
@@ -111,6 +112,7 @@ export default function ActiveProgramStrip({
             <Link
               href={`/programs/${programId}/edit`}
               className="flex items-center gap-1.5 px-3 py-2 border border-border text-foreground text-sm font-semibold uppercase tracking-wider hover:bg-muted transition-colors doom-focus-ring"
+              style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.20), 0 1px 0 rgba(0,0,0,0.30)' }}
             >
               <Pencil size={14} />
               EDIT
@@ -119,6 +121,7 @@ export default function ActiveProgramStrip({
               type="button"
               onClick={() => setDeleteTarget(true)}
               className="flex items-center gap-1.5 px-3 py-2 border border-error/50 text-error text-sm font-semibold uppercase tracking-wider hover:bg-error/10 transition-colors doom-focus-ring"
+              style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.20), 0 1px 0 rgba(0,0,0,0.30)' }}
             >
               <Trash2 size={14} />
               DELETE

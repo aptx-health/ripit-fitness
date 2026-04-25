@@ -97,7 +97,7 @@ export default function FollowAlongHeader({
           <button
             type="button"
             onClick={handleBannerTap}
-            className={`w-full text-center text-sm text-secondary-foreground/50 pb-2 transition-opacity duration-500 ${
+            className={`w-full text-center text-sm text-secondary-foreground/80 pb-2 transition-opacity duration-500 ${
               bannerFading ? 'opacity-0' : 'opacity-100'
             }`}
           >
