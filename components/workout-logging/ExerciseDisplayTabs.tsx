@@ -1,6 +1,6 @@
 'use client'
 
-import { Check } from 'lucide-react'
+import { Check, Sparkles } from 'lucide-react'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/radix/tabs'
 import type { LoadState } from '@/hooks/useProgressiveExercises'
@@ -154,7 +154,24 @@ export default function ExerciseDisplayTabs({
           <div className="flex flex-col items-center justify-center h-full py-12">
             <p className="text-base sm:text-lg text-error">Failed to load history</p>
           </div>
-        ) : exerciseHistory ? (
+        ) : !exerciseHistory ? (
+          <div className="flex items-center justify-center h-full py-12">
+            <div
+              role="note"
+              className="flex items-start gap-2.5 p-3.5 border border-dashed border-border/40 bg-muted/35"
+            >
+              <Sparkles
+                aria-hidden="true"
+                size={18}
+                className="shrink-0 mt-[5px] text-muted-foreground"
+                strokeWidth={1.8}
+              />
+              <span className="text-lg leading-relaxed text-muted-foreground">
+                First time doing this one. Log a set and your history starts here.
+              </span>
+            </div>
+          </div>
+        ) : (
           <div className="space-y-4">
             {/* Last performed header */}
             <div className="border border-border border-l-4 border-l-success bg-card doom-noise p-3">
@@ -200,7 +217,7 @@ export default function ExerciseDisplayTabs({
               </div>
             </div>
           </div>
-        ) : null}
+        )}
       </TabsContent>
     </Tabs>
   )
