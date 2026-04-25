@@ -98,10 +98,10 @@ export function WeightKeypad({
           type="button"
           onClick={handleExpand}
           className="w-full h-12 px-4 flex items-center justify-center
-            bg-card border border-border
             text-2xl font-bold text-foreground tabular-nums
             hover:border-primary
             transition-all duration-75"
+          style={{ backgroundColor: 'rgba(0,0,0,0.3)', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.50), inset 0 0 0 1px rgba(254,243,199,0.06)' }}
         >
           {value || '0'}
           <span className="text-sm font-semibold text-muted-foreground ml-2">
@@ -122,9 +122,9 @@ export function WeightKeypad({
       {/* Current value display */}
       <div
         className="w-full h-12 px-4 flex items-center justify-center
-          bg-card border-2 border-primary
-          text-2xl font-bold text-foreground tabular-nums
-          shadow-[0_0_8px_rgba(var(--primary-rgb),0.2)]"
+          border-2 border-primary
+          text-2xl font-bold text-foreground tabular-nums"
+        style={{ backgroundColor: 'rgba(0,0,0,0.3)', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.50), 0 0 8px rgba(var(--primary-rgb),0.2)' }}
       >
         {value || '0'}
         <span className="text-sm font-semibold text-muted-foreground ml-2">
@@ -162,6 +162,7 @@ export function WeightKeypad({
           font-bold uppercase tracking-wider text-sm
           hover:bg-primary/90 active:bg-primary/80
           transition-colors"
+        style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)' }}
       >
         DONE
       </button>

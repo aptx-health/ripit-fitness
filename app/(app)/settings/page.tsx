@@ -26,6 +26,7 @@ export default function SettingsPage() {
   const [weightUnit, setWeightUnit] = useState<'lbs' | 'kg'>('lbs')
   const [intensityEnabled, setIntensityEnabled] = useState(false)
   const [intensityRating, setIntensityRating] = useState<'rpe' | 'rir'>('rir')
+  const [loggingMode, setLoggingMode] = useState<'full' | 'follow_along'>('full')
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
@@ -44,6 +45,7 @@ export default function SettingsPage() {
       setWeightUnit(settings.defaultWeightUnit)
       setIntensityEnabled(settings.intensityEnabled)
       setIntensityRating(settings.defaultIntensityRating)
+      setLoggingMode(settings.loggingMode || 'full')
     }
   }, [settings])
 
@@ -66,6 +68,7 @@ export default function SettingsPage() {
         defaultWeightUnit: weightUnit,
         ...(isAdmin ? { intensityEnabled } : {}),
         ...(hasIntensityAccess ? { defaultIntensityRating: intensityRating } : {}),
+        loggingMode,
       })
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
@@ -80,7 +83,8 @@ export default function SettingsPage() {
     settings &&
     (weightUnit !== settings.defaultWeightUnit ||
       (isAdmin && intensityEnabled !== settings.intensityEnabled) ||
-      (hasIntensityAccess && intensityRating !== settings.defaultIntensityRating))
+      (hasIntensityAccess && intensityRating !== settings.defaultIntensityRating) ||
+      loggingMode !== (settings.loggingMode || 'full'))
 
   return (
     <div className="bg-background px-4 sm:px-6 py-8">
@@ -283,6 +287,46 @@ export default function SettingsPage() {
                   </p>
                 </div>
               )}
+            </div>
+
+            {/* Workout Mode */}
+            <div>
+              <span
+                id="workout-mode-label"
+                className="block text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wider"
+              >
+                Workout Mode
+              </span>
+              <fieldset
+                className="flex gap-2"
+                aria-labelledby="workout-mode-label"
+              >
+                <button
+                  type="button"
+                  onClick={() => setLoggingMode('follow_along')}
+                  className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
+                    loggingMode === 'follow_along'
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'bg-muted text-foreground border-border hover:bg-secondary'
+                  }`}
+                >
+                  Follow Along
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLoggingMode('full')}
+                  className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
+                    loggingMode === 'full'
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'bg-muted text-foreground border-border hover:bg-secondary'
+                  }`}
+                >
+                  Log Sets
+                </button>
+              </fieldset>
+              <p className="text-sm text-muted-foreground mt-1">
+                Follow Along guides you through exercises without tracking weights.
+              </p>
             </div>
 
             {/* Save Button */}

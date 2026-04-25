@@ -1,9 +1,9 @@
 'use client'
 
-import { AlertCircle, Trash2 } from 'lucide-react'
+import { AlertCircle, Check, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { useRestTimer } from '@/hooks/useRestTimer'
 import type { LoggedSet } from '@/types/workout'
+import RestStopwatch from './RestStopwatch'
 
 interface PrescribedSet {
   id: string
@@ -44,6 +44,24 @@ function formatIntensity(set: { rpe: number | null; rir: number | null }) {
   return null
 }
 
+function formatWeight(weight: number, weightUnit: string): string {
+  if (weight === 0) return 'Bodyweight'
+  return `${weight} ${weightUnit}`
+}
+
+/**
+ * Check if all prescribed sets are uniform (same reps and intensity).
+ */
+function isUniformPrescription(sets: PrescribedSet[]): boolean {
+  if (sets.length <= 1) return true
+  const first = sets[0]
+  return sets.every(s =>
+    s.reps === first.reps &&
+    s.rpe === first.rpe &&
+    s.rir === first.rir
+  )
+}
+
 export default function SetList({
   prescribedSets,
   loggedSets,
@@ -55,12 +73,20 @@ export default function SetList({
   const loggedSetNumbers = new Set(loggedSets.map(s => s.setNumber))
   const remainingSets = prescribedSets.filter(s => !loggedSetNumbers.has(s.setNumber))
 
-  const { formatted: restFormatted, isRunning: restRunning } = useRestTimer(
-    loggedSets.length,
-    exerciseId || ''
-  )
+  // Rest timer dismiss state — resets when a new set is logged
+  const [restDismissed, setRestDismissed] = useState(false)
+  const prevLogCountRef = useRef(loggedSets.length)
 
-  // Track which set was just logged for the power-up flash animation
+  useEffect(() => {
+    if (loggedSets.length > prevLogCountRef.current) {
+      const frame = requestAnimationFrame(() => setRestDismissed(false))
+      prevLogCountRef.current = loggedSets.length
+      return () => cancelAnimationFrame(frame)
+    }
+    prevLogCountRef.current = loggedSets.length
+  }, [loggedSets.length])
+
+  // Track which set was just logged for the flash animation
   const prevExerciseRef = useRef(exerciseId)
   const prevCountRef = useRef(loggedSets.length)
   const [flashSetNumber, setFlashSetNumber] = useState<number | null>(null)
@@ -68,18 +94,15 @@ export default function SetList({
   useEffect(() => {
     const count = loggedSets.length
 
-    // Exercise changed — reset tracking, no animation
     if (exerciseId !== prevExerciseRef.current) {
       prevExerciseRef.current = exerciseId
       prevCountRef.current = count
-      // Defer reset to avoid synchronous setState in useEffect
       const frame = requestAnimationFrame(() => setFlashSetNumber(null))
       return () => cancelAnimationFrame(frame)
     }
 
     if (count > prevCountRef.current) {
       const newest = loggedSets[count - 1]
-      // Defer to avoid synchronous setState in useEffect
       const frame = requestAnimationFrame(() => setFlashSetNumber(newest.setNumber))
       const flashOffTimer = setTimeout(() => setFlashSetNumber(null), 650)
       prevCountRef.current = count
@@ -91,6 +114,10 @@ export default function SetList({
     prevCountRef.current = count
   }, [loggedSets, exerciseId])
 
+  // Collapsed summary: show when no sets logged and prescription is uniform
+  const showCollapsedSummary = loggedSets.length === 0 && isUniformPrescription(prescribedSets) && prescribedSets.length > 1
+  const firstPrescribed = prescribedSets[0]
+
   return (
     <div className="space-y-1">
       {/* Last Performance — compact inline */}
@@ -101,83 +128,116 @@ export default function SetList({
           {exerciseHistory.sets.map((set, i) => (
             <span key={set.setNumber}>
               {i > 0 && ' · '}
-              {set.reps}×{set.weight}{set.weightUnit}
+              {formatWeight(set.weight, set.weightUnit)} × {set.reps}
               {showIntensity && formatIntensity(set) ? ` ${formatIntensity(set)}` : ''}
             </span>
           ))}
         </div>
       )}
 
-      {/* Logged sets */}
-      {loggedSets.length > 0 && (
+      {/* Sets header */}
+      <span className="block text-xs font-bold text-muted-foreground uppercase tracking-wider px-1 mb-0.5">
+        Sets
+      </span>
+
+      {/* Collapsed prescription summary */}
+      {showCollapsedSummary && firstPrescribed && (
+        <div className="px-2 py-2 text-base text-muted-foreground">
+          Prescribed: {prescribedSets.length} × {firstPrescribed.reps} reps
+          {showIntensity && formatIntensity(firstPrescribed) ? ` @ ${formatIntensity(firstPrescribed)}` : ''}
+        </div>
+      )}
+
+      {/* Per-row view: logged + rest timer + prescribed */}
+      {!showCollapsedSummary && (
         <div>
-          <span className="block text-xs font-bold text-success-text/60 uppercase tracking-wider px-1 mb-0.5">
-            LOGGED
-          </span>
+          {/* Logged sets */}
           {loggedSets.map((set) => {
             const isFailed = set._syncStatus === 'error'
             const isPending = set._syncStatus === 'pending'
             return (
               <div
-                key={`${set.exerciseId}-${set.setNumber}`}
-                className={`flex items-center justify-between px-2 py-1.5 text-base ${
-                  isFailed
-                    ? 'text-warning'
-                    : 'text-success-text opacity-70'
-                } ${flashSetNumber === set.setNumber ? 'doom-set-logged' : ''}`}
+                key={`logged-${set.exerciseId}-${set.setNumber}`}
+                className={`px-2.5 py-3 ${flashSetNumber === set.setNumber ? 'doom-set-logged' : ''}`}
+                style={{
+                  backgroundColor: 'color-mix(in srgb, var(--success) 8%, transparent)',
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04), inset 0 -1px 0 rgba(0,0,0,0.30)',
+                }}
               >
-                <span className="flex items-center gap-1.5">
-                  {isFailed && <AlertCircle size={14} className="flex-shrink-0" />}
-                  <span className="font-bold">{set.setNumber}.</span>
-                  {set.reps}×{set.weight}{set.weightUnit}
-                  {showIntensity && formatIntensity(set) ? ` · ${formatIntensity(set)}` : ''}
-                  {isPending && <span className="text-xs text-muted-foreground">saving...</span>}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => onDeleteSet(set.setNumber)}
-                  className="text-error/50 hover:text-error p-0.5"
-                >
-                  <Trash2 size={14} />
-                </button>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-start gap-2 flex-1 min-w-0">
+                    {/* State indicator — filled circle */}
+                    <span className="flex-shrink-0 mt-0.5 w-[22px] h-[22px] flex items-center justify-center" style={{ backgroundColor: isFailed ? 'var(--warning)' : 'var(--success)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -1px 0 rgba(0,0,0,0.20)' }}>
+                      {isFailed ? (
+                        <AlertCircle size={12} className="text-white" />
+                      ) : (
+                        <Check size={12} className="text-white" strokeWidth={3} />
+                      )}
+                    </span>
+                    <div className="min-w-0">
+                      <span className="block text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                        Set {set.setNumber}
+                      </span>
+                      <span className={`block text-base font-bold ${isFailed ? 'text-warning' : 'text-foreground'}`}>
+                        {formatWeight(set.weight, set.weightUnit)} × {set.reps}
+                        {showIntensity && formatIntensity(set) ? ` · ${formatIntensity(set)}` : ''}
+                      </span>
+                      {isPending && <span className="text-xs text-muted-foreground">saving...</span>}
+                    </div>
+                  </div>
+                  {/* Delete — hidden by default, visible on hover */}
+                  <button
+                    type="button"
+                    onClick={() => onDeleteSet(set.setNumber)}
+                    className="opacity-0 hover:opacity-100 focus:opacity-100 text-muted-foreground/30 hover:text-error p-1 transition-all doom-focus-ring"
+                    aria-label={`Delete set ${set.setNumber}`}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
               </div>
             )
           })}
-        </div>
-      )}
 
-      {/* Remaining prescribed sets */}
-      {remainingSets.length > 0 && (
-        <div className="mt-1">
-          <span className="flex items-baseline justify-between px-1 mb-0.5">
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              PRESCRIBED
-            </span>
-            {restRunning && (
-              <span
-                role="timer"
-                className="text-sm font-bold tracking-wider text-muted-foreground/30 tabular-nums"
-                aria-label={`Rest timer: ${restFormatted}`}
-                aria-live="off"
-              >
-                {restFormatted}
-              </span>
-            )}
-          </span>
-          <div className="border border-border/50 divide-y divide-border/30">
-            {remainingSets.map((set) => (
-              <div
-                key={set.id}
-                className="flex items-center px-2 py-1.5 text-base text-muted-foreground/70"
-              >
-                <span className="font-bold w-6">{set.setNumber}.</span>
-                <span>
-                  {set.reps} reps @ {set.weight || '—'}
-                  {showIntensity && formatIntensity(set) ? ` · ${formatIntensity(set)}` : ''}
+          {/* Rest timer card — between logged and prescribed */}
+          {loggedSets.length > 0 && remainingSets.length > 0 && (
+            <RestStopwatch
+              loggedSetCount={loggedSets.length}
+              exerciseId={exerciseId || ''}
+              dismissed={restDismissed}
+              onDismiss={() => setRestDismissed(true)}
+            />
+          )}
+
+          {/* Prescribed sets */}
+          {remainingSets.map((set) => (
+            <div
+              key={`prescribed-${set.id}`}
+              className="px-2.5 py-3 opacity-55"
+            >
+              <div className="flex items-start gap-2">
+                <span className="flex-shrink-0 mt-0.5 w-[22px] h-[22px] flex items-center justify-center text-xs font-bold text-muted-foreground" style={{ backgroundColor: 'rgba(0,0,0,0.3)', boxShadow: 'inset 0 1px 1px rgba(0,0,0,0.30)' }}>
+                  {set.setNumber}
                 </span>
+                <div>
+                  <span className="block text-[13px] text-muted-foreground">
+                    {set.reps} reps{set.weight ? ` @ ${set.weight}` : ''}
+                    {showIntensity && formatIntensity(set) ? ` · ${formatIntensity(set)}` : ''}
+                  </span>
+                </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
+
+          {/* Rest timer when all sets logged (no more prescribed) */}
+          {loggedSets.length > 0 && remainingSets.length === 0 && (
+            <RestStopwatch
+              loggedSetCount={loggedSets.length}
+              exerciseId={exerciseId || ''}
+              dismissed={restDismissed}
+              onDismiss={() => setRestDismissed(true)}
+            />
+          )}
         </div>
       )}
     </div>

@@ -13,6 +13,7 @@ export type UserSettings = {
   lastPostSessionPromptAt: string | null
   experienceLevel: string | null
   intensityEnabled: boolean
+  loggingMode: 'full' | 'follow_along'
 }
 
 type UseUserSettingsReturn = {

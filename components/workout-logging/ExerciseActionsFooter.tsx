@@ -1,111 +1,76 @@
 'use client'
 
-import { LogOut, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react'
-import ActionsMenu, { type ActionItem } from '../ActionsMenu'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+
+const RAISED_SHADOW = 'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)'
+const RECESSED_SHADOW = 'inset 0 1px 2px rgba(0,0,0,0.50), inset 0 0 0 1px rgba(254,243,199,0.06)'
 
 interface ExerciseActionsFooterProps {
-  currentExerciseName: string
+  currentExerciseIndex: number
+  totalExercises: number
   nextSetNumber: number
-  totalLoggedSets: number
   canLogSet: boolean
   hasLoggedAllPrescribed: boolean
   extraSetsMode: boolean
-  isSubmitting: boolean
   onLogSet: () => void
-  onCompleteWorkout: () => void
-  onAddExercise: () => void
-  onEditExercise: () => void
-  onReplaceExercise: () => void
-  onDeleteExercise: () => void
-  onExitWorkout: () => void
+  onPrevious: () => void
+  onNext: () => void
 }
 
 export default function ExerciseActionsFooter({
-  currentExerciseName,
+  currentExerciseIndex,
+  totalExercises,
   nextSetNumber,
-  totalLoggedSets,
   canLogSet,
   hasLoggedAllPrescribed,
   extraSetsMode,
-  isSubmitting,
   onLogSet,
-  onCompleteWorkout,
-  onAddExercise,
-  onEditExercise,
-  onReplaceExercise,
-  onDeleteExercise,
-  onExitWorkout,
+  onPrevious,
+  onNext,
 }: ExerciseActionsFooterProps) {
-  const actions: ActionItem[] = [
-    {
-      label: 'Edit this exercise',
-      icon: Pencil,
-      onClick: onEditExercise,
-      disabled: false
-    },
-    {
-      label: 'Add an exercise',
-      icon: Plus,
-      onClick: onAddExercise,
-      disabled: false
-    },
-    {
-      label: 'Swap this exercise',
-      icon: RefreshCw,
-      onClick: onReplaceExercise,
-      disabled: false
-    },
-    {
-      label: 'Delete this exercise',
-      icon: Trash2,
-      onClick: onDeleteExercise,
-      disabled: false,
-      variant: 'danger' as const,
-      requiresConfirmation: true,
-      confirmationMessage: `Are you sure you want to delete "${currentExerciseName}"?`
-    },
-    {
-      label: 'Exit workout',
-      icon: LogOut,
-      onClick: onExitWorkout,
-      disabled: false,
-      variant: 'danger' as const,
-      requiresConfirmation: false
-    }
-  ]
+  const isFirst = currentExerciseIndex === 0
+  const isLast = currentExerciseIndex >= totalExercises - 1
+  const showLogSet = !(hasLoggedAllPrescribed && !extraSetsMode)
+
+  if (!showLogSet) return null
 
   return (
-    <div className="border-t border-border px-3 py-2 bg-card flex-shrink-0">
-      <div className="flex items-center gap-2">
-        {/* Log Set Button */}
-        <button type="button"
+    <div
+      className="bg-secondary px-4 py-3 flex-shrink-0"
+      style={{ boxShadow: 'inset 0 1px 0 rgba(0,0,0,0.25)' }}
+    >
+      <div className="flex items-center gap-2.5">
+        <button
+          type="button"
+          onClick={onPrevious}
+          disabled={isFirst}
+          className="w-10 h-11 flex items-center justify-center text-secondary-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed doom-focus-ring"
+          style={{ backgroundColor: 'rgba(0,0,0,0.35)', boxShadow: RECESSED_SHADOW }}
+          aria-label="Previous exercise"
+        >
+          <ChevronLeft size={18} strokeWidth={2.5} />
+        </button>
+
+        <button
+          type="button"
           onClick={onLogSet}
-          disabled={!canLogSet || (hasLoggedAllPrescribed && !extraSetsMode)}
-          className="flex-1 py-2.5 bg-accent text-accent-foreground text-sm font-bold uppercase tracking-wider transition-all hover:bg-accent/90 disabled:opacity-40 disabled:cursor-not-allowed doom-button-3d doom-focus-ring"
+          disabled={!canLogSet}
+          className="flex-1 h-11 bg-accent text-accent-foreground text-sm font-medium uppercase tracking-widest transition-all disabled:opacity-40 disabled:cursor-not-allowed doom-focus-ring"
+          style={{ boxShadow: RAISED_SHADOW }}
         >
           LOG SET {nextSetNumber}
         </button>
 
-        {/* Complete Workout Button */}
-        <button type="button"
-          disabled={isSubmitting || totalLoggedSets === 0}
-          className="py-2.5 px-4 border border-success text-success text-sm font-bold uppercase tracking-wider transition-all hover:bg-success hover:text-success-foreground disabled:opacity-30 disabled:cursor-not-allowed doom-button-3d doom-focus-ring"
-          onMouseDown={(e) => {
-            if (isSubmitting || totalLoggedSets === 0) return;
-            e.preventDefault();
-            onCompleteWorkout();
-          }}
+        <button
+          type="button"
+          onClick={onNext}
+          disabled={isLast}
+          className="w-10 h-11 flex items-center justify-center text-secondary-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed doom-focus-ring"
+          style={{ backgroundColor: 'rgba(0,0,0,0.35)', boxShadow: RECESSED_SHADOW }}
+          aria-label="Next exercise"
         >
-          {isSubmitting ? 'SAVING...' : 'COMPLETE'}
+          <ChevronRight size={18} strokeWidth={2.5} />
         </button>
-
-        {/* Actions Menu */}
-        <ActionsMenu
-          variant="default"
-          size="md"
-          className="self-stretch w-10"
-          actions={actions}
-        />
       </div>
     </div>
   )

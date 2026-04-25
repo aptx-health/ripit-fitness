@@ -17,6 +17,7 @@ type UpdateSettingsRequest = {
   equipmentPreference?: 'machines' | 'free_weights_cables'
   onboardingCompleted?: boolean
   intensityEnabled?: boolean
+  loggingMode?: 'full' | 'follow_along'
 }
 
 export async function GET(_request: NextRequest) {
@@ -72,7 +73,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json() as UpdateSettingsRequest
-    const { displayName, defaultWeightUnit, defaultIntensityRating, dismissedPrimer, dismissedWarmup, dismissedStickNudge, completedTours, postSessionPromptCount, lastPostSessionPromptAt, experienceLevel, equipmentPreference, onboardingCompleted, intensityEnabled } = body
+    const { displayName, defaultWeightUnit, defaultIntensityRating, dismissedPrimer, dismissedWarmup, dismissedStickNudge, completedTours, postSessionPromptCount, lastPostSessionPromptAt, experienceLevel, equipmentPreference, onboardingCompleted, intensityEnabled, loggingMode } = body
 
     // Validate weight unit
     if (defaultWeightUnit && !['lbs', 'kg'].includes(defaultWeightUnit)) {
@@ -106,6 +107,14 @@ export async function PUT(request: NextRequest) {
       )
     }
 
+    // Validate logging mode
+    if (loggingMode && !['full', 'follow_along'].includes(loggingMode)) {
+      return NextResponse.json(
+        { error: 'Invalid logging mode. Must be "full" or "follow_along"' },
+        { status: 400 }
+      )
+    }
+
     // Validate equipment preference
     if (equipmentPreference && !['machines', 'free_weights_cables'].includes(equipmentPreference)) {
       return NextResponse.json(
@@ -131,6 +140,7 @@ export async function PUT(request: NextRequest) {
         ...(equipmentPreference !== undefined && { equipmentPreference }),
         ...(onboardingCompleted !== undefined && { onboardingCompleted }),
         ...(intensityEnabled !== undefined && { intensityEnabled }),
+        ...(loggingMode !== undefined && { loggingMode }),
         updatedAt: new Date()
       },
       create: {

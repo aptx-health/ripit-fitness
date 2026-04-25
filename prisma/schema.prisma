@@ -303,6 +303,7 @@ model UserSettings {
   onboardingCompleted       Boolean   @default(false)
   customProgramLimitBypass  Boolean   @default(false)
   intensityEnabled          Boolean   @default(false)
+  loggingMode               String    @default("full")
   createdAt                 DateTime  @default(now())
   updatedAt                 DateTime  @updatedAt
 

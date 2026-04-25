@@ -204,7 +204,8 @@ export default function MyProgramsList({
                       type="button"
                       onClick={() => handleActivate(program.id, program.name)}
                       disabled={isLoading}
-                      className="flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground text-sm font-semibold uppercase tracking-wider doom-button-3d doom-focus-ring disabled:opacity-50"
+                      className="flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground text-sm font-semibold uppercase tracking-wider doom-focus-ring disabled:opacity-50"
+                      style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)' }}
                     >
                       <Star size={14} />
                       ACTIVATE
@@ -212,6 +213,7 @@ export default function MyProgramsList({
                     <Link
                       href={`/programs/${program.id}/edit`}
                       className="flex items-center gap-1.5 px-3 py-2 border border-border text-foreground text-sm font-semibold uppercase tracking-wider hover:bg-muted transition-colors doom-focus-ring"
+                      style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.20), 0 1px 0 rgba(0,0,0,0.30)' }}
                     >
                       <Pencil size={14} />
                       EDIT
@@ -221,6 +223,7 @@ export default function MyProgramsList({
                       onClick={() => handleDuplicate(program.id)}
                       disabled={isLoading}
                       className="flex items-center gap-1.5 px-3 py-2 border border-border text-foreground text-sm font-semibold uppercase tracking-wider hover:bg-muted transition-colors doom-focus-ring disabled:opacity-50"
+                      style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.20), 0 1px 0 rgba(0,0,0,0.30)' }}
                     >
                       {duplicating === program.id ? (
                         <div className="w-4 h-4 border-2 border-foreground border-t-transparent rounded-full animate-spin" />
@@ -235,6 +238,7 @@ export default function MyProgramsList({
                         onClick={() => setDeleteTarget({ id: program.id, name: program.name })}
                         disabled={isLoading}
                         className="flex items-center gap-1.5 px-3 py-2 border border-error/50 text-error text-sm font-semibold uppercase tracking-wider hover:bg-error/10 transition-colors doom-focus-ring disabled:opacity-50"
+                        style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.20), 0 1px 0 rgba(0,0,0,0.30)' }}
                       >
                         {deleting === program.id ? (
                           <div className="w-4 h-4 border-2 border-error border-t-transparent rounded-full animate-spin" />
