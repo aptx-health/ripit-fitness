@@ -123,7 +123,7 @@ export default function SignupPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 bg-white border border-input rounded-md shadow-sm text-foreground placeholder:text-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                className="mt-1 block w-full px-3 py-2 bg-white border border-input rounded-md shadow-sm text-gray-900 placeholder:text-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 placeholder="you@example.com"
               />
             </div>
@@ -137,7 +137,7 @@ export default function SignupPage() {
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 bg-white border border-input rounded-md shadow-sm text-foreground placeholder:text-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                className="mt-1 block w-full px-3 py-2 bg-white border border-input rounded-md shadow-sm text-gray-900 placeholder:text-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 placeholder="Optional"
               />
             </div>
@@ -153,7 +153,7 @@ export default function SignupPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full px-3 py-2 pr-16 bg-white border border-input rounded-md shadow-sm text-foreground placeholder:text-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                  className="block w-full px-3 py-2 pr-16 bg-white border border-input rounded-md shadow-sm text-gray-900 placeholder:text-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                   placeholder="••••••••"
                 />
                 <button
@@ -178,7 +178,7 @@ export default function SignupPage() {
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="block w-full px-3 py-2 pr-16 bg-white border border-input rounded-md shadow-sm text-foreground placeholder:text-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                  className="block w-full px-3 py-2 pr-16 bg-white border border-input rounded-md shadow-sm text-gray-900 placeholder:text-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                   placeholder="••••••••"
                 />
                 <button
