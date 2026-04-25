@@ -13,6 +13,14 @@
 #   ./scripts/dev.sh restart worker             # any overmind subcommand
 #   ./scripts/dev.sh connect app
 set -e
+
+# Pre-flight: verify Docker is responsive (hangs when VM is frozen)
+if ! perl -e 'alarm 5; exec @ARGV' -- docker info >/dev/null 2>&1; then
+  echo "ERROR: Docker is not running or not responding (timed out after 5s)." >&2
+  echo "Try: open -a Docker   (or restart Docker Desktop)" >&2
+  exit 1
+fi
+
 source "$(dirname "$0")/worktree-env.sh"
 
 if [ $# -eq 0 ]; then
