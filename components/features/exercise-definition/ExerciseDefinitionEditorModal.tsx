@@ -401,13 +401,13 @@ export default function ExerciseDefinitionEditorModal({
                   <label htmlFor="exercise-instructions" className="block text-sm font-semibold text-foreground uppercase tracking-wide">
                     Instructions
                   </label>
-                  <span className="text-xs text-muted-foreground">{formData.instructions.length} / 400</span>
+                  <span className="text-xs text-muted-foreground">{formData.instructions.length} / 1000</span>
                 </div>
                 <textarea
                   id="exercise-instructions"
                   value={formData.instructions}
                   onChange={(e) => setFormData({ ...formData, instructions: e.target.value })}
-                  maxLength={400}
+                  maxLength={1000}
                   rows={4}
                   className={`w-full px-3 py-2 border-2 rounded bg-background text-foreground ${
                     errors.instructions ? 'border-error' : 'border-border focus:border-primary'
