@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react'
+import { CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface FollowAlongFooterProps {
   currentIndex: number

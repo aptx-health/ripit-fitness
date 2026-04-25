@@ -77,14 +77,16 @@ export default function ExerciseActionsFooter({
   return (
     <div className="border-t border-border px-3 py-2 bg-card flex-shrink-0">
       <div className="flex items-center gap-2">
-        {/* Log Set Button */}
-        <button type="button"
-          onClick={onLogSet}
-          disabled={!canLogSet || (hasLoggedAllPrescribed && !extraSetsMode)}
-          className="flex-1 py-2.5 bg-accent text-accent-foreground text-sm font-bold uppercase tracking-wider transition-all hover:bg-accent/90 disabled:opacity-40 disabled:cursor-not-allowed doom-button-3d doom-focus-ring"
-        >
-          LOG SET {nextSetNumber}
-        </button>
+        {/* Log Set Button — hidden when celebration card is showing */}
+        {!(hasLoggedAllPrescribed && !extraSetsMode) && (
+          <button type="button"
+            onClick={onLogSet}
+            disabled={!canLogSet}
+            className="flex-1 py-2.5 bg-accent text-accent-foreground text-sm font-bold uppercase tracking-wider transition-all hover:bg-accent/90 disabled:opacity-40 disabled:cursor-not-allowed doom-button-3d doom-focus-ring"
+          >
+            LOG SET {nextSetNumber}
+          </button>
+        )}
 
         {/* Complete Workout Button */}
         <button type="button"

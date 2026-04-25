@@ -1,5 +1,6 @@
 'use client'
 
+import { Check } from 'lucide-react'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/radix/tabs'
 import type { LoadState } from '@/hooks/useProgressiveExercises'
@@ -170,42 +171,36 @@ export default function ExerciseDisplayTabs({
               <p className="text-sm text-muted-foreground">{exerciseHistory.workoutName}</p>
             </div>
 
-            {/* Sets table */}
+            {/* Sets completed — matching logged set row format */}
             <div>
               <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
                 SETS COMPLETED
               </h4>
-              <div className="border border-border divide-y divide-border bg-card doom-noise">
-                {/* Header row */}
-                <div className="flex items-center px-3 py-1.5 text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                  <span className="w-10">#</span>
-                  <span className="flex-1">WEIGHT</span>
-                  <span className="w-16 text-right">REPS</span>
-                  <span className="w-16 text-right">
-                    {exerciseHistory.sets.some(s => s.rir !== null) ? 'RIR' : exerciseHistory.sets.some(s => s.rpe !== null) ? 'RPE' : ''}
-                  </span>
-                </div>
-                {exerciseHistory.sets.map((set) => (
-                  <div
-                    key={set.setNumber}
-                    className="flex items-center px-3 py-2.5 text-base"
-                  >
-                    <span className="w-10 font-bold text-muted-foreground">{set.setNumber}</span>
-                    <span className="flex-1 font-bold text-foreground">{set.weight}{set.weightUnit}</span>
-                    <span className="w-16 text-right font-semibold text-foreground">{set.reps}</span>
-                    <span className="w-16 text-right text-muted-foreground">
-                      {set.rir !== null ? set.rir : set.rpe !== null ? set.rpe : ''}
-                    </span>
-                  </div>
-                ))}
+              <div className="divide-y divide-border/30">
+                {exerciseHistory.sets.map((set) => {
+                  const weight = set.weight === 0 ? 'Bodyweight' : `${set.weight} ${set.weightUnit}`
+                  const intensity = set.rir !== null ? `RIR ${set.rir}` : set.rpe !== null ? `RPE ${set.rpe}` : null
+                  return (
+                    <div key={set.setNumber} className="px-2 py-2">
+                      <div className="flex items-start gap-2">
+                        <Check size={16} className="text-success flex-shrink-0 mt-0.5" />
+                        <div>
+                          <span className="block text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                            Set {set.setNumber}
+                          </span>
+                          <span className="block text-base font-bold text-foreground">
+                            {weight} &times; {set.reps}
+                            {intensity ? ` \u00b7 ${intensity}` : ''}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             </div>
           </div>
-        ) : (
-          <div className="flex items-center justify-center h-full py-12">
-            <p className="text-base sm:text-lg text-muted-foreground">No history available for this exercise</p>
-          </div>
-        )}
+        ) : null}
       </TabsContent>
     </Tabs>
   )

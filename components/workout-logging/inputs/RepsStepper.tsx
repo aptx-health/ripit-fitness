@@ -34,9 +34,9 @@ export function RepsStepper({ value, onChange, placeholder }: RepsStepperProps) 
           onClick={handleDecrement}
           disabled={!hasValue || numericValue <= 0}
           className="flex-shrink-0 min-w-[56px] min-h-[56px] flex items-center justify-center
-            border-2 border-error-border bg-error-muted text-error-text
-            hover:bg-error hover:text-error-foreground
-            active:bg-error-hover active:text-error-foreground
+            border-2 border-border bg-muted text-foreground
+            hover:bg-secondary hover:text-foreground
+            active:bg-secondary active:text-foreground
             disabled:opacity-30
             transition-all duration-75"
           aria-label="Decrease reps"
