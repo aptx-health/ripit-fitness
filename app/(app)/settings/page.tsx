@@ -106,7 +106,7 @@ export default function SettingsPage() {
                     <DropdownMenu.Trigger asChild>
                       <button
                         type="button"
-                        className="w-full px-4 py-2 border-2 border-border bg-muted text-foreground font-semibold uppercase tracking-wider transition-colors hover:border-primary hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background flex items-center justify-center gap-2"
+                        className="w-full px-4 py-2 border-2 border-border bg-muted text-foreground font-semibold uppercase tracking-wider transition-colors hover:border-primary hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background flex items-center justify-center gap-2 doom-raised-subtle"
                       >
                         <Palette className="w-4 h-4" />
                         {preference ? THEME_LABELS[preference.themeName] : '...'}
@@ -153,7 +153,7 @@ export default function SettingsPage() {
                         mode: preference.mode === 'dark' ? 'light' : 'dark',
                       })
                     }
-                    className="w-full px-4 py-2 border-2 border-border bg-muted text-foreground font-semibold uppercase tracking-wider transition-colors hover:border-primary hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background flex items-center justify-center gap-2"
+                    className="w-full px-4 py-2 border-2 border-border bg-muted text-foreground font-semibold uppercase tracking-wider transition-colors hover:border-primary hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background flex items-center justify-center gap-2 doom-raised-subtle"
                   >
                     {preference?.mode === 'dark' ? (
                       <>
@@ -187,8 +187,8 @@ export default function SettingsPage() {
                   onClick={() => setWeightUnit('lbs')}
                   className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
                     weightUnit === 'lbs'
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-muted text-foreground border-border hover:bg-secondary'
+                      ? 'bg-primary text-primary-foreground border-primary doom-raised'
+                      : 'bg-muted text-foreground border-border hover:bg-secondary doom-raised-subtle'
                   }`}
                 >
                   LBS
@@ -198,8 +198,8 @@ export default function SettingsPage() {
                   onClick={() => setWeightUnit('kg')}
                   className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
                     weightUnit === 'kg'
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-muted text-foreground border-border hover:bg-secondary'
+                      ? 'bg-primary text-primary-foreground border-primary doom-raised'
+                      : 'bg-muted text-foreground border-border hover:bg-secondary doom-raised-subtle'
                   }`}
                 >
                   KG
@@ -264,8 +264,8 @@ export default function SettingsPage() {
                       onClick={() => setIntensityRating('rpe')}
                       className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
                         intensityRating === 'rpe'
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'bg-muted text-foreground border-border hover:bg-secondary'
+                          ? 'bg-primary text-primary-foreground border-primary doom-raised'
+                          : 'bg-muted text-foreground border-border hover:bg-secondary doom-raised-subtle'
                       }`}
                     >
                       RPE
@@ -275,8 +275,8 @@ export default function SettingsPage() {
                       onClick={() => setIntensityRating('rir')}
                       className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
                         intensityRating === 'rir'
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'bg-muted text-foreground border-border hover:bg-secondary'
+                          ? 'bg-primary text-primary-foreground border-primary doom-raised'
+                          : 'bg-muted text-foreground border-border hover:bg-secondary doom-raised-subtle'
                       }`}
                     >
                       RIR
@@ -306,8 +306,8 @@ export default function SettingsPage() {
                   onClick={() => setLoggingMode('follow_along')}
                   className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
                     loggingMode === 'follow_along'
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-muted text-foreground border-border hover:bg-secondary'
+                      ? 'bg-primary text-primary-foreground border-primary doom-raised'
+                      : 'bg-muted text-foreground border-border hover:bg-secondary doom-raised-subtle'
                   }`}
                 >
                   Follow Along
@@ -317,8 +317,8 @@ export default function SettingsPage() {
                   onClick={() => setLoggingMode('full')}
                   className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
                     loggingMode === 'full'
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-muted text-foreground border-border hover:bg-secondary'
+                      ? 'bg-primary text-primary-foreground border-primary doom-raised'
+                      : 'bg-muted text-foreground border-border hover:bg-secondary doom-raised-subtle'
                   }`}
                 >
                   Log Sets
@@ -340,7 +340,7 @@ export default function SettingsPage() {
               type="button"
               onClick={handleSave}
               disabled={isSaving || !isDirty}
-              className={`w-full md:w-auto md:min-w-[200px] px-4 py-3 border-2 font-semibold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed ${
+              className={`w-full md:w-auto md:min-w-[200px] px-4 py-3 border-2 font-semibold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed doom-raised ${
                 saved
                   ? 'bg-success text-white border-success'
                   : 'bg-primary text-primary-foreground border-primary hover:bg-primary-hover'
@@ -390,7 +390,7 @@ export default function SettingsPage() {
                     setPasswordError(null)
                     setPasswordSuccess(false)
                   }}
-                  className="px-4 py-2 border-2 border-border bg-muted text-foreground hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center gap-2"
+                  className="px-4 py-2 border-2 border-border bg-muted text-foreground hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center gap-2 doom-raised-subtle"
                 >
                   <KeyRound size={16} />
                   Change Password
@@ -476,7 +476,7 @@ export default function SettingsPage() {
                         }
                       }}
                       disabled={isChangingPassword || !currentPassword || !newPassword || !confirmNewPassword}
-                      className="w-full md:w-auto md:min-w-[200px] px-4 py-2 bg-primary text-primary-foreground border-2 border-primary hover:bg-primary-hover transition-colors font-semibold uppercase tracking-wider text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full md:w-auto md:min-w-[200px] px-4 py-2 bg-primary text-primary-foreground border-2 border-primary hover:bg-primary-hover transition-colors font-semibold uppercase tracking-wider text-sm disabled:opacity-50 disabled:cursor-not-allowed doom-raised"
                     >
                       {isChangingPassword ? 'Changing...' : 'Update Password'}
                     </button>
@@ -499,7 +499,7 @@ export default function SettingsPage() {
                 </span>
                 <Link
                   href="/admin"
-                  className="w-full md:w-auto md:min-w-[200px] px-4 py-3 bg-muted text-foreground border-2 border-border hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2"
+                  className="w-full md:w-auto md:min-w-[200px] px-4 py-3 bg-muted text-foreground border-2 border-border hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2 doom-raised-subtle"
                 >
                   <Shield size={18} />
                   Admin Panel
@@ -516,7 +516,7 @@ export default function SettingsPage() {
                 <button
                   type="button"
                   onClick={() => setFeedbackOpen(true)}
-                  className="flex-1 px-4 py-3 bg-muted text-foreground border-2 border-border hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-3 bg-muted text-foreground border-2 border-border hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2 doom-raised-subtle"
                 >
                   <MessageSquarePlus size={18} />
                   Send Feedback
@@ -526,7 +526,7 @@ export default function SettingsPage() {
                   href={`https://venmo.com/${process.env.NEXT_PUBLIC_VENMO_HANDLE}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 px-4 py-3 bg-muted text-foreground border-2 border-border hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-3 bg-muted text-foreground border-2 border-border hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2 doom-raised-subtle"
                 >
                   <Heart size={18} />
                   Support Ripit
@@ -541,7 +541,7 @@ export default function SettingsPage() {
               <form action="/api/auth/signout" method="POST">
                 <button
                   type="submit"
-                  className="w-full md:w-auto md:min-w-[200px] px-4 py-3 border-2 border-border bg-muted text-foreground hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm"
+                  className="w-full md:w-auto md:min-w-[200px] px-4 py-3 border-2 border-border bg-muted text-foreground hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm doom-raised-subtle"
                 >
                   Sign Out
                 </button>

@@ -86,7 +86,7 @@ const AlertDialogAction = React.forwardRef<
 >(({ className = '', ...props }, ref) => (
   <AlertDialogPrimitive.Action
     ref={ref}
-    className={`inline-flex h-10 items-center justify-center rounded-none border-2 border-orange-600 bg-orange-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-orange-700 hover:border-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
+    className={`inline-flex h-10 items-center justify-center rounded-none border-2 border-orange-600 bg-orange-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-orange-700 hover:border-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 doom-raised ${className}`}
     {...props}
   />
 ))
@@ -98,7 +98,7 @@ const AlertDialogCancel = React.forwardRef<
 >(({ className = '', ...props }, ref) => (
   <AlertDialogPrimitive.Cancel
     ref={ref}
-    className={`inline-flex h-10 items-center justify-center rounded-none border-2 border-zinc-600 bg-transparent px-4 py-2 text-sm font-semibold text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
+    className={`inline-flex h-10 items-center justify-center rounded-none border-2 border-zinc-600 bg-transparent px-4 py-2 text-sm font-semibold text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 doom-raised-subtle ${className}`}
     {...props}
   />
 ))
