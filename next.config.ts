@@ -30,7 +30,6 @@ const nextConfig: NextConfig = {
     'pino-abstract-transport',
     'better-auth',
     'pg',
-    'dotenv',
   ],
   // Turbopack config required for Next.js 16 (used in dev via --turbopack flag)
   turbopack: {},
