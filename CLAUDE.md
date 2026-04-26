@@ -26,12 +26,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # ALWAYS use Doppler for environment variables — ALWAYS specify --config explicitly
 doppler run --config dev_personal -- [command]
 
-# Primary repo: start all services
-overmind start                                # Starts PostgreSQL, Redis, worker, Next.js
-overmind start -l postgres,app                # Just DB + app (skip redis/worker)
+# Primary repo: start all services (wraps overmind with OVERMIND_SOCKET in /tmp
+# so Turbopack doesn't panic trying to scan .overmind.sock in the project root)
+./scripts/dev.sh                              # Default: just PostgreSQL + Next.js app
+./scripts/dev.sh start                        # ALL services (postgres, redis, worker, minio, app)
+./scripts/dev.sh start -l postgres,app        # Just DB + app (explicit subset)
 
 # Worktree: port and auth URLs are auto-derived from worktree slot
-DOPPLER_CONFIG=dev_personal_worktree1 overmind start -l postgres,app
+DOPPLER_CONFIG=dev_personal_worktree1 ./scripts/dev.sh start -l postgres,app
 
 # Database operations
 doppler run --config dev_personal -- npx prisma studio
@@ -52,7 +54,7 @@ Each git worktree gets **isolated Docker containers** (postgres, redis) on uniqu
 ```bash
 npm install
 doppler run --config dev_personal -- npx prisma generate
-DOPPLER_CONFIG=dev_personal_worktree1 overmind start -l postgres,app
+DOPPLER_CONFIG=dev_personal_worktree1 ./scripts/dev.sh start -l postgres,app
 ```
 
 Startup auto-applies schema, creates BetterAuth tables, and seeds a test user: **dmays@test.com / password**.
@@ -159,6 +161,7 @@ Program
 - **PrescribedSet**: Template/plan (what program prescribes)
 - **LoggedSet**: Actual performance (what user logged)
 - **WorkoutCompletion**: Tracks completed/incomplete/abandoned workouts
+- **AppEvent**: Client-side analytics events (signup source, page views)
 
 **Important**: We store BOTH prescribed and logged sets to enable plan vs reality comparison.
 
@@ -531,8 +534,12 @@ Self-hosted k8s infrastructure is operational (staging + production). PostgreSQL
 
 ### Active Documentation
 - `/docs/DATABASE_MIGRATIONS.md` - Database migration workflow with Prisma
+- `/docs/DATABASE_CONNECTIONS.md` - PgBouncer pooling, `DATABASE_URL` vs `DIRECT_URL`, health endpoints
 - `/docs/LOGGING.md` - Logging configuration and usage with Pino
+- `/docs/RATE_LIMITING.md` - Rate limiting tiers, patterns, and tuning guidance
 - `/docs/STYLING.md` - DOOM theme color system and styling guide
+- `/docs/ADDING_LEARN_ARTICLES.md` - Adding articles to the Learn tab (seed file + data migration pattern)
+- `/docs/IMAGE_TRACEABILITY.md` - Docker image SHA traceability
 - `/docs/features/PROGRAM_MANAGEMENT_IMPROVEMENTS.md` - Program management enhancements
 - `/docs/features/PERFORMANCE_ANALYSIS.md` - Performance analysis and optimizations
 - `/docs/archive/gcp/` - Archived GCP Pub/Sub documentation (historical reference)
@@ -549,7 +556,7 @@ Self-hosted k8s infrastructure is operational (staging + production). PostgreSQL
 - No emojis in code or commits unless explicitly requested
 - Keep solutions simple - avoid over-engineering
 - **Git file paths with special characters**: Always wrap file paths containing brackets or other special characters in double quotes when using git commands to prevent shell glob expansion. Example: `git add "app/api/exercises/[exerciseId]/route.ts"` instead of `git add app/api/exercises/[exerciseId]/route.ts`
-- **Local development**: Use `overmind start` (primary) or `DOPPLER_CONFIG=dev_personal_worktree1 overmind start -l postgres,app` (worktree). Each worktree gets isolated postgres/redis containers on unique ports. Test user `dmays@test.com / password` is auto-seeded.
+- **Local development**: Use `./scripts/dev.sh` (primary) or `DOPPLER_CONFIG=dev_personal_worktree1 ./scripts/dev.sh start -l postgres,app` (worktree). The wrapper sources `scripts/worktree-env.sh` so `OVERMIND_SOCKET` lands in `/tmp` (avoids a Turbopack panic reading `.overmind.sock`) and each worktree gets isolated postgres/redis containers on unique ports. Test user `dmays@test.com / password` is auto-seeded.
 - **Prisma version**: Stay on v6.x. Use `npx prisma@6.19.0` to avoid installing v7
 - **Testing**: Use the `dev_test` doppler config: `doppler run --config dev_test -- npm test`
 

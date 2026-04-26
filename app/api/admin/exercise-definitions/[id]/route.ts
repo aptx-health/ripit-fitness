@@ -18,7 +18,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const auth = await requireEditor()
+    const auth = await requireEditor({ rateLimit: true })
     if (auth.response) return auth.response
     const user = auth.user
 
@@ -37,6 +37,7 @@ export async function GET(
         aliases: true,
         instructions: true,
         notes: true,
+        imageUrls: true,
         isSystem: true,
         createdBy: true,
         userId: true,
@@ -88,7 +89,7 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params
-    const auth = await requireEditor()
+    const auth = await requireEditor({ rateLimit: true })
     if (auth.response) return auth.response
     const user = auth.user
 
@@ -123,6 +124,7 @@ export async function PATCH(
       aliases: body.aliases,
       instructions: body.instructions,
       notes: body.notes,
+      imageUrls: body.imageUrls,
     }
 
     // Validate input
@@ -170,6 +172,7 @@ export async function PATCH(
     if (input.aliases !== undefined) updateData.aliases = input.aliases
     if (input.instructions !== undefined) updateData.instructions = input.instructions
     if (input.notes !== undefined) updateData.notes = input.notes
+    if (input.imageUrls !== undefined) updateData.imageUrls = input.imageUrls
 
     // Update exercise definition
     const updated = await prisma.exerciseDefinition.update({
@@ -186,6 +189,7 @@ export async function PATCH(
         aliases: true,
         instructions: true,
         notes: true,
+        imageUrls: true,
         isSystem: true,
         createdBy: true,
         createdAt: true,
@@ -218,7 +222,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
-    const auth = await requireEditor()
+    const auth = await requireEditor({ rateLimit: true })
     if (auth.response) return auth.response
     const user = auth.user
 

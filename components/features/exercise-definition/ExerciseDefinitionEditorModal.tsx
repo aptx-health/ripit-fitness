@@ -1,9 +1,12 @@
 'use client';
 
+import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
+import { useToast } from '@/components/ToastProvider';
 import { Button } from '@/components/ui/Button';
 import { clientLogger } from '@/lib/client-logger';
 import EquipmentSelector from './EquipmentSelector';
+import ExerciseInfoPreview from './ExerciseInfoPreview';
 import FAUSelector from './FAUSelector';
 
 export interface ExerciseDefinition {
@@ -16,6 +19,7 @@ export interface ExerciseDefinition {
   aliases: string[];
   instructions?: string;
   notes?: string;
+  imageUrls?: string[];
 }
 
 export interface ExerciseDefinitionEditorModalProps {
@@ -37,6 +41,8 @@ export default function ExerciseDefinitionEditorModal({
   onSuccess,
   apiBasePath = '/api/exercise-definitions',
 }: ExerciseDefinitionEditorModalProps) {
+  const toast = useToast();
+  const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
   const [formData, setFormData] = useState({
     name: initialName,
     equipment: [] as string[],
@@ -46,6 +52,7 @@ export default function ExerciseDefinitionEditorModal({
     aliases: [] as string[],
     instructions: '',
     notes: '',
+    imageUrls: [] as string[],
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isDuplicateName, setIsDuplicateName] = useState(false);
@@ -73,6 +80,7 @@ export default function ExerciseDefinitionEditorModal({
               aliases: exercise.aliases || [],
               instructions: exercise.instructions || '',
               notes: exercise.notes || '',
+              imageUrls: exercise.imageUrls || [],
             });
             setUsageCount(exercise.usageCount || 0);
           }
@@ -94,9 +102,11 @@ export default function ExerciseDefinitionEditorModal({
         aliases: [],
         instructions: '',
         notes: '',
+        imageUrls: [],
       });
       setUsageCount(0);
     }
+    setActiveTab('edit');
   }, [isOpen, mode, exerciseId, initialName, apiBasePath]);
 
   // Debounced duplicate check
@@ -149,6 +159,7 @@ export default function ExerciseDefinitionEditorModal({
           aliases: formData.aliases,
           instructions: formData.instructions || null,
           notes: formData.notes || null,
+          imageUrls: formData.imageUrls,
         }),
       });
 
@@ -171,6 +182,12 @@ export default function ExerciseDefinitionEditorModal({
         onSuccess(data.data);
       }
 
+      const action = mode === 'create' ? 'Created' : 'Updated';
+      toast.success(
+        `${action}: ${data.data?.name || formData.name}`,
+        data.data?.id ? `ID: ${data.data.id}` : undefined
+      );
+
       onClose();
     } catch (error) {
       clientLogger.error('Error saving exercise:', error);
@@ -178,7 +195,7 @@ export default function ExerciseDefinitionEditorModal({
     } finally {
       setIsSubmitting(false);
     }
-  }, [mode, exerciseId, formData, onSuccess, onClose, apiBasePath]);
+  }, [mode, exerciseId, formData, onSuccess, onClose, apiBasePath, toast]);
 
   const handleClose = useCallback(() => {
     setFormData({
@@ -190,10 +207,12 @@ export default function ExerciseDefinitionEditorModal({
       aliases: [],
       instructions: '',
       notes: '',
+      imageUrls: [],
     });
     setErrors({});
     setIsDuplicateName(false);
     setUsageCount(0);
+    setActiveTab('edit');
     onClose();
   }, [onClose]);
 
@@ -222,12 +241,46 @@ export default function ExerciseDefinitionEditorModal({
           </h2>
         </div>
 
+        {/* Tab Switcher */}
+        <div className="flex border-b-2 border-border">
+          <button
+            type="button"
+            onClick={() => setActiveTab('edit')}
+            className={`flex-1 px-4 py-2 text-sm font-bold uppercase tracking-wide transition-colors ${
+              activeTab === 'edit'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted/30 text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Edit
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('preview')}
+            className={`flex-1 px-4 py-2 text-sm font-bold uppercase tracking-wide transition-colors ${
+              activeTab === 'preview'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted/30 text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Preview
+          </button>
+        </div>
+
         {/* Content */}
         <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-6">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <div className="text-muted-foreground">Loading...</div>
             </div>
+          ) : activeTab === 'preview' ? (
+            <ExerciseInfoPreview
+              imageUrls={formData.imageUrls}
+              instructions={formData.instructions}
+              primaryFAUs={formData.primaryFAUs}
+              secondaryFAUs={formData.secondaryFAUs}
+              equipment={formData.equipment}
+            />
           ) : (
             <>
               {/* Usage Warning */}
@@ -348,13 +401,13 @@ export default function ExerciseDefinitionEditorModal({
                   <label htmlFor="exercise-instructions" className="block text-sm font-semibold text-foreground uppercase tracking-wide">
                     Instructions
                   </label>
-                  <span className="text-xs text-muted-foreground">{formData.instructions.length} / 400</span>
+                  <span className="text-xs text-muted-foreground">{formData.instructions.length} / 1000</span>
                 </div>
                 <textarea
                   id="exercise-instructions"
                   value={formData.instructions}
                   onChange={(e) => setFormData({ ...formData, instructions: e.target.value })}
-                  maxLength={400}
+                  maxLength={1000}
                   rows={4}
                   className={`w-full px-3 py-2 border-2 rounded bg-background text-foreground ${
                     errors.instructions ? 'border-error' : 'border-border focus:border-primary'
@@ -384,6 +437,88 @@ export default function ExerciseDefinitionEditorModal({
                   placeholder="Additional notes or tips..."
                 />
                 {errors.notes && <p className="text-sm text-error font-medium mt-1">{errors.notes}</p>}
+              </div>
+
+              {/* Image URLs */}
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="block text-sm font-semibold text-foreground uppercase tracking-wide">
+                    Image URLs
+                  </span>
+                  <span className="text-xs text-muted-foreground">{formData.imageUrls.length} / 10</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Add image URLs for this exercise. Order determines display order in the Info tab.
+                </p>
+
+                {formData.imageUrls.map((url, index) => (
+                  <div key={index} className="flex items-center gap-2 mb-2">
+                    <div className="flex flex-col gap-0.5">
+                      <button
+                        type="button"
+                        disabled={index === 0}
+                        onClick={() => {
+                          const urls = [...formData.imageUrls];
+                          [urls[index - 1], urls[index]] = [urls[index], urls[index - 1]];
+                          setFormData({ ...formData, imageUrls: urls });
+                        }}
+                        className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-30"
+                        aria-label={`Move image ${index + 1} up`}
+                      >
+                        <ArrowUp size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        disabled={index === formData.imageUrls.length - 1}
+                        onClick={() => {
+                          const urls = [...formData.imageUrls];
+                          [urls[index], urls[index + 1]] = [urls[index + 1], urls[index]];
+                          setFormData({ ...formData, imageUrls: urls });
+                        }}
+                        className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-30"
+                        aria-label={`Move image ${index + 1} down`}
+                      >
+                        <ArrowDown size={14} />
+                      </button>
+                    </div>
+                    <input
+                      type="text"
+                      value={url}
+                      onChange={(e) => {
+                        const urls = [...formData.imageUrls];
+                        urls[index] = e.target.value;
+                        setFormData({ ...formData, imageUrls: urls });
+                      }}
+                      className="flex-1 px-3 py-2 border-2 border-border rounded bg-background text-foreground text-sm focus:border-primary"
+                      placeholder="https://..."
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const urls = formData.imageUrls.filter((_, i) => i !== index);
+                        setFormData({ ...formData, imageUrls: urls });
+                      }}
+                      className="p-1.5 text-muted-foreground hover:text-error transition-colors"
+                      aria-label={`Remove image ${index + 1}`}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                ))}
+
+                {formData.imageUrls.length < 10 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormData({ ...formData, imageUrls: [...formData.imageUrls, ''] });
+                    }}
+                    className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 font-medium mt-1"
+                  >
+                    <Plus size={16} />
+                    Add Image URL
+                  </button>
+                )}
+                {errors.imageUrls && <p className="text-sm text-error font-medium mt-1">{errors.imageUrls}</p>}
               </div>
             </>
           )}

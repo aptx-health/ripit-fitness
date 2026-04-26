@@ -1,10 +1,11 @@
 'use client'
 
-import { Check, CheckCheck, ExternalLink, Github, MessageSquarePlus, Tag } from 'lucide-react'
+import { ArrowDown, ArrowUp, Check, CheckCheck, ExternalLink, Github, MessageSquarePlus, Tag } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 import type { FeedbackStatus } from '@/types/feedback'
+import { POST_SESSION_REFINEMENTS } from '@/types/feedback'
 
 interface FeedbackItem {
   id: string
@@ -13,26 +14,50 @@ interface FeedbackItem {
   message: string
   pageUrl: string
   userAgent: string | null
+  properties: string | null
   status: string
   adminNote: string | null
   githubIssueUrl: string | null
   createdAt: string
+  rating: number | null
+  refinements: string[]
+}
+
+interface PostSessionStats {
+  avgRatingOverall: number | null
+  avgRatingThisWeek: number | null
+  sampleSizeOverall: number
+  sampleSizeThisWeek: number
+  ratingDistribution: Record<number, number>
+  fiveStarPct: number
+  refinementCounts: Array<{ refinement: string; count: number }>
 }
 
 const STATUS_TABS = ['unresolved', 'all', 'new', 'reviewed', 'resolved'] as const
+type TabValue = typeof STATUS_TABS[number] | 'post_session'
 
 const CATEGORY_LABELS: Record<string, string> = {
   bug: 'bug',
   feature: 'enhancement',
   confusion: 'ux',
   general: 'feedback',
+  post_session: 'post-session',
 }
+
+const REFINEMENT_LABELS: Record<string, string> = {}
+for (const r of POST_SESSION_REFINEMENTS) {
+  REFINEMENT_LABELS[r.value] = r.label
+}
+
+type SortOption = 'newest' | 'rating_asc' | 'rating_desc'
 
 export default function AdminFeedbackPage() {
   const [feedback, setFeedback] = useState<FeedbackItem[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
-  const [activeStatus, setActiveStatus] = useState<string>('unresolved')
+  const [activeTab, setActiveTab] = useState<TabValue>('unresolved')
+  const [sortBy, setSortBy] = useState<SortOption>('newest')
+  const [postSessionStats, setPostSessionStats] = useState<PostSessionStats | null>(null)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [adminNote, setAdminNote] = useState('')
   const [updating, setUpdating] = useState<string | null>(null)
@@ -44,8 +69,12 @@ export default function AdminFeedbackPage() {
   useEffect(() => {
     const expandId = searchParams.get('expand')
     if (expandId) {
-      setActiveStatus('all')
+      setActiveTab('all')
       setExpandedId(expandId)
+    }
+    const tab = searchParams.get('tab')
+    if (tab === 'post_session') {
+      setActiveTab('post_session')
     }
   }, [searchParams])
 
@@ -54,8 +83,19 @@ export default function AdminFeedbackPage() {
     setLoading(true)
 
     const params = new URLSearchParams()
-    if (activeStatus !== 'all') params.set('status', activeStatus)
-    // 'unresolved' is passed to API which handles it as status IN ['new', 'reviewed']
+    const isPostSession = activeTab === 'post_session'
+
+    if (isPostSession) {
+      params.set('category', 'post_session')
+    } else if (activeTab !== 'all') {
+      params.set('status', activeTab)
+    }
+
+    // Apply sort for post-session tab
+    if (isPostSession && sortBy !== 'newest') {
+      params.set('sort', sortBy)
+    }
+
     params.set('limit', '100')
 
     fetch(`/api/feedback?${params}`)
@@ -64,6 +104,7 @@ export default function AdminFeedbackPage() {
         if (!cancelled) {
           setFeedback(json.feedback || [])
           setTotal(json.total || 0)
+          setPostSessionStats(json.postSessionStats || null)
           setLoading(false)
 
           // If auto-expanding from URL, set the admin note for the expanded item
@@ -77,7 +118,7 @@ export default function AdminFeedbackPage() {
       .catch(() => { if (!cancelled) setLoading(false) })
 
     return () => { cancelled = true }
-  }, [activeStatus, searchParams])
+  }, [activeTab, sortBy, searchParams])
 
   const updateFeedback = async (id: string, status: FeedbackStatus, note?: string) => {
     setUpdating(id)
@@ -160,6 +201,7 @@ export default function AdminFeedbackPage() {
       case 'bug': return 'text-red-800 bg-red-100 border-red-300 dark:text-red-400 dark:bg-red-900/30 dark:border-red-700'
       case 'feature': return 'text-blue-800 bg-blue-100 border-blue-300 dark:text-blue-400 dark:bg-blue-900/30 dark:border-blue-700'
       case 'confusion': return 'text-yellow-800 bg-yellow-100 border-yellow-300 dark:text-yellow-400 dark:bg-yellow-900/30 dark:border-yellow-700'
+      case 'post_session': return 'text-purple-800 bg-purple-100 border-purple-300 dark:text-purple-400 dark:bg-purple-900/30 dark:border-purple-700'
       default: return 'text-zinc-700 bg-zinc-100 border-zinc-300 dark:text-zinc-400 dark:bg-zinc-800 dark:border-zinc-600'
     }
   }
@@ -173,6 +215,8 @@ export default function AdminFeedbackPage() {
     }
   }
 
+  const isPostSessionTab = activeTab === 'post_session'
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -183,15 +227,15 @@ export default function AdminFeedbackPage() {
         <span className="text-sm text-muted-foreground">{total} total</span>
       </div>
 
-      {/* Status tabs */}
+      {/* Tabs: status tabs + post-session tab */}
       <div className="flex gap-1 mb-6 overflow-x-auto">
         {STATUS_TABS.map((tab) => (
           <button
             type="button"
             key={tab}
-            onClick={() => setActiveStatus(tab)}
+            onClick={() => { setActiveTab(tab); setSortBy('newest') }}
             className={`px-3 py-1.5 text-xs font-semibold uppercase tracking-wider border-2 transition-colors ${
-              activeStatus === tab
+              activeTab === tab
                 ? 'bg-primary text-primary-foreground border-primary'
                 : 'bg-muted text-muted-foreground border-border hover:bg-secondary'
             }`}
@@ -199,14 +243,148 @@ export default function AdminFeedbackPage() {
             {tab}
           </button>
         ))}
+        <span className="w-px bg-border mx-1" />
+        <button
+          type="button"
+          onClick={() => { setActiveTab('post_session'); setSortBy('newest') }}
+          className={`px-3 py-1.5 text-xs font-semibold uppercase tracking-wider border-2 transition-colors ${
+            isPostSessionTab
+              ? 'bg-purple-600 text-white border-purple-600'
+              : 'bg-muted text-muted-foreground border-border hover:bg-secondary'
+          }`}
+        >
+          Post-Session
+        </button>
       </div>
+
+      {/* Post-session stats header */}
+      {isPostSessionTab && postSessionStats && (
+        <div className="mb-6 bg-card border-2 border-border p-4 space-y-4">
+          {/* Average ratings row */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="bg-background border border-border p-3">
+              <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                Avg Rating (Overall)
+              </div>
+              <div className="text-2xl font-bold text-foreground">
+                {postSessionStats.avgRatingOverall !== null
+                  ? `${postSessionStats.avgRatingOverall}/5`
+                  : '--'}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                n={postSessionStats.sampleSizeOverall}
+              </p>
+            </div>
+            <div className="bg-background border border-border p-3">
+              <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                Avg Rating (This Week)
+              </div>
+              <div className="text-2xl font-bold text-foreground">
+                {postSessionStats.avgRatingThisWeek !== null
+                  ? `${postSessionStats.avgRatingThisWeek}/5`
+                  : '--'}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                n={postSessionStats.sampleSizeThisWeek}
+              </p>
+            </div>
+            <div className="bg-background border border-border p-3">
+              <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                5-Star Rate
+              </div>
+              <div className="text-2xl font-bold text-foreground">
+                {postSessionStats.fiveStarPct}%
+              </div>
+            </div>
+            <div className="bg-background border border-border p-3">
+              <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                Rating Distribution
+              </div>
+              <div className="flex items-end gap-1 h-8">
+                {[1, 2, 3, 4, 5].map((r) => {
+                  const count = postSessionStats.ratingDistribution[r] || 0
+                  const maxCount = Math.max(...Object.values(postSessionStats.ratingDistribution), 1)
+                  const height = Math.max((count / maxCount) * 100, 5)
+                  return (
+                    <div key={r} className="flex-1 flex flex-col items-center gap-0.5">
+                      <div
+                        className={`w-full ${r >= 4 ? 'bg-green-500' : r === 3 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                        style={{ height: `${height}%` }}
+                        title={`${r}: ${count}`}
+                      />
+                      <span className="text-[10px] text-muted-foreground">{r}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Refinement categories breakdown */}
+          {postSessionStats.refinementCounts.length > 0 && (
+            <div>
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                Issue Categories
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {postSessionStats.refinementCounts.map((r) => (
+                  <span
+                    key={r.refinement}
+                    className="text-xs px-2 py-1 border font-semibold bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-700"
+                  >
+                    {REFINEMENT_LABELS[r.refinement] || r.refinement.replace(/_/g, ' ')} ({r.count})
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Sort controls */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider">Sort:</span>
+            <button
+              type="button"
+              onClick={() => setSortBy('newest')}
+              className={`px-2 py-1 text-xs font-semibold border transition-colors ${
+                sortBy === 'newest'
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'bg-muted text-muted-foreground border-border hover:bg-secondary'
+              }`}
+            >
+              Newest
+            </button>
+            <button
+              type="button"
+              onClick={() => setSortBy('rating_asc')}
+              className={`px-2 py-1 text-xs font-semibold border transition-colors flex items-center gap-1 ${
+                sortBy === 'rating_asc'
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'bg-muted text-muted-foreground border-border hover:bg-secondary'
+              }`}
+            >
+              <ArrowUp size={12} /> Rating (Low First)
+            </button>
+            <button
+              type="button"
+              onClick={() => setSortBy('rating_desc')}
+              className={`px-2 py-1 text-xs font-semibold border transition-colors flex items-center gap-1 ${
+                sortBy === 'rating_desc'
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'bg-muted text-muted-foreground border-border hover:bg-secondary'
+              }`}
+            >
+              <ArrowDown size={12} /> Rating (High First)
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Feedback list */}
       {loading ? (
         <div className="text-sm text-muted-foreground">Loading...</div>
       ) : feedback.length === 0 ? (
         <div className="text-sm text-muted-foreground py-8 text-center">
-          No {activeStatus === 'all' ? '' : activeStatus} feedback yet.
+          No {isPostSessionTab ? 'post-session' : activeTab === 'all' ? '' : activeTab} feedback yet.
         </div>
       ) : (
         <div className="space-y-2">
@@ -223,11 +401,25 @@ export default function AdminFeedbackPage() {
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm text-foreground whitespace-pre-wrap break-words">
-                      {item.message.length > 150
-                        ? `${item.message.substring(0, 150)}...`
-                        : item.message}
-                    </p>
+                    {item.rating !== null && (
+                      <span className="text-sm font-semibold text-foreground mr-2">
+                        Rating: {item.rating}/5
+                      </span>
+                    )}
+                    {item.refinements?.length > 0 && (
+                      <span className="text-sm text-muted-foreground">
+                        — {item.refinements.map((r) => REFINEMENT_LABELS[r] || r.replace(/_/g, ' ')).join(', ')}
+                      </span>
+                    )}
+                    {item.message ? (
+                      <p className="text-sm text-foreground whitespace-pre-wrap break-words mt-1">
+                        {item.message.length > 150
+                          ? `${item.message.substring(0, 150)}...`
+                          : item.message}
+                      </p>
+                    ) : !item.rating && (
+                      <p className="text-sm text-muted-foreground italic">No message</p>
+                    )}
                     <div className="flex flex-wrap gap-2 mt-2">
                       <span className={`text-xs px-2 py-0.5 border font-semibold uppercase ${categoryColor(item.category)}`}>
                         {item.category}
@@ -264,13 +456,56 @@ export default function AdminFeedbackPage() {
               {/* Expanded detail */}
               {expandedId === item.id && (
                 <div className="px-4 pb-4 border-t border-border pt-3 space-y-3">
+                  {/* Question prompt (post_session) */}
+                  {item.category === 'post_session' && item.properties && (() => {
+                    try {
+                      const props = JSON.parse(item.properties)
+                      return props.question ? (
+                        <div>
+                          <span className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                            Question Asked
+                          </span>
+                          <p className="text-sm text-foreground italic bg-muted p-3 border border-border">
+                            {props.question}
+                          </p>
+                        </div>
+                      ) : null
+                    } catch { return null }
+                  })()}
+
+                  {/* Rating & refinements (post-session) */}
+                  {item.rating !== null && (
+                    <div>
+                      <span className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                        Rating
+                      </span>
+                      <p className="text-sm text-foreground bg-muted p-3 border border-border">
+                        {item.rating}/5
+                      </p>
+                    </div>
+                  )}
+                  {item.refinements?.length > 0 && (
+                    <div>
+                      <span className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                        Issues Selected
+                      </span>
+                      <div className="flex flex-wrap gap-1.5 bg-muted p-3 border border-border">
+                        {item.refinements.map((r) => (
+                          <span key={r} className="text-xs px-2 py-1 border font-semibold uppercase bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-700">
+                            {REFINEMENT_LABELS[r] || r.replace(/_/g, ' ')}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Full message */}
                   <div>
                     <span className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
                       Full Message
                     </span>
                     <p className="text-sm text-foreground whitespace-pre-wrap break-words bg-muted p-3 border border-border">
-                      {item.message}
+                      {item.message || '(no message)'}
                     </p>
                   </div>
 

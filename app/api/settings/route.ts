@@ -11,6 +11,13 @@ type UpdateSettingsRequest = {
   dismissedWarmup?: boolean
   dismissedStickNudge?: boolean
   completedTours?: string
+  postSessionPromptCount?: number
+  lastPostSessionPromptAt?: string
+  experienceLevel?: 'beginner' | 'experienced'
+  equipmentPreference?: 'machines' | 'free_weights_cables'
+  onboardingCompleted?: boolean
+  intensityEnabled?: boolean
+  loggingMode?: 'full' | 'follow_along'
 }
 
 export async function GET(_request: NextRequest) {
@@ -66,7 +73,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json() as UpdateSettingsRequest
-    const { displayName, defaultWeightUnit, defaultIntensityRating, dismissedPrimer, dismissedWarmup, dismissedStickNudge, completedTours } = body
+    const { displayName, defaultWeightUnit, defaultIntensityRating, dismissedPrimer, dismissedWarmup, dismissedStickNudge, completedTours, postSessionPromptCount, lastPostSessionPromptAt, experienceLevel, equipmentPreference, onboardingCompleted, intensityEnabled, loggingMode } = body
 
     // Validate weight unit
     if (defaultWeightUnit && !['lbs', 'kg'].includes(defaultWeightUnit)) {
@@ -84,6 +91,38 @@ export async function PUT(request: NextRequest) {
       )
     }
 
+    // Validate postSessionPromptCount
+    if (postSessionPromptCount !== undefined && (typeof postSessionPromptCount !== 'number' || postSessionPromptCount < 0 || !Number.isInteger(postSessionPromptCount))) {
+      return NextResponse.json(
+        { error: 'Invalid postSessionPromptCount. Must be a non-negative integer' },
+        { status: 400 }
+      )
+    }
+
+    // Validate experience level
+    if (experienceLevel && !['beginner', 'experienced'].includes(experienceLevel)) {
+      return NextResponse.json(
+        { error: 'Invalid experience level. Must be "beginner" or "experienced"' },
+        { status: 400 }
+      )
+    }
+
+    // Validate logging mode
+    if (loggingMode && !['full', 'follow_along'].includes(loggingMode)) {
+      return NextResponse.json(
+        { error: 'Invalid logging mode. Must be "full" or "follow_along"' },
+        { status: 400 }
+      )
+    }
+
+    // Validate equipment preference
+    if (equipmentPreference && !['machines', 'free_weights_cables'].includes(equipmentPreference)) {
+      return NextResponse.json(
+        { error: 'Invalid equipment preference. Must be "machines" or "free_weights_cables"' },
+        { status: 400 }
+      )
+    }
+
     // Update or create settings
     const settings = await prisma.userSettings.upsert({
       where: { userId: user.id },
@@ -95,6 +134,13 @@ export async function PUT(request: NextRequest) {
         ...(dismissedWarmup !== undefined && { dismissedWarmup }),
         ...(dismissedStickNudge !== undefined && { dismissedStickNudge }),
         ...(completedTours !== undefined && { completedTours }),
+        ...(postSessionPromptCount !== undefined && { postSessionPromptCount }),
+        ...(lastPostSessionPromptAt !== undefined && { lastPostSessionPromptAt: new Date(lastPostSessionPromptAt) }),
+        ...(experienceLevel !== undefined && { experienceLevel }),
+        ...(equipmentPreference !== undefined && { equipmentPreference }),
+        ...(onboardingCompleted !== undefined && { onboardingCompleted }),
+        ...(intensityEnabled !== undefined && { intensityEnabled }),
+        ...(loggingMode !== undefined && { loggingMode }),
         updatedAt: new Date()
       },
       create: {

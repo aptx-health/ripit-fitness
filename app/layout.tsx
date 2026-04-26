@@ -55,8 +55,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" data-theme="ripit" data-mode="dark" className="dark" suppressHydrationWarning>
       <head>
+        <link rel="preload" href="/green-frog-squat-1.png" as="image" type="image/png" />
+        <link rel="preload" href="/green-frog-squat-1-light.png" as="image" type="image/png" />
         <script
           dangerouslySetInnerHTML={{
             __html: `

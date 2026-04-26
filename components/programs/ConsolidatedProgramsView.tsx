@@ -4,13 +4,10 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import CommunityProgramsView from '@/components/community/CommunityProgramsView'
 import { useToast } from '@/components/ToastProvider'
-import { useTour } from '@/components/tour/TourProvider'
-import { useUserSettings } from '@/hooks/useUserSettings'
+import { useProgramAccess } from '@/hooks/useCustomProgramAccess'
 import { clientLogger } from '@/lib/client-logger'
-import { PROGRAMS_PAGE_STEPS, PROGRAMS_PAGE_TOUR_ID } from '@/lib/tour/steps/programs-page'
 import StrengthActivationModal from '../StrengthActivationModal'
 import ActiveProgramStrip from './ActiveProgramStrip'
-import ArchivedProgramsSection from './ArchivedProgramsSection'
 import MyProgramsList from './MyProgramsList'
 
 type StrengthProgram = {
@@ -18,6 +15,7 @@ type StrengthProgram = {
   name: string
   description: string | null
   isActive: boolean
+  isUserCreated: boolean
   createdAt: Date
   copyStatus: string | null
   targetDaysPerWeek: number | null
@@ -45,46 +43,32 @@ type CommunityProgram = {
 
 type Props = {
   strengthPrograms: StrengthProgram[]
-  archivedStrengthCount: number
   communityPrograms: CommunityProgram[]
   currentUserId: string
   activeWeekInfo: { weekNumber: number; totalWeeks: number } | null
+  programCount: number
+  isAdmin: boolean
+  customProgramLimitBypass: boolean
 }
 
 export default function ConsolidatedProgramsView({
   strengthPrograms,
-  archivedStrengthCount,
   communityPrograms,
   currentUserId,
   activeWeekInfo,
+  programCount,
+  isAdmin,
+  customProgramLimitBypass,
 }: Props) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const toast = useToast()
-  const { settings, isLoading: settingsLoading } = useUserSettings()
-  const { startTour, isActive: tourActive } = useTour()
-
   // Default to Browse tab for first-time users (no programs yet) or when URL param says so
   const tabParam = searchParams.get('tab')
   const isNewUser = strengthPrograms.length === 0
   const [activeTab, setActiveTab] = useState<'my' | 'browse'>(
     tabParam === 'browse' || isNewUser ? 'browse' : 'my'
   )
-
-  // Programs page guided tour - triggers on Browse tab for first-time users
-  useEffect(() => {
-    if (settingsLoading || !settings || tourActive) return
-    if (activeTab !== 'browse') return
-    try {
-      const completed: string[] = JSON.parse(settings.completedTours || '[]')
-      if (!completed.includes(PROGRAMS_PAGE_TOUR_ID)) {
-        const timer = setTimeout(() => {
-          startTour(PROGRAMS_PAGE_TOUR_ID, PROGRAMS_PAGE_STEPS)
-        }, 300)
-        return () => clearTimeout(timer)
-      }
-    } catch { /* invalid JSON, skip */ }
-  }, [settingsLoading, settings, tourActive, activeTab, startTour])
 
   // Cloning state
   const [cloningProgramId, setCloningProgramId] = useState<string | null>(null)
@@ -101,6 +85,12 @@ export default function ConsolidatedProgramsView({
   const [existingActiveProgram, setExistingActiveProgram] = useState<{ id: string; name: string } | null>(null)
 
   const activeProgram = strengthPrograms.find(p => p.isActive)
+
+  const { hasAccess, bypassLimit, maxPrograms } = useProgramAccess({
+    programCount,
+    isAdmin,
+    customProgramLimitBypass,
+  })
 
   const cleanupCloningState = () => {
     if (pollingIntervalRef.current) {
@@ -286,7 +276,6 @@ export default function ConsolidatedProgramsView({
             </button>
             <button
               type="button"
-              data-tour="browse-tab"
               onClick={() => handleTabChange('browse')}
               className={`flex-1 py-2.5 text-sm font-bold uppercase tracking-wider transition-colors doom-focus-ring ${
                 activeTab === 'browse'
@@ -302,24 +291,24 @@ export default function ConsolidatedProgramsView({
         {/* Tab Content */}
         <div className="px-4 sm:px-0">
           {activeTab === 'my' ? (
-            <div className="space-y-4">
-              <MyProgramsList
-                programs={strengthPrograms}
-                cloningProgress={cloningProgress}
-                localCopyStatuses={localCopyStatuses}
-                deletedPrograms={deletedPrograms}
-                hasActiveProgram={!!activeProgram}
-                activeProgram={activeProgram ? { id: activeProgram.id, name: activeProgram.name } : null}
-              />
-
-              {archivedStrengthCount > 0 && (
-                <ArchivedProgramsSection count={archivedStrengthCount} />
-              )}
-            </div>
+            <MyProgramsList
+              programs={strengthPrograms}
+              cloningProgress={cloningProgress}
+              localCopyStatuses={localCopyStatuses}
+              deletedPrograms={deletedPrograms}
+              hasActiveProgram={!!activeProgram}
+              activeProgram={activeProgram ? { id: activeProgram.id, name: activeProgram.name } : null}
+              programCount={programCount}
+              hasAccess={hasAccess}
+              bypassLimit={bypassLimit}
+              maxPrograms={maxPrograms}
+            />
           ) : (
             <CommunityProgramsView
               communityPrograms={communityPrograms}
               currentUserId={currentUserId}
+              hasAccess={hasAccess}
+              maxPrograms={maxPrograms}
             />
           )}
         </div>

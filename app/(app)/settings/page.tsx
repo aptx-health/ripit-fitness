@@ -1,9 +1,8 @@
 'use client'
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { Heart, KeyRound, MessageSquarePlus, Moon, Palette, RotateCcw, Save, Shield, Sun } from 'lucide-react'
+import { Heart, KeyRound, Lock, MessageSquarePlus, Moon, Palette, Save, Shield, Sun } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import FeedbackModal from '@/components/features/FeedbackModal'
 import { useThemePreference } from '@/hooks/useThemePreference'
@@ -17,14 +16,15 @@ type ConnectedAccounts = {
 }
 
 export default function SettingsPage() {
-  const router = useRouter()
   const { data: session } = useSession()
   const { settings, isLoading, updateSettings } = useUserSettings()
   const { preference, updateTheme } = useThemePreference()
   const userRole = (session?.user as Record<string, unknown>)?.role as string | undefined
   const isAdmin = userRole === 'admin' || userRole === 'editor'
   const [weightUnit, setWeightUnit] = useState<'lbs' | 'kg'>('lbs')
+  const [intensityEnabled, setIntensityEnabled] = useState(false)
   const [intensityRating, setIntensityRating] = useState<'rpe' | 'rir'>('rir')
+  const [loggingMode, setLoggingMode] = useState<'full' | 'follow_along'>('full')
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
@@ -41,7 +41,9 @@ export default function SettingsPage() {
   useEffect(() => {
     if (settings) {
       setWeightUnit(settings.defaultWeightUnit)
+      setIntensityEnabled(settings.intensityEnabled)
       setIntensityRating(settings.defaultIntensityRating)
+      setLoggingMode(settings.loggingMode || 'full')
     }
   }, [settings])
 
@@ -62,7 +64,9 @@ export default function SettingsPage() {
     try {
       await updateSettings({
         defaultWeightUnit: weightUnit,
-        defaultIntensityRating: intensityRating,
+        ...(isAdmin ? { intensityEnabled } : {}),
+        ...(intensityEnabled ? { defaultIntensityRating: intensityRating } : {}),
+        loggingMode,
       })
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
@@ -76,7 +80,9 @@ export default function SettingsPage() {
   const isDirty =
     settings &&
     (weightUnit !== settings.defaultWeightUnit ||
-      intensityRating !== settings.defaultIntensityRating)
+      (isAdmin && intensityEnabled !== settings.intensityEnabled) ||
+      (intensityEnabled && intensityRating !== settings.defaultIntensityRating) ||
+      loggingMode !== (settings.loggingMode || 'full'))
 
   return (
     <div className="bg-background px-4 sm:px-6 py-8">
@@ -199,43 +205,133 @@ export default function SettingsPage() {
               </fieldset>
             </div>
 
-            {/* Intensity Rating */}
+            {/* Intensity Tracking Toggle */}
+            <div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="block text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                    Intensity Tracking (RIR/RPE)
+                  </span>
+                  {!isAdmin && (
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                      <Lock size={12} />
+                      Premium Feature Coming Soon
+                    </span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={intensityEnabled}
+                  aria-label="Toggle intensity tracking"
+                  disabled={!isAdmin}
+                  onClick={() => setIntensityEnabled(!intensityEnabled)}
+                  className={`relative inline-flex h-7 w-12 min-w-12 items-center rounded-full border-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
+                    !isAdmin
+                      ? 'border-border bg-muted cursor-not-allowed opacity-50'
+                      : intensityEnabled
+                        ? 'border-primary bg-primary'
+                        : 'border-border bg-muted hover:border-primary'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-5 w-5 rounded-full transition-transform ${
+                      intensityEnabled
+                        ? 'translate-x-[22px] bg-primary-foreground'
+                        : 'translate-x-[2px] bg-muted-foreground'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {/* RPE/RIR Selector — animated reveal when intensity is enabled */}
+              <div
+                className={`grid transition-all duration-300 ease-in-out ${
+                  intensityEnabled
+                    ? 'grid-rows-[1fr] opacity-100'
+                    : 'grid-rows-[0fr] opacity-0'
+                }`}
+              >
+                <div className="overflow-hidden">
+                  <div className="mt-3">
+                    <span
+                      id="intensity-rating-label"
+                      className="block text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wider"
+                    >
+                      Default Rating Type
+                    </span>
+                    <fieldset
+                      className="flex gap-2"
+                      aria-labelledby="intensity-rating-label"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setIntensityRating('rpe')}
+                        className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
+                          intensityRating === 'rpe'
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'bg-muted text-foreground border-border hover:bg-secondary'
+                        }`}
+                      >
+                        RPE
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIntensityRating('rir')}
+                        className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
+                          intensityRating === 'rir'
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'bg-muted text-foreground border-border hover:bg-secondary'
+                        }`}
+                      >
+                        RIR
+                      </button>
+                    </fieldset>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      RPE = Rate of Perceived Exertion, RIR = Reps in Reserve
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Workout Mode */}
             <div>
               <span
-                id="intensity-rating-label"
+                id="workout-mode-label"
                 className="block text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wider"
               >
-                Default Intensity Rating
+                Workout Mode
               </span>
               <fieldset
                 className="flex gap-2"
-                aria-labelledby="intensity-rating-label"
+                aria-labelledby="workout-mode-label"
               >
                 <button
                   type="button"
-                  onClick={() => setIntensityRating('rpe')}
+                  onClick={() => setLoggingMode('follow_along')}
                   className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
-                    intensityRating === 'rpe'
+                    loggingMode === 'follow_along'
                       ? 'bg-primary text-primary-foreground border-primary'
                       : 'bg-muted text-foreground border-border hover:bg-secondary'
                   }`}
                 >
-                  RPE
+                  Follow Along
                 </button>
                 <button
                   type="button"
-                  onClick={() => setIntensityRating('rir')}
+                  onClick={() => setLoggingMode('full')}
                   className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
-                    intensityRating === 'rir'
+                    loggingMode === 'full'
                       ? 'bg-primary text-primary-foreground border-primary'
                       : 'bg-muted text-foreground border-border hover:bg-secondary'
                   }`}
                 >
-                  RIR
+                  Log Sets
                 </button>
               </fieldset>
               <p className="text-sm text-muted-foreground mt-1">
-                RPE = Rate of Perceived Exertion, RIR = Reps in Reserve
+                Follow Along guides you through exercises without tracking weights.
               </p>
             </div>
 
@@ -445,34 +541,6 @@ export default function SettingsPage() {
               </div>
               <FeedbackModal open={feedbackOpen} onOpenChange={setFeedbackOpen} />
             </div>
-
-            {/* Replay Tours */}
-            {settings && (() => {
-              let hasCompleted = false
-              try { hasCompleted = JSON.parse(settings.completedTours || '[]').length > 0 } catch {}
-              return hasCompleted
-            })() && (
-              <div className="pt-4 border-t border-border">
-                <span className="block text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
-                  Guided Tours
-                </span>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    await updateSettings({ completedTours: '[]' })
-                    setSaved(false)
-                    router.refresh()
-                  }}
-                  className="px-4 py-2 border-2 border-border bg-muted text-foreground hover:bg-secondary hover:border-primary transition-colors font-semibold uppercase tracking-wider text-sm flex items-center gap-2"
-                >
-                  <RotateCcw size={16} />
-                  Replay Tours
-                </button>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Re-enables guided hints on the training and workout screens.
-                </p>
-              </div>
-            )}
 
             {/* Sign Out */}
             <div className="pt-4 border-t border-border">

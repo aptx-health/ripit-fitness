@@ -11,6 +11,12 @@ jobs:
     description: "Reproduce and fix bugs with regression tests"
     budget: 10.0
 
+  ux-autopilot:
+    trigger: "label:agent-ready,ux"
+    agent: ux-autopilot
+    description: "Implement UX-focused issues — styling, layout, responsiveness, visual polish"
+    budget: 10.0
+
   spike:
     trigger: "label:spike"
     agent: spike

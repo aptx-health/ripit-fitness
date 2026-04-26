@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
 import { useUserSettings } from '@/hooks/useUserSettings'
+import { trackEvent } from '@/lib/analytics'
 
 interface BeginnerPrimerWizardProps {
   open: boolean
@@ -35,7 +36,7 @@ const PAGES = [
           Controlled reps at moderate effort beat heavy weight with sloppy form. Your first week, pick weights that feel almost too easy — you&apos;ll dial it in.
         </p>
         <p className="text-muted-foreground mb-4">
-          The app tracks something called RIR (reps in reserve). It just means &ldquo;how many more could you have done?&rdquo; You&apos;ll get a feel for it.
+          A good rule of thumb: after each set, you should feel like you could have done 2-3 more reps. If you&apos;re grinding out every rep, go lighter.
         </p>
         <Link href="/learn/choosing-the-right-weight" className="text-sm text-primary hover:text-primary/80 font-semibold uppercase tracking-wider">
           Read more: Choosing the Right Weight
@@ -102,6 +103,7 @@ export function BeginnerPrimerWizard({ open, onDismiss }: BeginnerPrimerWizardPr
     setDismissing(true)
     try {
       await updateSettings({ dismissedPrimer: true })
+      trackEvent('primer_dismissed', { page_reached: currentPage + 1 })
       onDismiss()
     } catch {
       setDismissing(false)

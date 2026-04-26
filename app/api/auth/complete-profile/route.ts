@@ -2,6 +2,11 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { Pool } from 'pg'
 import { getCurrentUser } from '@/lib/auth/server'
 import { logger } from '@/lib/logger'
+import {
+  authSensitiveLimiter,
+  checkRateLimit,
+  getClientIp,
+} from '@/lib/rate-limit'
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 
@@ -12,6 +17,11 @@ export async function POST(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    // IP-keyed rate limit. Account linking is a credential-stuffing target
+    // and bypasses BetterAuth's own limiter. 5 req / 60s per IP.
+    const limited = await checkRateLimit(authSensitiveLimiter, getClientIp(request))
+    if (limited) return limited
 
     const { email, password } = await request.json()
 

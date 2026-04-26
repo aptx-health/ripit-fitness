@@ -22,7 +22,7 @@ type ActionsMenuProps = {
   icon?: React.ComponentType<{ size?: number; className?: string }>
   disabled?: boolean
   size?: 'sm' | 'md' | 'lg'
-  variant?: 'default' | 'primary' | 'accent'
+  variant?: 'default' | 'primary' | 'accent' | 'ghost'
   className?: string
 }
 
@@ -75,7 +75,8 @@ export default function ActionsMenu({
   const variantClasses = {
     default: 'bg-muted hover:bg-secondary',
     primary: 'bg-primary-muted hover:bg-primary hover:border-primary hover:text-white',
-    accent: 'bg-accent hover:bg-accent-hover text-white'
+    accent: 'bg-accent hover:bg-accent-hover text-white',
+    ghost: 'bg-transparent border-transparent hover:bg-transparent',
   }
 
   // Variant classes for action items

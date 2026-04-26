@@ -15,6 +15,7 @@ type UseProgramActionsParams = {
   setWeeks: React.Dispatch<React.SetStateAction<Week[]>>
   setIsLoading: (loading: boolean) => void
   setError: (error: string | null) => void
+  onComplete?: () => void
 }
 
 export function useProgramActions({
@@ -29,6 +30,7 @@ export function useProgramActions({
   setWeeks,
   setIsLoading,
   setError,
+  onComplete,
 }: UseProgramActionsParams) {
   const router = useRouter()
 
@@ -136,6 +138,10 @@ export function useProgramActions({
     }
 
     if (editMode) {
+      if (onComplete) {
+        onComplete()
+        return
+      }
       router.push('/training')
       return
     }
@@ -157,7 +163,7 @@ export function useProgramActions({
     }
 
     setShowActivationModal(true)
-  }, [router, editMode, weeksCache, weeks, programId, setError])
+  }, [router, editMode, weeksCache, weeks, programId, setError, onComplete])
 
   const handleDuplicateProgram = useCallback(async () => {
     if (!programId) return

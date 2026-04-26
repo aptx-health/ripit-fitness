@@ -21,6 +21,7 @@ function LoginForm() {
   const oauthError = getOAuthError(searchParams.get('error'))
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(oauthError)
   const [loading, setLoading] = useState(false)
 
@@ -50,14 +51,14 @@ function LoginForm() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <div className="max-w-md w-full space-y-8 p-6 sm:p-8 bg-card rounded-lg shadow-lg border border-border">
+      <div className="max-w-md w-full space-y-6 p-6 sm:p-8 bg-card rounded-lg shadow-lg border border-border">
         <AuthPageHeader />
 
-        <OAuthButtons />
+        <h1 className="text-[22px] font-semibold text-foreground">
+          Sign in to your account
+        </h1>
 
-        <OrDivider />
-
-        <form onSubmit={handleLogin} className="space-y-6">
+        <form onSubmit={handleLogin} className="space-y-4">
           {error && (
             <div className="bg-error-muted border border-error-border text-error-text px-4 py-3 rounded">
               {error}
@@ -75,28 +76,38 @@ function LoginForm() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 bg-background border border-input rounded-md shadow-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                className="mt-1 block w-full px-3 py-2 bg-white border border-input rounded-md shadow-sm text-gray-900 placeholder:text-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 placeholder="you@example.com"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-foreground">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 bg-background border border-input rounded-md shadow-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                placeholder="••••••••"
-              />
-              <div className="mt-1 text-right">
+              <div className="flex items-center justify-between">
+                <label htmlFor="password" className="block text-sm font-medium text-foreground">
+                  Password
+                </label>
                 <Link href="/forgot-password" className="text-sm text-muted-foreground hover:text-primary">
                   Forgot password?
                 </Link>
+              </div>
+              <div className="relative mt-1">
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="block w-full px-3 py-2 pr-16 bg-white border border-input rounded-md shadow-sm text-gray-900 placeholder:text-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-sm text-muted-foreground hover:text-foreground"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? 'Hide' : 'Show'}
+                </button>
               </div>
             </div>
           </div>
@@ -106,19 +117,24 @@ function LoginForm() {
             disabled={loading}
             loading={loading}
             variant="primary"
-            doom
             className="w-full"
           >
             Sign in
           </Button>
+        </form>
 
-          <p className="text-center text-sm text-muted-foreground">
-            Don&apos;t have an account?{' '}
-            <Link href="/signup" className="font-medium text-primary hover:text-primary-hover">
-              Sign up
+        <OrDivider />
+
+        <OAuthButtons />
+
+        <div className="border-t border-border pt-4">
+          <p className="text-center text-[15px] text-muted-foreground">
+            New to Ripit?{' '}
+            <Link href="/signup" className="font-semibold text-primary hover:text-primary-hover">
+              Create an account &rarr;
             </Link>
           </p>
-        </form>
+        </div>
       </div>
     </div>
   )

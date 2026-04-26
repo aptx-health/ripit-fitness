@@ -120,7 +120,7 @@ export default function FeedbackModal({ open, onOpenChange }: FeedbackModalProps
                 What kind of feedback?
               </span>
               <div className="grid grid-cols-2 gap-2">
-                {FEEDBACK_CATEGORIES.map((cat) => (
+                {FEEDBACK_CATEGORIES.filter((cat) => cat.value !== 'post_session').map((cat) => (
                   <button
                     key={cat.value}
                     type="button"

@@ -23,7 +23,7 @@ import {
  */
 export async function GET(request: NextRequest) {
   try {
-    const auth = await requireEditor()
+    const auth = await requireEditor({ rateLimit: true })
     if (auth.response) return auth.response
 
     const { searchParams } = new URL(request.url)
@@ -181,7 +181,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const auth = await requireEditor()
+    const auth = await requireEditor({ rateLimit: true })
     if (auth.response) return auth.response
     const user = auth.user
 
@@ -195,6 +195,7 @@ export async function POST(request: NextRequest) {
       aliases: body.aliases || [],
       instructions: body.instructions,
       notes: body.notes,
+      imageUrls: body.imageUrls || [],
     }
 
     // Validate input
@@ -234,6 +235,7 @@ export async function POST(request: NextRequest) {
         aliases: input.aliases || [],
         instructions: input.instructions,
         notes: input.notes,
+        imageUrls: input.imageUrls || [],
         isSystem: true, // Admin creates system exercises
         createdBy: user.id,
         userId: user.id, // Track who created it even for system exercises
@@ -249,6 +251,7 @@ export async function POST(request: NextRequest) {
         aliases: true,
         instructions: true,
         notes: true,
+        imageUrls: true,
         isSystem: true,
         createdBy: true,
         createdAt: true,

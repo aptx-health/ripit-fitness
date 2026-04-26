@@ -10,6 +10,7 @@ interface WeightKeypadProps {
   isExpanded: boolean
   onExpand: () => void
   onCollapse: () => void
+  onCancel: () => void
 }
 
 const KEYPAD_KEYS = [
@@ -26,6 +27,7 @@ export function WeightKeypad({
   isExpanded,
   onExpand,
   onCollapse,
+  onCancel,
 }: WeightKeypadProps) {
   const replaceOnNext = useRef(false)
 
@@ -90,18 +92,18 @@ export function WeightKeypad({
   // Compact view
   if (!isExpanded) {
     return (
-      <div data-tour="weight-input">
-        <span className="block text-xs text-muted-foreground mb-1 font-bold uppercase tracking-wider">
+      <div>
+        <span className="block text-sm text-muted-foreground mb-1 font-bold uppercase tracking-wider">
           WEIGHT ({weightUnit.toUpperCase()})
         </span>
         <button
           type="button"
           onClick={handleExpand}
           className="w-full h-12 px-4 flex items-center justify-center
-            bg-card border border-border
             text-2xl font-bold text-foreground tabular-nums
             hover:border-primary
             transition-all duration-75"
+          style={{ backgroundColor: 'rgba(0,0,0,0.3)', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.50), inset 0 0 0 1px rgba(254,243,199,0.06)' }}
         >
           {value || '0'}
           <span className="text-sm font-semibold text-muted-foreground ml-2">
@@ -115,16 +117,16 @@ export function WeightKeypad({
   // Expanded view with keypad - mt-auto pushes to bottom of flex container
   return (
     <div className="mt-auto">
-      <span className="block text-xs text-muted-foreground mb-1 font-bold uppercase tracking-wider">
+      <span className="block text-sm text-muted-foreground mb-1 font-bold uppercase tracking-wider">
         WEIGHT ({weightUnit.toUpperCase()})
       </span>
 
       {/* Current value display */}
       <div
         className="w-full h-12 px-4 flex items-center justify-center
-          bg-card border-2 border-primary
-          text-2xl font-bold text-foreground tabular-nums
-          shadow-[0_0_8px_rgba(var(--primary-rgb),0.2)]"
+          border-2 border-primary
+          text-2xl font-bold text-foreground tabular-nums"
+        style={{ backgroundColor: 'rgba(0,0,0,0.3)', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.50), 0 0 8px rgba(var(--primary-rgb),0.2)' }}
       >
         {value || '0'}
         <span className="text-sm font-semibold text-muted-foreground ml-2">
@@ -154,17 +156,32 @@ export function WeightKeypad({
         ))}
       </div>
 
-      {/* Done button */}
-      <button
-        type="button"
-        onClick={handleDone}
-        className="w-full mt-px h-11 bg-primary text-primary-foreground
-          font-bold uppercase tracking-wider text-sm
-          hover:bg-primary/90 active:bg-primary/80
-          transition-colors"
-      >
-        DONE
-      </button>
+      {/* Cancel + Done buttons */}
+      <div className="flex gap-px mt-px">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="flex-1 h-11 bg-error text-error-foreground
+            font-bold uppercase tracking-wider text-sm
+            hover:bg-error-hover active:bg-error/80
+            transition-colors"
+          aria-label="Cancel weight entry"
+          style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)' }}
+        >
+          CANCEL
+        </button>
+        <button
+          type="button"
+          onClick={handleDone}
+          className="flex-[2] h-11 bg-primary text-primary-foreground
+            font-bold uppercase tracking-wider text-sm
+            hover:bg-primary/90 active:bg-primary/80
+            transition-colors"
+          style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)' }}
+        >
+          DONE
+        </button>
+      </div>
     </div>
   )
 }

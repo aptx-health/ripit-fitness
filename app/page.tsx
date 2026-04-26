@@ -7,6 +7,15 @@ export default async function Home() {
   const { user } = await getCurrentUser()
 
   if (user) {
+    // Check if onboarding is completed
+    const settings = await prisma.userSettings.findUnique({
+      where: { userId: user.id },
+      select: { onboardingCompleted: true },
+    })
+    if (settings && !settings.onboardingCompleted) {
+      redirect('/onboarding')
+    }
+
     // If user has an active program, go straight to Training
     const hasActiveProgram = await prisma.program.count({
       where: { userId: user.id, isActive: true, isArchived: false },

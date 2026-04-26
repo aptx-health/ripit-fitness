@@ -124,7 +124,8 @@ export async function fetchDraft(workoutId: string): Promise<DraftResponse> {
 
 export async function completeDraft(
   workoutId: string,
-  fallbackSets?: LoggedSet[]
+  fallbackSets?: LoggedSet[],
+  guidedCompletion?: boolean
 ): Promise<void> {
   await fetchWithRetry<{ success: boolean }>(
     `/api/workouts/${workoutId}/complete`,
@@ -142,6 +143,7 @@ export async function completeDraft(
           rir: s.rir,
           isWarmup: s.isWarmup ?? false,
         })),
+        ...(guidedCompletion && { guidedCompletion: true }),
       }),
     }
   )

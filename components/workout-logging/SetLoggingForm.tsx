@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useUserSettings } from '@/hooks/useUserSettings'
 import { IntensitySelector } from './inputs/IntensitySelector'
 import { RepsStepper } from './inputs/RepsStepper'
@@ -41,6 +41,7 @@ interface SetLoggingFormProps {
   onExpandedInputChange: (input: ExpandedInput) => void
   onExtraSets: () => void
   onNextExercise: () => void
+  onCompleteWorkout?: () => void
   isLastExercise: boolean
 }
 
@@ -56,6 +57,7 @@ export default function SetLoggingForm({
   onExpandedInputChange,
   onExtraSets,
   onNextExercise,
+  onCompleteWorkout,
   isLastExercise,
 }: SetLoggingFormProps) {
   const { settings } = useUserSettings()
@@ -69,6 +71,29 @@ export default function SetLoggingForm({
       })
     }
   }, [settings?.defaultWeightUnit, currentSet, onSetChange])
+
+  // Capture the value before expansion so cancel can restore it
+  const valueBeforeExpand = useRef<string>('')
+
+  const handleExpand = useCallback((input: ExpandedInput) => {
+    if (input === 'weight') valueBeforeExpand.current = currentSet.weight
+    else if (input === 'rpe') valueBeforeExpand.current = currentSet.rpe
+    else if (input === 'rir') valueBeforeExpand.current = currentSet.rir
+    onExpandedInputChange(input)
+  }, [currentSet.weight, currentSet.rpe, currentSet.rir, onExpandedInputChange])
+
+  const handleCollapse = useCallback(() => {
+    onExpandedInputChange(null)
+  }, [onExpandedInputChange])
+
+  const handleCancel = useCallback((input: ExpandedInput) => {
+    // Restore the value from before expansion
+    const restored = valueBeforeExpand.current
+    if (input === 'weight') onSetChange({ ...currentSet, weight: restored })
+    else if (input === 'rpe') onSetChange({ ...currentSet, rpe: restored })
+    else if (input === 'rir') onSetChange({ ...currentSet, rir: restored })
+    onExpandedInputChange(null)
+  }, [currentSet, onSetChange, onExpandedInputChange])
 
   if (hasLoggedAllPrescribed && !extraSetsMode) {
     return (
@@ -84,30 +109,26 @@ export default function SetLoggingForm({
           >
             Extra Sets
           </button>
-          {!isLastExercise ? (
+          {isLastExercise ? (
+            <button
+              type="button"
+              onClick={onCompleteWorkout}
+              className="flex-1 py-2.5 bg-primary text-primary-foreground text-sm font-bold uppercase tracking-wider transition-all hover:bg-primary/90 doom-focus-ring"
+            >
+              Complete Workout
+            </button>
+          ) : (
             <button
               type="button"
               onClick={onNextExercise}
-              className="flex-1 py-2.5 bg-primary text-primary-foreground text-sm font-bold uppercase tracking-wider transition-all hover:bg-primary/90 doom-button-3d doom-focus-ring"
+              className="flex-1 py-2.5 bg-primary text-primary-foreground text-sm font-bold uppercase tracking-wider transition-all hover:bg-primary/90 doom-focus-ring"
             >
               Next Exercise
             </button>
-          ) : (
-            <div className="flex-1 py-2.5 text-center text-sm text-success-text font-bold uppercase tracking-wider">
-              Last exercise
-            </div>
           )}
         </div>
       </div>
     )
-  }
-
-  const handleExpand = (input: ExpandedInput) => {
-    onExpandedInputChange(input)
-  }
-
-  const handleCollapse = () => {
-    onExpandedInputChange(null)
   }
 
   const showReps = expandedInput === null
@@ -137,6 +158,7 @@ export default function SetLoggingForm({
                 isExpanded={false}
                 onExpand={() => handleExpand('weight')}
                 onCollapse={handleCollapse}
+                onCancel={() => handleCancel('weight')}
               />
             </div>
             <div className="flex-1">
@@ -149,6 +171,7 @@ export default function SetLoggingForm({
                   isExpanded={false}
                   onExpand={() => handleExpand('rir')}
                   onCollapse={handleCollapse}
+                  onCancel={() => handleCancel('rir')}
                 />
               )}
               {hasRpe && (
@@ -160,6 +183,7 @@ export default function SetLoggingForm({
                   isExpanded={false}
                   onExpand={() => handleExpand('rpe')}
                   onCollapse={handleCollapse}
+                  onCancel={() => handleCancel('rpe')}
                 />
               )}
             </div>
@@ -175,6 +199,7 @@ export default function SetLoggingForm({
                 isExpanded={expandedInput === 'weight'}
                 onExpand={() => handleExpand('weight')}
                 onCollapse={handleCollapse}
+                onCancel={() => handleCancel('weight')}
               />
             )}
 
@@ -188,6 +213,7 @@ export default function SetLoggingForm({
                 isExpanded={expandedInput === 'rir'}
                 onExpand={() => handleExpand('rir')}
                 onCollapse={handleCollapse}
+                onCancel={() => handleCancel('rir')}
               />
             )}
 
@@ -200,6 +226,7 @@ export default function SetLoggingForm({
                 isExpanded={expandedInput === 'rpe'}
                 onExpand={() => handleExpand('rpe')}
                 onCollapse={handleCollapse}
+                onCancel={() => handleCancel('rpe')}
               />
             )}
           </>

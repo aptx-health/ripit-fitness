@@ -11,6 +11,7 @@ export interface CreateExerciseDefinitionInput {
   aliases?: string[];
   instructions?: string;
   notes?: string;
+  imageUrls?: string[];
 }
 
 export interface UpdateExerciseDefinitionInput {
@@ -22,6 +23,7 @@ export interface UpdateExerciseDefinitionInput {
   aliases?: string[];
   instructions?: string;
   notes?: string;
+  imageUrls?: string[];
 }
 
 export interface ValidationError {
@@ -37,6 +39,8 @@ const MAX_ALIAS_LENGTH = 50;
 const MAX_ALIASES = 10;
 const MAX_INSTRUCTIONS_LENGTH = 400;
 const MAX_NOTES_LENGTH = 400;
+const MAX_IMAGE_URLS = 10;
+const MAX_IMAGE_URL_LENGTH = 500;
 
 export function normalizeExerciseName(name: string): string {
   return name
@@ -151,6 +155,32 @@ export function validateExerciseDefinition(
       field: 'notes',
       message: `Notes must be ${MAX_NOTES_LENGTH} characters or less`,
     });
+  }
+
+  // Image URLs validation (optional)
+  if (input.imageUrls) {
+    if (input.imageUrls.length > MAX_IMAGE_URLS) {
+      errors.push({
+        field: 'imageUrls',
+        message: `Maximum ${MAX_IMAGE_URLS} image URLs allowed`,
+      });
+    }
+    const tooLongUrls = input.imageUrls.filter(
+      (url) => url.length > MAX_IMAGE_URL_LENGTH
+    );
+    if (tooLongUrls.length > 0) {
+      errors.push({
+        field: 'imageUrls',
+        message: `Image URLs must be ${MAX_IMAGE_URL_LENGTH} characters or less`,
+      });
+    }
+    const emptyUrls = input.imageUrls.filter((url) => !url.trim());
+    if (emptyUrls.length > 0) {
+      errors.push({
+        field: 'imageUrls',
+        message: 'Image URLs must not be empty',
+      });
+    }
   }
 
   return errors;

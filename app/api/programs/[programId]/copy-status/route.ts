@@ -80,11 +80,24 @@ export async function GET(
           });
         }
 
-        // If stuck for >5 minutes, mark as failed (Cloud Run timeout is 540s)
+        // If stuck for >5 minutes, clean up (Cloud Run timeout is 540s)
         if (cloneAge > 300000) {
+          if (!hasData) {
+            // Empty shell with no weeks — delete it entirely
+            await prisma.program.delete({
+              where: { id: programId },
+            });
+
+            return NextResponse.json({
+              status: 'not_found',
+              error: 'Clone timed out. Please try again.',
+            }, { status: 404 });
+          }
+
+          // Partial clone with some weeks — mark as failed but keep data
           await prisma.program.update({
             where: { id: programId },
-            data: { copyStatus: 'failed' }
+            data: { copyStatus: 'failed' },
           });
 
           return NextResponse.json({
@@ -102,7 +115,7 @@ export async function GET(
       });
     }
 
-    // Program not found - likely failed and was deleted
+    // Program not found — may have been cleaned up after a failed clone
     return NextResponse.json({
       status: 'not_found',
       error: 'Program not found - cloning may have failed',

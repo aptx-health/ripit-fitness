@@ -118,14 +118,13 @@ export async function cloneCommunityProgram(
         programType: 'strength',
       });
     } catch (publishError) {
-      // Job enqueue failed — mark shell program as failed so it doesn't stay stuck in 'cloning'
+      // Job enqueue failed — delete the empty shell program so it doesn't linger
       logger.error(
         { error: publishError, programId: shellProgram.id },
-        'Failed to publish clone job, marking program as failed'
+        'Failed to publish clone job, deleting shell program'
       );
-      await prisma.program.update({
+      await prisma.program.delete({
         where: { id: shellProgram.id },
-        data: { copyStatus: 'failed' },
       });
       return {
         success: false,

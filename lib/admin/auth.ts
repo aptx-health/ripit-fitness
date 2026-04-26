@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server'
 import { type AuthUser, getCurrentUser, type UserRole } from '@/lib/auth/server'
 import { logger } from '@/lib/logger'
+import { adminLimiter, checkRateLimit } from '@/lib/rate-limit'
+
+export interface RequireOptions {
+  /** Apply the admin rate limiter (30 req / 60s per user). Use on write handlers. */
+  rateLimit?: boolean
+}
 
 const ADMIN_ROLES: UserRole[] = ['admin']
 const EDITOR_ROLES: UserRole[] = ['admin', 'editor']
@@ -21,7 +27,7 @@ export type AdminAuth = AdminAuthResult | AdminAuthError
  * Require admin role for an API route.
  * Returns { user } on success, or { response } with the appropriate error.
  */
-export async function requireAdmin(): Promise<AdminAuth> {
+export async function requireAdmin(opts: RequireOptions = {}): Promise<AdminAuth> {
   const { user, error } = await getCurrentUser()
 
   if (error || !user) {
@@ -34,6 +40,11 @@ export async function requireAdmin(): Promise<AdminAuth> {
     return { response: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) }
   }
 
+  if (opts.rateLimit) {
+    const limited = await checkRateLimit(adminLimiter, user.id)
+    if (limited) return { response: limited }
+  }
+
   return { user }
 }
 
@@ -41,7 +52,7 @@ export async function requireAdmin(): Promise<AdminAuth> {
  * Require editor or admin role for an API route.
  * Returns { user } on success, or { response } with the appropriate error.
  */
-export async function requireEditor(): Promise<AdminAuth> {
+export async function requireEditor(opts: RequireOptions = {}): Promise<AdminAuth> {
   const { user, error } = await getCurrentUser()
 
   if (error || !user) {
@@ -52,6 +63,11 @@ export async function requireEditor(): Promise<AdminAuth> {
   if (!EDITOR_ROLES.includes(user.role)) {
     logger.warn({ userId: user.id, role: user.role }, 'Editor auth: forbidden (editor required)')
     return { response: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) }
+  }
+
+  if (opts.rateLimit) {
+    const limited = await checkRateLimit(adminLimiter, user.id)
+    if (limited) return { response: limited }
   }
 
   return { user }

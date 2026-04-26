@@ -20,6 +20,7 @@ model Program {
   programType       String    @default("strength")
   isArchived        Boolean   @default(false)
   archivedAt        DateTime?
+  deletedAt         DateTime?
   copyStatus        String?   @default("ready")
   goals             String[]  @default([])
   level             String?
@@ -34,6 +35,7 @@ model Program {
   @@index([userId])
   @@index([userId, isUserCreated])
   @@index([userId, isArchived])
+  @@index([userId, deletedAt])
 }
 
 model Week {
@@ -285,17 +287,25 @@ model UserCardioMetricPreferences {
 }
 
 model UserSettings {
-  id                     String   @id @default(cuid())
-  userId                 String   @unique
-  displayName            String?
-  defaultWeightUnit      String   @default("lbs")
-  defaultIntensityRating String   @default("rir")
-  dismissedPrimer        Boolean  @default(false)
-  dismissedWarmup        Boolean  @default(false)
-  dismissedStickNudge    Boolean  @default(false)
-  completedTours         String   @default("[]")
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
+  id                        String    @id @default(cuid())
+  userId                    String    @unique
+  displayName               String?
+  defaultWeightUnit         String    @default("lbs")
+  defaultIntensityRating    String    @default("rir")
+  dismissedPrimer           Boolean   @default(false)
+  dismissedWarmup           Boolean   @default(false)
+  dismissedStickNudge       Boolean   @default(false)
+  completedTours            String    @default("[]")
+  postSessionPromptCount    Int       @default(0)
+  lastPostSessionPromptAt   DateTime?
+  experienceLevel           String?
+  equipmentPreference       String?
+  onboardingCompleted       Boolean   @default(false)
+  customProgramLimitBypass  Boolean   @default(false)
+  intensityEnabled          Boolean   @default(false)
+  loggingMode               String    @default("full")
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
 
   @@index([userId])
 }
@@ -485,15 +495,47 @@ model ArticleComment {
   @@index([articleId, createdAt])
 }
 
+// -- Analytics Events --
+
+model AppEvent {
+  id         String   @id @default(cuid())
+  userId     String
+  event      String
+  properties Json?
+  pageUrl    String?
+  sessionId  String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([event, createdAt])
+}
+
+// -- Waiver Acceptance --
+
+model WaiverAcceptance {
+  id            String   @id @default(cuid())
+  userId        String
+  waiverVersion String
+  acceptedAt    DateTime @default(now())
+  ipAddress     String?
+  userAgent     String?
+
+  @@index([userId, waiverVersion])
+  @@index([userId, acceptedAt])
+}
+
 // -- User Feedback --
 
 model Feedback {
   id        String   @id @default(cuid())
   userId    String
-  category  String   // "bug" | "feature" | "confusion" | "general"
-  message   String
+  category  String   // "bug" | "feature" | "confusion" | "general" | "post_session"
+  message   String   @default("")
   pageUrl   String
   userAgent String?
+  properties     String?  // JSON blob for extra context (e.g. question shown for post_session)
+  rating         Int?     // 1-5 experience rating (post_session)
+  refinements    String[] // ["confusing", "buggy", etc.] (post_session)
   status         String   @default("new") // "new" | "reviewed" | "resolved"
   adminNote      String?
   githubIssueUrl String?
@@ -502,5 +544,6 @@ model Feedback {
 
   @@index([userId])
   @@index([status])
+  @@index([category])
   @@index([createdAt(sort: Desc)])
 }
