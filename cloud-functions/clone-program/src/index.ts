@@ -171,7 +171,7 @@ worker.on('failed', async (job, error) => {
 })
 
 worker.on('error', (error) => {
-  console.error('[worker] error:', error.message)
+  console.error('[worker] error:', error.message || error)
   workerReady = false
 })
 
