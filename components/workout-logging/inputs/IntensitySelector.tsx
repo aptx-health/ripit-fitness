@@ -10,6 +10,7 @@ interface IntensitySelectorProps {
   isExpanded: boolean
   onExpand: () => void
   onCollapse: () => void
+  onCancel: () => void
 }
 
 export function IntensitySelector({
@@ -19,6 +20,7 @@ export function IntensitySelector({
   isExpanded,
   onExpand,
   onCollapse,
+  onCancel,
 }: IntensitySelectorProps) {
   const presets: IntensityPreset[] = type === 'rpe' ? RPE_PRESETS : RIR_PRESETS
   const label = type === 'rpe' ? 'RPE' : 'RIR'
@@ -88,19 +90,31 @@ export function IntensitySelector({
           )
         })}
 
-        {/* Clear / Skip button */}
-        <button
-          type="button"
-          onClick={() => {
-            onChange('')
-            onCollapse()
-          }}
-          className="w-full px-3 py-2.5 bg-card
-            text-muted-foreground font-bold uppercase tracking-wider text-sm
-            hover:bg-muted transition-colors"
-        >
-          SKIP {label}
-        </button>
+        {/* Cancel + Skip buttons */}
+        <div className="flex">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="flex-1 px-3 py-2.5 bg-error text-error-foreground
+              font-bold uppercase tracking-wider text-sm
+              hover:bg-error-hover transition-colors"
+            aria-label={`Cancel ${label} selection`}
+          >
+            CANCEL
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              onChange('')
+              onCollapse()
+            }}
+            className="flex-1 px-3 py-2.5 bg-card
+              text-muted-foreground font-bold uppercase tracking-wider text-sm
+              hover:bg-muted transition-colors border-l border-border"
+          >
+            SKIP {label}
+          </button>
+        </div>
       </div>
     </div>
   )
