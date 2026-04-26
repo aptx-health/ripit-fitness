@@ -10,6 +10,7 @@ interface WeightKeypadProps {
   isExpanded: boolean
   onExpand: () => void
   onCollapse: () => void
+  onCancel: () => void
 }
 
 const KEYPAD_KEYS = [
@@ -26,6 +27,7 @@ export function WeightKeypad({
   isExpanded,
   onExpand,
   onCollapse,
+  onCancel,
 }: WeightKeypadProps) {
   const replaceOnNext = useRef(false)
 
@@ -154,18 +156,32 @@ export function WeightKeypad({
         ))}
       </div>
 
-      {/* Done button */}
-      <button
-        type="button"
-        onClick={handleDone}
-        className="w-full mt-px h-11 bg-primary text-primary-foreground
-          font-bold uppercase tracking-wider text-sm
-          hover:bg-primary/90 active:bg-primary/80
-          transition-colors"
-        style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)' }}
-      >
-        DONE
-      </button>
+      {/* Cancel + Done buttons */}
+      <div className="flex gap-px mt-px">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="flex-1 h-11 bg-error text-error-foreground
+            font-bold uppercase tracking-wider text-sm
+            hover:bg-error-hover active:bg-error/80
+            transition-colors"
+          aria-label="Cancel weight entry"
+          style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)' }}
+        >
+          CANCEL
+        </button>
+        <button
+          type="button"
+          onClick={handleDone}
+          className="flex-[2] h-11 bg-primary text-primary-foreground
+            font-bold uppercase tracking-wider text-sm
+            hover:bg-primary/90 active:bg-primary/80
+            transition-colors"
+          style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)' }}
+        >
+          DONE
+        </button>
+      </div>
     </div>
   )
 }

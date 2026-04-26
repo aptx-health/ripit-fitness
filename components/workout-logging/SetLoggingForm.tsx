@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useUserSettings } from '@/hooks/useUserSettings'
 import { IntensitySelector } from './inputs/IntensitySelector'
 import { RepsStepper } from './inputs/RepsStepper'
@@ -72,6 +72,29 @@ export default function SetLoggingForm({
     }
   }, [settings?.defaultWeightUnit, currentSet, onSetChange])
 
+  // Capture the value before expansion so cancel can restore it
+  const valueBeforeExpand = useRef<string>('')
+
+  const handleExpand = useCallback((input: ExpandedInput) => {
+    if (input === 'weight') valueBeforeExpand.current = currentSet.weight
+    else if (input === 'rpe') valueBeforeExpand.current = currentSet.rpe
+    else if (input === 'rir') valueBeforeExpand.current = currentSet.rir
+    onExpandedInputChange(input)
+  }, [currentSet.weight, currentSet.rpe, currentSet.rir, onExpandedInputChange])
+
+  const handleCollapse = useCallback(() => {
+    onExpandedInputChange(null)
+  }, [onExpandedInputChange])
+
+  const handleCancel = useCallback((input: ExpandedInput) => {
+    // Restore the value from before expansion
+    const restored = valueBeforeExpand.current
+    if (input === 'weight') onSetChange({ ...currentSet, weight: restored })
+    else if (input === 'rpe') onSetChange({ ...currentSet, rpe: restored })
+    else if (input === 'rir') onSetChange({ ...currentSet, rir: restored })
+    onExpandedInputChange(null)
+  }, [currentSet, onSetChange, onExpandedInputChange])
+
   if (hasLoggedAllPrescribed && !extraSetsMode) {
     return (
       <div className="bg-success-muted border-2 border-success-border p-4 flex-shrink-0">
@@ -108,14 +131,6 @@ export default function SetLoggingForm({
     )
   }
 
-  const handleExpand = (input: ExpandedInput) => {
-    onExpandedInputChange(input)
-  }
-
-  const handleCollapse = () => {
-    onExpandedInputChange(null)
-  }
-
   const showReps = expandedInput === null
   const showWeight = expandedInput === null || expandedInput === 'weight'
   const showIntensity = expandedInput === null || expandedInput === 'rpe' || expandedInput === 'rir'
@@ -143,6 +158,7 @@ export default function SetLoggingForm({
                 isExpanded={false}
                 onExpand={() => handleExpand('weight')}
                 onCollapse={handleCollapse}
+                onCancel={() => handleCancel('weight')}
               />
             </div>
             <div className="flex-1">
@@ -155,6 +171,7 @@ export default function SetLoggingForm({
                   isExpanded={false}
                   onExpand={() => handleExpand('rir')}
                   onCollapse={handleCollapse}
+                  onCancel={() => handleCancel('rir')}
                 />
               )}
               {hasRpe && (
@@ -166,6 +183,7 @@ export default function SetLoggingForm({
                   isExpanded={false}
                   onExpand={() => handleExpand('rpe')}
                   onCollapse={handleCollapse}
+                  onCancel={() => handleCancel('rpe')}
                 />
               )}
             </div>
@@ -181,6 +199,7 @@ export default function SetLoggingForm({
                 isExpanded={expandedInput === 'weight'}
                 onExpand={() => handleExpand('weight')}
                 onCollapse={handleCollapse}
+                onCancel={() => handleCancel('weight')}
               />
             )}
 
@@ -194,6 +213,7 @@ export default function SetLoggingForm({
                 isExpanded={expandedInput === 'rir'}
                 onExpand={() => handleExpand('rir')}
                 onCollapse={handleCollapse}
+                onCancel={() => handleCancel('rir')}
               />
             )}
 
@@ -206,6 +226,7 @@ export default function SetLoggingForm({
                 isExpanded={expandedInput === 'rpe'}
                 onExpand={() => handleExpand('rpe')}
                 onCollapse={handleCollapse}
+                onCancel={() => handleCancel('rpe')}
               />
             )}
           </>
