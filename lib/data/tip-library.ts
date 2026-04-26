@@ -29,11 +29,6 @@ export const TIP_LIBRARY: Tip[] = [
     tier: 'beginner',
   },
   {
-    id: 'info-tab',
-    text: "Not sure how an exercise works? Tap the INFO tab to see which muscles it targets and how to set up.",
-    tier: 'beginner',
-  },
-  {
     id: 'skip-exercise',
     text: "Not comfortable with an exercise? Go ahead and skip to the next. You don't need to log everything.",
     tier: 'beginner',
