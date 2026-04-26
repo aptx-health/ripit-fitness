@@ -48,10 +48,10 @@ export default function OnboardingPage() {
   const [copyProgress, setCopyProgress] = useState<string | null>(null)
   const [fadeKey, setFadeKey] = useState(0)
 
-  const changeStep = (next: Step) => {
+  const changeStep = useCallback((next: Step) => {
     setFadeKey(k => k + 1)
     setStep(next)
-  }
+  }, [])
 
   useEffect(() => {
     async function check() {
@@ -72,7 +72,7 @@ export default function OnboardingPage() {
       }
     }
     check()
-  }, [router])
+  }, [router, changeStep])
 
   const completeOnboarding = useCallback(async (
     level: ExperienceLevel,
@@ -159,7 +159,7 @@ export default function OnboardingPage() {
       setError('Network error. Please try again.')
       changeStep(level === 'beginner' ? 'info' : 'experience')
     }
-  }, [])
+  }, [changeStep])
 
   const handleExperienceSelect = (level: ExperienceLevel) => {
     setSelectedCard(level)
@@ -577,7 +577,6 @@ function SelectionCard({
     <button
       type="button"
       onClick={onClick}
-      role="button"
       tabIndex={0}
       style={{
         width: '100%',
