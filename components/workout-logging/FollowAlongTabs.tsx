@@ -30,22 +30,15 @@ interface FollowAlongViewProps {
   exercise: Exercise
   prescribedSets: PrescribedSet[]
   tip: string
-}
-
-const FAU_DISPLAY_NAMES: Record<string, string> = {
-  chest: 'Chest', 'mid-back': 'Mid Back', 'lower-back': 'Lower Back',
-  'front-delts': 'Front Delts', 'side-delts': 'Side Delts', 'rear-delts': 'Rear Delts',
-  lats: 'Lats', traps: 'Traps', biceps: 'Biceps', triceps: 'Triceps',
-  forearms: 'Forearms', quads: 'Quads', adductors: 'Adductors',
-  hamstrings: 'Hamstrings', glutes: 'Glutes', calves: 'Calves',
-  abs: 'Abs', obliques: 'Obliques',
+  tipCount?: number
+  onNextTip?: () => void
 }
 
 /**
- * Format prescribed sets as compact subtitle: "3 x 12" or "3 sets x 12 reps".
- * For varying reps: "3 sets: 12, 10, 8"
+ * Format prescribed sets as compact directive: "3 sets of 12 reps"
+ * For varying reps: "3 sets: 12, 10, 8 reps"
  */
-function formatPrescriptionSubtitle(prescribedSets: PrescribedSet[]): string {
+function formatPrescriptionDirective(prescribedSets: PrescribedSet[]): string {
   if (prescribedSets.length === 0) return 'No sets prescribed'
 
   const repsValues = prescribedSets.map(s => {
@@ -58,25 +51,50 @@ function formatPrescriptionSubtitle(prescribedSets: PrescribedSet[]): string {
   const count = prescribedSets.length
 
   if (allSame) {
-    return `${count} sets of ${repsValues[0]} repetitions`
+    return `${count} sets of ${repsValues[0]} reps`
   }
 
-  return `${count} sets: ${repsValues.join(', ')} repetitions`
+  return `${count} sets: ${repsValues.join(', ')} reps`
 }
 
 /**
  * Single-scroll follow-along view. No tabs — all content flows top to bottom:
- * title block, exercise image (crossfade), instructions, coaching tip.
+ * title block, "What To Do" card, exercise image, instructions, coaching tip.
  */
 export default function FollowAlongTabs({
   exercise,
   prescribedSets,
   tip,
+  tipCount = 0,
+  onNextTip,
 }: FollowAlongViewProps) {
-  const subtitle = formatPrescriptionSubtitle(prescribedSets)
-  const primaryMuscles = exercise.exerciseDefinition?.primaryFAUs
-    ?.map(fau => FAU_DISPLAY_NAMES[fau] || fau.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()))
+  const directive = formatPrescriptionDirective(prescribedSets)
   const imageUrls = exercise.exerciseDefinition?.imageUrls || []
+
+  // Pulse animation — fires twice on exercise screen load
+  const cardRef = useRef<HTMLDivElement>(null)
+  const [pulseKey, setPulseKey] = useState(exercise.id)
+
+  useEffect(() => {
+    setPulseKey(exercise.id)
+  }, [exercise.id])
+
+  useEffect(() => {
+    const el = cardRef.current
+    if (!el) return
+
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (prefersReduced) return
+
+    el.classList.remove('wtd-pulse')
+    // Force reflow so re-adding the class restarts the animation
+    void el.offsetWidth
+    el.classList.add('wtd-pulse')
+
+    const cleanup = () => el.classList.remove('wtd-pulse')
+    el.addEventListener('animationend', cleanup, { once: true })
+    return () => el.removeEventListener('animationend', cleanup)
+  }, [pulseKey])
 
   // Track whether content is scrollable and not fully scrolled
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -97,19 +115,37 @@ export default function FollowAlongTabs({
     <div className="flex flex-col h-full min-h-0">
       <div className="relative flex-1 min-h-0">
         <div ref={scrollRef} onScroll={checkScroll} className="h-full overflow-y-auto">
-        {/* Title block */}
+        {/* Title block — exercise name only */}
         <div className="bg-card border-b border-border px-4 py-4 text-center">
-          <h2 className="text-xl font-bold text-foreground uppercase tracking-wider doom-heading">
+          <h2 className="text-[18px] font-semibold text-foreground uppercase tracking-wider doom-heading">
             {exercise.name}
           </h2>
-          <p className="text-base text-primary font-semibold mt-1">
-            {subtitle}
-          </p>
-          {primaryMuscles && primaryMuscles.length > 0 && (
-            <p className="text-xs text-muted-foreground uppercase tracking-widest mt-1.5">
-              {primaryMuscles.join(' \u00b7 ')}
-            </p>
-          )}
+        </div>
+
+        {/* "What To Do" prescription card */}
+        <div className="px-4 pt-4">
+          <div
+            ref={cardRef}
+            className="wtd-card px-[14px] py-[14px]"
+            style={{
+              backgroundColor: 'color-mix(in srgb, var(--primary) 8%, transparent)',
+              boxShadow: [
+                'inset 0 1px 0 color-mix(in srgb, var(--primary) 30%, transparent)',
+                'inset 0 -1px 0 rgba(0,0,0,0.30)',
+                'inset 0 0 0 1px color-mix(in srgb, var(--primary) 25%, transparent)',
+              ].join(', '),
+            }}
+          >
+            <span
+              className="block text-[11px] font-medium uppercase tracking-[0.12em]"
+              style={{ color: 'var(--primary)' }}
+            >
+              What to do
+            </span>
+            <span className="block text-[22px] font-medium text-foreground leading-[1.1] mt-0.5">
+              {directive}
+            </span>
+          </div>
         </div>
 
         {/* Exercise demonstration */}
@@ -135,7 +171,11 @@ export default function FollowAlongTabs({
         {/* Coaching tip */}
         {tip && (
           <div className="px-4 pt-4 pb-4">
-            <BeginnerTipCard tip={tip} />
+            <BeginnerTipCard
+              tip={tip}
+              tipCount={tipCount}
+              onNextTip={onNextTip}
+            />
           </div>
         )}
         </div>

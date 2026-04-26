@@ -562,6 +562,8 @@ export default function ExerciseLoggingModal({
                   exercise={currentExercise}
                   prescribedSets={currentPrescribedSets}
                   tip={currentTip}
+                  tipCount={tierTips.length}
+                  onNextTip={rotateTip}
                 />
               ) : (
                 <ExerciseDisplayTabs
