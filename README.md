@@ -2,7 +2,7 @@
   <img src="public/frog-banner-horizontal.png" alt="Ripit Fitness" />
 </div>
 
-# Ripit Fitness
+# Ripit Fitness [![Better Stack Badge](https://uptime.betterstack.com/status-badges/v1/monitor/2krtg.svg)](https://uptime.betterstack.com/?utm_source=status_badge)
 
 A focused strength training tracker that lets you build programs and track workouts without rigid app constraints.
 

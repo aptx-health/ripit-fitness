@@ -1,3 +1,4 @@
+import { withSentryConfig } from "@sentry/nextjs";
 import withSerwistInit from "@serwist/next";
 import type { NextConfig } from "next";
 
@@ -103,4 +104,18 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSerwist(nextConfig);
+export default withSentryConfig(withSerwist(nextConfig), {
+  org: "aptx-health",
+  project: "javascript-nextjs",
+
+  // Suppress source map upload logs outside CI
+  silent: !process.env.CI,
+
+  // Route browser requests to avoid ad blockers
+  tunnelRoute: "/sentry-tunnel",
+
+  // Source maps upload disabled until SENTRY_AUTH_TOKEN is configured
+  sourcemaps: {
+    disable: true,
+  },
+});

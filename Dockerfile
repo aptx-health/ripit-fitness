@@ -55,7 +55,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # Prisma migrations + exercise data sync (for k8s init container)
 COPY --from=builder /app/prisma ./prisma
-RUN npm install prisma@6.19.0 --save-exact --no-audit --no-fund --ignore-scripts
+# dotenv: Sentry's transitive dep c12 dynamically imports dotenv at runtime;
+# Next.js standalone output traces only the package.json stub, not the code.
+RUN npm install prisma@6.19.0 dotenv --save-exact --no-audit --no-fund --ignore-scripts
 # Copy Prisma engines from deps stage and fix ownership
 # npm install above creates @prisma/ owned by root; engines need to be writable by nextjs at runtime
 COPY --from=deps --chown=nextjs:nodejs /app/node_modules/@prisma/engines ./node_modules/@prisma/engines
