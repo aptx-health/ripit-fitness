@@ -176,7 +176,7 @@ export default function ExerciseLoggingModal({
     (s) => s.setNumber === nextSetNumber
   )
 
-  // Premium intensity gate: admins always have access, others need intensityEnabled
+  // Intensity preference check: user has it enabled in settings
   const { hasAccess: hasIntensityAccess } = useIntensityAccess()
 
   // Check if current exercise has any prescribed RPE/RIR (gated by premium)
