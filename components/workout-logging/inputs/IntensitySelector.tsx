@@ -116,6 +116,30 @@ export function IntensitySelector({
           </button>
         </div>
       </div>
+
+      {/* Info blurb */}
+      <div className="mt-3 p-3.5 border border-dashed border-border/40 bg-muted/35 flex items-start gap-2.5">
+        <svg
+          aria-hidden="true"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          className="shrink-0 mt-[5px] stroke-muted-foreground"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M9 18h6" />
+          <path d="M10 22h4" />
+          <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5C8.35 12.26 8.82 13.02 9 14" />
+        </svg>
+        <span className="text-sm leading-relaxed text-muted-foreground">
+          {type === 'rir'
+            ? 'Reps in Reserve: How many more reps you think you could have done after stopping your set.'
+            : 'Rate of Perceived Exertion: How hard did the last set feel?'}
+        </span>
+      </div>
     </div>
   )
 }

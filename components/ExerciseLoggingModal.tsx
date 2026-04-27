@@ -1,11 +1,12 @@
 'use client'
 
-import { AlertTriangle, LogOut, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react'
+import { AlertTriangle, Info, LogOut, Pencil, Plus, RefreshCw, Trash2, X } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import { useImagePrefetch } from '@/hooks/useImagePrefetch'
 import { useIntensityAccess } from '@/hooks/useIntensityAccess'
+import { useUserSettings } from '@/hooks/useUserSettings'
 import { type Exercise, type ExerciseHistory, useProgressiveExercises } from '@/hooks/useProgressiveExercises'
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
 import { useWorkoutDraft } from '@/hooks/useWorkoutDraft'
@@ -178,8 +179,30 @@ export default function ExerciseLoggingModal({
 
   // Intensity preference check: user has it enabled in settings
   const { hasAccess: hasIntensityAccess } = useIntensityAccess()
+  const { settings, updateSettings } = useUserSettings()
 
-  // Check if current exercise has any prescribed RPE/RIR (gated by premium)
+  // One-time intensity intro tip
+  const completedTours: string[] = useMemo(() => {
+    try { return JSON.parse(settings?.completedTours || '[]') } catch { return [] }
+  }, [settings?.completedTours])
+  const showIntensityIntro = hasIntensityAccess && !completedTours.includes('intensity-intro')
+  const [intensityIntroDismissed, setIntensityIntroDismissed] = useState(false)
+  const showIntensityBubble = showIntensityIntro && !intensityIntroDismissed
+
+  const dismissIntensityIntro = useCallback(() => {
+    setIntensityIntroDismissed(true)
+    const updated = [...completedTours, 'intensity-intro']
+    updateSettings({ completedTours: JSON.stringify(updated) }).catch(() => {})
+  }, [completedTours, updateSettings])
+
+  // Auto-dismiss intensity intro after 15 seconds
+  useEffect(() => {
+    if (!showIntensityBubble) return
+    const timer = setTimeout(dismissIntensityIntro, 15000)
+    return () => clearTimeout(timer)
+  }, [showIntensityBubble, dismissIntensityIntro])
+
+  // Check if current exercise has any prescribed RPE/RIR
   const hasRpe = hasIntensityAccess && currentPrescribedSets.some((s) => s.rpe !== null)
   const hasRir = hasIntensityAccess && currentPrescribedSets.some((s) => s.rir !== null)
 
@@ -526,6 +549,24 @@ export default function ExerciseLoggingModal({
                 <div className="h-8 bg-muted animate-pulse" />
               </div>
             )
+          )}
+
+          {/* One-time intensity intro bubble */}
+          {showIntensityBubble && (
+            <div className="mx-4 mt-2 mb-1 px-3 py-3 bg-primary/10 border-2 border-primary/30 flex items-start gap-2.5">
+              <Info size={18} className="text-primary flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-foreground flex-1">
+                Intensity tracking is on. You&apos;ll see <strong>RIR</strong> (Reps in Reserve) or <strong>RPE</strong> (Rate of Perceived Exertion) fields on your sets. You can change or disable this in Settings.
+              </p>
+              <button
+                type="button"
+                onClick={dismissIntensityIntro}
+                className="text-muted-foreground hover:text-foreground flex-shrink-0 mt-0.5"
+                aria-label="Dismiss intensity tip"
+              >
+                <X size={16} />
+              </button>
+            </div>
           )}
 
           {/* Content area with tabs — swipeable */}
