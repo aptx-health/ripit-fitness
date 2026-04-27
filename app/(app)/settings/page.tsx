@@ -1,7 +1,7 @@
 'use client'
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { Heart, KeyRound, Lock, MessageSquarePlus, Moon, Palette, Save, Shield, Sun } from 'lucide-react'
+import { Heart, KeyRound, MessageSquarePlus, Moon, Palette, Save, Shield, Sun } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import FeedbackModal from '@/components/features/FeedbackModal'
@@ -64,7 +64,7 @@ export default function SettingsPage() {
     try {
       await updateSettings({
         defaultWeightUnit: weightUnit,
-        ...(isAdmin ? { intensityEnabled } : {}),
+        intensityEnabled,
         ...(intensityEnabled ? { defaultIntensityRating: intensityRating } : {}),
         loggingMode,
       })
@@ -80,7 +80,7 @@ export default function SettingsPage() {
   const isDirty =
     settings &&
     (weightUnit !== settings.defaultWeightUnit ||
-      (isAdmin && intensityEnabled !== settings.intensityEnabled) ||
+      intensityEnabled !== settings.intensityEnabled ||
       (intensityEnabled && intensityRating !== settings.defaultIntensityRating) ||
       loggingMode !== (settings.loggingMode || 'full'))
 
@@ -212,26 +212,17 @@ export default function SettingsPage() {
                   <span className="block text-sm font-semibold text-muted-foreground uppercase tracking-wider">
                     Intensity Tracking (RIR/RPE)
                   </span>
-                  {!isAdmin && (
-                    <span className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                      <Lock size={12} />
-                      Premium Feature Coming Soon
-                    </span>
-                  )}
                 </div>
                 <button
                   type="button"
                   role="switch"
                   aria-checked={intensityEnabled}
                   aria-label="Toggle intensity tracking"
-                  disabled={!isAdmin}
                   onClick={() => setIntensityEnabled(!intensityEnabled)}
                   className={`relative inline-flex h-7 w-12 min-w-12 items-center rounded-full border-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
-                    !isAdmin
-                      ? 'border-border bg-muted cursor-not-allowed opacity-50'
-                      : intensityEnabled
-                        ? 'border-primary bg-primary'
-                        : 'border-border bg-muted hover:border-primary'
+                    intensityEnabled
+                      ? 'border-primary bg-primary'
+                      : 'border-border bg-muted hover:border-primary'
                   }`}
                 >
                   <span

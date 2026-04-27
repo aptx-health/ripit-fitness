@@ -1,9 +1,9 @@
 import { useUserSettings } from '@/hooks/useUserSettings'
 
 /**
- * Returns whether the current user has access to intensity features (RIR/RPE).
- * Access requires intensityEnabled in settings. Admins can toggle this on/off
- * in settings — admin role grants the ability to toggle, not automatic access.
+ * Returns whether the current user has intensity features (RIR/RPE) enabled.
+ * All users can toggle this on/off in Settings. Beginners start with it off,
+ * experienced users get it auto-enabled during onboarding.
  */
 export function useIntensityAccess() {
   const { settings, isLoading } = useUserSettings()

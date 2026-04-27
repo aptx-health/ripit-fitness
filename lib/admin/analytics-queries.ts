@@ -44,11 +44,13 @@ function weeksAgo(n: number): Date {
 
 const END_USER_ROLE = 'user'
 
-/** SQL fragment: WHERE clause to restrict to end users on "user" aliased as u */
-const ONLY_END_USERS_ON_U = Prisma.sql`AND u.role = ${END_USER_ROLE}`
+/** SQL fragment: WHERE clause to restrict to end users on "user" aliased as u.
+ *  Cast column to text so this works whether role is a "UserRole" enum (prod)
+ *  or plain text (test harness). */
+const ONLY_END_USERS_ON_U = Prisma.sql`AND u.role::text = ${END_USER_ROLE}`
 
 /** SQL fragment: WHERE clause to restrict to end users on "user" table directly */
-const ONLY_END_USERS = Prisma.sql`AND role = ${END_USER_ROLE}`
+const ONLY_END_USERS = Prisma.sql`AND role::text = ${END_USER_ROLE}`
 
 /** Only consider users who signed up within the last N days for time-to-first-workout */
 const SIGNUP_LOOKBACK_DAYS = 90
@@ -166,17 +168,9 @@ async function getUsageMetrics(db: Db): Promise<UsageMetrics> {
 
   const fourWeeksAgo = weeksAgo(4)
 
-  // Parallel: user counts + workout counts (end users only; staff excluded).
-  // WorkoutCompletion queries use INNER JOIN on "user" to filter by role.
-  const [
-    totalUsers,
-    newSignups,
-    thisWeek,
-    lastWeek,
-    allTime,
-    totalStartedRows,
-    recentRows,
-  ] = await Promise.all([
+  // Two batches to stay within PgBouncer's connection_limit=5.
+  // Batch 1: user counts + this/last week completions (4 queries)
+  const [totalUsers, newSignups, thisWeek, lastWeek] = await Promise.all([
     db.$queryRaw<[{ count: bigint }]>`
       SELECT COUNT(*)::bigint as count FROM "user"
       WHERE 1=1 ${ONLY_END_USERS}
@@ -201,6 +195,10 @@ async function getUsageMetrics(db: Db): Promise<UsageMetrics> {
         AND wc."completedAt" < ${weekStart}
       ${ONLY_END_USERS_ON_U}
     `,
+  ])
+
+  // Batch 2: all-time counts + per-user recent completions (3 queries)
+  const [allTime, totalStartedRows, recentRows] = await Promise.all([
     db.$queryRaw<[{ count: bigint }]>`
       SELECT COUNT(*)::bigint as count
       FROM "WorkoutCompletion" wc
@@ -215,8 +213,6 @@ async function getUsageMetrics(db: Db): Promise<UsageMetrics> {
       WHERE wc.status IN ('completed', 'abandoned')
       ${ONLY_END_USERS_ON_U}
     `,
-    // Avg workouts per user per week (over last 4 weeks):
-    // rows are per-user completion counts.
     db.$queryRaw<Array<{ userId: string; cnt: bigint }>>`
       SELECT wc."userId" as "userId", COUNT(*)::bigint as cnt
       FROM "WorkoutCompletion" wc
@@ -284,41 +280,49 @@ async function getRetentionMetrics(db: Db): Promise<RetentionMetrics> {
   const wau = Number(wauRows[0].count)
   const mau = Number(mauRows[0].count)
 
-  // 7-day retention cohorts: for each of the last 8 weeks, what % are still active
+  // 7-day retention cohorts: single query computes all 8 weeks at once.
+  // Each row returns the week offset (1–8), signup count, and count of those
+  // users who completed a workout in the last 7 days.
+  const cohortStart = weeksAgo(8)
+  const recentCutoff = daysAgo(7)
+  const cohortRows = await db.$queryRaw<
+    Array<{ week_offset: number; signup_count: bigint; active_count: bigint }>
+  >`
+    WITH week_buckets AS (
+      SELECT generate_series(1, 8) AS week_offset
+    ),
+    cohort_signups AS (
+      SELECT
+        wb.week_offset,
+        u.id as user_id
+      FROM week_buckets wb
+      INNER JOIN "user" u
+        ON u."createdAt" >= (${cohortStart} + (wb.week_offset - 1) * INTERVAL '7 days')
+        AND u."createdAt" < (${cohortStart} + wb.week_offset * INTERVAL '7 days')
+      WHERE u.role::text = ${END_USER_ROLE}
+    )
+    SELECT
+      cs.week_offset,
+      COUNT(DISTINCT cs.user_id)::bigint AS signup_count,
+      COUNT(DISTINCT wc."userId")::bigint AS active_count
+    FROM cohort_signups cs
+    LEFT JOIN "WorkoutCompletion" wc
+      ON wc."userId" = cs.user_id
+      AND wc.status = 'completed'
+      AND wc."completedAt" >= ${recentCutoff}
+    GROUP BY cs.week_offset
+    ORDER BY cs.week_offset ASC
+  `
+
+  // Build lookup and fill in all 8 weeks (missing rows = 0 signups)
+  const cohortMap = new Map(
+    cohortRows.map((r) => [r.week_offset, r])
+  )
   const cohorts: RetentionCohort[] = []
   for (let w = 1; w <= 8; w++) {
-    const cohortStart = weeksAgo(w)
-    const cohortEnd = weeksAgo(w - 1)
-
-    const signups = await db.$queryRaw<[{ count: bigint }]>`
-      SELECT COUNT(*)::bigint as count FROM "user"
-      WHERE "createdAt" >= ${cohortStart} AND "createdAt" < ${cohortEnd}
-      ${ONLY_END_USERS}
-    `
-    const signupCount = Number(signups[0].count)
-    if (signupCount === 0) {
-      cohorts.push({
-        weekLabel: `${w}w ago`,
-        signupCount: 0,
-        activeCount: 0,
-        retentionPct: 0,
-      })
-      continue
-    }
-
-    // Users from that cohort who completed a workout in the last 7 days
-    const activeFromCohort = await db.$queryRaw<[{ count: bigint }]>`
-      SELECT COUNT(DISTINCT wc."userId")::bigint as count
-      FROM "WorkoutCompletion" wc
-      INNER JOIN "user" u ON u.id = wc."userId"
-      WHERE u."createdAt" >= ${cohortStart}
-        AND u."createdAt" < ${cohortEnd}
-        AND wc.status = 'completed'
-        AND wc."completedAt" >= ${daysAgo(7)}
-        ${ONLY_END_USERS_ON_U}
-    `
-    const activeCount = Number(activeFromCohort[0].count)
-
+    const row = cohortMap.get(w)
+    const signupCount = row ? Number(row.signup_count) : 0
+    const activeCount = row ? Number(row.active_count) : 0
     cohorts.push({
       weekLabel: `${w}w ago`,
       signupCount,
@@ -460,7 +464,7 @@ async function getFeedbackVolume(db: Db): Promise<FeedbackVolume[]> {
     FROM "Feedback" f
     WHERE f."createdAt" >= ${weekStart}
       AND f."userId" IN (
-        SELECT id FROM "user" WHERE role = ${END_USER_ROLE}
+        SELECT id FROM "user" WHERE role::text = ${END_USER_ROLE}
       )
     GROUP BY f.category
     ORDER BY count DESC
@@ -475,60 +479,84 @@ async function getSignupAttributionMetrics(
   const windowDays = 30
   const windowStart = daysAgo(windowDays)
 
-  // 1. Source breakdown over the window. Legacy signup_completed events
-  //    pre-#490 will have null properties — we coalesce them to 'unknown'
-  //    so the breakdown still totals up.
-  const sourceRows = await db.$queryRaw<
-    Array<{ source: string; count: bigint }>
-  >`
-    SELECT
-      COALESCE(NULLIF(e.properties->>'source', ''), 'unknown') as source,
-      COUNT(DISTINCT e."userId")::bigint as count
-    FROM "AppEvent" e
-    INNER JOIN "user" u ON u.id = e."userId"
-    WHERE e.event = 'signup_completed'
-      AND e."createdAt" >= ${windowStart}
-      ${ONLY_END_USERS_ON_U}
-    GROUP BY 1
-    ORDER BY count DESC
-  `
+  // All 5 attribution queries are independent — run in parallel.
+  const [sourceRows, gymRows, landingViewed, signupStarted, signupCompleted] =
+    await Promise.all([
+      // 1. Source breakdown. Legacy signup_completed events pre-#490 have null
+      //    properties — coalesce to 'unknown' so the breakdown still totals up.
+      db.$queryRaw<Array<{ source: string; count: bigint }>>`
+        SELECT
+          COALESCE(NULLIF(e.properties->>'source', ''), 'unknown') as source,
+          COUNT(DISTINCT e."userId")::bigint as count
+        FROM "AppEvent" e
+        INNER JOIN "user" u ON u.id = e."userId"
+        WHERE e.event = 'signup_completed'
+          AND e."createdAt" >= ${windowStart}
+          ${ONLY_END_USERS_ON_U}
+        GROUP BY 1
+        ORDER BY count DESC
+      `,
+      // 2. Per-gym signups + conversion to first workout.
+      db.$queryRaw<
+        Array<{ gymSlug: string; signupCount: bigint; firstWorkoutCount: bigint }>
+      >`
+        WITH gym_signups AS (
+          SELECT
+            e.properties->>'gymSlug' as "gymSlug",
+            e."userId" as "userId"
+          FROM "AppEvent" e
+          INNER JOIN "user" u ON u.id = e."userId"
+          WHERE e.event = 'signup_completed'
+            AND e."createdAt" >= ${windowStart}
+            AND e.properties->>'gymSlug' IS NOT NULL
+            AND e.properties->>'gymSlug' <> ''
+            ${ONLY_END_USERS_ON_U}
+        )
+        SELECT
+          gs."gymSlug" as "gymSlug",
+          COUNT(DISTINCT gs."userId")::bigint as "signupCount",
+          COUNT(DISTINCT wc."userId")::bigint as "firstWorkoutCount"
+        FROM gym_signups gs
+        LEFT JOIN "WorkoutCompletion" wc
+          ON wc."userId" = gs."userId"
+          AND wc.status = 'completed'
+        GROUP BY gs."gymSlug"
+        ORDER BY "signupCount" DESC, gs."gymSlug" ASC
+      `,
+      // 3. QR funnel: qr_landing_viewed → signup_started (source='qr') → signup_completed (source='qr')
+      db.$queryRaw<[{ count: bigint }]>`
+        SELECT COUNT(DISTINCT e."userId")::bigint as count
+        FROM "AppEvent" e
+        INNER JOIN "user" u ON u.id = e."userId"
+        WHERE e.event = 'qr_landing_viewed'
+          AND e."createdAt" >= ${windowStart}
+          ${ONLY_END_USERS_ON_U}
+      `,
+      db.$queryRaw<[{ count: bigint }]>`
+        SELECT COUNT(DISTINCT e."userId")::bigint as count
+        FROM "AppEvent" e
+        INNER JOIN "user" u ON u.id = e."userId"
+        WHERE e.event = 'signup_started'
+          AND e.properties->>'source' = 'qr'
+          AND e."createdAt" >= ${windowStart}
+          ${ONLY_END_USERS_ON_U}
+      `,
+      db.$queryRaw<[{ count: bigint }]>`
+        SELECT COUNT(DISTINCT e."userId")::bigint as count
+        FROM "AppEvent" e
+        INNER JOIN "user" u ON u.id = e."userId"
+        WHERE e.event = 'signup_completed'
+          AND e.properties->>'source' = 'qr'
+          AND e."createdAt" >= ${windowStart}
+          ${ONLY_END_USERS_ON_U}
+      `,
+    ])
+
   const sourceBreakdown: SignupSourceBreakdown[] = sourceRows.map((r) => ({
     source: r.source,
     count: Number(r.count),
   }))
 
-  // 2. Per-gym signups + conversion to first workout. Joins back to
-  //    WorkoutCompletion to compute the conversion %.
-  const gymRows = await db.$queryRaw<
-    Array<{
-      gymSlug: string
-      signupCount: bigint
-      firstWorkoutCount: bigint
-    }>
-  >`
-    WITH gym_signups AS (
-      SELECT
-        e.properties->>'gymSlug' as "gymSlug",
-        e."userId" as "userId"
-      FROM "AppEvent" e
-      INNER JOIN "user" u ON u.id = e."userId"
-      WHERE e.event = 'signup_completed'
-        AND e."createdAt" >= ${windowStart}
-        AND e.properties->>'gymSlug' IS NOT NULL
-        AND e.properties->>'gymSlug' <> ''
-        ${ONLY_END_USERS_ON_U}
-    )
-    SELECT
-      gs."gymSlug" as "gymSlug",
-      COUNT(DISTINCT gs."userId")::bigint as "signupCount",
-      COUNT(DISTINCT wc."userId")::bigint as "firstWorkoutCount"
-    FROM gym_signups gs
-    LEFT JOIN "WorkoutCompletion" wc
-      ON wc."userId" = gs."userId"
-      AND wc.status = 'completed'
-    GROUP BY gs."gymSlug"
-    ORDER BY "signupCount" DESC, gs."gymSlug" ASC
-  `
   const perGym: PerGymSignup[] = gymRows.map((r) => {
     const signupCount = Number(r.signupCount)
     const firstWorkoutCount = Number(r.firstWorkoutCount)
@@ -542,38 +570,6 @@ async function getSignupAttributionMetrics(
           : 0,
     }
   })
-
-  // 3. QR funnel: qr_landing_viewed → signup_started (source='qr') → signup_completed (source='qr')
-  //    Landing views can be from non-authenticated users if /go/[slug] is ever public —
-  //    today every event is auth-gated by /api/events, so we still INNER JOIN user.
-  const [landingViewed, signupStarted, signupCompleted] = await Promise.all([
-    db.$queryRaw<[{ count: bigint }]>`
-      SELECT COUNT(DISTINCT e."userId")::bigint as count
-      FROM "AppEvent" e
-      INNER JOIN "user" u ON u.id = e."userId"
-      WHERE e.event = 'qr_landing_viewed'
-        AND e."createdAt" >= ${windowStart}
-        ${ONLY_END_USERS_ON_U}
-    `,
-    db.$queryRaw<[{ count: bigint }]>`
-      SELECT COUNT(DISTINCT e."userId")::bigint as count
-      FROM "AppEvent" e
-      INNER JOIN "user" u ON u.id = e."userId"
-      WHERE e.event = 'signup_started'
-        AND e.properties->>'source' = 'qr'
-        AND e."createdAt" >= ${windowStart}
-        ${ONLY_END_USERS_ON_U}
-    `,
-    db.$queryRaw<[{ count: bigint }]>`
-      SELECT COUNT(DISTINCT e."userId")::bigint as count
-      FROM "AppEvent" e
-      INNER JOIN "user" u ON u.id = e."userId"
-      WHERE e.event = 'signup_completed'
-        AND e.properties->>'source' = 'qr'
-        AND e."createdAt" >= ${windowStart}
-        ${ONLY_END_USERS_ON_U}
-    `,
-  ])
 
   const qrSteps = [
     { step: 'QR Landing Viewed', count: Number(landingViewed[0].count) },
@@ -660,15 +656,16 @@ export async function getAnalyticsData(
   db: Db = defaultPrisma,
 ): Promise<AnalyticsData> {
   try {
-    const [usage, retention, funnel, feedbackVolume, signupAttribution, postSession] =
-      await Promise.all([
-        getUsageMetrics(db),
-        getRetentionMetrics(db),
-        getFunnelMetrics(db),
-        getFeedbackVolume(db),
-        getSignupAttributionMetrics(db),
-        getPostSessionMetrics(db),
-      ])
+    // Run sequentially to stay within PgBouncer's connection_limit=5.
+    // Each function batches its queries to max 5 concurrent. Running all 6 in
+    // Promise.all would create ~20 concurrent queries that exhaust the pool
+    // and cause Prisma P2024 timeouts.
+    const usage = await getUsageMetrics(db)
+    const retention = await getRetentionMetrics(db)
+    const funnel = await getFunnelMetrics(db)
+    const feedbackVolume = await getFeedbackVolume(db)
+    const signupAttribution = await getSignupAttributionMetrics(db)
+    const postSession = await getPostSessionMetrics(db)
 
     return {
       usage,

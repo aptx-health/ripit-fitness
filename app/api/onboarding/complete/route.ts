@@ -58,6 +58,9 @@ export async function POST(request: NextRequest) {
       settingsUpdate.equipmentPreference = equipmentPreference || 'machines'
       settingsUpdate.dismissedPrimer = true // they saw it during onboarding
       settingsUpdate.loggingMode = 'follow_along'
+    } else if (experienceLevel === 'experienced') {
+      settingsUpdate.intensityEnabled = true
+      settingsUpdate.defaultIntensityRating = 'rir'
     }
 
     await prisma.userSettings.upsert({
