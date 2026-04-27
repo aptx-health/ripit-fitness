@@ -44,11 +44,13 @@ function weeksAgo(n: number): Date {
 
 const END_USER_ROLE = 'user'
 
-/** SQL fragment: WHERE clause to restrict to end users on "user" aliased as u */
-const ONLY_END_USERS_ON_U = Prisma.sql`AND u.role = ${END_USER_ROLE}`
+/** SQL fragment: WHERE clause to restrict to end users on "user" aliased as u.
+ *  Cast column to text so this works whether role is a "UserRole" enum (prod)
+ *  or plain text (test harness). */
+const ONLY_END_USERS_ON_U = Prisma.sql`AND u.role::text = ${END_USER_ROLE}`
 
 /** SQL fragment: WHERE clause to restrict to end users on "user" table directly */
-const ONLY_END_USERS = Prisma.sql`AND role = ${END_USER_ROLE}`
+const ONLY_END_USERS = Prisma.sql`AND role::text = ${END_USER_ROLE}`
 
 /** Only consider users who signed up within the last N days for time-to-first-workout */
 const SIGNUP_LOOKBACK_DAYS = 90
@@ -166,17 +168,9 @@ async function getUsageMetrics(db: Db): Promise<UsageMetrics> {
 
   const fourWeeksAgo = weeksAgo(4)
 
-  // Parallel: user counts + workout counts (end users only; staff excluded).
-  // WorkoutCompletion queries use INNER JOIN on "user" to filter by role.
-  const [
-    totalUsers,
-    newSignups,
-    thisWeek,
-    lastWeek,
-    allTime,
-    totalStartedRows,
-    recentRows,
-  ] = await Promise.all([
+  // Two batches to stay within PgBouncer's connection_limit=5.
+  // Batch 1: user counts + this/last week completions (4 queries)
+  const [totalUsers, newSignups, thisWeek, lastWeek] = await Promise.all([
     db.$queryRaw<[{ count: bigint }]>`
       SELECT COUNT(*)::bigint as count FROM "user"
       WHERE 1=1 ${ONLY_END_USERS}
@@ -201,6 +195,10 @@ async function getUsageMetrics(db: Db): Promise<UsageMetrics> {
         AND wc."completedAt" < ${weekStart}
       ${ONLY_END_USERS_ON_U}
     `,
+  ])
+
+  // Batch 2: all-time counts + per-user recent completions (3 queries)
+  const [allTime, totalStartedRows, recentRows] = await Promise.all([
     db.$queryRaw<[{ count: bigint }]>`
       SELECT COUNT(*)::bigint as count
       FROM "WorkoutCompletion" wc
@@ -215,8 +213,6 @@ async function getUsageMetrics(db: Db): Promise<UsageMetrics> {
       WHERE wc.status IN ('completed', 'abandoned')
       ${ONLY_END_USERS_ON_U}
     `,
-    // Avg workouts per user per week (over last 4 weeks):
-    // rows are per-user completion counts.
     db.$queryRaw<Array<{ userId: string; cnt: bigint }>>`
       SELECT wc."userId" as "userId", COUNT(*)::bigint as cnt
       FROM "WorkoutCompletion" wc
@@ -303,7 +299,7 @@ async function getRetentionMetrics(db: Db): Promise<RetentionMetrics> {
       INNER JOIN "user" u
         ON u."createdAt" >= (${cohortStart} + (wb.week_offset - 1) * INTERVAL '7 days')
         AND u."createdAt" < (${cohortStart} + wb.week_offset * INTERVAL '7 days')
-      WHERE u.role = ${END_USER_ROLE}
+      WHERE u.role::text = ${END_USER_ROLE}
     )
     SELECT
       cs.week_offset,
@@ -468,7 +464,7 @@ async function getFeedbackVolume(db: Db): Promise<FeedbackVolume[]> {
     FROM "Feedback" f
     WHERE f."createdAt" >= ${weekStart}
       AND f."userId" IN (
-        SELECT id FROM "user" WHERE role = ${END_USER_ROLE}
+        SELECT id FROM "user" WHERE role::text = ${END_USER_ROLE}
       )
     GROUP BY f.category
     ORDER BY count DESC
@@ -661,9 +657,9 @@ export async function getAnalyticsData(
 ): Promise<AnalyticsData> {
   try {
     // Run sequentially to stay within PgBouncer's connection_limit=5.
-    // Each function has its own internal parallelism (up to 7 concurrent queries),
-    // which is manageable for a 5-connection pool. Running all 6 in Promise.all
-    // creates ~20 concurrent queries that exhaust the pool and cause P2024 timeouts.
+    // Each function batches its queries to max 5 concurrent. Running all 6 in
+    // Promise.all would create ~20 concurrent queries that exhaust the pool
+    // and cause Prisma P2024 timeouts.
     const usage = await getUsageMetrics(db)
     const retention = await getRetentionMetrics(db)
     const funnel = await getFunnelMetrics(db)
