@@ -120,6 +120,8 @@ export default function RootLayout({
                     } else {
                       root.classList.remove('dark');
                     }
+                    // Notify React components so theme toggle icon updates
+                    window.dispatchEvent(new Event('themechange'));
                   };
                   darkModeMediaQuery.addEventListener('change', updateMode);
                 }
