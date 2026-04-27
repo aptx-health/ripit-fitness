@@ -25,6 +25,7 @@ export async function updateSession(request: NextRequest) {
       !pathname.startsWith('/forgot-password') &&
       !pathname.startsWith('/reset-password') &&
       !pathname.startsWith('/auth/complete-profile') &&
+      !pathname.startsWith('/go') &&
       !pathname.startsWith('/waiver') &&
       !pathname.startsWith('/_next') &&
       !pathname.startsWith('/api')) {

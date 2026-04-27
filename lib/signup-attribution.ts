@@ -20,9 +20,12 @@
 export type SignupSource = 'qr' | 'organic' | 'oauth'
 export type SignupMethod = 'email' | 'google' | 'discord'
 
+export type QrMode = 'beginner' | 'experienced'
+
 export interface SignupAttribution {
   source: SignupSource
   gymSlug?: string
+  mode?: QrMode
 }
 
 export interface PendingOAuthSignup {

@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { clearAttribution, getAttribution } from '@/lib/signup-attribution'
 
 type Step = 'loading' | 'experience' | 'equipment' | 'info' | 'completing'
 
@@ -52,27 +53,6 @@ export default function OnboardingPage() {
     setFadeKey(k => k + 1)
     setStep(next)
   }, [])
-
-  useEffect(() => {
-    async function check() {
-      try {
-        const res = await fetch('/api/settings')
-        if (!res.ok) {
-          changeStep('experience')
-          return
-        }
-        const data = await res.json()
-        if (data.settings?.onboardingCompleted) {
-          router.replace('/')
-          return
-        }
-        changeStep('experience')
-      } catch {
-        changeStep('experience')
-      }
-    }
-    check()
-  }, [router, changeStep])
 
   const completeOnboarding = useCallback(async (
     level: ExperienceLevel,
@@ -161,6 +141,41 @@ export default function OnboardingPage() {
     }
   }, [changeStep])
 
+  useEffect(() => {
+    async function check() {
+      try {
+        const res = await fetch('/api/settings')
+        if (!res.ok) {
+          applyQrMode()
+          return
+        }
+        const data = await res.json()
+        if (data.settings?.onboardingCompleted) {
+          router.replace('/')
+          return
+        }
+        applyQrMode()
+      } catch {
+        applyQrMode()
+      }
+    }
+
+    function applyQrMode() {
+      const attribution = getAttribution()
+      clearAttribution()
+      if (attribution.mode === 'experienced') {
+        completeOnboarding('experienced')
+      } else if (attribution.mode === 'beginner') {
+        setExperienceLevel('beginner')
+        changeStep('equipment')
+      } else {
+        changeStep('experience')
+      }
+    }
+
+    check()
+  }, [router, changeStep, completeOnboarding])
+
   const handleExperienceSelect = (level: ExperienceLevel) => {
     setSelectedCard(level)
     setExperienceLevel(level)
@@ -187,7 +202,11 @@ export default function OnboardingPage() {
 
   const handleBack = () => {
     if (step === 'equipment') {
-      changeStep('experience')
+      // If QR mode pre-selected beginner, don't go back to experience
+      const attribution = getAttribution()
+      if (attribution.mode !== 'beginner') {
+        changeStep('experience')
+      }
     } else if (step === 'info') {
       changeStep('equipment')
     }
@@ -198,13 +217,14 @@ export default function OnboardingPage() {
   }
 
   // --- Progress bar math ---
-  const totalSegments = 3
-  const currentSegment =
-    step === 'experience' ? 0 :
-    step === 'equipment' ? 1 :
-    step === 'info' ? 2 : 0
+  // QR beginner mode skips experience step: 2 segments instead of 3
+  const qrBeginner = getAttribution().mode === 'beginner'
+  const totalSegments = qrBeginner ? 2 : 3
+  const currentSegment = qrBeginner
+    ? (step === 'equipment' ? 0 : step === 'info' ? 1 : 0)
+    : (step === 'experience' ? 0 : step === 'equipment' ? 1 : step === 'info' ? 2 : 0)
 
-  const canGoBack = step === 'equipment' || step === 'info'
+  const canGoBack = (step === 'equipment' && !qrBeginner) || step === 'info'
 
   // --- Loading ---
   if (step === 'loading') {

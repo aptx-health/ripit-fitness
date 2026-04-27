@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/Button'
 import { flushEvents, trackEvent } from '@/lib/analytics'
 import { signUp } from '@/lib/auth-client'
 import {
-  clearAttribution,
   getAttribution,
   resolveSource,
 } from '@/lib/signup-attribution'
@@ -47,6 +46,7 @@ export default function SignupPage() {
     const source = resolveSource('email', attribution)
     const startedProps: Record<string, unknown> = { source, method: 'email' }
     if (attribution.gymSlug) startedProps.gymSlug = attribution.gymSlug
+    if (attribution.mode) startedProps.mode = attribution.mode
     trackEvent('signup_started', startedProps)
 
     setLoading(true)
@@ -86,8 +86,9 @@ export default function SignupPage() {
         method: 'email',
       }
       if (attribution.gymSlug) completedProps.gymSlug = attribution.gymSlug
+      if (attribution.mode) completedProps.mode = attribution.mode
       trackEvent('signup_completed', completedProps)
-      clearAttribution()
+      // Don't clear attribution here — onboarding reads mode from it
       await flushEvents(true)
       window.location.href = '/onboarding'
     } catch {
