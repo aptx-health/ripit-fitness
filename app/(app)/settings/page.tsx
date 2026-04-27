@@ -205,7 +205,8 @@ export default function SettingsPage() {
               </fieldset>
             </div>
 
-            {/* Intensity Tracking Toggle */}
+            {/* Intensity Tracking Toggle — hidden in follow-along mode */}
+            {loggingMode !== 'follow_along' && (
             <div>
               <div className="flex items-center justify-between">
                 <div>
@@ -285,6 +286,7 @@ export default function SettingsPage() {
                 </div>
               </div>
             </div>
+            )}
 
             {/* Workout Mode */}
             <div>
