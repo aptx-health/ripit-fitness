@@ -44,11 +44,13 @@ function weeksAgo(n: number): Date {
 
 const END_USER_ROLE = 'user'
 
-/** SQL fragment: WHERE clause to restrict to end users on "user" aliased as u */
-const ONLY_END_USERS_ON_U = Prisma.sql`AND u.role = ${END_USER_ROLE}::"UserRole"`
+/** SQL fragment: WHERE clause to restrict to end users on "user" aliased as u.
+ *  Cast column to text so this works whether role is a "UserRole" enum (prod)
+ *  or plain text (test harness). */
+const ONLY_END_USERS_ON_U = Prisma.sql`AND u.role::text = ${END_USER_ROLE}`
 
 /** SQL fragment: WHERE clause to restrict to end users on "user" table directly */
-const ONLY_END_USERS = Prisma.sql`AND role = ${END_USER_ROLE}::"UserRole"`
+const ONLY_END_USERS = Prisma.sql`AND role::text = ${END_USER_ROLE}`
 
 /** Only consider users who signed up within the last N days for time-to-first-workout */
 const SIGNUP_LOOKBACK_DAYS = 90
@@ -297,7 +299,7 @@ async function getRetentionMetrics(db: Db): Promise<RetentionMetrics> {
       INNER JOIN "user" u
         ON u."createdAt" >= (${cohortStart} + (wb.week_offset - 1) * INTERVAL '7 days')
         AND u."createdAt" < (${cohortStart} + wb.week_offset * INTERVAL '7 days')
-      WHERE u.role = ${END_USER_ROLE}::"UserRole"
+      WHERE u.role::text = ${END_USER_ROLE}
     )
     SELECT
       cs.week_offset,
@@ -462,7 +464,7 @@ async function getFeedbackVolume(db: Db): Promise<FeedbackVolume[]> {
     FROM "Feedback" f
     WHERE f."createdAt" >= ${weekStart}
       AND f."userId" IN (
-        SELECT id FROM "user" WHERE role = ${END_USER_ROLE}::"UserRole"
+        SELECT id FROM "user" WHERE role::text = ${END_USER_ROLE}
       )
     GROUP BY f.category
     ORDER BY count DESC
