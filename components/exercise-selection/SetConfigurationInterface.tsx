@@ -98,13 +98,17 @@ export function SetConfigurationInterface({
   const [duplicatingSetId, setDuplicatingSetId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<Tab>('sets')
 
-  // Update intensity type when settings load (only for new exercises, not when editing)
+  // Update intensity type when settings load
   useEffect(() => {
     if (!hasIntensityAccess) {
       setExerciseIntensityType('NONE')
       return
     }
-    if (!initialConfig && settings?.defaultIntensityRating) {
+    if (initialConfig) {
+      // Editing: apply the initialConfig intensity type once access is confirmed
+      setExerciseIntensityType(initialConfig.intensityType)
+    } else if (settings?.defaultIntensityRating) {
+      // New exercise: use the user's default
       const newIntensityType = settings.defaultIntensityRating === 'rpe'
         ? 'RPE'
         : settings.defaultIntensityRating === 'rir'
