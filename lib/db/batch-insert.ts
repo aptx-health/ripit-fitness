@@ -7,6 +7,8 @@ import { validateWorkoutLimit } from '@/lib/validation/workout-limits'
  */
 export type WeekData = {
   weekNumber: number
+  name?: string | null
+  description?: string | null
   workouts: Array<{
     name: string
     dayNumber: number
@@ -176,10 +178,10 @@ export async function batchInsertWeek(
   // Pre-generate week ID
   const weekId = createId()
 
-  // 1. INSERT Week
+  // 1. INSERT Week (include name and description if present)
   await tx.$executeRaw(Prisma.sql`
-    INSERT INTO "Week" (id, "weekNumber", "programId", "userId")
-    VALUES (${weekId}, ${week.weekNumber}, ${programId}, ${userId})
+    INSERT INTO "Week" (id, "weekNumber", name, description, "programId", "userId")
+    VALUES (${weekId}, ${week.weekNumber}, ${week.name || null}, ${week.description || null}, ${programId}, ${userId})
   `)
 
   // 2. Insert all content
