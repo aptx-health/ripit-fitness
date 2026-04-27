@@ -7,7 +7,7 @@ import { checkRateLimit, programManagementLimiter } from '@/lib/rate-limit'
 
 const PROGRAM_MAP: Record<string, string> = {
   machines: 'Machine Starter',
-  free_weights_cables: 'Nothing But Cables*',
+  free_weights_cables: 'Beginner Free Weights and Cables',
 }
 
 interface OnboardingRequest {
