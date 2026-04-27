@@ -15,9 +15,10 @@ export function useRestTimer(
   loggedSetCount: number,
   exerciseId: string
 ) {
+  // Start running immediately if we mount with sets already logged
   const [elapsed, setElapsed] = useState(0)
-  const [isRunning, setIsRunning] = useState(false)
-  const startRef = useRef<number | null>(null)
+  const [isRunning, setIsRunning] = useState(loggedSetCount > 0)
+  const startRef = useRef<number | null>(loggedSetCount > 0 ? Date.now() : null)
   const prevExerciseRef = useRef(exerciseId)
   const prevCountRef = useRef(loggedSetCount)
 

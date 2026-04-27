@@ -1,9 +1,8 @@
 'use client'
 
-import { Lock, Minus, Plus, X } from 'lucide-react'
+import { Minus, Plus, X } from 'lucide-react'
 import { useState } from 'react'
 import { LoadingFrog } from '@/components/ui/loading-frog'
-import { useIntensityAccess } from '@/hooks/useIntensityAccess'
 import type { Week } from '@/types/program-builder'
 
 interface TransformWeekModalProps {
@@ -28,7 +27,6 @@ export default function TransformWeekModal({
   weekNumber,
   onTransform
 }: TransformWeekModalProps) {
-  const { hasAccess: hasIntensityAccess } = useIntensityAccess()
   const [intensityDirection, setIntensityDirection] = useState<'MORE' | 'LESS' | 'NONE'>('NONE')
   const [intensityMagnitude, setIntensityMagnitude] = useState<number>(1)
   const [volumeAdjustment, setVolumeAdjustment] = useState<number>(0)
@@ -170,78 +168,69 @@ export default function TransformWeekModal({
           <div className="space-y-3">
             <h3 className="text-sm font-bold text-foreground doom-heading uppercase tracking-wider">Adjust Intensity</h3>
 
-            {!hasIntensityAccess ? (
-              <div className="px-3 py-2.5 border-2 border-border bg-muted text-muted-foreground opacity-60 flex items-center gap-2">
-                <Lock size={14} />
-                <span className="text-sm">Premium Feature Coming Soon</span>
-              </div>
-            ) : (
-              <>
-                {/* Intensity Direction Selection */}
-                <div className="flex gap-2">
-                  <button type="button"
-                    onClick={() => setIntensityDirection('NONE')}
-                    disabled={isSubmitting || stats !== null}
-                    className={`flex-1 px-3 py-2 text-xs font-semibold uppercase tracking-wider border-2 transition-colors doom-focus-ring ${
-                      intensityDirection === 'NONE'
-                        ? 'bg-primary text-primary-foreground border-primary doom-button-3d'
-                        : 'bg-muted text-foreground border-border hover:bg-muted/80'
-                    } disabled:opacity-50`}
-                  >
-                    None
-                  </button>
-                  <button type="button"
-                    onClick={() => setIntensityDirection('MORE')}
-                    disabled={isSubmitting || stats !== null}
-                    className={`flex-1 px-3 py-2 text-xs font-semibold uppercase tracking-wider border-2 transition-colors doom-focus-ring ${
-                      intensityDirection === 'MORE'
-                        ? 'bg-primary text-primary-foreground border-primary doom-button-3d'
-                        : 'bg-muted text-foreground border-border hover:bg-muted/80'
-                    } disabled:opacity-50`}
-                  >
-                    More
-                  </button>
-                  <button type="button"
-                    onClick={() => setIntensityDirection('LESS')}
-                    disabled={isSubmitting || stats !== null}
-                    className={`flex-1 px-3 py-2 text-xs font-semibold uppercase tracking-wider border-2 transition-colors doom-focus-ring ${
-                      intensityDirection === 'LESS'
-                        ? 'bg-primary text-primary-foreground border-primary doom-button-3d'
-                        : 'bg-muted text-foreground border-border hover:bg-muted/80'
-                    } disabled:opacity-50`}
-                  >
-                    Less
-                  </button>
-                </div>
+            {/* Intensity Direction Selection */}
+            <div className="flex gap-2">
+              <button type="button"
+                onClick={() => setIntensityDirection('NONE')}
+                disabled={isSubmitting || stats !== null}
+                className={`flex-1 px-3 py-2 text-xs font-semibold uppercase tracking-wider border-2 transition-colors doom-focus-ring ${
+                  intensityDirection === 'NONE'
+                    ? 'bg-primary text-primary-foreground border-primary doom-button-3d'
+                    : 'bg-muted text-foreground border-border hover:bg-muted/80'
+                } disabled:opacity-50`}
+              >
+                None
+              </button>
+              <button type="button"
+                onClick={() => setIntensityDirection('MORE')}
+                disabled={isSubmitting || stats !== null}
+                className={`flex-1 px-3 py-2 text-xs font-semibold uppercase tracking-wider border-2 transition-colors doom-focus-ring ${
+                  intensityDirection === 'MORE'
+                    ? 'bg-primary text-primary-foreground border-primary doom-button-3d'
+                    : 'bg-muted text-foreground border-border hover:bg-muted/80'
+                } disabled:opacity-50`}
+              >
+                More
+              </button>
+              <button type="button"
+                onClick={() => setIntensityDirection('LESS')}
+                disabled={isSubmitting || stats !== null}
+                className={`flex-1 px-3 py-2 text-xs font-semibold uppercase tracking-wider border-2 transition-colors doom-focus-ring ${
+                  intensityDirection === 'LESS'
+                    ? 'bg-primary text-primary-foreground border-primary doom-button-3d'
+                    : 'bg-muted text-foreground border-border hover:bg-muted/80'
+                } disabled:opacity-50`}
+              >
+                Less
+              </button>
+            </div>
 
-                {/* Intensity Magnitude Stepper */}
-                {intensityDirection !== 'NONE' && (
-                  <div className="flex items-center gap-3">
-                    <button type="button"
-                      onClick={decrementMagnitude}
-                      disabled={isSubmitting || stats !== null || intensityMagnitude <= 1}
-                      className="p-2 bg-muted border-2 border-border hover:bg-muted/80 disabled:opacity-50 doom-button-3d doom-focus-ring"
-                    >
-                      <Minus size={16} />
-                    </button>
-                    <div className="flex-1 text-center">
-                      <div className="text-3xl font-bold text-foreground doom-heading">
-                        {intensityDirection === 'MORE' ? '+' : '-'}{intensityMagnitude}
-                      </div>
-                      <div className="text-xs text-muted-foreground uppercase tracking-wide">
-                        Intensity adjustment
-                      </div>
-                    </div>
-                    <button type="button"
-                      onClick={incrementMagnitude}
-                      disabled={isSubmitting || stats !== null || intensityMagnitude >= 5}
-                      className="p-2 bg-muted border-2 border-border hover:bg-muted/80 disabled:opacity-50 doom-button-3d doom-focus-ring"
-                    >
-                      <Plus size={16} />
-                    </button>
+            {/* Intensity Magnitude Stepper */}
+            {intensityDirection !== 'NONE' && (
+              <div className="flex items-center gap-3">
+                <button type="button"
+                  onClick={decrementMagnitude}
+                  disabled={isSubmitting || stats !== null || intensityMagnitude <= 1}
+                  className="p-2 bg-muted border-2 border-border hover:bg-muted/80 disabled:opacity-50 doom-button-3d doom-focus-ring"
+                >
+                  <Minus size={16} />
+                </button>
+                <div className="flex-1 text-center">
+                  <div className="text-3xl font-bold text-foreground doom-heading">
+                    {intensityDirection === 'MORE' ? '+' : '-'}{intensityMagnitude}
                   </div>
-                )}
-              </>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wide">
+                    Intensity adjustment
+                  </div>
+                </div>
+                <button type="button"
+                  onClick={incrementMagnitude}
+                  disabled={isSubmitting || stats !== null || intensityMagnitude >= 5}
+                  className="p-2 bg-muted border-2 border-border hover:bg-muted/80 disabled:opacity-50 doom-button-3d doom-focus-ring"
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
             )}
           </div>
 

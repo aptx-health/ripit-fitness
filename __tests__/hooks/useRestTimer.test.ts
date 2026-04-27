@@ -52,8 +52,8 @@ describe('useRestTimer', () => {
       { initialProps: { count: 3 } }
     )
 
-    // Timer not running initially (all prescribed sets already logged)
-    expect(result.current.isRunning).toBe(false)
+    // Timer running on mount when sets already logged
+    expect(result.current.isRunning).toBe(true)
 
     // Log extra set 4
     rerender({ count: 4 })
@@ -100,9 +100,10 @@ describe('useRestTimer', () => {
       { initialProps: { count: 1, exId: 'ex-1' } }
     )
 
-    expect(result.current.isRunning).toBe(false) // Initial mount, no increase
+    // Timer running on mount when sets already logged
+    expect(result.current.isRunning).toBe(true)
 
-    // Switch exercise
+    // Switch exercise — timer resets
     rerender({ count: 0, exId: 'ex-2' })
     expect(result.current.isRunning).toBe(false)
     expect(result.current.elapsed).toBe(0)
