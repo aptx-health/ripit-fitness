@@ -63,6 +63,8 @@ export async function POST(
     const newWeek = await prisma.week.create({
       data: {
         weekNumber: newWeekNumber,
+        name: originalWeek.name,
+        description: originalWeek.description,
         programId: originalWeek.programId,
         userId: user.id,
       }
