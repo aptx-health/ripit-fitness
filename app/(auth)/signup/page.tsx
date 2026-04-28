@@ -17,7 +17,6 @@ import {
 export default function SignupPage() {
   const _router = useRouter()
   const [email, setEmail] = useState('')
-  const [displayName, setDisplayName] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -52,30 +51,16 @@ export default function SignupPage() {
     setLoading(true)
 
     try {
-      const trimmedName = displayName.trim()
       const { error } = await signUp.email({
         email,
         password,
-        name: trimmedName || email.split('@')[0],
+        name: email.split('@')[0],
       })
 
       if (error) {
         setError(error.message || 'Could not create account')
         setLoading(false)
         return
-      }
-
-      // Save display name to UserSettings if provided (non-blocking)
-      if (trimmedName) {
-        try {
-          await fetch('/api/settings', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ displayName: trimmedName }),
-          })
-        } catch {
-          // Non-blocking — user can set display name later in Settings
-        }
       }
 
       // BetterAuth signs in immediately after signup.
@@ -126,20 +111,6 @@ export default function SignupPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="mt-1 block w-full px-3 py-2 bg-white border border-input rounded-md shadow-sm text-gray-900 placeholder:text-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                 placeholder="you@example.com"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="displayName" className="block text-sm font-medium text-foreground">
-                Display name
-              </label>
-              <input
-                id="displayName"
-                type="text"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 bg-white border border-input rounded-md shadow-sm text-gray-900 placeholder:text-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                placeholder="Optional"
               />
             </div>
 

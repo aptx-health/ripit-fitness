@@ -1,9 +1,9 @@
 'use client'
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { Heart, KeyRound, MessageSquarePlus, Moon, Palette, Save, Shield, Sun } from 'lucide-react'
+import { Heart, KeyRound, MessageSquarePlus, Moon, Palette, Shield, Sun } from 'lucide-react'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import FeedbackModal from '@/components/features/FeedbackModal'
 import { useThemePreference } from '@/hooks/useThemePreference'
 import { useUserSettings } from '@/hooks/useUserSettings'
@@ -25,9 +25,8 @@ export default function SettingsPage() {
   const [intensityEnabled, setIntensityEnabled] = useState(false)
   const [intensityRating, setIntensityRating] = useState<'rpe' | 'rir'>('rir')
   const [loggingMode, setLoggingMode] = useState<'full' | 'follow_along'>('full')
-  const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [saved, setSaved] = useState(false)
+  const initializedRef = useRef(false)
   const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccounts | null>(null)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   const [showPasswordChange, setShowPasswordChange] = useState(false)
@@ -44,6 +43,8 @@ export default function SettingsPage() {
       setIntensityEnabled(settings.intensityEnabled)
       setIntensityRating(settings.defaultIntensityRating)
       setLoggingMode(settings.loggingMode || 'full')
+      // Mark initialized after first settings load so auto-save doesn't fire on mount
+      setTimeout(() => { initializedRef.current = true }, 0)
     }
   }, [settings])
 
@@ -56,33 +57,24 @@ export default function SettingsPage() {
       .catch(() => {})
   }, [])
 
-  const handleSave = async () => {
-    setIsSaving(true)
+  // Auto-save when any setting changes (debounced to avoid rapid-fire requests)
+  useEffect(() => {
+    if (!initializedRef.current) return
     setError(null)
-    setSaved(false)
 
-    try {
-      await updateSettings({
+    const timeout = setTimeout(() => {
+      updateSettings({
         defaultWeightUnit: weightUnit,
         intensityEnabled,
         ...(intensityEnabled ? { defaultIntensityRating: intensityRating } : {}),
         loggingMode,
+      }).catch((err) => {
+        setError(err instanceof Error ? err.message : 'Failed to save settings')
       })
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2000)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save settings')
-    } finally {
-      setIsSaving(false)
-    }
-  }
+    }, 300)
 
-  const isDirty =
-    settings &&
-    (weightUnit !== settings.defaultWeightUnit ||
-      intensityEnabled !== settings.intensityEnabled ||
-      (intensityEnabled && intensityRating !== settings.defaultIntensityRating) ||
-      loggingMode !== (settings.loggingMode || 'full'))
+    return () => clearTimeout(timeout)
+  }, [weightUnit, intensityEnabled, intensityRating, loggingMode, updateSettings])
 
   return (
     <div className="bg-background px-4 sm:px-6 py-8">
@@ -168,126 +160,6 @@ export default function SettingsPage() {
                 </div>
             </div>
 
-            {/* Weight Unit */}
-            <div>
-              <span
-                id="weight-unit-label"
-                className="block text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wider"
-              >
-                Default Weight Unit
-              </span>
-              <fieldset
-                className="flex gap-2"
-                aria-labelledby="weight-unit-label"
-              >
-                <button
-                  type="button"
-                  onClick={() => setWeightUnit('lbs')}
-                  className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
-                    weightUnit === 'lbs'
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-muted text-foreground border-border hover:bg-secondary'
-                  }`}
-                >
-                  LBS
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setWeightUnit('kg')}
-                  className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
-                    weightUnit === 'kg'
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-muted text-foreground border-border hover:bg-secondary'
-                  }`}
-                >
-                  KG
-                </button>
-              </fieldset>
-            </div>
-
-            {/* Intensity Tracking Toggle — hidden in follow-along mode */}
-            {loggingMode !== 'follow_along' && (
-            <div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="block text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-                    Intensity Tracking (RIR/RPE)
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={intensityEnabled}
-                  aria-label="Toggle intensity tracking"
-                  onClick={() => setIntensityEnabled(!intensityEnabled)}
-                  className={`relative inline-flex h-7 w-12 min-w-12 items-center rounded-full border-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
-                    intensityEnabled
-                      ? 'border-primary bg-primary'
-                      : 'border-border bg-muted hover:border-primary'
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-5 w-5 rounded-full transition-transform ${
-                      intensityEnabled
-                        ? 'translate-x-[22px] bg-primary-foreground'
-                        : 'translate-x-[2px] bg-muted-foreground'
-                    }`}
-                  />
-                </button>
-              </div>
-
-              {/* RPE/RIR Selector — animated reveal when intensity is enabled */}
-              <div
-                className={`grid transition-all duration-300 ease-in-out ${
-                  intensityEnabled
-                    ? 'grid-rows-[1fr] opacity-100'
-                    : 'grid-rows-[0fr] opacity-0'
-                }`}
-              >
-                <div className="overflow-hidden">
-                  <div className="mt-3">
-                    <span
-                      id="intensity-rating-label"
-                      className="block text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wider"
-                    >
-                      Default Rating Type
-                    </span>
-                    <fieldset
-                      className="flex gap-2"
-                      aria-labelledby="intensity-rating-label"
-                    >
-                      <button
-                        type="button"
-                        onClick={() => setIntensityRating('rpe')}
-                        className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
-                          intensityRating === 'rpe'
-                            ? 'bg-primary text-primary-foreground border-primary'
-                            : 'bg-muted text-foreground border-border hover:bg-secondary'
-                        }`}
-                      >
-                        RPE
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setIntensityRating('rir')}
-                        className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
-                          intensityRating === 'rir'
-                            ? 'bg-primary text-primary-foreground border-primary'
-                            : 'bg-muted text-foreground border-border hover:bg-secondary'
-                        }`}
-                      >
-                        RIR
-                      </button>
-                    </fieldset>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      RPE = Rate of Perceived Exertion, RIR = Reps in Reserve
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            )}
-
             {/* Workout Mode */}
             <div>
               <span
@@ -302,7 +174,7 @@ export default function SettingsPage() {
               >
                 <button
                   type="button"
-                  onClick={() => setLoggingMode('follow_along')}
+                  onClick={() => { setLoggingMode('follow_along'); setIntensityEnabled(false) }}
                   className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
                     loggingMode === 'follow_along'
                       ? 'bg-primary text-primary-foreground border-primary'
@@ -328,26 +200,102 @@ export default function SettingsPage() {
               </p>
             </div>
 
-            {/* Save Button */}
+            {/* Intensity Tracking — only visible in Log Sets mode */}
+            <div
+              className={`grid transition-all duration-300 ease-in-out ${
+                loggingMode === 'full'
+                  ? 'grid-rows-[1fr] opacity-100'
+                  : 'grid-rows-[0fr] opacity-0'
+              }`}
+            >
+              <div className="overflow-hidden">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="block text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                        Intensity Tracking (RIR/RPE)
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={intensityEnabled}
+                      aria-label="Toggle intensity tracking"
+                      onClick={() => setIntensityEnabled(!intensityEnabled)}
+                      className={`relative inline-flex h-7 w-12 min-w-12 items-center rounded-full border-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
+                        intensityEnabled
+                          ? 'border-primary bg-primary'
+                          : 'border-border bg-muted hover:border-primary'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-5 w-5 rounded-full transition-transform ${
+                          intensityEnabled
+                            ? 'translate-x-[22px] bg-primary-foreground'
+                            : 'translate-x-[2px] bg-muted-foreground'
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {/* RPE/RIR Selector — animated reveal when intensity is enabled */}
+                  <div
+                    className={`grid transition-all duration-300 ease-in-out ${
+                      intensityEnabled
+                        ? 'grid-rows-[1fr] opacity-100'
+                        : 'grid-rows-[0fr] opacity-0'
+                    }`}
+                  >
+                    <div className="overflow-hidden">
+                      <div className="mt-3">
+                        <span
+                          id="intensity-rating-label"
+                          className="block text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wider"
+                        >
+                          Default Rating Type
+                        </span>
+                        <fieldset
+                          className="flex gap-2"
+                          aria-labelledby="intensity-rating-label"
+                        >
+                          <button
+                            type="button"
+                            onClick={() => setIntensityRating('rpe')}
+                            className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
+                              intensityRating === 'rpe'
+                                ? 'bg-primary text-primary-foreground border-primary'
+                                : 'bg-muted text-foreground border-border hover:bg-secondary'
+                            }`}
+                          >
+                            RPE
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setIntensityRating('rir')}
+                            className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
+                              intensityRating === 'rir'
+                                ? 'bg-primary text-primary-foreground border-primary'
+                                : 'bg-muted text-foreground border-border hover:bg-secondary'
+                            }`}
+                          >
+                            RIR
+                          </button>
+                        </fieldset>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          RPE = Rate of Perceived Exertion, RIR = Reps in Reserve
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {error && (
               <div className="p-3 bg-error/10 border-2 border-error text-error text-sm">
                 {error}
               </div>
             )}
-
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={isSaving || !isDirty}
-              className={`w-full md:w-auto md:min-w-[200px] px-4 py-3 border-2 font-semibold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed ${
-                saved
-                  ? 'bg-success text-white border-success'
-                  : 'bg-primary text-primary-foreground border-primary hover:bg-primary-hover'
-              }`}
-            >
-              <Save size={18} />
-              {isSaving ? 'Saving...' : saved ? 'Saved' : 'Save'}
-            </button>
 
             {/* Account Section */}
             <div className="pt-4 border-t border-border space-y-4">
@@ -372,10 +320,6 @@ export default function SettingsPage() {
                   <ProviderBadge
                     name="Google"
                     connected={connectedAccounts?.providers.includes('google') ?? false}
-                  />
-                  <ProviderBadge
-                    name="Discord"
-                    connected={connectedAccounts?.providers.includes('discord') ?? false}
                   />
                 </div>
               </div>

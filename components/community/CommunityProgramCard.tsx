@@ -141,8 +141,8 @@ export default function CommunityProgramCard({
               </span>
             )}
 
-            {/* Goal Badges (show first 3) */}
-            {program.goals.slice(0, 3).map((goal) => (
+            {/* Goal Badges (show first 3 that have labels) */}
+            {program.goals.filter((g) => GOAL_LABELS[g]).slice(0, 3).map((goal) => (
               <span
                 key={goal}
                 className="px-2 py-1 bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider border border-primary/30"
@@ -151,9 +151,9 @@ export default function CommunityProgramCard({
               </span>
             ))}
 
-            {program.goals.length > 3 && (
+            {program.goals.filter((g) => GOAL_LABELS[g]).length > 3 && (
               <span className="px-2 py-1 bg-muted text-muted-foreground text-xs font-bold uppercase tracking-wider">
-                +{program.goals.length - 3} more
+                +{program.goals.filter((g) => GOAL_LABELS[g]).length - 3} more
               </span>
             )}
           </div>

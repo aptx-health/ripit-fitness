@@ -482,6 +482,20 @@ function EquipmentScreen({
 // --- Screen 3: Consolidated Info ---
 
 function InfoScreen({ onFinish }: { onFinish: () => void }) {
+  const [showFade, setShowFade] = useState(true)
+
+  useEffect(() => {
+    function handleScroll() {
+      const scrollBottom = window.innerHeight + window.scrollY
+      const docHeight = document.documentElement.scrollHeight
+      // Hide fade when within 40px of the bottom
+      setShowFade(docHeight - scrollBottom > 40)
+    }
+    handleScroll()
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   return (
     <>
       <h1 className="text-[32px] font-semibold text-foreground mb-9">
@@ -519,6 +533,22 @@ function InfoScreen({ onFinish }: { onFinish: () => void }) {
       >
         LET&apos;S GO
       </button>
+
+      {/* Scroll fade indicator — hints there's more content below */}
+      <div
+        aria-hidden
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 64,
+          background: 'linear-gradient(to bottom, transparent, var(--background))',
+          pointerEvents: 'none',
+          opacity: showFade ? 1 : 0,
+          transition: 'opacity 0.3s ease',
+        }}
+      />
     </>
   )
 }
