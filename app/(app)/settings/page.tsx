@@ -81,7 +81,7 @@ export default function SettingsPage() {
       <div className="max-w-md md:max-w-2xl mx-auto space-y-6">
         <h1 className="text-xl font-bold">Settings</h1>
 
-        {isLoading ? (
+        {isLoading || !settings ? (
           <div className="text-sm text-muted-foreground">Loading...</div>
         ) : (
           <>
