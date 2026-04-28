@@ -79,6 +79,7 @@ export default function FollowAlongTabs({
     setPulseKey(exercise.id)
   }, [exercise.id])
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: pulseKey is an intentional trigger to re-fire the pulse animation on exercise change
   useEffect(() => {
     const el = cardRef.current
     if (!el) return
@@ -107,6 +108,7 @@ export default function FollowAlongTabs({
     setShowScrollFade(hasMoreBelow)
   }, [])
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: exercise.id triggers scroll re-check when exercise changes
   useEffect(() => {
     checkScroll()
   }, [checkScroll, exercise.id])

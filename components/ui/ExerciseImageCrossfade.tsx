@@ -46,7 +46,8 @@ export default function ExerciseImageCrossfade({
   const resolved = imageUrls.map(resolveUrl)
   const hasAnimation = resolved.length === 2 && !prefersReducedMotion
 
-  // Cycle between images
+  // Cycle between images — activeIndex is an intentional trigger to restart the timer after each transition
+  // biome-ignore lint/correctness/useExhaustiveDependencies: activeIndex triggers timer restart for cycling animation
   useEffect(() => {
     if (!hasAnimation || paused) return
     timerRef.current = setTimeout(() => {
