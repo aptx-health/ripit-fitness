@@ -3,7 +3,6 @@
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, use, useEffect } from 'react'
 import { trackEvent } from '@/lib/analytics'
-import { useSession } from '@/lib/auth-client'
 import type { QrMode } from '@/lib/signup-attribution'
 import { setAttribution } from '@/lib/signup-attribution'
 
@@ -12,11 +11,8 @@ const VALID_MODES: QrMode[] = ['beginner', 'experienced']
 function GoPageInner({ gymSlug }: { gymSlug: string }) {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { data: session, isPending } = useSession()
 
   useEffect(() => {
-    if (isPending) return
-
     const rawMode = searchParams.get('mode')
     const mode = rawMode && VALID_MODES.includes(rawMode as QrMode)
       ? (rawMode as QrMode)
@@ -25,9 +21,10 @@ function GoPageInner({ gymSlug }: { gymSlug: string }) {
     setAttribution({ source: 'qr', gymSlug, mode })
     trackEvent('qr_landing_viewed', { gymSlug, mode: mode ?? null })
 
-    // Authenticated users go straight to training; unauthenticated go to signup
-    router.replace(session ? '/training' : '/signup')
-  }, [gymSlug, searchParams, router, session, isPending])
+    // Always redirect to /signup — middleware handles authenticated users
+    // by redirecting them to / (which lands on /training)
+    router.replace('/signup')
+  }, [gymSlug, searchParams, router])
 
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-background">
