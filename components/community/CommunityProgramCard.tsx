@@ -44,6 +44,7 @@ export default function CommunityProgramCard({
   const [showUnpublishDialog, setShowUnpublishDialog] = useState(false)
   const [showLimitModal, setShowLimitModal] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [descExpanded, setDescExpanded] = useState(false)
 
   const isAuthor = program.authorUserId === currentUserId
 
@@ -126,10 +127,22 @@ export default function CommunityProgramCard({
           </div>
         </div>
 
-        {/* Description */}
-        <p className="text-sm text-foreground/80 mb-4 line-clamp-3 break-words">
-          {program.description}
-        </p>
+        {/* Description — tap to expand */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            setDescExpanded((v) => !v)
+          }}
+          className="text-sm text-foreground/80 mb-4 break-words text-left w-full"
+        >
+          <span className={descExpanded ? '' : 'line-clamp-3'}>
+            {program.description}
+          </span>
+          {!descExpanded && program.description.length > 120 && (
+            <span className="text-primary text-xs font-semibold uppercase tracking-wider ml-1">more</span>
+          )}
+        </button>
 
         {/* Metadata Badges */}
         {(program.level || program.goals.length > 0) && (
