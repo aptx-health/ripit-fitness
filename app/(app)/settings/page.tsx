@@ -27,6 +27,7 @@ export default function SettingsPage() {
   const [loggingMode, setLoggingMode] = useState<'full' | 'follow_along'>('full')
   const [error, setError] = useState<string | null>(null)
   const initializedRef = useRef(false)
+  const prevSettingsRef = useRef<typeof settings>(null)
   const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccounts | null>(null)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   const [showPasswordChange, setShowPasswordChange] = useState(false)
@@ -37,16 +38,18 @@ export default function SettingsPage() {
   const [passwordSuccess, setPasswordSuccess] = useState(false)
   const [isChangingPassword, setIsChangingPassword] = useState(false)
 
-  useEffect(() => {
-    if (settings) {
-      setWeightUnit(settings.defaultWeightUnit)
-      setIntensityEnabled(settings.intensityEnabled)
-      setIntensityRating(settings.defaultIntensityRating)
-      setLoggingMode(settings.loggingMode || 'full')
-      // Mark initialized after first settings load so auto-save doesn't fire on mount
+  // Sync local state from settings — runs during render (not after) to avoid flash
+  if (settings && settings !== prevSettingsRef.current) {
+    prevSettingsRef.current = settings
+    setWeightUnit(settings.defaultWeightUnit)
+    setIntensityEnabled(settings.intensityEnabled)
+    setIntensityRating(settings.defaultIntensityRating)
+    setLoggingMode(settings.loggingMode || 'full')
+    if (!initializedRef.current) {
+      // Use setTimeout so the auto-save effect skips this render's state updates
       setTimeout(() => { initializedRef.current = true }, 0)
     }
-  }, [settings])
+  }
 
   useEffect(() => {
     fetch('/api/settings/connected-accounts')
