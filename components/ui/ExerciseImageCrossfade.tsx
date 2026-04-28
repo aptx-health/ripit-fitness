@@ -11,8 +11,6 @@ interface ExerciseImageCrossfadeProps {
   holdDuration?: number
   /** Crossfade transition duration in ms. Default 300. */
   fadeDuration?: number
-  /** Optional label override. Default uses "Exercise demonstration" */
-  label?: string
 }
 
 const POSITION_LABELS = ['START', 'FINISH'] as const
@@ -26,7 +24,6 @@ export default function ExerciseImageCrossfade({
   exerciseName,
   holdDuration = 1200,
   fadeDuration = 300,
-  label,
 }: ExerciseImageCrossfadeProps) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [paused, setPaused] = useState(false)
@@ -46,7 +43,8 @@ export default function ExerciseImageCrossfade({
   const resolved = imageUrls.map(resolveUrl)
   const hasAnimation = resolved.length === 2 && !prefersReducedMotion
 
-  // Cycle between images
+  // Cycle between images — activeIndex is an intentional trigger to restart the timer after each transition
+  // biome-ignore lint/correctness/useExhaustiveDependencies: activeIndex triggers timer restart for cycling animation
   useEffect(() => {
     if (!hasAnimation || paused) return
     timerRef.current = setTimeout(() => {
@@ -71,11 +69,6 @@ export default function ExerciseImageCrossfade({
             More images to come
           </p>
         </div>
-        {label && (
-          <div className="border-t border-border px-3 py-1.5 bg-card">
-            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{label}</p>
-          </div>
-        )}
       </div>
     )
   }
@@ -93,11 +86,6 @@ export default function ExerciseImageCrossfade({
             sizes="(max-width: 640px) 100vw, 600px"
           />
         </div>
-        {label && (
-          <div className="border-t border-border px-3 py-1.5 bg-card">
-            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{label}</p>
-          </div>
-        )}
       </div>
     )
   }
@@ -168,10 +156,7 @@ export default function ExerciseImageCrossfade({
           </span>
         )}
       </button>
-      <div className="border-t border-border px-3 py-1.5 bg-card flex items-center justify-between">
-        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-          {label || 'Exercise demonstration'}
-        </p>
+      <div className="border-t border-border px-3 py-1.5 bg-card flex items-center justify-end">
         {/* Dot indicators for current position */}
         <div className="flex gap-1.5">
           {POSITION_LABELS.map((pos, i) => (

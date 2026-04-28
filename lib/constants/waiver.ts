@@ -5,7 +5,7 @@
  * will force existing users to re-accept before they can proceed.
  */
 
-export const CURRENT_WAIVER_VERSION = '1.0'
+export const CURRENT_WAIVER_VERSION = '1.1'
 
 export const WAIVER_TEXT = `
 ASSUMPTION OF RISK AND RELEASE OF LIABILITY
@@ -24,5 +24,5 @@ Voluntary Participation. Your use of the App is entirely voluntary. No one is re
 
 Age Requirement. You confirm that you are at least 18 years of age, or have the consent of a parent or legal guardian.
 
-Governing Law. This agreement is governed by the laws of the State of Colorado.
+Governing Law. This agreement is governed by the laws of the state or jurisdiction in which you reside, to the extent applicable. Any dispute arising under this agreement shall be resolved in accordance with the laws of that jurisdiction.
 `.trim()

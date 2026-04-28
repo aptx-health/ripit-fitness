@@ -127,14 +127,7 @@ export default function CommunityProgramsView({
     <div>
         {/* Filter Buttons */}
         <div className="sticky top-0 bg-background z-10 pb-4">
-          <div className="flex flex-wrap gap-2">
-            <span className="px-4 py-2 bg-primary text-primary-foreground doom-button-3d font-semibold text-sm sm:text-base uppercase tracking-wider">
-              All ({communityPrograms.length})
-            </span>
-          </div>
-
-          {/* Additional Filters - Compact Popovers */}
-          <div className="mt-4 flex flex-wrap gap-2 items-center">
+          <div className="flex flex-wrap gap-2 items-center">
             {/* Level Filter Popover */}
             <Popover>
               <PopoverTrigger asChild>

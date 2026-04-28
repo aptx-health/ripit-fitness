@@ -44,6 +44,7 @@ export default function CommunityProgramCard({
   const [showUnpublishDialog, setShowUnpublishDialog] = useState(false)
   const [showLimitModal, setShowLimitModal] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [descExpanded, setDescExpanded] = useState(false)
 
   const isAuthor = program.authorUserId === currentUserId
 
@@ -126,10 +127,22 @@ export default function CommunityProgramCard({
           </div>
         </div>
 
-        {/* Description */}
-        <p className="text-sm text-foreground/80 mb-4 line-clamp-3 break-words">
-          {program.description}
-        </p>
+        {/* Description — tap to expand */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            setDescExpanded((v) => !v)
+          }}
+          className="text-sm text-foreground/80 mb-4 break-words text-left w-full"
+        >
+          <span className={descExpanded ? '' : 'line-clamp-3'}>
+            {program.description}
+          </span>
+          {!descExpanded && program.description.length > 120 && (
+            <span className="text-primary text-xs font-semibold uppercase tracking-wider ml-1">more</span>
+          )}
+        </button>
 
         {/* Metadata Badges */}
         {(program.level || program.goals.length > 0) && (
@@ -141,8 +154,8 @@ export default function CommunityProgramCard({
               </span>
             )}
 
-            {/* Goal Badges (show first 3) */}
-            {program.goals.slice(0, 3).map((goal) => (
+            {/* Goal Badges (show first 3 that have labels) */}
+            {program.goals.filter((g) => GOAL_LABELS[g]).slice(0, 3).map((goal) => (
               <span
                 key={goal}
                 className="px-2 py-1 bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider border border-primary/30"
@@ -151,9 +164,9 @@ export default function CommunityProgramCard({
               </span>
             ))}
 
-            {program.goals.length > 3 && (
+            {program.goals.filter((g) => GOAL_LABELS[g]).length > 3 && (
               <span className="px-2 py-1 bg-muted text-muted-foreground text-xs font-bold uppercase tracking-wider">
-                +{program.goals.length - 3} more
+                +{program.goals.filter((g) => GOAL_LABELS[g]).length - 3} more
               </span>
             )}
           </div>
