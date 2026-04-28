@@ -9,8 +9,6 @@ type Step = 'loading' | 'experience' | 'equipment' | 'info' | 'completing'
 type ExperienceLevel = 'beginner' | 'experienced'
 type EquipmentPreference = 'machines' | 'free_weights_cables'
 
-const RAISED_SHADOW = 'inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)'
-
 const INFO_GROUPS = [
   {
     header: 'THE PROGRAM GUIDES YOU',
@@ -244,26 +242,16 @@ export default function OnboardingPage() {
         <div className="flex flex-1 flex-col items-center justify-center gap-8 px-6">
           {copyFailed ? (
             <FadeIn key="completing-failed" className="text-center max-w-sm">
-              <p style={{ fontSize: 18, color: '#FEF3C7' }} className="mb-3">
+              <p className="mb-3 text-lg text-foreground">
                 Failed to load the program
               </p>
-              <p style={{ fontSize: 15, color: 'rgba(254,243,199,0.75)', lineHeight: 1.5 }} className="mb-6">
+              <p className="mb-6 text-[15px] leading-relaxed text-muted-foreground">
                 Go to the Programs tab and browse available programs.
               </p>
               <button
                 type="button"
                 onClick={() => { window.location.href = '/programs' }}
-                className="w-full doom-focus-ring"
-                style={{
-                  height: 48,
-                  backgroundColor: '#10B981',
-                  color: '#fff',
-                  fontSize: 14,
-                  fontWeight: 500,
-                  letterSpacing: '0.1em',
-                  textTransform: 'uppercase',
-                  boxShadow: RAISED_SHADOW,
-                }}
+                className="w-full min-h-12 bg-success text-sm font-medium uppercase tracking-widest text-success-foreground doom-focus-ring"
               >
                 Go to Programs
               </button>
@@ -273,24 +261,24 @@ export default function OnboardingPage() {
               <div className="h-8 w-8 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-primary" />
               {completingProgramName ? (
                 <FadeIn key="completing-beginner" className="text-center">
-                  <p style={{ fontSize: 18, color: '#FEF3C7' }}>
-                    Copying <span className="font-semibold" style={{ color: '#10B981' }}>{completingProgramName}</span> to your profile
+                  <p className="text-lg text-foreground">
+                    Copying <span className="font-semibold text-success">{completingProgramName}</span> to your profile
                   </p>
                   {copyProgress && (
-                    <p className="mt-2" style={{ fontSize: 14, color: 'rgba(254,243,199,0.75)' }}>{copyProgress}</p>
+                    <p className="mt-2 text-sm text-muted-foreground">{copyProgress}</p>
                   )}
                 </FadeIn>
               ) : experienceLevel === 'experienced' ? (
                 <FadeIn key="completing-experienced" className="text-center max-w-sm">
-                  <p style={{ fontSize: 18, color: '#FEF3C7' }} className="mb-3">
-                    Taking you to <span className="font-semibold" style={{ color: '#10B981' }}>Programs</span>
+                  <p className="mb-3 text-lg text-foreground">
+                    Taking you to <span className="font-semibold text-success">Programs</span>
                   </p>
-                  <p style={{ fontSize: 15, color: 'rgba(254,243,199,0.75)', lineHeight: 1.5 }}>
+                  <p className="text-[15px] leading-relaxed text-muted-foreground">
                     Browse the library and find a program that fits your goals. Use filters to narrow by equipment, level, or focus area.
                   </p>
                 </FadeIn>
               ) : (
-                <p style={{ fontSize: 18, color: 'rgba(254,243,199,0.75)' }}>Getting things ready...</p>
+                <p className="text-lg text-muted-foreground">Getting things ready...</p>
               )}
             </>
           )}
@@ -301,17 +289,16 @@ export default function OnboardingPage() {
 
   return (
     <Shell>
-      {/* Progress segments — flush to top edge */}
-      <div style={{ display: 'flex', gap: 3, padding: '0 24px' }}>
+      {/* Progress segments */}
+      <div className="flex gap-[3px] px-6">
         {Array.from({ length: totalSegments }).map((_, i) => (
           <div
             key={i}
+            className="h-[5px] flex-1"
             style={{
-              flex: 1,
-              height: 5,
               backgroundColor: i <= currentSegment
-                ? '#10B981'
-                : 'rgba(0,0,0,0.25)',
+                ? 'var(--success)'
+                : 'var(--muted)',
             }}
           />
         ))}
@@ -319,34 +306,23 @@ export default function OnboardingPage() {
 
       {/* Error toast */}
       {error && (
-        <div className="mx-auto mt-4 max-w-lg" style={{ padding: '0 24px' }}>
-          <div className="border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+        <div className="mx-auto mt-4 max-w-lg px-6">
+          <div className="border border-error/20 bg-error/10 px-4 py-3 text-sm text-error-text">
             {error}
           </div>
         </div>
       )}
 
       {/* Content area */}
-      <FadeIn key={fadeKey} className="flex flex-1 flex-col" style={{ padding: '0 24px' }}>
-        <div className={`mx-auto w-full max-w-lg flex-1 flex flex-col ${step !== 'info' ? 'justify-center' : ''}`} style={{ paddingTop: 32, paddingBottom: 24 }}>
+      <FadeIn key={fadeKey} className="flex flex-1 flex-col px-6">
+        <div className={`mx-auto w-full max-w-lg flex-1 flex flex-col ${step !== 'info' ? 'justify-center' : ''} pt-8 pb-6`}>
           {/* Back link */}
           {canGoBack && (
             <button
               type="button"
               onClick={handleBack}
-              style={{
-                color: 'rgba(254,243,199,0.5)',
-                fontSize: 13,
-                fontWeight: 500,
-                letterSpacing: '0.05em',
-                textTransform: 'uppercase',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                padding: 0,
-                marginBottom: 24,
-                alignSelf: 'flex-start',
-              }}
+              className="mb-6 self-start bg-transparent border-none cursor-pointer p-0 text-[13px] font-medium uppercase tracking-wider text-muted-foreground min-h-12 flex items-center"
+              aria-label="Go back"
             >
               &larr; BACK
             </button>
@@ -381,10 +357,7 @@ export default function OnboardingPage() {
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      className="flex min-h-[100dvh] flex-col"
-      style={{ backgroundColor: 'var(--background)' }}
-    >
+    <div className="flex min-h-[100dvh] flex-col bg-background">
       {children}
     </div>
   )
@@ -439,14 +412,14 @@ function ExperienceScreen({
 }) {
   return (
     <>
-      <h1 style={{ fontSize: 28, fontWeight: 600, color: '#FEF3C7', marginBottom: 8 }}>
+      <h1 className="text-[28px] font-semibold text-foreground mb-2">
         New to strength training?
       </h1>
-      <p style={{ fontSize: 15, lineHeight: 1.5, color: 'rgba(254,243,199,0.75)', marginBottom: 32 }}>
+      <p className="text-[15px] leading-relaxed text-muted-foreground mb-8">
         This shapes your starting point.
       </p>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div className="flex flex-col gap-3">
         <SelectionCard
           label="YES, I'M NEW"
           isSelected={selected === 'beginner' || (!selected && previousChoice === 'beginner')}
@@ -475,14 +448,14 @@ function EquipmentScreen({
 }) {
   return (
     <>
-      <h1 style={{ fontSize: 28, fontWeight: 600, color: '#FEF3C7', marginBottom: 8 }}>
+      <h1 className="text-[28px] font-semibold text-foreground mb-2">
         What equipment are you most comfortable with?
       </h1>
-      <p style={{ fontSize: 15, lineHeight: 1.5, color: 'rgba(254,243,199,0.75)', marginBottom: 32 }}>
+      <p className="text-[15px] leading-relaxed text-muted-foreground mb-8">
         We&apos;ll match you with a program that fits.
       </p>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div className="flex flex-col gap-3">
         <SelectionCard
           label="MACHINES"
           description="Fixed paths, easy to learn. Great for getting started."
@@ -511,42 +484,25 @@ function EquipmentScreen({
 function InfoScreen({ onFinish }: { onFinish: () => void }) {
   return (
     <>
-      <h1 style={{ fontSize: 32, fontWeight: 600, color: '#FEF3C7', marginBottom: 36 }}>
+      <h1 className="text-[32px] font-semibold text-foreground mb-9">
         Before you start
       </h1>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+      <div className="flex flex-col gap-8">
         {INFO_GROUPS.map((group) => (
           <div key={group.header}>
-            <p style={{
-              fontSize: 14,
-              fontWeight: 500,
-              letterSpacing: '0.1em',
-              color: '#10B981',
-              textTransform: 'uppercase',
-              fontVariant: 'small-caps',
-              marginBottom: 12,
-            }}>
+            <p className="text-sm font-medium tracking-widest text-success uppercase mb-3"
+              style={{ fontVariant: 'small-caps' }}
+            >
               {group.header}
             </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div className="flex flex-col gap-2.5">
               {group.bullets.map((bullet, i) => (
-                <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                <div key={i} className="flex gap-3 items-start">
                   <span
-                    style={{
-                      display: 'inline-block',
-                      width: 5,
-                      height: 5,
-                      backgroundColor: '#10B981',
-                      marginTop: 9,
-                      flexShrink: 0,
-                    }}
+                    className="inline-block w-[5px] h-[5px] bg-success mt-[9px] shrink-0"
                   />
-                  <span style={{
-                    fontSize: 16,
-                    lineHeight: 1.6,
-                    color: 'rgba(254,243,199,0.85)',
-                  }}>
+                  <span className="text-base leading-relaxed text-foreground/85">
                     {bullet}
                   </span>
                 </div>
@@ -559,20 +515,7 @@ function InfoScreen({ onFinish }: { onFinish: () => void }) {
       <button
         type="button"
         onClick={onFinish}
-        className="w-full doom-focus-ring"
-        style={{
-          marginTop: 32,
-          height: 48,
-          backgroundColor: '#10B981',
-          color: '#fff',
-          fontSize: 14,
-          fontWeight: 500,
-          letterSpacing: '0.1em',
-          textTransform: 'uppercase',
-          border: 'none',
-          cursor: 'pointer',
-          boxShadow: RAISED_SHADOW,
-        }}
+        className="w-full min-h-12 mt-8 bg-success text-sm font-medium uppercase tracking-widest text-success-foreground doom-focus-ring"
       >
         LET&apos;S GO
       </button>
@@ -598,54 +541,25 @@ function SelectionCard({
       type="button"
       onClick={onClick}
       tabIndex={0}
-      style={{
-        width: '100%',
-        padding: 20,
-        textAlign: 'left',
-        cursor: 'pointer',
-        position: 'relative',
-        backgroundColor: isSelected
-          ? 'rgba(16,185,129,0.08)'
-          : 'rgba(254,243,199,0.04)',
-        border: isSelected
-          ? '1px solid #10B981'
-          : '1px solid rgba(254,243,199,0.12)',
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 1px 0 rgba(0,0,0,0.30)',
-        transition: 'border-color 0.15s, background-color 0.15s',
-      }}
+      className={`w-full p-5 text-left cursor-pointer relative transition-colors duration-150 min-h-12 ${
+        isSelected
+          ? 'bg-success/10 border border-success'
+          : 'bg-card border border-border'
+      }`}
     >
       {/* Checkmark */}
       {isSelected && (
-        <span style={{
-          position: 'absolute',
-          top: 12,
-          right: 12,
-          color: '#10B981',
-          fontSize: 16,
-          fontWeight: 700,
-        }}>
+        <span className="absolute top-3 right-3 text-success text-base font-bold">
           &#10003;
         </span>
       )}
 
-      <span style={{
-        display: 'block',
-        fontSize: 14,
-        fontWeight: 500,
-        letterSpacing: '0.08em',
-        color: '#FEF3C7',
-      }}>
+      <span className="block text-sm font-medium tracking-wider text-foreground">
         {label}
       </span>
 
       {description && (
-        <span style={{
-          display: 'block',
-          marginTop: 4,
-          fontSize: 14,
-          lineHeight: 1.5,
-          color: 'rgba(254,243,199,0.75)',
-        }}>
+        <span className="block mt-1 text-sm leading-relaxed text-muted-foreground">
           {description}
         </span>
       )}
