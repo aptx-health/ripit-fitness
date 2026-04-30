@@ -5,7 +5,8 @@ import { LoadingFrog } from '@/components/ui/loading-frog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/radix/tabs'
 import type { LoadState } from '@/hooks/useProgressiveExercises'
 import type { LoggedSet } from '@/types/workout'
-import BeginnerTipCard from './BeginnerTipCard'
+import { MessageCard } from '@/components/ui/MessageCard'
+import type { MessageData } from '@/components/ui/MessageCard'
 import ExerciseInfoContent from './ExerciseInfoContent'
 import SetList from './SetList'
 
@@ -57,7 +58,7 @@ interface ExerciseDisplayTabsProps {
   loggingForm: React.ReactNode
   isInputExpanded?: boolean
   showIntensity?: boolean
-  tip?: string
+  message?: MessageData | null
 }
 
 // Loading skeleton for history tab
@@ -83,7 +84,7 @@ export default function ExerciseDisplayTabs({
   loggingForm,
   isInputExpanded = false,
   showIntensity = true,
-  tip,
+  message,
 }: ExerciseDisplayTabsProps) {
   const hasNotes = !!exercise.notes
 
@@ -122,7 +123,7 @@ export default function ExerciseDisplayTabs({
               exerciseId={exercise.id}
               showIntensity={showIntensity}
             />
-            {tip && <BeginnerTipCard tip={tip} />}
+            {message && <MessageCard message={message} variant="exercise_logger" />}
           </>
         )}
       </TabsContent>

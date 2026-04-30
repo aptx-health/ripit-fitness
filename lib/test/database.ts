@@ -142,6 +142,7 @@ export class TestDatabase {
       'Program',
       'CommunityProgram',
       'UserSettings',
+      'InAppMessage',
       'WaiverAcceptance'
     ]
 
