@@ -18,11 +18,14 @@ interface SignupRow {
 
 export async function GET(request: NextRequest) {
   try {
-    const auth = await requireEditor()
+    const auth = await requireEditor({ rateLimit: true })
     if (auth.response) return auth.response
 
     const daysParam = request.nextUrl.searchParams.get('days')
-    const days = daysParam ? Math.min(Math.max(Number(daysParam), 1), 365) : 30
+    const parsedDays = daysParam ? Number(daysParam) : NaN
+    const days = Number.isFinite(parsedDays)
+      ? Math.min(Math.max(Math.floor(parsedDays), 1), 365)
+      : 30
     const since = new Date()
     since.setDate(since.getDate() - days)
     since.setHours(0, 0, 0, 0)
