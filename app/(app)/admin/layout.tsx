@@ -26,6 +26,7 @@ export default async function AdminLayout({
     { href: '/admin/community-programs', label: 'Programs' },
     { href: '/admin/feedback', label: 'Feedback' },
     { href: '/admin/analytics', label: 'Analytics' },
+    { href: '/admin/signups', label: 'Signups' },
   ]
 
   return (
