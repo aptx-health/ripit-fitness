@@ -120,33 +120,32 @@ export default function ExerciseSearchModal({
     }
   }, [effectiveExercise])
 
-  if (!isOpen) return null
+  // Memoize initialConfig to prevent the useEffect in SetConfigurationInterface
+  // from resetting exerciseIntensityType on every parent re-render
+  const initialConfig = useMemo(() => {
+    if (!editingExercise) return undefined
 
-  // Prepare initial config for editing
-  const initialConfig = editingExercise ? {
-    sets: editingExercise.prescribedSets.map(set => {
-      const firstSet = editingExercise.prescribedSets[0]
-      const intensityType = firstSet?.rpe !== null && firstSet?.rpe !== undefined ? 'RPE'
-        : firstSet?.rir !== null && firstSet?.rir !== undefined ? 'RIR'
-        : 'NONE'
+    const firstSet = editingExercise.prescribedSets[0]
+    const intensityType: 'RIR' | 'RPE' | 'NONE' =
+      firstSet?.rpe !== null && firstSet?.rpe !== undefined ? 'RPE'
+      : firstSet?.rir !== null && firstSet?.rir !== undefined ? 'RIR'
+      : 'NONE'
 
-      return {
+    return {
+      sets: editingExercise.prescribedSets.map(set => ({
         id: set.id,
         setNumber: set.setNumber,
         reps: set.reps,
         intensityValue: intensityType === 'RPE' ? (set.rpe ?? undefined)
           : intensityType === 'RIR' ? (set.rir ?? undefined)
           : undefined
-      }
-    }),
-    intensityType: (() => {
-      const firstSet = editingExercise.prescribedSets[0]
-      return firstSet?.rpe !== null && firstSet?.rpe !== undefined ? 'RPE' as const
-        : firstSet?.rir !== null && firstSet?.rir !== undefined ? 'RIR' as const
-        : 'NONE' as const
-    })(),
-    notes: editingExercise.notes || ''
-  } : undefined
+      })),
+      intensityType,
+      notes: editingExercise.notes || ''
+    }
+  }, [editingExercise])
+
+  if (!isOpen) return null
 
   return (
     <>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { WizardDialog, type WizardStep } from '@/components/ui/radix/wizard-dialog'
 import { clientLogger } from '@/lib/client-logger'
 import type { ExerciseDefinition } from '../wizard-steps/ExerciseSearchStep'
@@ -71,32 +71,32 @@ export function EditExerciseWizard({
     instructions: exercise.exerciseDefinition?.instructions,
   }
 
-  // Determine initial intensity type from prescribed sets
-  const getInitialIntensityType = (): 'RIR' | 'RPE' | 'NONE' => {
+  // Memoize initialConfig to prevent the useEffect in SetConfigurationInterface
+  // from resetting exerciseIntensityType on every parent re-render
+  const initialConfig = useMemo(() => {
     const firstSet = exercise.prescribedSets[0]
-    if (!firstSet) return 'NONE'
+    const intensityType: 'RIR' | 'RPE' | 'NONE' =
+      firstSet?.rpe !== null && firstSet?.rpe !== undefined ? 'RPE'
+      : firstSet?.rir !== null && firstSet?.rir !== undefined ? 'RIR'
+      : 'NONE'
 
-    if (firstSet.rpe !== null && firstSet.rpe !== undefined) return 'RPE'
-    if (firstSet.rir !== null && firstSet.rir !== undefined) return 'RIR'
-    return 'NONE'
-  }
-
-  const initialConfig = {
-    setCount: exercise.prescribedSets.length,
-    intensityType: getInitialIntensityType(),
-    notes: exercise.notes || '',
-    sets: exercise.prescribedSets.map((set) => ({
-      id: set.id,
-      setNumber: set.setNumber,
-      reps: set.reps,
-      intensityValue:
-        getInitialIntensityType() === 'RPE'
-          ? set.rpe ?? undefined
-          : getInitialIntensityType() === 'RIR'
-          ? set.rir ?? undefined
-          : undefined,
-    })),
-  }
+    return {
+      setCount: exercise.prescribedSets.length,
+      intensityType,
+      notes: exercise.notes || '',
+      sets: exercise.prescribedSets.map((set) => ({
+        id: set.id,
+        setNumber: set.setNumber,
+        reps: set.reps,
+        intensityValue:
+          intensityType === 'RPE'
+            ? set.rpe ?? undefined
+            : intensityType === 'RIR'
+            ? set.rir ?? undefined
+            : undefined,
+      })),
+    }
+  }, [exercise.prescribedSets, exercise.notes])
 
   // Reset wizard state when opened
   useEffect(() => {
