@@ -106,6 +106,7 @@ export async function cloneCommunityProgram(
         programType: 'strength',
         isUserCreated: true,
         copyStatus: 'cloning',
+        sourceCommunityProgramId: communityProgram.id,
       },
     });
 

@@ -4,6 +4,7 @@ import { AlertTriangle, Info, LogOut, Pencil, Plus, RefreshCw, Trash2, X } from 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { LoadingFrog } from '@/components/ui/loading-frog'
+import type { MessageData } from '@/components/ui/MessageCard'
 import { useImagePrefetch } from '@/hooks/useImagePrefetch'
 import { useIntensityAccess } from '@/hooks/useIntensityAccess'
 import { type Exercise, type ExerciseHistory, useProgressiveExercises } from '@/hooks/useProgressiveExercises'
@@ -13,7 +14,6 @@ import { useWorkoutDraft } from '@/hooks/useWorkoutDraft'
 import { completeDraft, discardDraft } from '@/lib/api/workout-sets'
 import { clientLogger } from '@/lib/client-logger'
 import { parseRepsFromPrescribed } from '@/lib/constants/intensity-presets'
-import { TIP_LIBRARY } from '@/lib/data/tip-library'
 import type { LoggedSet } from '@/types/workout'
 import type { ActionItem } from './ActionsMenu'
 import ExerciseDefinitionEditorModal from './features/exercise-definition/ExerciseDefinitionEditorModal'
@@ -44,6 +44,9 @@ type Props = {
   initialHistory?: ExerciseHistory | null
   initialExerciseIndex?: number
   showTips?: boolean
+  messages?: MessageData[]
+  onMessageSeen?: (messageId: string) => void
+  onMessageDismissed?: (messageId: string) => void
   loggingMode?: 'full' | 'follow_along'
   onComplete: () => Promise<void>
   onRefresh?: () => Promise<void>
@@ -59,6 +62,9 @@ export default function ExerciseLoggingModal({
   initialHistory,
   initialExerciseIndex = 0,
   showTips = false,
+  messages: messagesProp = [],
+  onMessageSeen,
+  onMessageDismissed,
   loggingMode: loggingModeProp = 'full',
   onComplete,
   onRefresh,
@@ -101,29 +107,29 @@ export default function ExerciseLoggingModal({
   }, [])
 
   // Tip rotation — sequential through array order, then random
-  const tierTips = useMemo(
-    () => showTips ? TIP_LIBRARY.filter(t => t.tier === 'beginner') : [],
-    [showTips]
+  const tipMessages = useMemo(
+    () => showTips ? messagesProp : [],
+    [showTips, messagesProp]
   )
   const [currentTipIndex, setCurrentTipIndex] = useState(0)
   const seenAllRef = useRef(false)
-  const currentTip = tierTips[currentTipIndex]?.text ?? ''
+  const currentMessage = tipMessages[currentTipIndex] ?? null
 
   const rotateTip = useCallback(() => {
-    if (tierTips.length <= 1) return
+    if (tipMessages.length <= 1) return
     setCurrentTipIndex(prev => {
       const nextSequential = prev + 1
-      if (nextSequential < tierTips.length && !seenAllRef.current) {
-        if (nextSequential === tierTips.length - 1) seenAllRef.current = true
+      if (nextSequential < tipMessages.length && !seenAllRef.current) {
+        if (nextSequential === tipMessages.length - 1) seenAllRef.current = true
         return nextSequential
       }
       // All shown — pick random, excluding current
       seenAllRef.current = true
-      let next = Math.floor(Math.random() * (tierTips.length - 1))
+      let next = Math.floor(Math.random() * (tipMessages.length - 1))
       if (next >= prev) next += 1
       return next
     })
-  }, [tierTips.length])
+  }, [tipMessages.length])
 
   // Wizard state
   const [activeWizard, setActiveWizard] = useState<'add' | 'swap' | 'edit' | 'delete' | null>(null)
@@ -602,9 +608,11 @@ export default function ExerciseLoggingModal({
                 <FollowAlongTabs
                   exercise={currentExercise}
                   prescribedSets={currentPrescribedSets}
-                  tip={currentTip}
-                  tipCount={tierTips.length}
+                  message={currentMessage}
+                  tipCount={tipMessages.length}
                   onNextTip={rotateTip}
+                  onMessageSeen={onMessageSeen}
+                  onMessageDismissed={onMessageDismissed}
                 />
               ) : (
                 <ExerciseDisplayTabs
@@ -617,7 +625,9 @@ export default function ExerciseLoggingModal({
                   onDeleteSet={handleDeleteSet}
                   isInputExpanded={expandedInput !== null}
                   showIntensity={hasIntensityAccess}
-                  tip={currentTip}
+                  message={currentMessage}
+                  onMessageSeen={onMessageSeen}
+                  onMessageDismissed={onMessageDismissed}
                   loggingForm={
                     <SetLoggingForm
                       prescribedSet={prescribedSet}
