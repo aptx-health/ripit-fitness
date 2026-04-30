@@ -33,6 +33,7 @@ export async function POST(
         minWorkouts: existing.minWorkouts,
         maxWorkouts: existing.maxWorkouts,
         programTargeting: existing.programTargeting,
+        slides: existing.slides,
         ownerType: existing.ownerType,
         ownerId: existing.ownerId,
         priority: existing.priority,

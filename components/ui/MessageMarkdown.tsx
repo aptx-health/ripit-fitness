@@ -1,9 +1,9 @@
 'use client'
 
 import Link from 'next/link'
+import type { Components } from 'react-markdown'
 import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
-import type { Components } from 'react-markdown'
 import { MESSAGE_ICONS } from '@/lib/icons/message-icons'
 
 const ICON_PATTERN = /\{icon:(\w+)\}/g

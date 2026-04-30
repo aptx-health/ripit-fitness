@@ -1,10 +1,10 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { requireEditor } from '@/lib/admin/auth'
 import {
+  isValidIcon,
+  isValidLifecycle,
   isValidPlacement,
   isValidUserType,
-  isValidLifecycle,
-  isValidIcon,
   validateMessageContent,
   validateProgramTargeting,
 } from '@/lib/admin/message-validation'
@@ -76,6 +76,7 @@ export async function POST(request: NextRequest) {
       minWorkouts,
       maxWorkouts,
       programTargeting,
+      slides,
       priority = 0,
       active = true,
     } = body
@@ -126,6 +127,7 @@ export async function POST(request: NextRequest) {
         minWorkouts: minWorkouts ?? null,
         maxWorkouts: maxWorkouts ?? null,
         programTargeting: programTargeting || null,
+        slides: slides || null,
         ownerType: 'platform',
         priority,
         active,

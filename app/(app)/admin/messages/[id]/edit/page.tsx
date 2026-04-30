@@ -2,8 +2,8 @@
 
 import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useReducer, useState } from 'react'
-import { MessageEditor } from '@/components/admin/MessageEditor'
 import type { MessageFormData } from '@/components/admin/MessageEditor'
+import { MessageEditor } from '@/components/admin/MessageEditor'
 
 export default function EditMessagePage() {
   const { id } = useParams<{ id: string }>()

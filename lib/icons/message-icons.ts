@@ -1,16 +1,16 @@
+import type { LucideIcon } from 'lucide-react'
 import {
-  Lightbulb,
   BookOpen,
+  Clock,
   Dumbbell,
   Heart,
-  Target,
-  Zap,
-  Clock,
-  TrendingUp,
-  Shield,
+  Lightbulb,
   MessageCircle,
+  Shield,
+  Target,
+  TrendingUp,
+  Zap,
 } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
 
 export const MESSAGE_ICONS: Record<string, LucideIcon> = {
   Lightbulb,

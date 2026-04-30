@@ -2,11 +2,11 @@
 
 import { Check, Sparkles } from 'lucide-react'
 import { LoadingFrog } from '@/components/ui/loading-frog'
+import type { MessageData } from '@/components/ui/MessageCard'
+import { MessageCard } from '@/components/ui/MessageCard'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/radix/tabs'
 import type { LoadState } from '@/hooks/useProgressiveExercises'
 import type { LoggedSet } from '@/types/workout'
-import { MessageCard } from '@/components/ui/MessageCard'
-import type { MessageData } from '@/components/ui/MessageCard'
 import ExerciseInfoContent from './ExerciseInfoContent'
 import SetList from './SetList'
 
@@ -59,6 +59,8 @@ interface ExerciseDisplayTabsProps {
   isInputExpanded?: boolean
   showIntensity?: boolean
   message?: MessageData | null
+  onMessageSeen?: (messageId: string) => void
+  onMessageDismissed?: (messageId: string) => void
 }
 
 // Loading skeleton for history tab
@@ -85,6 +87,8 @@ export default function ExerciseDisplayTabs({
   isInputExpanded = false,
   showIntensity = true,
   message,
+  onMessageSeen,
+  onMessageDismissed,
 }: ExerciseDisplayTabsProps) {
   const hasNotes = !!exercise.notes
 
@@ -123,7 +127,14 @@ export default function ExerciseDisplayTabs({
               exerciseId={exercise.id}
               showIntensity={showIntensity}
             />
-            {message && <MessageCard message={message} variant="exercise_logger" />}
+            {message && (
+              <MessageCard
+                message={message}
+                variant="exercise_logger"
+                onSeen={onMessageSeen}
+                onDismiss={onMessageDismissed}
+              />
+            )}
           </>
         )}
       </TabsContent>

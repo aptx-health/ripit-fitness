@@ -1,10 +1,10 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { requireEditor } from '@/lib/admin/auth'
 import {
+  isValidIcon,
+  isValidLifecycle,
   isValidPlacement,
   isValidUserType,
-  isValidLifecycle,
-  isValidIcon,
   validateMessageContent,
   validateProgramTargeting,
 } from '@/lib/admin/message-validation'
@@ -122,6 +122,9 @@ export async function PATCH(
     }
     if (body.active !== undefined) {
       data.active = body.active
+    }
+    if (body.slides !== undefined) {
+      data.slides = body.slides || null
     }
 
     const message = await prisma.inAppMessage.update({

@@ -554,7 +554,8 @@ model Feedback {
 model InAppMessage {
   id               String   @id @default(cuid())
   name             String?  // admin-only label, not shown to users
-  content          String
+  content          String   // primary slide content (used when slides is null)
+  slides           String?  // JSON: [{ content: string, icon: string }] for multi-slide carousel
   placement        String
   userType         String   @default("all")
   icon             String   @default("Lightbulb")

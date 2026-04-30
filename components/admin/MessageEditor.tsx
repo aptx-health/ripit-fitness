@@ -2,14 +2,20 @@
 
 import { Copy, Save, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { MESSAGE_ICONS, MESSAGE_ICON_NAMES } from '@/lib/icons/message-icons'
 import { CommunityProgramSelector } from '@/components/admin/CommunityProgramSelector'
 import { MessageCard } from '@/components/ui/MessageCard'
+import { MESSAGE_ICON_NAMES, MESSAGE_ICONS } from '@/lib/icons/message-icons'
+
+export interface SlideData {
+  content: string
+  icon: string
+}
 
 export interface MessageFormData {
   id?: string
   name: string | null
   content: string
+  slides?: string | null
   placement: string
   userType: string
   icon: string
@@ -40,6 +46,16 @@ export function MessageEditor({ message, onSave, onCancel, onDelete, onDuplicate
 
   const [name, setName] = useState(message?.name ?? '')
   const [content, setContent] = useState(message?.content ?? '')
+  const [additionalSlides, setAdditionalSlides] = useState<SlideData[]>(() => {
+    if (!message?.slides) return []
+    try {
+      const parsed = JSON.parse(message.slides)
+      if (Array.isArray(parsed) && parsed.length > 1) {
+        return parsed.slice(1) // first slide is content+icon
+      }
+    } catch { /* ignore */ }
+    return []
+  })
   const [placement, setPlacement] = useState(message?.placement ?? 'training_tab')
   const [userType, setUserType] = useState(message?.userType ?? 'all')
   const [icon, setIcon] = useState(message?.icon ?? 'Lightbulb')
@@ -240,6 +256,9 @@ export function MessageEditor({ message, onSave, onCancel, onDelete, onDuplicate
       minWorkouts: minWorkouts ? parseInt(minWorkouts, 10) : null,
       maxWorkouts: maxWorkouts ? parseInt(maxWorkouts, 10) : null,
       programTargeting: selectedProgramIds.size > 0 ? JSON.stringify([...selectedProgramIds]) : null,
+      slides: additionalSlides.length > 0
+        ? JSON.stringify([{ content, icon }, ...additionalSlides])
+        : null,
       priority: parseInt(priority, 10) || 0,
       active,
     }
@@ -298,6 +317,9 @@ export function MessageEditor({ message, onSave, onCancel, onDelete, onDuplicate
     icon,
     lifecycle,
     version: message?.version ?? 1,
+    slides: additionalSlides.length > 0
+      ? JSON.stringify([{ content, icon }, ...additionalSlides])
+      : null,
   }
 
   return (
@@ -561,6 +583,93 @@ export function MessageEditor({ message, onSave, onCancel, onDelete, onDuplicate
           })}
         </div>
         <p className="text-xs text-muted-foreground mt-1">Selected: {icon}</p>
+      </div>
+
+      {/* Additional Slides (Carousel) */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Additional Slides
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Add slides to make this message a carousel. The content and icon above are slide 1.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setAdditionalSlides((prev) => [...prev, { content: '', icon }])}
+            className="px-3 py-1 bg-muted text-muted-foreground border-2 border-border hover:bg-secondary text-xs font-semibold uppercase tracking-wider transition-colors"
+          >
+            + Add Slide
+          </button>
+        </div>
+
+        {additionalSlides.length > 0 && (
+          <div className="space-y-3">
+            {additionalSlides.map((slide, i) => {
+              const slideNum = i + 2 // slide 1 is the main content
+              return (
+                <div key={i} className="p-3 border-2 border-border bg-muted/20">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Slide {slideNum}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setAdditionalSlides((prev) => prev.filter((_, j) => j !== i))}
+                      className="text-xs text-red-400 hover:text-red-300 transition-colors"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  <textarea
+                    value={slide.content}
+                    onChange={(e) => {
+                      setAdditionalSlides((prev) => {
+                        const next = [...prev]
+                        next[i] = { ...next[i], content: e.target.value }
+                        return next
+                      })
+                    }}
+                    rows={2}
+                    placeholder="Slide content"
+                    className="w-full px-3 py-2 bg-input border-2 border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-y text-sm mb-2"
+                  />
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Icon</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {MESSAGE_ICON_NAMES.map((iconName) => {
+                        const IconComp = MESSAGE_ICONS[iconName]
+                        return (
+                          <button
+                            type="button"
+                            key={iconName}
+                            onClick={() => {
+                              setAdditionalSlides((prev) => {
+                                const next = [...prev]
+                                next[i] = { ...next[i], icon: iconName }
+                                return next
+                              })
+                            }}
+                            className={`p-1.5 border transition-colors ${
+                              slide.icon === iconName
+                                ? 'border-primary bg-primary/10 text-primary'
+                                : 'border-border bg-muted text-muted-foreground hover:border-primary/50'
+                            }`}
+                            title={iconName}
+                          >
+                            <IconComp size={14} />
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       {/* Active Toggle */}

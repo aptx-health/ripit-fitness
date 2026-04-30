@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import ExerciseImageCrossfade from '@/components/ui/ExerciseImageCrossfade'
-import { MessageCard } from '@/components/ui/MessageCard'
 import type { MessageData } from '@/components/ui/MessageCard'
+import { MessageCard } from '@/components/ui/MessageCard'
 
 interface PrescribedSet {
   id: string
@@ -33,6 +33,8 @@ interface FollowAlongViewProps {
   message: MessageData | null
   tipCount?: number
   onNextTip?: () => void
+  onMessageSeen?: (messageId: string) => void
+  onMessageDismissed?: (messageId: string) => void
 }
 
 /**
@@ -68,6 +70,8 @@ export default function FollowAlongTabs({
   message,
   tipCount = 0,
   onNextTip,
+  onMessageSeen,
+  onMessageDismissed,
 }: FollowAlongViewProps) {
   const directive = formatPrescriptionDirective(prescribedSets)
   const imageUrls = exercise.exerciseDefinition?.imageUrls || []
@@ -179,6 +183,8 @@ export default function FollowAlongTabs({
               variant="exercise_logger"
               tipCount={tipCount}
               onNextTip={onNextTip}
+              onSeen={onMessageSeen}
+              onDismiss={onMessageDismissed}
             />
           </div>
         )}

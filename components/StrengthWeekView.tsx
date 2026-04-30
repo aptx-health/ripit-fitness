@@ -6,8 +6,8 @@ import { useCallback, useEffect, useState, useTransition } from 'react'
 import ExerciseLoggingModal from '@/components/ExerciseLoggingModal'
 import { PostSessionFeedback } from '@/components/features/training/PostSessionFeedback'
 import { ProgramCompletionModal } from '@/components/ProgramCompletionModal'
-import { MessageCard } from '@/components/ui/MessageCard'
 import type { MessageData } from '@/components/ui/MessageCard'
+import { MessageCard } from '@/components/ui/MessageCard'
 import WeekNavigator from '@/components/ui/WeekNavigator'
 import WorkoutHistoryList from '@/components/WorkoutHistoryList'
 import WorkoutCard from '@/components/workout/WorkoutCard'
@@ -522,6 +522,24 @@ export default function StrengthWeekView({
           initialExerciseIndex={workoutMetadata.resumeExerciseIndex ?? 0}
           showTips={showTips || loggingMode === 'follow_along'}
           messages={loggerMessages}
+          onMessageSeen={async (messageId) => {
+            try {
+              const current = settings?.seenMessageIds
+              const ids: string[] = current ? JSON.parse(current) : []
+              if (!ids.includes(messageId)) ids.push(messageId)
+              await updateSettings({ seenMessageIds: JSON.stringify(ids) } as Parameters<typeof updateSettings>[0])
+              setLoggerMessages((prev) => prev.filter((m) => m.id !== messageId))
+            } catch { /* seen tracking failed silently */ }
+          }}
+          onMessageDismissed={async (messageId) => {
+            try {
+              const current = settings?.dismissedMessageIds
+              const ids: string[] = current ? JSON.parse(current) : []
+              if (!ids.includes(messageId)) ids.push(messageId)
+              await updateSettings({ dismissedMessageIds: JSON.stringify(ids) } as Parameters<typeof updateSettings>[0])
+              setLoggerMessages((prev) => prev.filter((m) => m.id !== messageId))
+            } catch { /* dismiss failed silently */ }
+          }}
           loggingMode={loggingMode}
           onComplete={handleCompleteWorkout}
           onRefresh={handleRefreshMetadata}

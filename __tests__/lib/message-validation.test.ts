@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
+  isValidIcon,
+  isValidLifecycle,
   isValidPlacement,
   isValidUserType,
-  isValidLifecycle,
-  isValidIcon,
   validateMessageContent,
   validateProgramTargeting,
 } from '@/lib/admin/message-validation'

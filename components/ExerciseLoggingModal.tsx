@@ -4,6 +4,7 @@ import { AlertTriangle, Info, LogOut, Pencil, Plus, RefreshCw, Trash2, X } from 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { LoadingFrog } from '@/components/ui/loading-frog'
+import type { MessageData } from '@/components/ui/MessageCard'
 import { useImagePrefetch } from '@/hooks/useImagePrefetch'
 import { useIntensityAccess } from '@/hooks/useIntensityAccess'
 import { type Exercise, type ExerciseHistory, useProgressiveExercises } from '@/hooks/useProgressiveExercises'
@@ -13,7 +14,6 @@ import { useWorkoutDraft } from '@/hooks/useWorkoutDraft'
 import { completeDraft, discardDraft } from '@/lib/api/workout-sets'
 import { clientLogger } from '@/lib/client-logger'
 import { parseRepsFromPrescribed } from '@/lib/constants/intensity-presets'
-import type { MessageData } from '@/components/ui/MessageCard'
 import type { LoggedSet } from '@/types/workout'
 import type { ActionItem } from './ActionsMenu'
 import ExerciseDefinitionEditorModal from './features/exercise-definition/ExerciseDefinitionEditorModal'
@@ -45,6 +45,8 @@ type Props = {
   initialExerciseIndex?: number
   showTips?: boolean
   messages?: MessageData[]
+  onMessageSeen?: (messageId: string) => void
+  onMessageDismissed?: (messageId: string) => void
   loggingMode?: 'full' | 'follow_along'
   onComplete: () => Promise<void>
   onRefresh?: () => Promise<void>
@@ -61,6 +63,8 @@ export default function ExerciseLoggingModal({
   initialExerciseIndex = 0,
   showTips = false,
   messages: messagesProp = [],
+  onMessageSeen,
+  onMessageDismissed,
   loggingMode: loggingModeProp = 'full',
   onComplete,
   onRefresh,
@@ -607,6 +611,8 @@ export default function ExerciseLoggingModal({
                   message={currentMessage}
                   tipCount={tipMessages.length}
                   onNextTip={rotateTip}
+                  onMessageSeen={onMessageSeen}
+                  onMessageDismissed={onMessageDismissed}
                 />
               ) : (
                 <ExerciseDisplayTabs
@@ -620,6 +626,8 @@ export default function ExerciseLoggingModal({
                   isInputExpanded={expandedInput !== null}
                   showIntensity={hasIntensityAccess}
                   message={currentMessage}
+                  onMessageSeen={onMessageSeen}
+                  onMessageDismissed={onMessageDismissed}
                   loggingForm={
                     <SetLoggingForm
                       prescribedSet={prescribedSet}

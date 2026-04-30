@@ -3,6 +3,7 @@ CREATE TABLE "InAppMessage" (
     "id" TEXT NOT NULL,
     "name" TEXT,
     "content" TEXT NOT NULL,
+    "slides" TEXT,
     "placement" TEXT NOT NULL,
     "userType" TEXT NOT NULL DEFAULT 'all',
     "icon" TEXT NOT NULL DEFAULT 'Lightbulb',

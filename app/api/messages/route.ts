@@ -121,6 +121,7 @@ export async function GET(request: NextRequest) {
         version: msg.version,
         placement: msg.placement,
         priority: msg.priority,
+        slides: msg.slides,
       })),
     })
   } catch (error) {
