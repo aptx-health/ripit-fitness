@@ -18,7 +18,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const auth = await requireEditor({ rateLimit: true })
+    const auth = await requireEditor()
     if (auth.response) return auth.response
     const user = auth.user
 

@@ -9,7 +9,7 @@ import { logger } from '@/lib/logger'
  */
 export async function GET() {
   try {
-    const auth = await requireEditor({ rateLimit: true })
+    const auth = await requireEditor()
     if (auth.response) return auth.response
 
     const tags = await prisma.tag.findMany({

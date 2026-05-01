@@ -19,7 +19,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const auth = await requireEditor({ rateLimit: true })
+    const auth = await requireEditor()
     if (auth.response) return auth.response
 
     const { id } = await params
