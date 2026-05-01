@@ -26,6 +26,7 @@ type Props = {
   onSkip: (workoutId: string) => void
   onUnskip: (workoutId: string) => void
   onLog: (workoutId: string) => void
+  hideSkip?: boolean
 }
 
 export default function WorkoutCard({
@@ -38,6 +39,7 @@ export default function WorkoutCard({
   onSkip,
   onUnskip,
   onLog,
+  hideSkip = false,
 }: Props) {
   const latestCompletion = workout.completions[0]
   const isCompleted = latestCompletion?.status === 'completed'
@@ -157,7 +159,7 @@ export default function WorkoutCard({
             <Play size={16} />
             {isDraft ? 'Continue Workout' : 'Start Workout'}
           </button>
-          {!latestCompletion && (
+          {!latestCompletion && !hideSkip && (
             <button
               type="button"
               onClick={() => onSkip(workout.id)}

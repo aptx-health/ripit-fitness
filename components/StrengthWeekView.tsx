@@ -119,12 +119,19 @@ export default function StrengthWeekView({
   const [modalMode, setModalMode] = useState<ModalMode>(null)
   const [selectedWorkoutId, setSelectedWorkoutId] = useState<string | null>(null)
   const [workoutMetadata, setWorkoutMetadata] = useState<WorkoutMetadata | null>(null)
-  // Auto-expand first workout when arriving from onboarding (?expand=first)
+  // Auto-expand first workout for beginners with no workout history or via ?expand=first
   const shouldExpandFirst = searchParams.get('expand') === 'first'
   const firstWorkoutId = week.workouts.length > 0 ? week.workouts[0].id : null
   const [expandedWorkoutId, setExpandedWorkoutId] = useState<string | null>(
     shouldExpandFirst && firstWorkoutId ? firstWorkoutId : null
   )
+  // Expand first workout once settings load for beginners with no history
+  const isBeginnerFirstVisit = historyCount === 0 && !settingsLoading && settings?.loggingMode !== 'full'
+  useEffect(() => {
+    if (isBeginnerFirstVisit && firstWorkoutId && !expandedWorkoutId) {
+      setExpandedWorkoutId(firstWorkoutId)
+    }
+  }, [isBeginnerFirstVisit, firstWorkoutId, expandedWorkoutId])
   const [isLoadingWorkout, setIsLoadingWorkout] = useState(false)
   const [modalKey, setModalKey] = useState(0)
   const [showCompletionModal, setShowCompletionModal] = useState(false)
@@ -479,6 +486,7 @@ export default function StrengthWeekView({
             onSkip={handleSkipWorkout}
             onUnskip={handleUnskipWorkout}
             onLog={handleOpenLogging}
+            hideSkip={isBeginnerFirstVisit && workout.id === firstWorkoutId}
           />
         ))}
 
