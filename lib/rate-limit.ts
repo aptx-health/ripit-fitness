@@ -113,7 +113,7 @@ export const communityCloneLimiter = lazyLimiter({ keyPrefix: 'clone', points: 3
 /**
  * Admin endpoints: 30 req / 60s per user
  */
-export const adminLimiter = lazyLimiter({ keyPrefix: 'admin', points: 30, duration: 60 })
+export const adminLimiter = lazyLimiter({ keyPrefix: 'admin', points: 60, duration: 60 })
 
 /**
  * Sensitive auth endpoints that bypass BetterAuth's built-in limiter

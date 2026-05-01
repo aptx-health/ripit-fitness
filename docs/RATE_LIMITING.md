@@ -9,7 +9,7 @@ Rate limiting is enforced at the API-route layer using [`rate-limiter-flexible`]
 | T0 — queue protection | `communityCloneLimiter` | 3 / 60s | userId | Protects the BullMQ clone worker from being flooded with multi-week jobs |
 | T1 — program mgmt | `programManagementLimiter` | 20 / 60s | userId | Program CRUD (create, duplicate, activate, restart) — the expensive ones enqueue or transact across many rows |
 | T2 — destructive ops | `destructiveOpLimiter` | 10 / 60s | userId | Delete/archive program, bulk `applyToFuture` exercise replace/delete |
-| T3 — admin | `adminLimiter` | 30 / 60s | userId | All `/api/admin/*` endpoints (reads + writes). Defense in depth behind editor/admin role |
+| T3 — admin | `adminLimiter` | 60 / 60s | userId | Admin write endpoints (`POST`/`PATCH`/`DELETE` under `/api/admin/*`). GETs are excluded per the read-endpoint policy below |
 | T4 — workout writes | `workoutActionLimiter` | 10 / 10s | userId | Complete, skip, clear a workout |
 | T4 — set logging | `setLoggingLimiter` | 60 / 10s | userId | Draft sync, per-set upsert, per-set delete — intentionally generous for live logging |
 | T5 — auth sensitive | `authSensitiveLimiter` | 5 / 60s | **IP** | `/api/auth/complete-profile` (bypasses BetterAuth's own limiter) |
