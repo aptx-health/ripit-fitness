@@ -308,8 +308,14 @@ function resolveExerciseIds(
   return { resolved: data, missing }
 }
 
+const updatePrograms = process.argv.includes('--update-programs')
+
 async function syncCommunityPrograms(programs: CuratedMeta[]) {
-  console.log('Step 3: Syncing community programs...')
+  if (updatePrograms) {
+    console.log('Step 3: Syncing community programs (--update-programs: will overwrite existing)...')
+  } else {
+    console.log('Step 3: Syncing community programs...')
+  }
 
   // Build name → id lookup
   const allDefs = await prisma.exerciseDefinition.findMany({
@@ -319,6 +325,7 @@ async function syncCommunityPrograms(programs: CuratedMeta[]) {
 
   let created = 0
   let updated = 0
+  let skipped = 0
 
   // Check which snapshot files exist
   const availableSnapshots = new Set(readdirSync(SNAPSHOT_DIR))
@@ -377,19 +384,26 @@ async function syncCommunityPrograms(programs: CuratedMeta[]) {
     })
 
     if (existing) {
-      await prisma.communityProgram.update({
-        where: { id: existing.id },
-        data,
-      })
-      updated++
+      if (updatePrograms) {
+        await prisma.communityProgram.update({
+          where: { id: existing.id },
+          data,
+        })
+        console.log(`  UPDATED: ${data.name}`)
+        updated++
+      } else {
+        console.log(`  SKIP (exists): ${data.name}`)
+        skipped++
+      }
+      continue
     } else {
       await prisma.communityProgram.create({ data })
       created++
     }
   }
 
-  console.log(`  Created: ${created}, Updated: ${updated}`)
-  return { created, updated }
+  console.log(`  Created: ${created}, Updated: ${updated}, Skipped: ${skipped}`)
+  return { created, updated, skipped }
 }
 
 // ── Step 4: Verify ─────────────────────────────────────────────────
