@@ -49,6 +49,48 @@ export const THEME_LABELS: Record<ThemeName, string> = {
 
 const STORAGE_KEY = 'themePreference';
 const OLD_STORAGE_KEY = 'darkMode';
+const COOKIE_KEY = 'theme_pref';
+const COOKIE_MAX_AGE_DAYS = 365;
+
+// ============================================================================
+// Utility Functions
+// ============================================================================
+
+// ============================================================================
+// Cookie Helpers (fallback persistence for iOS Safari localStorage eviction)
+// ============================================================================
+
+/**
+ * Saves theme preference to a cookie as a fallback for localStorage eviction.
+ * Cookies are more resilient on iOS Safari PWAs than localStorage.
+ */
+function saveToCookie(preference: ThemePreference): void {
+  if (typeof document === 'undefined') return;
+
+  const value = `${preference.themeName}:${preference.mode}`;
+  const maxAge = COOKIE_MAX_AGE_DAYS * 24 * 60 * 60;
+  document.cookie = `${COOKIE_KEY}=${value};path=/;max-age=${maxAge};SameSite=Lax`;
+}
+
+/**
+ * Reads theme preference from cookie.
+ * Returns null if no valid cookie found.
+ */
+function getFromCookie(): ThemePreference | null {
+  if (typeof document === 'undefined') return null;
+
+  const cookies = document.cookie.split(';');
+  for (const cookie of cookies) {
+    const [name, val] = cookie.trim().split('=');
+    if (name === COOKIE_KEY && val) {
+      const [themeName, mode] = val.split(':') as [ThemeName, ThemeMode];
+      if (THEMES.includes(themeName) && MODES.includes(mode)) {
+        return { themeName, mode };
+      }
+    }
+  }
+  return null;
+}
 
 // ============================================================================
 // Utility Functions
@@ -122,7 +164,19 @@ export function getThemePreference(): ThemePreference {
     clientLogger.error('Failed to parse theme preference:', error);
   }
 
-  // Fallback: Use system preference for mode
+  // Fallback: Check cookie (survives iOS localStorage eviction)
+  const fromCookie = getFromCookie();
+  if (fromCookie) {
+    // Re-populate localStorage from cookie
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(fromCookie));
+    } catch {
+      // Ignore write failures
+    }
+    return fromCookie;
+  }
+
+  // Final fallback: Use system preference for mode
   return {
     themeName: DEFAULT_THEME.themeName,
     mode: getSystemPreference(),
@@ -140,6 +194,9 @@ export function saveThemePreference(preference: ThemePreference): void {
   } catch (error) {
     clientLogger.error('Failed to save theme preference:', error);
   }
+
+  // Also save to cookie as fallback (survives iOS localStorage eviction)
+  saveToCookie(preference);
 }
 
 /**
