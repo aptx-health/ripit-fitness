@@ -28,8 +28,9 @@ model Program {
   durationDisplay   String?
   targetDaysPerWeek Int?
   equipmentNeeded   String[]  @default([])
-  focusAreas        String[]  @default([])
-  weeks             Week[]
+  focusAreas            String[]  @default([])
+  sourceCommunityProgramId String?
+  weeks                 Week[]
 
   @@index([userId, isActive])
   @@index([userId])
@@ -304,6 +305,8 @@ model UserSettings {
   customProgramLimitBypass  Boolean   @default(false)
   intensityEnabled          Boolean   @default(false)
   loggingMode               String    @default("full")
+  dismissedMessageIds       String    @default("[]")
+  seenMessageIds            String    @default("[]")
   createdAt                 DateTime  @default(now())
   updatedAt                 DateTime  @updatedAt
 
@@ -546,4 +549,30 @@ model Feedback {
   @@index([status])
   @@index([category])
   @@index([createdAt(sort: Desc)])
+}
+
+model InAppMessage {
+  id               String   @id @default(cuid())
+  name             String?  // admin-only label, not shown to users
+  content          String   // primary slide content (used when slides is null)
+  slides           String?  // JSON: [{ content: string, icon: string }] for multi-slide carousel
+  placement        String
+  userType         String   @default("all")
+  icon             String   @default("Lightbulb")
+  lifecycle        String   @default("show_always")
+  minWorkouts      Int?
+  maxWorkouts      Int?
+  programTargeting String?
+  ownerType        String   @default("platform")
+  ownerId          String?
+  priority         Int      @default(0)
+  active           Boolean  @default(true)
+  version          Int      @default(1)
+  locale           String   @default("en")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([placement, active])
+  @@index([placement, userType, active])
+  @@index([ownerType, ownerId])
 }

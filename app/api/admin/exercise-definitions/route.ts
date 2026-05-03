@@ -23,7 +23,7 @@ import {
  */
 export async function GET(request: NextRequest) {
   try {
-    const auth = await requireEditor({ rateLimit: true })
+    const auth = await requireEditor()
     if (auth.response) return auth.response
 
     const { searchParams } = new URL(request.url)

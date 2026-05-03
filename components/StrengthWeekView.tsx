@@ -5,8 +5,9 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState, useTransition } from 'react'
 import ExerciseLoggingModal from '@/components/ExerciseLoggingModal'
 import { PostSessionFeedback } from '@/components/features/training/PostSessionFeedback'
-import { StickNudgeBanner } from '@/components/features/training/StickNudgeBanner'
 import { ProgramCompletionModal } from '@/components/ProgramCompletionModal'
+import type { MessageData } from '@/components/ui/MessageCard'
+import { MessageCard } from '@/components/ui/MessageCard'
 import WeekNavigator from '@/components/ui/WeekNavigator'
 import WorkoutHistoryList from '@/components/WorkoutHistoryList'
 import WorkoutCard from '@/components/workout/WorkoutCard'
@@ -118,12 +119,19 @@ export default function StrengthWeekView({
   const [modalMode, setModalMode] = useState<ModalMode>(null)
   const [selectedWorkoutId, setSelectedWorkoutId] = useState<string | null>(null)
   const [workoutMetadata, setWorkoutMetadata] = useState<WorkoutMetadata | null>(null)
-  // Auto-expand first workout when arriving from onboarding (?expand=first)
+  // Auto-expand first workout for beginners with no workout history or via ?expand=first
   const shouldExpandFirst = searchParams.get('expand') === 'first'
   const firstWorkoutId = week.workouts.length > 0 ? week.workouts[0].id : null
   const [expandedWorkoutId, setExpandedWorkoutId] = useState<string | null>(
     shouldExpandFirst && firstWorkoutId ? firstWorkoutId : null
   )
+  // Expand first workout once settings load for beginners with no history
+  const isBeginnerFirstVisit = historyCount === 0 && !settingsLoading && settings?.loggingMode !== 'full'
+  useEffect(() => {
+    if (isBeginnerFirstVisit && firstWorkoutId && !expandedWorkoutId) {
+      setExpandedWorkoutId(firstWorkoutId)
+    }
+  }, [isBeginnerFirstVisit, firstWorkoutId, expandedWorkoutId])
   const [isLoadingWorkout, setIsLoadingWorkout] = useState(false)
   const [modalKey, setModalKey] = useState(0)
   const [showCompletionModal, setShowCompletionModal] = useState(false)
@@ -134,10 +142,44 @@ export default function StrengthWeekView({
 
   const resumeWorkoutId = searchParams.get('resume')
 
-  // Contextual content triggers
-  const showStickNudge = historyCount >= 3 && historyCount <= 8 && !settings?.dismissedStickNudge && !settingsLoading
-  const showTips = historyCount <= 3 && settings?.experienceLevel === 'beginner'
+  // Contextual content
   const loggingMode = (settings?.loggingMode as 'full' | 'follow_along' | undefined) || 'full'
+  const [trainingMessage, setTrainingMessage] = useState<MessageData | null>(null)
+  const [loggerMessages, setLoggerMessages] = useState<MessageData[]>([])
+  const showTips = loggerMessages.length > 0
+
+  // Fetch contextual messages from the API
+  useEffect(() => {
+    if (settingsLoading) return
+
+    const params = new URLSearchParams({
+      workoutCount: String(historyCount),
+      programId,
+    })
+
+    const fetchMessages = async (placement: string) => {
+      try {
+        const res = await fetch(`/api/messages?placement=${placement}&${params}`)
+        if (!res.ok) return []
+        const json = await res.json()
+        return json.data || []
+      } catch {
+        return []
+      }
+    }
+
+    let cancelled = false
+    Promise.all([
+      fetchMessages('training_tab'),
+      fetchMessages('exercise_logger'),
+    ]).then(([training, logger]) => {
+      if (cancelled) return
+      setTrainingMessage(training[0] ?? null)
+      setLoggerMessages(logger)
+    })
+
+    return () => { cancelled = true }
+  }, [historyCount, programId, settingsLoading])
 
   const checkProgramCompletion = useCallback(async (openModal = false) => {
     // Skip check if we're currently restarting
@@ -405,9 +447,29 @@ export default function StrengthWeekView({
         )}
       </div>
 
-      {showStickNudge && (
+      {trainingMessage && (
         <div className="mb-4">
-          <StickNudgeBanner onDismiss={refetchSettings} />
+          <MessageCard
+            message={trainingMessage}
+            variant="training_tab"
+            onDismiss={async (messageId) => {
+              try {
+                const current = settings?.dismissedMessageIds
+                const ids: string[] = current ? JSON.parse(current) : []
+                if (!ids.includes(messageId)) ids.push(messageId)
+                await updateSettings({ dismissedMessageIds: JSON.stringify(ids) } as Parameters<typeof updateSettings>[0])
+                setTrainingMessage(null)
+              } catch { /* dismiss failed silently */ }
+            }}
+            onSeen={async (messageId) => {
+              try {
+                const current = settings?.seenMessageIds
+                const ids: string[] = current ? JSON.parse(current) : []
+                if (!ids.includes(messageId)) ids.push(messageId)
+                await updateSettings({ seenMessageIds: JSON.stringify(ids) } as Parameters<typeof updateSettings>[0])
+              } catch { /* seen tracking failed silently */ }
+            }}
+          />
         </div>
       )}
 
@@ -424,6 +486,7 @@ export default function StrengthWeekView({
             onSkip={handleSkipWorkout}
             onUnskip={handleUnskipWorkout}
             onLog={handleOpenLogging}
+            hideSkip={isBeginnerFirstVisit && workout.id === firstWorkoutId}
           />
         ))}
 
@@ -466,6 +529,25 @@ export default function StrengthWeekView({
           initialHistory={workoutMetadata.firstExerciseHistory}
           initialExerciseIndex={workoutMetadata.resumeExerciseIndex ?? 0}
           showTips={showTips || loggingMode === 'follow_along'}
+          messages={loggerMessages}
+          onMessageSeen={async (messageId) => {
+            try {
+              const current = settings?.seenMessageIds
+              const ids: string[] = current ? JSON.parse(current) : []
+              if (!ids.includes(messageId)) ids.push(messageId)
+              await updateSettings({ seenMessageIds: JSON.stringify(ids) } as Parameters<typeof updateSettings>[0])
+              setLoggerMessages((prev) => prev.filter((m) => m.id !== messageId))
+            } catch { /* seen tracking failed silently */ }
+          }}
+          onMessageDismissed={async (messageId) => {
+            try {
+              const current = settings?.dismissedMessageIds
+              const ids: string[] = current ? JSON.parse(current) : []
+              if (!ids.includes(messageId)) ids.push(messageId)
+              await updateSettings({ dismissedMessageIds: JSON.stringify(ids) } as Parameters<typeof updateSettings>[0])
+              setLoggerMessages((prev) => prev.filter((m) => m.id !== messageId))
+            } catch { /* dismiss failed silently */ }
+          }}
           loggingMode={loggingMode}
           onComplete={handleCompleteWorkout}
           onRefresh={handleRefreshMetadata}

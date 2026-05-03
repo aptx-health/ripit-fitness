@@ -161,6 +161,7 @@ Program
 - **PrescribedSet**: Template/plan (what program prescribes)
 - **LoggedSet**: Actual performance (what user logged)
 - **WorkoutCompletion**: Tracks completed/incomplete/abandoned workouts
+- **InAppMessage**: Admin-managed messages shown in workout UI (carousel slides, lifecycle targeting, placement rules)
 - **AppEvent**: Client-side analytics events (signup source, page views)
 
 **Important**: We store BOTH prescribed and logged sets to enable plan vs reality comparison.

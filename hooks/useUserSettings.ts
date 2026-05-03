@@ -14,6 +14,8 @@ export type UserSettings = {
   experienceLevel: string | null
   intensityEnabled: boolean
   loggingMode: 'full' | 'follow_along'
+  dismissedMessageIds: string
+  seenMessageIds: string
 }
 
 type UseUserSettingsReturn = {
