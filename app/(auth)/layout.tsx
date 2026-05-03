@@ -24,12 +24,14 @@ export default function AuthLayout({
                 } catch (e) {}
               } else {
                 // Fallback: check cookie (survives iOS localStorage eviction)
+                var VALID_THEMES = ['ripit','doom','catppuccin','cyber','forest','synthwave','dracula','github','clyde','ninety','blossom','okabe'];
+                var VALID_MODES = ['light','dark'];
                 var cookies = document.cookie.split(';');
                 for (var i = 0; i < cookies.length; i++) {
                   var parts = cookies[i].trim().split('=');
                   if (parts[0] === COOKIE_KEY && parts[1]) {
                     var vals = parts[1].split(':');
-                    if (vals.length === 2) {
+                    if (vals.length === 2 && VALID_THEMES.indexOf(vals[0]) !== -1 && VALID_MODES.indexOf(vals[1]) !== -1) {
                       themeName = vals[0];
                       mode = vals[1];
                       hasStored = true;
