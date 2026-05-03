@@ -96,6 +96,7 @@ export default function ExerciseDisplayTabs({
 
   // When the exercise changes, reset to "log-sets" if the current tab is
   // unavailable on the new exercise (e.g. "notes" tab when there are no notes).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: exercise.id is intentional — re-evaluate tab availability on exercise switch
   useEffect(() => {
     if (activeTab === 'notes' && !hasNotes) {
       setActiveTab('log-sets')
