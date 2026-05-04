@@ -138,6 +138,44 @@ describe('Draft Timer Persistence', () => {
       expect(response.success).toBe(true)
       expect(response.draft!.startedAt).toBeNull()
     })
+
+    it('should backfill startedAt on pre-migration drafts when updated', async () => {
+      const scenario = await createCompleteTestScenario(prisma, userId, {
+        loggedSetCount: 1,
+        status: 'draft'
+      })
+      const { workout, exercise } = scenario
+
+      // Simulate pre-migration draft (no startedAt)
+      await prisma.workoutCompletion.updateMany({
+        where: { workoutId: workout.id, userId },
+        data: { startedAt: null }
+      })
+
+      const before = new Date()
+
+      // Update the draft — should backfill startedAt
+      const result = await simulateDraftSave(prisma, workout.id, userId, [
+        {
+          exerciseId: exercise.id,
+          setNumber: 1,
+          reps: 8,
+          weight: 155,
+          weightUnit: 'lbs',
+          rpe: null,
+          rir: null,
+        }
+      ])
+
+      expect(result.success).toBe(true)
+
+      const completion = await prisma.workoutCompletion.findFirst({
+        where: { workoutId: workout.id, userId }
+      })
+
+      expect(completion?.startedAt).toBeTruthy()
+      expect(new Date(completion!.startedAt!).getTime()).toBeGreaterThanOrEqual(before.getTime())
+    })
   })
 })
 
@@ -185,7 +223,10 @@ async function simulateDraftSave(
       const draftCompletion = existingDraft
         ? await tx.workoutCompletion.update({
             where: { id: existingDraft.id },
-            data: { completedAt: new Date() }
+            data: {
+              completedAt: new Date(),
+              ...(!existingDraft.startedAt ? { startedAt: new Date() } : {}),
+            }
           })
         : await tx.workoutCompletion.create({
             data: {

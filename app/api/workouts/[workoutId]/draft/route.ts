@@ -137,7 +137,11 @@ export async function POST(
       const draftCompletion = existingDraft
         ? await tx.workoutCompletion.update({
             where: { id: existingDraft.id },
-            data: { completedAt: new Date() }
+            data: {
+              completedAt: new Date(),
+              // Backfill startedAt for pre-migration drafts
+              ...(!existingDraft.startedAt ? { startedAt: new Date() } : {}),
+            }
           })
         : await tx.workoutCompletion.create({
             data: {
