@@ -118,5 +118,11 @@ DATABASE_URL="$LOCAL_DB_URL" DIRECT_URL="$LOCAL_DB_URL" \
   npx ts-node --compiler-options '{"module":"CommonJS","types":["node"]}' "$SEEDS_DIR/seed-dev-content.ts" 2>&1
 echo "Dev content seeded"
 
+# Seed analytics test data (end user + events, feedback, completions for CSV export)
+echo "Seeding analytics test data..."
+DATABASE_URL="$LOCAL_DB_URL" DIRECT_URL="$LOCAL_DB_URL" \
+  npx ts-node --compiler-options '{"module":"CommonJS","types":["node"]}' "$SEEDS_DIR/seed-analytics-data.ts" 2>&1
+echo "Analytics test data seeded"
+
 # Wait for docker process to exit (keeps script running)
 wait $DOCKER_PID
