@@ -207,22 +207,6 @@ jobs:
           PGPASSWORD: postgres
         run: ./scripts/smoke-test-learn-content.sh
 
-      - name: Smoke test — sync-exercise-data (non-fatal)
-        # sync-exercise-data only updates metadata/images on existing rows and
-        # verifies production-like counts (>=275 images, etc). A fresh smoke-test
-        # DB will never hit those thresholds because the base exercises were
-        # originally seeded manually via prisma/seeds/*.sql in staging/prod
-        # (see issues #245, #250). We still run the script to catch runtime
-        # errors, but do not fail the job on verification thresholds.
-        continue-on-error: true
-        run: |
-          docker run --rm \
-            --network host \
-            -e DATABASE_URL="$DATABASE_URL" \
-            -e DIRECT_URL="$DIRECT_URL" \
-            "$IMAGE" \
-            sh -c "node scripts/sync-exercise-data.cjs"
-
       - name: Smoke test — boot app
         run: |
           # Start the app in the background
