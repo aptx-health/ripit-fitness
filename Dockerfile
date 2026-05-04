@@ -25,16 +25,6 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
-# Pre-compile the exercise data sync script to plain JS so the runner
-# stage doesn't need tsx (and its fragile transitive dep tree) at runtime.
-RUN ./node_modules/.bin/esbuild scripts/sync-exercise-data.ts \
-      --bundle \
-      --platform=node \
-      --format=cjs \
-      --target=node20 \
-      --external:@prisma/client \
-      --outfile=scripts-dist/sync-exercise-data.cjs
-
 # --- Stage 3: runner ---
 FROM node:20-alpine AS runner
 WORKDIR /app
@@ -53,7 +43,7 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Prisma migrations + exercise data sync (for k8s init container)
+# Prisma migrations (for k8s init container)
 COPY --from=builder /app/prisma ./prisma
 # dotenv: Sentry's transitive dep c12 dynamically imports dotenv at runtime;
 # Next.js standalone output traces only the package.json stub, not the code.
@@ -63,9 +53,6 @@ RUN npm install prisma@6.19.0 dotenv --save-exact --no-audit --no-fund --ignore-
 COPY --from=deps --chown=nextjs:nodejs /app/node_modules/@prisma/engines ./node_modules/@prisma/engines
 RUN chown -R nextjs:nodejs ./node_modules/@prisma ./node_modules/prisma
 COPY scripts/prisma-migrate.sh ./scripts/prisma-migrate.sh
-COPY --from=builder /app/scripts-dist/sync-exercise-data.cjs ./scripts/sync-exercise-data.cjs
-COPY scripts/exercise-mapping.json ./scripts/exercise-mapping.json
-COPY scripts/validated-exercise-ids.json ./scripts/validated-exercise-ids.json
 RUN chmod +x ./scripts/prisma-migrate.sh
 
 USER nextjs

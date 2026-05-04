@@ -143,6 +143,7 @@ model WorkoutCompletion {
   workoutId   String
   userId      String
   completedAt DateTime    @default(now())
+  startedAt   DateTime?
   status      String
   notes       String?
   isArchived  Boolean     @default(false)

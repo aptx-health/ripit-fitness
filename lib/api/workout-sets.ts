@@ -17,6 +17,7 @@ type DeleteSetResponse = {
 type DraftResponse = {
   completionId: string
   sets: LoggedSet[]
+  startedAt: string | null
 } | null
 
 async function fetchWithRetry<T>(
@@ -89,6 +90,7 @@ export async function fetchDraft(workoutId: string): Promise<DraftResponse> {
     success: boolean
     draft: {
       id: string
+      startedAt: string | null
       loggedSets: Array<{
         id: string
         exerciseId: string
@@ -107,6 +109,7 @@ export async function fetchDraft(workoutId: string): Promise<DraftResponse> {
 
   return {
     completionId: result.draft.id,
+    startedAt: result.draft.startedAt,
     sets: result.draft.loggedSets.map(s => ({
       id: s.id,
       exerciseId: s.exerciseId,

@@ -113,7 +113,7 @@ export default function SetLoggingForm({
             <button
               type="button"
               onClick={onCompleteWorkout}
-              className="flex-1 py-2.5 bg-primary text-primary-foreground text-sm font-bold uppercase tracking-wider transition-all hover:bg-primary/90 doom-focus-ring"
+              className="flex-1 py-2.5 bg-primary text-primary-foreground text-sm font-bold uppercase tracking-wider transition-all hover:bg-primary/90 doom-button-3d doom-focus-ring"
             >
               Complete Workout
             </button>
@@ -121,7 +121,7 @@ export default function SetLoggingForm({
             <button
               type="button"
               onClick={onNextExercise}
-              className="flex-1 py-2.5 bg-primary text-primary-foreground text-sm font-bold uppercase tracking-wider transition-all hover:bg-primary/90 doom-focus-ring"
+              className="flex-1 py-2.5 bg-primary text-primary-foreground text-sm font-bold uppercase tracking-wider transition-all hover:bg-primary/90 doom-button-3d doom-focus-ring"
             >
               Next Exercise
             </button>

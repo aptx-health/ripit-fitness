@@ -61,7 +61,7 @@ export default function EquipmentSelector({
             {getDisplayText()}
           </button>
         </PopoverTrigger>
-        <PopoverContent className="w-[500px] p-3" align="start">
+        <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[500px] p-3" align="start">
           <div className="space-y-3">
             {/* Common Equipment */}
             <div>
@@ -78,8 +78,11 @@ export default function EquipmentSelector({
               <div className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2">
                 Specialized Equipment
               </div>
-              <div className="grid grid-cols-2 gap-1 max-h-48 overflow-y-auto">
-                {EQUIPMENT_GROUPS.specialized.map((equipment) => renderEquipmentButton(equipment))}
+              <div className="relative">
+                <div className="grid grid-cols-2 gap-1 max-h-36 sm:max-h-48 overflow-y-auto">
+                  {EQUIPMENT_GROUPS.specialized.map((equipment) => renderEquipmentButton(equipment))}
+                </div>
+                <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-card to-transparent" />
               </div>
             </div>
           </div>

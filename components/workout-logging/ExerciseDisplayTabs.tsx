@@ -1,6 +1,7 @@
 'use client'
 
 import { Check, Sparkles } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import type { MessageData } from '@/components/ui/MessageCard'
 import { MessageCard } from '@/components/ui/MessageCard'
@@ -91,9 +92,19 @@ export default function ExerciseDisplayTabs({
   onMessageDismissed,
 }: ExerciseDisplayTabsProps) {
   const hasNotes = !!exercise.notes
+  const [activeTab, setActiveTab] = useState('log-sets')
+
+  // When the exercise changes, reset to "log-sets" if the current tab is
+  // unavailable on the new exercise (e.g. "notes" tab when there are no notes).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: exercise.id is intentional — re-evaluate tab availability on exercise switch
+  useEffect(() => {
+    if (activeTab === 'notes' && !hasNotes) {
+      setActiveTab('log-sets')
+    }
+  }, [exercise.id, hasNotes, activeTab])
 
   return (
-    <Tabs defaultValue="log-sets" className="w-full h-full flex flex-col">
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full flex flex-col">
       <TabsList className="flex-shrink-0 sticky top-0 z-10 overflow-hidden">
         <TabsTrigger value="log-sets" className="flex-1">
           <span>Log Sets</span>

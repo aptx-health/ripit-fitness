@@ -53,6 +53,7 @@ type UseWorkoutDraftReturn = {
   failedSetCount: number
   isOnline: boolean
   completionId: string | null
+  startedAt: string | null
   logSet: (set: Omit<LoggedSet, 'id' | '_syncStatus'>) => void
   deleteSet: (setId: string | undefined, exerciseId: string, setNumber: number) => void
   retrySet: (exerciseId: string, setNumber: number) => void
@@ -64,6 +65,7 @@ export function useWorkoutDraft(workoutId: string): UseWorkoutDraftReturn {
   const [loggedSets, setLoggedSets] = useState<LoggedSet[]>([])
   const [isHydrating, setIsHydrating] = useState(true)
   const [completionId, setCompletionId] = useState<string | null>(null)
+  const [startedAt, setStartedAt] = useState<string | null>(null)
   const [isOnline, setIsOnline] = useState(
     typeof navigator !== 'undefined' ? navigator.onLine : true
   )
@@ -94,6 +96,7 @@ export function useWorkoutDraft(workoutId: string): UseWorkoutDraftReturn {
         if (cancelled) return
 
         if (draft) {
+          setStartedAt(draft.startedAt)
           // Check localStorage for sets that failed to persist (offline/error recovery)
           const cached = readLocalCache(workoutId)
           const dbSetKeys = new Set(
@@ -353,6 +356,7 @@ export function useWorkoutDraft(workoutId: string): UseWorkoutDraftReturn {
     failedSetCount,
     isOnline,
     completionId,
+    startedAt,
     logSet,
     deleteSet,
     retrySet,
