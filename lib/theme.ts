@@ -24,6 +24,8 @@ export interface ThemePreference {
 // Constants
 // ============================================================================
 
+// NOTE: These lists are duplicated in the inline scripts in app/layout.tsx and app/(auth)/layout.tsx.
+// Inline scripts can't import modules, so keep all three in sync when adding/removing themes.
 export const THEMES: ThemeName[] = ['ripit', 'doom', 'catppuccin', 'cyber', 'forest', 'synthwave', 'dracula', 'github', 'clyde', 'ninety', 'blossom', 'okabe'];
 export const MODES: ThemeMode[] = ['light', 'dark'];
 

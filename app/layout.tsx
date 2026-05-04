@@ -97,6 +97,7 @@ export default function RootLayout({
                     hasStored = true;
                   } else {
                     // Fallback: check cookie (survives iOS localStorage eviction)
+                    // Keep in sync with THEMES/MODES in lib/theme.ts
                     var VALID_THEMES = ['ripit','doom','catppuccin','cyber','forest','synthwave','dracula','github','clyde','ninety','blossom','okabe'];
                     var VALID_MODES = ['light','dark'];
                     var cookies = document.cookie.split(';');
