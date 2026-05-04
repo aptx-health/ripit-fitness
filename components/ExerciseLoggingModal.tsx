@@ -164,6 +164,7 @@ export default function ExerciseLoggingModal({
     loggedSets,
     isHydrating,
     failedSetCount,
+    startedAt,
     logSet,
     deleteSet,
     flushFailedSets,
@@ -527,6 +528,7 @@ export default function ExerciseLoggingModal({
               currentExerciseIndex={currentIndex}
               totalExercises={totalExercises}
               failedSetCount={failedSetCount}
+              startedAt={startedAt}
               onCompleteWorkout={() => setIsConfirming(true)}
               onClose={handleExitWorkout}
               menuActions={[

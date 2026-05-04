@@ -144,6 +144,7 @@ export async function POST(
               workoutId,
               userId: user.id,
               status: 'draft',
+              startedAt: new Date(),
               completedAt: new Date(),
             },
           })
@@ -297,6 +298,7 @@ export async function GET(
       draft: {
         id: draftCompletion.id,
         lastUpdated: draftCompletion.completedAt,
+        startedAt: draftCompletion.startedAt,
         status: draftCompletion.status,
         loggedSets,
         setsCount: loggedSets.length,

@@ -5,15 +5,16 @@ import { useEffect, useRef, useState } from 'react'
 /**
  * Timestamp-based elapsed workout timer that survives browser backgrounding.
  * Starts when the hook mounts (workout opens) and counts up.
+ * Accepts an optional initialElapsedSeconds to resume from a previous session.
  */
-export function useWorkoutTimer() {
+export function useWorkoutTimer(initialElapsedSeconds = 0) {
   const startRef = useRef<number>(0)
-  const [elapsed, setElapsed] = useState(0)
+  const [elapsed, setElapsed] = useState(initialElapsedSeconds)
 
-  // Initialize start time on mount
+  // Initialize start time on mount, offset by any initial elapsed time
   useEffect(() => {
-    startRef.current = Date.now()
-  }, [])
+    startRef.current = Date.now() - initialElapsedSeconds * 1000
+  }, [initialElapsedSeconds])
 
   useEffect(() => {
     const tick = () => {
