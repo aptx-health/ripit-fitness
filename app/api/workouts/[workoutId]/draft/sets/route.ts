@@ -78,7 +78,13 @@ export async function POST(
       })
       if (!draft) {
         draft = await tx.workoutCompletion.create({
-          data: { workoutId, userId: user.id, status: 'draft', completedAt: new Date() },
+          data: { workoutId, userId: user.id, status: 'draft', startedAt: new Date(), completedAt: new Date() },
+        })
+      } else if (!draft.startedAt) {
+        // Backfill startedAt for pre-migration drafts
+        draft = await tx.workoutCompletion.update({
+          where: { id: draft.id },
+          data: { startedAt: new Date() },
         })
       }
 

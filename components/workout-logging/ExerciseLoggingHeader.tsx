@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo } from 'react'
 import { Check, X } from 'lucide-react'
 import ActionsMenu, { type ActionItem } from '@/components/ActionsMenu'
 import { useWorkoutTimer } from '@/hooks/useWorkoutTimer'
@@ -8,6 +9,7 @@ interface ExerciseLoggingHeaderProps {
   currentExerciseIndex: number
   totalExercises: number
   failedSetCount?: number
+  startedAt?: string | null
   onCompleteWorkout: () => void
   onClose: () => void
   menuActions: ActionItem[]
@@ -53,12 +55,18 @@ export default function ExerciseLoggingHeader({
   currentExerciseIndex,
   totalExercises,
   failedSetCount = 0,
+  startedAt,
   onCompleteWorkout,
   onClose,
   menuActions,
   modeToggle,
 }: ExerciseLoggingHeaderProps) {
-  const { formatted: elapsedTime } = useWorkoutTimer()
+  const initialElapsed = useMemo(() => {
+    if (!startedAt) return 0
+    return Math.max(0, Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000))
+  }, [startedAt])
+
+  const { formatted: elapsedTime } = useWorkoutTimer(initialElapsed)
 
   return (
     <div
