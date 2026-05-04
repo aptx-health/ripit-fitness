@@ -74,15 +74,20 @@ export default function AdminAnalyticsPage() {
             {new Date(data.generatedAt).toLocaleTimeString()} (cached 5 min)
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => fetchData(true)}
-          aria-label="Refresh analytics data"
-          className="text-sm text-orange-500 hover:text-orange-400 transition-colors"
-        >
-          Refresh
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => fetchData(true)}
+            aria-label="Refresh analytics data"
+            className="text-sm text-orange-500 hover:text-orange-400 transition-colors"
+          >
+            Refresh
+          </button>
+        </div>
       </div>
+
+      {/* CSV Export */}
+      <CsvExportPanel />
 
       {/* Usage Section */}
       <Section title="Usage">
@@ -648,6 +653,96 @@ function TrendArrow({ current, previous }: { current: number | null; previous: n
     <span className={`text-xs ml-1 font-semibold ${isUp ? 'text-green-400' : 'text-red-400'}`}>
       {isUp ? '\u2191' : '\u2193'} {Math.abs(diff)}
     </span>
+  )
+}
+
+const CSV_TABLES = [
+  { value: 'events', label: 'Events', description: 'Raw analytics events (page views, signups, etc.)' },
+  { value: 'feedback', label: 'Feedback', description: 'User feedback and post-session ratings' },
+  { value: 'completions', label: 'Completions', description: 'Workout completions and abandonments' },
+] as const
+
+const CSV_DAY_OPTIONS = [30, 60, 90, 180, 365] as const
+
+function CsvExportPanel() {
+  const [table, setTable] = useState<string>('events')
+  const [days, setDays] = useState<number>(90)
+  const [downloading, setDownloading] = useState(false)
+
+  const handleDownload = async () => {
+    setDownloading(true)
+    try {
+      const res = await fetch(`/api/admin/analytics/export?table=${table}&days=${days}`)
+      if (!res.ok) throw new Error('Export failed')
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = res.headers.get('Content-Disposition')?.match(/filename="(.+)"/)?.[1]
+        ?? `ripit-${table}-${days}d.csv`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+    } catch {
+      // Let the user know via a simple alert — not worth a toast system for admin-only
+      alert('Failed to download CSV. Check the console for details.')
+    } finally {
+      setDownloading(false)
+    }
+  }
+
+  const selected = CSV_TABLES.find((t) => t.value === table)
+
+  return (
+    <Section title="Export Raw Data">
+      <p className="text-sm text-muted-foreground mb-4">
+        Download raw data as CSV for external analysis. Only includes end-user data (excludes staff accounts).
+      </p>
+      <div className="flex flex-wrap items-end gap-3">
+        <div>
+          <label htmlFor="export-table" className="block text-xs text-muted-foreground uppercase tracking-wider mb-1">
+            Table
+          </label>
+          <select
+            id="export-table"
+            value={table}
+            onChange={(e) => setTable(e.target.value)}
+            className="bg-background border border-border rounded-md px-3 py-2 text-sm text-foreground"
+          >
+            {CSV_TABLES.map((t) => (
+              <option key={t.value} value={t.value}>{t.label}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="export-days" className="block text-xs text-muted-foreground uppercase tracking-wider mb-1">
+            Period
+          </label>
+          <select
+            id="export-days"
+            value={days}
+            onChange={(e) => setDays(Number(e.target.value))}
+            className="bg-background border border-border rounded-md px-3 py-2 text-sm text-foreground"
+          >
+            {CSV_DAY_OPTIONS.map((d) => (
+              <option key={d} value={d}>{d} days</option>
+            ))}
+          </select>
+        </div>
+        <button
+          type="button"
+          onClick={handleDownload}
+          disabled={downloading}
+          className="bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white text-sm font-semibold px-4 py-2 rounded-md transition-colors"
+        >
+          {downloading ? 'Exporting...' : 'Download CSV'}
+        </button>
+      </div>
+      {selected && (
+        <p className="text-xs text-muted-foreground mt-2">{selected.description}</p>
+      )}
+    </Section>
   )
 }
 
