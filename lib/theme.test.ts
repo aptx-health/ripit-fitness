@@ -188,6 +188,98 @@ describe('Theme System', () => {
     });
   });
 
+  describe('cookie fallback persistence', () => {
+    beforeEach(() => {
+      // Mock document.cookie
+      let cookieStore = '';
+      Object.defineProperty(global.document, 'cookie', {
+        get: () => cookieStore,
+        set: (val: string) => {
+          // Simple cookie setter (only stores latest value for the key)
+          const [pair] = val.split(';');
+          const [name] = pair.split('=');
+          // Remove existing cookie with same name
+          const cookies = cookieStore.split(';').filter(c => c.trim() && !c.trim().startsWith(name + '='));
+          cookies.push(pair);
+          cookieStore = cookies.filter(Boolean).join('; ');
+        },
+        configurable: true,
+      });
+      global.document = global.document || {} as Document;
+    });
+
+    it('saves to cookie when saving preference', () => {
+      // Need to setup document mock for this test
+      const cookieStore = { value: '' };
+      global.document = {
+        cookie: '',
+        documentElement: { dataset: {}, classList: { add: vi.fn(), remove: vi.fn() } },
+      } as unknown as Document;
+      Object.defineProperty(global.document, 'cookie', {
+        get: () => cookieStore.value,
+        set: (val: string) => {
+          const [pair] = val.split(';');
+          cookieStore.value = pair;
+        },
+        configurable: true,
+      });
+
+      const preference: ThemePreference = { themeName: 'cyber', mode: 'light' };
+      saveThemePreference(preference);
+
+      expect(cookieStore.value).toBe('theme_pref=cyber:light');
+    });
+
+    it('reads from cookie when localStorage is empty', () => {
+      // No localStorage value
+      localStorageMock.clear();
+
+      // Set up cookie with theme
+      let cookieStore = 'theme_pref=forest:dark';
+      global.document = {
+        cookie: cookieStore,
+        documentElement: { dataset: {}, classList: { add: vi.fn(), remove: vi.fn() } },
+      } as unknown as Document;
+      Object.defineProperty(global.document, 'cookie', {
+        get: () => cookieStore,
+        set: (val: string) => { cookieStore = val.split(';')[0]; },
+        configurable: true,
+      });
+
+      const preference = getThemePreference();
+
+      expect(preference.themeName).toBe('forest');
+      expect(preference.mode).toBe('dark');
+
+      // Should also re-populate localStorage
+      const stored = localStorage.getItem('themePreference');
+      expect(stored).toBeTruthy();
+      const parsed = JSON.parse(stored!);
+      expect(parsed.themeName).toBe('forest');
+      expect(parsed.mode).toBe('dark');
+    });
+
+    it('ignores invalid cookie values', () => {
+      localStorageMock.clear();
+
+      const cookieStore = 'theme_pref=invalid:badmode';
+      global.document = {
+        cookie: cookieStore,
+        documentElement: { dataset: {}, classList: { add: vi.fn(), remove: vi.fn() } },
+      } as unknown as Document;
+      Object.defineProperty(global.document, 'cookie', {
+        get: () => cookieStore,
+        set: () => {},
+        configurable: true,
+      });
+
+      const preference = getThemePreference();
+
+      // Should fall back to default
+      expect(preference.themeName).toBe('ripit');
+    });
+  });
+
   describe('applyTheme', () => {
     beforeEach(() => {
       // Mock document
