@@ -11,17 +11,16 @@ export interface CloneResult {
 /**
  * Generates a unique program name by checking for existing programs and auto-incrementing
  * Examples:
- * - "My Program (Community)" if no conflict
- * - "My Program (Community) (2)" if first name exists
- * - "My Program (Community) (3)" if first two exist
+ * - "My Program" if no conflict
+ * - "My Program (2)" if first name exists
+ * - "My Program (3)" if first two exist
  */
 async function generateUniqueProgramName(
   prisma: PrismaClient,
   baseName: string,
   userId: string
 ): Promise<string> {
-  const suffix = ' (Community)';
-  let candidateName = `${baseName}${suffix}`;
+  let candidateName = baseName;
 
   const checkNameExists = async (name: string): Promise<boolean> => {
     const strengthProgram = await prisma.program.findFirst({
@@ -38,7 +37,7 @@ async function generateUniqueProgramName(
 
   let counter = 2;
   while (counter < 100) {
-    candidateName = `${baseName}${suffix} (${counter})`;
+    candidateName = `${baseName} (${counter})`;
 
     const exists = await checkNameExists(candidateName);
 
@@ -49,7 +48,7 @@ async function generateUniqueProgramName(
     counter++;
   }
 
-  return `${baseName}${suffix} (${Date.now()})`;
+  return `${baseName} (${Date.now()})`;
 }
 
 /**
