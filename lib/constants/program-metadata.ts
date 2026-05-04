@@ -156,6 +156,7 @@ export const EQUIPMENT_GROUPS = {
     'kettlebell',
     'cable',
     'machine',
+    'smith_machine',
     'bodyweight',
     'resistance_band',
   ],
