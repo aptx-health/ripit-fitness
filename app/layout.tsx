@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Rajdhani } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ToastProvider";
+import { ThemeInitializer } from "@/components/ThemeInitializer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -165,6 +166,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${rajdhani.variable} antialiased`}
       >
+        <ThemeInitializer />
         <ToastProvider>{children}</ToastProvider>
       </body>
     </html>
