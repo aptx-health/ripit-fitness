@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import BottomNav from '@/components/BottomNav'
 import FloatingDraftButton from '@/components/FloatingDraftButton'
 import FeedbackButton from '@/components/features/FeedbackButton'
+import { SessionContextTracker } from '@/components/features/SessionContextTracker'
 import { SignupCompletedTracker } from '@/components/features/SignupCompletedTracker'
 import Header from '@/components/Header'
 import { getCurrentUser } from '@/lib/auth/server'
@@ -35,6 +36,7 @@ export default async function AppLayout({
     <DraftWorkoutProvider>
       <div className="min-h-screen bg-background">
         <SignupCompletedTracker />
+        <SessionContextTracker />
         <Header userEmail={user.email || ''} />
         <FloatingDraftButton />
         <div className="pb-20 md:pb-0">

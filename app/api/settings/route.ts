@@ -20,6 +20,8 @@ type UpdateSettingsRequest = {
   loggingMode?: 'full' | 'follow_along'
   dismissedMessageIds?: string
   seenMessageIds?: string
+  pwaPromptShownCount?: number
+  pwaPromptDismissedAt?: string | null
 }
 
 export async function GET(_request: NextRequest) {
@@ -75,7 +77,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json() as UpdateSettingsRequest
-    const { displayName, defaultWeightUnit, defaultIntensityRating, dismissedPrimer, dismissedWarmup, dismissedStickNudge, completedTours, postSessionPromptCount, lastPostSessionPromptAt, experienceLevel, equipmentPreference, onboardingCompleted, intensityEnabled, loggingMode, dismissedMessageIds, seenMessageIds } = body
+    const { displayName, defaultWeightUnit, defaultIntensityRating, dismissedPrimer, dismissedWarmup, dismissedStickNudge, completedTours, postSessionPromptCount, lastPostSessionPromptAt, experienceLevel, equipmentPreference, onboardingCompleted, intensityEnabled, loggingMode, dismissedMessageIds, seenMessageIds, pwaPromptShownCount, pwaPromptDismissedAt } = body
 
     // Validate weight unit
     if (defaultWeightUnit && !['lbs', 'kg'].includes(defaultWeightUnit)) {
@@ -145,6 +147,8 @@ export async function PUT(request: NextRequest) {
         ...(loggingMode !== undefined && { loggingMode }),
         ...(dismissedMessageIds !== undefined && { dismissedMessageIds }),
         ...(seenMessageIds !== undefined && { seenMessageIds }),
+        ...(pwaPromptShownCount !== undefined && { pwaPromptShownCount }),
+        ...(pwaPromptDismissedAt !== undefined && { pwaPromptDismissedAt: pwaPromptDismissedAt ? new Date(pwaPromptDismissedAt) : null }),
         updatedAt: new Date()
       },
       create: {

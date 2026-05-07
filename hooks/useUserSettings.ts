@@ -16,6 +16,8 @@ export type UserSettings = {
   loggingMode: 'full' | 'follow_along'
   dismissedMessageIds: string
   seenMessageIds: string
+  pwaPromptShownCount: number
+  pwaPromptDismissedAt: string | null
 }
 
 type UseUserSettingsReturn = {
