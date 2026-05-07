@@ -11,7 +11,7 @@ export default function EditMessagePage() {
   const [message, setMessage] = useState<MessageFormData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [refreshKey, refresh] = useReducer((x: number) => x + 1, 0)
+  const [refreshKey, _refresh] = useReducer((x: number) => x + 1, 0)
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: refreshKey triggers re-fetch intentionally
   useEffect(() => {

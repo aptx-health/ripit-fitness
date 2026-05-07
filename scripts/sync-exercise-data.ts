@@ -395,7 +395,6 @@ async function syncCommunityPrograms(programs: CuratedMeta[]) {
         console.log(`  SKIP (exists): ${data.name}`)
         skipped++
       }
-      continue
     } else {
       await prisma.communityProgram.create({ data })
       created++

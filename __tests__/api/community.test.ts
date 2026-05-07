@@ -447,7 +447,7 @@ describe('Community Programs API', () => {
       });
 
       expect(clonedProgram).toBeTruthy();
-      expect(clonedProgram!.name).toBe('Original Program (Community)');
+      expect(clonedProgram!.name).toBe('Original Program');
       expect(clonedProgram!.userId).toBe(otherUserId);
       expect(clonedProgram!.isActive).toBe(false);
       expect(clonedProgram!.isUserCreated).toBe(true);

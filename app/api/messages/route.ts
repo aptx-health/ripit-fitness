@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
     }
 
     const workoutCount = parseInt(workoutCountStr, 10)
-    if (isNaN(workoutCount) || workoutCount < 0) {
+    if (Number.isNaN(workoutCount) || workoutCount < 0) {
       return NextResponse.json({ error: 'workoutCount must be a non-negative integer' }, { status: 400 })
     }
 

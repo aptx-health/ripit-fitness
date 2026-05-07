@@ -150,6 +150,13 @@ export interface PostSessionMetrics {
   totalRated: number
 }
 
+export interface PwaMetrics {
+  /** Distinct users who opened the app in standalone mode in the last 7 days */
+  pwaUsers: number
+  /** Distinct users who opened the app in a browser in the last 7 days */
+  browserUsers: number
+}
+
 export interface AnalyticsData {
   usage: UsageMetrics
   retention: RetentionMetrics
@@ -157,6 +164,7 @@ export interface AnalyticsData {
   feedbackVolume: FeedbackVolume[]
   signupAttribution: SignupAttributionMetrics
   postSession: PostSessionMetrics
+  pwa: PwaMetrics
   generatedAt: string
 }
 
@@ -650,6 +658,33 @@ async function getPostSessionMetrics(db: Db): Promise<PostSessionMetrics> {
   }
 }
 
+// ---- PWA ----
+
+async function getPwaMetrics(db: Db = defaultPrisma): Promise<PwaMetrics> {
+  const since = daysAgo(7)
+
+  const rows = await db.$queryRaw<Array<{ standalone: string; user_count: bigint }>>`
+    SELECT
+      e.properties->>'standalone' AS standalone,
+      COUNT(DISTINCT e."userId") AS user_count
+    FROM "AppEvent" e
+    INNER JOIN "user" u ON u.id = e."userId" ${ONLY_END_USERS_ON_U}
+    WHERE e.event = 'session_context'
+      AND e."createdAt" >= ${since}
+      AND e.properties->>'standalone' IS NOT NULL
+    GROUP BY e.properties->>'standalone'
+  `
+
+  let pwaUsers = 0
+  let browserUsers = 0
+  for (const row of rows) {
+    if (row.standalone === 'true') pwaUsers = Number(row.user_count)
+    else browserUsers = Number(row.user_count)
+  }
+
+  return { pwaUsers, browserUsers }
+}
+
 // ---- Main ----
 
 export async function getAnalyticsData(
@@ -666,6 +701,7 @@ export async function getAnalyticsData(
     const feedbackVolume = await getFeedbackVolume(db)
     const signupAttribution = await getSignupAttributionMetrics(db)
     const postSession = await getPostSessionMetrics(db)
+    const pwa = await getPwaMetrics(db)
 
     return {
       usage,
@@ -674,6 +710,7 @@ export async function getAnalyticsData(
       feedbackVolume,
       signupAttribution,
       postSession,
+      pwa,
       generatedAt: new Date().toISOString(),
     }
   } catch (error) {
