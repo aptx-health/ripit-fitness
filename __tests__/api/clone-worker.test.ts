@@ -207,7 +207,7 @@ describe('Program Cloning via BullMQ Worker', () => {
 
       expect(clonedProgram).toBeTruthy();
       expect(clonedProgram!.copyStatus).toBe('ready');
-      expect(clonedProgram!.name).toBe('Test Strength Program (Community)');
+      expect(clonedProgram!.name).toBe('Test Strength Program');
       expect(clonedProgram!.userId).toBe(otherUserId);
       expect(clonedProgram!.isActive).toBe(false);
 
