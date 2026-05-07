@@ -178,6 +178,61 @@ describe('User Settings API', () => {
       expect(response.error).toBe('Unauthorized')
     })
   })
+
+  describe('PWA prompt fields', () => {
+    it('should default pwaPromptShownCount to 0 and pwaPromptDismissedAt to null', async () => {
+      const response = await simulateGetSettings(prisma, userId)
+
+      expect(response.success).toBe(true)
+      expect(response.settings?.pwaPromptShownCount).toBe(0)
+      expect(response.settings?.pwaPromptDismissedAt).toBeNull()
+    })
+
+    it('should update pwaPromptShownCount', async () => {
+      await prisma.userSettings.create({
+        data: { userId, defaultWeightUnit: 'lbs', defaultIntensityRating: 'rpe' }
+      })
+
+      const settings = await prisma.userSettings.update({
+        where: { userId },
+        data: { pwaPromptShownCount: 2 }
+      })
+
+      expect(settings.pwaPromptShownCount).toBe(2)
+    })
+
+    it('should update pwaPromptDismissedAt', async () => {
+      await prisma.userSettings.create({
+        data: { userId, defaultWeightUnit: 'lbs', defaultIntensityRating: 'rpe' }
+      })
+
+      const now = new Date()
+      const settings = await prisma.userSettings.update({
+        where: { userId },
+        data: { pwaPromptDismissedAt: now }
+      })
+
+      expect(settings.pwaPromptDismissedAt).toEqual(now)
+    })
+
+    it('should clear pwaPromptDismissedAt by setting to null', async () => {
+      await prisma.userSettings.create({
+        data: {
+          userId,
+          defaultWeightUnit: 'lbs',
+          defaultIntensityRating: 'rpe',
+          pwaPromptDismissedAt: new Date(),
+        }
+      })
+
+      const settings = await prisma.userSettings.update({
+        where: { userId },
+        data: { pwaPromptDismissedAt: null }
+      })
+
+      expect(settings.pwaPromptDismissedAt).toBeNull()
+    })
+  })
 })
 
 // Simulation functions that replicate API logic

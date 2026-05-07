@@ -123,6 +123,34 @@ export default function AdminAnalyticsPage() {
             info="Of all the workouts people started, what percent did they finish (vs. abandoned mid-session)? Higher is better. If this dips, the session UX might be getting in the way."
           />
         </div>
+
+        {/* PWA Install Breakdown */}
+        {(data.pwa.pwaUsers > 0 || data.pwa.browserUsers > 0) && (
+          <div className="mt-4">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+              App Install (7 days)
+            </h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <MetricCard
+                label="Installed (PWA)"
+                value={data.pwa.pwaUsers}
+                info="Users who opened Ripit as an installed app (home screen) in the last 7 days."
+              />
+              <MetricCard
+                label="Browser"
+                value={data.pwa.browserUsers}
+                info="Users who opened Ripit in a web browser (not installed) in the last 7 days."
+              />
+              <MetricCard
+                label="Install Rate"
+                value={data.pwa.pwaUsers + data.pwa.browserUsers > 0
+                  ? `${Math.round((data.pwa.pwaUsers / (data.pwa.pwaUsers + data.pwa.browserUsers)) * 100)}%`
+                  : '—'}
+                info="Percentage of active users running the installed PWA vs. browser. Higher means the install prompt is working."
+              />
+            </div>
+          </div>
+        )}
       </Section>
 
       {/* Retention Section */}

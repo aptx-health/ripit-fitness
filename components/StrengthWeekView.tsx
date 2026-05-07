@@ -5,12 +5,15 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState, useTransition } from 'react'
 import ExerciseLoggingModal from '@/components/ExerciseLoggingModal'
 import { PostSessionFeedback } from '@/components/features/training/PostSessionFeedback'
+import { PwaInstallPrompt } from '@/components/features/training/PwaInstallPrompt'
 import { ProgramCompletionModal } from '@/components/ProgramCompletionModal'
 import type { MessageData } from '@/components/ui/MessageCard'
 import { MessageCard } from '@/components/ui/MessageCard'
 import WeekNavigator from '@/components/ui/WeekNavigator'
 import WorkoutHistoryList from '@/components/WorkoutHistoryList'
 import WorkoutCard from '@/components/workout/WorkoutCard'
+import { useBeforeInstallPrompt } from '@/hooks/useBeforeInstallPrompt'
+import { usePwaPrompt } from '@/hooks/usePwaPrompt'
 import { useUserSettings } from '@/hooks/useUserSettings'
 import { clientLogger } from '@/lib/client-logger'
 import { useDraftWorkout } from '@/lib/contexts/DraftWorkoutContext'
@@ -139,6 +142,24 @@ export default function StrengthWeekView({
   const [isProgramComplete, setIsProgramComplete] = useState(false)
   const [showPostSession, setShowPostSession] = useState(false)
   const [pendingProgramCompletionCheck, setPendingProgramCompletionCheck] = useState(false)
+  const [pendingPwaCheck, setPendingPwaCheck] = useState(false)
+  const [wasFirstWorkout, setWasFirstWorkout] = useState(false)
+
+  // PWA install prompt — capture beforeinstallprompt early for Android
+  const { deferredPrompt } = useBeforeInstallPrompt()
+  const {
+    showPrompt: showPwaPrompt,
+    triggerAfterWorkout,
+    triggerOnPageLoad,
+    handleClose: handlePwaClose,
+    handleInstalled: handlePwaInstalled,
+  } = usePwaPrompt(settings, updateSettings)
+
+  // Trigger PWA prompt on page load for returning users (second session+)
+  useEffect(() => {
+    if (settingsLoading) return
+    triggerOnPageLoad(historyCount)
+  }, [settingsLoading]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const resumeWorkoutId = searchParams.get('resume')
 
@@ -325,6 +346,9 @@ export default function StrengthWeekView({
 
   // Completion is handled inside ExerciseLoggingModal now (per-set writes + status flip)
   const handleCompleteWorkout = async () => {
+    // Capture before router.refresh() updates the prop
+    if (historyCount === 0) setWasFirstWorkout(true)
+
     handleCloseModal(true)
 
     // Check if we should show the post-session feedback prompt
@@ -351,7 +375,32 @@ export default function StrengthWeekView({
 
   const handlePostSessionClose = async () => {
     setShowPostSession(false)
+    // After post-session feedback, try showing PWA prompt (first workout trigger)
+    // Use wasFirstWorkout flag because router.refresh() updates historyCount before this runs
+    if (wasFirstWorkout) {
+      triggerAfterWorkout(1)
+      setWasFirstWorkout(false)
+    }
+    // If PWA prompt will show, defer program completion check to after it closes
+    // We check this on next render via the showPwaPrompt state
     if (pendingProgramCompletionCheck) {
+      setPendingPwaCheck(true)
+    }
+  }
+
+  // When post-session closes but PWA prompt doesn't show, run deferred checks
+  useEffect(() => {
+    if (pendingPwaCheck && !showPwaPrompt && !showPostSession) {
+      setPendingPwaCheck(false)
+      setPendingProgramCompletionCheck(false)
+      checkProgramCompletion(true)
+    }
+  }, [pendingPwaCheck, showPwaPrompt, showPostSession, checkProgramCompletion])
+
+  const handlePwaPromptClose = async () => {
+    await handlePwaClose()
+    if (pendingPwaCheck) {
+      setPendingPwaCheck(false)
       setPendingProgramCompletionCheck(false)
       await checkProgramCompletion(true)
     }
@@ -558,6 +607,14 @@ export default function StrengthWeekView({
       <PostSessionFeedback
         open={showPostSession}
         onClose={handlePostSessionClose}
+      />
+
+      {/* PWA Install Prompt */}
+      <PwaInstallPrompt
+        open={showPwaPrompt}
+        onClose={handlePwaPromptClose}
+        onInstalled={handlePwaInstalled}
+        deferredPrompt={deferredPrompt}
       />
 
       {/* Program Completion Modal */}

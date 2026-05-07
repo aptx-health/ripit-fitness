@@ -308,6 +308,8 @@ model UserSettings {
   loggingMode               String    @default("full")
   dismissedMessageIds       String    @default("[]")
   seenMessageIds            String    @default("[]")
+  pwaPromptShownCount       Int       @default(0)
+  pwaPromptDismissedAt      DateTime?
   createdAt                 DateTime  @default(now())
   updatedAt                 DateTime  @updatedAt
 
