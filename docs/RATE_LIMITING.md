@@ -62,12 +62,14 @@ if (rl.response) return rl.response
 return withRateLimitHeaders(NextResponse.json({ ok: true }), rl)
 ```
 
-For **admin** routes, prefer the `requireEditor({ rateLimit: true })` helper — it combines editor role check and rate limiting in one call:
+For **admin write** routes (`POST`/`PATCH`/`DELETE`), prefer the `requireEditor({ rateLimit: true })` helper — it combines editor role check and rate limiting in one call:
 
 ```ts
 const auth = await requireEditor({ rateLimit: true })
 if (auth.response) return auth.response
 ```
+
+Admin **read** routes (`GET`) use `requireEditor()` without the `rateLimit` flag — read endpoints are excluded from rate limiting per the policy above.
 
 For **pre-auth** or **auth-sensitive** routes, key by IP rather than user id:
 
