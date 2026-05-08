@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { clearAttribution, getAttribution } from '@/lib/signup-attribution'
 
 type Step = 'loading' | 'experience' | 'equipment' | 'info' | 'completing'
@@ -357,7 +357,7 @@ export default function OnboardingPage() {
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-[100dvh] flex-col bg-background">
+    <div className="flex min-h-screen min-h-[100svh] flex-col bg-background">
       {children}
     </div>
   )
@@ -372,19 +372,8 @@ function FadeIn({
   className?: string
   style?: React.CSSProperties
 }) {
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    el.style.animation = 'none'
-    void el.offsetHeight
-    el.style.animation = ''
-  }, [])
-
   return (
     <div
-      ref={ref}
       className={className}
       style={{ animation: 'onboarding-fade-in 0.4s ease-out both', ...style }}
     >
