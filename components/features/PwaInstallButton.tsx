@@ -1,10 +1,10 @@
 'use client'
 
 import { Download, X } from 'lucide-react'
-import { usePathname } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
-import { PwaInstallPrompt } from '@/components/features/training/PwaInstallPrompt'
+import { usePathname } from 'next/navigation'
 import { useBeforeInstallPrompt } from '@/hooks/useBeforeInstallPrompt'
+import { PwaInstallPrompt } from '@/components/features/training/PwaInstallPrompt'
 import { trackEvent } from '@/lib/analytics'
 
 const DISMISS_KEY = 'pwa-install-button-dismissed'
