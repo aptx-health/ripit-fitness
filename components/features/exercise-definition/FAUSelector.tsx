@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/radix/popover';
 import { FAU_DISPLAY_NAMES } from '@/lib/fau-volume';
+import { pluralize } from '@/lib/format/pluralize';
 
 export interface FAUSelectorProps {
   value: string[];
@@ -117,7 +118,7 @@ export default function FAUSelector({
       {/* Selection count */}
       {value.length > 0 && (
         <p className="text-sm text-muted-foreground">
-          {value.length} {variant} muscle group{value.length !== 1 ? 's' : ''} selected
+          {pluralize(value.length, `${variant} muscle group`)} selected
         </p>
       )}
     </div>

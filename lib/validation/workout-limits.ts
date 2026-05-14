@@ -1,4 +1,5 @@
 import type { Prisma, PrismaClient } from '@prisma/client'
+import { pluralize } from '@/lib/format/pluralize'
 
 export const MAX_WORKOUTS_PER_WEEK = 10
 
@@ -14,7 +15,7 @@ export async function validateWorkoutLimit(
     return {
       valid: false,
       currentCount,
-      error: `Cannot add ${additionalWorkouts} workout${additionalWorkouts > 1 ? 's' : ''}. Week already has ${currentCount} workout${currentCount !== 1 ? 's' : ''}. Maximum ${MAX_WORKOUTS_PER_WEEK} workouts per week allowed.`
+      error: `Cannot add ${pluralize(additionalWorkouts, 'workout')}. Week already has ${pluralize(currentCount, 'workout')}. Maximum ${MAX_WORKOUTS_PER_WEEK} workouts per week allowed.`
     }
   }
 

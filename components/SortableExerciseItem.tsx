@@ -3,6 +3,7 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { GripVertical, Pencil, Trash2 } from 'lucide-react'
+import { pluralize } from '@/lib/format/pluralize'
 
 type PrescribedSet = {
   id: string
@@ -76,7 +77,7 @@ export default function SortableExerciseItem({
         <div className="flex-1">
           <span className="font-medium text-foreground">{exercise.name}</span>
           <span className="text-muted-foreground ml-2">
-            ({exercise.prescribedSets.length} set{exercise.prescribedSets.length !== 1 ? 's' : ''})
+            ({pluralize(exercise.prescribedSets.length, 'set')})
           </span>
         </div>
       </div>

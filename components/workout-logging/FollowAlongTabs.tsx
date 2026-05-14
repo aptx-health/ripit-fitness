@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import ExerciseImageCrossfade from '@/components/ui/ExerciseImageCrossfade'
 import type { MessageData } from '@/components/ui/MessageCard'
 import { MessageCard } from '@/components/ui/MessageCard'
+import { pluralize } from '@/lib/format/pluralize'
 
 interface PrescribedSet {
   id: string
@@ -54,10 +55,10 @@ function formatPrescriptionDirective(prescribedSets: PrescribedSet[]): string {
   const count = prescribedSets.length
 
   if (allSame) {
-    return `${count} sets of ${repsValues[0]} reps`
+    return `${pluralize(count, 'set')} of ${repsValues[0]} reps`
   }
 
-  return `${count} sets: ${repsValues.join(', ')} reps`
+  return `${pluralize(count, 'set')}: ${repsValues.join(', ')} reps`
 }
 
 /**

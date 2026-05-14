@@ -1,3 +1,5 @@
+import { pluralize } from '@/lib/format/pluralize'
+
 type StrengthMetadataProps = {
   weekCount?: number
   workoutCount?: number
@@ -13,12 +15,12 @@ export default function StrengthMetadata({
     <div className="flex gap-4 text-sm text-muted-foreground">
       {weekCount !== undefined && (
         <span>
-          {weekCount} week{weekCount !== 1 ? 's' : ''}
+          {pluralize(weekCount, 'week')}
         </span>
       )}
       {workoutCount !== undefined && (
         <span>
-          {workoutCount} workout{workoutCount !== 1 ? 's' : ''}
+          {pluralize(workoutCount, 'workout')}
         </span>
       )}
     </div>

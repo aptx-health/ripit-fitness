@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { pluralize } from '@/lib/format/pluralize'
 
 interface SignupRow {
   email: string
@@ -81,7 +82,7 @@ export default function AdminSignupsPage() {
             Recent Signups
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Last 30 days &middot; {rows.length} signup{rows.length !== 1 ? 's' : ''}
+            Last 30 days &middot; {pluralize(rows.length, 'signup')}
           </p>
         </div>
         <button
