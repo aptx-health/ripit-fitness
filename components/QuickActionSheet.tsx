@@ -226,13 +226,13 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
               <>
                 {/* Draft row: tap the body to resume, tap the trailing trash
                     chip to arm + confirm discard inline. */}
-                <div className="flex items-stretch bg-warning/10">
+                <div className="flex items-stretch bg-accent/10">
                   <button
                     type="button"
                     onClick={handleResumeDraft}
-                    className="group flex-1 flex items-center gap-3 px-4 py-3.5 text-left hover:bg-warning/15 active:bg-warning/25 transition-colors doom-focus-ring min-w-0"
+                    className="group flex-1 flex items-center gap-3 px-4 py-3.5 text-left hover:bg-accent/15 active:bg-accent/25 transition-colors doom-focus-ring min-w-0"
                   >
-                    <span className="inline-flex items-center justify-center w-10 h-10 border border-warning bg-warning text-warning-foreground shrink-0">
+                    <span className="inline-flex items-center justify-center w-10 h-10 border border-accent bg-accent text-accent-foreground shrink-0">
                       <Play size={20} strokeWidth={2.25} />
                     </span>
                     <div className="flex-1 min-w-0">
@@ -314,14 +314,14 @@ type ActionRowProps = {
   subtitle?: string
   onClick?: () => void
   disabled?: boolean
-  /** Color treatment for the icon chip. `success` (jungle green) for the
-   *  primary "go" action when a program is active. */
-  tone?: 'success' | 'warning'
+  /** Color treatment for the icon chip. `success` for the "Continue your
+   *  program" go-action; `accent` for the theme's brand voice. */
+  tone?: 'success' | 'accent'
 }
 
 const TONE_CHIP_STYLES = {
   success: 'bg-success text-success-foreground border-success',
-  warning: 'bg-warning text-warning-foreground border-warning',
+  accent: 'bg-accent text-accent-foreground border-accent',
 } as const
 
 function ActionRow({

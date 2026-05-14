@@ -55,10 +55,14 @@ export default function BottomNav() {
                 />
               )}
               <span
-                className="relative inline-flex flex-col items-center justify-center w-full h-full rounded-md bg-warning text-warning-foreground transition-transform active:translate-y-[3px] overflow-hidden"
+                className="relative inline-flex flex-col items-center justify-center w-full h-full rounded-md bg-accent text-accent-foreground transition-transform active:translate-y-[3px] overflow-hidden"
                 style={{
+                  // Use accent (theme's brand voice) so the chip wears each
+                  // theme's identity — gold in Ripit, purple in GitHub, cyan in
+                  // synthwave, etc. Bottom edge pairs with --accent-hover for
+                  // the 3D illusion. Warning would always be amber/orange.
                   boxShadow:
-                    '0 5px 0 var(--accent-hover, #B36F08), 0 7px 10px rgba(0,0,0,0.35), inset 0 2px 0 rgba(255,255,255,0.45), inset 0 -1px 0 rgba(0,0,0,0.15)',
+                    '0 5px 0 var(--accent-hover), 0 7px 10px rgba(0,0,0,0.35), inset 0 2px 0 rgba(255,255,255,0.45), inset 0 -1px 0 rgba(0,0,0,0.15)',
                 }}
               >
                 {activeDraft && <span aria-hidden="true" className="chip-gold-shine" />}
