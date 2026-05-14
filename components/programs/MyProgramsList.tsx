@@ -1,10 +1,11 @@
 'use client'
 
-import { ChevronDown, ChevronRight, Copy, Lock, Pencil, Plus, Star, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronRight, Copy, Lock, Pencil, Star, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useToast } from '@/components/ToastProvider'
+import { CreateNewCard } from '@/components/ui/CreateNewCard'
 import { clientLogger } from '@/lib/client-logger'
 import ActivationConfirmModal from './ActivationConfirmModal'
 
@@ -318,13 +319,7 @@ function CreateProgramRow({
   if (hasAccess) {
     return (
       <div className="space-y-1">
-        <Link
-          href="/programs/new"
-          className="flex items-center justify-center gap-2 w-full py-3 border-2 border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary transition-all text-sm font-semibold uppercase tracking-wider doom-focus-ring"
-        >
-          <Plus size={16} />
-          CREATE NEW PROGRAM
-        </Link>
+        <CreateNewCard href="/programs/new" label="CREATE NEW PROGRAM" />
         {!bypassLimit && (
           <p className="text-sm text-muted-foreground text-center">
             {programCount} of {maxPrograms} program slots used
@@ -336,14 +331,11 @@ function CreateProgramRow({
 
   return (
     <div className="space-y-1">
-      <button
-        type="button"
+      <CreateNewCard
+        label="CREATE NEW PROGRAM"
+        locked
         onClick={onPremiumGate}
-        className="flex items-center justify-center gap-2 w-full py-3 border-2 border-dashed border-border text-muted-foreground hover:text-muted-foreground/80 transition-all text-sm font-semibold uppercase tracking-wider doom-focus-ring cursor-not-allowed opacity-70"
-      >
-        <Lock size={16} />
-        CREATE NEW PROGRAM
-      </button>
+      />
       <p className="text-sm text-muted-foreground text-center">
         {programCount} of {maxPrograms} program slots used
       </p>

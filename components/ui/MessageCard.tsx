@@ -3,6 +3,7 @@
 import { ChevronRight, X } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { MessageMarkdown } from '@/components/ui/MessageMarkdown'
+import { TipAnnotation } from '@/components/ui/TipAnnotation'
 import { MESSAGE_ICONS } from '@/lib/icons/message-icons'
 
 export interface MessageSlide {
@@ -75,77 +76,74 @@ export function MessageCard({
     setSlideIndex((prev) => (prev + 1) % slides.length)
   }, [slides.length])
 
-  return (
-    <div
-      role="note"
-      className="relative p-3.5 border border-dashed border-border/40 bg-muted/35"
+  const dismissButton = isDismissable ? (
+    <button
+      type="button"
+      onClick={() => onDismiss(message.id)}
+      className={`absolute p-2 text-muted-foreground hover:text-foreground transition-colors doom-focus-ring z-10 ${
+        isCarousel ? 'top-1.5 left-1.5' : 'top-1.5 right-1.5'
+      }`}
+      aria-label="Dismiss"
     >
-      {isDismissable && (
-        <button
-          type="button"
-          onClick={() => onDismiss(message.id)}
-          className={`absolute p-2 text-muted-foreground hover:text-foreground transition-colors doom-focus-ring z-10 ${
-            isCarousel ? 'top-1.5 left-1.5' : 'top-1.5 right-1.5'
-          }`}
-          aria-label="Dismiss"
-        >
-          <X size={16} />
-        </button>
-      )}
+      <X size={16} />
+    </button>
+  ) : null
 
-      <div className={`flex items-start gap-2.5 ${isDismissable && isCarousel ? 'pl-6' : ''}`}>
-        <Icon
-          aria-hidden="true"
-          size={18}
-          strokeWidth={1.8}
-          className="shrink-0 mt-[5px] text-muted-foreground"
-        />
-        <div
-          aria-live="polite"
-          className={`text-lg leading-relaxed text-muted-foreground flex-1 ${
-            isDismissable || isCarousel ? 'pr-6' : ''
-          }`}
-        >
-          <MessageMarkdown content={currentSlide.content} />
-        </div>
-      </div>
+  const carouselOverlay = isCarousel ? (
+    <>
+      <span className="absolute bottom-1.5 left-3.5 text-[10px] text-muted-foreground/40">
+        {slideIndex + 1}/{slides.length}
+      </span>
+      <button
+        type="button"
+        onClick={goNext}
+        className="absolute right-0 top-0 bottom-0 w-10 flex items-center justify-end pr-2 doom-focus-ring"
+        style={{
+          background:
+            'linear-gradient(to right, transparent, color-mix(in srgb, var(--muted) 85%, transparent) 40%)',
+        }}
+        aria-label="Next slide"
+      >
+        <ChevronRight size={16} className="text-muted-foreground/60" />
+      </button>
+    </>
+  ) : null
 
-      {/* Carousel: right arrow + subtle counter */}
-      {isCarousel && (
+  const multiMessageNav = !isCarousel && hasMultiMessageNav ? (
+    <button
+      type="button"
+      onClick={onNextTip}
+      className="absolute right-0 top-0 bottom-0 w-10 flex items-center justify-end pr-2 doom-focus-ring"
+      style={{
+        background:
+          'linear-gradient(to right, transparent, color-mix(in srgb, var(--muted) 85%, transparent) 40%)',
+      }}
+      aria-label="Next tip"
+    >
+      <ChevronRight size={16} className="text-muted-foreground/60" />
+    </button>
+  ) : null
+
+  return (
+    <TipAnnotation
+      icon={<Icon aria-hidden="true" size={16} strokeWidth={1.8} />}
+      overlay={
         <>
-          <span className="absolute bottom-1.5 left-3.5 text-[10px] text-muted-foreground/40">
-            {slideIndex + 1}/{slides.length}
-          </span>
-          <button
-            type="button"
-            onClick={goNext}
-            className="absolute right-0 top-0 bottom-0 w-10 flex items-center justify-end pr-2 doom-focus-ring"
-            style={{
-              background:
-                'linear-gradient(to right, transparent, color-mix(in srgb, var(--muted) 85%, transparent) 40%)',
-            }}
-            aria-label="Next slide"
-          >
-            <ChevronRight size={16} className="text-muted-foreground/60" />
-          </button>
+          {dismissButton}
+          {carouselOverlay}
+          {multiMessageNav}
         </>
-      )}
-
-      {/* Multi-message navigation (logger tip rotation across different messages) */}
-      {!isCarousel && hasMultiMessageNav && (
-        <button
-          type="button"
-          onClick={onNextTip}
-          className="absolute right-0 top-0 bottom-0 w-10 flex items-center justify-end pr-2 doom-focus-ring"
-          style={{
-            background:
-              'linear-gradient(to right, transparent, color-mix(in srgb, var(--muted) 85%, transparent) 40%)',
-          }}
-          aria-label="Next tip"
-        >
-          <ChevronRight size={16} className="text-muted-foreground/60" />
-        </button>
-      )}
-    </div>
+      }
+      className={isDismissable && isCarousel ? 'pl-6' : ''}
+    >
+      <div
+        aria-live="polite"
+        className={`text-lg leading-relaxed text-muted-foreground ${
+          isDismissable || isCarousel ? 'pr-6' : ''
+        }`}
+      >
+        <MessageMarkdown content={currentSlide.content} />
+      </div>
+    </TipAnnotation>
   )
 }

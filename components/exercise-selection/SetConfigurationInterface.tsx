@@ -2,6 +2,7 @@
 
 import { Plus, Trash } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
+import { CreateNewCard } from '@/components/ui/CreateNewCard'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/radix/popover'
 import { useIntensityAccess } from '@/hooks/useIntensityAccess'
 import { useUserSettings } from '@/hooks/useUserSettings'
@@ -498,14 +499,11 @@ export function SetConfigurationInterface({
               </div>
 
               {/* Add Set Button */}
-              <button
-                type="button"
+              <CreateNewCard
                 onClick={handleAddSet}
-                className="w-full mt-2 py-2.5 border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary transition-colors flex items-center justify-center gap-2 text-base font-bold uppercase tracking-wider"
-              >
-                <Plus size={16} />
-                ADD SET (CLONES LAST)
-              </button>
+                label="ADD SET (CLONES LAST)"
+                className="mt-2"
+              />
             </div>
 
           </div>
