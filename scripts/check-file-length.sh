@@ -10,9 +10,10 @@ for file in "$@"; do
     continue
   fi
 
-  # Skip test files
+  # Skip test files and vendored skill code (.claude/skills/**)
   case "$file" in
     *__tests__/*|*.test.ts|*.test.tsx|*.spec.ts|*.spec.tsx) continue ;;
+    .claude/skills/*|*/.claude/skills/*) continue ;;
   esac
 
   line_count=$(wc -l < "$file")
