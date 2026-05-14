@@ -23,6 +23,7 @@ import ExerciseActionsFooter from './workout-logging/ExerciseActionsFooter'
 import ExerciseDisplayTabs from './workout-logging/ExerciseDisplayTabs'
 import ExerciseLoggingHeader from './workout-logging/ExerciseLoggingHeader'
 import ExerciseNavigation from './workout-logging/ExerciseNavigation'
+import ExitWorkoutConfirm from './workout-logging/ExitWorkoutConfirm'
 import FollowAlongFooter from './workout-logging/FollowAlongFooter'
 import FollowAlongHeader from './workout-logging/FollowAlongHeader'
 import FollowAlongTabs from './workout-logging/FollowAlongTabs'
@@ -835,75 +836,13 @@ export default function ExerciseLoggingModal({
         />
       )}
 
-      {/* Exit workout confirmation */}
       {showExitConfirm && (
-        <div className="fixed inset-0 backdrop-blur-md bg-background/80 flex items-center justify-center z-[60] p-4">
-          <div className="bg-card border-2 border-warning p-6 sm:p-8 text-center max-w-sm w-full shadow-xl doom-corners">
-            <div className="text-warning mb-4 flex justify-center">
-              <AlertTriangle size={56} strokeWidth={2} />
-            </div>
-            <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2 uppercase tracking-wider">
-              {totalLoggedSets > 0 ? 'Exit Workout?' : 'Confirm Exit'}
-            </h3>
-            <p className="text-base sm:text-lg text-muted-foreground mb-6">
-              {totalLoggedSets > 0
-                ? 'You have logged sets. Do you want to save as draft or discard?'
-                : 'Are you sure you want to exit?'}
-            </p>
-            {totalLoggedSets > 0 ? (
-              <div className="flex flex-col gap-3">
-                <Button
-                  type="button"
-                  variant="primary"
-                  doom
-                  onClick={handleExitSaveAsDraft}
-                  className="w-full px-4 py-3 text-base sm:text-lg font-bold uppercase tracking-wider"
-                >
-                  Save as Draft
-                </Button>
-                <Button
-                  type="button"
-                  variant="danger"
-                  doom
-                  onClick={handleExitDiscard}
-                  className="w-full px-4 py-3 text-base sm:text-lg font-bold uppercase tracking-wider"
-                >
-                  Discard All
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  doom
-                  onClick={() => setShowExitConfirm(false)}
-                  className="w-full px-4 py-3 text-base sm:text-lg font-bold uppercase tracking-wider border-2 border-border hover:border-primary"
-                >
-                  Cancel
-                </Button>
-              </div>
-            ) : (
-              <div className="flex gap-3">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  doom
-                  onClick={() => setShowExitConfirm(false)}
-                  className="flex-1 px-4 py-3 text-base sm:text-lg font-bold uppercase tracking-wider border-2 border-border hover:border-primary"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="button"
-                  variant="danger"
-                  doom
-                  onClick={handleExitDiscard}
-                  className="flex-1 px-4 py-3 text-base sm:text-lg font-bold uppercase tracking-wider"
-                >
-                  Exit
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
+        <ExitWorkoutConfirm
+          hasUnsavedWork={totalLoggedSets > 0}
+          onSaveAsDraft={handleExitSaveAsDraft}
+          onDiscard={handleExitDiscard}
+          onCancel={() => setShowExitConfirm(false)}
+        />
       )}
     </>,
     document.body

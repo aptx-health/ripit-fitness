@@ -89,12 +89,14 @@ export default function ExerciseLoggingHeader({
 
         {/* Right: action icons */}
         <div className="flex items-center justify-end gap-3.5">
-          <ActionsMenu
-            actions={menuActions}
-            size="sm"
-            variant="ghost"
-            className="text-secondary-foreground/80 hover:text-secondary-foreground"
-          />
+          {menuActions.length > 0 && (
+            <ActionsMenu
+              actions={menuActions}
+              size="sm"
+              variant="ghost"
+              className="text-secondary-foreground/80 hover:text-secondary-foreground"
+            />
+          )}
           <button
             type="button"
             onClick={onCompleteWorkout}

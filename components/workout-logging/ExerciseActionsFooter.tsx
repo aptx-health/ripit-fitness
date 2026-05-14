@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 
 const RAISED_SHADOW = 'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)'
 const RECESSED_SHADOW = 'inset 0 1px 2px rgba(0,0,0,0.50), inset 0 0 0 1px rgba(254,243,199,0.06)'
@@ -15,6 +15,8 @@ interface ExerciseActionsFooterProps {
   onLogSet: () => void
   onPrevious: () => void
   onNext: () => void
+  /** When provided, renders an Add Exercise button side-by-side with LOG SET. */
+  onAddExercise?: () => void
 }
 
 export default function ExerciseActionsFooter({
@@ -27,6 +29,7 @@ export default function ExerciseActionsFooter({
   onLogSet,
   onPrevious,
   onNext,
+  onAddExercise,
 }: ExerciseActionsFooterProps) {
   const isFirst = currentExerciseIndex === 0
   const isLast = currentExerciseIndex >= totalExercises - 1
@@ -51,15 +54,30 @@ export default function ExerciseActionsFooter({
           <ChevronLeft size={18} strokeWidth={2.5} />
         </button>
 
-        <button
-          type="button"
-          onClick={onLogSet}
-          disabled={!canLogSet}
-          className="flex-1 h-11 bg-accent text-accent-foreground text-sm font-medium uppercase tracking-widest transition-all disabled:opacity-40 disabled:cursor-not-allowed doom-focus-ring"
-          style={{ boxShadow: RAISED_SHADOW }}
-        >
-          LOG SET {nextSetNumber}
-        </button>
+        <div className="flex-1 flex items-stretch gap-2">
+          <button
+            type="button"
+            onClick={onLogSet}
+            disabled={!canLogSet}
+            className={`${onAddExercise ? 'flex-[1.4]' : 'flex-1'} h-11 bg-accent text-accent-foreground text-sm font-medium uppercase tracking-widest transition-all disabled:opacity-40 disabled:cursor-not-allowed doom-focus-ring`}
+            style={{ boxShadow: RAISED_SHADOW }}
+          >
+            LOG SET {nextSetNumber}
+          </button>
+
+          {onAddExercise && (
+            <button
+              type="button"
+              onClick={onAddExercise}
+              className="flex-1 h-11 bg-primary text-primary-foreground text-sm font-medium uppercase tracking-widest transition-all doom-focus-ring inline-flex items-center justify-center gap-1"
+              style={{ boxShadow: RAISED_SHADOW }}
+              aria-label="Add another exercise"
+            >
+              <Plus size={16} strokeWidth={2.5} />
+              ADD
+            </button>
+          )}
+        </div>
 
         <button
           type="button"
