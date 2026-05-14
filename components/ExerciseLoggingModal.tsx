@@ -15,6 +15,7 @@ import { useWorkoutDraft } from '@/hooks/useWorkoutDraft'
 import { completeDraft, discardDraft } from '@/lib/api/workout-sets'
 import { clientLogger } from '@/lib/client-logger'
 import { parseRepsFromPrescribed } from '@/lib/constants/intensity-presets'
+import { formatPrescribedSummary } from '@/lib/format/prescribed-summary'
 import type { LoggedSet } from '@/types/workout'
 import type { ActionItem } from './ActionsMenu'
 import ExerciseDefinitionEditorModal from './features/exercise-definition/ExerciseDefinitionEditorModal'
@@ -187,6 +188,23 @@ export default function ExerciseLoggingModal({
 
   // Intensity preference check: user has it enabled in settings
   const { hasAccess: hasIntensityAccess } = useIntensityAccess()
+
+  // Persistent context banner above the input area: show the prescription for
+  // the current set, and the user's position in the set sequence. When the
+  // user is past the prescribed count (extra sets) we hide "of N" so the label
+  // doesn't read "Set 5 of 4".
+  const prescribedSummary = useMemo(
+    () =>
+      prescribedSet
+        ? formatPrescribedSummary(prescribedSet, { showIntensity: hasIntensityAccess }) ||
+          undefined
+        : undefined,
+    [prescribedSet, hasIntensityAccess]
+  )
+  const totalPrescribedSets =
+    currentPrescribedSets.length > 0 && nextSetNumber <= currentPrescribedSets.length
+      ? currentPrescribedSets.length
+      : undefined
   const { settings, updateSettings } = useUserSettings()
 
   // One-time intensity intro tip
@@ -633,6 +651,9 @@ export default function ExerciseLoggingModal({
                   message={currentMessage}
                   onMessageSeen={onMessageSeen}
                   onMessageDismissed={onMessageDismissed}
+                  currentSetNumber={nextSetNumber}
+                  totalSets={totalPrescribedSets}
+                  prescribedSummary={prescribedSummary}
                   loggingForm={
                     <SetLoggingForm
                       prescribedSet={prescribedSet}
