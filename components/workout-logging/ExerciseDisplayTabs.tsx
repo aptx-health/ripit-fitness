@@ -144,7 +144,7 @@ export default function ExerciseDisplayTabs({
           totalSets={totalSets}
           prescribed={prescribedSummary}
         />
-        <div className="px-4 flex flex-col gap-2">
+        <div className="px-4 flex-1 flex flex-col gap-2">
           {loggingForm}
           {!isInputExpanded && (
             <>
