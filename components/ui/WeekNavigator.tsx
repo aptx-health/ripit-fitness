@@ -26,17 +26,17 @@ export default function WeekNavigator({
         {/* Prev button */}
         <Link
           href={hasPrev ? `${baseUrl}?week=${currentWeek - 1}` : '#'}
-          className={`shrink-0 flex items-center justify-center w-10 h-10 rounded-full transition-colors doom-focus-ring ${
+          className={`shrink-0 flex items-center justify-center w-11 h-11 rounded-full transition-colors doom-focus-ring ${
             hasPrev
-              ? 'text-foreground hover:bg-muted/50 active:bg-muted'
-              : 'text-muted-foreground/20 pointer-events-none'
+              ? 'text-foreground hover:bg-muted/60 active:bg-muted'
+              : 'text-muted-foreground opacity-40 cursor-not-allowed pointer-events-none'
           }`}
           aria-disabled={!hasPrev}
           aria-label="Previous week"
           tabIndex={hasPrev ? 0 : -1}
           onClick={e => !hasPrev && e.preventDefault()}
         >
-          <ChevronLeft size={22} strokeWidth={1.5} />
+          <ChevronLeft size={20} strokeWidth={2.75} />
         </Link>
 
         {/* Center content */}
@@ -52,17 +52,17 @@ export default function WeekNavigator({
         {/* Next button */}
         <Link
           href={hasNext ? `${baseUrl}?week=${currentWeek + 1}` : '#'}
-          className={`shrink-0 flex items-center justify-center w-10 h-10 rounded-full transition-colors doom-focus-ring ${
+          className={`shrink-0 flex items-center justify-center w-11 h-11 rounded-full transition-colors doom-focus-ring ${
             hasNext
-              ? 'text-foreground hover:bg-muted/50 active:bg-muted'
-              : 'text-muted-foreground/20 pointer-events-none'
+              ? 'text-foreground hover:bg-muted/60 active:bg-muted'
+              : 'text-muted-foreground opacity-40 cursor-not-allowed pointer-events-none'
           }`}
           aria-disabled={!hasNext}
           aria-label="Next week"
           tabIndex={hasNext ? 0 : -1}
           onClick={e => !hasNext && e.preventDefault()}
         >
-          <ChevronRight size={22} strokeWidth={1.5} />
+          <ChevronRight size={20} strokeWidth={2.75} />
         </Link>
 
         {/* Completion indicator badge */}
