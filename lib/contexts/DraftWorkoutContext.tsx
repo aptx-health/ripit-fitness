@@ -55,6 +55,7 @@ export function DraftWorkoutProvider({ children }: { children: ReactNode }) {
   // navigate back to /training. Re-fetching on navigation propagates the
   // server state into the context without each handler having to remember
   // to call refreshDraft itself.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: pathname is the trigger, not a value used inside
   useEffect(() => {
     fetchDraft()
   }, [fetchDraft, pathname])
