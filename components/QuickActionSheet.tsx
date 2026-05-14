@@ -1,14 +1,16 @@
 'use client'
 
-import { Activity, Dumbbell, LayoutGrid, type LucideIcon } from 'lucide-react'
+import * as DialogPrimitive from '@radix-ui/react-dialog'
+import {
+  ChevronRight,
+  Dumbbell,
+  LayoutGrid,
+  Play,
+  X,
+  type LucideIcon,
+} from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
-import {
-  Dialog,
-  DialogBody,
-  DialogContent,
-  DialogTitle,
-} from '@/components/ui/radix/dialog'
 import { clientLogger } from '@/lib/client-logger'
 import { useDraftWorkout } from '@/lib/contexts/DraftWorkoutContext'
 
@@ -27,6 +29,13 @@ type Props = {
   onOpenChange: (open: boolean) => void
 }
 
+// Bottom-anchored sheet sitting above the h-14 mobile bottom nav, with a small
+// breathing gap so the nav's gold action chip doesn't kiss the panel border.
+const NAV_OFFSET_PX = 56 + 8
+const SHEET_BOTTOM_STYLE = {
+  bottom: `calc(env(safe-area-inset-bottom, 0px) + ${NAV_OFFSET_PX}px)`,
+}
+
 export default function QuickActionSheet({ open, onOpenChange }: Props) {
   const router = useRouter()
   const { activeDraft } = useDraftWorkout()
@@ -34,19 +43,14 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
   const [isLoadingNext, setIsLoadingNext] = useState(false)
   const [isStartingFreestyle, setIsStartingFreestyle] = useState(false)
 
-  // Fetch next-workout only when the sheet opens AND no draft is active
-  // (when a draft is active, only Resume Draft is enabled — next-workout doesn't matter).
   useEffect(() => {
-    if (!open || activeDraft) {
-      return
-    }
+    if (!open || activeDraft) return
     let cancelled = false
     setIsLoadingNext(true)
     fetch('/api/training/next-workout', { cache: 'no-store' })
       .then((res) => (res.ok ? res.json() : { next: null }))
       .then((data) => {
-        if (cancelled) return
-        setNextWorkout(data.next)
+        if (!cancelled) setNextWorkout(data.next)
       })
       .catch((err) => {
         clientLogger.error('Failed to load next workout:', err)
@@ -96,82 +100,105 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
     }
   }, [isStartingFreestyle, onOpenChange, router])
 
+  const continueSubtitle = isLoadingNext
+    ? 'Loading…'
+    : nextWorkout
+      ? `Week ${nextWorkout.weekNumber} · Day ${nextWorkout.dayNumber} · ${nextWorkout.workoutName}`
+      : 'No active program'
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="!w-[92vw] !max-w-md"
-        showClose={true}
-      >
-        <DialogTitle className="px-4 sm:px-6 pt-4 sm:pt-5 pb-2 text-base font-bold uppercase tracking-wider text-foreground doom-heading">
-          Quick actions
-        </DialogTitle>
-        <DialogBody className="px-3 sm:px-4 pb-4 sm:pb-5 space-y-2">
-          {activeDraft ? (
-            <>
+    <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay
+          className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 50,
+            background: 'rgba(0,0,0,0.55)',
+            backdropFilter: 'blur(2px)',
+          }}
+        />
+        <DialogPrimitive.Content
+          aria-describedby={undefined}
+          className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom data-[state=open]:duration-200 data-[state=closed]:duration-150"
+          style={{
+            position: 'fixed',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 'min(96vw, 28rem)',
+            zIndex: 51,
+            ...SHEET_BOTTOM_STYLE,
+          }}
+        >
+          <div
+            className="bg-card border border-border doom-corners divide-y divide-border"
+            style={{ boxShadow: '0 -8px 24px rgba(0,0,0,0.35)' }}
+          >
+            {/* Header — same cream surface as rows; close as a chunky bordered chip */}
+            <div className="flex items-center justify-between px-4 pt-3 pb-2.5">
+              <DialogPrimitive.Title className="doom-label text-foreground/80">
+                Quick actions
+              </DialogPrimitive.Title>
+              <DialogPrimitive.Close
+                aria-label="Close"
+                className="inline-flex items-center justify-center w-8 h-8 border border-border bg-muted/30 hover:bg-muted/60 active:bg-muted text-foreground/70 hover:text-foreground transition-colors doom-focus-ring"
+              >
+                <X size={16} strokeWidth={2.5} />
+              </DialogPrimitive.Close>
+            </div>
+
+            {activeDraft ? (
               <ActionRow
-                icon={Dumbbell}
-                label={`Resume draft: ${activeDraft.workoutName}`}
+                icon={Play}
+                label={activeDraft.workoutName}
                 subtitle={
                   activeDraft.isAdHoc
-                    ? 'Continue your freestyle workout'
-                    : 'Continue your in-progress workout'
+                    ? 'Resume freestyle workout'
+                    : 'Resume in-progress workout'
                 }
                 onClick={handleResumeDraft}
-                emphasis="primary"
+                primary
               />
+            ) : (
               <ActionRow
-                icon={Dumbbell}
-                label="Freestyle workout"
-                subtitle="Finish current workout first"
-                disabled
-              />
-              <ActionRow
-                icon={LayoutGrid}
-                label="Pick a workout"
-                subtitle="Finish current workout first"
-                disabled
-              />
-            </>
-          ) : (
-            <>
-              <ActionRow
-                icon={Activity}
-                label={
-                  nextWorkout
-                    ? `Continue your program`
-                    : 'Continue your program'
-                }
-                subtitle={
-                  isLoadingNext
-                    ? 'Loading…'
-                    : nextWorkout
-                      ? `${nextWorkout.programName} — Week ${nextWorkout.weekNumber}, ${nextWorkout.workoutName}`
-                      : 'No active program'
-                }
+                icon={Play}
+                label="Continue your program"
+                subtitle={continueSubtitle}
                 onClick={nextWorkout ? handleContinueProgram : undefined}
                 disabled={!nextWorkout}
-                emphasis={nextWorkout ? 'primary' : undefined}
+                primary={!!nextWorkout}
               />
-              <ActionRow
-                icon={Dumbbell}
-                label="Freestyle workout"
-                subtitle={
-                  isStartingFreestyle ? 'Starting…' : 'Log sets as you go'
-                }
-                onClick={handleStartFreestyle}
-                disabled={isStartingFreestyle}
-              />
-              <ActionRow
-                icon={LayoutGrid}
-                label="Pick a workout"
-                subtitle="Coming soon"
-                disabled
-              />
-            </>
-          )}
-        </DialogBody>
-      </DialogContent>
-    </Dialog>
+            )}
+
+            <ActionRow
+              icon={Dumbbell}
+              label="Freestyle workout"
+              subtitle={
+                activeDraft
+                  ? 'Finish current workout first'
+                  : isStartingFreestyle
+                    ? 'Starting…'
+                    : 'Log sets as you go'
+              }
+              onClick={
+                !activeDraft && !isStartingFreestyle
+                  ? handleStartFreestyle
+                  : undefined
+              }
+              disabled={!!activeDraft || isStartingFreestyle}
+            />
+
+            <ActionRow
+              icon={LayoutGrid}
+              label="Pick a workout"
+              subtitle={activeDraft ? 'Finish current workout first' : 'Coming soon'}
+              disabled
+            />
+          </div>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   )
 }
 
@@ -181,7 +208,7 @@ type ActionRowProps = {
   subtitle?: string
   onClick?: () => void
   disabled?: boolean
-  emphasis?: 'primary'
+  primary?: boolean
 }
 
 function ActionRow({
@@ -190,16 +217,21 @@ function ActionRow({
   subtitle,
   onClick,
   disabled = false,
-  emphasis,
+  primary = false,
 }: ActionRowProps) {
+  const isPrimary = primary && !disabled
   const baseStyles =
-    'w-full flex items-center gap-3 px-3 py-3 text-left border-2 transition-colors doom-focus-ring'
-  const enabledStyles =
-    emphasis === 'primary'
-      ? 'border-accent bg-accent/5 hover:bg-accent/10 active:bg-accent/15 text-foreground'
-      : 'border-border bg-card hover:bg-muted active:bg-muted/80 text-foreground'
-  const disabledStyles =
-    'border-border bg-muted/30 text-muted-foreground cursor-not-allowed opacity-60'
+    'group w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors doom-focus-ring'
+  const enabledStyles = 'hover:bg-muted/50 active:bg-muted/70 cursor-pointer'
+  const disabledStyles = 'opacity-50 cursor-not-allowed'
+
+  // Icon chip: green-success tile for the primary action (echoes the bottom-nav
+  // gold chip language), bordered cream tile for the rest.
+  const chipStyles = isPrimary
+    ? 'bg-success text-success-foreground border-success'
+    : disabled
+      ? 'bg-muted/40 text-muted-foreground border-border'
+      : 'bg-muted/30 text-foreground/80 border-border'
 
   return (
     <button
@@ -208,21 +240,30 @@ function ActionRow({
       disabled={disabled}
       className={`${baseStyles} ${disabled ? disabledStyles : enabledStyles}`}
     >
-      <Icon
-        className={`h-5 w-5 shrink-0 ${
-          disabled ? 'text-muted-foreground' : emphasis === 'primary' ? 'text-accent' : 'text-foreground'
-        }`}
-      />
+      <span
+        className={`inline-flex items-center justify-center w-10 h-10 border ${chipStyles} shrink-0`}
+      >
+        <Icon size={20} strokeWidth={2.25} />
+      </span>
       <div className="flex-1 min-w-0">
-        <div className="font-semibold text-sm uppercase tracking-wider truncate">
+        <div className="font-bold text-base text-foreground doom-heading truncate">
           {label}
         </div>
         {subtitle && (
-          <div className="text-xs text-muted-foreground truncate mt-0.5">
+          <div className="text-sm text-muted-foreground truncate mt-0.5">
             {subtitle}
           </div>
         )}
       </div>
+      {!disabled && (
+        <ChevronRight
+          size={20}
+          strokeWidth={2.5}
+          className={`shrink-0 transition-transform group-hover:translate-x-0.5 ${
+            isPrimary ? 'text-success' : 'text-muted-foreground'
+          }`}
+        />
+      )}
     </button>
   )
 }
