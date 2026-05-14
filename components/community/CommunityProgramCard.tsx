@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
 import { EQUIPMENT_LABELS, GOAL_LABELS, LEVEL_LABELS } from '@/lib/constants/program-metadata'
+import { formatRelativeTime } from '@/lib/format/relativeTime'
 import UnpublishProgramDialog from './UnpublishProgramDialog'
 
 type CommunityProgram = {
@@ -47,21 +48,6 @@ export default function CommunityProgramCard({
   const [descExpanded, setDescExpanded] = useState(false)
 
   const isAuthor = program.authorUserId === currentUserId
-
-  // Format published date
-  const formatDate = (date: Date) => {
-    const now = new Date()
-    const published = new Date(date)
-    const diffInMs = now.getTime() - published.getTime()
-    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
-
-    if (diffInDays === 0) return 'Today'
-    if (diffInDays === 1) return 'Yesterday'
-    if (diffInDays < 7) return `${diffInDays} days ago`
-    if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} weeks ago`
-    if (diffInDays < 365) return `${Math.floor(diffInDays / 30)} months ago`
-    return `${Math.floor(diffInDays / 365)} years ago`
-  }
 
   const handleAddProgram = async () => {
     setIsAdding(true)
@@ -203,7 +189,7 @@ export default function CommunityProgramCard({
 
         {/* Published date */}
         <div className="text-sm text-muted-foreground mb-4">
-          Published {formatDate(program.publishedAt)}
+          Published {formatRelativeTime(program.publishedAt)}
         </div>
 
         {/* Error message */}

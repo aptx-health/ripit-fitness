@@ -6,6 +6,7 @@ import { useToast } from '@/components/ToastProvider';
 import { Button } from '@/components/ui/Button';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { clientLogger } from '@/lib/client-logger';
+import { pluralize } from '@/lib/format/pluralize';
 import EquipmentSelector from './EquipmentSelector';
 import ExerciseInfoPreview from './ExerciseInfoPreview';
 import FAUSelector from './FAUSelector';
@@ -273,8 +274,7 @@ export default function ExerciseDefinitionEditorModal({
               {mode === 'edit' && usageCount > 0 && (
                 <div className="bg-warning-muted border-2 border-warning-border rounded p-4">
                   <p className="text-sm text-warning-text font-medium">
-                    ⚠️ This exercise is used {usageCount} time
-                    {usageCount > 1 ? 's' : ''} in this program. Changes will affect future sessions.
+                    ⚠️ This exercise is used {pluralize(usageCount, 'time')} in this program. Changes will affect future sessions.
                   </p>
                 </div>
               )}

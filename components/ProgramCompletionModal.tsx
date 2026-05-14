@@ -4,6 +4,7 @@ import { X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
+import { pluralize } from '@/lib/format/pluralize'
 
 interface CompletionStats {
   programName: string
@@ -264,7 +265,7 @@ export function ProgramCompletionModal({
 
               {stats.skippedWorkouts > 0 && (
                 <p className="text-sm text-muted-foreground text-center border-t-2 border-border pt-4">
-                  {stats.skippedWorkouts} workout{stats.skippedWorkouts !== 1 ? 's' : ''} skipped
+                  {pluralize(stats.skippedWorkouts, 'workout')} skipped
                 </p>
               )}
             </div>

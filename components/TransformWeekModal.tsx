@@ -4,6 +4,7 @@ import { Minus, Plus, X } from 'lucide-react'
 import { useState } from 'react'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import { SegmentedControl } from '@/components/ui/SegmentedControl'
+import { pluralize } from '@/lib/format/pluralize'
 import type { Week } from '@/types/program-builder'
 
 interface TransformWeekModalProps {
@@ -137,22 +138,22 @@ export default function TransformWeekModal({
               <p className="text-sm font-bold text-success doom-heading uppercase tracking-wider">Transformation Complete!</p>
               {stats.intensityUpdatedCount > 0 && (
                 <p className="text-xs text-foreground">
-                  Updated intensity on {stats.intensityUpdatedCount} set{stats.intensityUpdatedCount !== 1 ? 's' : ''}
+                  Updated intensity on {pluralize(stats.intensityUpdatedCount, 'set')}
                 </p>
               )}
               {stats.volumeAddedCount > 0 && (
                 <p className="text-xs text-foreground">
-                  Added {stats.volumeAddedCount} set{stats.volumeAddedCount !== 1 ? 's' : ''} to {stats.volumeAddedCount} exercise{stats.volumeAddedCount !== 1 ? 's' : ''}
+                  Added {pluralize(stats.volumeAddedCount, 'set')} to {pluralize(stats.volumeAddedCount, 'exercise')}
                 </p>
               )}
               {stats.volumeRemovedCount > 0 && (
                 <p className="text-xs text-foreground">
-                  Removed {stats.volumeRemovedCount} set{stats.volumeRemovedCount !== 1 ? 's' : ''} from {stats.volumeRemovedCount} exercise{stats.volumeRemovedCount !== 1 ? 's' : ''}
+                  Removed {pluralize(stats.volumeRemovedCount, 'set')} from {pluralize(stats.volumeRemovedCount, 'exercise')}
                 </p>
               )}
               {stats.skippedExercises > 0 && (
                 <p className="text-xs text-muted-foreground">
-                  Skipped {stats.skippedExercises} exercise{stats.skippedExercises !== 1 ? 's' : ''} (no sets to modify)
+                  Skipped {pluralize(stats.skippedExercises, 'exercise')} (no sets to modify)
                 </p>
               )}
             </div>

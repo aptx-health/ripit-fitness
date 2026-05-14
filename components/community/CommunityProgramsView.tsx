@@ -13,6 +13,7 @@ import {
   FITNESS_LEVELS,
   LEVEL_LABELS,
 } from '@/lib/constants/program-metadata'
+import { pluralize } from '@/lib/format/pluralize'
 import CommunityProgramCard from './CommunityProgramCard'
 
 type CommunityProgram = {
@@ -176,8 +177,7 @@ export default function CommunityProgramsView({
           {/* Results count */}
           {filteredPrograms.length > 0 && (
             <p className="text-sm text-muted-foreground mt-3">
-              Showing {filteredPrograms.length} program
-              {filteredPrograms.length !== 1 ? 's' : ''}
+              Showing {pluralize(filteredPrograms.length, 'program')}
             </p>
           )}
         </div>

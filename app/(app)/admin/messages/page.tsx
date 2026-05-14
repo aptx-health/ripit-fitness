@@ -3,6 +3,7 @@
 import { Plus } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { pluralize } from '@/lib/format/pluralize'
 import { MESSAGE_ICONS } from '@/lib/icons/message-icons'
 
 interface Message {
@@ -177,7 +178,7 @@ export default function AdminMessagesPage() {
 
       {/* Sort indicator */}
       <p className="text-xs text-muted-foreground mb-3">
-        Sorted by priority (highest first) &middot; {sortedMessages.length} message{sortedMessages.length !== 1 ? 's' : ''}
+        Sorted by priority (highest first) &middot; {pluralize(sortedMessages.length, 'message')}
       </p>
 
       {/* Message list */}

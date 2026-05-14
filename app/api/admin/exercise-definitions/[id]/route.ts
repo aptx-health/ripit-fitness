@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { requireEditor } from '@/lib/admin/auth'
 import { prisma } from '@/lib/db'
+import { pluralize } from '@/lib/format/pluralize'
 import { logger } from '@/lib/logger'
 import {
   normalizeExerciseName,
@@ -261,7 +262,7 @@ export async function DELETE(
         {
           error: 'Exercise is in use',
           usageCount,
-          message: `This exercise is used ${usageCount} time${usageCount > 1 ? 's' : ''}. Use force=true to delete anyway.`,
+          message: `This exercise is used ${pluralize(usageCount, 'time')}. Use force=true to delete anyway.`,
         },
         { status: 409 }
       )
