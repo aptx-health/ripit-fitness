@@ -17,6 +17,10 @@ export type ExerciseDefinition = {
   createdBy?: string | null
 }
 
+// Cap popover width to viewport on mobile so the right column doesn't clip.
+// Radix collision detection can shift but not shrink a hardcoded width.
+const FILTER_POPOVER_CLASS = 'w-[min(500px,calc(100vw-1.5rem))] p-3'
+
 interface ExerciseSearchInterfaceProps {
   onExerciseSelect: (exercise: ExerciseDefinition) => void
   initialQuery?: string
@@ -172,7 +176,7 @@ export function ExerciseSearchInterface({
                 {selectedFAU ? FAU_DISPLAY_NAMES[selectedFAU] : 'All Muscle Groups'}
               </button>
             </PopoverTrigger>
-            <PopoverContent className="w-[500px] p-3" align="start">
+            <PopoverContent className={FILTER_POPOVER_CLASS} align="start" collisionPadding={8}>
               <div className="space-y-2">
                 <div className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-2">
                   Select Muscle Group
@@ -221,7 +225,7 @@ export function ExerciseSearchInterface({
                 {selectedEquipment ? EQUIPMENT_DISPLAY_NAMES[selectedEquipment] : 'All Equipment'}
               </button>
             </PopoverTrigger>
-            <PopoverContent className="w-[500px] p-3" align="start">
+            <PopoverContent className={FILTER_POPOVER_CLASS} align="start" collisionPadding={8}>
               <div className="space-y-2">
                 <div className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-2">
                   Select Equipment
