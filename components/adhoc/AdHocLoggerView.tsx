@@ -569,9 +569,9 @@ function EmptyState() {
   return (
     <div className="flex-1 flex items-center justify-center px-6 py-8">
       <TipAnnotation
-        icon={<Sparkles aria-hidden="true" size={16} strokeWidth={1.8} />}
+        icon={<Sparkles aria-hidden="true" size={20} strokeWidth={1.8} />}
       >
-        <span className="text-base leading-relaxed text-foreground">
+        <span className="text-xl sm:text-2xl leading-relaxed text-foreground">
           Pick your first exercise to start logging. Add as many as you want as you go.
         </span>
       </TipAnnotation>
