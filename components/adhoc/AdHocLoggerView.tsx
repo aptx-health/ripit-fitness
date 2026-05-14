@@ -8,6 +8,8 @@ import {
   type ExerciseDefinition,
   ExerciseSearchInterface,
 } from '@/components/exercise-selection/ExerciseSearchInterface'
+import { Button } from '@/components/ui/Button'
+import { LoadingFrog } from '@/components/ui/loading-frog'
 import { TipAnnotation } from '@/components/ui/TipAnnotation'
 import ExerciseActionsFooter from '@/components/workout-logging/ExerciseActionsFooter'
 import ExerciseDisplayTabs from '@/components/workout-logging/ExerciseDisplayTabs'
@@ -103,6 +105,7 @@ export default function AdHocLoggerView({
   const [isAdding, setIsAdding] = useState(false)
   const [isLoggingSet, setIsLoggingSet] = useState(false)
   const [isCompleting, setIsCompleting] = useState(false)
+  const [isConfirmingComplete, setIsConfirmingComplete] = useState(false)
   const [isDiscarding, setIsDiscarding] = useState(false)
   const [historyByExerciseId, setHistoryByExerciseId] = useState<
     Map<string, ExerciseHistory | null>
@@ -300,12 +303,16 @@ export default function AdHocLoggerView({
     [currentExercise, loggedSets, completionId]
   )
 
+  // Header check icon → confirmation modal (matches programmed logger).
+  // If no sets have been logged, the workout can't be completed at all, so
+  // bail out silently rather than opening the modal.
+  const handleRequestComplete = useCallback(() => {
+    if (loggedSets.length === 0) return
+    setIsConfirmingComplete(true)
+  }, [loggedSets.length])
+
   const handleCompleteWorkout = useCallback(async () => {
-    if (isCompleting) return
-    if (loggedSets.length === 0) {
-      setShowExitConfirm(true)
-      return
-    }
+    if (isCompleting || loggedSets.length === 0) return
     setIsCompleting(true)
     try {
       const res = await fetch(`/api/workouts/adhoc/${completionId}/complete`, {
@@ -405,7 +412,7 @@ export default function AdHocLoggerView({
           currentExerciseIndex={hasExercises ? currentIndex : 0}
           totalExercises={Math.max(1, exercises.length)}
           startedAt={startedAt}
-          onCompleteWorkout={handleCompleteWorkout}
+          onCompleteWorkout={handleRequestComplete}
           onClose={handleClose}
           menuActions={[]}
         />
@@ -510,6 +517,50 @@ export default function AdHocLoggerView({
           onCancel={() => setShowExitConfirm(false)}
         />
       )}
+      {isConfirmingComplete &&
+        createPortal(
+          <div className="fixed inset-0 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center z-[60] p-4">
+            <div className="bg-card border-2 border-border p-6 sm:p-8 text-center min-w-[300px] max-w-sm w-full shadow-xl doom-corners">
+              {!isCompleting ? (
+                <>
+                  <p className="text-lg sm:text-xl mb-6 text-foreground font-bold uppercase tracking-wider">
+                    Complete this workout?
+                  </p>
+                  <div className="flex justify-center gap-3">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      doom
+                      onClick={() => setIsConfirmingComplete(false)}
+                      className="px-4 sm:px-6 py-2.5 sm:py-3 text-base font-bold uppercase tracking-wider border-2 border-border hover:border-primary"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="success"
+                      doom
+                      onClick={handleCompleteWorkout}
+                      className="px-4 sm:px-6 py-2.5 sm:py-3 text-base font-bold uppercase tracking-wider"
+                    >
+                      Confirm
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="mb-3 flex justify-center">
+                    <LoadingFrog size={64} speed={0.8} />
+                  </div>
+                  <p className="text-foreground uppercase tracking-wider font-bold">
+                    Completing workout…
+                  </p>
+                </>
+              )}
+            </div>
+          </div>,
+          document.body
+        )}
     </>
   )
 }
