@@ -6,10 +6,10 @@ import { checkRateLimit, setLoggingLimiter } from '@/lib/rate-limit'
 
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: Promise<{ workoutId: string; setId: string }> }
+  { params }: { params: Promise<{ completionId: string; setId: string }> }
 ) {
   try {
-    const { workoutId, setId } = await params
+    const { completionId, setId } = await params
 
     const { user, error } = await getCurrentUser()
     if (error || !user) {
@@ -19,47 +19,40 @@ export async function DELETE(
     const limited = await checkRateLimit(setLoggingLimiter, user.id)
     if (limited) return limited
 
-    // Find the set and verify ownership through the completion -> workout -> program chain
     const loggedSet = await prisma.loggedSet.findUnique({
       where: { id: setId },
-      include: {
-        completion: {
-          include: {
-            workout: {
-              include: { week: { include: { program: { select: { userId: true } } } } },
-            },
-          },
-        },
-      },
+      include: { completion: true },
     })
 
     if (!loggedSet) {
       return NextResponse.json({ error: 'Set not found' }, { status: 404 })
     }
-
-    // This is the programmed-workout deletion path; ad-hoc sets are deleted
-    // via /api/workouts/adhoc/[completionId]/sets/[setId].
-    if (!loggedSet.completion.workout) {
-      return NextResponse.json({ error: 'Set does not belong to this workout' }, { status: 400 })
-    }
-
-    if (loggedSet.completion.workout.week.program.userId !== user.id) {
+    if (loggedSet.completion.userId !== user.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
-
-    if (loggedSet.completion.workoutId !== workoutId) {
-      return NextResponse.json({ error: 'Set does not belong to this workout' }, { status: 400 })
+    if (loggedSet.completionId !== completionId) {
+      return NextResponse.json(
+        { error: 'Set does not belong to this workout' },
+        { status: 400 }
+      )
     }
-
+    if (!loggedSet.completion.isAdHoc) {
+      return NextResponse.json(
+        { error: 'Not an ad-hoc workout' },
+        { status: 400 }
+      )
+    }
     if (loggedSet.completion.status !== 'draft') {
-      return NextResponse.json({ error: 'Cannot delete sets from a completed workout' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Cannot delete sets from a completed workout' },
+        { status: 400 }
+      )
     }
 
-    // Delete the set and renumber remaining sets for the same exercise
+    // Delete + renumber remaining sets for this exercise to stay sequential.
     const result = await prisma.$transaction(async (tx) => {
       await tx.loggedSet.delete({ where: { id: setId } })
 
-      // Renumber remaining sets for this exercise to keep sequential
       const remainingSets = await tx.loggedSet.findMany({
         where: {
           completionId: loggedSet.completionId,
@@ -69,15 +62,14 @@ export async function DELETE(
       })
 
       const renumbered: Array<{ id: string; setNumber: number }> = []
-
       for (let i = 0; i < remainingSets.length; i++) {
-        const expectedSetNumber = i + 1
-        if (remainingSets[i].setNumber !== expectedSetNumber) {
+        const expected = i + 1
+        if (remainingSets[i].setNumber !== expected) {
           await tx.loggedSet.update({
             where: { id: remainingSets[i].id },
-            data: { setNumber: expectedSetNumber },
+            data: { setNumber: expected },
           })
-          renumbered.push({ id: remainingSets[i].id, setNumber: expectedSetNumber })
+          renumbered.push({ id: remainingSets[i].id, setNumber: expected })
         }
       }
 
@@ -85,8 +77,11 @@ export async function DELETE(
     })
 
     return NextResponse.json({ success: true, renumbered: result.renumbered })
-  } catch (error) {
-    logger.error({ error, context: 'draft-sets-delete' }, 'Error deleting draft set')
+  } catch (err) {
+    logger.error(
+      { error: err, context: 'adhoc-sets-delete' },
+      'Error deleting set from ad-hoc workout'
+    )
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

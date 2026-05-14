@@ -8,7 +8,9 @@ export default function FloatingDraftButton() {
   const { activeDraft } = useDraftWorkout()
   const router = useRouter()
 
-  if (!activeDraft) return null
+  // Hidden for ad-hoc drafts; the bottom-nav action button (PR2) is the home
+  // for that pulse + resume affordance. Programmed drafts still render here.
+  if (!activeDraft || activeDraft.workoutId === null) return null
 
   return (
     <button

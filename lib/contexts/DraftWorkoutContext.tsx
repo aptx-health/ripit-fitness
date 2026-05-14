@@ -12,8 +12,9 @@ import { clientLogger } from '@/lib/client-logger'
 
 type ActiveDraft = {
   completionId: string
-  workoutId: string
+  workoutId: string | null
   workoutName: string
+  isAdHoc: boolean
 }
 
 type DraftWorkoutContextValue = {

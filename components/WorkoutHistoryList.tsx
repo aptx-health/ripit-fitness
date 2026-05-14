@@ -25,6 +25,8 @@ type WorkoutCompletion = {
   id: string
   completedAt: Date
   status: string
+  isAdHoc: boolean
+  name: string | null
   workout: {
     id: string
     name: string
@@ -33,7 +35,7 @@ type WorkoutCompletion = {
         name: string
       }
     }
-  }
+  } | null
   loggedSets: LoggedSet[]
   _count: {
     loggedSets: number
@@ -176,11 +178,13 @@ export default function WorkoutHistoryList({ count, compact = false }: Props) {
                 })}
               </p>
               <h3 className="text-lg font-bold text-foreground doom-heading mb-1">
-                {completion.workout.name}
+                {completion.workout?.name ?? completion.name ?? 'Open Workout'}
               </h3>
-              <p className="text-sm text-muted-foreground">
-                {completion.workout.week.program.name}
-              </p>
+              {completion.workout && (
+                <p className="text-sm text-muted-foreground">
+                  {completion.workout.week.program.name}
+                </p>
+              )}
             </div>
             <div className="ml-4">
               {isItemCompleted && (
@@ -229,14 +233,16 @@ export default function WorkoutHistoryList({ count, compact = false }: Props) {
                 </div>
               )
             })}
-            <div className="pt-2">
-              <Link
-                href={`/programs/${completion.workout.id}`}
-                className="text-sm text-primary hover:text-primary-hover font-medium"
-              >
-                View Full Workout →
-              </Link>
-            </div>
+            {completion.workout && (
+              <div className="pt-2">
+                <Link
+                  href={`/programs/${completion.workout.id}`}
+                  className="text-sm text-primary hover:text-primary-hover font-medium"
+                >
+                  View Full Workout →
+                </Link>
+              </div>
+            )}
           </div>
         )}
       </div>
