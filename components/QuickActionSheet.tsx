@@ -2,8 +2,6 @@
 
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import {
-  ChevronDown,
-  ChevronRight,
   Dumbbell,
   LayoutGrid,
   type LucideIcon,
@@ -12,7 +10,7 @@ import {
   X,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { discardDraft } from '@/lib/api/workout-sets'
 import { clientLogger } from '@/lib/client-logger'
 import { useDraftWorkout } from '@/lib/contexts/DraftWorkoutContext'
@@ -45,13 +43,27 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
   const [nextWorkout, setNextWorkout] = useState<NextWorkout | null>(null)
   const [isLoadingNext, setIsLoadingNext] = useState(false)
   const [isStartingFreestyle, setIsStartingFreestyle] = useState(false)
-  const [isDraftExpanded, setIsDraftExpanded] = useState(false)
   const [isDiscardingDraft, setIsDiscardingDraft] = useState(false)
+  const [confirmDiscard, setConfirmDiscard] = useState(false)
+  const confirmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Collapse the draft section whenever the sheet closes (or the draft clears)
+  // Reset the inline-confirm state whenever the sheet closes or the draft
+  // clears, so the trash button never reopens still armed.
   useEffect(() => {
-    if (!open || !activeDraft) setIsDraftExpanded(false)
+    if (!open || !activeDraft) {
+      setConfirmDiscard(false)
+      if (confirmTimerRef.current) {
+        clearTimeout(confirmTimerRef.current)
+        confirmTimerRef.current = null
+      }
+    }
   }, [open, activeDraft])
+
+  useEffect(() => {
+    return () => {
+      if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current)
+    }
+  }, [])
 
   // Re-fetch active draft each time the sheet opens — context only loads on
   // mount, so a draft saved elsewhere wouldn't otherwise show up here.
@@ -129,7 +141,6 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
       }
       clearDraft()
       await refreshDraft()
-      setIsDraftExpanded(false)
       router.refresh()
     } catch (err) {
       clientLogger.error('Failed to discard draft:', err)
@@ -137,6 +148,31 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
       setIsDiscardingDraft(false)
     }
   }, [activeDraft, isDiscardingDraft, clearDraft, refreshDraft, router])
+
+  // Two-stage inline confirm: first tap arms (button turns red + label), second
+  // tap within ~4s discards. Any sheet close or draft change resets it.
+  const handleDiscardClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation()
+      if (!activeDraft || isDiscardingDraft) return
+      if (confirmDiscard) {
+        if (confirmTimerRef.current) {
+          clearTimeout(confirmTimerRef.current)
+          confirmTimerRef.current = null
+        }
+        setConfirmDiscard(false)
+        void handleDiscardDraft()
+        return
+      }
+      setConfirmDiscard(true)
+      if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current)
+      confirmTimerRef.current = setTimeout(() => {
+        setConfirmDiscard(false)
+        confirmTimerRef.current = null
+      }, 4000)
+    },
+    [activeDraft, isDiscardingDraft, confirmDiscard, handleDiscardDraft],
+  )
 
   const continueSubtitle = isLoadingNext
     ? 'Loading…'
@@ -186,95 +222,85 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
               </DialogPrimitive.Close>
             </div>
 
-            {/* Draft section: appears above the main actions when a draft is in
-                progress, separated by a thin border + spacing. Tapping the row
-                expands it to reveal Continue + Discard controls inline. */}
-            {activeDraft && (
+            {activeDraft ? (
               <>
-                <div className="bg-warning/5">
-                  <ActionRow
-                    icon={Play}
-                    label="Continue draft workout"
-                    subtitle={
-                      activeDraft.isAdHoc ? 'Freestyle' : activeDraft.workoutName
-                    }
-                    onClick={() => setIsDraftExpanded((v) => !v)}
-                    tone="warning"
-                    expanded={isDraftExpanded}
-                  />
-                  {isDraftExpanded && (
-                    <div className="px-4 pb-3 flex gap-2">
-                      <button
-                        type="button"
-                        onClick={handleResumeDraft}
-                        className="flex-[1.4] h-10 bg-warning text-warning-foreground text-sm font-bold uppercase tracking-wider doom-button-3d-accent doom-focus-ring"
-                      >
-                        Continue
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleDiscardDraft}
-                        disabled={isDiscardingDraft}
-                        className="flex-1 h-10 bg-error text-error-foreground text-sm font-bold uppercase tracking-wider inline-flex items-center justify-center gap-1.5 disabled:opacity-50 doom-focus-ring"
-                        style={{
-                          boxShadow:
-                            'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)',
-                        }}
-                      >
-                        <Trash2 size={14} strokeWidth={2.5} />
-                        {isDiscardingDraft ? 'Discarding…' : 'Discard'}
-                      </button>
+                {/* Draft row: tap the body to resume, tap the trailing trash
+                    chip to arm + confirm discard inline. */}
+                <div className="flex items-stretch bg-warning/10">
+                  <button
+                    type="button"
+                    onClick={handleResumeDraft}
+                    className="group flex-1 flex items-center gap-3 px-4 py-3.5 text-left hover:bg-warning/15 active:bg-warning/25 transition-colors doom-focus-ring min-w-0"
+                  >
+                    <span className="inline-flex items-center justify-center w-10 h-10 border border-warning bg-warning text-warning-foreground shrink-0">
+                      <Play size={20} strokeWidth={2.25} />
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-bold text-base text-foreground doom-heading truncate">
+                        {activeDraft.isAdHoc
+                          ? 'Freestyle workout'
+                          : activeDraft.workoutName}
+                      </div>
+                      <div className="text-sm text-muted-foreground truncate mt-0.5">
+                        In progress · tap to resume
+                      </div>
                     </div>
-                  )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDiscardClick}
+                    disabled={isDiscardingDraft}
+                    aria-label={
+                      confirmDiscard ? 'Confirm discard draft' : 'Discard draft'
+                    }
+                    className={`shrink-0 inline-flex items-center justify-center gap-1.5 px-3 my-2 mr-3 border transition-colors doom-focus-ring disabled:opacity-50 ${
+                      confirmDiscard
+                        ? 'bg-error text-error-foreground border-error'
+                        : 'bg-card hover:bg-error/15 hover:border-error/60 hover:text-error text-foreground/70 border-border'
+                    }`}
+                  >
+                    <Trash2 size={18} strokeWidth={2.5} />
+                    {confirmDiscard && (
+                      <span className="text-xs font-black uppercase tracking-wider">
+                        {isDiscardingDraft ? 'Discarding' : 'Confirm'}
+                      </span>
+                    )}
+                  </button>
                 </div>
-                {/* Visual gap separating draft from the always-visible actions */}
-                <div className="h-2 bg-card border-b border-border" />
+
+                {/* Single explanatory line replacing three rows of identical
+                    "finish current workout first" denial. */}
+                <div className="px-4 py-3 text-center text-xs text-muted-foreground italic border-t border-border">
+                  Continue or discard your draft to unlock other actions
+                </div>
               </>
+            ) : (
+              <div className="divide-y divide-border">
+                <ActionRow
+                  icon={Play}
+                  label="Continue your program"
+                  subtitle={continueSubtitle}
+                  onClick={nextWorkout ? handleContinueProgram : undefined}
+                  disabled={!nextWorkout}
+                  tone={nextWorkout ? 'success' : undefined}
+                />
+                <ActionRow
+                  icon={Dumbbell}
+                  label="Freestyle workout"
+                  subtitle={
+                    isStartingFreestyle ? 'Starting…' : 'Log sets as you go'
+                  }
+                  onClick={!isStartingFreestyle ? handleStartFreestyle : undefined}
+                  disabled={isStartingFreestyle}
+                />
+                <ActionRow
+                  icon={LayoutGrid}
+                  label="Pick a workout"
+                  subtitle="Coming soon"
+                  disabled
+                />
+              </div>
             )}
-
-            <div className="divide-y divide-border">
-              <ActionRow
-                icon={Play}
-                label="Continue your program"
-                subtitle={
-                  activeDraft
-                    ? 'Finish current workout first'
-                    : continueSubtitle
-                }
-                onClick={
-                  !activeDraft && nextWorkout ? handleContinueProgram : undefined
-                }
-                disabled={!!activeDraft || !nextWorkout}
-                tone={!activeDraft && nextWorkout ? 'success' : undefined}
-              />
-
-              <ActionRow
-                icon={Dumbbell}
-                label="Freestyle workout"
-                subtitle={
-                  activeDraft
-                    ? 'Finish current workout first'
-                    : isStartingFreestyle
-                      ? 'Starting…'
-                      : 'Log sets as you go'
-                }
-                onClick={
-                  !activeDraft && !isStartingFreestyle
-                    ? handleStartFreestyle
-                    : undefined
-                }
-                disabled={!!activeDraft || isStartingFreestyle}
-              />
-
-              <ActionRow
-                icon={LayoutGrid}
-                label="Pick a workout"
-                subtitle={
-                  activeDraft ? 'Finish current workout first' : 'Coming soon'
-                }
-                disabled
-              />
-            </div>
           </div>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
@@ -288,24 +314,14 @@ type ActionRowProps = {
   subtitle?: string
   onClick?: () => void
   disabled?: boolean
-  /** Color treatment for the icon chip + chevron. `success` (jungle green) for
-   *  Continue your program; `warning` (banana gold) for the draft-resume row,
-   *  echoing the bottom-nav gold chip's call-back to in-progress work. */
+  /** Color treatment for the icon chip. `success` (jungle green) for the
+   *  primary "go" action when a program is active. */
   tone?: 'success' | 'warning'
-  /** When true, renders a down-chevron instead of right-chevron to indicate
-   *  the row toggles an expanded section. */
-  expanded?: boolean
 }
 
-const TONE_STYLES = {
-  success: {
-    chip: 'bg-success text-success-foreground border-success',
-    chevron: 'text-success',
-  },
-  warning: {
-    chip: 'bg-warning text-warning-foreground border-warning',
-    chevron: 'text-warning',
-  },
+const TONE_CHIP_STYLES = {
+  success: 'bg-success text-success-foreground border-success',
+  warning: 'bg-warning text-warning-foreground border-warning',
 } as const
 
 function ActionRow({
@@ -315,16 +331,15 @@ function ActionRow({
   onClick,
   disabled = false,
   tone,
-  expanded = false,
 }: ActionRowProps) {
   const activeTone = !disabled && tone ? tone : null
   const baseStyles =
-    'group w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors doom-focus-ring'
+    'w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors doom-focus-ring'
   const enabledStyles = 'hover:bg-muted/50 active:bg-muted/70 cursor-pointer'
   const disabledStyles = 'opacity-50 cursor-not-allowed'
 
   const chipStyles = activeTone
-    ? TONE_STYLES[activeTone].chip
+    ? TONE_CHIP_STYLES[activeTone]
     : disabled
       ? 'bg-muted/40 text-muted-foreground border-border'
       : 'bg-muted/30 text-foreground/80 border-border'
@@ -351,24 +366,6 @@ function ActionRow({
           </div>
         )}
       </div>
-      {!disabled &&
-        (expanded ? (
-          <ChevronDown
-            size={20}
-            strokeWidth={2.5}
-            className={`shrink-0 transition-transform ${
-              activeTone ? TONE_STYLES[activeTone].chevron : 'text-muted-foreground'
-            }`}
-          />
-        ) : (
-          <ChevronRight
-            size={20}
-            strokeWidth={2.5}
-            className={`shrink-0 transition-transform group-hover:translate-x-0.5 ${
-              activeTone ? TONE_STYLES[activeTone].chevron : 'text-muted-foreground'
-            }`}
-          />
-        ))}
     </button>
   )
 }
