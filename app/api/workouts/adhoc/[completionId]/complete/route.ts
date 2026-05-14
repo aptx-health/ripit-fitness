@@ -1,0 +1,66 @@
+import { type NextRequest, NextResponse } from 'next/server'
+import { getCurrentUser } from '@/lib/auth/server'
+import { prisma } from '@/lib/db'
+import { findAdHocCompletion } from '@/lib/db/adhoc-completion'
+import { recordEvent } from '@/lib/events'
+import { logger } from '@/lib/logger'
+import { checkRateLimit, workoutActionLimiter } from '@/lib/rate-limit'
+
+export async function POST(
+  _request: NextRequest,
+  { params }: { params: Promise<{ completionId: string }> }
+) {
+  try {
+    const { completionId } = await params
+
+    const { user, error } = await getCurrentUser()
+    if (error || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const limited = await checkRateLimit(workoutActionLimiter, user.id)
+    if (limited) return limited
+
+    const lookup = await findAdHocCompletion(completionId, user.id)
+    if (!lookup.ok) {
+      return NextResponse.json({ error: lookup.error }, { status: lookup.status })
+    }
+
+    if (lookup.completion.status === 'completed') {
+      return NextResponse.json(
+        { error: 'Workout already completed' },
+        { status: 400 }
+      )
+    }
+
+    // Require at least one logged set so we don't persist empty ad-hoc sessions.
+    const setCount = await prisma.loggedSet.count({ where: { completionId } })
+    if (setCount === 0) {
+      return NextResponse.json(
+        { error: 'Log at least one set before completing.' },
+        { status: 400 }
+      )
+    }
+
+    const completion = await prisma.workoutCompletion.update({
+      where: { id: completionId },
+      data: { status: 'completed', completedAt: new Date() },
+      select: { id: true, completedAt: true, status: true },
+    })
+
+    recordEvent(user.id, 'adhoc_workout_completed', { completionId })
+
+    logger.info(
+      { userId: user.id, completionId, setCount },
+      'Ad-hoc workout completed'
+    )
+
+    return NextResponse.json({ success: true, completion })
+  } catch (err) {
+    logger.error(
+      { error: err, context: 'adhoc-complete' },
+      'Error completing ad-hoc workout'
+    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}

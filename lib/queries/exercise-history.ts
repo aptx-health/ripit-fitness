@@ -55,6 +55,7 @@ export async function getBatchExercisePerformance(
     take: 50, // Limit to recent workouts - sufficient for finding last performance
     select: {
       completedAt: true,
+      name: true,
       workout: { select: { name: true } },
       loggedSets: {
         where: {
@@ -103,7 +104,7 @@ export async function getBatchExercisePerformance(
 
         historyMap.set(defId, {
           completedAt: completion.completedAt,
-          workoutName: completion.workout.name,
+          workoutName: completion.workout?.name ?? completion.name ?? 'Open Workout',
           sets: exerciseSets
         });
       }
@@ -157,7 +158,7 @@ export async function getLastExercisePerformance(
 
   return {
     completedAt: lastCompletion.completedAt,
-    workoutName: lastCompletion.workout.name,
+    workoutName: lastCompletion.workout?.name ?? lastCompletion.name ?? 'Open Workout',
     sets: lastCompletion.loggedSets.map(set => ({
       setNumber: set.setNumber,
       reps: set.reps,

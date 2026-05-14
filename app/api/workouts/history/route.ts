@@ -28,6 +28,8 @@ export async function GET(request: NextRequest) {
         id: true,
         status: true,
         completedAt: true,
+        isAdHoc: true,
+        name: true,
         workout: {
           select: {
             id: true,
