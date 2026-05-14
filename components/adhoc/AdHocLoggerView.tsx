@@ -17,6 +17,7 @@ import SetLoggingForm, {
   type ExpandedInput,
 } from '@/components/workout-logging/SetLoggingForm'
 import { useIntensityAccess } from '@/hooks/useIntensityAccess'
+import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
 import { clientLogger } from '@/lib/client-logger'
 import type { LoggedSet } from '@/types/workout'
 
@@ -359,6 +360,15 @@ export default function AdHocLoggerView({
   const isInputExpanded = expandedInput !== null
   const hasExercises = exercises.length > 0
 
+  const swipeHandlers = useSwipeNavigation({
+    onSwipeLeft: () => {
+      if (currentIndex < exercises.length - 1) goToExercise(currentIndex + 1)
+    },
+    onSwipeRight: () => {
+      if (currentIndex > 0) goToExercise(currentIndex - 1)
+    },
+  })
+
   return (
     <>
       <div className="fixed inset-0 bg-background flex flex-col" style={{ zIndex: 50 }}>
@@ -371,7 +381,7 @@ export default function AdHocLoggerView({
           menuActions={[]}
         />
 
-        <div className="flex-1 overflow-hidden flex flex-col">
+        <div className="flex-1 overflow-hidden flex flex-col" {...swipeHandlers}>
           {hasExercises && currentExercise ? (
             <ExerciseDisplayTabs
               exercise={currentExercise}
