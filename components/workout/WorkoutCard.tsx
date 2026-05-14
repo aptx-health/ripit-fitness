@@ -140,9 +140,9 @@ export default function WorkoutCard({
               <span className="p-1 text-muted-foreground">
                 {expanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
               </span>
-            ) : (
+            ) : isSkipped ? (
               <ChevronRight size={18} className="text-muted-foreground" />
-            )}
+            ) : null}
           </div>
         </div>
       </button>
