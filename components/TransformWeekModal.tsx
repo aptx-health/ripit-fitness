@@ -3,6 +3,7 @@
 import { Minus, Plus, X } from 'lucide-react'
 import { useState } from 'react'
 import { LoadingFrog } from '@/components/ui/loading-frog'
+import { SegmentedControl } from '@/components/ui/SegmentedControl'
 import type { Week } from '@/types/program-builder'
 
 interface TransformWeekModalProps {
@@ -169,41 +170,16 @@ export default function TransformWeekModal({
             <h3 className="text-sm font-bold text-foreground doom-heading uppercase tracking-wider">Adjust Intensity</h3>
 
             {/* Intensity Direction Selection */}
-            <div className="flex gap-2">
-              <button type="button"
-                onClick={() => setIntensityDirection('NONE')}
-                disabled={isSubmitting || stats !== null}
-                className={`flex-1 px-3 py-2 text-xs font-semibold uppercase tracking-wider border-2 transition-colors doom-focus-ring ${
-                  intensityDirection === 'NONE'
-                    ? 'bg-primary text-primary-foreground border-primary doom-button-3d'
-                    : 'bg-muted text-foreground border-border hover:bg-muted/80'
-                } disabled:opacity-50`}
-              >
-                None
-              </button>
-              <button type="button"
-                onClick={() => setIntensityDirection('MORE')}
-                disabled={isSubmitting || stats !== null}
-                className={`flex-1 px-3 py-2 text-xs font-semibold uppercase tracking-wider border-2 transition-colors doom-focus-ring ${
-                  intensityDirection === 'MORE'
-                    ? 'bg-primary text-primary-foreground border-primary doom-button-3d'
-                    : 'bg-muted text-foreground border-border hover:bg-muted/80'
-                } disabled:opacity-50`}
-              >
-                More
-              </button>
-              <button type="button"
-                onClick={() => setIntensityDirection('LESS')}
-                disabled={isSubmitting || stats !== null}
-                className={`flex-1 px-3 py-2 text-xs font-semibold uppercase tracking-wider border-2 transition-colors doom-focus-ring ${
-                  intensityDirection === 'LESS'
-                    ? 'bg-primary text-primary-foreground border-primary doom-button-3d'
-                    : 'bg-muted text-foreground border-border hover:bg-muted/80'
-                } disabled:opacity-50`}
-              >
-                Less
-              </button>
-            </div>
+            <SegmentedControl
+              aria-label="Intensity direction"
+              options={[
+                { value: 'NONE', label: 'None', disabled: isSubmitting || stats !== null },
+                { value: 'MORE', label: 'More', disabled: isSubmitting || stats !== null },
+                { value: 'LESS', label: 'Less', disabled: isSubmitting || stats !== null },
+              ]}
+              value={intensityDirection}
+              onChange={(next) => setIntensityDirection(next)}
+            />
 
             {/* Intensity Magnitude Stepper */}
             {intensityDirection !== 'NONE' && (

@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import CommunityProgramsView from '@/components/community/CommunityProgramsView'
 import { useToast } from '@/components/ToastProvider'
+import { SegmentedControl } from '@/components/ui/SegmentedControl'
 import { useProgramAccess } from '@/hooks/useCustomProgramAccess'
 import { clientLogger } from '@/lib/client-logger'
 import StrengthActivationModal from '../StrengthActivationModal'
@@ -262,30 +263,15 @@ export default function ConsolidatedProgramsView({
 
         {/* Tab Toggle */}
         <div className="px-4 sm:px-0 mb-4">
-          <div className="flex border border-border">
-            <button
-              type="button"
-              onClick={() => handleTabChange('my')}
-              className={`flex-1 py-2.5 text-sm font-bold uppercase tracking-wider transition-colors doom-focus-ring ${
-                activeTab === 'my'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-card text-muted-foreground hover:text-foreground hover:bg-muted/50'
-              }`}
-            >
-              MY PROGRAMS
-            </button>
-            <button
-              type="button"
-              onClick={() => handleTabChange('browse')}
-              className={`flex-1 py-2.5 text-sm font-bold uppercase tracking-wider transition-colors doom-focus-ring ${
-                activeTab === 'browse'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-card text-muted-foreground hover:text-foreground hover:bg-muted/50'
-              }`}
-            >
-              BROWSE
-            </button>
-          </div>
+          <SegmentedControl
+            aria-label="Programs view"
+            options={[
+              { value: 'my', label: 'My Programs' },
+              { value: 'browse', label: 'Browse' },
+            ]}
+            value={activeTab}
+            onChange={(next) => handleTabChange(next)}
+          />
         </div>
 
         {/* Tab Content */}

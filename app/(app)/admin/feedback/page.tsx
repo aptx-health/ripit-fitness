@@ -4,6 +4,7 @@ import { ArrowDown, ArrowUp, Check, CheckCheck, ExternalLink, Github, MessageSqu
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
+import { SegmentedControl } from '@/components/ui/SegmentedControl'
 import type { FeedbackStatus } from '@/types/feedback'
 import { POST_SESSION_REFINEMENTS } from '@/types/feedback'
 
@@ -228,33 +229,16 @@ export default function AdminFeedbackPage() {
       </div>
 
       {/* Tabs: status tabs + post-session tab */}
-      <div className="flex gap-1 mb-6 overflow-x-auto">
-        {STATUS_TABS.map((tab) => (
-          <button
-            type="button"
-            key={tab}
-            onClick={() => { setActiveTab(tab); setSortBy('newest') }}
-            className={`px-3 py-1.5 text-xs font-semibold uppercase tracking-wider border-2 transition-colors ${
-              activeTab === tab
-                ? 'bg-primary text-primary-foreground border-primary'
-                : 'bg-muted text-muted-foreground border-border hover:bg-secondary'
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-        <span className="w-px bg-border mx-1" />
-        <button
-          type="button"
-          onClick={() => { setActiveTab('post_session'); setSortBy('newest') }}
-          className={`px-3 py-1.5 text-xs font-semibold uppercase tracking-wider border-2 transition-colors ${
-            isPostSessionTab
-              ? 'bg-purple-600 text-white border-purple-600'
-              : 'bg-muted text-muted-foreground border-border hover:bg-secondary'
-          }`}
-        >
-          Post-Session
-        </button>
+      <div className="mb-6 overflow-x-auto">
+        <SegmentedControl
+          aria-label="Feedback filter"
+          options={[
+            ...STATUS_TABS.map((tab) => ({ value: tab, label: tab })),
+            { value: 'post_session', label: 'Post-Session' },
+          ]}
+          value={activeTab}
+          onChange={(next) => { setActiveTab(next); setSortBy('newest') }}
+        />
       </div>
 
       {/* Post-session stats header */}
