@@ -28,6 +28,7 @@ export default async function AdminLayout({
     { href: '/admin/feedback', label: 'Feedback' },
     { href: '/admin/analytics', label: 'Analytics' },
     { href: '/admin/signups', label: 'Signups' },
+    { href: '/dev/theme-validator?view=grid', label: 'Themes' },
   ]
 
   return (
