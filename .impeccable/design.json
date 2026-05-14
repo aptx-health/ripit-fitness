@@ -1,0 +1,330 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-14T00:00:00.000Z",
+  "title": "Design System: Ripit Fitness",
+  "extensions": {
+    "colorMeta": {
+      "background": {
+        "role": "neutral",
+        "displayName": "Warm Cream",
+        "canonical": "#FBF8F3",
+        "tonalRamp": ["#1A1108", "#3A2817", "#78573B", "#A88C6F", "#D4C4B0", "#E8DCC8", "#F5EFE6", "#FBF8F3"]
+      },
+      "foreground": {
+        "role": "neutral",
+        "displayName": "Rich Ink Brown",
+        "canonical": "#3A2817",
+        "tonalRamp": ["#1A1108", "#3A2817", "#5C3F25", "#78573B", "#A88C6F", "#D4C4B0", "#F5EFE6", "#FBF8F3"]
+      },
+      "card": {
+        "role": "neutral",
+        "displayName": "Card Cream",
+        "canonical": "#FFFCF7",
+        "tonalRamp": ["#1A1108", "#3A2817", "#78573B", "#A88C6F", "#D4C4B0", "#E8DCC8", "#FFFCF7", "#FFFCF7"]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Warm Tan",
+        "canonical": "#F5EFE6",
+        "tonalRamp": ["#1A1108", "#3A2817", "#5C3F25", "#78573B", "#A88C6F", "#D4C4B0", "#F5EFE6", "#FBF8F3"]
+      },
+      "muted-foreground": {
+        "role": "neutral",
+        "displayName": "Medium Brown",
+        "canonical": "#78573B",
+        "tonalRamp": ["#1A1108", "#3A2817", "#5C3F25", "#78573B", "#A88C6F", "#D4C4B0", "#F5EFE6", "#FBF8F3"]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Sandy Brown",
+        "canonical": "#D4C4B0",
+        "tonalRamp": ["#3A2817", "#5C3F25", "#78573B", "#A88C6F", "#D4C4B0", "#E8DCC8", "#F5EFE6", "#FBF8F3"]
+      },
+      "primary": {
+        "role": "primary",
+        "displayName": "Jungle Emerald",
+        "canonical": "#10B981",
+        "tonalRamp": ["#022C22", "#064E3B", "#047857", "#059669", "#10B981", "#34D399", "#6EE7B7", "#D1FAE5"]
+      },
+      "primary-hover": {
+        "role": "primary",
+        "displayName": "Jungle Emerald Deep",
+        "canonical": "#059669"
+      },
+      "primary-active": {
+        "role": "primary",
+        "displayName": "Jungle Emerald Pressed",
+        "canonical": "#047857"
+      },
+      "secondary": {
+        "role": "secondary",
+        "displayName": "Barrel Brown",
+        "canonical": "#92400E",
+        "tonalRamp": ["#3A1A03", "#65290D", "#78350F", "#92400E", "#B45309", "#D97706", "#F59E0B", "#FEF3C7"]
+      },
+      "warning": {
+        "role": "tertiary",
+        "displayName": "Banana Yellow",
+        "canonical": "#F59E0B",
+        "tonalRamp": ["#3A1A03", "#65290D", "#92400E", "#B45309", "#D97706", "#F59E0B", "#FBBF24", "#FEF3C7"]
+      },
+      "accent": {
+        "role": "tertiary",
+        "displayName": "Banana Gold",
+        "canonical": "#D4930A",
+        "tonalRamp": ["#3A1A03", "#65290D", "#92400E", "#A16207", "#B8790A", "#D4930A", "#F59E0B", "#FEF9E6"]
+      },
+      "success": {
+        "role": "state",
+        "displayName": "Completed Emerald",
+        "canonical": "#10B981",
+        "tonalRamp": ["#022C22", "#064E3B", "#047857", "#059669", "#10B981", "#34D399", "#6EE7B7", "#D1FAE5"]
+      },
+      "error": {
+        "role": "state",
+        "displayName": "DK Tie Red",
+        "canonical": "#DC2626",
+        "tonalRamp": ["#450A0A", "#7F1D1D", "#991B1B", "#B91C1C", "#DC2626", "#EF4444", "#F87171", "#FEE2E2"]
+      },
+      "background-dark": {
+        "role": "neutral",
+        "displayName": "Night Jungle",
+        "canonical": "#1A1108",
+        "tonalRamp": ["#0A0604", "#1A1108", "#251A0F", "#3A2817", "#4A3420", "#78573B", "#D4C4B0", "#FEF3C7"]
+      },
+      "foreground-dark": {
+        "role": "neutral",
+        "displayName": "Night Cream",
+        "canonical": "#FEF3C7"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display (UPPERCASE Stenciled)",
+        "purpose": "Page and program titles. Stenciled, letter-spaced, often with text-shadow for the stamped-on-paper feel."
+      },
+      "headline": {
+        "displayName": "Headline (UPPERCASE Card Title)",
+        "purpose": "Section headers and workout-day titles inside bracketed cards."
+      },
+      "title": {
+        "displayName": "Title (UPPERCASE Button & Card Subhead)",
+        "purpose": "Card subtitles, button labels, dialog titles."
+      },
+      "body": {
+        "displayName": "Body (Sentence Case)",
+        "purpose": "Workout descriptions, instructional copy, paragraphs. Cap at 65–75ch in long-form."
+      },
+      "label": {
+        "displayName": "Label (UPPERCASE Micro)",
+        "purpose": "Form labels, captions, badge text, nav labels."
+      }
+    },
+    "shadows": [
+      {
+        "name": "button-press-rest",
+        "value": "0 4px 0 var(--primary-active), 0 6px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2)",
+        "purpose": "Primary button at rest — the gameboy press default."
+      },
+      {
+        "name": "button-press-hover",
+        "value": "0 4px 0 var(--primary-active), 0 0 30px rgba(var(--primary-rgb), 0.6), inset 0 1px 0 rgba(255,255,255,0.3)",
+        "purpose": "Primary button on :hover — adds an outer emerald glow without changing the press geometry."
+      },
+      {
+        "name": "button-press-active",
+        "value": "0 0 0 var(--primary-active), 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2)",
+        "purpose": "Primary button on :active — paired with translateY(4px). The button presses in."
+      },
+      {
+        "name": "card-completed",
+        "value": "0 0 20px rgba(var(--success-rgb), 0.3), inset 0 1px 0 rgba(var(--success-rgb), 0.1)",
+        "purpose": "Card with a completed workout. Outer emerald glow at 30% RGB opacity."
+      },
+      {
+        "name": "card-in-progress",
+        "value": "0 0 20px rgba(var(--warning-rgb), 0.3), inset 0 1px 0 rgba(var(--warning-rgb), 0.1)",
+        "purpose": "Card with an in-progress workout. Pulses between 20px and 40px outer glow at 2s ease-in-out."
+      },
+      {
+        "name": "focus-ring",
+        "value": "0 0 0 3px var(--background), 0 0 0 6px var(--primary), 0 0 20px rgba(var(--primary-rgb), 0.6)",
+        "purpose": "Keyboard focus on any interactive element. Triple-stack: background gap, primary ring, outer glow."
+      },
+      {
+        "name": "card-modal",
+        "value": "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+        "purpose": "Modal dialog panels. The only place a non-state ambient shadow is permitted, because the modal is itself a state."
+      }
+    ],
+    "motion": [
+      {
+        "name": "button-press-transition",
+        "value": "all 0.1s ease",
+        "purpose": "Primary button state transitions. Snappy — the press should feel immediate."
+      },
+      {
+        "name": "card-state-transition",
+        "value": "all 0.3s ease",
+        "purpose": "Card border/shadow transitions when workout state changes."
+      },
+      {
+        "name": "input-focus-transition",
+        "value": "all 0.3s ease",
+        "purpose": "Input border, background, and shadow on focus."
+      },
+      {
+        "name": "doom-pulse",
+        "value": "doom-pulse 2s ease-in-out infinite",
+        "purpose": "In-progress workout card animated glow. Oscillates between 20px and 40px outer shadow."
+      },
+      {
+        "name": "doom-fade-in",
+        "value": "doom-fade-in 0.4s ease-out",
+        "purpose": "Page enter animation. Opacity 0→1, translateY(10px → 0)."
+      },
+      {
+        "name": "pwa-btn-shine",
+        "value": "pwa-btn-shine 8s ease-in-out 2s infinite",
+        "purpose": "The PWA install button's rare diagonal shimmer — paired with the rare-round corner treatment as eye-draw."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ],
+    "signatureUtilities": [
+      {
+        "name": "doom-corners",
+        "css": ".ds-doom-corners { position: relative; } .ds-doom-corners::before { content: ''; position: absolute; top: 0; left: 0; width: 16px; height: 16px; border-top: 3px solid #10B981; border-left: 3px solid #10B981; z-index: 3; } .ds-doom-corners::after { content: ''; position: absolute; bottom: 0; right: 0; width: 16px; height: 16px; border-bottom: 3px solid #10B981; border-right: 3px solid #10B981; z-index: 3; }",
+        "purpose": "The L-bracket card frame. Two 16×16px corner brackets in primary emerald, applied via ::before and ::after. The signature card chrome."
+      },
+      {
+        "name": "doom-noise",
+        "css": ".ds-doom-noise { position: relative; } .ds-doom-noise::before { content: ''; position: absolute; inset: 0; background-image: url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E\"); pointer-events: none; z-index: 1; border-radius: inherit; } .ds-doom-noise > * { position: relative; z-index: 2; }",
+        "purpose": "Low-opacity SVG fractal noise overlay (~3% opacity) for paper-grain texture. Apply to hero panels and modal surfaces."
+      },
+      {
+        "name": "doom-angular",
+        "css": ".ds-doom-angular { border-radius: 0; clip-path: polygon(0% 8px, 8px 0%, calc(100% - 8px) 0%, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0% calc(100% - 8px)); }",
+        "purpose": "Octagonal chamfered-corner shape (8px corner-cut). An alternative to doom-corners when the bracket pseudo-elements would conflict."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button (Gameboy Press)",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The default primary action. Hard 0-radius, gameboy-press 3D shadow that collapses on :active.",
+      "html": "<button class=\"ds-btn-primary\">START WORKOUT</button>",
+      "css": ".ds-btn-primary { font-family: Rajdhani, -apple-system, sans-serif; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; color: #FFFFFF; background: #10B981; border: none; padding: 12px 24px; border-radius: 0; cursor: pointer; transition: all 0.1s ease; box-shadow: 0 4px 0 #047857, 0 6px 8px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.2); transform: translateY(0); } .ds-btn-primary:hover { background: #059669; box-shadow: 0 4px 0 #047857, 0 0 30px rgba(16,185,129,0.6), inset 0 1px 0 rgba(255,255,255,0.3); } .ds-btn-primary:active { background: #047857; transform: translateY(4px); box-shadow: 0 0 0 #047857, 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px #FBF8F3, 0 0 0 6px #10B981, 0 4px 0 #047857; }"
+    },
+    {
+      "name": "Rare-Rounded CTA",
+      "kind": "button",
+      "refersTo": "button-rare-rounded",
+      "description": "The exception button. Rounded 12px, banana-gold fill, with a slow shimmer. Used at most once per screen as eye-draw.",
+      "html": "<button class=\"ds-btn-rare-rounded\"><span>NEXT EXERCISE</span><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"9 18 15 12 9 6\"/></svg></button>",
+      "css": ".ds-btn-rare-rounded { position: relative; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; font-family: Rajdhani, sans-serif; font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.08em; color: #3A2817; background: #F59E0B; border: none; padding: 16px 32px; border-radius: 12px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(245,158,11,0.3); } .ds-btn-rare-rounded::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.25) 45%, rgba(255,255,255,0.35) 50%, rgba(255,255,255,0.25) 55%, transparent 70%); transform: translateX(-100%); animation: ds-shine 8s ease-in-out 2s infinite; pointer-events: none; } .ds-btn-rare-rounded:hover { background: #D97706; box-shadow: 0 6px 16px rgba(245,158,11,0.5); } .ds-btn-rare-rounded:active { transform: translateY(1px); } @keyframes ds-shine { 0%, 85% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Non-primary inline action. Warm-tan background, flat (no 3D press), hard 0-radius.",
+      "html": "<button class=\"ds-btn-secondary\">CANCEL</button>",
+      "css": ".ds-btn-secondary { font-family: Rajdhani, sans-serif; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; color: #3A2817; background: #F5EFE6; border: 2px solid #D4C4B0; padding: 10px 22px; border-radius: 0; cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease; } .ds-btn-secondary:hover { background: #E8DCC8; border-color: #A88C6F; } .ds-btn-secondary:active { background: #D4C4B0; }"
+    },
+    {
+      "name": "Bracketed Card",
+      "kind": "card",
+      "refersTo": "card-bracketed",
+      "description": "The signature card frame. Card-cream surface, sandy-brown border, and emerald L-bracket pseudo-elements in opposing corners.",
+      "html": "<div class=\"ds-card-bracketed\"><div class=\"ds-card-title\">DAY 1: MACHINE WORKOUT</div><div class=\"ds-card-meta\">5 exercises<span>·</span>May 13</div></div>",
+      "css": ".ds-card-bracketed { position: relative; background: #FFFCF7; color: #3A2817; border: 1px solid #D4C4B0; border-radius: 0; padding: 16px 20px; transition: all 0.3s ease; } .ds-card-bracketed::before { content: ''; position: absolute; top: 0; left: 0; width: 16px; height: 16px; border-top: 3px solid #10B981; border-left: 3px solid #10B981; z-index: 3; } .ds-card-bracketed::after { content: ''; position: absolute; bottom: 0; right: 0; width: 16px; height: 16px; border-bottom: 3px solid #10B981; border-right: 3px solid #10B981; z-index: 3; } .ds-card-bracketed:hover { border-color: rgba(212,147,10,0.4); } .ds-card-title { font-family: Rajdhani, sans-serif; font-weight: 700; font-size: 1.125rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; } .ds-card-meta { font-family: Rajdhani, sans-serif; font-weight: 500; font-size: 0.875rem; color: #78573B; display: inline-flex; align-items: center; gap: 0.5rem; }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input-stamped",
+      "description": "Form input. Warm-tan fill, 2px sandy-brown border, hard 0-radius. Focus shifts border to emerald + outer glow.",
+      "html": "<input class=\"ds-input-stamped\" type=\"text\" placeholder=\"WEIGHT (LBS)\" />",
+      "css": ".ds-input-stamped { font-family: Rajdhani, sans-serif; font-weight: 500; font-size: 1rem; letter-spacing: 0.02em; color: #3A2817; background: #F5EFE6; border: 2px solid #D4C4B0; border-radius: 0; padding: 12px 16px; width: 100%; transition: all 0.3s ease; } .ds-input-stamped::placeholder { color: #78573B; text-transform: uppercase; font-size: 0.875rem; letter-spacing: 0.05em; } .ds-input-stamped:focus { outline: none; border-color: #10B981; background: #FFFCF7; box-shadow: 0 0 20px rgba(16,185,129,0.3); }"
+    },
+    {
+      "name": "Status Badge (Clipped Chip)",
+      "kind": "chip",
+      "refersTo": "badge-clipped",
+      "description": "Status pill with subtle parallelogram chamfer via clip-path. Solid state color + uppercase label.",
+      "html": "<span class=\"ds-badge-completed\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"20 6 9 17 4 12\"/></svg>COMPLETED</span>",
+      "css": ".ds-badge-completed { display: inline-flex; align-items: center; gap: 0.5rem; padding: 4px 12px; font-family: Rajdhani, sans-serif; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #FFFFFF; background: #10B981; border-radius: 0; clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%); box-shadow: 0 0 10px rgba(16,185,129,0.5); }"
+    },
+    {
+      "name": "Bottom Navigation",
+      "kind": "nav",
+      "refersTo": "bottom-nav",
+      "description": "Mobile-first fixed bottom nav with four tabs. Active tab shifts to banana-gold accent with a 3px golden underline.",
+      "html": "<nav class=\"ds-bottom-nav\"><a class=\"ds-bottom-nav-tab ds-bottom-nav-tab--active\" href=\"#\" aria-current=\"page\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"22 12 18 12 15 21 9 3 6 12 2 12\"/></svg><span>Training</span></a><a class=\"ds-bottom-nav-tab\" href=\"#\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"7\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\"/><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\"/><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\"/></svg><span>Programs</span></a><a class=\"ds-bottom-nav-tab\" href=\"#\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z\"/><path d=\"M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z\"/></svg><span>Learn</span></a><a class=\"ds-bottom-nav-tab\" href=\"#\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"3\"/><path d=\"M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z\"/></svg><span>Settings</span></a></nav>",
+      "css": ".ds-bottom-nav { display: flex; align-items: stretch; height: 56px; background: rgba(245,239,230,0.95); border-top: 2px solid #D4C4B0; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); } .ds-bottom-nav-tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: #78573B; text-decoration: none; transition: color 0.2s ease; font-family: Rajdhani, sans-serif; } .ds-bottom-nav-tab span { font-size: 11px; font-weight: 500; } .ds-bottom-nav-tab:hover { color: #3A2817; } .ds-bottom-nav-tab--active { color: #D4930A; border-bottom: 3px solid #FBBF24; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Cartridge-Era Field Guide",
+    "overview": "Ripit is styled as a warm paper field guide a grown-up would reach for to learn a new physical skill, with cartridge-era (NES → SNES → GBA) detailing carried in the geometry, textures, and tactility. The page background is warm cream with dark-brown body text. Cards sit as flat parchment panels with sharp L-bracket corners. Buttons feel like physical printed buttons that press 4px when you tap them. Headings are uppercase stenciled Rajdhani with positive letter-spacing. The frog mascot is the guide's illustrator's signature — present on the splash and at empty states, never decorating the workout data itself.\n\nThe system explicitly refuses three lanes documented in PRODUCT.md: gym-bro / influencer-culture aesthetics, generic clean-white SaaS, and stock illustration / beauty-shot photography.\n\nRipit ships twelve user-selectable themes as a first-class personalization feature — a deliberate point of difference from every other fitness app in the category. The palette documented here is the canonical ripit default (Donkey-Kong jungle); eleven alternates ship as opt-in (doom, catppuccin, cyber, forest, synthwave, dracula, github, clyde, ninety, blossom, okabe). Every theme implements the same CSS-custom-property role schema, so every component and rule in this spec applies theme-agnostically. The roles are stable; only the hex values rotate.\n\nThe single load-bearing tension is friendly enough for a gym newcomer + serious enough for an adult who's never trained. We solve it by keeping the playful retro language in the chrome around the data and keeping the data itself — sets, reps, weights, history — plain, legible, and trustworthy.",
+    "keyCharacteristics": [
+      "Warm cream page with rich-brown text — never #fff, never #000",
+      "Emerald jungle-green primary, banana gold accent, barrel brown secondary, DK-tie red error",
+      "Rajdhani everywhere — uppercase with positive letter-spacing for headings/labels, sentence-case for body",
+      "Sharp 0-radius corners by default; rounded corners are a deliberate exception, used as an eye-draw signal",
+      "Cards framed by doom-corners L-brackets in primary green",
+      "Buttons press with doom-button-3d — 4px hard shadow that translates on :active",
+      "Glow and animated pulse reserved for state changes, never decorative",
+      "Real photos of real lifters in real gyms — no stock illustration, no studio lighting",
+      "Twelve user-selectable themes implementing the same role schema — ripit is canonical, eleven alternates ship for personalization"
+    ],
+    "rules": [
+      { "name": "The Field-Guide-Not-the-Game Rule", "body": "Retro language lives in the geometry, textures, and chrome. The data (sets, reps, weights, history) stays plain, legible, and serious. If a screen reads as 'playing a game' rather than 'consulting a manual about training,' roll it back.", "section": "overview" },
+      { "name": "The Adult-Newcomer Rule", "body": "Two readers have to feel at home: a gym newcomer who's never trained, and an older adult new to the app. Anything that reads as 'for kids' or 'for gamers' — chunky pixel fonts in the data layer, cartoon mascots inside workout cards, scoreboard-style copy — has failed the test. The frog is allowed on splashes, empty states, and the loading screen; not inside the workout itself.", "section": "overview" },
+      { "name": "The Role-Stability Rule", "body": "Component code, named rules, and screen designs target token roles (--primary, --background, --accent, etc.), never specific hex values. Hard-coding #10B981 into a component is forbidden; reference var(--color-primary) or the corresponding Tailwind utility (bg-primary, text-foreground) so the component renders correctly across all twelve themes. New themes added later inherit the entire component library for free.", "section": "colors" },
+      { "name": "The Warm-Neutrals Rule", "body": "In the canonical ripit palette: no #fff, no #000, no carbon-gray. Every neutral carries warm-brown chroma. The page is cream, the card is cream, the text is brown, the border is sandy. Cold neutrals belong to opt-in themes (doom, cyber, dracula, etc.), not to the canonical ripit look.", "section": "colors" },
+      { "name": "The 10% Primary Rule", "body": "The primary role carries roughly 5–15% of any given screen, regardless of theme. It marks actions and active state; it never fills large surface areas. A screen filled with primary has failed the test — whether that primary is ripit's Jungle Emerald, doom's Hell-Fire Orange, or blossom's Hot Pink.", "section": "colors" },
+      { "name": "The Rarity-Is-The-Point Rule", "body": "The accent role appears on ≤5% of any screen and only on elements meant to attract the eye (rare round-cornered CTAs, active-tab underlines). Saturate it across cards or borders and the eye-draw signal collapses — theme-agnostic.", "section": "colors" },
+      { "name": "The UPPERCASE-Stenciled-Headings Rule", "body": "Display, headline, title, and label styles are uppercase with positive letter-spacing (0.05–0.1em). Body and prose stay sentence case. Mixing them produces flat hierarchy; respecting them produces the field-guide voice.", "section": "typography" },
+      { "name": "The Tabular-Numerics Rule", "body": "Any number the user reads to act on (weights, reps, sets, durations, history) renders with font-variant-numeric: tabular-nums. Visual alignment of stacked numbers is part of the trust contract.", "section": "typography" },
+      { "name": "The No-Decorative-Type Rule", "body": "No gradient text. No outlined letters. No animated character reveals on workout data. Rajdhani's own weight and tracking carries all the expression we need.", "section": "typography" },
+      { "name": "The Flat-Until-State Rule", "body": "Cards and surfaces are flat at rest. Shadows and glows arrive only as a response to state — hover, focus, in-progress, completed. No ambient drop-shadows on resting surfaces. Decorative shadow is forbidden.", "section": "elevation" },
+      { "name": "The Press-Means-Press Rule", "body": "Primary buttons must translateY(4px) on :active and collapse their offset shadow to zero. The tactile feedback is load-bearing — it's how a button reads as a physical thing rather than a styled div. Skipping this treatment on a primary button is a regression.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do default to sharp 0-radius corners on every element. Cards, buttons, inputs, modals, badges — hard edges are the system's default voice.",
+      "Do use rounded corners as a rare eye-draw signal — primarily the PWA install button, the occasional end-of-flow CTA, and indicator pills meant to interrupt the visual rhythm. Their incongruence is the signal.",
+      "Do apply doom-corners L-brackets to addressable card regions in the primary emerald. The frame is the brand.",
+      "Do keep numbers in font-variant-numeric: tabular-nums so logged sets stack cleanly.",
+      "Do translate primary buttons 4px on :active and collapse their offset shadow. The press is load-bearing.",
+      "Do keep the warm-brown chroma in every neutral (#FBF8F3 cream, #3A2817 brown, #D4C4B0 sandy border) — even at scale.",
+      "Do use real photos of real lifters in real gyms for exercise demonstrations.",
+      "Do reserve glow and pulse animations for state changes — completed, in-progress, focused, just-logged — never decoratively on resting surfaces.",
+      "Do use UPPERCASE Rajdhani with 0.05–0.1em letter-spacing on every title, label, and button. Reserve sentence case for body and prose.",
+      "Do preserve the OKABE color-blind-safe theme as a peer of the default — never an afterthought.",
+      "Do reference token roles (var(--color-primary), bg-primary, text-foreground) instead of hex values in component code, so every component works across all twelve themes."
+    ],
+    "donts": [
+      "Don't use macho-neon palettes, carbon-fiber backgrounds, shirtless-influencer photography, or 'BEAST MODE' copy. The system explicitly rejects gym-bro and influencer-culture aesthetics.",
+      "Don't make Ripit look like Apple Fitness, Centr, or Peloton's app — generic clean-white SaaS with thin sans on #fff, blue accents, abstract gradients, and rounded-lg everywhere is the second lane we refuse.",
+      "Don't use stock illustration, mascots-doing-yoga vectors, or studio-lit beauty photography for exercise demos. Real people, real gyms, or nothing.",
+      "Don't use pure #000 or #fff anywhere. The neutrals carry warm-brown chroma.",
+      "Don't put rounded corners on cards, inputs, or workout-list items. Round is reserved.",
+      "Don't put gradient text on headings. Rajdhani's weight and tracking carries all the expression we need.",
+      "Don't use side-stripe border-left or border-right accents greater than 1px as a colored stripe on cards or list items as decoration. The 4px secondary-brown strip on the current workout card is the only allowed use; everywhere else it's banned.",
+      "Don't apply ambient drop-shadows to cards at rest. Shadows arrive with state.",
+      "Don't drop the frog mascot inside workout data. The frog belongs on splash, empty states, and the loading screen. Never on a logged set.",
+      "Don't game-ify the data layer — no XP bars, no streak fireworks, no scoreboard styling on weights. The Field-Guide-Not-the-Game Rule governs every screen.",
+      "Don't use em dashes (—) in UI copy. Use commas, colons, semicolons, or periods. (And not -- either.)",
+      "Don't mock up new components in rounded-lg 'because it looks clean.' Hard edges are the default; cleanness is not the brand goal.",
+      "Don't hard-code hex values into components. Reference token roles instead. Hard-coded hex breaks the twelve-theme contract."
+    ]
+  }
+}

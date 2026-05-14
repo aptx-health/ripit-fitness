@@ -76,6 +76,7 @@ Good themes for a single run:
 - Splitting one oversized file
 - Removing dead code from a coherent module
 - Fixing all instances of one specific lint rule
+- **Impeccable anti-pattern sweep** on changed UI files — pick ONE anti-pattern (e.g. side-stripe borders, gradient text, em dashes in copy, hardcoded hex colors that should be theme tokens) and remove every instance across the surveyed surface. See `.claude/skills/impeccable/SKILL.md` for the full list.
 
 Bad scopes for a single run:
 - "Review every changed file"
@@ -195,6 +196,17 @@ Look for and eliminate:
 - Boolean props passed as `prop={true}` — use shorthand `prop`
 - `useState` + `useEffect` pairs replaceable with derived values
 - `?.` chains longer than 3 levels — use intermediate variables for readability
+
+### UI/visual anti-patterns (mechanical fixes only)
+
+These are safe to fix mechanically when they appear in changed `.tsx` / `.css` files. Anything requiring judgment (palette, hierarchy, layout rhythm) is out of scope — file a `needs-review` issue instead.
+
+- **Hardcoded colors** (`#fff`, `text-red-500`, `bg-gray-100`, etc.) on themed elements → replace with the matching `var(--*)` token from `app/globals.css`
+- **Em dashes in user-facing strings** (`—` or `--`) → replace with comma, colon, semicolon, period, or parentheses. Source: impeccable copy rule. Do not touch em dashes inside code comments or markdown docs.
+- **Stale `console.log` debugging** left in UI components → remove or convert to `clientLogger.debug`
+- **Touch targets < 48px** on interactive elements (`min-h-8` / `min-h-10` buttons, etc.) → bump to `min-h-12 min-w-12` if the visual design clearly intends them as primary tap targets; otherwise file an issue
+
+Subjective UI issues (gradient text, side-stripe accents, glassmorphism, hero-metric template, identical card grids, modal-first thinking) → file a `needs-review` issue with the impeccable rule cited. Do NOT auto-fix.
 
 ## What not to change
 

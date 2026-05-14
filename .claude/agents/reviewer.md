@@ -54,6 +54,30 @@ For each changed file, evaluate:
 3. **Performance**: N+1 queries? Unnecessary re-renders? Missing `include`/`select`?
 4. **Style**: Follows project patterns? Proper error handling with logger?
 5. **Tests**: Are critical paths tested? Do existing tests still pass?
+6. **UI/UX (when applicable)**: For changes touching `*.tsx`, `*.css`, `app/globals.css`, or anything under `components/`, apply the impeccable lens — see below.
+
+### Impeccable UI lens
+
+For any PR that changes user-facing UI, run a mental `/impeccable audit` + `/impeccable critique` pass. The skill lives at `.claude/skills/impeccable/`; read a specific command's reference (e.g. `.claude/skills/impeccable/reference/audit.md`) if you need the full rubric.
+
+**Absolute bans — comment REQUEST_CHANGES if introduced by the PR:**
+- Side-stripe borders > 1px as a colored accent (use full borders, background tints, or nothing)
+- Gradient text (`background-clip: text` + gradient background)
+- Decorative glassmorphism (blurs/glass cards used for vibes, not function)
+- The SaaS hero-metric template (big number + small label + gradient accent)
+- Identical card grids of icon + heading + text repeated endlessly
+- Modal-as-first-thought when an inline/progressive disclosure would work
+- Em dashes in copy (`—` or `--`) — use commas, colons, semicolons, periods, parentheses
+
+**Project-specific UI rules — these WIN over impeccable's generic defaults:**
+- Colors must use `var(--*)` theme tokens, never hardcoded hex or raw Tailwind color classes — see `app/globals.css`
+- Touch targets ≥ 48px (`min-h-12 min-w-12`) on interactive elements
+- Bottom-fixed UI must use `env(safe-area-inset-bottom)`; top-fixed UI must use `env(safe-area-inset-top)`
+- Full-screen mobile modals use `h-[100dvh]` (not `100vh`)
+- Mobile baseline text is `text-sm`; `text-xs` is too small except in tight constraints
+- Focus rings use `.doom-focus-ring` or `ring-[var(--ring)]`
+
+Flag (not auto-fix) UI issues that involve subjective design judgment — colors, spacing rhythm, hierarchy, motion choices. These are NEVER-FIX per the protocol below; comment with the relevant impeccable rule and let the author decide.
 
 ## Fix protocol
 

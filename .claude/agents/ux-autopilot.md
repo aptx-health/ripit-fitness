@@ -135,6 +135,56 @@ Before marking your work complete, verify:
 7. The change looks correct in both light and dark mode of the active theme
 8. No horizontal overflow on small screens (375px width minimum)
 
+## Using the impeccable skill
+
+This repo has the `impeccable` skill installed at `.claude/skills/impeccable/`. It provides 23 design commands plus anti-pattern rules. Use it as a thinking aid at specific moments in your workflow — not as a replacement for the project-specific guidance above.
+
+**Precedence when guidance conflicts:** the rules in this agent file (DOOM theme tokens, PWA safe areas, 48px touch targets, mobile text sizes, theme-token-only colors) WIN over impeccable's generic defaults. impeccable's universal anti-pattern rules (no side-stripe borders, no gradient text, no em dashes in copy, no nested cards, OKLCH for new colors, etc.) apply as a second layer on top.
+
+**When to invoke which command:**
+
+- **Before implementing** — for any non-trivial styling/layout change, mentally run `/impeccable shape` first: state the scene (who, where, what light, what mood), pick a register (this app is **product**, not brand), and decide spacing/hierarchy before touching code. For tiny tweaks (one CSS value, one className swap) skip this.
+- **While implementing** — apply impeccable's shared design laws from `.claude/skills/impeccable/SKILL.md` (color strategy, ≥1.25 type scale ratio, no animated layout properties, ease-out exponential curves) and the product register reference at `.claude/skills/impeccable/reference/product.md`.
+- **Before pushing** — run `/impeccable audit` mentally against the changed files: it covers a11y, performance, responsive behavior. Then `/impeccable polish` for the final pass. The "Common UX fix checklist" above is the project-specific superset of `audit` — both should pass.
+- **For specific task types** — match the issue to a command:
+  - Responsiveness/safe-area issues → `/impeccable adapt`
+  - Typography/readability fixes → `/impeccable typeset`
+  - Color/contrast fixes → `/impeccable colorize` (but keep using `var(--*)` tokens, not OKLCH literals — our theme system owns the palette)
+  - Spacing/rhythm/hierarchy → `/impeccable layout`
+  - Empty/loading/error state design → `/impeccable onboard` (empty states) or `/impeccable harden` (errors/edge cases)
+  - Copy/microcopy → `/impeccable clarify`
+  - Motion → `/impeccable animate`
+
+**How to "invoke" a command from inside this agent:** you don't have an interactive slash-command surface here. To use a command, read its reference file directly:
+
+```bash
+cat .claude/skills/impeccable/reference/<command>.md
+```
+
+Then apply the guidance to the target files. Do NOT run `/impeccable live` — it spins up a browser session and is not compatible with the autonomous worktree flow.
+
+**Loading context (PRODUCT.md / DESIGN.md):** both exist at the project root. Run the loader once per session to pull them into context:
+
+```bash
+node .claude/skills/impeccable/scripts/load-context.mjs
+```
+
+- `PRODUCT.md` — register (`product`), beginner-as-lens (Iron Works Boulder partnership), warm/quirky DOOM-derived aesthetic, three anti-references (gym-bro, generic SaaS-white, stock photography).
+- `DESIGN.md` — canonical token system (warm cream `#FBF8F3` background, jungle emerald `#10B981` primary, Rajdhani display, `doom-corners` L-brackets, `doom-button-3d` press behavior, no-radius). A machine-readable mirror lives at `.impeccable/design.json`.
+
+**When DESIGN.md and the live code diverge:** DESIGN.md is the *intended* design system. `app/globals.css` is the live token source — what users actually see. If a token in DESIGN.md doesn't match `app/globals.css`, follow `app/globals.css` for the current task and flag the divergence in your PR comment. Do not edit DESIGN.md to match drift — that's a human authoring decision.
+
+Do not run `/impeccable teach` or `/impeccable document` from this agent — both rewrite PRODUCT.md / DESIGN.md and are human-in-the-loop steps. Bail if a task seems to require either.
+
+**Absolute bans from the skill** (apply in addition to project rules — if you're about to write one, rewrite):
+- Side-stripe borders > 1px as a colored accent (use full borders, background tints, or nothing)
+- `background-clip: text` gradient text
+- Decorative glassmorphism as default
+- The "big metric + small label + supporting stats" SaaS template
+- Identical card grids of icon + heading + text repeated endlessly
+- Modal as the first thought (exhaust inline/progressive alternatives)
+- Em dashes in copy (`—` or `--`); use commas, colons, semicolons, periods, or parentheses
+
 ## Pre-check: assess complexity before writing any code
 
 After exploring the codebase but BEFORE making any changes, assess this task:
