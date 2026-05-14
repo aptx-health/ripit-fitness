@@ -62,13 +62,22 @@ export default function MediaUploader({ onInsert }: MediaUploaderProps) {
       <span className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
         Media Upload
       </span>
+      {/*
+        Drag-drop file upload zone.
+        Semantically a "create-new" affordance (empty container inviting an upload),
+        not a tip annotation — so it uses the solid-2px-border treatment shared
+        with <CreateNewCard>. Kept as raw markup rather than wrapped in the primitive
+        because the body content swaps between three states (idle / uploading / preview)
+        and the children include a hidden file input + a preview <img>.
+        See DESIGN.md §5 Components — Dashed vs Solid.
+      */}
       {/* biome-ignore lint/a11y/useKeyWithClickEvents: file upload drop zone with hidden input */}
       <div
         role="button"
         tabIndex={0}
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleDrop}
-        className="border-2 border-dashed border-border p-4 text-center hover:border-primary transition-colors cursor-pointer"
+        className="border-2 border-border p-4 text-center hover:border-primary hover:bg-muted/40 transition-colors cursor-pointer"
         onClick={() => fileRef.current?.click()}
       >
         <input

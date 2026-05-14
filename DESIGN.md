@@ -280,6 +280,16 @@ The default button is the **gameboy-pressed primary**: solid emerald background,
 - **Internal Padding:** `16px 20px` baseline; `24px` for larger panels.
 - **Texture (optional):** The `doom-noise` utility overlays a low-opacity (≈3%) SVG fractal noise pattern on the surface to give the parchment its paper grain. Apply on hero panels and modal surfaces, skip on dense list items.
 
+### Dashed vs Solid Border Treatment
+
+The dashed-border idiom carries **two distinct semantics** and must not be conflated. The two patterns are visually distinct primitives and must stay that way; merging them collapses a meaningful signal the user reads at a glance.
+
+- **Dashed (1px) → field-guide tip annotation.** Reserved for small inline notes the user can read past: the "First time doing this one" empty-history note, the RIR/RPE helper at the bottom of the intensity drawer, the "Your program is ready" first-run message on the Training page. Use the `<TipAnnotation>` primitive (`components/ui/TipAnnotation.tsx`) — never hand-roll the `border border-dashed border-border/40 bg-muted/35` className. The `variant="first-run"` rendering adds a `TIP` parallelogram-clipped sticker, swaps the icon for a small inline frog ornament, and applies the `doom-noise` paper-grain overlay. Per the Adult-Newcomer Rule, the frog only appears in `first-run` — it does not propagate into the default variant.
+
+- **Solid (2px) → create-new affordance.** Reserved for empty containers that invite the user to add something: `+ CREATE NEW PROGRAM` on the Programs page, `+ ADD SET (CLONES LAST)` in the program builder. Use the `<CreateNewCard>` primitive (`components/ui/CreateNewCard.tsx`) — never hand-roll the `border-2 border-border + Plus icon + uppercase Rajdhani label` pattern. The `locked` prop swaps the icon for a `Lock` and applies `cursor-not-allowed` for premium-gated create flows.
+
+If a new pattern needs an "empty frame" treatment that is neither a tip annotation nor a create-new affordance — e.g. a "request a program" empty-state placeholder, or a drag-drop file upload zone — **propose a third primitive** rather than reusing either of the existing two. Each new register requires an explicit decision; the dashed/solid pair holds because both readings are scarce.
+
 ### Inputs
 
 - **Shape:** Sharp 0-radius. 2px sandy-brown border at rest. Warm-tan `#F5EFE6` background.

@@ -227,7 +227,14 @@ export default function CommunityProgramsView({
               ))}
             </div>
 
-            {/* Request a Program prompt */}
+            {/*
+              "Request a program" prompt. This is an *empty-state placeholder*
+              — not a create-new affordance and not a tip annotation. The
+              dashed border is doing a third job here: signalling "this
+              region is a placeholder, not a real card." Kept as raw markup
+              with this comment so future cleanup doesn't mis-classify it.
+              See DESIGN.md §5 Components — Dashed vs Solid.
+            */}
             <div className="border-2 border-dashed border-border bg-card/50 p-6 sm:p-8 text-center mb-8">
               <p className="text-sm sm:text-base text-muted-foreground mb-4">
                 Looking for something specific?
