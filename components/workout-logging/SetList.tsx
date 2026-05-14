@@ -1,6 +1,5 @@
 'use client'
 
-import { AlertCircle, Check, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import type { LoggedSet } from '@/types/workout'
 import RestStopwatch from './RestStopwatch'
@@ -33,7 +32,12 @@ interface SetListProps {
   prescribedSets: PrescribedSet[]
   loggedSets: LoggedSet[]
   exerciseHistory: ExerciseHistory | null
-  onDeleteSet: (setNumber: number) => void
+  /**
+   * @deprecated Logged-set deletion now lives on `<LoggedSetList>`. Kept for
+   * backwards compatibility with callers that still wire it through; this
+   * component no longer renders the delete affordance.
+   */
+  onDeleteSet?: (setNumber: number) => void
   exerciseId?: string
   showIntensity?: boolean
 }
@@ -62,11 +66,16 @@ function isUniformPrescription(sets: PrescribedSet[]): boolean {
   )
 }
 
+/**
+ * Prescribed-set rendering for the LOG SETS tab. Logged sets now render in a
+ * dedicated `<LoggedSetList>` above the input area (#727). This component
+ * keeps the prescribed-set view + rest timer + history strip in their
+ * existing slot below the input.
+ */
 export default function SetList({
   prescribedSets,
   loggedSets,
   exerciseHistory,
-  onDeleteSet,
   exerciseId,
   showIntensity = true,
 }: SetListProps) {
@@ -85,34 +94,6 @@ export default function SetList({
     }
     prevLogCountRef.current = loggedSets.length
   }, [loggedSets.length])
-
-  // Track which set was just logged for the flash animation
-  const prevExerciseRef = useRef(exerciseId)
-  const prevCountRef = useRef(loggedSets.length)
-  const [flashSetNumber, setFlashSetNumber] = useState<number | null>(null)
-
-  useEffect(() => {
-    const count = loggedSets.length
-
-    if (exerciseId !== prevExerciseRef.current) {
-      prevExerciseRef.current = exerciseId
-      prevCountRef.current = count
-      const frame = requestAnimationFrame(() => setFlashSetNumber(null))
-      return () => cancelAnimationFrame(frame)
-    }
-
-    if (count > prevCountRef.current) {
-      const newest = loggedSets[count - 1]
-      const frame = requestAnimationFrame(() => setFlashSetNumber(newest.setNumber))
-      const flashOffTimer = setTimeout(() => setFlashSetNumber(null), 650)
-      prevCountRef.current = count
-      return () => {
-        cancelAnimationFrame(frame)
-        clearTimeout(flashOffTimer)
-      }
-    }
-    prevCountRef.current = count
-  }, [loggedSets, exerciseId])
 
   // Collapsed summary: show when no sets logged and prescription is uniform
   const showCollapsedSummary = loggedSets.length === 0 && isUniformPrescription(prescribedSets) && prescribedSets.length > 1
@@ -148,57 +129,9 @@ export default function SetList({
         </div>
       )}
 
-      {/* Per-row view: logged + rest timer + prescribed */}
+      {/* Rest timer + prescribed rows */}
       {!showCollapsedSummary && (
         <div>
-          {/* Logged sets */}
-          {loggedSets.map((set) => {
-            const isFailed = set._syncStatus === 'error'
-            const isPending = set._syncStatus === 'pending'
-            return (
-              <div
-                key={`logged-${set.exerciseId}-${set.setNumber}`}
-                className={`px-2.5 py-3 ${flashSetNumber === set.setNumber ? 'doom-set-logged' : ''}`}
-                style={{
-                  backgroundColor: 'color-mix(in srgb, var(--success) 8%, transparent)',
-                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04), inset 0 -1px 0 rgba(0,0,0,0.30)',
-                }}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-start gap-2 flex-1 min-w-0">
-                    {/* State indicator — filled circle */}
-                    <span className="flex-shrink-0 mt-0.5 w-[22px] h-[22px] flex items-center justify-center" style={{ backgroundColor: isFailed ? 'var(--warning)' : 'var(--success)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -1px 0 rgba(0,0,0,0.20)' }}>
-                      {isFailed ? (
-                        <AlertCircle size={12} className="text-white" />
-                      ) : (
-                        <Check size={12} className="text-white" strokeWidth={3} />
-                      )}
-                    </span>
-                    <div className="min-w-0">
-                      <span className="block text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                        Set {set.setNumber}
-                      </span>
-                      <span className={`block text-base font-bold ${isFailed ? 'text-warning' : 'text-foreground'}`}>
-                        {formatWeight(set.weight, set.weightUnit)} × {set.reps}
-                        {showIntensity && formatIntensity(set) ? ` · ${formatIntensity(set)}` : ''}
-                      </span>
-                      {isPending && <span className="text-xs text-muted-foreground">saving...</span>}
-                    </div>
-                  </div>
-                  {/* Delete — hidden by default, visible on hover */}
-                  <button
-                    type="button"
-                    onClick={() => onDeleteSet(set.setNumber)}
-                    className="opacity-0 hover:opacity-100 focus:opacity-100 text-muted-foreground/30 hover:text-error p-1 transition-all doom-focus-ring"
-                    aria-label={`Delete set ${set.setNumber}`}
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              </div>
-            )
-          })}
-
           {/* Rest timer card — between logged and prescribed */}
           {loggedSets.length > 0 && remainingSets.length > 0 && (
             <RestStopwatch
