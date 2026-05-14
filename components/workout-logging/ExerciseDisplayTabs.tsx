@@ -183,7 +183,7 @@ export default function ExerciseDisplayTabs({
             <TipAnnotation
               icon={<Sparkles aria-hidden="true" size={16} strokeWidth={1.8} />}
             >
-              <span className="text-base leading-relaxed text-muted-foreground">
+              <span className="text-lg leading-relaxed text-muted-foreground">
                 First time doing this one. Log a set and your history starts here.
               </span>
             </TipAnnotation>

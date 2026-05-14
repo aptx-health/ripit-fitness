@@ -28,6 +28,11 @@ interface CreateNewCardProps {
   href?: string
   /** Button mode — renders as a <button>. Pass either onClick OR href. */
   onClick?: () => void
+  /**
+   * Disables the card. When combined with `href`, the card falls back to
+   * `<button disabled>` (no navigation) — the inert disabled state wins over
+   * the anchor mode by design.
+   */
   disabled?: boolean
   /**
    * Locked variant — shows a Lock icon, applies cursor-not-allowed/opacity,
