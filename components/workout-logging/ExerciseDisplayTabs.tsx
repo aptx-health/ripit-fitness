@@ -11,6 +11,7 @@ import type { LoadState } from '@/hooks/useProgressiveExercises'
 import type { LoggedSet } from '@/types/workout'
 import DrawerContextBanner from './DrawerContextBanner'
 import ExerciseInfoContent from './ExerciseInfoContent'
+import LoggedSetList from './LoggedSetList'
 import SetList from './SetList'
 
 interface PrescribedSet {
@@ -144,6 +145,13 @@ export default function ExerciseDisplayTabs({
           totalSets={totalSets}
           prescribed={prescribedSummary}
         />
+        {!isInputExpanded && (
+          <LoggedSetList
+            loggedSets={loggedSets}
+            onDeleteSet={onDeleteSet}
+            showIntensity={showIntensity}
+          />
+        )}
         <div className="px-4 flex-1 flex flex-col gap-2">
           {loggingForm}
           {!isInputExpanded && (
