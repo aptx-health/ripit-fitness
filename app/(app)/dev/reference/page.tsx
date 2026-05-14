@@ -26,12 +26,6 @@ export default function ReferenceIndexPage() {
 
         <div className="bg-card border border-border doom-corners divide-y divide-border">
           <ReferenceRow
-            href="/dev/reference/training"
-            title="Training Page"
-            description="Bracketed workout list, week navigator, four row states on one screen, field-guide tip treatment."
-            tickets="#700 #702 #704 #717"
-          />
-          <ReferenceRow
             href="/dev/reference/logger"
             title="Exercise Logger"
             description="Input-stamped numeric fields, segmented tabs, drawer context banner, weight keypad with muted CANCEL."
