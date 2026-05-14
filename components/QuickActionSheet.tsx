@@ -2,15 +2,18 @@
 
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import {
+  ChevronDown,
   ChevronRight,
   Dumbbell,
   LayoutGrid,
-  Play,
-  X,
   type LucideIcon,
+  Play,
+  Trash2,
+  X,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
+import { discardDraft } from '@/lib/api/workout-sets'
 import { clientLogger } from '@/lib/client-logger'
 import { useDraftWorkout } from '@/lib/contexts/DraftWorkoutContext'
 
@@ -38,10 +41,23 @@ const SHEET_BOTTOM_STYLE = {
 
 export default function QuickActionSheet({ open, onOpenChange }: Props) {
   const router = useRouter()
-  const { activeDraft } = useDraftWorkout()
+  const { activeDraft, refreshDraft, clearDraft } = useDraftWorkout()
   const [nextWorkout, setNextWorkout] = useState<NextWorkout | null>(null)
   const [isLoadingNext, setIsLoadingNext] = useState(false)
   const [isStartingFreestyle, setIsStartingFreestyle] = useState(false)
+  const [isDraftExpanded, setIsDraftExpanded] = useState(false)
+  const [isDiscardingDraft, setIsDiscardingDraft] = useState(false)
+
+  // Collapse the draft section whenever the sheet closes (or the draft clears)
+  useEffect(() => {
+    if (!open || !activeDraft) setIsDraftExpanded(false)
+  }, [open, activeDraft])
+
+  // Re-fetch active draft each time the sheet opens — context only loads on
+  // mount, so a draft saved elsewhere wouldn't otherwise show up here.
+  useEffect(() => {
+    if (open) refreshDraft()
+  }, [open, refreshDraft])
 
   useEffect(() => {
     if (!open || activeDraft) return
@@ -100,6 +116,28 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
     }
   }, [isStartingFreestyle, onOpenChange, router])
 
+  const handleDiscardDraft = useCallback(async () => {
+    if (!activeDraft || isDiscardingDraft) return
+    setIsDiscardingDraft(true)
+    try {
+      if (activeDraft.isAdHoc) {
+        await fetch(`/api/workouts/adhoc/${activeDraft.completionId}`, {
+          method: 'DELETE',
+        })
+      } else if (activeDraft.workoutId) {
+        await discardDraft(activeDraft.workoutId)
+      }
+      clearDraft()
+      await refreshDraft()
+      setIsDraftExpanded(false)
+      router.refresh()
+    } catch (err) {
+      clientLogger.error('Failed to discard draft:', err)
+    } finally {
+      setIsDiscardingDraft(false)
+    }
+  }, [activeDraft, isDiscardingDraft, clearDraft, refreshDraft, router])
+
   const continueSubtitle = isLoadingNext
     ? 'Loading…'
     : nextWorkout
@@ -132,11 +170,11 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
           }}
         >
           <div
-            className="bg-card border border-border doom-corners divide-y divide-border"
+            className="bg-card border border-border doom-corners"
             style={{ boxShadow: '0 -8px 24px rgba(0,0,0,0.35)' }}
           >
             {/* Header — same cream surface as rows; close as a chunky bordered chip */}
-            <div className="flex items-center justify-between px-4 pt-3 pb-2.5">
+            <div className="flex items-center justify-between px-4 pt-3 pb-2.5 border-b border-border">
               <DialogPrimitive.Title className="doom-label text-foreground/80">
                 Quick actions
               </DialogPrimitive.Title>
@@ -148,53 +186,95 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
               </DialogPrimitive.Close>
             </div>
 
-            {activeDraft ? (
-              <ActionRow
-                icon={Play}
-                label={activeDraft.workoutName}
-                subtitle={
-                  activeDraft.isAdHoc
-                    ? 'Resume freestyle workout'
-                    : 'Resume in-progress workout'
-                }
-                onClick={handleResumeDraft}
-                primary
-              />
-            ) : (
+            {/* Draft section: appears above the main actions when a draft is in
+                progress, separated by a thin border + spacing. Tapping the row
+                expands it to reveal Continue + Discard controls inline. */}
+            {activeDraft && (
+              <>
+                <div className="bg-warning/5">
+                  <ActionRow
+                    icon={Play}
+                    label="Continue draft workout"
+                    subtitle={
+                      activeDraft.isAdHoc ? 'Freestyle' : activeDraft.workoutName
+                    }
+                    onClick={() => setIsDraftExpanded((v) => !v)}
+                    tone="warning"
+                    expanded={isDraftExpanded}
+                  />
+                  {isDraftExpanded && (
+                    <div className="px-4 pb-3 flex gap-2">
+                      <button
+                        type="button"
+                        onClick={handleResumeDraft}
+                        className="flex-[1.4] h-10 bg-warning text-warning-foreground text-sm font-bold uppercase tracking-wider doom-button-3d-accent doom-focus-ring"
+                      >
+                        Continue
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleDiscardDraft}
+                        disabled={isDiscardingDraft}
+                        className="flex-1 h-10 bg-error text-error-foreground text-sm font-bold uppercase tracking-wider inline-flex items-center justify-center gap-1.5 disabled:opacity-50 doom-focus-ring"
+                        style={{
+                          boxShadow:
+                            'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)',
+                        }}
+                      >
+                        <Trash2 size={14} strokeWidth={2.5} />
+                        {isDiscardingDraft ? 'Discarding…' : 'Discard'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+                {/* Visual gap separating draft from the always-visible actions */}
+                <div className="h-2 bg-card border-b border-border" />
+              </>
+            )}
+
+            <div className="divide-y divide-border">
               <ActionRow
                 icon={Play}
                 label="Continue your program"
-                subtitle={continueSubtitle}
-                onClick={nextWorkout ? handleContinueProgram : undefined}
-                disabled={!nextWorkout}
-                primary={!!nextWorkout}
+                subtitle={
+                  activeDraft
+                    ? 'Finish current workout first'
+                    : continueSubtitle
+                }
+                onClick={
+                  !activeDraft && nextWorkout ? handleContinueProgram : undefined
+                }
+                disabled={!!activeDraft || !nextWorkout}
+                tone={!activeDraft && nextWorkout ? 'success' : undefined}
               />
-            )}
 
-            <ActionRow
-              icon={Dumbbell}
-              label="Freestyle workout"
-              subtitle={
-                activeDraft
-                  ? 'Finish current workout first'
-                  : isStartingFreestyle
-                    ? 'Starting…'
-                    : 'Log sets as you go'
-              }
-              onClick={
-                !activeDraft && !isStartingFreestyle
-                  ? handleStartFreestyle
-                  : undefined
-              }
-              disabled={!!activeDraft || isStartingFreestyle}
-            />
+              <ActionRow
+                icon={Dumbbell}
+                label="Freestyle workout"
+                subtitle={
+                  activeDraft
+                    ? 'Finish current workout first'
+                    : isStartingFreestyle
+                      ? 'Starting…'
+                      : 'Log sets as you go'
+                }
+                onClick={
+                  !activeDraft && !isStartingFreestyle
+                    ? handleStartFreestyle
+                    : undefined
+                }
+                disabled={!!activeDraft || isStartingFreestyle}
+              />
 
-            <ActionRow
-              icon={LayoutGrid}
-              label="Pick a workout"
-              subtitle={activeDraft ? 'Finish current workout first' : 'Coming soon'}
-              disabled
-            />
+              <ActionRow
+                icon={LayoutGrid}
+                label="Pick a workout"
+                subtitle={
+                  activeDraft ? 'Finish current workout first' : 'Coming soon'
+                }
+                disabled
+              />
+            </div>
           </div>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
@@ -208,8 +288,25 @@ type ActionRowProps = {
   subtitle?: string
   onClick?: () => void
   disabled?: boolean
-  primary?: boolean
+  /** Color treatment for the icon chip + chevron. `success` (jungle green) for
+   *  Continue your program; `warning` (banana gold) for the draft-resume row,
+   *  echoing the bottom-nav gold chip's call-back to in-progress work. */
+  tone?: 'success' | 'warning'
+  /** When true, renders a down-chevron instead of right-chevron to indicate
+   *  the row toggles an expanded section. */
+  expanded?: boolean
 }
+
+const TONE_STYLES = {
+  success: {
+    chip: 'bg-success text-success-foreground border-success',
+    chevron: 'text-success',
+  },
+  warning: {
+    chip: 'bg-warning text-warning-foreground border-warning',
+    chevron: 'text-warning',
+  },
+} as const
 
 function ActionRow({
   icon: Icon,
@@ -217,18 +314,17 @@ function ActionRow({
   subtitle,
   onClick,
   disabled = false,
-  primary = false,
+  tone,
+  expanded = false,
 }: ActionRowProps) {
-  const isPrimary = primary && !disabled
+  const activeTone = !disabled && tone ? tone : null
   const baseStyles =
     'group w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors doom-focus-ring'
   const enabledStyles = 'hover:bg-muted/50 active:bg-muted/70 cursor-pointer'
   const disabledStyles = 'opacity-50 cursor-not-allowed'
 
-  // Icon chip: green-success tile for the primary action (echoes the bottom-nav
-  // gold chip language), bordered cream tile for the rest.
-  const chipStyles = isPrimary
-    ? 'bg-success text-success-foreground border-success'
+  const chipStyles = activeTone
+    ? TONE_STYLES[activeTone].chip
     : disabled
       ? 'bg-muted/40 text-muted-foreground border-border'
       : 'bg-muted/30 text-foreground/80 border-border'
@@ -255,15 +351,24 @@ function ActionRow({
           </div>
         )}
       </div>
-      {!disabled && (
-        <ChevronRight
-          size={20}
-          strokeWidth={2.5}
-          className={`shrink-0 transition-transform group-hover:translate-x-0.5 ${
-            isPrimary ? 'text-success' : 'text-muted-foreground'
-          }`}
-        />
-      )}
+      {!disabled &&
+        (expanded ? (
+          <ChevronDown
+            size={20}
+            strokeWidth={2.5}
+            className={`shrink-0 transition-transform ${
+              activeTone ? TONE_STYLES[activeTone].chevron : 'text-muted-foreground'
+            }`}
+          />
+        ) : (
+          <ChevronRight
+            size={20}
+            strokeWidth={2.5}
+            className={`shrink-0 transition-transform group-hover:translate-x-0.5 ${
+              activeTone ? TONE_STYLES[activeTone].chevron : 'text-muted-foreground'
+            }`}
+          />
+        ))}
     </button>
   )
 }

@@ -55,12 +55,13 @@ export default function BottomNav() {
                 />
               )}
               <span
-                className="relative inline-flex flex-col items-center justify-center w-full h-full rounded-md bg-warning text-warning-foreground transition-transform active:translate-y-[3px]"
+                className="relative inline-flex flex-col items-center justify-center w-full h-full rounded-md bg-warning text-warning-foreground transition-transform active:translate-y-[3px] overflow-hidden"
                 style={{
                   boxShadow:
                     '0 5px 0 var(--accent-hover, #B36F08), 0 7px 10px rgba(0,0,0,0.35), inset 0 2px 0 rgba(255,255,255,0.45), inset 0 -1px 0 rgba(0,0,0,0.15)',
                 }}
               >
+                {activeDraft && <span aria-hidden="true" className="chip-gold-shine" />}
                 <Dumbbell
                   className="h-5 w-5 -translate-y-[1px]"
                   strokeWidth={2.75}
