@@ -39,18 +39,31 @@ export default function BottomNav() {
           <button
             type="button"
             onClick={() => setSheetOpen(true)}
-            className={`flex-1 flex flex-col items-center justify-center min-h-12 min-w-12 transition-colors ${
-              activeDraft
-                ? 'text-accent animate-pulse'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
+            className="flex-1 flex items-center justify-center doom-focus-ring"
             aria-label={
               activeDraft
                 ? `Resume draft workout: ${activeDraft.workoutName}`
                 : 'Quick actions'
             }
           >
-            <Dumbbell className="h-6 w-6" />
+            <span className="relative inline-flex items-center justify-center w-16 h-[3.25rem] -translate-y-1">
+              {activeDraft && (
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 rounded-md pointer-events-none"
+                  style={{ animation: 'doom-pulse 2s ease-in-out infinite' }}
+                />
+              )}
+              <span
+                className="relative inline-flex items-center justify-center w-full h-full rounded-md bg-warning text-warning-foreground transition-transform active:translate-y-[3px]"
+                style={{
+                  boxShadow:
+                    '0 5px 0 var(--accent-hover, #B36F08), 0 7px 10px rgba(0,0,0,0.35), inset 0 2px 0 rgba(255,255,255,0.45), inset 0 -1px 0 rgba(0,0,0,0.15)',
+                }}
+              >
+                <Dumbbell className="h-7 w-7" strokeWidth={2.75} />
+              </span>
+            </span>
             <span className="sr-only">Quick actions</span>
           </button>
           {TABS_AFTER.map((tab) => (
