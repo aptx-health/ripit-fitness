@@ -1,5 +1,6 @@
 'use client'
 
+import { Button } from '@/components/ui/Button'
 import { type IntensityPreset, RIR_PRESETS, RPE_PRESETS } from '@/lib/constants/intensity-presets'
 
 interface IntensitySelectorProps {
@@ -92,28 +93,24 @@ export function IntensitySelector({
 
         {/* Cancel + Skip buttons */}
         <div className="flex">
-          <button
-            type="button"
+          <Button
+            variant="secondary"
             onClick={onCancel}
-            className="flex-1 px-3 py-2.5 bg-error text-error-foreground
-              font-bold uppercase tracking-wider text-sm
-              hover:bg-error-hover transition-colors"
             aria-label={`Cancel ${label} selection`}
+            className="flex-1 !rounded-none px-3 py-2.5 text-error font-bold uppercase tracking-wider text-sm"
           >
             CANCEL
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="ghost"
             onClick={() => {
               onChange('')
               onCollapse()
             }}
-            className="flex-1 px-3 py-2.5 bg-card
-              text-muted-foreground font-bold uppercase tracking-wider text-sm
-              hover:bg-muted transition-colors border-l border-border"
+            className="flex-1 !rounded-none px-3 py-2.5 bg-card text-muted-foreground font-bold uppercase tracking-wider text-sm hover:bg-muted border-l border-border"
           >
             SKIP {label}
-          </button>
+          </Button>
         </div>
       </div>
 
