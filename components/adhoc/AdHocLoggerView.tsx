@@ -360,12 +360,41 @@ export default function AdHocLoggerView({
   const isInputExpanded = expandedInput !== null
   const hasExercises = exercises.length > 0
 
+  // Swipe + slide-out animation, mirroring the programmed logger.
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(
+    null
+  )
+  const slideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const triggerSlide = useCallback(
+    (direction: 'left' | 'right', action: () => void) => {
+      setSlideDirection(direction)
+      if (slideTimeoutRef.current) clearTimeout(slideTimeoutRef.current)
+      slideTimeoutRef.current = setTimeout(() => {
+        action()
+        setSlideDirection(null)
+      }, 150)
+    },
+    []
+  )
+
+  useEffect(
+    () => () => {
+      if (slideTimeoutRef.current) clearTimeout(slideTimeoutRef.current)
+    },
+    []
+  )
+
   const swipeHandlers = useSwipeNavigation({
     onSwipeLeft: () => {
-      if (currentIndex < exercises.length - 1) goToExercise(currentIndex + 1)
+      if (currentIndex < exercises.length - 1) {
+        triggerSlide('left', () => goToExercise(currentIndex + 1))
+      }
     },
     onSwipeRight: () => {
-      if (currentIndex > 0) goToExercise(currentIndex - 1)
+      if (currentIndex > 0) {
+        triggerSlide('right', () => goToExercise(currentIndex - 1))
+      }
     },
   })
 
@@ -381,7 +410,16 @@ export default function AdHocLoggerView({
           menuActions={[]}
         />
 
-        <div className="flex-1 overflow-hidden flex flex-col" {...swipeHandlers}>
+        <div
+          className={`flex-1 overflow-hidden flex flex-col transition-transform duration-150 ease-out ${
+            slideDirection === 'left'
+              ? '-translate-x-4 opacity-80'
+              : slideDirection === 'right'
+                ? 'translate-x-4 opacity-80'
+                : ''
+          }`}
+          {...swipeHandlers}
+        >
           {hasExercises && currentExercise ? (
             <ExerciseDisplayTabs
               exercise={currentExercise}
