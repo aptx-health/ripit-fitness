@@ -28,8 +28,7 @@ import Link from 'next/link'
 const RAISED_SHADOW =
   'inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)'
 const RECESSED_SHADOW =
-  'inset 0 1px 2px rgba(0,0,0,0.50), inset 0 0 0 1px rgba(254,243,199,0.06)'
-const RECESSED_FILL = 'rgba(0,0,0,0.3)'
+  'inset 0 1px 2px rgba(0,0,0,0.50), inset 0 0 0 1px rgba(255,255,255,0.06)'
 
 export default function LoggerReferencePage() {
   return (
@@ -332,23 +331,23 @@ function RepsStepperMock() {
       <div className="flex items-center">
         <button
           type="button"
-          className="flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center text-foreground"
-          style={{ backgroundColor: RECESSED_FILL, boxShadow: RAISED_SHADOW }}
+          className="flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center bg-secondary text-secondary-foreground"
+          style={{ boxShadow: RAISED_SHADOW }}
           aria-label="Decrease reps"
         >
           <Minus size={24} strokeWidth={3} />
         </button>
 
         <div
-          className="flex-1 min-h-[44px] flex items-center justify-center text-2xl font-bold text-foreground tabular-nums min-w-[60px]"
-          style={{ backgroundColor: RECESSED_FILL, boxShadow: RECESSED_SHADOW }}
+          className="flex-1 min-h-[44px] flex items-center justify-center text-2xl font-bold bg-secondary text-secondary-foreground tabular-nums min-w-[60px]"
+          style={{ boxShadow: RECESSED_SHADOW }}
         >
           5
         </div>
 
         <button
           type="button"
-          className="flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center bg-success-muted text-success-text"
+          className="flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center bg-success text-success-foreground"
           style={{ boxShadow: RAISED_SHADOW }}
           aria-label="Increase reps"
         >
@@ -367,12 +366,12 @@ function WeightTriggerMock() {
       </span>
       <button
         type="button"
-        className="w-full h-12 px-4 flex items-center justify-center text-2xl font-bold text-foreground tabular-nums hover:border-primary transition-all"
-        style={{ backgroundColor: RECESSED_FILL, boxShadow: RECESSED_SHADOW }}
+        className="w-full h-12 px-4 flex items-center justify-center text-2xl font-bold bg-secondary text-secondary-foreground tabular-nums transition-all"
+        style={{ boxShadow: RECESSED_SHADOW }}
         aria-label="Edit weight"
       >
         135
-        <span className="text-sm font-semibold text-muted-foreground ml-2">
+        <span className="text-sm font-semibold text-secondary-foreground/70 ml-2">
           lb
         </span>
       </button>
@@ -388,11 +387,11 @@ function RirTriggerMock() {
       </span>
       <button
         type="button"
-        className="w-full h-12 px-4 flex items-center justify-center hover:border-primary transition-all"
-        style={{ backgroundColor: RECESSED_FILL, boxShadow: RECESSED_SHADOW }}
+        className="w-full h-12 px-4 flex items-center justify-center bg-secondary transition-all"
+        style={{ boxShadow: RECESSED_SHADOW }}
         aria-label="Edit RIR"
       >
-        <span className="text-2xl font-bold text-foreground tabular-nums">2</span>
+        <span className="text-2xl font-bold text-secondary-foreground tabular-nums">2</span>
       </button>
     </div>
   )
@@ -412,15 +411,14 @@ function WeightKeypadMock() {
       </span>
 
       <div
-        className="w-full h-12 px-4 flex items-center justify-center border-2 border-primary text-2xl font-bold text-foreground tabular-nums"
+        className="w-full h-12 px-4 flex items-center justify-center border-2 border-primary text-2xl font-bold bg-secondary text-secondary-foreground tabular-nums"
         style={{
-          backgroundColor: RECESSED_FILL,
           boxShadow:
             'inset 0 1px 2px rgba(0,0,0,0.50), 0 0 8px rgba(var(--primary-rgb),0.2)',
         }}
       >
         135
-        <span className="text-sm font-semibold text-muted-foreground ml-2">
+        <span className="text-sm font-semibold text-secondary-foreground/70 ml-2">
           lb
         </span>
       </div>
