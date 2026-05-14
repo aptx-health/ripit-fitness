@@ -456,7 +456,7 @@ export default function AdHocLoggerView({
       )}
       {showExitConfirm && (
         <ExitWorkoutConfirm
-          hasLoggedSets={totalLoggedSets > 0}
+          hasUnsavedWork={totalLoggedSets > 0 || exercises.length > 0}
           onSaveAsDraft={handleExitSaveAsDraft}
           onDiscard={handleExitDiscard}
           onCancel={() => setShowExitConfirm(false)}

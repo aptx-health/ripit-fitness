@@ -838,7 +838,7 @@ export default function ExerciseLoggingModal({
 
       {showExitConfirm && (
         <ExitWorkoutConfirm
-          hasLoggedSets={totalLoggedSets > 0}
+          hasUnsavedWork={totalLoggedSets > 0}
           onSaveAsDraft={handleExitSaveAsDraft}
           onDiscard={handleExitDiscard}
           onCancel={() => setShowExitConfirm(false)}

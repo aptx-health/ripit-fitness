@@ -4,8 +4,13 @@ import { AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 
 type Props = {
-  /** Whether any sets have been logged in the current session. Drives copy + button set. */
-  hasLoggedSets: boolean
+  /**
+   * Whether the session has any state worth preserving — for programmed
+   * workouts that's logged sets; for ad-hoc that's logged sets OR added
+   * exercises (an exercise scaffold is itself work the user might want to
+   * save and come back to). Drives copy + button set.
+   */
+  hasUnsavedWork: boolean
   onSaveAsDraft: () => void
   onDiscard: () => void
   onCancel: () => void
@@ -13,13 +18,12 @@ type Props = {
 
 /**
  * Shared exit-confirmation modal used by both the programmed
- * `<ExerciseLoggingModal>` and the ad-hoc logger surface. Behavior matches
- * the original programmed-flow modal:
- *  - With logged sets: Save as Draft / Discard All / Cancel
- *  - Without logged sets: Cancel / Exit
+ * `<ExerciseLoggingModal>` and the ad-hoc logger surface.
+ *  - With unsaved work: Save as Draft / Discard All / Cancel
+ *  - Otherwise: Cancel / Exit
  */
 export default function ExitWorkoutConfirm({
-  hasLoggedSets,
+  hasUnsavedWork,
   onSaveAsDraft,
   onDiscard,
   onCancel,
@@ -31,14 +35,14 @@ export default function ExitWorkoutConfirm({
           <AlertTriangle size={56} strokeWidth={2} />
         </div>
         <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2 uppercase tracking-wider">
-          {hasLoggedSets ? 'Exit Workout?' : 'Confirm Exit'}
+          {hasUnsavedWork ? 'Exit Workout?' : 'Confirm Exit'}
         </h3>
         <p className="text-base sm:text-lg text-muted-foreground mb-6">
-          {hasLoggedSets
-            ? 'You have logged sets. Do you want to save as draft or discard?'
+          {hasUnsavedWork
+            ? 'Save as draft to pick up where you left off, or discard.'
             : 'Are you sure you want to exit?'}
         </p>
-        {hasLoggedSets ? (
+        {hasUnsavedWork ? (
           <div className="flex flex-col gap-3">
             <Button
               type="button"
