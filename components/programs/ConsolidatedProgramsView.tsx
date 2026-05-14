@@ -265,6 +265,7 @@ export default function ConsolidatedProgramsView({
         <div className="px-4 sm:px-0 mb-4">
           <SegmentedControl
             aria-label="Programs view"
+            tone="bold"
             options={[
               { value: 'my', label: 'My Programs' },
               { value: 'browse', label: 'Browse' },

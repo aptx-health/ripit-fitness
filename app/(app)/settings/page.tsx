@@ -174,6 +174,7 @@ export default function SettingsPage() {
               </span>
               <SegmentedControl
                 aria-label="Workout mode"
+                tone="bold"
                 options={[
                   { value: 'follow_along', label: 'Follow Along' },
                   { value: 'full', label: 'Log Sets' },
@@ -249,6 +250,7 @@ export default function SettingsPage() {
                         </span>
                         <SegmentedControl
                           aria-label="Default rating type"
+                          tone="bold"
                           options={[
                             { value: 'rpe', label: 'RPE' },
                             { value: 'rir', label: 'RIR' },

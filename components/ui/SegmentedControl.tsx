@@ -16,6 +16,16 @@ import { type KeyboardEvent, useCallback, useRef } from 'react'
  *     and uses only the 2px primary bottom underline, so the lift doesn't
  *     fight horizontal density.
  *
+ * The `tone` prop controls the strength of the active-state contrast for the
+ * `lift` presentation:
+ *   - `subtle` (default): card-cream lift + primary underline. Right when the
+ *     control sits on the app background or a clearly distinct surface.
+ *   - `bold`: active option fills with `bg-primary text-primary-foreground`
+ *     (no underline — the fill is the indicator). Use when the control sits
+ *     on a surface that's close in value to `bg-card`, where the subtle lift
+ *     doesn't read as active (e.g. Settings cards, Transform Week modal,
+ *     Programs view atop the app shell).
+ *
  * All colors flow through theme tokens — works across every theme.
  */
 export type SegmentedControlOption<T extends string> = {
@@ -38,6 +48,12 @@ export interface SegmentedControlProps<T extends string> {
    * `underline` for 4+ options.
    */
   presentation?: 'lift' | 'underline'
+  /**
+   * Active-state contrast for the `lift` presentation. Defaults to `subtle`.
+   * Use `bold` (primary fill) when the control sits on a surface close in
+   * value to `bg-card`. Ignored for the `underline` presentation.
+   */
+  tone?: 'subtle' | 'bold'
   className?: string
   'aria-label'?: string
 }
@@ -47,10 +63,12 @@ export function SegmentedControl<const T extends string>({
   value,
   onChange,
   presentation,
+  tone = 'subtle',
   className = '',
   'aria-label': ariaLabel,
 }: SegmentedControlProps<T>) {
   const resolvedPresentation = presentation ?? (options.length <= 3 ? 'lift' : 'underline')
+  const isBoldLift = resolvedPresentation === 'lift' && tone === 'bold'
   const buttonRefs = useRef<Array<HTMLButtonElement | null>>([])
 
   const focusOption = useCallback(
@@ -109,9 +127,15 @@ export function SegmentedControl<const T extends string>({
 
         let stateStyles: string
         if (resolvedPresentation === 'lift') {
-          stateStyles = isActive
-            ? 'bg-card text-foreground'
-            : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+          if (isBoldLift) {
+            stateStyles = isActive
+              ? 'bg-primary text-primary-foreground'
+              : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+          } else {
+            stateStyles = isActive
+              ? 'bg-card text-foreground'
+              : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+          }
         } else {
           stateStyles = isActive
             ? 'text-primary'
@@ -140,7 +164,7 @@ export function SegmentedControl<const T extends string>({
                 className="absolute top-1.5 right-2 w-2 h-2 bg-primary"
               />
             )}
-            {isActive && (
+            {isActive && !isBoldLift && (
               <span
                 aria-hidden="true"
                 className="absolute left-0 right-0 bottom-0 h-[2px] bg-primary"

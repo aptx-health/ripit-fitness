@@ -172,6 +172,7 @@ export default function TransformWeekModal({
             {/* Intensity Direction Selection */}
             <SegmentedControl
               aria-label="Intensity direction"
+              tone="bold"
               options={[
                 { value: 'NONE', label: 'None', disabled: isSubmitting || stats !== null },
                 { value: 'MORE', label: 'More', disabled: isSubmitting || stats !== null },
