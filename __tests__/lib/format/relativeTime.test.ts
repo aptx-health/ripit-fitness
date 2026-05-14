@@ -79,5 +79,12 @@ describe('formatRelativeTime', () => {
       const inFive = new Date(NOW.getTime() + 5 * 24 * 60 * 60 * 1000)
       expect(formatRelativeTime(inFive)).toBe('in 5 days')
     })
+
+    it('returns "Today" for a same-day timestamp a few hours in the future', () => {
+      // Symmetric with the past-3-hours case: Math.trunc keeps both as "Today"
+      // rather than rendering the future side as "tomorrow".
+      const inThreeHours = new Date(NOW.getTime() + 1000 * 60 * 60 * 3)
+      expect(formatRelativeTime(inThreeHours)).toBe('Today')
+    })
   })
 })

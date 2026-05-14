@@ -20,26 +20,34 @@
  *   formatRelativeTime(oneMonthAgo) // "1 month ago"
  *
  * TODO: When i18n lands, switch 'en' to navigator.language or a user-pref token.
+ * The formatter instances below assume a fixed locale; reallocate per-call (or
+ * memoize by locale) when that changes.
  */
+
+// Two formatters: `auto` collapses single-day deltas to "yesterday"/"tomorrow",
+// `always` keeps numeric units ("1 month ago" rather than "last month") since
+// numeric weeks/months/years read more naturally in this app. Hoisted to module
+// scope so we don't reallocate on every call.
+const rtfAuto = new Intl.RelativeTimeFormat('en', { numeric: 'auto' })
+const rtfAlways = new Intl.RelativeTimeFormat('en', { numeric: 'always' })
+
+const ONE_DAY_MS = 1000 * 60 * 60 * 24
+
 export function formatRelativeTime(date: Date | string): string {
   const target = typeof date === 'string' ? new Date(date) : date
   const now = new Date()
 
   const diffInMs = now.getTime() - target.getTime()
-  const oneDayMs = 1000 * 60 * 60 * 24
-  const diffInDays = Math.floor(diffInMs / oneDayMs)
+  // `trunc` (not `floor`) keeps past/future symmetric: a few hours either side
+  // of "now" should both collapse to "Today", whereas `floor(-0.125) === -1`
+  // would render a 3-hour-future date as "tomorrow".
+  const diffInDays = Math.trunc(diffInMs / ONE_DAY_MS)
   const absDays = Math.abs(diffInDays)
 
   // Same-calendar-day fast path: today regardless of hour-level drift.
   if (absDays === 0) return 'Today'
 
-  // Two formatters: `auto` collapses single-day deltas to "yesterday"/"tomorrow",
-  // `always` keeps numeric units ("1 month ago" rather than "last month") since
-  // numeric weeks/months/years read more naturally in this app.
-  const rtfAuto = new Intl.RelativeTimeFormat('en', { numeric: 'auto' })
-  const rtfAlways = new Intl.RelativeTimeFormat('en', { numeric: 'always' })
-
-  // Past = negative deltas; future = positive. We use signed values so Intl
+  // Past = positive diffInDays; future = negative. We use signed values so Intl
   // handles "ago" vs "in N" automatically.
   const sign = diffInDays > 0 ? -1 : 1
 
