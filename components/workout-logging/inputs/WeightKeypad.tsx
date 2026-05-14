@@ -2,6 +2,7 @@
 
 import { Delete } from 'lucide-react'
 import { useCallback, useEffect, useRef } from 'react'
+import { Button } from '@/components/ui/Button'
 
 interface WeightKeypadProps {
   value: string
@@ -158,29 +159,23 @@ export function WeightKeypad({
 
       {/* Cancel + Done buttons */}
       <div className="flex gap-px mt-px">
-        <button
-          type="button"
+        <Button
+          variant="secondary"
+          doom
           onClick={onCancel}
-          className="flex-1 h-11 bg-error text-error-foreground
-            font-bold uppercase tracking-wider text-sm
-            hover:bg-error-hover active:bg-error/80
-            transition-colors"
           aria-label="Cancel weight entry"
-          style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)' }}
+          className="flex-1 h-11 text-error uppercase tracking-wider text-sm"
         >
           CANCEL
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          variant="primary"
+          doom
           onClick={handleDone}
-          className="flex-[2] h-11 bg-primary text-primary-foreground
-            font-bold uppercase tracking-wider text-sm
-            hover:bg-primary/90 active:bg-primary/80
-            transition-colors"
-          style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)' }}
+          className="flex-[2] h-11 uppercase tracking-wider text-sm"
         >
           DONE
-        </button>
+        </Button>
       </div>
     </div>
   )
