@@ -527,7 +527,10 @@ export default function AdHocLoggerView({
 
   return (
     <>
-      <div className="fixed inset-0 bg-background flex flex-col" style={{ zIndex: 50 }}>
+      <div
+        className="fixed inset-0 z-50 flex items-stretch justify-center sm:items-center sm:backdrop-blur-md sm:bg-black/40 sm:dark:bg-black/60"
+      >
+        <div className="bg-background w-full h-[100dvh] sm:h-[85vh] sm:max-h-[85vh] sm:max-w-2xl sm:border-2 sm:border-border sm:rounded-lg sm:shadow-xl flex flex-col overflow-hidden">
         <ExerciseLoggingHeader
           currentExerciseIndex={hasExercises ? currentIndex : 0}
           totalExercises={Math.max(1, exercises.length)}
@@ -647,6 +650,7 @@ export default function AdHocLoggerView({
             </button>
           </div>
         )}
+        </div>
       </div>
 
       {pickerMode && (
