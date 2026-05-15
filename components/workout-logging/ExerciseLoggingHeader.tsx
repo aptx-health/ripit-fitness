@@ -2,8 +2,10 @@
 
 import { Check, Plus, X } from 'lucide-react'
 import { useMemo } from 'react'
-import ActionsMenu, { type ActionItem } from '@/components/ActionsMenu'
 import { useWorkoutTimer } from '@/hooks/useWorkoutTimer'
+import ExerciseQuickActionsMenu, {
+  type QuickAction,
+} from './ExerciseQuickActionsMenu'
 
 interface ExerciseLoggingHeaderProps {
   currentExerciseIndex: number
@@ -13,7 +15,7 @@ interface ExerciseLoggingHeaderProps {
   onCompleteWorkout: () => void
   onClose: () => void
   onAddExercise?: () => void
-  menuActions: ActionItem[]
+  menuActions: QuickAction[]
   modeToggle?: React.ReactNode
 }
 
@@ -92,11 +94,9 @@ export default function ExerciseLoggingHeader({
         {/* Right: action icons */}
         <div className="flex items-center justify-end gap-3.5">
           {menuActions.length > 0 && (
-            <ActionsMenu
+            <ExerciseQuickActionsMenu
               actions={menuActions}
-              size="sm"
-              variant="ghost"
-              className="text-secondary-foreground/80 hover:text-secondary-foreground"
+              triggerClassName="text-secondary-foreground/80 hover:text-secondary-foreground"
             />
           )}
           {onAddExercise && (
