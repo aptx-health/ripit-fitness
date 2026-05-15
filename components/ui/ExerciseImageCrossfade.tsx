@@ -180,8 +180,15 @@ export default function ExerciseImageCrossfade({
           />
         ))}
 
-        {/* Position label pill */}
-        <span className="absolute bottom-3 left-3 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-primary bg-background/80 border border-primary">
+        {/* Position label sticker — chrome, not a button */}
+        <span
+          className="absolute bottom-3 left-3 uppercase font-semibold text-muted-foreground bg-card/85 pointer-events-none"
+          style={{
+            fontSize: '0.65rem',
+            letterSpacing: '0.1em',
+            padding: '2px 8px',
+          }}
+        >
           {POSITION_LABELS[activeIndex]}
         </span>
 
