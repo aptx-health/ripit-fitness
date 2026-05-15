@@ -30,12 +30,10 @@ type Props = {
   onOpenChange: (open: boolean) => void
 }
 
-// Bottom-anchored sheet sitting above the h-14 mobile bottom nav, with a small
-// breathing gap so the nav's gold action chip doesn't kiss the panel border.
-const NAV_OFFSET_PX = 56 + 8
-const SHEET_BOTTOM_STYLE = {
-  bottom: `calc(env(safe-area-inset-bottom, 0px) + ${NAV_OFFSET_PX}px)`,
-}
+// Bottom-anchored on mobile (above h-14 nav with a breathing gap so the gold
+// chip doesn't kiss the panel); centered on desktop where there's no bottom nav.
+const MOBILE_BOTTOM = 'bottom-[calc(env(safe-area-inset-bottom,0px)+64px)]'
+const DESKTOP_CENTER = 'md:bottom-auto md:top-1/2 md:-translate-y-1/2'
 
 export default function QuickActionSheet({ open, onOpenChange }: Props) {
   const router = useRouter()
@@ -195,15 +193,7 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
         />
         <DialogPrimitive.Content
           aria-describedby={undefined}
-          className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom data-[state=open]:duration-200 data-[state=closed]:duration-150"
-          style={{
-            position: 'fixed',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: 'min(96vw, 28rem)',
-            zIndex: 51,
-            ...SHEET_BOTTOM_STYLE,
-          }}
+          className={`fixed left-1/2 -translate-x-1/2 z-[51] w-[min(96vw,28rem)] ${MOBILE_BOTTOM} ${DESKTOP_CENTER} data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom md:data-[state=closed]:slide-out-to-bottom-0 md:data-[state=open]:slide-in-from-bottom-0 md:data-[state=open]:fade-in-0 md:data-[state=closed]:fade-out-0 data-[state=open]:duration-200 data-[state=closed]:duration-150`}
         >
           <div
             className="bg-card border border-border doom-corners"

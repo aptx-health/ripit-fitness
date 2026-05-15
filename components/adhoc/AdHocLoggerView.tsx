@@ -1,6 +1,6 @@
 'use client'
 
-import { Plus, Sparkles } from 'lucide-react'
+import { Plus, RefreshCw, Sparkles, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -9,6 +9,7 @@ import {
   ExerciseSearchInterface,
 } from '@/components/exercise-selection/ExerciseSearchInterface'
 import { WorkoutRollupModal } from '@/components/features/training/WorkoutRollupModal'
+import { useToast } from '@/components/ToastProvider'
 import { Button } from '@/components/ui/Button'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import {
@@ -24,6 +25,7 @@ import { TipAnnotation } from '@/components/ui/TipAnnotation'
 import ExerciseActionsFooter from '@/components/workout-logging/ExerciseActionsFooter'
 import ExerciseDisplayTabs from '@/components/workout-logging/ExerciseDisplayTabs'
 import ExerciseLoggingHeader from '@/components/workout-logging/ExerciseLoggingHeader'
+import type { QuickAction } from '@/components/workout-logging/ExerciseQuickActionsMenu'
 import ExitWorkoutConfirm from '@/components/workout-logging/ExitWorkoutConfirm'
 import SetLoggingForm, {
   type ExpandedInput,
@@ -93,6 +95,7 @@ export default function AdHocLoggerView({
   initialLoggedSets,
 }: Props) {
   const router = useRouter()
+  const toast = useToast()
   const { hasAccess: hasIntensityAccess } = useIntensityAccess()
 
   const [exercises, setExercises] = useState<AdHocExercise[]>(initialExercises)
@@ -112,8 +115,10 @@ export default function AdHocLoggerView({
   const [currentIndex, setCurrentIndex] = useState(0)
   const [currentSet, setCurrentSet] = useState(EMPTY_SET)
   const [expandedInput, setExpandedInput] = useState<ExpandedInput>(null)
-  const [isPickerOpen, setIsPickerOpen] = useState(false)
+  const [pickerMode, setPickerMode] = useState<PickerMode | null>(null)
   const [isAdding, setIsAdding] = useState(false)
+  const [isSwapping, setIsSwapping] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [isLoggingSet, setIsLoggingSet] = useState(false)
   const [isCompleting, setIsCompleting] = useState(false)
   const [isConfirmingComplete, setIsConfirmingComplete] = useState(false)
@@ -243,7 +248,7 @@ export default function AdHocLoggerView({
         // any pending input expansion.
         setCurrentSet(EMPTY_SET)
         setExpandedInput(null)
-        setIsPickerOpen(false)
+        setPickerMode(null)
       } catch (err) {
         clientLogger.error('Failed to add exercises:', err)
       } finally {
@@ -252,6 +257,90 @@ export default function AdHocLoggerView({
     },
     [completionId, isAdding]
   )
+
+  const handleSwapExercise = useCallback(
+    async (definitions: ExerciseDefinition[]) => {
+      const target = exercises[currentIndex]
+      const replacement = definitions[0]
+      if (!target || !replacement || isSwapping) return
+      setIsSwapping(true)
+      try {
+        const res = await fetch(`/api/exercises/${target.id}/replace`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            newExerciseDefinitionId: replacement.id,
+            applyToFuture: false,
+          }),
+        })
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}))
+          clientLogger.error('Failed to swap exercise:', err)
+          return
+        }
+        const data = await res.json()
+        const updated = data.exercises?.[0]
+        if (!updated) return
+        setExercises((prev) =>
+          prev.map((ex, i) =>
+            i === currentIndex
+              ? {
+                  ...ex,
+                  name: updated.name,
+                  exerciseDefinition: {
+                    primaryFAUs: updated.exerciseDefinition.primaryFAUs,
+                    secondaryFAUs: updated.exerciseDefinition.secondaryFAUs,
+                    equipment: updated.exerciseDefinition.equipment,
+                    instructions: updated.exerciseDefinition.instructions ?? undefined,
+                    imageUrls: updated.exerciseDefinition.imageUrls,
+                  },
+                }
+              : ex
+          )
+        )
+        // Reset input so the new exercise's history can pre-fill.
+        setCurrentSet(EMPTY_SET)
+        setExpandedInput(null)
+        setPickerMode(null)
+      } catch (err) {
+        clientLogger.error('Failed to swap exercise:', err)
+      } finally {
+        setIsSwapping(false)
+      }
+    },
+    [currentIndex, exercises, isSwapping]
+  )
+
+  const handleDeleteExercise = useCallback(async () => {
+    const target = exercises[currentIndex]
+    if (!target || isDeleting) return
+    setIsDeleting(true)
+    try {
+      const res = await fetch(`/api/exercises/${target.id}/delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ applyToFuture: false }),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        clientLogger.error('Failed to delete exercise:', err)
+        return
+      }
+      setLoggedSets((prev) => prev.filter((s) => s.exerciseId !== target.id))
+      setExercises((prev) => {
+        const next = prev.filter((ex) => ex.id !== target.id)
+        // Keep currentIndex in range; bias toward the previous exercise.
+        setCurrentIndex((idx) => Math.max(0, Math.min(idx, next.length - 1)))
+        return next
+      })
+      setCurrentSet(EMPTY_SET)
+      setExpandedInput(null)
+    } catch (err) {
+      clientLogger.error('Failed to delete exercise:', err)
+    } finally {
+      setIsDeleting(false)
+    }
+  }, [currentIndex, exercises, isDeleting])
 
   const handleLogSet = useCallback(async () => {
     if (!currentExercise || isLoggingSet) return
@@ -333,12 +422,18 @@ export default function AdHocLoggerView({
   )
 
   // Header check icon → confirmation modal (matches programmed logger).
-  // If no sets have been logged, the workout can't be completed at all, so
-  // bail out silently rather than opening the modal.
+  // If no sets have been logged, nudge the user to log something first
+  // instead of silently doing nothing.
   const handleRequestComplete = useCallback(() => {
-    if (loggedSets.length === 0) return
+    if (loggedSets.length === 0) {
+      toast.warning(
+        'Log a set first',
+        'Add at least one set before completing the workout.'
+      )
+      return
+    }
     setIsConfirmingComplete(true)
-  }, [loggedSets.length])
+  }, [loggedSets.length, toast])
 
   const handleCompleteWorkout = useCallback(async () => {
     if (isCompleting || loggedSets.length === 0) return
@@ -452,15 +547,41 @@ export default function AdHocLoggerView({
 
   return (
     <>
-      <div className="fixed inset-0 bg-background flex flex-col" style={{ zIndex: 50 }}>
+      <div
+        className="fixed inset-0 z-50 flex items-stretch justify-center sm:items-center sm:backdrop-blur-md sm:bg-black/40 sm:dark:bg-black/60"
+      >
+        <div className="bg-background w-full h-[100dvh] sm:h-[85vh] sm:max-h-[85vh] sm:max-w-2xl sm:border-2 sm:border-border sm:rounded-lg sm:shadow-xl flex flex-col overflow-hidden">
         <ExerciseLoggingHeader
           currentExerciseIndex={hasExercises ? currentIndex : 0}
           totalExercises={Math.max(1, exercises.length)}
           startedAt={startedAt}
           onCompleteWorkout={handleRequestComplete}
           onClose={handleClose}
-          onAddExercise={hasExercises ? () => setIsPickerOpen(true) : undefined}
-          menuActions={[]}
+          menuActions={
+            hasExercises && currentExercise
+              ? ([
+                  {
+                    label: 'Add an exercise',
+                    icon: Plus,
+                    onClick: () => setPickerMode({ kind: 'add' }),
+                  },
+                  {
+                    label: 'Swap this exercise',
+                    icon: RefreshCw,
+                    onClick: () =>
+                      setPickerMode({ kind: 'swap', replacingName: currentExercise.name }),
+                  },
+                  {
+                    label: 'Delete this exercise',
+                    icon: Trash2,
+                    onClick: handleDeleteExercise,
+                    variant: 'danger',
+                    requiresConfirmation: true,
+                    confirmationMessage: `Are you sure you want to delete "${currentExercise.name}"? Any sets you've logged for it will be removed.`,
+                  },
+                ] satisfies QuickAction[])
+              : []
+          }
         />
 
         <div
@@ -537,7 +658,7 @@ export default function AdHocLoggerView({
           >
             <button
               type="button"
-              onClick={() => setIsPickerOpen(true)}
+              onClick={() => setPickerMode({ kind: 'add' })}
               className="w-full h-11 bg-primary text-primary-foreground text-sm font-medium uppercase tracking-widest transition-all doom-focus-ring inline-flex items-center justify-center gap-2"
               style={{
                 boxShadow:
@@ -549,13 +670,15 @@ export default function AdHocLoggerView({
             </button>
           </div>
         )}
+        </div>
       </div>
 
-      {isPickerOpen && (
+      {pickerMode && (
         <ExercisePickerModal
-          onClose={() => setIsPickerOpen(false)}
-          onConfirm={handleAddExercises}
-          isAdding={isAdding}
+          mode={pickerMode}
+          onClose={() => setPickerMode(null)}
+          onConfirm={pickerMode.kind === 'add' ? handleAddExercises : handleSwapExercise}
+          isBusy={pickerMode.kind === 'add' ? isAdding : isSwapping}
         />
       )}
       {showExitConfirm && (
@@ -633,20 +756,27 @@ function EmptyState() {
   )
 }
 
+type PickerMode =
+  | { kind: 'add' }
+  | { kind: 'swap'; replacingName: string }
+
 function ExercisePickerModal({
+  mode,
   onClose,
   onConfirm,
-  isAdding,
+  isBusy,
 }: {
+  mode: PickerMode
   onClose: () => void
   onConfirm: (defs: ExerciseDefinition[]) => void
-  isAdding: boolean
+  isBusy: boolean
 }) {
-  // Preserve selection order so exercises are inserted the way the user picked them.
+  const isAdd = mode.kind === 'add'
+  // Multi-select state used only in add mode.
   const [selectedDefs, setSelectedDefs] = useState<ExerciseDefinition[]>([])
   const selectedIds = new Set(selectedDefs.map((d) => d.id))
 
-  const handleToggle = useCallback((def: ExerciseDefinition) => {
+  const handleAddToggle = useCallback((def: ExerciseDefinition) => {
     setSelectedDefs((prev) =>
       prev.some((d) => d.id === def.id)
         ? prev.filter((d) => d.id !== def.id)
@@ -654,7 +784,19 @@ function ExercisePickerModal({
     )
   }, [])
 
+  const handleSwapSelect = useCallback(
+    (def: ExerciseDefinition) => {
+      if (isBusy) return
+      onConfirm([def])
+    },
+    [isBusy, onConfirm]
+  )
+
   const count = selectedDefs.length
+  const title = isAdd ? 'Search Exercises' : 'Swap Exercise'
+  const description = isAdd
+    ? 'Pick one or more to add to your workout'
+    : `Pick a replacement for ${mode.kind === 'swap' ? mode.replacingName : ''}`
 
   return (
     <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
@@ -667,10 +809,10 @@ function ExercisePickerModal({
           <div className="flex items-center justify-between">
             <div className="flex-1">
               <DialogTitle className="text-lg font-bold text-primary-foreground tracking-wider uppercase">
-                Search Exercises
+                {title}
               </DialogTitle>
               <DialogDescription className="text-base font-bold text-primary-foreground/70 uppercase tracking-wide">
-                Pick one or more to add to your workout
+                {description}
               </DialogDescription>
             </div>
           </div>
@@ -678,26 +820,28 @@ function ExercisePickerModal({
 
         <DialogBody className="flex-1 min-h-0">
           <ExerciseSearchInterface
-            onExerciseSelect={handleToggle}
-            selectedIds={selectedIds}
+            onExerciseSelect={isAdd ? handleAddToggle : handleSwapSelect}
+            selectedIds={isAdd ? selectedIds : undefined}
             preloadExercises
           />
         </DialogBody>
 
         <DialogFooter className="border-t border-border bg-card py-2">
           <div className="flex items-center justify-end gap-2 w-full">
-            <Button variant="secondary" onClick={onClose} doom disabled={isAdding}>
+            <Button variant="secondary" onClick={onClose} doom disabled={isBusy}>
               Cancel
             </Button>
-            <Button
-              variant="primary"
-              onClick={() => onConfirm(selectedDefs)}
-              disabled={count === 0 || isAdding}
-              loading={isAdding}
-              doom
-            >
-              {count === 0 ? 'Add' : count === 1 ? 'Add 1 exercise' : `Add all (${count})`}
-            </Button>
+            {isAdd && (
+              <Button
+                variant="primary"
+                onClick={() => onConfirm(selectedDefs)}
+                disabled={count === 0 || isBusy}
+                loading={isBusy}
+                doom
+              >
+                {count === 0 ? 'Add' : count === 1 ? 'Add 1 exercise' : `Add all (${count})`}
+              </Button>
+            )}
           </div>
         </DialogFooter>
       </DialogContent>

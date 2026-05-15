@@ -1,10 +1,13 @@
 'use client'
 
-import { Settings } from 'lucide-react'
+import { Dumbbell, Settings } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useState } from 'react'
+import QuickActionSheet from '@/components/QuickActionSheet'
 import { ThemeSelector } from '@/components/ThemeSelector'
+import { useDraftWorkout } from '@/lib/contexts/DraftWorkoutContext'
 
 type Props = {
   userEmail: string
@@ -12,6 +15,8 @@ type Props = {
 
 export default function Header({ userEmail }: Props) {
   const pathname = usePathname()
+  const { activeDraft } = useDraftWorkout()
+  const [sheetOpen, setSheetOpen] = useState(false)
 
   const NAV_LINKS = [
     { href: '/training', label: 'Training' },
@@ -20,6 +25,7 @@ export default function Header({ userEmail }: Props) {
   ] as const
 
   return (
+    <>
     <nav
       className="hidden md:block bg-card border-b border-border"
       style={{ paddingTop: 'env(safe-area-inset-top)' }}
@@ -59,6 +65,33 @@ export default function Header({ userEmail }: Props) {
 
           {/* Right: Desktop Menu */}
           <div className="flex items-center space-x-4">
+            <button
+              type="button"
+              onClick={() => setSheetOpen(true)}
+              aria-label={
+                activeDraft
+                  ? `Resume draft workout: ${activeDraft.workoutName}`
+                  : 'Start a workout'
+              }
+              className="relative inline-flex items-center gap-2 px-4 h-9 bg-accent text-accent-foreground transition-transform active:translate-y-[2px] doom-focus-ring overflow-hidden"
+              style={{
+                boxShadow:
+                  '0 4px 0 var(--accent-hover), 0 6px 10px rgba(0,0,0,0.30), inset 0 2px 0 rgba(255,255,255,0.45), inset 0 -1px 0 rgba(0,0,0,0.15)',
+              }}
+            >
+              {activeDraft && (
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 pointer-events-none"
+                  style={{ animation: 'doom-pulse 2s ease-in-out infinite' }}
+                />
+              )}
+              {activeDraft && <span aria-hidden="true" className="chip-gold-shine" />}
+              <Dumbbell size={16} strokeWidth={2.75} className="relative" />
+              <span className="relative text-xs font-black uppercase tracking-[0.1em]">
+                Workout
+              </span>
+            </button>
             <ThemeSelector />
             <Link
               href="/settings"
@@ -80,5 +113,7 @@ export default function Header({ userEmail }: Props) {
         </div>
       </div>
     </nav>
+    <QuickActionSheet open={sheetOpen} onOpenChange={setSheetOpen} />
+    </>
   )
 }

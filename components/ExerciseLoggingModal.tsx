@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle, Info, LogOut, Pencil, Plus, RefreshCw, Trash2, X } from 'lucide-react'
+import { AlertTriangle, Info, Pencil, Plus, RefreshCw, Trash2, X } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Button } from '@/components/ui/Button'
@@ -17,12 +17,12 @@ import { clientLogger } from '@/lib/client-logger'
 import { parseRepsFromPrescribed } from '@/lib/constants/intensity-presets'
 import { formatPrescribedSummary } from '@/lib/format/prescribed-summary'
 import type { LoggedSet } from '@/types/workout'
-import type { ActionItem } from './ActionsMenu'
 import ExerciseDefinitionEditorModal from './features/exercise-definition/ExerciseDefinitionEditorModal'
 import ExerciseActionsFooter from './workout-logging/ExerciseActionsFooter'
 import ExerciseDisplayTabs from './workout-logging/ExerciseDisplayTabs'
 import ExerciseLoggingHeader from './workout-logging/ExerciseLoggingHeader'
 import ExerciseNavigation from './workout-logging/ExerciseNavigation'
+import type { QuickAction } from './workout-logging/ExerciseQuickActionsMenu'
 import ExitWorkoutConfirm from './workout-logging/ExitWorkoutConfirm'
 import FollowAlongFooter from './workout-logging/FollowAlongFooter'
 import FollowAlongHeader from './workout-logging/FollowAlongHeader'
@@ -555,9 +555,15 @@ export default function ExerciseLoggingModal({
                 { label: 'Edit this exercise', icon: Pencil, onClick: handleEditExercise },
                 { label: 'Add an exercise', icon: Plus, onClick: handleAddExercise },
                 { label: 'Swap this exercise', icon: RefreshCw, onClick: handleReplaceExercise },
-                { label: 'Delete this exercise', icon: Trash2, onClick: handleDeleteExercise, variant: 'danger' as const, requiresConfirmation: true, confirmationMessage: `Are you sure you want to delete "${currentExercise?.name || 'this exercise'}"?` },
-                { label: 'Exit workout', icon: LogOut, onClick: handleExitWorkout, variant: 'danger' as const },
-              ] satisfies ActionItem[]}
+                {
+                  label: 'Delete this exercise',
+                  icon: Trash2,
+                  onClick: handleDeleteExercise,
+                  variant: 'danger',
+                  requiresConfirmation: true,
+                  confirmationMessage: `Are you sure you want to delete "${currentExercise?.name || 'this exercise'}"?`,
+                },
+              ] satisfies QuickAction[]}
             />
           )}
 
