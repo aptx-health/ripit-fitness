@@ -15,7 +15,7 @@ interface PrescribedSet {
   rir: number | null
 }
 
-export type ExpandedInput = 'weight' | 'rpe' | 'rir' | null
+export type ExpandedInput = 'weight' | 'rpe' | 'rir' | 'reps' | null
 
 interface SetLoggingFormProps {
   prescribedSet: PrescribedSet | undefined
@@ -79,8 +79,9 @@ export default function SetLoggingForm({
     if (input === 'weight') valueBeforeExpand.current = currentSet.weight
     else if (input === 'rpe') valueBeforeExpand.current = currentSet.rpe
     else if (input === 'rir') valueBeforeExpand.current = currentSet.rir
+    else if (input === 'reps') valueBeforeExpand.current = currentSet.reps
     onExpandedInputChange(input)
-  }, [currentSet.weight, currentSet.rpe, currentSet.rir, onExpandedInputChange])
+  }, [currentSet.weight, currentSet.rpe, currentSet.rir, currentSet.reps, onExpandedInputChange])
 
   const handleCollapse = useCallback(() => {
     onExpandedInputChange(null)
@@ -92,6 +93,7 @@ export default function SetLoggingForm({
     if (input === 'weight') onSetChange({ ...currentSet, weight: restored })
     else if (input === 'rpe') onSetChange({ ...currentSet, rpe: restored })
     else if (input === 'rir') onSetChange({ ...currentSet, rir: restored })
+    else if (input === 'reps') onSetChange({ ...currentSet, reps: restored })
     onExpandedInputChange(null)
   }, [currentSet, onSetChange, onExpandedInputChange])
 
@@ -131,7 +133,7 @@ export default function SetLoggingForm({
     )
   }
 
-  const showReps = expandedInput === null
+  const showReps = expandedInput === null || expandedInput === 'reps'
   const showWeight = expandedInput === null || expandedInput === 'weight'
   const showIntensity = expandedInput === null || expandedInput === 'rpe' || expandedInput === 'rir'
 
@@ -144,6 +146,10 @@ export default function SetLoggingForm({
             value={currentSet.reps}
             onChange={(val) => onSetChange({ ...currentSet, reps: val })}
             placeholder={prescribedSet?.reps?.toString()}
+            isExpanded={expandedInput === 'reps'}
+            onExpand={() => handleExpand('reps')}
+            onCollapse={handleCollapse}
+            onCancel={() => handleCancel('reps')}
           />
         )}
 
