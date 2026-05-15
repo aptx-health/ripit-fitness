@@ -51,7 +51,7 @@ type Props = {
   onMessageSeen?: (messageId: string) => void
   onMessageDismissed?: (messageId: string) => void
   loggingMode?: 'full' | 'follow_along'
-  onComplete: () => Promise<void>
+  onComplete: (result?: { completionId: string; rollup: import('@/lib/stats/workout-rollup').WorkoutRollup | null }) => Promise<void>
   onRefresh?: () => Promise<void>
 }
 
@@ -419,9 +419,9 @@ export default function ExerciseLoggingModal({
     try {
       // Pass fallback sets if any per-set writes failed
       const fallback = failedSetCount > 0 ? loggedSets : undefined
-      await completeDraft(workoutId, fallback)
+      const result = await completeDraft(workoutId, fallback)
       clearCache()
-      await onComplete()
+      await onComplete(result)
       // Do not call onClose() here — onComplete() already closes the modal
       // via handleCloseModal(true) with router.refresh() inside startTransition.
       // Calling onClose() again triggers a second router.refresh() outside
@@ -444,9 +444,9 @@ export default function ExerciseLoggingModal({
   const handleGuidedComplete = async () => {
     setIsSubmitting(true)
     try {
-      await completeDraft(workoutId, undefined, true)
+      const result = await completeDraft(workoutId, undefined, true)
       clearCache()
-      await onComplete()
+      await onComplete(result)
     } catch (error) {
       clientLogger.error('Error completing guided workout:', error)
       setIsSubmitting(false)

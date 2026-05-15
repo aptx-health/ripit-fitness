@@ -5,6 +5,7 @@ import { findAdHocCompletion } from '@/lib/db/adhoc-completion'
 import { recordEvent } from '@/lib/events'
 import { logger } from '@/lib/logger'
 import { checkRateLimit, workoutActionLimiter } from '@/lib/rate-limit'
+import { computeWorkoutRollup } from '@/lib/stats/workout-rollup'
 
 export async function POST(
   _request: NextRequest,
@@ -55,7 +56,17 @@ export async function POST(
       'Ad-hoc workout completed'
     )
 
-    return NextResponse.json({ success: true, completion })
+    let rollup = null
+    try {
+      rollup = await computeWorkoutRollup(prisma, completion.id, user.id)
+    } catch (rollupErr) {
+      logger.error(
+        { error: rollupErr, completionId: completion.id, context: 'adhoc-complete' },
+        'Failed to compute rollup; returning completion without it'
+      )
+    }
+
+    return NextResponse.json({ success: true, completion, rollup })
   } catch (err) {
     logger.error(
       { error: err, context: 'adhoc-complete' },

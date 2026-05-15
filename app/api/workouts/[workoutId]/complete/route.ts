@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db'
 import { recordEvent } from '@/lib/events'
 import { logger } from '@/lib/logger'
 import { checkRateLimit, workoutActionLimiter } from '@/lib/rate-limit'
+import { computeWorkoutRollup } from '@/lib/stats/workout-rollup'
 
 type LoggedSetInput = {
   exerciseId: string
@@ -162,6 +163,16 @@ export async function POST(
 
     recordEvent(user.id, 'workout_completed', { workoutId })
 
+    let rollup = null
+    try {
+      rollup = await computeWorkoutRollup(prisma, completion.id, user.id)
+    } catch (rollupErr) {
+      logger.error(
+        { error: rollupErr, completionId: completion.id, context: 'workout-complete' },
+        'Failed to compute rollup; returning completion without it'
+      )
+    }
+
     return NextResponse.json({
       success: true,
       completion: {
@@ -169,6 +180,7 @@ export async function POST(
         completedAt: completion.completedAt,
         status: completion.status,
       },
+      rollup,
     })
   } catch (error) {
     if (error instanceof Error && error.message === 'ALREADY_COMPLETED') {
