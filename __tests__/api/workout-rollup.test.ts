@@ -1,12 +1,12 @@
 import type { PrismaClient } from '@prisma/client'
 import { beforeEach, describe, expect, it } from 'vitest'
+import { computeWorkoutRollup } from '@/lib/stats/workout-rollup'
 import { getTestDatabase } from '@/lib/test/database'
 import {
   createCompleteTestScenario,
   createTestUser,
   createTestWorkoutCompletion,
 } from '@/lib/test/factories'
-import { computeWorkoutRollup } from '@/lib/stats/workout-rollup'
 
 async function addLoggedSets(
   prisma: PrismaClient,

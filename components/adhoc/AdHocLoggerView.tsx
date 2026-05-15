@@ -8,6 +8,7 @@ import {
   type ExerciseDefinition,
   ExerciseSearchInterface,
 } from '@/components/exercise-selection/ExerciseSearchInterface'
+import { WorkoutRollupModal } from '@/components/features/training/WorkoutRollupModal'
 import { Button } from '@/components/ui/Button'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import {
@@ -30,7 +31,6 @@ import SetLoggingForm, {
 import { useIntensityAccess } from '@/hooks/useIntensityAccess'
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
 import { clientLogger } from '@/lib/client-logger'
-import { WorkoutRollupModal } from '@/components/features/training/WorkoutRollupModal'
 import type { WorkoutRollup } from '@/lib/stats/workout-rollup'
 import type { LoggedSet } from '@/types/workout'
 
