@@ -1,3 +1,4 @@
+import type { WorkoutRollup } from '@/lib/stats/workout-rollup'
 import type { LoggedSet } from '@/types/workout'
 
 const MAX_RETRIES = 3
@@ -125,12 +126,21 @@ export async function fetchDraft(workoutId: string): Promise<DraftResponse> {
   }
 }
 
+export type CompleteDraftResult = {
+  completionId: string
+  rollup: WorkoutRollup | null
+}
+
 export async function completeDraft(
   workoutId: string,
   fallbackSets?: LoggedSet[],
   guidedCompletion?: boolean
-): Promise<void> {
-  await fetchWithRetry<{ success: boolean }>(
+): Promise<CompleteDraftResult> {
+  const res = await fetchWithRetry<{
+    success: boolean
+    completion: { id: string }
+    rollup: WorkoutRollup | null
+  }>(
     `/api/workouts/${workoutId}/complete`,
     {
       method: 'POST',
@@ -150,6 +160,7 @@ export async function completeDraft(
       }),
     }
   )
+  return { completionId: res.completion.id, rollup: res.rollup }
 }
 
 export async function discardDraft(workoutId: string): Promise<void> {

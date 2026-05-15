@@ -30,6 +30,8 @@ import SetLoggingForm, {
 import { useIntensityAccess } from '@/hooks/useIntensityAccess'
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
 import { clientLogger } from '@/lib/client-logger'
+import { WorkoutRollupModal } from '@/components/features/training/WorkoutRollupModal'
+import type { WorkoutRollup } from '@/lib/stats/workout-rollup'
 import type { LoggedSet } from '@/types/workout'
 
 export type AdHocExercise = {
@@ -121,6 +123,8 @@ export default function AdHocLoggerView({
   >(new Map())
   const [historyLoadingIds, setHistoryLoadingIds] = useState<Set<string>>(new Set())
   const [showExitConfirm, setShowExitConfirm] = useState(false)
+  const [rollup, setRollup] = useState<WorkoutRollup | null>(null)
+  const [showRollup, setShowRollup] = useState(false)
   // Tracks which exercises we've already pre-filled from history this session,
   // so user typing isn't clobbered when history arrives later.
   const prefilledFromHistoryIds = useRef<Set<string>>(new Set())
@@ -349,6 +353,15 @@ export default function AdHocLoggerView({
         setIsCompleting(false)
         return
       }
+      const data = (await res.json().catch(() => ({}))) as {
+        rollup?: WorkoutRollup | null
+      }
+      setIsConfirmingComplete(false)
+      if (data.rollup) {
+        setRollup(data.rollup)
+        setShowRollup(true)
+        return
+      }
       router.push('/training')
       router.refresh()
     } catch (err) {
@@ -356,6 +369,13 @@ export default function AdHocLoggerView({
       setIsCompleting(false)
     }
   }, [isCompleting, loggedSets.length, completionId, router])
+
+  const handleRollupClose = useCallback(() => {
+    setShowRollup(false)
+    setRollup(null)
+    router.push('/training')
+    router.refresh()
+  }, [router])
 
   const handleExitSaveAsDraft = useCallback(() => {
     setShowExitConfirm(false)
@@ -590,6 +610,11 @@ export default function AdHocLoggerView({
           </div>,
           document.body
         )}
+      <WorkoutRollupModal
+        open={showRollup}
+        rollup={rollup}
+        onClose={handleRollupClose}
+      />
     </>
   )
 }
