@@ -1,6 +1,7 @@
 'use client'
 
 import { Minus, Plus } from 'lucide-react'
+import { NumberKeypad } from './NumberKeypad'
 
 const RAISED_SHADOW = 'inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)'
 const RECESSED_SHADOW = 'inset 0 1px 2px rgba(0,0,0,0.50), inset 0 0 0 1px rgba(254,243,199,0.06)'
@@ -9,11 +10,35 @@ interface RepsStepperProps {
   value: string
   onChange: (value: string) => void
   placeholder?: string
+  isExpanded?: boolean
+  onExpand?: () => void
+  onCollapse?: () => void
+  onCancel?: () => void
 }
 
-export function RepsStepper({ value, onChange, placeholder }: RepsStepperProps) {
+export function RepsStepper({
+  value,
+  onChange,
+  placeholder,
+  isExpanded = false,
+  onExpand,
+  onCollapse,
+  onCancel,
+}: RepsStepperProps) {
   const numericValue = value ? parseInt(value, 10) : 0
   const hasValue = value !== ''
+
+  if (isExpanded && onCollapse && onCancel) {
+    return (
+      <NumberKeypad
+        value={value}
+        onChange={onChange}
+        onCollapse={onCollapse}
+        onCancel={onCancel}
+        label="REPETITIONS"
+      />
+    )
+  }
 
   const handleDecrement = () => {
     if (!hasValue) return
@@ -46,9 +71,15 @@ export function RepsStepper({ value, onChange, placeholder }: RepsStepperProps) 
           <Minus size={24} strokeWidth={3} />
         </button>
 
-        <div
+        <button
+          type="button"
+          onClick={onExpand}
+          disabled={!onExpand}
+          aria-label="Edit reps with keypad"
           className="flex-1 min-h-[44px] flex items-center justify-center
-            text-2xl font-bold text-foreground tabular-nums min-w-[60px]"
+            text-2xl font-bold text-foreground tabular-nums min-w-[60px]
+            transition-all duration-75
+            disabled:cursor-default"
           style={{ backgroundColor: 'rgba(0,0,0,0.3)', boxShadow: RECESSED_SHADOW }}
         >
           {hasValue ? numericValue : (
@@ -56,7 +87,7 @@ export function RepsStepper({ value, onChange, placeholder }: RepsStepperProps) 
               {placeholder || '0'}
             </span>
           )}
-        </div>
+        </button>
 
         <button
           type="button"

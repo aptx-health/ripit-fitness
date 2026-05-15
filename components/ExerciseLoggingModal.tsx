@@ -599,7 +599,7 @@ export default function ExerciseLoggingModal({
 
           {/* Content area with tabs — swipeable */}
           <div
-            className={`flex-1 overflow-hidden pb-2 transition-transform duration-150 ease-out ${
+            className={`flex-1 overflow-hidden transition-transform duration-150 ease-out ${
               slideDirection === 'left' ? '-translate-x-4 opacity-80' :
               slideDirection === 'right' ? 'translate-x-4 opacity-80' : ''
             }`}
