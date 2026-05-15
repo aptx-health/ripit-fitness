@@ -8,6 +8,7 @@ import {
   type ExerciseDefinition,
   ExerciseSearchInterface,
 } from '@/components/exercise-selection/ExerciseSearchInterface'
+import { useToast } from '@/components/ToastProvider'
 import { Button } from '@/components/ui/Button'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import {
@@ -20,7 +21,6 @@ import {
   DialogTitle,
 } from '@/components/ui/radix/dialog'
 import { TipAnnotation } from '@/components/ui/TipAnnotation'
-import { useToast } from '@/components/ToastProvider'
 import ExerciseActionsFooter from '@/components/workout-logging/ExerciseActionsFooter'
 import ExerciseDisplayTabs from '@/components/workout-logging/ExerciseDisplayTabs'
 import ExerciseLoggingHeader from '@/components/workout-logging/ExerciseLoggingHeader'
