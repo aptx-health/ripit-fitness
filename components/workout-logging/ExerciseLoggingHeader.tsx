@@ -33,10 +33,10 @@ function ProgressIndicator({ current, total }: { current: number; total: number 
             style={{
               backgroundColor: exerciseIndex <= current
                 ? 'var(--primary)'
-                : 'rgba(0,0,0,0.25)',
+                : 'color-mix(in srgb, var(--secondary-foreground) 40%, transparent)',
               boxShadow: exerciseIndex <= current
                 ? undefined
-                : 'inset 0 1px 0 rgba(0,0,0,0.20)',
+                : 'inset 0 0 0 1px color-mix(in srgb, var(--secondary-foreground) 15%, transparent)',
             }}
           />
         )
