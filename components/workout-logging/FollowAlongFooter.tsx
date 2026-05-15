@@ -26,7 +26,10 @@ export default function FollowAlongFooter({
   return (
     <div
       className="flex-shrink-0 bg-secondary px-4 py-3 flex gap-2.5"
-      style={{ boxShadow: 'inset 0 1px 0 rgba(0,0,0,0.25)' }}
+      style={{
+        boxShadow: 'inset 0 1px 0 rgba(0,0,0,0.25)',
+        paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))',
+      }}
     >
       <Button
         variant="secondary"

@@ -40,7 +40,10 @@ export default function ExerciseActionsFooter({
   return (
     <div
       className="bg-secondary px-4 py-3 flex-shrink-0"
-      style={{ boxShadow: 'inset 0 1px 0 rgba(0,0,0,0.25)' }}
+      style={{
+        boxShadow: 'inset 0 1px 0 rgba(0,0,0,0.25)',
+        paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))',
+      }}
     >
       <div className="flex items-center gap-2.5">
         <button
