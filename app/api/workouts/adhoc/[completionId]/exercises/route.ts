@@ -7,7 +7,8 @@ import { logger } from '@/lib/logger'
 import { checkRateLimit, workoutActionLimiter } from '@/lib/rate-limit'
 
 type AddAdHocExerciseRequest = {
-  exerciseDefinitionId: string
+  exerciseDefinitionId?: string
+  exerciseDefinitionIds?: string[]
   notes?: string
 }
 
@@ -41,11 +42,24 @@ export async function POST(
     if (limited) return limited
 
     const body = (await request.json()) as AddAdHocExerciseRequest
-    const { exerciseDefinitionId, notes } = body
+    const { exerciseDefinitionId, exerciseDefinitionIds, notes } = body
 
-    if (!exerciseDefinitionId) {
+    const ids = exerciseDefinitionIds && exerciseDefinitionIds.length > 0
+      ? exerciseDefinitionIds
+      : exerciseDefinitionId
+        ? [exerciseDefinitionId]
+        : []
+
+    if (ids.length === 0) {
       return NextResponse.json(
         { error: 'Exercise definition ID is required' },
+        { status: 400 }
+      )
+    }
+
+    if (ids.length > 20) {
+      return NextResponse.json(
+        { error: 'Cannot add more than 20 exercises at once' },
         { status: 400 }
       )
     }
@@ -62,40 +76,54 @@ export async function POST(
       )
     }
 
-    const exerciseDefinition = await prisma.exerciseDefinition.findUnique({
-      where: { id: exerciseDefinitionId },
+    const definitions = await prisma.exerciseDefinition.findMany({
+      where: { id: { in: ids } },
       select: { id: true, name: true },
     })
 
-    if (!exerciseDefinition) {
+    if (definitions.length !== ids.length) {
       return NextResponse.json(
-        { error: 'Exercise definition not found' },
+        { error: 'One or more exercise definitions not found' },
         { status: 404 }
       )
     }
+
+    // Preserve client-supplied insertion order.
+    const definitionsById = new Map(definitions.map((d) => [d.id, d]))
+    const ordered = ids.map((id) => definitionsById.get(id)!)
 
     // Order is unique-within-completion; compute next from existing rows.
     const existingExercises = await prisma.exercise.findMany({
       where: { workoutCompletionId: completionId },
       select: { order: true },
     })
-    const nextOrder = Math.max(0, ...existingExercises.map((e) => e.order)) + 1
+    const baseOrder = Math.max(0, ...existingExercises.map((e) => e.order))
 
-    const exercise = await prisma.exercise.create({
-      data: {
-        name: exerciseDefinition.name,
-        exerciseDefinitionId,
-        order: nextOrder,
-        workoutId: null,
-        isOneOff: true,
-        workoutCompletionId: completionId,
-        notes: notes || null,
-        userId: user.id,
-      },
-      include: exerciseInclude,
+    const created = await prisma.$transaction(
+      ordered.map((def, idx) =>
+        prisma.exercise.create({
+          data: {
+            name: def.name,
+            exerciseDefinitionId: def.id,
+            order: baseOrder + idx + 1,
+            workoutId: null,
+            isOneOff: true,
+            workoutCompletionId: completionId,
+            notes: notes || null,
+            userId: user.id,
+          },
+          include: exerciseInclude,
+        })
+      )
+    )
+
+    // Backwards-compatible response: keep `exercise` for single-add callers,
+    // always include `exercises` array for batch callers.
+    return NextResponse.json({
+      success: true,
+      exercise: created[0],
+      exercises: created,
     })
-
-    return NextResponse.json({ success: true, exercise })
   } catch (err) {
     logger.error(
       { error: err, context: 'adhoc-exercise-add' },
