@@ -309,7 +309,20 @@ export function ExerciseSearchInterface({
               return (
               <div
                 key={exercise.id}
+                role={isMultiSelect ? 'button' : undefined}
+                tabIndex={isMultiSelect ? 0 : undefined}
+                aria-pressed={isMultiSelect ? !!isSelected : undefined}
                 onClick={isMultiSelect ? () => onExerciseSelect(exercise) : undefined}
+                onKeyDown={
+                  isMultiSelect
+                    ? (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          onExerciseSelect(exercise)
+                        }
+                      }
+                    : undefined
+                }
                 className={`border-2 p-4 transition-all bg-card ${
                   isSelected
                     ? 'border-primary bg-primary/10 shadow-[0_0_20px_rgba(var(--primary-rgb),0.35)]'

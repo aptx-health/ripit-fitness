@@ -9,6 +9,7 @@ import {
   ExerciseSearchInterface,
 } from '@/components/exercise-selection/ExerciseSearchInterface'
 import { Button } from '@/components/ui/Button'
+import { LoadingFrog } from '@/components/ui/loading-frog'
 import {
   Dialog,
   DialogBody,
@@ -18,7 +19,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/radix/dialog'
-import { LoadingFrog } from '@/components/ui/loading-frog'
 import { TipAnnotation } from '@/components/ui/TipAnnotation'
 import ExerciseActionsFooter from '@/components/workout-logging/ExerciseActionsFooter'
 import ExerciseDisplayTabs from '@/components/workout-logging/ExerciseDisplayTabs'
@@ -439,6 +439,7 @@ export default function AdHocLoggerView({
           startedAt={startedAt}
           onCompleteWorkout={handleRequestComplete}
           onClose={handleClose}
+          onAddExercise={hasExercises ? () => setIsPickerOpen(true) : undefined}
           menuActions={[]}
         />
 
@@ -503,7 +504,6 @@ export default function AdHocLoggerView({
             onLogSet={handleLogSet}
             onPrevious={() => goToExercise(currentIndex - 1)}
             onNext={() => goToExercise(currentIndex + 1)}
-            onAddExercise={() => setIsPickerOpen(true)}
           />
         )}
 
