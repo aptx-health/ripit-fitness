@@ -1,11 +1,11 @@
 'use client'
 
-import { CheckCircle } from 'lucide-react'
+import { CheckCircle, Loader2 } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState, useTransition } from 'react'
 import ExerciseLoggingModal from '@/components/ExerciseLoggingModal'
-import { PostSessionFeedback } from '@/components/features/training/PostSessionFeedback'
 import { PwaInstallPrompt } from '@/components/features/training/PwaInstallPrompt'
+import { WorkoutRollupModal } from '@/components/features/training/WorkoutRollupModal'
 import { ProgramCompletionModal } from '@/components/ProgramCompletionModal'
 import type { MessageData } from '@/components/ui/MessageCard'
 import { MessageCard } from '@/components/ui/MessageCard'
@@ -17,7 +17,7 @@ import { usePwaPrompt } from '@/hooks/usePwaPrompt'
 import { useUserSettings } from '@/hooks/useUserSettings'
 import { clientLogger } from '@/lib/client-logger'
 import { useDraftWorkout } from '@/lib/contexts/DraftWorkoutContext'
-import { POST_SESSION_COOLDOWN } from '@/types/feedback'
+import type { WorkoutRollup } from '@/lib/stats/workout-rollup'
 
 type Workout = {
   id: string
@@ -113,7 +113,7 @@ export default function StrengthWeekView({
   const router = useRouter()
   const searchParams = useSearchParams()
   const { activeDraft, refreshDraft, clearDraft } = useDraftWorkout()
-  const { settings, isLoading: settingsLoading, refetch: refetchSettings, updateSettings } = useUserSettings()
+  const { settings, isLoading: settingsLoading, updateSettings } = useUserSettings()
   const [isPending, startTransition] = useTransition()
   const [updatingWorkoutId, setUpdatingWorkoutId] = useState<string | null>(null)
   const [skippingWorkout, setSkippingWorkout] = useState<string | null>(null)
@@ -140,10 +140,11 @@ export default function StrengthWeekView({
   const [showCompletionModal, setShowCompletionModal] = useState(false)
   const [isRestarting, setIsRestarting] = useState(false)
   const [isProgramComplete, setIsProgramComplete] = useState(false)
-  const [showPostSession, setShowPostSession] = useState(false)
   const [pendingProgramCompletionCheck, setPendingProgramCompletionCheck] = useState(false)
   const [pendingPwaCheck, setPendingPwaCheck] = useState(false)
   const [wasFirstWorkout, setWasFirstWorkout] = useState(false)
+  const [rollup, setRollup] = useState<WorkoutRollup | null>(null)
+  const [showRollup, setShowRollup] = useState(false)
 
   // PWA install prompt — capture beforeinstallprompt early for Android
   const { deferredPrompt } = useBeforeInstallPrompt()
@@ -344,58 +345,54 @@ export default function StrengthWeekView({
     }
   }
 
-  // Completion is handled inside ExerciseLoggingModal now (per-set writes + status flip)
-  const handleCompleteWorkout = async () => {
+  // Completion is handled inside ExerciseLoggingModal now (per-set writes + status flip).
+  // After the rollup modal closes we chain into the PWA prompt (first workout only) and
+  // then the program completion check.
+  const runPostCompletionFlow = useCallback(async () => {
+    if (wasFirstWorkout) {
+      triggerAfterWorkout(1)
+      setWasFirstWorkout(false)
+      setPendingPwaCheck(true)
+      setPendingProgramCompletionCheck(true)
+      return
+    }
+    await checkProgramCompletion(true)
+  }, [wasFirstWorkout, triggerAfterWorkout, checkProgramCompletion])
+
+  const handleCompleteWorkout = async (
+    result?: { completionId: string; rollup: WorkoutRollup | null }
+  ) => {
     // Capture before router.refresh() updates the prop
     if (historyCount === 0) setWasFirstWorkout(true)
 
     handleCloseModal(true)
 
-    // Check if we should show the post-session feedback prompt
-    const shouldPrompt = settings
-      && (settings.postSessionPromptCount % POST_SESSION_COOLDOWN === 0)
-    if (shouldPrompt) {
-      setShowPostSession(true)
-      setPendingProgramCompletionCheck(true)
-      // Bump the prompt counter immediately so skip/send both count
-      updateSettings({
-        postSessionPromptCount: (settings.postSessionPromptCount ?? 0) + 1,
-        lastPostSessionPromptAt: new Date().toISOString(),
-      }).then(() => refetchSettings()).catch(() => {})
-    } else {
-      // Increment counter even when not showing to keep cadence
-      if (settings) {
-        updateSettings({
-          postSessionPromptCount: (settings.postSessionPromptCount ?? 0) + 1,
-        }).then(() => refetchSettings()).catch(() => {})
-      }
-      await checkProgramCompletion(true)
+    if (result?.rollup) {
+      setRollup(result.rollup)
+      setShowRollup(true)
+      // PWA + program completion deferred until rollup closes
+      return
     }
+
+    await runPostCompletionFlow()
   }
 
-  const handlePostSessionClose = async () => {
-    setShowPostSession(false)
-    // After post-session feedback, try showing PWA prompt (first workout trigger)
-    // Use wasFirstWorkout flag because router.refresh() updates historyCount before this runs
-    if (wasFirstWorkout) {
-      triggerAfterWorkout(1)
-      setWasFirstWorkout(false)
-    }
-    // If PWA prompt will show, defer program completion check to after it closes
-    // We check this on next render via the showPwaPrompt state
-    if (pendingProgramCompletionCheck) {
-      setPendingPwaCheck(true)
-    }
+  const handleRollupClose = async () => {
+    setShowRollup(false)
+    setRollup(null)
+    await runPostCompletionFlow()
   }
 
-  // When post-session closes but PWA prompt doesn't show, run deferred checks
+  // When PWA prompt closes (or never showed) run deferred program completion check
   useEffect(() => {
-    if (pendingPwaCheck && !showPwaPrompt && !showPostSession) {
+    if (pendingPwaCheck && !showPwaPrompt) {
       setPendingPwaCheck(false)
-      setPendingProgramCompletionCheck(false)
-      checkProgramCompletion(true)
+      if (pendingProgramCompletionCheck) {
+        setPendingProgramCompletionCheck(false)
+        checkProgramCompletion(true)
+      }
     }
-  }, [pendingPwaCheck, showPwaPrompt, showPostSession, checkProgramCompletion])
+  }, [pendingPwaCheck, showPwaPrompt, pendingProgramCompletionCheck, checkProgramCompletion])
 
   const handlePwaPromptClose = async () => {
     await handlePwaClose()
@@ -564,6 +561,22 @@ export default function StrengthWeekView({
         <WorkoutHistoryList count={historyCount} compact />
       )}
 
+      {/* Fullscreen loading overlay shown while a workout is being restored
+          (e.g. ?resume= from QuickActionSheet) before the modal can open. */}
+      {isLoadingWorkout && !workoutMetadata && (
+        <div
+          role="status"
+          aria-live="polite"
+          aria-label="Restoring workout"
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm"
+        >
+          <Loader2 className="w-10 h-10 text-primary animate-spin" />
+          <p className="mt-4 text-sm font-semibold uppercase tracking-wider text-foreground">
+            {resumeWorkoutId ? 'Restoring workout…' : 'Loading workout…'}
+          </p>
+        </div>
+      )}
+
       {/* Logging Modal - uses progressive loading */}
       {workoutMetadata && modalMode === 'logging' && (
         <ExerciseLoggingModal
@@ -603,10 +616,11 @@ export default function StrengthWeekView({
         />
       )}
 
-      {/* Post-Session Feedback */}
-      <PostSessionFeedback
-        open={showPostSession}
-        onClose={handlePostSessionClose}
+      {/* Workout Rollup */}
+      <WorkoutRollupModal
+        open={showRollup}
+        rollup={rollup}
+        onClose={handleRollupClose}
       />
 
       {/* PWA Install Prompt */}

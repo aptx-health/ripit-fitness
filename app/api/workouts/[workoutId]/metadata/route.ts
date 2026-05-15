@@ -102,6 +102,7 @@ export async function GET(
     // When resuming a draft, find the first exercise with incomplete sets
     let resumeExerciseIndex = 0
     let exerciseCount: number
+    let targetExerciseId: string | null = null
     if (completionId && completionStatus === 'draft') {
       // Fetch all exercises (ordered) and logged set counts in parallel
       const [allExercises, loggedSetCounts] = await Promise.all([
@@ -136,6 +137,8 @@ export async function GET(
           resumeExerciseIndex = i
         }
       }
+
+      targetExerciseId = allExercises[resumeExerciseIndex]?.id ?? null
     } else {
       // Non-draft: just count exercises
       exerciseCount = await prisma.exercise.count({
@@ -143,13 +146,19 @@ export async function GET(
       })
     }
 
-    // Fetch the target exercise (first incomplete for drafts, first overall otherwise)
-    const targetExercise = await prisma.exercise.findFirst({
-      where: { OR: whereConditions, userId: user.id },
-      orderBy: { order: 'asc' },
-      skip: resumeExerciseIndex,
-      select: exerciseSelect,
-    })
+    // Fetch the target exercise. For drafts we already know the id from the
+    // ordered list above — use findUnique to avoid a redundant offset scan.
+    const targetExercise = targetExerciseId
+      ? await prisma.exercise.findUnique({
+          where: { id: targetExerciseId },
+          select: exerciseSelect,
+        })
+      : await prisma.exercise.findFirst({
+          where: { OR: whereConditions, userId: user.id },
+          orderBy: { order: 'asc' },
+          skip: resumeExerciseIndex,
+          select: exerciseSelect,
+        })
 
     // Fetch history for the target exercise
     let targetExerciseHistory = null

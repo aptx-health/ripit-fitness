@@ -8,6 +8,7 @@ import {
   type ExerciseDefinition,
   ExerciseSearchInterface,
 } from '@/components/exercise-selection/ExerciseSearchInterface'
+import { WorkoutRollupModal } from '@/components/features/training/WorkoutRollupModal'
 import { useToast } from '@/components/ToastProvider'
 import { Button } from '@/components/ui/Button'
 import { LoadingFrog } from '@/components/ui/loading-frog'
@@ -43,6 +44,7 @@ import {
 } from '@/lib/api/adhoc-workout'
 import { FetchError } from '@/lib/api/fetch'
 import { clientLogger } from '@/lib/client-logger'
+import type { WorkoutRollup } from '@/lib/stats/workout-rollup'
 import type { LoggedSet } from '@/types/workout'
 
 export type AdHocExercise = {
@@ -137,6 +139,8 @@ export default function AdHocLoggerView({
   >(new Map())
   const [historyLoadingIds, setHistoryLoadingIds] = useState<Set<string>>(new Set())
   const [showExitConfirm, setShowExitConfirm] = useState(false)
+  const [rollup, setRollup] = useState<WorkoutRollup | null>(null)
+  const [showRollup, setShowRollup] = useState(false)
   // Tracks which exercises we've already pre-filled from history this session,
   // so user typing isn't clobbered when history arrives later.
   const prefilledFromHistoryIds = useRef<Set<string>>(new Set())
@@ -502,9 +506,16 @@ export default function AdHocLoggerView({
 
     setIsCompleting(true)
     try {
-      await completeAdHocWorkout(completionId, {
-        onRetry: onRetryToast('Completing workout'),
-      })
+      const { rollup: completedRollup } = await completeAdHocWorkout<WorkoutRollup>(
+        completionId,
+        { onRetry: onRetryToast('Completing workout') }
+      )
+      setIsConfirmingComplete(false)
+      if (completedRollup) {
+        setRollup(completedRollup)
+        setShowRollup(true)
+        return
+      }
       router.push('/training')
       router.refresh()
     } catch (err) {
@@ -519,6 +530,13 @@ export default function AdHocLoggerView({
       setIsConfirmingComplete(false)
     }
   }, [isCompleting, loggedSets, completionId, router, onRetryToast, toast])
+
+  const handleRollupClose = useCallback(() => {
+    setShowRollup(false)
+    setRollup(null)
+    router.push('/training')
+    router.refresh()
+  }, [router])
 
   const handleExitSaveAsDraft = useCallback(() => {
     setShowExitConfirm(false)
@@ -790,6 +808,11 @@ export default function AdHocLoggerView({
           </div>,
           document.body
         )}
+      <WorkoutRollupModal
+        open={showRollup}
+        rollup={rollup}
+        onClose={handleRollupClose}
+      />
     </>
   )
 }

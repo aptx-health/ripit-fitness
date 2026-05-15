@@ -7,6 +7,7 @@ import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'
 import { clientLogger } from '@/lib/client-logger'
+import { stripDuplicateTitleHeading } from '@/lib/format/article-body'
 
 interface Tag {
   id: string
@@ -194,7 +195,7 @@ export default function ArticleDetail({
         {/* Article body - markdown */}
         <div className="prose-learn mb-12">
           <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
-            {article.body}
+            {stripDuplicateTitleHeading(article.body, article.title)}
           </ReactMarkdown>
         </div>
 

@@ -135,15 +135,15 @@ export async function deleteAdHocSet(
   )
 }
 
-export async function completeAdHocWorkout(
+export async function completeAdHocWorkout<TRollup = unknown>(
   completionId: string,
   retry: RetryOpts = {}
-): Promise<void> {
-  await fetchJsonWithRetry<{ success: boolean }>(
-    `/api/workouts/adhoc/${completionId}/complete`,
-    { method: 'POST' },
-    retry
-  )
+): Promise<{ rollup: TRollup | null }> {
+  const result = await fetchJsonWithRetry<{
+    success: boolean
+    rollup: TRollup | null
+  }>(`/api/workouts/adhoc/${completionId}/complete`, { method: 'POST' }, retry)
+  return { rollup: result.rollup ?? null }
 }
 
 export async function discardAdHocWorkout(
