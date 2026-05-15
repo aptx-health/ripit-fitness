@@ -3,7 +3,9 @@
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 
 const RAISED_SHADOW = 'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)'
-const RECESSED_SHADOW = 'inset 0 1px 2px rgba(0,0,0,0.50), inset 0 0 0 1px rgba(254,243,199,0.06)'
+// Side nav buttons: subtle raised treatment so they read as pressable navigation siblings
+// rather than heavy slabs. Top highlight gives gameboy physicality without rounded corners.
+const NAV_RAISED_SHADOW = 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)'
 
 interface ExerciseActionsFooterProps {
   currentExerciseIndex: number
@@ -50,8 +52,8 @@ export default function ExerciseActionsFooter({
           type="button"
           onClick={onPrevious}
           disabled={isFirst}
-          className="w-10 h-11 flex items-center justify-center text-secondary-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed doom-focus-ring"
-          style={{ backgroundColor: 'rgba(0,0,0,0.35)', boxShadow: RECESSED_SHADOW }}
+          className="w-11 h-11 flex items-center justify-center text-secondary-foreground transition-all disabled:opacity-50 disabled:cursor-not-allowed doom-focus-ring active:translate-y-[2px] active:[box-shadow:inset_0_1px_2px_rgba(0,0,0,0.40)]"
+          style={{ backgroundColor: 'rgba(0,0,0,0.20)', boxShadow: NAV_RAISED_SHADOW }}
           aria-label="Previous exercise"
         >
           <ChevronLeft size={18} strokeWidth={2.5} />
@@ -86,8 +88,8 @@ export default function ExerciseActionsFooter({
           type="button"
           onClick={onNext}
           disabled={isLast}
-          className="w-10 h-11 flex items-center justify-center text-secondary-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed doom-focus-ring"
-          style={{ backgroundColor: 'rgba(0,0,0,0.35)', boxShadow: RECESSED_SHADOW }}
+          className="w-11 h-11 flex items-center justify-center text-secondary-foreground transition-all disabled:opacity-50 disabled:cursor-not-allowed doom-focus-ring active:translate-y-[2px] active:[box-shadow:inset_0_1px_2px_rgba(0,0,0,0.40)]"
+          style={{ backgroundColor: 'rgba(0,0,0,0.20)', boxShadow: NAV_RAISED_SHADOW }}
           aria-label="Next exercise"
         >
           <ChevronRight size={18} strokeWidth={2.5} />
