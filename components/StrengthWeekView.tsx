@@ -487,10 +487,10 @@ export default function StrengthWeekView({
             ) : undefined
           }
         />
-        {week.description && (
+        {week.description && !trainingMessage && (
           <div className="mt-3 px-1">
-            <p className="text-base text-muted-foreground leading-relaxed">
-              {week.description}
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              <span className="font-bold">Week Overview:</span> {week.description}
             </p>
           </div>
         )}
