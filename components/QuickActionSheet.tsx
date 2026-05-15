@@ -11,6 +11,12 @@ import {
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useToast } from '@/components/ToastProvider'
+import {
+  discardAdHocWorkout,
+  startFreestyleWorkout,
+} from '@/lib/api/adhoc-workout'
+import { FetchError, fetchJsonWithRetry } from '@/lib/api/fetch'
 import { discardDraft } from '@/lib/api/workout-sets'
 import { clientLogger } from '@/lib/client-logger'
 import { useDraftWorkout } from '@/lib/contexts/DraftWorkoutContext'
@@ -37,6 +43,7 @@ const DESKTOP_CENTER = 'md:bottom-auto md:top-1/2 md:-translate-y-1/2'
 
 export default function QuickActionSheet({ open, onOpenChange }: Props) {
   const router = useRouter()
+  const toast = useToast()
   const { activeDraft, refreshDraft, clearDraft } = useDraftWorkout()
   const [nextWorkout, setNextWorkout] = useState<NextWorkout | null>(null)
   const [isLoadingNext, setIsLoadingNext] = useState(false)
@@ -73,8 +80,10 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
     if (!open || activeDraft) return
     let cancelled = false
     setIsLoadingNext(true)
-    fetch('/api/training/next-workout', { cache: 'no-store' })
-      .then((res) => (res.ok ? res.json() : { next: null }))
+    fetchJsonWithRetry<{ next: NextWorkout | null }>(
+      '/api/training/next-workout',
+      { cache: 'no-store' }
+    )
       .then((data) => {
         if (!cancelled) setNextWorkout(data.next)
       })
@@ -110,30 +119,48 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
     if (isStartingFreestyle) return
     setIsStartingFreestyle(true)
     try {
-      const res = await fetch('/api/workouts/adhoc', { method: 'POST' })
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        clientLogger.error('Failed to start freestyle workout:', data)
-        return
-      }
-      const data = await res.json()
+      const completion = await startFreestyleWorkout({
+        onRetry: ({ attempt }) =>
+          toast.warning(
+            'Slow connection',
+            `Starting workout — retrying (attempt ${attempt + 1})…`
+          ),
+      })
       onOpenChange(false)
-      router.push(`/training/adhoc/${data.completion.id}`)
+      router.push(`/training/adhoc/${completion.id}`)
     } catch (err) {
       clientLogger.error('Failed to start freestyle workout:', err)
+      // 409 = existing draft; surface it specifically so the user can resume.
+      if (err instanceof FetchError && err.status === 409) {
+        toast.warning(
+          'Finish your current workout',
+          'You already have a workout in progress.'
+        )
+        await refreshDraft()
+      } else {
+        toast.error(
+          "Couldn't start workout",
+          err instanceof FetchError && err.message
+            ? err.message
+            : 'Check your connection and try again.'
+        )
+      }
     } finally {
       setIsStartingFreestyle(false)
     }
-  }, [isStartingFreestyle, onOpenChange, router])
+  }, [isStartingFreestyle, onOpenChange, router, refreshDraft, toast])
 
   const handleDiscardDraft = useCallback(async () => {
     if (!activeDraft || isDiscardingDraft) return
     setIsDiscardingDraft(true)
     try {
+      const onRetry = ({ attempt }: { attempt: number }) =>
+        toast.warning(
+          'Slow connection',
+          `Discarding draft — retrying (attempt ${attempt + 1})…`
+        )
       if (activeDraft.isAdHoc) {
-        await fetch(`/api/workouts/adhoc/${activeDraft.completionId}`, {
-          method: 'DELETE',
-        })
+        await discardAdHocWorkout(activeDraft.completionId, { onRetry })
       } else if (activeDraft.workoutId) {
         await discardDraft(activeDraft.workoutId)
       }
@@ -142,10 +169,16 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
       router.refresh()
     } catch (err) {
       clientLogger.error('Failed to discard draft:', err)
+      toast.error(
+        "Couldn't discard draft",
+        err instanceof FetchError && err.message
+          ? err.message
+          : 'Check your connection and try again.'
+      )
     } finally {
       setIsDiscardingDraft(false)
     }
-  }, [activeDraft, isDiscardingDraft, clearDraft, refreshDraft, router])
+  }, [activeDraft, isDiscardingDraft, clearDraft, refreshDraft, router, toast])
 
   // Two-stage inline confirm: first tap arms (button turns red + label), second
   // tap within ~4s discards. Any sheet close or draft change resets it.
