@@ -526,7 +526,6 @@ export default function AdHocLoggerView({
           startedAt={startedAt}
           onCompleteWorkout={handleRequestComplete}
           onClose={handleClose}
-          onAddExercise={hasExercises ? () => setPickerMode({ kind: 'add' }) : undefined}
           menuActions={
             hasExercises && currentExercise
               ? ([

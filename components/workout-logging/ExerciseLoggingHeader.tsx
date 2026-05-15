@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, Plus, X } from 'lucide-react'
+import { Check, X } from 'lucide-react'
 import { useMemo } from 'react'
 import { useWorkoutTimer } from '@/hooks/useWorkoutTimer'
 import ExerciseQuickActionsMenu, {
@@ -14,7 +14,6 @@ interface ExerciseLoggingHeaderProps {
   startedAt?: string | null
   onCompleteWorkout: () => void
   onClose: () => void
-  onAddExercise?: () => void
   menuActions: QuickAction[]
   modeToggle?: React.ReactNode
 }
@@ -61,7 +60,6 @@ export default function ExerciseLoggingHeader({
   startedAt,
   onCompleteWorkout,
   onClose,
-  onAddExercise,
   menuActions,
   modeToggle,
 }: ExerciseLoggingHeaderProps) {
@@ -98,16 +96,6 @@ export default function ExerciseLoggingHeader({
               actions={menuActions}
               triggerClassName="text-secondary-foreground/80 hover:text-secondary-foreground"
             />
-          )}
-          {onAddExercise && (
-            <button
-              type="button"
-              onClick={onAddExercise}
-              className="p-1 text-secondary-foreground/80 hover:text-secondary-foreground transition-colors doom-focus-ring"
-              aria-label="Add exercise"
-            >
-              <Plus size={20} strokeWidth={2.5} />
-            </button>
           )}
           <button
             type="button"
