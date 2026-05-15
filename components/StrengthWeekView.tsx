@@ -501,6 +501,7 @@ export default function StrengthWeekView({
           <MessageCard
             message={trainingMessage}
             variant="training_tab"
+            isFirstRun={historyCount === 0}
             onDismiss={async (messageId) => {
               try {
                 const current = settings?.dismissedMessageIds

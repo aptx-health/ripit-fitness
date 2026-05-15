@@ -40,6 +40,13 @@ interface MessageCardProps {
   onNextTip?: () => void
   onDismiss?: (messageId: string) => void
   onSeen?: (messageId: string) => void
+  /**
+   * When true, renders with the field-guide first-run treatment
+   * (TIP sticker, frog ornament, paper-grain overlay). Use only for
+   * brand-new users who have not yet completed any workouts —
+   * see DESIGN.md §1 The Adult-Newcomer Rule.
+   */
+  isFirstRun?: boolean
 }
 
 export function MessageCard({
@@ -49,6 +56,7 @@ export function MessageCard({
   onNextTip,
   onDismiss,
   onSeen,
+  isFirstRun = false,
 }: MessageCardProps) {
   const seenRef = useRef(false)
   const slides = getSlides(message)
@@ -126,6 +134,7 @@ export function MessageCard({
 
   return (
     <TipAnnotation
+      variant={isFirstRun ? 'first-run' : 'default'}
       icon={<Icon aria-hidden="true" size={16} strokeWidth={1.8} />}
       overlay={
         <>
