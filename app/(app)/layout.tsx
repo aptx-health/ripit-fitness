@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation'
 import BottomNav from '@/components/BottomNav'
-import FloatingDraftButton from '@/components/FloatingDraftButton'
 import FeedbackButton from '@/components/features/FeedbackButton'
 import { PwaInstallButton } from '@/components/features/PwaInstallButton'
 import { SessionContextTracker } from '@/components/features/SessionContextTracker'
@@ -39,7 +38,6 @@ export default async function AppLayout({
         <SignupCompletedTracker />
         <SessionContextTracker />
         <Header userEmail={user.email || ''} />
-        <FloatingDraftButton />
         <div className="pb-20 md:pb-0">
           <div
             className="md:hidden"

@@ -3,6 +3,7 @@
 import { AlertTriangle, Info, LogOut, Pencil, Plus, RefreshCw, Trash2, X } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { Button } from '@/components/ui/Button'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import type { MessageData } from '@/components/ui/MessageCard'
 import { useImagePrefetch } from '@/hooks/useImagePrefetch'
@@ -14,6 +15,7 @@ import { useWorkoutDraft } from '@/hooks/useWorkoutDraft'
 import { completeDraft, discardDraft } from '@/lib/api/workout-sets'
 import { clientLogger } from '@/lib/client-logger'
 import { parseRepsFromPrescribed } from '@/lib/constants/intensity-presets'
+import { formatPrescribedSummary } from '@/lib/format/prescribed-summary'
 import type { LoggedSet } from '@/types/workout'
 import type { ActionItem } from './ActionsMenu'
 import ExerciseDefinitionEditorModal from './features/exercise-definition/ExerciseDefinitionEditorModal'
@@ -21,6 +23,7 @@ import ExerciseActionsFooter from './workout-logging/ExerciseActionsFooter'
 import ExerciseDisplayTabs from './workout-logging/ExerciseDisplayTabs'
 import ExerciseLoggingHeader from './workout-logging/ExerciseLoggingHeader'
 import ExerciseNavigation from './workout-logging/ExerciseNavigation'
+import ExitWorkoutConfirm from './workout-logging/ExitWorkoutConfirm'
 import FollowAlongFooter from './workout-logging/FollowAlongFooter'
 import FollowAlongHeader from './workout-logging/FollowAlongHeader'
 import FollowAlongTabs from './workout-logging/FollowAlongTabs'
@@ -186,6 +189,23 @@ export default function ExerciseLoggingModal({
 
   // Intensity preference check: user has it enabled in settings
   const { hasAccess: hasIntensityAccess } = useIntensityAccess()
+
+  // Persistent context banner above the input area: show the prescription for
+  // the current set, and the user's position in the set sequence. When the
+  // user is past the prescribed count (extra sets) we hide "of N" so the label
+  // doesn't read "Set 5 of 4".
+  const prescribedSummary = useMemo(
+    () =>
+      prescribedSet
+        ? formatPrescribedSummary(prescribedSet, { showIntensity: hasIntensityAccess }) ||
+          undefined
+        : undefined,
+    [prescribedSet, hasIntensityAccess]
+  )
+  const totalPrescribedSets =
+    currentPrescribedSets.length > 0 && nextSetNumber <= currentPrescribedSets.length
+      ? currentPrescribedSets.length
+      : undefined
   const { settings, updateSettings } = useUserSettings()
 
   // One-time intensity intro tip
@@ -514,7 +534,7 @@ export default function ExerciseLoggingModal({
     <>
       <div className="fixed inset-0 z-50 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center">
         {/* Modal - Full screen on mobile, centered on desktop */}
-        <div className="bg-card w-full h-[100dvh] sm:h-[85vh] sm:max-h-[85vh] sm:max-w-2xl sm:border-2 sm:border-border sm:rounded-lg flex flex-col shadow-xl pb-[env(safe-area-inset-bottom)]">
+        <div className="bg-card w-full h-[100dvh] sm:h-[85vh] sm:max-h-[85vh] sm:max-w-2xl sm:border-2 sm:border-border sm:rounded-lg flex flex-col shadow-xl">
           {/* Header */}
           {isFollowAlong ? (
             <FollowAlongHeader
@@ -598,12 +618,14 @@ export default function ExerciseLoggingModal({
                 <p className="text-error uppercase tracking-wider font-bold">
                   Failed to load exercise
                 </p>
-                <button type="button"
+                <Button
+                  type="button"
+                  variant="primary"
                   onClick={() => refreshExercises()}
-                  className="mt-4 px-4 py-2 bg-primary text-primary-foreground font-bold uppercase tracking-wider"
+                  className="mt-4 font-bold uppercase tracking-wider"
                 >
                   Retry
-                </button>
+                </Button>
               </div>
             ) : currentExercise ? (
               isFollowAlong ? (
@@ -630,6 +652,9 @@ export default function ExerciseLoggingModal({
                   message={currentMessage}
                   onMessageSeen={onMessageSeen}
                   onMessageDismissed={onMessageDismissed}
+                  currentSetNumber={nextSetNumber}
+                  totalSets={totalPrescribedSets}
+                  prescribedSummary={prescribedSummary}
                   loggingForm={
                     <SetLoggingForm
                       prescribedSet={prescribedSet}
@@ -686,20 +711,24 @@ export default function ExerciseLoggingModal({
                       {isFollowAlong ? 'Nice work! Mark this workout as done?' : 'Complete this workout?'}
                     </p>
                     <div className="flex justify-center gap-3">
-                      <button type="button"
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        doom
                         onClick={() => setIsConfirming(false)}
-                        className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-muted text-foreground hover:bg-secondary transition-colors font-bold uppercase tracking-wider border-2 border-border hover:border-primary doom-focus-ring"
-                        style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.20), 0 1px 0 rgba(0,0,0,0.30)' }}
+                        className="px-4 sm:px-6 py-2.5 sm:py-3 text-base font-bold uppercase tracking-wider border-2 border-border hover:border-primary"
                       >
                         Cancel
-                      </button>
-                      <button type="button"
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="success"
+                        doom
                         onClick={isFollowAlong ? handleGuidedComplete : handleCompleteWorkout}
-                        className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-success text-success-foreground hover:bg-success/90 transition-colors font-bold uppercase tracking-wider doom-focus-ring"
-                        style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)' }}
+                        className="px-4 sm:px-6 py-2.5 sm:py-3 text-base font-bold uppercase tracking-wider"
                       >
                         {isFollowAlong ? 'Finish' : 'Confirm'}
-                      </button>
+                      </Button>
                     </div>
                   </>
                 ) : (
@@ -728,18 +757,24 @@ export default function ExerciseLoggingModal({
                   This will remove the only remaining set for this exercise. Are you sure?
                 </p>
                 <div className="flex justify-center gap-3">
-                  <button type="button"
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    doom
                     onClick={() => setShowDeleteConfirm({ show: false })}
-                    className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-muted text-foreground hover:bg-secondary transition-colors font-bold uppercase tracking-wider border-2 border-border hover:border-primary doom-focus-ring"
+                    className="px-4 sm:px-6 py-2.5 sm:py-3 text-base font-bold uppercase tracking-wider border-2 border-border hover:border-primary"
                   >
                     Cancel
-                  </button>
-                  <button type="button"
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="danger"
+                    doom
                     onClick={handleConfirmDelete}
-                    className="px-4 sm:px-6 py-2.5 sm:py-3 text-base bg-error text-error-foreground hover:bg-error/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
+                    className="px-4 sm:px-6 py-2.5 sm:py-3 text-base font-bold uppercase tracking-wider"
                   >
                     Delete Set
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -801,65 +836,13 @@ export default function ExerciseLoggingModal({
         />
       )}
 
-      {/* Exit workout confirmation */}
       {showExitConfirm && (
-        <div className="fixed inset-0 backdrop-blur-md bg-background/80 flex items-center justify-center z-[60] p-4">
-          <div className="bg-card border-2 border-warning p-6 sm:p-8 text-center max-w-sm w-full shadow-xl doom-corners">
-            <div className="text-warning mb-4 flex justify-center">
-              <AlertTriangle size={56} strokeWidth={2} />
-            </div>
-            <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2 uppercase tracking-wider">
-              {totalLoggedSets > 0 ? 'Exit Workout?' : 'Confirm Exit'}
-            </h3>
-            <p className="text-base sm:text-lg text-muted-foreground mb-6">
-              {totalLoggedSets > 0
-                ? 'You have logged sets. Do you want to save as draft or discard?'
-                : 'Are you sure you want to exit?'}
-            </p>
-            {totalLoggedSets > 0 ? (
-              <div className="flex flex-col gap-3">
-                <button type="button"
-                  onClick={handleExitSaveAsDraft}
-                  className="w-full px-4 py-3 text-base sm:text-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-bold uppercase tracking-wider doom-focus-ring"
-                  style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)' }}
-                >
-                  Save as Draft
-                </button>
-                <button type="button"
-                  onClick={handleExitDiscard}
-                  className="w-full px-4 py-3 text-base sm:text-lg bg-error text-error-foreground hover:bg-error/90 transition-colors font-bold uppercase tracking-wider doom-focus-ring"
-                  style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)' }}
-                >
-                  Discard All
-                </button>
-                <button type="button"
-                  onClick={() => setShowExitConfirm(false)}
-                  className="w-full px-4 py-3 text-base sm:text-lg bg-muted text-foreground hover:bg-secondary transition-colors font-bold uppercase tracking-wider border-2 border-border hover:border-primary doom-focus-ring"
-                  style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.20), 0 1px 0 rgba(0,0,0,0.30)' }}
-                >
-                  Cancel
-                </button>
-              </div>
-            ) : (
-              <div className="flex gap-3">
-                <button type="button"
-                  onClick={() => setShowExitConfirm(false)}
-                  className="flex-1 px-4 py-3 text-base sm:text-lg bg-muted text-foreground hover:bg-secondary transition-colors font-bold uppercase tracking-wider border-2 border-border hover:border-primary doom-focus-ring"
-                  style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.20), 0 1px 0 rgba(0,0,0,0.30)' }}
-                >
-                  Cancel
-                </button>
-                <button type="button"
-                  onClick={handleExitDiscard}
-                  className="flex-1 px-4 py-3 text-base sm:text-lg bg-error text-error-foreground hover:bg-error/90 transition-colors font-bold uppercase tracking-wider doom-focus-ring"
-                  style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)' }}
-                >
-                  Exit
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+        <ExitWorkoutConfirm
+          hasUnsavedWork={totalLoggedSets > 0}
+          onSaveAsDraft={handleExitSaveAsDraft}
+          onDiscard={handleExitDiscard}
+          onCancel={() => setShowExitConfirm(false)}
+        />
       )}
     </>,
     document.body

@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
+import { pluralize } from '@/lib/format/pluralize'
 
 type ActivationConfirmModalProps = {
   programId: string
@@ -262,7 +263,7 @@ export default function ActivationConfirmModal({
 
         {hasHistory && (
           <p className="text-base text-muted-foreground mb-6">
-            {historyState.completionCount} workout{historyState.completionCount !== 1 ? 's' : ''} logged — continue or start fresh?
+            {pluralize(historyState.completionCount, 'workout')} logged — continue or start fresh?
           </p>
         )}
 

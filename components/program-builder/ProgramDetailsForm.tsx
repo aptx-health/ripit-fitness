@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/Button'
+
 type ProgramDetailsFormProps = {
   editMode: boolean
   programId: string | null
@@ -63,26 +65,32 @@ export default function ProgramDetailsForm({
         </div>
 
         {!editMode && !programId && (
-          <button type="button"
+          <Button
+            type="button"
+            variant="primary"
+            doom
             onClick={createProgram}
             disabled={isLoading || !programName.trim()}
-            className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider"
+            className="uppercase tracking-wider"
           >
             {isLoading ? 'CREATING...' : 'CREATE PROGRAM'}
-          </button>
+          </Button>
         )}
         {editMode && (
           <div className="flex items-center justify-between">
             <div className="text-sm text-muted-foreground">
               Program changes are saved automatically
             </div>
-            <button type="button"
+            <Button
+              type="button"
+              variant="secondary"
+              doom
               onClick={handleDuplicateProgram}
               disabled={isLoading}
-              className="px-4 py-2 bg-secondary text-secondary-foreground hover:bg-secondary-hover disabled:opacity-50 doom-button-3d font-semibold uppercase tracking-wider"
+              className="uppercase tracking-wider"
             >
               {isLoading ? 'DUPLICATING...' : 'DUPLICATE PROGRAM'}
-            </button>
+            </Button>
           </div>
         )}
       </div>

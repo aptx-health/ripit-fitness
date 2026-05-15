@@ -6,9 +6,12 @@ import { LoadingFrog } from '@/components/ui/loading-frog'
 import type { MessageData } from '@/components/ui/MessageCard'
 import { MessageCard } from '@/components/ui/MessageCard'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/radix/tabs'
+import { TipAnnotation } from '@/components/ui/TipAnnotation'
 import type { LoadState } from '@/hooks/useProgressiveExercises'
 import type { LoggedSet } from '@/types/workout'
+import DrawerContextBanner from './DrawerContextBanner'
 import ExerciseInfoContent from './ExerciseInfoContent'
+import LoggedSetList from './LoggedSetList'
 import SetList from './SetList'
 
 interface PrescribedSet {
@@ -62,6 +65,12 @@ interface ExerciseDisplayTabsProps {
   message?: MessageData | null
   onMessageSeen?: (messageId: string) => void
   onMessageDismissed?: (messageId: string) => void
+  /** 1-indexed set number the user is currently logging. */
+  currentSetNumber: number
+  /** Total prescribed sets for the current exercise. Omit when unknown (e.g. ad-hoc mode). */
+  totalSets?: number
+  /** Pre-formatted prescription summary for the current set. Omit to drop the line. */
+  prescribedSummary?: string
 }
 
 // Loading skeleton for history tab
@@ -90,6 +99,9 @@ export default function ExerciseDisplayTabs({
   message,
   onMessageSeen,
   onMessageDismissed,
+  currentSetNumber,
+  totalSets,
+  prescribedSummary,
 }: ExerciseDisplayTabsProps) {
   const hasNotes = !!exercise.notes
   const [activeTab, setActiveTab] = useState('log-sets')
@@ -126,28 +138,43 @@ export default function ExerciseDisplayTabs({
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="log-sets" className="flex-1 overflow-y-auto px-4 flex flex-col gap-2">
-        {loggingForm}
+      <TabsContent value="log-sets" className="flex-1 overflow-y-auto flex flex-col">
+        <DrawerContextBanner
+          exerciseName={exercise.name}
+          currentSet={currentSetNumber}
+          totalSets={totalSets}
+          prescribed={prescribedSummary}
+        />
         {!isInputExpanded && (
-          <>
-            <SetList
-              prescribedSets={prescribedSets}
-              loggedSets={loggedSets}
-              exerciseHistory={null}
-              onDeleteSet={onDeleteSet}
-              exerciseId={exercise.id}
-              showIntensity={showIntensity}
-            />
-            {message && (
-              <MessageCard
-                message={message}
-                variant="exercise_logger"
-                onSeen={onMessageSeen}
-                onDismiss={onMessageDismissed}
-              />
-            )}
-          </>
+          <LoggedSetList
+            loggedSets={loggedSets}
+            onDeleteSet={onDeleteSet}
+            showIntensity={showIntensity}
+          />
         )}
+        <div className="px-4 flex-1 flex flex-col gap-2">
+          {loggingForm}
+          {!isInputExpanded && (
+            <>
+              <SetList
+                prescribedSets={prescribedSets}
+                loggedSets={loggedSets}
+                exerciseHistory={null}
+                onDeleteSet={onDeleteSet}
+                exerciseId={exercise.id}
+                showIntensity={showIntensity}
+              />
+              {message && (
+                <MessageCard
+                  message={message}
+                  variant="exercise_logger"
+                  onSeen={onMessageSeen}
+                  onDismiss={onMessageDismissed}
+                />
+              )}
+            </>
+          )}
+        </div>
       </TabsContent>
 
       <TabsContent value="info" className="flex-1 overflow-y-auto px-4">
@@ -179,20 +206,13 @@ export default function ExerciseDisplayTabs({
           </div>
         ) : !exerciseHistory ? (
           <div className="flex items-center justify-center h-full py-12">
-            <div
-              role="note"
-              className="flex items-start gap-2.5 p-3.5 border border-dashed border-border/40 bg-muted/35"
+            <TipAnnotation
+              icon={<Sparkles aria-hidden="true" size={16} strokeWidth={1.8} />}
             >
-              <Sparkles
-                aria-hidden="true"
-                size={18}
-                className="shrink-0 mt-[5px] text-muted-foreground"
-                strokeWidth={1.8}
-              />
               <span className="text-lg leading-relaxed text-muted-foreground">
                 First time doing this one. Log a set and your history starts here.
               </span>
-            </div>
+            </TipAnnotation>
           </div>
         ) : (
           <div className="space-y-4">

@@ -4,6 +4,7 @@ import * as AlertDialog from '@radix-ui/react-alert-dialog'
 import { AlertTriangle } from 'lucide-react'
 import { useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
+import { pluralize } from '@/lib/format/pluralize'
 
 type DeleteExerciseDialogProps = {
   open: boolean
@@ -119,7 +120,7 @@ export default function DeleteExerciseDialog({
               {usageCount > 0 && (
                 <div className="p-3 bg-error/10 border-2 border-error mb-3">
                   <p className="text-sm text-error font-medium">
-                    This exercise is used {usageCount} time{usageCount > 1 ? 's' : ''} in
+                    This exercise is used {pluralize(usageCount, 'time')} in
                     workouts. Deleting it will remove the exercise definition, but existing
                     workout data referencing it may be affected.
                   </p>

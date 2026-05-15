@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { pluralize } from '@/lib/format/pluralize'
 
 interface CommunityProgram {
   id: string
@@ -71,7 +72,7 @@ export function CommunityProgramSelector({ selectedIds, onChange }: CommunityPro
       </div>
       {selectedIds.size > 0 && (
         <p className="text-xs text-muted-foreground mt-1">
-          {selectedIds.size} program{selectedIds.size > 1 ? 's' : ''} selected
+          {pluralize(selectedIds.size, 'program')} selected
         </p>
       )}
     </div>

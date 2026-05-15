@@ -1,9 +1,7 @@
 'use client'
 
 import { CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react'
-
-const RAISED_SHADOW = 'inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)'
-const RECESSED_SHADOW = 'inset 0 1px 2px rgba(0,0,0,0.50), inset 0 0 0 1px rgba(254,243,199,0.06)'
+import { Button } from '@/components/ui/Button'
 
 interface FollowAlongFooterProps {
   currentIndex: number
@@ -28,40 +26,44 @@ export default function FollowAlongFooter({
   return (
     <div
       className="flex-shrink-0 bg-secondary px-4 py-3 flex gap-2.5"
-      style={{ boxShadow: 'inset 0 1px 0 rgba(0,0,0,0.25)' }}
+      style={{
+        boxShadow: 'inset 0 1px 0 rgba(0,0,0,0.25)',
+        paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))',
+      }}
     >
-      <button
-        type="button"
+      <Button
+        variant="secondary"
+        size="sm"
+        doom
         disabled={isFirst}
         onClick={onPrevious}
-        className="w-10 h-11 flex items-center justify-center text-secondary-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed doom-focus-ring"
-        style={{ backgroundColor: 'rgba(0,0,0,0.35)', boxShadow: RECESSED_SHADOW }}
         aria-label="Previous exercise"
+        className="w-10 h-11 px-0 py-0"
       >
         <ChevronLeft size={18} strokeWidth={2.5} />
-      </button>
+      </Button>
 
       {isLast ? (
-        <button
-          type="button"
+        <Button
+          variant="primary"
+          doom
           disabled={isSubmitting}
           onClick={onFinish}
-          className="flex-1 h-11 flex items-center justify-center gap-1.5 bg-primary text-primary-foreground font-medium uppercase tracking-widest text-sm transition-colors disabled:opacity-50 doom-focus-ring"
-          style={{ boxShadow: RAISED_SHADOW }}
+          className="flex-1 h-11 gap-1.5 uppercase tracking-widest text-sm font-medium"
         >
           <CheckCircle size={16} />
           Finish Workout
-        </button>
+        </Button>
       ) : (
-        <button
-          type="button"
+        <Button
+          variant="rare-rounded"
+          doom
           onClick={onNext}
-          className="flex-1 h-11 flex items-center justify-center gap-1.5 bg-accent text-accent-foreground font-medium uppercase tracking-widest text-sm transition-colors doom-focus-ring"
-          style={{ boxShadow: RAISED_SHADOW }}
+          className="flex-1 h-11 gap-1.5 uppercase tracking-widest text-sm font-medium"
         >
           Next Exercise
           <ChevronRight size={16} />
-        </button>
+        </Button>
       )}
     </div>
   )

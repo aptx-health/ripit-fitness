@@ -5,6 +5,7 @@ import { Heart, KeyRound, MessageSquarePlus, Moon, Palette, Shield, Sun } from '
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import FeedbackModal from '@/components/features/FeedbackModal'
+import { SegmentedControl } from '@/components/ui/SegmentedControl'
 import { useThemePreference } from '@/hooks/useThemePreference'
 import { useUserSettings } from '@/hooks/useUserSettings'
 import { authClient, useSession } from '@/lib/auth-client'
@@ -171,33 +172,23 @@ export default function SettingsPage() {
               >
                 Workout Mode
               </span>
-              <fieldset
-                className="flex gap-2"
-                aria-labelledby="workout-mode-label"
-              >
-                <button
-                  type="button"
-                  onClick={() => { setLoggingMode('follow_along'); setIntensityEnabled(false) }}
-                  className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
-                    loggingMode === 'follow_along'
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-muted text-foreground border-border hover:bg-secondary'
-                  }`}
-                >
-                  Follow Along
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setLoggingMode('full')}
-                  className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
-                    loggingMode === 'full'
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-muted text-foreground border-border hover:bg-secondary'
-                  }`}
-                >
-                  Log Sets
-                </button>
-              </fieldset>
+              <SegmentedControl
+                aria-label="Workout mode"
+                tone="bold"
+                options={[
+                  { value: 'follow_along', label: 'Follow Along' },
+                  { value: 'full', label: 'Log Sets' },
+                ]}
+                value={loggingMode}
+                onChange={(next) => {
+                  if (next === 'follow_along') {
+                    setLoggingMode('follow_along')
+                    setIntensityEnabled(false)
+                  } else {
+                    setLoggingMode('full')
+                  }
+                }}
+              />
               <p className="text-sm text-muted-foreground mt-1">
                 Follow Along guides you through exercises without tracking weights.
               </p>
@@ -257,33 +248,16 @@ export default function SettingsPage() {
                         >
                           Default Rating Type
                         </span>
-                        <fieldset
-                          className="flex gap-2"
-                          aria-labelledby="intensity-rating-label"
-                        >
-                          <button
-                            type="button"
-                            onClick={() => setIntensityRating('rpe')}
-                            className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
-                              intensityRating === 'rpe'
-                                ? 'bg-primary text-primary-foreground border-primary'
-                                : 'bg-muted text-foreground border-border hover:bg-secondary'
-                            }`}
-                          >
-                            RPE
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setIntensityRating('rir')}
-                            className={`flex-1 px-4 py-2 border-2 font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
-                              intensityRating === 'rir'
-                                ? 'bg-primary text-primary-foreground border-primary'
-                                : 'bg-muted text-foreground border-border hover:bg-secondary'
-                            }`}
-                          >
-                            RIR
-                          </button>
-                        </fieldset>
+                        <SegmentedControl
+                          aria-label="Default rating type"
+                          tone="bold"
+                          options={[
+                            { value: 'rpe', label: 'RPE' },
+                            { value: 'rir', label: 'RIR' },
+                          ]}
+                          value={intensityRating}
+                          onChange={(next) => setIntensityRating(next)}
+                        />
                         <p className="text-sm text-muted-foreground mt-1">
                           RPE = Rate of Perceived Exertion, RIR = Reps in Reserve
                         </p>

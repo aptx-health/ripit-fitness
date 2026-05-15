@@ -35,7 +35,8 @@ export async function GET() {
       draft: {
         completionId: draft.id,
         workoutId: draft.workoutId,
-        workoutName: draft.workout.name,
+        workoutName: draft.workout?.name ?? draft.name ?? 'Open Workout',
+        isAdHoc: draft.isAdHoc,
       },
     })
   } catch (err) {

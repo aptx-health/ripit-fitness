@@ -37,6 +37,12 @@ export async function DELETE(
       return NextResponse.json({ error: 'Set not found' }, { status: 404 })
     }
 
+    // This is the programmed-workout deletion path; ad-hoc sets are deleted
+    // via /api/workouts/adhoc/[completionId]/sets/[setId].
+    if (!loggedSet.completion.workout) {
+      return NextResponse.json({ error: 'Set does not belong to this workout' }, { status: 400 })
+    }
+
     if (loggedSet.completion.workout.week.program.userId !== user.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }

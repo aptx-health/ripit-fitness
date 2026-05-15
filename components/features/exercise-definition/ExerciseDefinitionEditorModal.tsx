@@ -4,7 +4,9 @@ import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useToast } from '@/components/ToastProvider';
 import { Button } from '@/components/ui/Button';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { clientLogger } from '@/lib/client-logger';
+import { pluralize } from '@/lib/format/pluralize';
 import EquipmentSelector from './EquipmentSelector';
 import ExerciseInfoPreview from './ExerciseInfoPreview';
 import FAUSelector from './FAUSelector';
@@ -242,30 +244,15 @@ export default function ExerciseDefinitionEditorModal({
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex border-b-2 border-border">
-          <button
-            type="button"
-            onClick={() => setActiveTab('edit')}
-            className={`flex-1 px-4 py-2 text-sm font-bold uppercase tracking-wide transition-colors ${
-              activeTab === 'edit'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted/30 text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            Edit
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('preview')}
-            className={`flex-1 px-4 py-2 text-sm font-bold uppercase tracking-wide transition-colors ${
-              activeTab === 'preview'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted/30 text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            Preview
-          </button>
-        </div>
+        <SegmentedControl
+          aria-label="Exercise editor mode"
+          options={[
+            { value: 'edit', label: 'Edit' },
+            { value: 'preview', label: 'Preview' },
+          ]}
+          value={activeTab}
+          onChange={(next) => setActiveTab(next)}
+        />
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-6">
@@ -287,8 +274,7 @@ export default function ExerciseDefinitionEditorModal({
               {mode === 'edit' && usageCount > 0 && (
                 <div className="bg-warning-muted border-2 border-warning-border rounded p-4">
                   <p className="text-sm text-warning-text font-medium">
-                    ⚠️ This exercise is used {usageCount} time
-                    {usageCount > 1 ? 's' : ''} in this program. Changes will affect future sessions.
+                    ⚠️ This exercise is used {pluralize(usageCount, 'time')} in this program. Changes will affect future sessions.
                   </p>
                 </div>
               )}

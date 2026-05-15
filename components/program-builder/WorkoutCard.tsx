@@ -1,5 +1,6 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { ChevronDown, ChevronRight, MoreVertical } from 'lucide-react'
+import { pluralize } from '@/lib/format/pluralize'
 import type { Exercise, Workout } from '@/types/program-builder'
 import SortableExerciseList from '../SortableExerciseList'
 
@@ -88,7 +89,7 @@ export default function WorkoutCard({
             </button>
             <span className="font-medium text-foreground doom-heading">{workout.name}</span>
             <span className="text-sm text-muted-foreground">
-              ({workout.exercises.length} exercise{workout.exercises.length !== 1 ? 's' : ''}, {workout.exercises.reduce((sum, ex) => sum + ex.prescribedSets.length, 0)} sets)
+              ({pluralize(workout.exercises.length, 'exercise')}, {workout.exercises.reduce((sum, ex) => sum + ex.prescribedSets.length, 0)} sets)
             </span>
 
             <DropdownMenu.Root>
