@@ -600,7 +600,10 @@ function ExercisePickerModal({
       style={{ position: 'fixed', inset: 0, zIndex: 80 }}
       className="bg-background flex flex-col"
     >
-      <div className="bg-secondary text-secondary-foreground px-4 py-3 flex items-center justify-between flex-shrink-0">
+      <div
+        className="bg-secondary text-secondary-foreground px-4 py-3 flex items-center justify-between flex-shrink-0"
+        style={{ paddingTop: 'calc(0.75rem + env(safe-area-inset-top, 0px))' }}
+      >
         <button
           type="button"
           onClick={onClose}
