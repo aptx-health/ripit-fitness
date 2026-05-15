@@ -1,6 +1,6 @@
 'use client'
 
-import { Plus, Sparkles, X } from 'lucide-react'
+import { Plus, Sparkles } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -9,6 +9,15 @@ import {
   ExerciseSearchInterface,
 } from '@/components/exercise-selection/ExerciseSearchInterface'
 import { Button } from '@/components/ui/Button'
+import {
+  Dialog,
+  DialogBody,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/radix/dialog'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import { TipAnnotation } from '@/components/ui/TipAnnotation'
 import ExerciseActionsFooter from '@/components/workout-logging/ExerciseActionsFooter'
@@ -177,46 +186,62 @@ export default function AdHocLoggerView({
     currentSet.weight,
   ])
 
-  const handleAddExercise = useCallback(
-    async (definition: ExerciseDefinition) => {
-      if (isAdding) return
+  const handleAddExercises = useCallback(
+    async (definitions: ExerciseDefinition[]) => {
+      if (isAdding || definitions.length === 0) return
       setIsAdding(true)
       try {
         const res = await fetch(`/api/workouts/adhoc/${completionId}/exercises`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ exerciseDefinitionId: definition.id }),
+          body: JSON.stringify({
+            exerciseDefinitionIds: definitions.map((d) => d.id),
+          }),
         })
         if (!res.ok) {
           const err = await res.json().catch(() => ({}))
-          clientLogger.error('Failed to add exercise:', err)
+          clientLogger.error('Failed to add exercises:', err)
           return
         }
         const data = await res.json()
-        const newExercise: AdHocExercise = {
-          id: data.exercise.id,
-          name: data.exercise.name,
-          notes: data.exercise.notes ?? null,
-          exerciseDefinition: {
-            primaryFAUs: data.exercise.exerciseDefinition.primaryFAUs,
-            secondaryFAUs: data.exercise.exerciseDefinition.secondaryFAUs,
-            equipment: data.exercise.exerciseDefinition.equipment,
-            instructions: data.exercise.exerciseDefinition.instructions ?? undefined,
-            imageUrls: data.exercise.exerciseDefinition.imageUrls,
-          },
-        }
+        const created: AdHocExercise[] = (data.exercises ?? [data.exercise]).map(
+          (e: {
+            id: string
+            name: string
+            notes: string | null
+            exerciseDefinition: {
+              primaryFAUs: string[]
+              secondaryFAUs: string[]
+              equipment: string[]
+              instructions?: string | null
+              imageUrls?: string[]
+            }
+          }) => ({
+            id: e.id,
+            name: e.name,
+            notes: e.notes ?? null,
+            exerciseDefinition: {
+              primaryFAUs: e.exerciseDefinition.primaryFAUs,
+              secondaryFAUs: e.exerciseDefinition.secondaryFAUs,
+              equipment: e.exerciseDefinition.equipment,
+              instructions: e.exerciseDefinition.instructions ?? undefined,
+              imageUrls: e.exerciseDefinition.imageUrls,
+            },
+          })
+        )
         setExercises((prev) => {
-          const next = [...prev, newExercise]
-          setCurrentIndex(next.length - 1)
+          const next = [...prev, ...created]
+          // Focus the first newly-added exercise so the user can start logging.
+          setCurrentIndex(prev.length)
           return next
         })
-        // New exercise — clear input so history pre-fill can run, and reset
+        // New exercise(s) — clear input so history pre-fill can run, and reset
         // any pending input expansion.
         setCurrentSet(EMPTY_SET)
         setExpandedInput(null)
         setIsPickerOpen(false)
       } catch (err) {
-        clientLogger.error('Failed to add exercise:', err)
+        clientLogger.error('Failed to add exercises:', err)
       } finally {
         setIsAdding(false)
       }
@@ -509,7 +534,8 @@ export default function AdHocLoggerView({
       {isPickerOpen && (
         <ExercisePickerModal
           onClose={() => setIsPickerOpen(false)}
-          onSelect={handleAddExercise}
+          onConfirm={handleAddExercises}
+          isAdding={isAdding}
         />
       )}
       {showExitConfirm && (
@@ -584,41 +610,72 @@ function EmptyState() {
 
 function ExercisePickerModal({
   onClose,
-  onSelect,
+  onConfirm,
+  isAdding,
 }: {
   onClose: () => void
-  onSelect: (def: ExerciseDefinition) => void
+  onConfirm: (defs: ExerciseDefinition[]) => void
+  isAdding: boolean
 }) {
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-  if (!mounted) return null
+  // Preserve selection order so exercises are inserted the way the user picked them.
+  const [selectedDefs, setSelectedDefs] = useState<ExerciseDefinition[]>([])
+  const selectedIds = new Set(selectedDefs.map((d) => d.id))
 
-  return createPortal(
-    <div
-      style={{ position: 'fixed', inset: 0, zIndex: 80 }}
-      className="bg-background flex flex-col"
-    >
-      <div
-        className="bg-secondary text-secondary-foreground px-4 py-3 flex items-center justify-between flex-shrink-0"
-        style={{ paddingTop: 'calc(0.75rem + env(safe-area-inset-top, 0px))' }}
+  const handleToggle = useCallback((def: ExerciseDefinition) => {
+    setSelectedDefs((prev) =>
+      prev.some((d) => d.id === def.id)
+        ? prev.filter((d) => d.id !== def.id)
+        : [...prev, def]
+    )
+  }, [])
+
+  const count = selectedDefs.length
+
+  return (
+    <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
+      <DialogContent
+        showClose={false}
+        fullScreenMobile={true}
+        className="w-full h-full sm:w-[90vw] sm:max-w-3xl sm:h-auto sm:max-h-[85vh] rounded-none sm:rounded-none border border-border bg-card"
       >
-        <button
-          type="button"
-          onClick={onClose}
-          className="p-1 doom-focus-ring"
-          aria-label="Cancel"
-        >
-          <X size={20} />
-        </button>
-        <span className="text-sm font-bold uppercase tracking-wider">Pick exercise</span>
-        <span className="w-7" />
-      </div>
-      <div className="flex-1 overflow-y-auto">
-        <ExerciseSearchInterface onExerciseSelect={onSelect} preloadExercises />
-      </div>
-    </div>,
-    document.body
+        <DialogHeader className="border-b border-border bg-primary py-2">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <DialogTitle className="text-lg font-bold text-primary-foreground tracking-wider uppercase">
+                Search Exercises
+              </DialogTitle>
+              <DialogDescription className="text-base font-bold text-primary-foreground/70 uppercase tracking-wide">
+                Pick one or more to add to your workout
+              </DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
+
+        <DialogBody className="flex-1 min-h-0">
+          <ExerciseSearchInterface
+            onExerciseSelect={handleToggle}
+            selectedIds={selectedIds}
+            preloadExercises
+          />
+        </DialogBody>
+
+        <DialogFooter className="border-t border-border bg-card py-2">
+          <div className="flex items-center justify-end gap-2 w-full">
+            <Button variant="secondary" onClick={onClose} doom disabled={isAdding}>
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => onConfirm(selectedDefs)}
+              disabled={count === 0 || isAdding}
+              loading={isAdding}
+              doom
+            >
+              {count === 0 ? 'Add' : count === 1 ? 'Add 1 exercise' : `Add all (${count})`}
+            </Button>
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }

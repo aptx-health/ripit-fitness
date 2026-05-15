@@ -1,6 +1,6 @@
 'use client'
 
-import { Filter, Search } from 'lucide-react'
+import { Check, Filter, Search } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/radix/popover'
 import { clientLogger } from '@/lib/client-logger'
@@ -27,6 +27,12 @@ interface ExerciseSearchInterfaceProps {
   preloadExercises?: boolean
   onCreateExercise?: (searchQuery: string) => void
   onEditExercise?: (exercise: ExerciseDefinition) => void
+  /**
+   * When provided, the picker switches to multi-select mode: cards highlight
+   * when their id is in the set, and clicking a card (or its button) toggles
+   * selection via onExerciseSelect rather than emitting once and closing.
+   */
+  selectedIds?: Set<string>
 }
 
 const ALL_FAUS = [
@@ -85,8 +91,10 @@ export function ExerciseSearchInterface({
   initialQuery = '',
   preloadExercises = false,
   onCreateExercise,
-  onEditExercise
+  onEditExercise,
+  selectedIds,
 }: ExerciseSearchInterfaceProps) {
+  const isMultiSelect = selectedIds !== undefined
   const [searchQuery, setSearchQuery] = useState(initialQuery)
   const [selectedFAU, setSelectedFAU] = useState<string | null>(null)
   const [selectedEquipment, setSelectedEquipment] = useState<string | null>(null)
@@ -296,10 +304,17 @@ export function ExerciseSearchInterface({
           </div>
         ) : (
           <div className="grid gap-3">
-            {exercises.map((exercise) => (
+            {exercises.map((exercise) => {
+              const isSelected = isMultiSelect && selectedIds?.has(exercise.id)
+              return (
               <div
                 key={exercise.id}
-                className="border-2 border-border p-4 hover:border-primary transition-all hover:shadow-[0_0_20px_rgba(var(--primary-rgb),0.2)] bg-card"
+                onClick={isMultiSelect ? () => onExerciseSelect(exercise) : undefined}
+                className={`border-2 p-4 transition-all bg-card ${
+                  isSelected
+                    ? 'border-primary bg-primary/10 shadow-[0_0_20px_rgba(var(--primary-rgb),0.35)]'
+                    : 'border-border hover:border-primary hover:shadow-[0_0_20px_rgba(var(--primary-rgb),0.2)]'
+                } ${isMultiSelect ? 'cursor-pointer' : ''}`}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
@@ -338,15 +353,26 @@ export function ExerciseSearchInterface({
                       </button>
                     )}
                     <button type="button"
-                      onClick={() => onExerciseSelect(exercise)}
-                      className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover font-bold uppercase tracking-wider text-sm border-2 border-primary-active shadow-[0_3px_0_var(--primary-active),0_5px_8px_rgba(0,0,0,0.4)] hover:shadow-[0_3px_0_var(--primary-active),0_0_20px_rgba(var(--primary-rgb),0.6)] active:translate-y-[3px] active:shadow-[0_0_0_var(--primary-active),0_2px_4px_rgba(0,0,0,0.4)] transition-all"
+                      onClick={(e) => { e.stopPropagation(); onExerciseSelect(exercise) }}
+                      aria-pressed={isMultiSelect ? !!isSelected : undefined}
+                      className={
+                        isSelected
+                          ? 'px-4 py-2 bg-primary text-primary-foreground font-bold uppercase tracking-wider text-sm border-2 border-primary-active flex items-center gap-1.5'
+                          : 'px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover font-bold uppercase tracking-wider text-sm border-2 border-primary-active shadow-[0_3px_0_var(--primary-active),0_5px_8px_rgba(0,0,0,0.4)] hover:shadow-[0_3px_0_var(--primary-active),0_0_20px_rgba(var(--primary-rgb),0.6)] active:translate-y-[3px] active:shadow-[0_0_0_var(--primary-active),0_2px_4px_rgba(0,0,0,0.4)] transition-all'
+                      }
                     >
-                      Select
+                      {isSelected ? (
+                        <>
+                          <Check size={16} strokeWidth={3} />
+                          Added
+                        </>
+                      ) : isMultiSelect ? 'Add' : 'Select'}
                     </button>
                   </div>
                 </div>
               </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>
