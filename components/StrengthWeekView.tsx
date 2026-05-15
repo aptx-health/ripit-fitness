@@ -1,6 +1,6 @@
 'use client'
 
-import { CheckCircle } from 'lucide-react'
+import { CheckCircle, Loader2 } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState, useTransition } from 'react'
 import ExerciseLoggingModal from '@/components/ExerciseLoggingModal'
@@ -562,6 +562,22 @@ export default function StrengthWeekView({
       {/* Recent History */}
       {historyCount > 0 && (
         <WorkoutHistoryList count={historyCount} compact />
+      )}
+
+      {/* Fullscreen loading overlay shown while a workout is being restored
+          (e.g. ?resume= from QuickActionSheet) before the modal can open. */}
+      {isLoadingWorkout && !workoutMetadata && (
+        <div
+          role="status"
+          aria-live="polite"
+          aria-label="Restoring workout"
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm"
+        >
+          <Loader2 className="w-10 h-10 text-primary animate-spin" />
+          <p className="mt-4 text-sm font-semibold uppercase tracking-wider text-foreground">
+            {resumeWorkoutId ? 'Restoring workout…' : 'Loading workout…'}
+          </p>
+        </div>
       )}
 
       {/* Logging Modal - uses progressive loading */}
