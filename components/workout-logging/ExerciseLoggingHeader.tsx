@@ -1,9 +1,11 @@
 'use client'
 
-import { Check, Plus, X } from 'lucide-react'
+import { Check, X } from 'lucide-react'
 import { useMemo } from 'react'
-import ActionsMenu, { type ActionItem } from '@/components/ActionsMenu'
 import { useWorkoutTimer } from '@/hooks/useWorkoutTimer'
+import ExerciseQuickActionsMenu, {
+  type QuickAction,
+} from './ExerciseQuickActionsMenu'
 
 interface ExerciseLoggingHeaderProps {
   currentExerciseIndex: number
@@ -12,8 +14,7 @@ interface ExerciseLoggingHeaderProps {
   startedAt?: string | null
   onCompleteWorkout: () => void
   onClose: () => void
-  onAddExercise?: () => void
-  menuActions: ActionItem[]
+  menuActions: QuickAction[]
   modeToggle?: React.ReactNode
 }
 
@@ -59,7 +60,6 @@ export default function ExerciseLoggingHeader({
   startedAt,
   onCompleteWorkout,
   onClose,
-  onAddExercise,
   menuActions,
   modeToggle,
 }: ExerciseLoggingHeaderProps) {
@@ -92,22 +92,10 @@ export default function ExerciseLoggingHeader({
         {/* Right: action icons */}
         <div className="flex items-center justify-end gap-3.5">
           {menuActions.length > 0 && (
-            <ActionsMenu
+            <ExerciseQuickActionsMenu
               actions={menuActions}
-              size="sm"
-              variant="ghost"
-              className="text-secondary-foreground/80 hover:text-secondary-foreground"
+              triggerClassName="text-accent hover:text-accent/80"
             />
-          )}
-          {onAddExercise && (
-            <button
-              type="button"
-              onClick={onAddExercise}
-              className="p-1 text-secondary-foreground/80 hover:text-secondary-foreground transition-colors doom-focus-ring"
-              aria-label="Add exercise"
-            >
-              <Plus size={20} strokeWidth={2.5} />
-            </button>
           )}
           <button
             type="button"
