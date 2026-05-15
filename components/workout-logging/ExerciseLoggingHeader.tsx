@@ -94,7 +94,7 @@ export default function ExerciseLoggingHeader({
           {menuActions.length > 0 && (
             <ExerciseQuickActionsMenu
               actions={menuActions}
-              triggerClassName="text-secondary-foreground/80 hover:text-secondary-foreground"
+              triggerClassName="text-accent hover:text-accent/80"
             />
           )}
           <button

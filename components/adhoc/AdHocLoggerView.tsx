@@ -20,6 +20,7 @@ import {
   DialogTitle,
 } from '@/components/ui/radix/dialog'
 import { TipAnnotation } from '@/components/ui/TipAnnotation'
+import { useToast } from '@/components/ToastProvider'
 import ExerciseActionsFooter from '@/components/workout-logging/ExerciseActionsFooter'
 import ExerciseDisplayTabs from '@/components/workout-logging/ExerciseDisplayTabs'
 import ExerciseLoggingHeader from '@/components/workout-logging/ExerciseLoggingHeader'
@@ -92,6 +93,7 @@ export default function AdHocLoggerView({
   initialLoggedSets,
 }: Props) {
   const router = useRouter()
+  const toast = useToast()
   const { hasAccess: hasIntensityAccess } = useIntensityAccess()
 
   const [exercises, setExercises] = useState<AdHocExercise[]>(initialExercises)
@@ -416,12 +418,18 @@ export default function AdHocLoggerView({
   )
 
   // Header check icon → confirmation modal (matches programmed logger).
-  // If no sets have been logged, the workout can't be completed at all, so
-  // bail out silently rather than opening the modal.
+  // If no sets have been logged, nudge the user to log something first
+  // instead of silently doing nothing.
   const handleRequestComplete = useCallback(() => {
-    if (loggedSets.length === 0) return
+    if (loggedSets.length === 0) {
+      toast.warning(
+        'Log a set first',
+        'Add at least one set before completing the workout.'
+      )
+      return
+    }
     setIsConfirmingComplete(true)
-  }, [loggedSets.length])
+  }, [loggedSets.length, toast])
 
   const handleCompleteWorkout = useCallback(async () => {
     if (isCompleting || loggedSets.length === 0) return

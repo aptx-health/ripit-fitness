@@ -80,11 +80,7 @@ export default function ExerciseQuickActionsMenu({
                 return (
                   <DropdownMenu.Item
                     key={`${action.label}-${index}`}
-                    onSelect={(e) => {
-                      // Keep menu open until our handler decides (confirmation flow).
-                      e.preventDefault()
-                      handleClick(action)
-                    }}
+                    onSelect={() => handleClick(action)}
                     disabled={action.disabled}
                     className={`min-h-[52px] px-4 py-3 flex items-center gap-3 cursor-pointer outline-none transition-colors text-base font-medium tracking-wide ${
                       action.disabled
