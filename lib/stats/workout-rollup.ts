@@ -1,5 +1,4 @@
 import type { PrismaClient } from '@prisma/client'
-import { getBatchExercisePerformance } from '@/lib/queries/exercise-history'
 
 export type RollupExercise = {
   exerciseDefinitionId: string
@@ -34,6 +33,59 @@ export type WorkoutRollup = {
 }
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000
+
+type PreviousHistorySet = { weight: number; reps: number; isWarmup: boolean }
+type PreviousHistory = { completedAt: Date; sets: PreviousHistorySet[] }
+
+// Inlined so tests can pass their own PrismaClient. lib/queries/exercise-history.ts
+// uses the singleton prisma directly, which has no DATABASE_URL in CI tests.
+async function fetchPreviousExerciseHistory(
+  prisma: PrismaClient,
+  exerciseDefinitionIds: string[],
+  userId: string,
+  beforeDate: Date
+): Promise<Map<string, PreviousHistory>> {
+  if (exerciseDefinitionIds.length === 0) return new Map()
+
+  const completions = await prisma.workoutCompletion.findMany({
+    where: {
+      userId,
+      status: 'completed',
+      isArchived: false,
+      completedAt: { lt: beforeDate },
+      loggedSets: {
+        some: { exercise: { exerciseDefinitionId: { in: exerciseDefinitionIds } } },
+      },
+    },
+    orderBy: { completedAt: 'desc' },
+    take: 50,
+    select: {
+      completedAt: true,
+      loggedSets: {
+        where: { exercise: { exerciseDefinitionId: { in: exerciseDefinitionIds } } },
+        select: {
+          weight: true,
+          reps: true,
+          isWarmup: true,
+          exercise: { select: { exerciseDefinitionId: true } },
+        },
+      },
+    },
+  })
+
+  const map = new Map<string, PreviousHistory>()
+  for (const completion of completions) {
+    for (const set of completion.loggedSets) {
+      const defId = set.exercise.exerciseDefinitionId
+      if (map.has(defId)) continue
+      const setsForDef = completion.loggedSets
+        .filter((s) => s.exercise.exerciseDefinitionId === defId)
+        .map((s) => ({ weight: s.weight, reps: s.reps, isWarmup: s.isWarmup }))
+      map.set(defId, { completedAt: completion.completedAt, sets: setsForDef })
+    }
+  }
+  return map
+}
 
 export async function computeWorkoutRollup(
   prisma: PrismaClient,
@@ -162,7 +214,8 @@ export async function computeWorkoutRollup(
   }
 
   const defIds = Array.from(byDef.keys())
-  const previousMap = await getBatchExercisePerformance(
+  const previousMap = await fetchPreviousExerciseHistory(
+    prisma,
     defIds,
     userId,
     completion.completedAt
