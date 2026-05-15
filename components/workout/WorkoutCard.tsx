@@ -96,11 +96,11 @@ export default function WorkoutCard({
         aria-expanded={hasActions ? expanded : undefined}
         className={`w-full text-left border-l-4 ${borderColor} ${stateClass} px-4 py-3 transition-all ${isInteractive ? 'hover:bg-muted/50 active:bg-muted/70 cursor-pointer' : 'cursor-default'} disabled:opacity-60 doom-focus-ring`}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-start gap-3">
           {/* Content */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-0.5">
-              <h3 className={`text-lg font-bold text-foreground doom-heading truncate ${isSkipped ? 'line-through opacity-60' : ''}`}>
+              <h3 className={`text-lg font-bold text-foreground doom-heading break-words ${isSkipped ? 'line-through opacity-60' : ''}`}>
                 DAY {workout.dayNumber}: {workout.name}
               </h3>
             </div>
@@ -117,8 +117,8 @@ export default function WorkoutCard({
             </div>
           </div>
 
-          {/* Status badge + chevron */}
-          <div className="flex items-center gap-2 shrink-0">
+          {/* Status badge + chevron — top-aligned to first line of title */}
+          <div className="flex items-center gap-2 shrink-0 min-h-7">
             {isCompleted && (
               <span className="doom-badge doom-badge-completed">
                 <Check size={12} />
