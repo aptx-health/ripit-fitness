@@ -117,7 +117,10 @@ export function WeightKeypad({
 
   // Expanded view with keypad - mt-auto pushes to bottom of flex container
   return (
-    <div className="mt-auto">
+    <div
+      className="mt-auto"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+    >
       <span className="block text-sm text-muted-foreground mb-1 font-bold uppercase tracking-wider">
         WEIGHT ({weightUnit.toUpperCase()})
       </span>
