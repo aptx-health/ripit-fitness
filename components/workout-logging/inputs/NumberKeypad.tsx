@@ -85,10 +85,7 @@ export function NumberKeypad({
   }
 
   return (
-    <div
-      className="mt-auto"
-      style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 1rem)' }}
-    >
+    <div className="mt-auto">
       {educationPanel ? (
         <div className="mb-2">{educationPanel}</div>
       ) : (
@@ -142,8 +139,12 @@ export function NumberKeypad({
         ))}
       </div>
 
-      {/* Cancel + Done buttons */}
-      <div className="flex gap-px mt-2">
+      {/* Cancel + Done buttons — sticky so they're always reachable on
+          short viewports where the rest of the keypad scrolls. */}
+      <div
+        className="sticky bottom-0 bg-card flex gap-px pt-2"
+        style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 1rem)' }}
+      >
         <Button
           variant="secondary"
           doom
