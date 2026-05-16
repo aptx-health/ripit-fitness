@@ -1,5 +1,6 @@
 'use client'
 
+import { Dumbbell } from 'lucide-react'
 import { NumberKeypad } from './NumberKeypad'
 
 interface WeightKeypadProps {
@@ -36,7 +37,8 @@ export function WeightKeypad({
 
   return (
     <div>
-      <span className="block text-sm text-muted-foreground mb-1 font-bold uppercase tracking-wider">
+      <span className="flex items-center gap-1.5 text-base text-muted-foreground mb-1 font-bold uppercase tracking-wider">
+        <Dumbbell size={14} strokeWidth={3} aria-hidden="true" />
         WEIGHT ({weightUnit.toUpperCase()})
       </span>
       <button

@@ -1,6 +1,6 @@
 'use client'
 
-import { Minus, Plus } from 'lucide-react'
+import { Hash, Minus, Plus } from 'lucide-react'
 import { NumberKeypad } from './NumberKeypad'
 
 const RAISED_SHADOW = 'inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)'
@@ -53,7 +53,8 @@ export function RepsStepper({
 
   return (
     <div>
-      <span className="block text-sm text-muted-foreground mb-1 font-bold uppercase tracking-wider">
+      <span className="flex items-center gap-1.5 text-base text-muted-foreground mb-1 font-bold uppercase tracking-wider">
+        <Hash size={14} strokeWidth={3} aria-hidden="true" />
         REPS
       </span>
       <div className="flex items-center">
@@ -82,9 +83,16 @@ export function RepsStepper({
             disabled:cursor-default"
           style={{ backgroundColor: 'rgba(0,0,0,0.3)', boxShadow: RECESSED_SHADOW }}
         >
-          {hasValue ? numericValue : (
+          {hasValue ? (
+            <>
+              {numericValue}
+              <span className="text-sm font-semibold text-muted-foreground ml-2">
+                reps
+              </span>
+            </>
+          ) : (
             <span className="text-muted-foreground text-lg">
-              {placeholder || '0'}
+              {placeholder ? `${placeholder} reps` : '0 reps'}
             </span>
           )}
         </button>
