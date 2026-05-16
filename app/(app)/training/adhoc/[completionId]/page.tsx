@@ -1,5 +1,7 @@
 import { redirect } from 'next/navigation'
+import { Suspense } from 'react'
 import AdHocLoggerView, { type AdHocExercise } from '@/components/adhoc/AdHocLoggerView'
+import { RestoringWorkoutSpinner } from '@/components/ui/RestoringWorkoutSpinner'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 
@@ -7,8 +9,21 @@ type Props = {
   params: Promise<{ completionId: string }>
 }
 
+/**
+ * Outer page returns synchronously so the HTML shell + spinner stream to
+ * the browser immediately on cold load. The data fetch happens inside the
+ * Suspense boundary so React streams the logger in once Prisma returns.
+ */
 export default async function AdHocLoggerPage({ params }: Props) {
   const { completionId } = await params
+  return (
+    <Suspense fallback={<RestoringWorkoutSpinner />}>
+      <AdHocLoggerLoader completionId={completionId} />
+    </Suspense>
+  )
+}
+
+async function AdHocLoggerLoader({ completionId }: { completionId: string }) {
   const { user, error } = await getCurrentUser()
 
   if (error || !user) {
@@ -67,7 +82,6 @@ export default async function AdHocLoggerPage({ params }: Props) {
     redirect('/training')
   }
 
-  // Group logged sets by exerciseId for fast lookups in the client.
   const exercises: AdHocExercise[] = completion.exercises.map((e) => ({
     id: e.id,
     name: e.name,
