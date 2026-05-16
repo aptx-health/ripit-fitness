@@ -22,7 +22,6 @@ import ExerciseDefinitionEditorModal from './features/exercise-definition/Exerci
 import ExerciseActionsFooter from './workout-logging/ExerciseActionsFooter'
 import ExerciseDisplayTabs from './workout-logging/ExerciseDisplayTabs'
 import ExerciseLoggingHeader from './workout-logging/ExerciseLoggingHeader'
-import ExerciseNavigation from './workout-logging/ExerciseNavigation'
 import type { QuickAction } from './workout-logging/ExerciseQuickActionsMenu'
 import ExitWorkoutConfirm from './workout-logging/ExitWorkoutConfirm'
 import FollowAlongFooter from './workout-logging/FollowAlongFooter'
@@ -572,24 +571,6 @@ export default function ExerciseLoggingModal({
                 },
               ] satisfies QuickAction[]}
             />
-          )}
-
-          {/* Exercise title — hidden in follow-along (title block shows name) */}
-          {!isFollowAlong && (
-            currentExercise ? (
-              <ExerciseNavigation
-                currentExercise={currentExercise}
-                currentExerciseIndex={currentIndex}
-                totalExercises={totalExercises}
-                onPrevious={handlePreviousExercise}
-                onNext={handleNextExercise}
-                hideChevrons
-              />
-            ) : (
-              <div className="px-4 py-3 border-b border-border">
-                <div className="h-8 bg-muted animate-pulse" />
-              </div>
-            )
           )}
 
           {/* One-time intensity intro bubble */}
