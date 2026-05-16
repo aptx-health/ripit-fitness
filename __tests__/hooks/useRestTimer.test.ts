@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { useRestTimer } from '@/hooks/useRestTimer'
+import { __clearRestTimerCache, useRestTimer } from '@/hooks/useRestTimer'
 
 // Mock requestAnimationFrame to execute synchronously in tests
 beforeEach(() => {
@@ -8,6 +8,7 @@ beforeEach(() => {
     cb(0)
     return 0
   })
+  __clearRestTimerCache()
 })
 
 afterEach(() => {
@@ -107,6 +108,43 @@ describe('useRestTimer', () => {
     rerender({ count: 0, exId: 'ex-2' })
     expect(result.current.isRunning).toBe(false)
     expect(result.current.elapsed).toBe(0)
+  })
+
+  it('preserves elapsed time across unmount/remount (tab switch within exercise)', () => {
+    // Simulate user logs a set, switches to Info tab (unmount), waits, then
+    // switches back to Log Sets tab (remount). Timer must not reset to zero.
+    const realNow = Date.now.bind(Date)
+    const t0 = 1_700_000_000_000
+    let now = t0
+    vi.spyOn(Date, 'now').mockImplementation(() => now)
+
+    try {
+      // Initial mount with no logged sets
+      const first = renderHook(
+        ({ count }) => useRestTimer(count, 'ex-1'),
+        { initialProps: { count: 0 } }
+      )
+
+      // Log a set — timer starts at t0
+      first.rerender({ count: 1 })
+      expect(first.result.current.isRunning).toBe(true)
+      expect(first.result.current.elapsed).toBe(0)
+
+      // 30 seconds pass while user is on the Info tab. Unmount, then remount.
+      first.unmount()
+      now = t0 + 30_000
+
+      const second = renderHook(
+        ({ count }) => useRestTimer(count, 'ex-1'),
+        { initialProps: { count: 1 } }
+      )
+
+      // Timer should still be running and show 30 seconds elapsed, not 0.
+      expect(second.result.current.isRunning).toBe(true)
+      expect(second.result.current.elapsed).toBe(30)
+    } finally {
+      vi.spyOn(Date, 'now').mockImplementation(realNow)
+    }
   })
 
   it('starts the timer when logging a set from zero', () => {
