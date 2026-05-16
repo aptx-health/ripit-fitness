@@ -562,8 +562,11 @@ export default function StrengthWeekView({
       )}
 
       {/* Fullscreen loading overlay shown while a workout is being restored
-          (e.g. ?resume= from QuickActionSheet) before the modal can open. */}
-      {isLoadingWorkout && !workoutMetadata && (
+          (e.g. ?resume= from QuickActionSheet) before the modal can open.
+          When a ?resume= param is present we keep the overlay up from the
+          first render so the user never sees the week view flash through
+          between Suspense releasing and the metadata fetch starting. */}
+      {(isLoadingWorkout || (resumeWorkoutId && !modalMode)) && !workoutMetadata && (
         <div
           role="status"
           aria-live="polite"
@@ -587,6 +590,7 @@ export default function StrengthWeekView({
           workoutName={workoutMetadata.workout.name}
           exerciseCount={workoutMetadata.exerciseCount}
           workoutCompletionId={workoutMetadata.completionId}
+          isResuming={workoutMetadata.completionStatus === 'draft'}
           initialExercise={workoutMetadata.firstExercise}
           initialHistory={workoutMetadata.firstExerciseHistory}
           initialExerciseIndex={workoutMetadata.resumeExerciseIndex ?? 0}

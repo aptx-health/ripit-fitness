@@ -6,6 +6,7 @@ import { createPortal } from 'react-dom'
 import { Button } from '@/components/ui/Button'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import type { MessageData } from '@/components/ui/MessageCard'
+import { RestoringWorkoutSpinner } from '@/components/ui/RestoringWorkoutSpinner'
 import { useImagePrefetch } from '@/hooks/useImagePrefetch'
 import { useIntensityAccess } from '@/hooks/useIntensityAccess'
 import { type Exercise, type ExerciseHistory, useProgressiveExercises } from '@/hooks/useProgressiveExercises'
@@ -43,6 +44,8 @@ type Props = {
   workoutName: string
   exerciseCount: number
   workoutCompletionId?: string
+  /** True when opening into an existing draft; drives "Restoring…" vs "Loading…" copy. */
+  isResuming?: boolean
   initialExercise?: Exercise | null
   initialHistory?: ExerciseHistory | null
   initialExerciseIndex?: number
@@ -61,6 +64,7 @@ export default function ExerciseLoggingModal({
   workoutId,
   exerciseCount,
   workoutCompletionId,
+  isResuming = false,
   initialExercise,
   initialHistory,
   initialExerciseIndex = 0,
@@ -88,6 +92,7 @@ export default function ExerciseLoggingModal({
     isDeleteAll?: boolean
   }>({ show: false })
   const [showExitConfirm, setShowExitConfirm] = useState(false)
+  const [isDiscarding, setIsDiscarding] = useState(false)
 
   // Input expansion state (lifted from SetLoggingForm for SetList visibility)
   const [expandedInput, setExpandedInput] = useState<ExpandedInput>(null)
@@ -392,13 +397,15 @@ export default function ExerciseLoggingModal({
   }
 
   const handleExitDiscard = async () => {
-    setShowExitConfirm(false)
+    setIsDiscarding(true)
     try {
       await discardDraft(workoutId)
     } catch {
       // Best effort — draft may not exist yet if no sets were logged
     }
     clearCache()
+    setShowExitConfirm(false)
+    setIsDiscarding(false)
     onClose(true)
   }
 
@@ -508,16 +515,16 @@ export default function ExerciseLoggingModal({
     }
   }, [navigateToLastExercise, totalExercises, goToExercise])
 
-  // Wait for hydration before rendering content
+  // Wait for hydration before rendering content. Use the shared spinner so
+  // the visual handoff from the parent's restore overlay stays seamless —
+  // user perceives one continuous "loading" state rather than two boxes.
   if (isHydrating) {
     if (!isOpen) return null
     if (typeof document === 'undefined') return null
     return createPortal(
-      <div className="fixed inset-0 z-50 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center">
-        <div className="bg-card border-2 border-border p-8 shadow-xl doom-corners">
-          <div className="animate-pulse text-center uppercase tracking-wider font-bold">Loading workout...</div>
-        </div>
-      </div>,
+      <RestoringWorkoutSpinner
+        label={isResuming ? 'Restoring workout…' : 'Loading workout…'}
+      />,
       document.body
     )
   }
@@ -848,6 +855,7 @@ export default function ExerciseLoggingModal({
           onSaveAsDraft={handleExitSaveAsDraft}
           onDiscard={handleExitDiscard}
           onCancel={() => setShowExitConfirm(false)}
+          isDiscarding={isDiscarding}
         />
       )}
     </>,
