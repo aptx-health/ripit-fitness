@@ -1,8 +1,15 @@
 'use client'
 
-import { Button } from '@/components/ui/Button'
+import { Gauge } from 'lucide-react'
 import { TipAnnotation } from '@/components/ui/TipAnnotation'
 import { type IntensityPreset, RIR_PRESETS, RPE_PRESETS } from '@/lib/constants/intensity-presets'
+
+const TRACE_SHADOW =
+  'inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 0 rgba(58, 40, 23, 0.12)'
+const TRACE_BUTTON_CLASS =
+  'flex-1 h-11 bg-muted font-bold uppercase tracking-wider text-sm ' +
+  'transition-all duration-75 hover:bg-secondary-hover ' +
+  'active:translate-y-[2px] active:shadow-none'
 
 interface IntensitySelectorProps {
   type: 'rpe' | 'rir'
@@ -38,7 +45,7 @@ export function IntensitySelector({
   if (!isExpanded) {
     return (
       <div>
-        <span className="block text-sm text-muted-foreground mb-1 font-bold uppercase tracking-wider">
+        <span className="block text-base text-muted-foreground mb-1 font-bold uppercase tracking-wider">
           {label}
         </span>
         <button
@@ -58,13 +65,26 @@ export function IntensitySelector({
   }
 
   // Expanded view with preset grid
+  const tipHeading = type === 'rir' ? 'REPS IN RESERVE' : 'PERCEIVED EXERTION'
+  const tipBody =
+    type === 'rir'
+      ? 'How many more reps you could have done after stopping the set.'
+      : 'How hard the last set felt, on a scale of 1 to 10.'
+
   return (
     <div>
-      <span className="block text-sm text-muted-foreground mb-1 font-bold uppercase tracking-wider">
-        {label}
-      </span>
+      <TipAnnotation
+        tint="primary"
+        icon={<Gauge size={16} strokeWidth={2.2} aria-hidden="true" />}
+        className="py-2 px-3"
+      >
+        <div className="text-base font-bold uppercase tracking-wider text-primary">
+          {tipHeading}
+        </div>
+        <p className="mt-0.5 text-base text-foreground">{tipBody}</p>
+      </TipAnnotation>
 
-      <div className="border border-border divide-y divide-border" style={{ boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.50), inset 0 0 0 1px rgba(254,243,199,0.06)' }}>
+      <div className="mt-2 border border-border divide-y divide-border" style={{ boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.50), inset 0 0 0 1px rgba(254,243,199,0.06)' }}>
         {presets.map((preset) => {
           const isSelected = numericValue === preset.value
           return (
@@ -72,7 +92,7 @@ export function IntensitySelector({
               key={preset.value}
               type="button"
               onClick={() => handleSelect(preset)}
-              className={`w-full px-3 py-2.5 flex items-center gap-3
+              className={`w-full px-3 py-3 flex items-center gap-3
                 transition-colors text-left
                 active:bg-primary active:text-primary-foreground
                 ${isSelected
@@ -80,68 +100,43 @@ export function IntensitySelector({
                   : 'bg-card text-foreground hover:bg-muted'
                 }`}
             >
-              <span className={`text-lg font-bold tabular-nums min-w-[36px] ${
+              <span className={`text-2xl font-bold tabular-nums min-w-[44px] ${
                 isSelected ? 'text-primary' : ''
               }`}>
                 {preset.label}
               </span>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-base text-foreground">
                 {preset.description}
               </span>
             </button>
           )
         })}
-
-        {/* Cancel + Skip buttons */}
-        <div className="flex">
-          <Button
-            variant="secondary"
-            onClick={onCancel}
-            aria-label={`Cancel ${label} selection`}
-            className="flex-1 !rounded-none px-3 py-2.5 text-error font-bold uppercase tracking-wider text-sm"
-          >
-            CANCEL
-          </Button>
-          <Button
-            variant="ghost"
-            onClick={() => {
-              onChange('')
-              onCollapse()
-            }}
-            className="flex-1 !rounded-none px-3 py-2.5 bg-card text-muted-foreground font-bold uppercase tracking-wider text-sm hover:bg-muted border-l border-border"
-          >
-            SKIP {label}
-          </Button>
-        </div>
       </div>
 
-      {/* Info blurb */}
-      <TipAnnotation
-        className="mt-3"
-        icon={
-          <svg
-            aria-hidden="true"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M9 18h6" />
-            <path d="M10 22h4" />
-            <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5C8.35 12.26 8.82 13.02 9 14" />
-          </svg>
-        }
-      >
-        <span className="text-sm leading-relaxed text-muted-foreground">
-          {type === 'rir'
-            ? 'Reps in Reserve: How many more reps you think you could have done after stopping your set.'
-            : 'Rate of Perceived Exertion: How hard did the last set feel?'}
-        </span>
-      </TipAnnotation>
+      {/* Cancel + Skip buttons — square-edged with a subtle tonal
+          underline trace for tactility (no primary-color emphasis). */}
+      <div className="flex gap-px mt-2">
+        <button
+          type="button"
+          onClick={onCancel}
+          aria-label={`Cancel ${label} selection`}
+          className={`${TRACE_BUTTON_CLASS} text-error`}
+          style={{ boxShadow: TRACE_SHADOW }}
+        >
+          CANCEL
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            onChange('')
+            onCollapse()
+          }}
+          className={`${TRACE_BUTTON_CLASS} text-muted-foreground`}
+          style={{ boxShadow: TRACE_SHADOW }}
+        >
+          SKIP {label}
+        </button>
+      </div>
     </div>
   )
 }
