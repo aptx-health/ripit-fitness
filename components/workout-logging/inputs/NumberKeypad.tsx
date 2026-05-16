@@ -1,7 +1,7 @@
 'use client'
 
 import { Delete } from 'lucide-react'
-import { useCallback, useEffect, useRef, type ReactNode } from 'react'
+import { type ReactNode, useCallback, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/Button'
 
 interface NumberKeypadProps {
@@ -87,7 +87,7 @@ export function NumberKeypad({
   return (
     <div
       className="mt-auto"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+      style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 1rem)' }}
     >
       {educationPanel ? (
         <div className="mb-2">{educationPanel}</div>
