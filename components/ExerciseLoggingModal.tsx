@@ -6,6 +6,7 @@ import { createPortal } from 'react-dom'
 import { Button } from '@/components/ui/Button'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import type { MessageData } from '@/components/ui/MessageCard'
+import { RestoringWorkoutSpinner } from '@/components/ui/RestoringWorkoutSpinner'
 import { useImagePrefetch } from '@/hooks/useImagePrefetch'
 import { useIntensityAccess } from '@/hooks/useIntensityAccess'
 import { type Exercise, type ExerciseHistory, useProgressiveExercises } from '@/hooks/useProgressiveExercises'
@@ -508,18 +509,13 @@ export default function ExerciseLoggingModal({
     }
   }, [navigateToLastExercise, totalExercises, goToExercise])
 
-  // Wait for hydration before rendering content
+  // Wait for hydration before rendering content. Use the shared spinner so
+  // the visual handoff from the parent's restore overlay stays seamless —
+  // user perceives one continuous "loading" state rather than two boxes.
   if (isHydrating) {
     if (!isOpen) return null
     if (typeof document === 'undefined') return null
-    return createPortal(
-      <div className="fixed inset-0 z-50 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center">
-        <div className="bg-card border-2 border-border p-8 shadow-xl doom-corners">
-          <div className="animate-pulse text-center uppercase tracking-wider font-bold">Loading workout...</div>
-        </div>
-      </div>,
-      document.body
-    )
+    return createPortal(<RestoringWorkoutSpinner />, document.body)
   }
 
   const canLogSet = currentSet.reps && currentSet.weight
