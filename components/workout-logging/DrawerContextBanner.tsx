@@ -40,12 +40,12 @@ export default function DrawerContextBanner({
         <h2 className="text-xl font-bold text-foreground doom-heading truncate">
           {exerciseName.toUpperCase()}
         </h2>
-        <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider tabular-nums shrink-0">
+        <span className="text-base text-muted-foreground font-bold uppercase tracking-wider tabular-nums shrink-0">
           {setLabel}
         </span>
       </div>
       {prescribed && (
-        <p className="mt-1 text-sm text-muted-foreground tabular-nums">
+        <p className="mt-1 text-base text-muted-foreground tabular-nums">
           Prescribed: <span className="text-foreground">{prescribed}</span>
         </p>
       )}
