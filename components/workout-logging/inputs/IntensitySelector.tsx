@@ -1,9 +1,15 @@
 'use client'
 
 import { Gauge } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
 import { TipAnnotation } from '@/components/ui/TipAnnotation'
 import { type IntensityPreset, RIR_PRESETS, RPE_PRESETS } from '@/lib/constants/intensity-presets'
+
+const TRACE_SHADOW =
+  'inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 0 rgba(58, 40, 23, 0.12)'
+const TRACE_BUTTON_CLASS =
+  'flex-1 h-11 bg-muted font-bold uppercase tracking-wider text-sm ' +
+  'transition-all duration-75 hover:bg-secondary-hover ' +
+  'active:translate-y-[2px] active:shadow-none'
 
 interface IntensitySelectorProps {
   type: 'rpe' | 'rir'
@@ -107,29 +113,29 @@ export function IntensitySelector({
         })}
       </div>
 
-      {/* Cancel + Skip buttons — pulled out of the preset list and given
-          the same doom-pressed treatment as the keypad action row. */}
+      {/* Cancel + Skip buttons — square-edged with a subtle tonal
+          underline trace for tactility (no primary-color emphasis). */}
       <div className="flex gap-px mt-2">
-        <Button
-          variant="secondary"
-          doom
+        <button
+          type="button"
           onClick={onCancel}
           aria-label={`Cancel ${label} selection`}
-          className="flex-1 h-11 text-error uppercase tracking-wider text-sm"
+          className={`${TRACE_BUTTON_CLASS} text-error`}
+          style={{ boxShadow: TRACE_SHADOW }}
         >
           CANCEL
-        </Button>
-        <Button
-          variant="secondary"
-          doom
+        </button>
+        <button
+          type="button"
           onClick={() => {
             onChange('')
             onCollapse()
           }}
-          className="flex-1 h-11 text-muted-foreground uppercase tracking-wider text-sm"
+          className={`${TRACE_BUTTON_CLASS} text-muted-foreground`}
+          style={{ boxShadow: TRACE_SHADOW }}
         >
           SKIP {label}
-        </Button>
+        </button>
       </div>
     </div>
   )
