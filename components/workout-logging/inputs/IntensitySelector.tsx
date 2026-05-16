@@ -105,28 +105,31 @@ export function IntensitySelector({
             </button>
           )
         })}
+      </div>
 
-        {/* Cancel + Skip buttons */}
-        <div className="flex">
-          <Button
-            variant="secondary"
-            onClick={onCancel}
-            aria-label={`Cancel ${label} selection`}
-            className="flex-1 !rounded-none px-3 py-2.5 text-error font-bold uppercase tracking-wider text-sm"
-          >
-            CANCEL
-          </Button>
-          <Button
-            variant="ghost"
-            onClick={() => {
-              onChange('')
-              onCollapse()
-            }}
-            className="flex-1 !rounded-none px-3 py-2.5 bg-card text-muted-foreground font-bold uppercase tracking-wider text-sm hover:bg-muted border-l border-border"
-          >
-            SKIP {label}
-          </Button>
-        </div>
+      {/* Cancel + Skip buttons — pulled out of the preset list and given
+          the same doom-pressed treatment as the keypad action row. */}
+      <div className="flex gap-px mt-2">
+        <Button
+          variant="secondary"
+          doom
+          onClick={onCancel}
+          aria-label={`Cancel ${label} selection`}
+          className="flex-1 h-11 text-error uppercase tracking-wider text-sm"
+        >
+          CANCEL
+        </Button>
+        <Button
+          variant="secondary"
+          doom
+          onClick={() => {
+            onChange('')
+            onCollapse()
+          }}
+          className="flex-1 h-11 text-muted-foreground uppercase tracking-wider text-sm"
+        >
+          SKIP {label}
+        </Button>
       </div>
     </div>
   )
