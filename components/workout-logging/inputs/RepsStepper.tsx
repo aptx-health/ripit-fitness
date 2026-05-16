@@ -1,6 +1,7 @@
 'use client'
 
 import { Hash, Minus, Plus } from 'lucide-react'
+import { LoggingEducationPanel } from './LoggingEducationPanel'
 import { NumberKeypad } from './NumberKeypad'
 
 const RAISED_SHADOW = 'inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)'
@@ -36,6 +37,7 @@ export function RepsStepper({
         onCollapse={onCollapse}
         onCancel={onCancel}
         label="REPETITIONS"
+        educationPanel={<LoggingEducationPanel mode="reps" />}
       />
     )
   }

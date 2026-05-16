@@ -143,6 +143,7 @@ export default function ExerciseDisplayTabs({
           currentSet={currentSetNumber}
           totalSets={totalSets}
           prescribed={prescribedSummary}
+          isInputExpanded={isInputExpanded}
         />
         <div className="px-4 pt-4 flex-1 flex flex-col gap-2">
           {loggingForm}

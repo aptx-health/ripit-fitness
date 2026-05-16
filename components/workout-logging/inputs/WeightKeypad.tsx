@@ -1,6 +1,7 @@
 'use client'
 
 import { Dumbbell } from 'lucide-react'
+import { LoggingEducationPanel } from './LoggingEducationPanel'
 import { NumberKeypad } from './NumberKeypad'
 
 interface WeightKeypadProps {
@@ -31,6 +32,7 @@ export function WeightKeypad({
         onCancel={onCancel}
         label={`WEIGHT (${weightUnit.toUpperCase()})`}
         unit={weightUnit}
+        educationPanel={<LoggingEducationPanel mode="weight" />}
       />
     )
   }
