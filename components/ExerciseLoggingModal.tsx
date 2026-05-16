@@ -89,6 +89,7 @@ export default function ExerciseLoggingModal({
     isDeleteAll?: boolean
   }>({ show: false })
   const [showExitConfirm, setShowExitConfirm] = useState(false)
+  const [isDiscarding, setIsDiscarding] = useState(false)
 
   // Input expansion state (lifted from SetLoggingForm for SetList visibility)
   const [expandedInput, setExpandedInput] = useState<ExpandedInput>(null)
@@ -393,13 +394,15 @@ export default function ExerciseLoggingModal({
   }
 
   const handleExitDiscard = async () => {
-    setShowExitConfirm(false)
+    setIsDiscarding(true)
     try {
       await discardDraft(workoutId)
     } catch {
       // Best effort — draft may not exist yet if no sets were logged
     }
     clearCache()
+    setShowExitConfirm(false)
+    setIsDiscarding(false)
     onClose(true)
   }
 
@@ -844,6 +847,7 @@ export default function ExerciseLoggingModal({
           onSaveAsDraft={handleExitSaveAsDraft}
           onDiscard={handleExitDiscard}
           onCancel={() => setShowExitConfirm(false)}
+          isDiscarding={isDiscarding}
         />
       )}
     </>,

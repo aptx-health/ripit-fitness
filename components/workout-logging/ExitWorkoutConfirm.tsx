@@ -14,6 +14,8 @@ type Props = {
   onSaveAsDraft: () => void
   onDiscard: () => void
   onCancel: () => void
+  /** When true, disables Save/Cancel and shows a spinner on the Discard button. */
+  isDiscarding?: boolean
 }
 
 /**
@@ -27,6 +29,7 @@ export default function ExitWorkoutConfirm({
   onSaveAsDraft,
   onDiscard,
   onCancel,
+  isDiscarding = false,
 }: Props) {
   return (
     <div className="fixed inset-0 backdrop-blur-md bg-background/80 flex items-center justify-center z-[60] p-4">
@@ -49,6 +52,7 @@ export default function ExitWorkoutConfirm({
               variant="primary"
               doom
               onClick={onSaveAsDraft}
+              disabled={isDiscarding}
               className="w-full px-4 py-3 text-base sm:text-lg font-bold uppercase tracking-wider"
             >
               Save as Draft
@@ -58,15 +62,17 @@ export default function ExitWorkoutConfirm({
               variant="danger"
               doom
               onClick={onDiscard}
+              loading={isDiscarding}
               className="w-full px-4 py-3 text-base sm:text-lg font-bold uppercase tracking-wider"
             >
-              Discard All
+              {isDiscarding ? 'Discarding…' : 'Discard All'}
             </Button>
             <Button
               type="button"
               variant="secondary"
               doom
               onClick={onCancel}
+              disabled={isDiscarding}
               className="w-full px-4 py-3 text-base sm:text-lg font-bold uppercase tracking-wider border-2 border-border hover:border-primary"
             >
               Cancel
@@ -79,6 +85,7 @@ export default function ExitWorkoutConfirm({
               variant="secondary"
               doom
               onClick={onCancel}
+              disabled={isDiscarding}
               className="flex-1 px-4 py-3 text-base sm:text-lg font-bold uppercase tracking-wider border-2 border-border hover:border-primary"
             >
               Cancel
@@ -88,9 +95,10 @@ export default function ExitWorkoutConfirm({
               variant="danger"
               doom
               onClick={onDiscard}
+              loading={isDiscarding}
               className="flex-1 px-4 py-3 text-base sm:text-lg font-bold uppercase tracking-wider"
             >
-              Exit
+              {isDiscarding ? 'Exiting…' : 'Exit'}
             </Button>
           </div>
         )}

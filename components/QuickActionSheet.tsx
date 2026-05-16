@@ -4,6 +4,7 @@ import * as DialogPrimitive from '@radix-ui/react-dialog'
 import {
   Dumbbell,
   LayoutGrid,
+  Loader2,
   type LucideIcon,
   Play,
   Trash2,
@@ -282,10 +283,14 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
                         : 'bg-card hover:bg-error/15 hover:border-error/60 hover:text-error text-foreground/70 border-border'
                     }`}
                   >
-                    <Trash2 size={18} strokeWidth={2.5} />
+                    {isDiscardingDraft ? (
+                      <Loader2 size={18} strokeWidth={2.5} className="animate-spin" />
+                    ) : (
+                      <Trash2 size={18} strokeWidth={2.5} />
+                    )}
                     {confirmDiscard && (
                       <span className="text-xs font-black uppercase tracking-wider">
-                        {isDiscardingDraft ? 'Discarding' : 'Confirm'}
+                        {isDiscardingDraft ? 'Discarding…' : 'Confirm'}
                       </span>
                     )}
                   </button>

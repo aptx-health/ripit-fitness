@@ -762,6 +762,7 @@ export default function AdHocLoggerView({
           onSaveAsDraft={handleExitSaveAsDraft}
           onDiscard={handleExitDiscard}
           onCancel={() => setShowExitConfirm(false)}
+          isDiscarding={isDiscarding}
         />
       )}
       {isConfirmingComplete &&
