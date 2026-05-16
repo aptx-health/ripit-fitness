@@ -128,7 +128,9 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
           ),
       })
       onOpenChange(false)
-      router.push(`/training/adhoc/${completion.id}`)
+      // `?new=1` signals the ad-hoc page + its loading.tsx to show
+      // "Loading workout…" instead of "Restoring workout…".
+      router.push(`/training/adhoc/${completion.id}?new=1`)
     } catch (err) {
       clientLogger.error('Failed to start freestyle workout:', err)
       // 409 = existing draft; surface it specifically so the user can resume.

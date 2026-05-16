@@ -44,6 +44,8 @@ type Props = {
   workoutName: string
   exerciseCount: number
   workoutCompletionId?: string
+  /** True when opening into an existing draft; drives "Restoring…" vs "Loading…" copy. */
+  isResuming?: boolean
   initialExercise?: Exercise | null
   initialHistory?: ExerciseHistory | null
   initialExerciseIndex?: number
@@ -62,6 +64,7 @@ export default function ExerciseLoggingModal({
   workoutId,
   exerciseCount,
   workoutCompletionId,
+  isResuming = false,
   initialExercise,
   initialHistory,
   initialExerciseIndex = 0,
@@ -518,7 +521,12 @@ export default function ExerciseLoggingModal({
   if (isHydrating) {
     if (!isOpen) return null
     if (typeof document === 'undefined') return null
-    return createPortal(<RestoringWorkoutSpinner />, document.body)
+    return createPortal(
+      <RestoringWorkoutSpinner
+        label={isResuming ? 'Restoring workout…' : 'Loading workout…'}
+      />,
+      document.body
+    )
   }
 
   const canLogSet = currentSet.reps && currentSet.weight

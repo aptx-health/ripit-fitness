@@ -590,6 +590,7 @@ export default function StrengthWeekView({
           workoutName={workoutMetadata.workout.name}
           exerciseCount={workoutMetadata.exerciseCount}
           workoutCompletionId={workoutMetadata.completionId}
+          isResuming={workoutMetadata.completionStatus === 'draft'}
           initialExercise={workoutMetadata.firstExercise}
           initialHistory={workoutMetadata.firstExerciseHistory}
           initialExerciseIndex={workoutMetadata.resumeExerciseIndex ?? 0}

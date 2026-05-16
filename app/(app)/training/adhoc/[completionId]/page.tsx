@@ -7,17 +7,27 @@ import { prisma } from '@/lib/db'
 
 type Props = {
   params: Promise<{ completionId: string }>
+  searchParams: Promise<{ new?: string }>
 }
 
 /**
  * Outer page returns synchronously so the HTML shell + spinner stream to
  * the browser immediately on cold load. The data fetch happens inside the
  * Suspense boundary so React streams the logger in once Prisma returns.
+ * `?new=1` (set by QuickActionSheet when starting a freestyle) flips the
+ * fallback copy from "Restoring…" to "Loading…".
  */
-export default async function AdHocLoggerPage({ params }: Props) {
-  const { completionId } = await params
+export default async function AdHocLoggerPage({ params, searchParams }: Props) {
+  const [{ completionId }, { new: newParam }] = await Promise.all([params, searchParams])
+  const isNew = newParam === '1'
   return (
-    <Suspense fallback={<RestoringWorkoutSpinner />}>
+    <Suspense
+      fallback={
+        <RestoringWorkoutSpinner
+          label={isNew ? 'Loading workout…' : 'Restoring workout…'}
+        />
+      }
+    >
       <AdHocLoggerLoader completionId={completionId} />
     </Suspense>
   )
