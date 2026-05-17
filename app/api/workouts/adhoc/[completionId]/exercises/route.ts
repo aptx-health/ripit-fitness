@@ -93,29 +93,33 @@ export async function POST(
     const ordered = ids.map((id) => definitionsById.get(id)!)
 
     // Order is unique-within-completion; compute next from existing rows.
-    const existingExercises = await prisma.exercise.findMany({
+    const orderAgg = await prisma.exercise.aggregate({
       where: { workoutCompletionId: completionId },
-      select: { order: true },
+      _max: { order: true },
     })
-    const baseOrder = Math.max(0, ...existingExercises.map((e) => e.order))
+    const baseOrder = orderAgg._max.order ?? 0
 
-    const created = await prisma.$transaction(
-      ordered.map((def, idx) =>
-        prisma.exercise.create({
-          data: {
-            name: def.name,
-            exerciseDefinitionId: def.id,
-            order: baseOrder + idx + 1,
-            workoutId: null,
-            isOneOff: true,
-            workoutCompletionId: completionId,
-            notes: notes || null,
-            userId: user.id,
-          },
-          include: exerciseInclude,
-        })
-      )
-    )
+    // Single-roundtrip insert + a follow-up findMany to hydrate the include.
+    // Cuts N+1 inserts inside $transaction down to two queries.
+    const createdRows = await prisma.exercise.createManyAndReturn({
+      data: ordered.map((def, idx) => ({
+        name: def.name,
+        exerciseDefinitionId: def.id,
+        order: baseOrder + idx + 1,
+        workoutId: null,
+        isOneOff: true,
+        workoutCompletionId: completionId,
+        notes: notes || null,
+        userId: user.id,
+      })),
+      select: { id: true, order: true },
+    })
+
+    const created = await prisma.exercise.findMany({
+      where: { id: { in: createdRows.map((r) => r.id) } },
+      include: exerciseInclude,
+      orderBy: { order: 'asc' },
+    })
 
     // Backwards-compatible response: keep `exercise` for single-add callers,
     // always include `exercises` array for batch callers.

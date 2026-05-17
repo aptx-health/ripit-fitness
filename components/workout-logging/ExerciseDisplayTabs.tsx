@@ -11,7 +11,6 @@ import type { LoadState } from '@/hooks/useProgressiveExercises'
 import type { LoggedSet } from '@/types/workout'
 import DrawerContextBanner from './DrawerContextBanner'
 import ExerciseInfoContent from './ExerciseInfoContent'
-import LoggedSetList from './LoggedSetList'
 import SetList from './SetList'
 
 interface PrescribedSet {
@@ -27,6 +26,7 @@ interface Exercise {
   id: string
   name: string
   notes: string | null
+  exerciseGroup?: string | null
   exerciseDefinition?: {
     primaryFAUs: string[]
     secondaryFAUs: string[]
@@ -71,6 +71,22 @@ interface ExerciseDisplayTabsProps {
   totalSets?: number
   /** Pre-formatted prescription summary for the current set. Omit to drop the line. */
   prescribedSummary?: string
+}
+
+function ExerciseTabTitle({ exercise }: { exercise: Exercise }) {
+  const supersetLabel = exercise.exerciseGroup ?? null
+  return (
+    <div className="pt-3 pb-2 mb-3 border-b border-border/60 -mx-4 px-4">
+      {supersetLabel && (
+        <span className="inline-block px-2 py-0.5 text-xs font-bold uppercase tracking-wider text-accent border border-accent mb-1">
+          Superset {supersetLabel}
+        </span>
+      )}
+      <h2 className="text-xl font-bold text-foreground doom-heading truncate">
+        {exercise.name.toUpperCase()}
+      </h2>
+    </div>
+  )
 }
 
 // Loading skeleton for history tab
@@ -144,15 +160,9 @@ export default function ExerciseDisplayTabs({
           currentSet={currentSetNumber}
           totalSets={totalSets}
           prescribed={prescribedSummary}
+          isInputExpanded={isInputExpanded}
         />
-        {!isInputExpanded && (
-          <LoggedSetList
-            loggedSets={loggedSets}
-            onDeleteSet={onDeleteSet}
-            showIntensity={showIntensity}
-          />
-        )}
-        <div className="px-4 flex-1 flex flex-col gap-2">
+        <div className="px-4 pt-4 flex-1 flex flex-col gap-2">
           {loggingForm}
           {!isInputExpanded && (
             <>
@@ -178,6 +188,7 @@ export default function ExerciseDisplayTabs({
       </TabsContent>
 
       <TabsContent value="info" className="flex-1 overflow-y-auto px-4">
+        <ExerciseTabTitle exercise={exercise} />
         <ExerciseInfoContent
           exerciseName={exercise.name}
           exerciseDefinition={exercise.exerciseDefinition}
@@ -186,6 +197,7 @@ export default function ExerciseDisplayTabs({
 
       {hasNotes && (
         <TabsContent value="notes" className="flex-1 overflow-y-auto px-4">
+          <ExerciseTabTitle exercise={exercise} />
           <div className="space-y-6">
             <div>
               <h4 className="text-lg sm:text-xl font-semibold text-foreground mb-3">Notes</h4>
@@ -198,6 +210,7 @@ export default function ExerciseDisplayTabs({
       )}
 
       <TabsContent value="history" className="flex-1 overflow-y-auto px-4">
+        <ExerciseTabTitle exercise={exercise} />
         {historyState === 'loading' || historyState === 'pending' ? (
           <HistoryLoadingSkeleton />
         ) : historyState === 'error' ? (

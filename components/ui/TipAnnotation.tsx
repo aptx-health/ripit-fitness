@@ -29,6 +29,12 @@ interface TipAnnotationProps {
    */
   variant?: 'default' | 'first-run'
   /**
+   * Optional theme-role tint for the dashed border and the default icon.
+   * Used to make a tip carry mode identity (e.g. weight vs reps loggers).
+   * Ignored when variant="first-run" so the frog/sticker treatment stays canonical.
+   */
+  tint?: 'primary' | 'secondary'
+  /**
    * Optional content rendered as a sibling of the icon+content row inside the wrapper.
    * Used for absolute-positioned interactive elements (e.g. the dismiss button or
    * carousel arrow on <MessageCard>). The wrapper is `position: relative` so children
@@ -43,12 +49,24 @@ export function TipAnnotation({
   children,
   icon,
   variant = 'default',
+  tint,
   overlay,
   className = '',
 }: TipAnnotationProps) {
   const isFirstRun = variant === 'first-run'
+  const activeTint = isFirstRun ? undefined : tint
+  const borderClass = activeTint === 'primary'
+    ? 'border-primary/40'
+    : activeTint === 'secondary'
+      ? 'border-secondary/40'
+      : 'border-border/40'
+  const iconColorClass = activeTint === 'primary'
+    ? 'text-primary'
+    : activeTint === 'secondary'
+      ? 'text-secondary'
+      : 'text-muted-foreground'
   const wrapperClass = [
-    'relative p-3 border border-dashed border-border/40 bg-muted/35 flex items-start gap-2.5',
+    `relative p-3 border border-dashed ${borderClass} bg-muted/35 flex items-start gap-2.5`,
     isFirstRun ? 'doom-noise' : '',
     className,
   ]
@@ -61,7 +79,7 @@ export function TipAnnotation({
       {isFirstRun ? (
         <StillFrog className="shrink-0 mt-[1px]" />
       ) : (
-        <span className="shrink-0 mt-[3px] text-muted-foreground inline-flex">
+        <span className={`shrink-0 mt-[3px] ${iconColorClass} inline-flex`}>
           {icon ?? <Lightbulb size={16} strokeWidth={1.8} aria-hidden="true" />}
         </span>
       )}

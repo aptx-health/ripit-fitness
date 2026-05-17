@@ -1,6 +1,6 @@
 'use client'
 
-import { Plus, Sparkles } from 'lucide-react'
+import { Plus, RefreshCw, Sparkles, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -8,6 +8,8 @@ import {
   type ExerciseDefinition,
   ExerciseSearchInterface,
 } from '@/components/exercise-selection/ExerciseSearchInterface'
+import { WorkoutRollupModal } from '@/components/features/training/WorkoutRollupModal'
+import { useToast } from '@/components/ToastProvider'
 import { Button } from '@/components/ui/Button'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import {
@@ -23,13 +25,26 @@ import { TipAnnotation } from '@/components/ui/TipAnnotation'
 import ExerciseActionsFooter from '@/components/workout-logging/ExerciseActionsFooter'
 import ExerciseDisplayTabs from '@/components/workout-logging/ExerciseDisplayTabs'
 import ExerciseLoggingHeader from '@/components/workout-logging/ExerciseLoggingHeader'
+import type { QuickAction } from '@/components/workout-logging/ExerciseQuickActionsMenu'
 import ExitWorkoutConfirm from '@/components/workout-logging/ExitWorkoutConfirm'
 import SetLoggingForm, {
   type ExpandedInput,
 } from '@/components/workout-logging/SetLoggingForm'
 import { useIntensityAccess } from '@/hooks/useIntensityAccess'
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
+import {
+  addAdHocExercises,
+  completeAdHocWorkout,
+  deleteAdHocExercise,
+  deleteAdHocSet,
+  discardAdHocWorkout,
+  fetchExerciseHistory,
+  logAdHocSet,
+  swapAdHocExercise,
+} from '@/lib/api/adhoc-workout'
+import { FetchError } from '@/lib/api/fetch'
 import { clientLogger } from '@/lib/client-logger'
+import type { WorkoutRollup } from '@/lib/stats/workout-rollup'
 import type { LoggedSet } from '@/types/workout'
 
 export type AdHocExercise = {
@@ -91,6 +106,7 @@ export default function AdHocLoggerView({
   initialLoggedSets,
 }: Props) {
   const router = useRouter()
+  const toast = useToast()
   const { hasAccess: hasIntensityAccess } = useIntensityAccess()
 
   const [exercises, setExercises] = useState<AdHocExercise[]>(initialExercises)
@@ -110,8 +126,10 @@ export default function AdHocLoggerView({
   const [currentIndex, setCurrentIndex] = useState(0)
   const [currentSet, setCurrentSet] = useState(EMPTY_SET)
   const [expandedInput, setExpandedInput] = useState<ExpandedInput>(null)
-  const [isPickerOpen, setIsPickerOpen] = useState(false)
+  const [pickerMode, setPickerMode] = useState<PickerMode | null>(null)
   const [isAdding, setIsAdding] = useState(false)
+  const [isSwapping, setIsSwapping] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [isLoggingSet, setIsLoggingSet] = useState(false)
   const [isCompleting, setIsCompleting] = useState(false)
   const [isConfirmingComplete, setIsConfirmingComplete] = useState(false)
@@ -121,6 +139,8 @@ export default function AdHocLoggerView({
   >(new Map())
   const [historyLoadingIds, setHistoryLoadingIds] = useState<Set<string>>(new Set())
   const [showExitConfirm, setShowExitConfirm] = useState(false)
+  const [rollup, setRollup] = useState<WorkoutRollup | null>(null)
+  const [showRollup, setShowRollup] = useState(false)
   // Tracks which exercises we've already pre-filled from history this session,
   // so user typing isn't clobbered when history arrives later.
   const prefilledFromHistoryIds = useRef<Set<string>>(new Set())
@@ -140,16 +160,23 @@ export default function AdHocLoggerView({
 
     const exerciseId = currentExercise.id
     setHistoryLoadingIds((prev) => new Set(prev).add(exerciseId))
-    fetch(`/api/exercises/${exerciseId}/history`)
-      .then((res) => (res.ok ? res.json() : { history: null }))
-      .then((data) => {
+    fetchExerciseHistory(exerciseId)
+      .then((history) => {
         setHistoryByExerciseId((prev) => {
           const next = new Map(prev)
-          next.set(exerciseId, data.history ?? null)
+          next.set(exerciseId, (history as ExerciseHistory | null) ?? null)
           return next
         })
       })
-      .catch((err) => clientLogger.error('Failed to load exercise history:', err))
+      .catch((err) => {
+        // Non-blocking — pre-fill from history is a convenience, not critical.
+        clientLogger.error('Failed to load exercise history:', err)
+        setHistoryByExerciseId((prev) => {
+          const next = new Map(prev)
+          next.set(exerciseId, null)
+          return next
+        })
+      })
       .finally(() => {
         setHistoryLoadingIds((prev) => {
           const next = new Set(prev)
@@ -186,49 +213,38 @@ export default function AdHocLoggerView({
     currentSet.weight,
   ])
 
+  // Shared onRetry callback so users see a "reconnecting…" toast on slow links
+  // before the request either succeeds or terminally fails.
+  const onRetryToast = useCallback(
+    (label: string) =>
+      ({ attempt }: { attempt: number }) => {
+        toast.warning('Slow connection', `${label} — retrying (attempt ${attempt + 1})…`)
+      },
+    [toast]
+  )
+
   const handleAddExercises = useCallback(
     async (definitions: ExerciseDefinition[]) => {
       if (isAdding || definitions.length === 0) return
       setIsAdding(true)
       try {
-        const res = await fetch(`/api/workouts/adhoc/${completionId}/exercises`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            exerciseDefinitionIds: definitions.map((d) => d.id),
-          }),
-        })
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}))
-          clientLogger.error('Failed to add exercises:', err)
-          return
-        }
-        const data = await res.json()
-        const created: AdHocExercise[] = (data.exercises ?? [data.exercise]).map(
-          (e: {
-            id: string
-            name: string
-            notes: string | null
-            exerciseDefinition: {
-              primaryFAUs: string[]
-              secondaryFAUs: string[]
-              equipment: string[]
-              instructions?: string | null
-              imageUrls?: string[]
-            }
-          }) => ({
-            id: e.id,
-            name: e.name,
-            notes: e.notes ?? null,
-            exerciseDefinition: {
-              primaryFAUs: e.exerciseDefinition.primaryFAUs,
-              secondaryFAUs: e.exerciseDefinition.secondaryFAUs,
-              equipment: e.exerciseDefinition.equipment,
-              instructions: e.exerciseDefinition.instructions ?? undefined,
-              imageUrls: e.exerciseDefinition.imageUrls,
-            },
-          })
+        const exercises = await addAdHocExercises(
+          completionId,
+          definitions.map((d) => d.id),
+          { onRetry: onRetryToast('Adding exercise') }
         )
+        const created: AdHocExercise[] = exercises.map((e) => ({
+          id: e.id,
+          name: e.name,
+          notes: e.notes ?? null,
+          exerciseDefinition: {
+            primaryFAUs: e.exerciseDefinition.primaryFAUs,
+            secondaryFAUs: e.exerciseDefinition.secondaryFAUs,
+            equipment: e.exerciseDefinition.equipment,
+            instructions: e.exerciseDefinition.instructions ?? undefined,
+            imageUrls: e.exerciseDefinition.imageUrls,
+          },
+        }))
         setExercises((prev) => {
           const next = [...prev, ...created]
           // Focus the first newly-added exercise so the user can start logging.
@@ -239,15 +255,91 @@ export default function AdHocLoggerView({
         // any pending input expansion.
         setCurrentSet(EMPTY_SET)
         setExpandedInput(null)
-        setIsPickerOpen(false)
+        setPickerMode(null)
       } catch (err) {
         clientLogger.error('Failed to add exercises:', err)
+        toast.error(
+          "Couldn't add exercise",
+          err instanceof FetchError && err.message ? err.message : 'Check your connection and try again.'
+        )
       } finally {
         setIsAdding(false)
       }
     },
-    [completionId, isAdding]
+    [completionId, isAdding, onRetryToast, toast]
   )
+
+  const handleSwapExercise = useCallback(
+    async (definitions: ExerciseDefinition[]) => {
+      const target = exercises[currentIndex]
+      const replacement = definitions[0]
+      if (!target || !replacement || isSwapping) return
+      setIsSwapping(true)
+      try {
+        const updated = await swapAdHocExercise(target.id, replacement.id, {
+          onRetry: onRetryToast('Swapping exercise'),
+        })
+        setExercises((prev) =>
+          prev.map((ex, i) =>
+            i === currentIndex
+              ? {
+                  ...ex,
+                  name: updated.name,
+                  exerciseDefinition: {
+                    primaryFAUs: updated.exerciseDefinition.primaryFAUs,
+                    secondaryFAUs: updated.exerciseDefinition.secondaryFAUs,
+                    equipment: updated.exerciseDefinition.equipment,
+                    instructions: updated.exerciseDefinition.instructions ?? undefined,
+                    imageUrls: updated.exerciseDefinition.imageUrls,
+                  },
+                }
+              : ex
+          )
+        )
+        // Reset input so the new exercise's history can pre-fill.
+        setCurrentSet(EMPTY_SET)
+        setExpandedInput(null)
+        setPickerMode(null)
+      } catch (err) {
+        clientLogger.error('Failed to swap exercise:', err)
+        toast.error(
+          "Couldn't swap exercise",
+          err instanceof FetchError && err.message ? err.message : 'Check your connection and try again.'
+        )
+      } finally {
+        setIsSwapping(false)
+      }
+    },
+    [currentIndex, exercises, isSwapping, onRetryToast, toast]
+  )
+
+  const handleDeleteExercise = useCallback(async () => {
+    const target = exercises[currentIndex]
+    if (!target || isDeleting) return
+    setIsDeleting(true)
+    try {
+      await deleteAdHocExercise(target.id, {
+        onRetry: onRetryToast('Removing exercise'),
+      })
+      setLoggedSets((prev) => prev.filter((s) => s.exerciseId !== target.id))
+      setExercises((prev) => {
+        const next = prev.filter((ex) => ex.id !== target.id)
+        // Keep currentIndex in range; bias toward the previous exercise.
+        setCurrentIndex((idx) => Math.max(0, Math.min(idx, next.length - 1)))
+        return next
+      })
+      setCurrentSet(EMPTY_SET)
+      setExpandedInput(null)
+    } catch (err) {
+      clientLogger.error('Failed to delete exercise:', err)
+      toast.error(
+        "Couldn't remove exercise",
+        err instanceof FetchError && err.message ? err.message : 'Check your connection and try again.'
+      )
+    } finally {
+      setIsDeleting(false)
+    }
+  }, [currentIndex, exercises, isDeleting, onRetryToast, toast])
 
   const handleLogSet = useCallback(async () => {
     if (!currentExercise || isLoggingSet) return
@@ -257,12 +349,30 @@ export default function AdHocLoggerView({
     const rpe = currentSet.rpe ? parseInt(currentSet.rpe, 10) : null
     const rir = currentSet.rir ? parseInt(currentSet.rir, 10) : null
 
+    // Optimistic append: render the set immediately with a temp id and
+    // _syncStatus='pending'. On success we swap in the server id; on terminal
+    // failure we mark it 'error' so the user sees that it didn't save.
+    const tempId = `tmp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+    const optimisticSet: LoggedSet = {
+      id: tempId,
+      exerciseId: currentExercise.id,
+      setNumber: nextSetNumber,
+      reps,
+      weight,
+      weightUnit: currentSet.weightUnit,
+      rpe,
+      rir,
+      isWarmup: false,
+      _syncStatus: 'pending',
+    }
+    setLoggedSets((prev) => [...prev, optimisticSet])
+    setExpandedInput(null)
     setIsLoggingSet(true)
+
     try {
-      const res = await fetch(`/api/workouts/adhoc/${completionId}/sets`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const saved = await logAdHocSet(
+        completionId,
+        {
           exerciseId: currentExercise.id,
           setNumber: nextSetNumber,
           reps,
@@ -270,24 +380,39 @@ export default function AdHocLoggerView({
           weightUnit: currentSet.weightUnit,
           rpe,
           rir,
-        }),
-      })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        clientLogger.error('Failed to log set:', err)
-        return
-      }
-      const data = await res.json()
-      setLoggedSets((prev) => [...prev, { ...data.set, isWarmup: data.set.isWarmup ?? false }])
-      // Inherit values into next set: keep currentSet as-is. Only collapse any
-      // expanded input so the user is back to the resting compact view.
-      setExpandedInput(null)
+        },
+        { onRetry: onRetryToast('Saving set') }
+      )
+      setLoggedSets((prev) =>
+        prev.map((s) =>
+          s.id === tempId
+            ? { ...saved, isWarmup: saved.isWarmup ?? false, _syncStatus: 'synced' }
+            : s
+        )
+      )
     } catch (err) {
       clientLogger.error('Failed to log set:', err)
+      setLoggedSets((prev) =>
+        prev.map((s) => (s.id === tempId ? { ...s, _syncStatus: 'error' } : s))
+      )
+      toast.error(
+        "Set didn't save",
+        err instanceof FetchError && err.message
+          ? err.message
+          : "Couldn't reach the server. Tap the set to retry."
+      )
     } finally {
       setIsLoggingSet(false)
     }
-  }, [currentExercise, currentSet, nextSetNumber, completionId, isLoggingSet])
+  }, [
+    currentExercise,
+    currentSet,
+    nextSetNumber,
+    completionId,
+    isLoggingSet,
+    onRetryToast,
+    toast,
+  ])
 
   const handleDeleteSet = useCallback(
     async (setNumber: number) => {
@@ -295,67 +420,123 @@ export default function AdHocLoggerView({
       const target = loggedSets.find(
         (s) => s.exerciseId === currentExercise.id && s.setNumber === setNumber
       )
-      if (!target) return
-      try {
-        const res = await fetch(
-          `/api/workouts/adhoc/${completionId}/sets/${target.id}`,
-          { method: 'DELETE' }
-        )
-        if (!res.ok) {
-          clientLogger.error('Failed to delete set')
-          return
-        }
-        const data = await res.json()
+      if (!target?.id) return
+
+      // Failed-to-sync sets never reached the server; just drop them locally
+      // and renumber on the client so the user can re-log.
+      if (target._syncStatus === 'error' || target.id.startsWith('tmp-')) {
         setLoggedSets((prev) => {
           const filtered = prev.filter((s) => s.id !== target.id)
-          const renumberMap = new Map<string, number>(
-            (data.renumbered as Array<{ id: string; setNumber: number }>).map((r) => [
-              r.id,
-              r.setNumber,
-            ])
+          return filtered.map((s) =>
+            s.exerciseId === currentExercise.id && s.setNumber > setNumber
+              ? { ...s, setNumber: s.setNumber - 1 }
+              : s
           )
-          return filtered.map((s) => {
-            if (s.id && renumberMap.has(s.id)) {
-              return { ...s, setNumber: renumberMap.get(s.id) as number }
-            }
-            return s
-          })
+        })
+        return
+      }
+
+      // Optimistic remove with rollback on failure.
+      const snapshot = loggedSets
+      setLoggedSets((prev) => {
+        const filtered = prev.filter((s) => s.id !== target.id)
+        return filtered.map((s) =>
+          s.exerciseId === currentExercise.id && s.setNumber > setNumber
+            ? { ...s, setNumber: s.setNumber - 1 }
+            : s
+        )
+      })
+
+      try {
+        const data = await deleteAdHocSet(completionId, target.id, {
+          onRetry: onRetryToast('Removing set'),
+        })
+        // Reconcile against server-authoritative renumber output.
+        setLoggedSets((prev) => {
+          const renumberMap = new Map<string, number>(
+            data.renumbered.map((r) => [r.id, r.setNumber])
+          )
+          return prev.map((s) =>
+            s.id && renumberMap.has(s.id)
+              ? { ...s, setNumber: renumberMap.get(s.id) as number }
+              : s
+          )
         })
       } catch (err) {
         clientLogger.error('Failed to delete set:', err)
+        setLoggedSets(snapshot)
+        toast.error(
+          "Couldn't remove set",
+          err instanceof FetchError && err.message ? err.message : 'Check your connection and try again.'
+        )
       }
     },
-    [currentExercise, loggedSets, completionId]
+    [currentExercise, loggedSets, completionId, onRetryToast, toast]
   )
 
   // Header check icon → confirmation modal (matches programmed logger).
-  // If no sets have been logged, the workout can't be completed at all, so
-  // bail out silently rather than opening the modal.
+  // If no sets have been logged, nudge the user to log something first
+  // instead of silently doing nothing.
   const handleRequestComplete = useCallback(() => {
-    if (loggedSets.length === 0) return
+    if (loggedSets.length === 0) {
+      toast.warning(
+        'Log a set first',
+        'Add at least one set before completing the workout.'
+      )
+      return
+    }
     setIsConfirmingComplete(true)
-  }, [loggedSets.length])
+  }, [loggedSets.length, toast])
 
   const handleCompleteWorkout = useCallback(async () => {
     if (isCompleting || loggedSets.length === 0) return
+
+    // Guard: don't let the user complete while there are unsynced sets — they
+    // could lose data on bad connections.
+    const pendingCount = loggedSets.filter(
+      (s) => s._syncStatus === 'pending' || s._syncStatus === 'error'
+    ).length
+    if (pendingCount > 0) {
+      toast.warning(
+        'Sets still saving',
+        `${pendingCount} set${pendingCount === 1 ? '' : 's'} haven't synced yet. Wait a moment, then try again.`
+      )
+      return
+    }
+
     setIsCompleting(true)
     try {
-      const res = await fetch(`/api/workouts/adhoc/${completionId}/complete`, {
-        method: 'POST',
-      })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        clientLogger.error('Failed to complete workout:', err)
-        setIsCompleting(false)
+      const { rollup: completedRollup } = await completeAdHocWorkout<WorkoutRollup>(
+        completionId,
+        { onRetry: onRetryToast('Completing workout') }
+      )
+      setIsConfirmingComplete(false)
+      if (completedRollup) {
+        setRollup(completedRollup)
+        setShowRollup(true)
         return
       }
       router.push('/training')
       router.refresh()
     } catch (err) {
       clientLogger.error('Failed to complete workout:', err)
+      toast.error(
+        "Couldn't complete workout",
+        err instanceof FetchError && err.message
+          ? err.message
+          : 'Check your connection and try again. Your sets are safe.'
+      )
       setIsCompleting(false)
+      setIsConfirmingComplete(false)
     }
-  }, [isCompleting, loggedSets.length, completionId, router])
+  }, [isCompleting, loggedSets, completionId, router, onRetryToast, toast])
+
+  const handleRollupClose = useCallback(() => {
+    setShowRollup(false)
+    setRollup(null)
+    router.push('/training')
+    router.refresh()
+  }, [router])
 
   const handleExitSaveAsDraft = useCallback(() => {
     setShowExitConfirm(false)
@@ -366,14 +547,23 @@ export default function AdHocLoggerView({
     if (isDiscarding) return
     setIsDiscarding(true)
     try {
-      await fetch(`/api/workouts/adhoc/${completionId}`, { method: 'DELETE' })
+      await discardAdHocWorkout(completionId, {
+        onRetry: onRetryToast('Discarding workout'),
+      })
+      setShowExitConfirm(false)
+      router.push('/training')
+      router.refresh()
     } catch (err) {
       clientLogger.error('Failed to discard ad-hoc workout:', err)
+      toast.error(
+        "Couldn't discard workout",
+        err instanceof FetchError && err.message
+          ? err.message
+          : 'Check your connection and try again.'
+      )
+      setIsDiscarding(false)
     }
-    setShowExitConfirm(false)
-    router.push('/training')
-    router.refresh()
-  }, [completionId, isDiscarding, router])
+  }, [completionId, isDiscarding, router, onRetryToast, toast])
 
   const handleClose = useCallback(() => {
     setShowExitConfirm(true)
@@ -432,15 +622,41 @@ export default function AdHocLoggerView({
 
   return (
     <>
-      <div className="fixed inset-0 bg-background flex flex-col" style={{ zIndex: 50 }}>
+      <div
+        className="fixed inset-0 z-50 flex items-stretch justify-center sm:items-center sm:backdrop-blur-md sm:bg-black/40 sm:dark:bg-black/60"
+      >
+        <div className="bg-background w-full h-[100dvh] sm:h-[85vh] sm:max-h-[85vh] sm:max-w-2xl sm:border-2 sm:border-border sm:rounded-lg sm:shadow-xl flex flex-col overflow-hidden">
         <ExerciseLoggingHeader
           currentExerciseIndex={hasExercises ? currentIndex : 0}
           totalExercises={Math.max(1, exercises.length)}
           startedAt={startedAt}
           onCompleteWorkout={handleRequestComplete}
           onClose={handleClose}
-          onAddExercise={hasExercises ? () => setIsPickerOpen(true) : undefined}
-          menuActions={[]}
+          menuActions={
+            hasExercises && currentExercise
+              ? ([
+                  {
+                    label: 'Add an exercise',
+                    icon: Plus,
+                    onClick: () => setPickerMode({ kind: 'add' }),
+                  },
+                  {
+                    label: 'Swap this exercise',
+                    icon: RefreshCw,
+                    onClick: () =>
+                      setPickerMode({ kind: 'swap', replacingName: currentExercise.name }),
+                  },
+                  {
+                    label: 'Delete this exercise',
+                    icon: Trash2,
+                    onClick: handleDeleteExercise,
+                    variant: 'danger',
+                    requiresConfirmation: true,
+                    confirmationMessage: `Are you sure you want to delete "${currentExercise.name}"? Any sets you've logged for it will be removed.`,
+                  },
+                ] satisfies QuickAction[])
+              : []
+          }
         />
 
         <div
@@ -517,7 +733,7 @@ export default function AdHocLoggerView({
           >
             <button
               type="button"
-              onClick={() => setIsPickerOpen(true)}
+              onClick={() => setPickerMode({ kind: 'add' })}
               className="w-full h-11 bg-primary text-primary-foreground text-sm font-medium uppercase tracking-widest transition-all doom-focus-ring inline-flex items-center justify-center gap-2"
               style={{
                 boxShadow:
@@ -529,13 +745,15 @@ export default function AdHocLoggerView({
             </button>
           </div>
         )}
+        </div>
       </div>
 
-      {isPickerOpen && (
+      {pickerMode && (
         <ExercisePickerModal
-          onClose={() => setIsPickerOpen(false)}
-          onConfirm={handleAddExercises}
-          isAdding={isAdding}
+          mode={pickerMode}
+          onClose={() => setPickerMode(null)}
+          onConfirm={pickerMode.kind === 'add' ? handleAddExercises : handleSwapExercise}
+          isBusy={pickerMode.kind === 'add' ? isAdding : isSwapping}
         />
       )}
       {showExitConfirm && (
@@ -544,6 +762,7 @@ export default function AdHocLoggerView({
           onSaveAsDraft={handleExitSaveAsDraft}
           onDiscard={handleExitDiscard}
           onCancel={() => setShowExitConfirm(false)}
+          isDiscarding={isDiscarding}
         />
       )}
       {isConfirmingComplete &&
@@ -590,6 +809,11 @@ export default function AdHocLoggerView({
           </div>,
           document.body
         )}
+      <WorkoutRollupModal
+        open={showRollup}
+        rollup={rollup}
+        onClose={handleRollupClose}
+      />
     </>
   )
 }
@@ -608,20 +832,27 @@ function EmptyState() {
   )
 }
 
+type PickerMode =
+  | { kind: 'add' }
+  | { kind: 'swap'; replacingName: string }
+
 function ExercisePickerModal({
+  mode,
   onClose,
   onConfirm,
-  isAdding,
+  isBusy,
 }: {
+  mode: PickerMode
   onClose: () => void
   onConfirm: (defs: ExerciseDefinition[]) => void
-  isAdding: boolean
+  isBusy: boolean
 }) {
-  // Preserve selection order so exercises are inserted the way the user picked them.
+  const isAdd = mode.kind === 'add'
+  // Multi-select state used only in add mode.
   const [selectedDefs, setSelectedDefs] = useState<ExerciseDefinition[]>([])
   const selectedIds = new Set(selectedDefs.map((d) => d.id))
 
-  const handleToggle = useCallback((def: ExerciseDefinition) => {
+  const handleAddToggle = useCallback((def: ExerciseDefinition) => {
     setSelectedDefs((prev) =>
       prev.some((d) => d.id === def.id)
         ? prev.filter((d) => d.id !== def.id)
@@ -629,7 +860,19 @@ function ExercisePickerModal({
     )
   }, [])
 
+  const handleSwapSelect = useCallback(
+    (def: ExerciseDefinition) => {
+      if (isBusy) return
+      onConfirm([def])
+    },
+    [isBusy, onConfirm]
+  )
+
   const count = selectedDefs.length
+  const title = isAdd ? 'Search Exercises' : 'Swap Exercise'
+  const description = isAdd
+    ? 'Pick one or more to add to your workout'
+    : `Pick a replacement for ${mode.kind === 'swap' ? mode.replacingName : ''}`
 
   return (
     <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
@@ -642,10 +885,10 @@ function ExercisePickerModal({
           <div className="flex items-center justify-between">
             <div className="flex-1">
               <DialogTitle className="text-lg font-bold text-primary-foreground tracking-wider uppercase">
-                Search Exercises
+                {title}
               </DialogTitle>
               <DialogDescription className="text-base font-bold text-primary-foreground/70 uppercase tracking-wide">
-                Pick one or more to add to your workout
+                {description}
               </DialogDescription>
             </div>
           </div>
@@ -653,26 +896,28 @@ function ExercisePickerModal({
 
         <DialogBody className="flex-1 min-h-0">
           <ExerciseSearchInterface
-            onExerciseSelect={handleToggle}
-            selectedIds={selectedIds}
+            onExerciseSelect={isAdd ? handleAddToggle : handleSwapSelect}
+            selectedIds={isAdd ? selectedIds : undefined}
             preloadExercises
           />
         </DialogBody>
 
         <DialogFooter className="border-t border-border bg-card py-2">
           <div className="flex items-center justify-end gap-2 w-full">
-            <Button variant="secondary" onClick={onClose} doom disabled={isAdding}>
+            <Button variant="secondary" onClick={onClose} doom disabled={isBusy}>
               Cancel
             </Button>
-            <Button
-              variant="primary"
-              onClick={() => onConfirm(selectedDefs)}
-              disabled={count === 0 || isAdding}
-              loading={isAdding}
-              doom
-            >
-              {count === 0 ? 'Add' : count === 1 ? 'Add 1 exercise' : `Add all (${count})`}
-            </Button>
+            {isAdd && (
+              <Button
+                variant="primary"
+                onClick={() => onConfirm(selectedDefs)}
+                disabled={count === 0 || isBusy}
+                loading={isBusy}
+                doom
+              >
+                {count === 0 ? 'Add' : count === 1 ? 'Add 1 exercise' : `Add all (${count})`}
+              </Button>
+            )}
           </div>
         </DialogFooter>
       </DialogContent>

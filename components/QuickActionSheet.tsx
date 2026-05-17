@@ -4,6 +4,7 @@ import * as DialogPrimitive from '@radix-ui/react-dialog'
 import {
   Dumbbell,
   LayoutGrid,
+  Loader2,
   type LucideIcon,
   Play,
   Trash2,
@@ -11,9 +12,16 @@ import {
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useToast } from '@/components/ToastProvider'
+import {
+  discardAdHocWorkout,
+  startFreestyleWorkout,
+} from '@/lib/api/adhoc-workout'
+import { FetchError, fetchJsonWithRetry } from '@/lib/api/fetch'
 import { discardDraft } from '@/lib/api/workout-sets'
 import { clientLogger } from '@/lib/client-logger'
 import { useDraftWorkout } from '@/lib/contexts/DraftWorkoutContext'
+import { useUserSettings } from '@/hooks/useUserSettings'
 
 type NextWorkout = {
   workoutId: string
@@ -30,25 +38,31 @@ type Props = {
   onOpenChange: (open: boolean) => void
 }
 
-// Bottom-anchored sheet sitting above the h-14 mobile bottom nav, with a small
-// breathing gap so the nav's gold action chip doesn't kiss the panel border.
-const NAV_OFFSET_PX = 56 + 8
-const SHEET_BOTTOM_STYLE = {
-  bottom: `calc(env(safe-area-inset-bottom, 0px) + ${NAV_OFFSET_PX}px)`,
-}
+// Bottom-anchored on mobile (above h-14 nav with a breathing gap so the gold
+// chip doesn't kiss the panel); centered on desktop where there's no bottom nav.
+const MOBILE_BOTTOM = 'bottom-[calc(env(safe-area-inset-bottom,0px)+64px)]'
+const DESKTOP_CENTER = 'md:bottom-auto md:top-1/2 md:-translate-y-1/2'
 
 export default function QuickActionSheet({ open, onOpenChange }: Props) {
   const router = useRouter()
+  const toast = useToast()
   const { activeDraft, refreshDraft, clearDraft } = useDraftWorkout()
+  const { settings, refetch: refetchSettings } = useUserSettings()
+  const isFollowAlong = settings?.loggingMode === 'follow_along'
   const [nextWorkout, setNextWorkout] = useState<NextWorkout | null>(null)
   const [isLoadingNext, setIsLoadingNext] = useState(false)
   const [isStartingFreestyle, setIsStartingFreestyle] = useState(false)
+  const [showFreestyleHeadsUp, setShowFreestyleHeadsUp] = useState(false)
   const [isDiscardingDraft, setIsDiscardingDraft] = useState(false)
   const [confirmDiscard, setConfirmDiscard] = useState(false)
   const confirmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Reset the inline-confirm state whenever the sheet closes or the draft
   // clears, so the trash button never reopens still armed.
+  useEffect(() => {
+    if (!open) setShowFreestyleHeadsUp(false)
+  }, [open])
+
   useEffect(() => {
     if (!open || !activeDraft) {
       setConfirmDiscard(false)
@@ -68,15 +82,20 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
   // Re-fetch active draft each time the sheet opens — context only loads on
   // mount, so a draft saved elsewhere wouldn't otherwise show up here.
   useEffect(() => {
-    if (open) refreshDraft()
-  }, [open, refreshDraft])
+    if (open) {
+      refreshDraft()
+      void refetchSettings()
+    }
+  }, [open, refreshDraft, refetchSettings])
 
   useEffect(() => {
     if (!open || activeDraft) return
     let cancelled = false
     setIsLoadingNext(true)
-    fetch('/api/training/next-workout', { cache: 'no-store' })
-      .then((res) => (res.ok ? res.json() : { next: null }))
+    fetchJsonWithRetry<{ next: NextWorkout | null }>(
+      '/api/training/next-workout',
+      { cache: 'no-store' }
+    )
       .then((data) => {
         if (!cancelled) setNextWorkout(data.next)
       })
@@ -108,34 +127,63 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
     router.push(`/training?resume=${nextWorkout.workoutId}`)
   }, [nextWorkout, onOpenChange, router])
 
-  const handleStartFreestyle = useCallback(async () => {
+  const startFreestyle = useCallback(async () => {
     if (isStartingFreestyle) return
     setIsStartingFreestyle(true)
     try {
-      const res = await fetch('/api/workouts/adhoc', { method: 'POST' })
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        clientLogger.error('Failed to start freestyle workout:', data)
-        return
-      }
-      const data = await res.json()
+      const completion = await startFreestyleWorkout({
+        onRetry: ({ attempt }) =>
+          toast.warning(
+            'Slow connection',
+            `Starting workout — retrying (attempt ${attempt + 1})…`
+          ),
+      })
       onOpenChange(false)
-      router.push(`/training/adhoc/${data.completion.id}`)
+      // `?new=1` signals the ad-hoc page + its loading.tsx to show
+      // "Loading workout…" instead of "Restoring workout…".
+      router.push(`/training/adhoc/${completion.id}?new=1`)
     } catch (err) {
       clientLogger.error('Failed to start freestyle workout:', err)
+      // 409 = existing draft; surface it specifically so the user can resume.
+      if (err instanceof FetchError && err.status === 409) {
+        toast.warning(
+          'Finish your current workout',
+          'You already have a workout in progress.'
+        )
+        await refreshDraft()
+      } else {
+        toast.error(
+          "Couldn't start workout",
+          err instanceof FetchError && err.message
+            ? err.message
+            : 'Check your connection and try again.'
+        )
+      }
     } finally {
       setIsStartingFreestyle(false)
     }
-  }, [isStartingFreestyle, onOpenChange, router])
+  }, [isStartingFreestyle, onOpenChange, router, refreshDraft, toast])
+
+  const handleFreestyleClick = useCallback(() => {
+    if (isStartingFreestyle) return
+    if (isFollowAlong) {
+      setShowFreestyleHeadsUp(true)
+      return
+    }
+    void startFreestyle()
+  }, [isStartingFreestyle, isFollowAlong, startFreestyle])
 
   const handleDiscardDraft = useCallback(async () => {
     if (!activeDraft || isDiscardingDraft) return
     setIsDiscardingDraft(true)
     try {
+      const onRetry = ({ attempt }: { attempt: number }) =>
+        toast.warning(
+          'Slow connection',
+          `Discarding draft — retrying (attempt ${attempt + 1})…`
+        )
       if (activeDraft.isAdHoc) {
-        await fetch(`/api/workouts/adhoc/${activeDraft.completionId}`, {
-          method: 'DELETE',
-        })
+        await discardAdHocWorkout(activeDraft.completionId, { onRetry })
       } else if (activeDraft.workoutId) {
         await discardDraft(activeDraft.workoutId)
       }
@@ -144,10 +192,16 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
       router.refresh()
     } catch (err) {
       clientLogger.error('Failed to discard draft:', err)
+      toast.error(
+        "Couldn't discard draft",
+        err instanceof FetchError && err.message
+          ? err.message
+          : 'Check your connection and try again.'
+      )
     } finally {
       setIsDiscardingDraft(false)
     }
-  }, [activeDraft, isDiscardingDraft, clearDraft, refreshDraft, router])
+  }, [activeDraft, isDiscardingDraft, clearDraft, refreshDraft, router, toast])
 
   // Two-stage inline confirm: first tap arms (button turns red + label), second
   // tap within ~4s discards. Any sheet close or draft change resets it.
@@ -195,15 +249,7 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
         />
         <DialogPrimitive.Content
           aria-describedby={undefined}
-          className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom data-[state=open]:duration-200 data-[state=closed]:duration-150"
-          style={{
-            position: 'fixed',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: 'min(96vw, 28rem)',
-            zIndex: 51,
-            ...SHEET_BOTTOM_STYLE,
-          }}
+          className={`fixed left-1/2 -translate-x-1/2 z-[51] w-[min(96vw,28rem)] ${MOBILE_BOTTOM} ${DESKTOP_CENTER} data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom md:data-[state=closed]:slide-out-to-bottom-0 md:data-[state=open]:slide-in-from-bottom-0 md:data-[state=open]:fade-in-0 md:data-[state=closed]:fade-out-0 data-[state=open]:duration-200 data-[state=closed]:duration-150`}
         >
           <div
             className="bg-card border border-border doom-corners"
@@ -259,10 +305,14 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
                         : 'bg-card hover:bg-error/15 hover:border-error/60 hover:text-error text-foreground/70 border-border'
                     }`}
                   >
-                    <Trash2 size={18} strokeWidth={2.5} />
+                    {isDiscardingDraft ? (
+                      <Loader2 size={18} strokeWidth={2.5} className="animate-spin" />
+                    ) : (
+                      <Trash2 size={18} strokeWidth={2.5} />
+                    )}
                     {confirmDiscard && (
                       <span className="text-xs font-black uppercase tracking-wider">
-                        {isDiscardingDraft ? 'Discarding' : 'Confirm'}
+                        {isDiscardingDraft ? 'Discarding…' : 'Confirm'}
                       </span>
                     )}
                   </button>
@@ -274,6 +324,43 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
                   Continue or discard your draft to unlock other actions
                 </div>
               </>
+            ) : showFreestyleHeadsUp ? (
+              <div className="px-5 pt-4 pb-5">
+                <h2 className="doom-heading text-foreground text-xl leading-tight">
+                  Freestyle is for logging
+                </h2>
+                <p className="text-base text-muted-foreground mt-2.5 leading-relaxed">
+                  It's a blank canvas where you pick exercises and log every
+                  set as you go. Worth a try if you're curious.
+                </p>
+                <p className="text-sm text-muted-foreground mt-3">
+                  Prefer logging?{' '}
+                  <span className="font-semibold text-foreground">
+                    Settings → Workout Mode
+                  </span>
+                  .
+                </p>
+                <div className="flex items-stretch gap-2 mt-5">
+                  <button
+                    type="button"
+                    onClick={() => setShowFreestyleHeadsUp(false)}
+                    className="px-5 py-3 border border-border bg-muted hover:bg-muted/70 text-foreground text-base font-bold uppercase tracking-wider doom-focus-ring transition-colors"
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowFreestyleHeadsUp(false)
+                      void startFreestyle()
+                    }}
+                    disabled={isStartingFreestyle}
+                    className="flex-1 doom-button-3d px-5 py-3 bg-primary text-primary-foreground hover:bg-primary-hover text-base font-bold uppercase tracking-wider doom-focus-ring disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isStartingFreestyle ? 'Starting…' : 'Try it'}
+                  </button>
+                </div>
+              </div>
             ) : (
               <div className="divide-y divide-border">
                 <ActionRow
@@ -290,7 +377,7 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
                   subtitle={
                     isStartingFreestyle ? 'Starting…' : 'Log sets as you go'
                   }
-                  onClick={!isStartingFreestyle ? handleStartFreestyle : undefined}
+                  onClick={!isStartingFreestyle ? handleFreestyleClick : undefined}
                   disabled={isStartingFreestyle}
                 />
                 <ActionRow

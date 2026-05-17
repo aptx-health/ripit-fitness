@@ -9,6 +9,7 @@ import {
   useEffect,
   useState,
 } from 'react'
+import { fetchJsonWithRetry } from '@/lib/api/fetch'
 import { clientLogger } from '@/lib/client-logger'
 
 type ActiveDraft = {
@@ -39,9 +40,10 @@ export function DraftWorkoutProvider({ children }: { children: ReactNode }) {
 
   const fetchDraft = useCallback(async () => {
     try {
-      const res = await fetch('/api/workouts/active-draft', { cache: 'no-store' })
-      if (!res.ok) return
-      const data = await res.json()
+      const data = await fetchJsonWithRetry<{ draft: ActiveDraft | null }>(
+        '/api/workouts/active-draft',
+        { cache: 'no-store' }
+      )
       setActiveDraft(data.draft)
     } catch (err) {
       clientLogger.error('Failed to fetch active draft:', err)

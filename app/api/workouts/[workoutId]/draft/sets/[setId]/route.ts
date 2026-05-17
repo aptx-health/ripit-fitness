@@ -55,31 +55,31 @@ export async function DELETE(
       return NextResponse.json({ error: 'Cannot delete sets from a completed workout' }, { status: 400 })
     }
 
-    // Delete the set and renumber remaining sets for the same exercise
+    // Bulk decrement-renumber: two round trips instead of 1 + N. The
+    // (completionId, exerciseId, setNumber) unique constraint is safe under
+    // this downward shift because we're filling the gap left by the deleted
+    // set.
+    const deletedSetNumber = loggedSet.setNumber
     const result = await prisma.$transaction(async (tx) => {
       await tx.loggedSet.delete({ where: { id: setId } })
 
-      // Renumber remaining sets for this exercise to keep sequential
-      const remainingSets = await tx.loggedSet.findMany({
+      await tx.$executeRaw`
+        UPDATE "LoggedSet"
+        SET "setNumber" = "setNumber" - 1
+        WHERE "completionId" = ${loggedSet.completionId}
+          AND "exerciseId" = ${loggedSet.exerciseId}
+          AND "setNumber" > ${deletedSetNumber}
+      `
+
+      const renumbered = await tx.loggedSet.findMany({
         where: {
           completionId: loggedSet.completionId,
           exerciseId: loggedSet.exerciseId,
+          setNumber: { gte: deletedSetNumber },
         },
+        select: { id: true, setNumber: true },
         orderBy: { setNumber: 'asc' },
       })
-
-      const renumbered: Array<{ id: string; setNumber: number }> = []
-
-      for (let i = 0; i < remainingSets.length; i++) {
-        const expectedSetNumber = i + 1
-        if (remainingSets[i].setNumber !== expectedSetNumber) {
-          await tx.loggedSet.update({
-            where: { id: remainingSets[i].id },
-            data: { setNumber: expectedSetNumber },
-          })
-          renumbered.push({ id: remainingSets[i].id, setNumber: expectedSetNumber })
-        }
-      }
 
       return { renumbered }
     })

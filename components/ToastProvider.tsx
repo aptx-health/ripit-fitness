@@ -1,10 +1,10 @@
 'use client'
 
 import * as Toast from '@radix-ui/react-toast'
-import { AlertCircle, CheckCircle2, X } from 'lucide-react'
+import { AlertCircle, AlertTriangle, CheckCircle2, X } from 'lucide-react'
 import { createContext, type ReactNode, useContext, useState } from 'react'
 
-type ToastType = 'success' | 'error'
+type ToastType = 'success' | 'error' | 'warning'
 
 type ToastMessage = {
   id: string
@@ -16,6 +16,7 @@ type ToastMessage = {
 type ToastContextType = {
   success: (title: string, description?: string) => void
   error: (title: string, description?: string) => void
+  warning: (title: string, description?: string) => void
 }
 
 const ToastContext = createContext<ToastContextType | null>(null)
@@ -41,12 +42,16 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     addToast('error', title, description)
   }
 
+  const warning = (title: string, description?: string) => {
+    addToast('warning', title, description)
+  }
+
   const removeToast = (id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id))
   }
 
   return (
-    <ToastContext.Provider value={{ success, error }}>
+    <ToastContext.Provider value={{ success, error, warning }}>
       <Toast.Provider swipeDirection="right">
         {children}
         {toasts.map((toast) => (
@@ -59,12 +64,16 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             className={`fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 z-[100] sm:w-full sm:max-w-sm p-4 rounded-lg shadow-lg border animate-in slide-in-from-bottom-5 ${
               toast.type === 'success'
                 ? 'bg-success text-success-foreground border-success'
-                : 'bg-error text-error-foreground border-error'
+                : toast.type === 'warning'
+                  ? 'bg-warning text-warning-foreground border-warning'
+                  : 'bg-error text-error-foreground border-error'
             }`}
           >
             <div className="flex items-start gap-3">
               {toast.type === 'success' ? (
                 <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              ) : toast.type === 'warning' ? (
+                <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" />
               ) : (
                 <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
               )}

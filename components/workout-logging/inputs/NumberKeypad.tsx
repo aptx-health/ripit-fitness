@@ -1,7 +1,7 @@
 'use client'
 
 import { Delete } from 'lucide-react'
-import { useCallback, useEffect, useRef } from 'react'
+import { type ReactNode, useCallback, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/Button'
 
 interface NumberKeypadProps {
@@ -12,6 +12,12 @@ interface NumberKeypadProps {
   label: string
   unit?: string
   max?: number
+  /**
+   * Optional educational panel rendered above the LCD readout. When provided,
+   * the small uppercase `label` above the LCD is suppressed — the panel's own
+   * header carries surface identification.
+   */
+  educationPanel?: ReactNode
 }
 
 const KEYPAD_KEYS = [
@@ -29,6 +35,7 @@ export function NumberKeypad({
   label,
   unit,
   max = 999,
+  educationPanel,
 }: NumberKeypadProps) {
   const replaceOnNext = useRef(true)
 
@@ -78,13 +85,14 @@ export function NumberKeypad({
   }
 
   return (
-    <div
-      className="mt-auto"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
-    >
-      <span className="block text-sm text-muted-foreground mb-1.5 font-bold uppercase tracking-wider">
-        {label}
-      </span>
+    <div className="mt-auto">
+      {educationPanel ? (
+        <div className="mb-2">{educationPanel}</div>
+      ) : (
+        <span className="block text-sm text-muted-foreground mb-1.5 font-bold uppercase tracking-wider">
+          {label}
+        </span>
+      )}
 
       {/* Current value display - recessed LCD screen */}
       <div
@@ -131,8 +139,12 @@ export function NumberKeypad({
         ))}
       </div>
 
-      {/* Cancel + Done buttons */}
-      <div className="flex gap-px mt-2">
+      {/* Cancel + Done buttons — sticky so they're always reachable on
+          short viewports where the rest of the keypad scrolls. */}
+      <div
+        className="sticky bottom-0 bg-card flex gap-px pt-2"
+        style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 1rem)' }}
+      >
         <Button
           variant="secondary"
           doom

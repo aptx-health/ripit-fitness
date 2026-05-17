@@ -1,6 +1,6 @@
 'use client'
 
-import { X } from 'lucide-react'
+import { ChevronRight, X } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
 interface FollowAlongHeaderProps {
@@ -97,11 +97,15 @@ export default function FollowAlongHeader({
           <button
             type="button"
             onClick={handleBannerTap}
-            className={`w-full text-center text-sm text-secondary-foreground/80 pb-2 transition-opacity duration-500 ${
+            className={`w-full pb-2 px-4 text-sm text-secondary-foreground/90 hover:text-secondary-foreground hover:bg-black/5 active:bg-black/10 cursor-pointer transition-all duration-500 doom-focus-ring flex items-center justify-center gap-1.5 ${
               bannerFading ? 'opacity-0' : 'opacity-100'
             }`}
           >
-            Ready to track weights? Tap here to switch to logging.
+            <span>
+              Ready to track weights?{' '}
+              <span className="font-semibold underline underline-offset-2">Switch to logging</span>
+            </span>
+            <ChevronRight size={16} strokeWidth={2.5} aria-hidden="true" />
           </button>
         )}
       </div>

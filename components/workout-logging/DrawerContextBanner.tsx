@@ -23,6 +23,12 @@ type DrawerContextBannerProps = {
   totalSets?: number
   /** Omit to drop the "Prescribed: ..." line entirely. */
   prescribed?: string
+  /**
+   * True when an input drawer (weight/reps/intensity) is expanded. Suppresses
+   * the "Prescribed: ..." line to give the expanded input more breathing room
+   * — the logger's own surface carries the immediate context.
+   */
+  isInputExpanded?: boolean
 }
 
 export default function DrawerContextBanner({
@@ -30,6 +36,7 @@ export default function DrawerContextBanner({
   currentSet,
   totalSets,
   prescribed,
+  isInputExpanded = false,
 }: DrawerContextBannerProps) {
   const setLabel =
     typeof totalSets === 'number' ? `Set ${currentSet} of ${totalSets}` : `Set ${currentSet}`
@@ -40,12 +47,12 @@ export default function DrawerContextBanner({
         <h2 className="text-xl font-bold text-foreground doom-heading truncate">
           {exerciseName.toUpperCase()}
         </h2>
-        <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider tabular-nums shrink-0">
+        <span className="text-base text-muted-foreground font-bold uppercase tracking-wider tabular-nums shrink-0">
           {setLabel}
         </span>
       </div>
-      {prescribed && (
-        <p className="mt-1 text-sm text-muted-foreground tabular-nums">
+      {prescribed && !isInputExpanded && (
+        <p className="mt-1 text-base text-muted-foreground tabular-nums">
           Prescribed: <span className="text-foreground">{prescribed}</span>
         </p>
       )}
