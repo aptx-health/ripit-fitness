@@ -21,6 +21,7 @@ import { FetchError, fetchJsonWithRetry } from '@/lib/api/fetch'
 import { discardDraft } from '@/lib/api/workout-sets'
 import { clientLogger } from '@/lib/client-logger'
 import { useDraftWorkout } from '@/lib/contexts/DraftWorkoutContext'
+import { useUserSettings } from '@/hooks/useUserSettings'
 
 type NextWorkout = {
   workoutId: string
@@ -46,15 +47,22 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
   const router = useRouter()
   const toast = useToast()
   const { activeDraft, refreshDraft, clearDraft } = useDraftWorkout()
+  const { settings, refetch: refetchSettings } = useUserSettings()
+  const isFollowAlong = settings?.loggingMode === 'follow_along'
   const [nextWorkout, setNextWorkout] = useState<NextWorkout | null>(null)
   const [isLoadingNext, setIsLoadingNext] = useState(false)
   const [isStartingFreestyle, setIsStartingFreestyle] = useState(false)
+  const [showFreestyleHeadsUp, setShowFreestyleHeadsUp] = useState(false)
   const [isDiscardingDraft, setIsDiscardingDraft] = useState(false)
   const [confirmDiscard, setConfirmDiscard] = useState(false)
   const confirmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Reset the inline-confirm state whenever the sheet closes or the draft
   // clears, so the trash button never reopens still armed.
+  useEffect(() => {
+    if (!open) setShowFreestyleHeadsUp(false)
+  }, [open])
+
   useEffect(() => {
     if (!open || !activeDraft) {
       setConfirmDiscard(false)
@@ -74,8 +82,11 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
   // Re-fetch active draft each time the sheet opens — context only loads on
   // mount, so a draft saved elsewhere wouldn't otherwise show up here.
   useEffect(() => {
-    if (open) refreshDraft()
-  }, [open, refreshDraft])
+    if (open) {
+      refreshDraft()
+      void refetchSettings()
+    }
+  }, [open, refreshDraft, refetchSettings])
 
   useEffect(() => {
     if (!open || activeDraft) return
@@ -116,7 +127,7 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
     router.push(`/training?resume=${nextWorkout.workoutId}`)
   }, [nextWorkout, onOpenChange, router])
 
-  const handleStartFreestyle = useCallback(async () => {
+  const startFreestyle = useCallback(async () => {
     if (isStartingFreestyle) return
     setIsStartingFreestyle(true)
     try {
@@ -152,6 +163,15 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
       setIsStartingFreestyle(false)
     }
   }, [isStartingFreestyle, onOpenChange, router, refreshDraft, toast])
+
+  const handleFreestyleClick = useCallback(() => {
+    if (isStartingFreestyle) return
+    if (isFollowAlong) {
+      setShowFreestyleHeadsUp(true)
+      return
+    }
+    void startFreestyle()
+  }, [isStartingFreestyle, isFollowAlong, startFreestyle])
 
   const handleDiscardDraft = useCallback(async () => {
     if (!activeDraft || isDiscardingDraft) return
@@ -304,6 +324,43 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
                   Continue or discard your draft to unlock other actions
                 </div>
               </>
+            ) : showFreestyleHeadsUp ? (
+              <div className="px-5 pt-4 pb-5">
+                <h2 className="doom-heading text-foreground text-xl leading-tight">
+                  Freestyle is for logging
+                </h2>
+                <p className="text-base text-muted-foreground mt-2.5 leading-relaxed">
+                  It's a blank canvas where you pick exercises and log every
+                  set as you go. Worth a try if you're curious.
+                </p>
+                <p className="text-sm text-muted-foreground mt-3">
+                  Prefer logging?{' '}
+                  <span className="font-semibold text-foreground">
+                    Settings → Workout Mode
+                  </span>
+                  .
+                </p>
+                <div className="flex items-stretch gap-2 mt-5">
+                  <button
+                    type="button"
+                    onClick={() => setShowFreestyleHeadsUp(false)}
+                    className="px-5 py-3 border border-border bg-muted hover:bg-muted/70 text-foreground text-base font-bold uppercase tracking-wider doom-focus-ring transition-colors"
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowFreestyleHeadsUp(false)
+                      void startFreestyle()
+                    }}
+                    disabled={isStartingFreestyle}
+                    className="flex-1 doom-button-3d px-5 py-3 bg-primary text-primary-foreground hover:bg-primary-hover text-base font-bold uppercase tracking-wider doom-focus-ring disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isStartingFreestyle ? 'Starting…' : 'Try it'}
+                  </button>
+                </div>
+              </div>
             ) : (
               <div className="divide-y divide-border">
                 <ActionRow
@@ -320,7 +377,7 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
                   subtitle={
                     isStartingFreestyle ? 'Starting…' : 'Log sets as you go'
                   }
-                  onClick={!isStartingFreestyle ? handleStartFreestyle : undefined}
+                  onClick={!isStartingFreestyle ? handleFreestyleClick : undefined}
                   disabled={isStartingFreestyle}
                 />
                 <ActionRow
