@@ -46,7 +46,7 @@ export class TestDatabase {
 
       // Push schema to get fresh test database (faster than migrations for testing)
       console.log('🔄 Pushing Prisma schema to test database...')
-      execSync('npx prisma db push --force-reset', {
+      execSync('npx prisma db push --force-reset --skip-generate', {
         stdio: 'pipe',
         env: {
           ...process.env,

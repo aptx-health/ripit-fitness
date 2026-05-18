@@ -7,7 +7,7 @@ import { type Job, Queue, QueueEvents, Worker } from 'bullmq';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { cloneCommunityProgram } from '@/lib/community/cloning';
 import { publishProgramToCommunity } from '@/lib/community/publishing';
-import type { ProgramCloneJob } from '@/lib/queue/clone-jobs';
+import { closeCloneJobsQueue, type ProgramCloneJob } from '@/lib/queue/clone-jobs';
 import { getTestDatabase } from '@/lib/test/database';
 import {
   createTestPrescribedSets,
@@ -79,6 +79,7 @@ describe('Program Cloning via BullMQ Worker', () => {
     await testWorker.close();
     await queueEvents.close();
     await queue.close();
+    await closeCloneJobsQueue();
     await stopRedisContainer();
   }, 10000);
 
