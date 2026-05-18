@@ -23,7 +23,6 @@ interface Card {
 interface ModeContent {
   tint: 'primary' | 'secondary'
   heading: string
-  intro: string
   cards: Card[]
 }
 
@@ -31,23 +30,21 @@ const CONTENT: Record<Mode, ModeContent> = {
   weight: {
     tint: 'primary',
     heading: 'RECORDING WEIGHT',
-    intro: 'Enter the total load you lifted this set.',
     cards: [
-      { label: 'BARBELL', description: 'Total weight, including the bar (45 lb)' },
+      { label: 'BARBELL', description: 'Include the bar (45 lb)' },
       { label: 'DUMBBELLS', description: 'Per hand, not the pair' },
-      { label: 'BODYWEIGHT', description: '0 unless you added weight with a vest or belt' },
-      { label: 'MACHINES', description: 'Read the weight on the stack (often 10 lb per plate)' },
+      { label: 'BODYWEIGHT', description: '0 unless using a vest/belt' },
+      { label: 'MACHINES', description: 'Weight on the stack (~10 lb/plate)' },
     ],
   },
   reps: {
     tint: 'secondary',
     heading: 'COUNTING REPS',
-    intro: 'A rep is one full movement, start to finish.',
     cards: [
-      { label: 'ONE SIDE', description: "Log one side's count, not the total" },
+      { label: 'PER SIDE', description: 'Count one side, not both combined' },
       { label: 'BREATHER MID-SET', description: "Same set if you didn't rack the weight" },
-      { label: 'WOBBLY REP', description: 'Counts if you finished the full movement' },
-      { label: 'PARTIAL REP', description: 'Usually not counted toward your set' },
+      { label: 'WOBBLY REP', description: 'Counts if you finished it' },
+      { label: 'PARTIAL REP', description: "Usually doesn't count" },
     ],
   },
 }
@@ -72,7 +69,6 @@ export function LoggingEducationPanel({ mode }: LoggingEducationPanelProps) {
         <div className={`text-base font-bold uppercase tracking-wider ${labelColorClass}`}>
           {content.heading}
         </div>
-        <p className="mt-0.5 text-base text-foreground">{content.intro}</p>
       </TipAnnotation>
 
       <div className="mt-2 grid grid-cols-2 gap-2">

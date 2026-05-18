@@ -42,7 +42,7 @@ export default function DrawerContextBanner({
     typeof totalSets === 'number' ? `Set ${currentSet} of ${totalSets}` : `Set ${currentSet}`
 
   return (
-    <div className="px-4 pt-3 pb-2 border-b border-border/60">
+    <div className="px-4 pt-2 pb-2 border-b border-border/60">
       <div className="flex items-baseline justify-between gap-3">
         <h2 className="text-xl font-bold text-foreground doom-heading truncate">
           {exerciseName.toUpperCase()}

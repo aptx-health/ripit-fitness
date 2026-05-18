@@ -92,7 +92,7 @@ export function IntensitySelector({
               key={preset.value}
               type="button"
               onClick={() => handleSelect(preset)}
-              className={`w-full px-3 py-3 flex items-center gap-3
+              className={`w-full px-3 py-2 flex items-center gap-3
                 transition-colors text-left
                 active:bg-primary active:text-primary-foreground
                 ${isSelected
