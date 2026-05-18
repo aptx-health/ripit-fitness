@@ -2255,6 +2255,59 @@ body > [data-training-widget] {
 }
 
 /* ============================================
+   PROTOTYPE: stamped-readout (SNES-menu / field-guide hybrid)
+   Theme-aware. Reads as a number stamped into the warm paper:
+   sandy 2px frame matching the canonical Input spec, plus a
+   chiseled inset that gives the well depth without becoming a
+   literal hardware bezel. Digits use Geist Mono (per DESIGN.md
+   §Typography — reserved for tabular numerics).
+   Built for visual evaluation; promote to a documented primitive
+   in DESIGN.md if it earns its place.
+   ============================================ */
+.readout-stamped {
+  background-color: var(--input);
+  color: var(--foreground);
+  border: 2px solid var(--border);
+  /* Chiseled inset: dark top/left hairline + light bottom/right
+     hairline produces the SNES-menu recessed-plate read. The soft
+     top-edge darkening adds a hint of debossed-into-paper depth
+     without an ambient drop-shadow on the outside (Flat-Until-State). */
+  box-shadow:
+    inset 1px 1px 0 rgba(0, 0, 0, 0.30),
+    inset -1px -1px 0 rgba(255, 255, 255, 0.20),
+    inset 0 3px 5px -2px rgba(0, 0, 0, 0.22);
+}
+
+.readout-stamped-digit {
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Raised counterpart to .readout-stamped — same warm palette and sandy
+   frame, but the chisel is inverted (light top-left, dark bottom-right)
+   so the surface reads as a pressable SNES-menu plate rather than a
+   recessed display. Use on buttons that sit beside .readout-stamped
+   wells. Press feedback collapses the highlight on :active. */
+.button-stamped {
+  background-color: var(--muted);
+  color: var(--foreground);
+  border: 2px solid var(--border);
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.30),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.22),
+    inset 0 -3px 5px -2px rgba(0, 0, 0, 0.15);
+  transition: box-shadow 75ms ease, transform 75ms ease;
+}
+.button-stamped:active:not(:disabled) {
+  box-shadow:
+    inset 1px 1px 0 rgba(0, 0, 0, 0.22),
+    inset -1px -1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 3px 5px -2px rgba(0, 0, 0, 0.20);
+  transform: translateY(1px);
+}
+
+
+/* ============================================
    LOADING ANIMATIONS
    ============================================ */
 

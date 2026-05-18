@@ -71,6 +71,9 @@ interface ExerciseDisplayTabsProps {
   totalSets?: number
   /** Pre-formatted prescription summary for the current set. Omit to drop the line. */
   prescribedSummary?: string
+  /** Exercise-scoped actions (edit / swap / delete) rendered as a gear menu
+      next to the exercise name in the context banner. Omit to hide. */
+  menuActions?: import('./ExerciseQuickActionsMenu').QuickAction[]
 }
 
 function ExerciseTabTitle({ exercise }: { exercise: Exercise }) {
@@ -118,6 +121,7 @@ export default function ExerciseDisplayTabs({
   currentSetNumber,
   totalSets,
   prescribedSummary,
+  menuActions,
 }: ExerciseDisplayTabsProps) {
   const hasNotes = !!exercise.notes
   const [activeTab, setActiveTab] = useState('log-sets')
@@ -161,6 +165,7 @@ export default function ExerciseDisplayTabs({
           totalSets={totalSets}
           prescribed={prescribedSummary}
           isInputExpanded={isInputExpanded}
+          menuActions={menuActions}
         />
         <div className="px-4 pt-4 flex-1 flex flex-col gap-2">
           {loggingForm}

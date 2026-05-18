@@ -1,11 +1,8 @@
 'use client'
 
-import { Check, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import { useMemo } from 'react'
 import { useWorkoutTimer } from '@/hooks/useWorkoutTimer'
-import ExerciseQuickActionsMenu, {
-  type QuickAction,
-} from './ExerciseQuickActionsMenu'
 
 interface ExerciseLoggingHeaderProps {
   currentExerciseIndex: number
@@ -14,7 +11,6 @@ interface ExerciseLoggingHeaderProps {
   startedAt?: string | null
   onCompleteWorkout: () => void
   onClose: () => void
-  menuActions: QuickAction[]
   modeToggle?: React.ReactNode
 }
 
@@ -60,7 +56,6 @@ export default function ExerciseLoggingHeader({
   startedAt,
   onCompleteWorkout,
   onClose,
-  menuActions,
   modeToggle,
 }: ExerciseLoggingHeaderProps) {
   const initialElapsed = useMemo(() => {
@@ -75,7 +70,7 @@ export default function ExerciseLoggingHeader({
       className="bg-secondary text-secondary-foreground flex-shrink-0"
       style={{ paddingTop: 'env(safe-area-inset-top)', boxShadow: 'inset 0 -1px 0 rgba(0,0,0,0.25)' }}
     >
-      <div className="px-4 py-3 grid items-center" style={{ gridTemplateColumns: '1fr auto 1fr' }}>
+      <div className="px-3 py-2.5 grid items-center gap-3" style={{ gridTemplateColumns: '1fr auto 1fr' }}>
         {/* Left: progress indicator */}
         <div className="flex items-center">
           <ProgressIndicator current={currentExerciseIndex} total={totalExercises} />
@@ -89,26 +84,26 @@ export default function ExerciseLoggingHeader({
           {elapsedTime}
         </span>
 
-        {/* Right: action icons */}
-        <div className="flex items-center justify-end gap-3.5">
-          {menuActions.length > 0 && (
-            <ExerciseQuickActionsMenu
-              actions={menuActions}
-              triggerClassName="text-accent hover:text-accent/80"
-            />
-          )}
+        {/* Right: FINISH pill (primary CTA) + boxed X escape hatch */}
+        <div className="flex items-center justify-end gap-2">
           <button
             type="button"
             onClick={onCompleteWorkout}
-            className="p-1 text-primary hover:text-primary/80 transition-colors doom-focus-ring"
-            aria-label="Complete workout"
+            className="h-9 px-3 bg-primary text-primary-foreground text-sm font-bold uppercase tracking-widest hover:bg-primary-hover transition-colors doom-focus-ring"
+            style={{
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.30)',
+            }}
           >
-            <Check size={18} strokeWidth={2.5} />
+            FINISH
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="p-1 text-secondary-foreground/80 hover:text-secondary-foreground transition-colors doom-focus-ring"
+            className="h-9 w-9 flex items-center justify-center text-secondary-foreground/80 hover:text-secondary-foreground transition-colors doom-focus-ring"
+            style={{
+              backgroundColor: 'rgba(0,0,0,0.30)',
+              boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.05)',
+            }}
             aria-label="Exit workout"
           >
             <X size={18} strokeWidth={2.5} />

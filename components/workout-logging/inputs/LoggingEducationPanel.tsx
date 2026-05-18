@@ -1,6 +1,7 @@
 'use client'
 
-import { Dumbbell, Hash } from 'lucide-react'
+import { ChevronRight, Dumbbell, Hash } from 'lucide-react'
+import { useState } from 'react'
 import { TipAnnotation } from '@/components/ui/TipAnnotation'
 
 /**
@@ -23,7 +24,6 @@ interface Card {
 interface ModeContent {
   tint: 'primary' | 'secondary'
   heading: string
-  intro: string
   cards: Card[]
 }
 
@@ -31,23 +31,22 @@ const CONTENT: Record<Mode, ModeContent> = {
   weight: {
     tint: 'primary',
     heading: 'RECORDING WEIGHT',
-    intro: 'Enter the total load you lifted this set.',
     cards: [
-      { label: 'BARBELL', description: 'Total weight, including the bar (45 lb)' },
-      { label: 'DUMBBELLS', description: 'Per hand, not the pair' },
-      { label: 'BODYWEIGHT', description: '0 unless you added weight with a vest or belt' },
-      { label: 'MACHINES', description: 'Read the weight on the stack (often 10 lb per plate)' },
+      { label: 'MACHINES', description: 'Read the number off the stack — plates are usually 10 lb / 5 kg each' },
+      { label: 'DUMBBELLS', description: 'Log the weight of one dumbbell, not the pair combined' },
+      { label: 'BODYWEIGHT', description: 'Leave at 0 unless you added a weight vest or belt' },
+      { label: 'BARBELL', description: "Include the bar's weight (usually 45 lb / 20 kg)" },
+      { label: 'OTHER EQUIPMENT', description: "Smith-machine bar is ~15 lb, EZ-bar is ~25 lb — add them to your loaded plates" },
     ],
   },
   reps: {
     tint: 'secondary',
     heading: 'COUNTING REPS',
-    intro: 'A rep is one full movement, start to finish.',
     cards: [
-      { label: 'ONE SIDE', description: "Log one side's count, not the total" },
-      { label: 'BREATHER MID-SET', description: "Same set if you didn't rack the weight" },
-      { label: 'WOBBLY REP', description: 'Counts if you finished the full movement' },
-      { label: 'PARTIAL REP', description: 'Usually not counted toward your set' },
+      { label: 'PER SIDE', description: 'For single-arm or single-leg work (unilateral), log the count of one side, not all combined' },
+      { label: 'BREATHER MID-SET', description: "If you paused briefly but didn't rack the weight, it still counts as one set" },
+      { label: 'WOBBLY REP', description: 'A shaky rep counts as long as you completed the full range of motion — careful to watch your form!' },
+      { label: 'PARTIAL REP', description: "Half reps usually don't count toward your set total" },
     ],
   },
 }
@@ -66,30 +65,55 @@ export function LoggingEducationPanel({ mode }: LoggingEducationPanelProps) {
       <Hash size={16} strokeWidth={2.2} aria-hidden="true" />
     )
 
-  return (
-    <div>
-      <TipAnnotation tint={content.tint} icon={icon} className="py-2 px-3">
-        <div className={`text-base font-bold uppercase tracking-wider ${labelColorClass}`}>
-          {content.heading}
-        </div>
-        <p className="mt-0.5 text-base text-foreground">{content.intro}</p>
-      </TipAnnotation>
+  const [index, setIndex] = useState(0)
+  const cards = content.cards
+  const current = cards[index]
+  const hasMultiple = cards.length > 1
+  const goNext = () => setIndex((i) => (i + 1) % cards.length)
 
-      <div className="mt-2 grid grid-cols-2 gap-2">
-        {content.cards.map((card) => (
-          <div
-            key={card.label}
-            className="border border-border bg-card px-3 py-2"
-          >
-            <div
-              className={`text-sm font-bold uppercase tracking-wider ${labelColorClass}`}
-            >
-              {card.label}
-            </div>
-            <p className="mt-0.5 text-sm text-foreground leading-snug">{card.description}</p>
-          </div>
-        ))}
-      </div>
+  // Mirrors the carousel arrow on <MessageCard> — a right-edge chevron
+  // with a soft gradient fade. No auto-advance; the user steps through.
+  // The carousel body is hidden below 700px viewport height; gate the
+  // overlay (chevron + counter) on the same query so we don't leave
+  // stray controls when only the heading remains.
+  const carouselOverlay = hasMultiple ? (
+    <div className="[@media(max-height:700px)]:hidden">
+      <span className="absolute bottom-1.5 left-3.5 text-xs font-semibold text-muted-foreground/70 tabular-nums">
+        {index + 1}/{cards.length}
+      </span>
+      <button
+        type="button"
+        onClick={goNext}
+        className="absolute right-0 top-0 bottom-0 w-10 flex items-center justify-end pr-2 doom-focus-ring"
+        style={{
+          background:
+            'linear-gradient(to right, transparent, color-mix(in srgb, var(--muted) 85%, transparent) 40%)',
+        }}
+        aria-label="Next tip"
+      >
+        <ChevronRight size={18} className="text-muted-foreground/70" />
+      </button>
     </div>
+  ) : null
+
+  return (
+    <TipAnnotation
+      tint={content.tint}
+      icon={icon}
+      overlay={carouselOverlay}
+      className="py-2 px-3"
+    >
+      <div className={`text-base font-bold uppercase tracking-wider ${labelColorClass}`}>
+        {content.heading}
+      </div>
+      <div className="mt-2 min-h-[4.5rem] pr-10 [@media(max-height:700px)]:hidden">
+        <div key={current.label} className="animate-in fade-in duration-200">
+          <span className={`text-lg font-bold uppercase tracking-wider ${labelColorClass}`}>
+            {current.label}:
+          </span>
+          <span className="text-lg text-foreground leading-snug"> {current.description}</span>
+        </div>
+      </div>
+    </TipAnnotation>
   )
 }

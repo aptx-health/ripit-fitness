@@ -46,14 +46,11 @@ export function WeightKeypad({
       <button
         type="button"
         onClick={onExpand}
-        className="w-full h-12 px-4 flex items-center justify-center
-          text-2xl font-bold text-foreground tabular-nums
-          hover:border-primary
-          transition-all duration-75"
-        style={{ backgroundColor: 'rgba(0,0,0,0.3)', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.50), inset 0 0 0 1px rgba(254,243,199,0.06)' }}
+        className="readout-stamped w-full h-12 px-4 flex items-center justify-center
+          text-2xl font-bold transition-all duration-75"
       >
-        {value || '0'}
-        <span className="text-sm font-semibold text-muted-foreground ml-2">
+        <span className="readout-stamped-digit">{value || '0'}</span>
+        <span className="text-sm font-semibold ml-2 readout-stamped-digit opacity-70">
           {weightUnit}
         </span>
       </button>

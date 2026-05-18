@@ -85,35 +85,34 @@ export function NumberKeypad({
   }
 
   return (
-    <div className="mt-auto">
+    <div className="flex flex-1 flex-col justify-end min-h-0">
+      {/* Content is bottom-anchored (thumb reach). Education panel takes its
+          natural height and sits just above the LCD; on tight viewports
+          (iPhone SE, mobile browser w/ URL bar) it shrinks and scrolls
+          internally so the LCD, keypad, and action footer stay visible. */}
       {educationPanel ? (
-        <div className="mb-2">{educationPanel}</div>
+        <div className="min-h-0 overflow-y-auto mb-2">{educationPanel}</div>
       ) : (
-        <span className="block text-sm text-muted-foreground mb-1.5 font-bold uppercase tracking-wider">
+        <span className="block text-sm text-muted-foreground mb-1.5 font-bold uppercase tracking-wider mt-auto">
           {label}
         </span>
       )}
 
-      {/* Current value display - recessed LCD screen */}
+      {/* Current value display — stamped readout (prototype) */}
       <div
-        className="w-full h-14 px-4 flex items-center justify-center
-          border-2 border-primary
-          text-3xl font-bold text-foreground tabular-nums bg-input"
-        style={{
-          boxShadow:
-            'inset 0 2px 3px rgba(58, 40, 23, 0.18), inset 0 0 0 1px rgba(255,255,255,0.4), 0 0 12px rgba(var(--primary-rgb), 0.25)',
-        }}
+        className="readout-stamped flex-shrink-0 w-full h-14 px-4 flex items-center justify-center
+          text-3xl font-bold"
       >
-        {value || '0'}
+        <span className="readout-stamped-digit">{value || '0'}</span>
         {unit && (
-          <span className="text-base font-semibold text-muted-foreground ml-2">
+          <span className="text-base font-semibold ml-2 readout-stamped-digit opacity-70">
             {unit}
           </span>
         )}
       </div>
 
       {/* Number keypad grid - tactile molded keys on hairline rules */}
-      <div className="grid grid-cols-3 gap-px mt-2 bg-border">
+      <div className="flex-shrink-0 grid grid-cols-3 gap-px mt-2 bg-border">
         {KEYPAD_KEYS.map((key) => (
           <button
             key={key}
@@ -139,10 +138,11 @@ export function NumberKeypad({
         ))}
       </div>
 
-      {/* Cancel + Done buttons — sticky so they're always reachable on
-          short viewports where the rest of the keypad scrolls. */}
+      {/* Cancel + Done buttons — pinned via flex layout so they're always
+          visible regardless of viewport height. Education panel above
+          scrolls internally to absorb any overflow. */}
       <div
-        className="sticky bottom-0 bg-card flex gap-px pt-2"
+        className="flex-shrink-0 bg-card flex gap-px pt-2"
         style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 1rem)' }}
       >
         <Button
