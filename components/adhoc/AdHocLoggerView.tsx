@@ -608,6 +608,10 @@ export default function AdHocLoggerView({
   )
 
   const swipeHandlers = useSwipeNavigation({
+    // Disable cross-exercise swipe while an input drawer is open — the
+    // carousel chevron and keypad are touch-heavy, swiping there would
+    // unintentionally jump to the next/prev exercise.
+    enabled: expandedInput === null,
     onSwipeLeft: () => {
       if (currentIndex < exercises.length - 1) {
         triggerSlide('left', () => goToExercise(currentIndex + 1))

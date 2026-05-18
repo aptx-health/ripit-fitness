@@ -355,6 +355,10 @@ export default function ExerciseLoggingModal({
   }, [])
 
   const swipeHandlers = useSwipeNavigation({
+    // Disable cross-exercise swipe while an input drawer is open — the
+    // carousel chevron and keypad are touch-heavy, swiping there would
+    // unintentionally jump to the next/prev exercise.
+    enabled: expandedInput === null,
     onSwipeLeft: () => {
       if (currentIndex < totalExercises - 1) {
         triggerSlide('left', handleNextExercise)

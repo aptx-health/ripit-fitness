@@ -32,20 +32,21 @@ const CONTENT: Record<Mode, ModeContent> = {
     tint: 'primary',
     heading: 'RECORDING WEIGHT',
     cards: [
-      { label: 'BARBELL', description: 'Include the bar (45 lb)' },
-      { label: 'DUMBBELLS', description: 'Per hand, not the pair' },
-      { label: 'BODYWEIGHT', description: '0 unless using a vest/belt' },
-      { label: 'MACHINES', description: 'Weight on the stack (~10 lb/plate)' },
+      { label: 'MACHINES', description: 'Read the number off the stack — plates are usually 10 lb / 5 kg each' },
+      { label: 'DUMBBELLS', description: 'Log the weight of one dumbbell, not the pair combined' },
+      { label: 'BODYWEIGHT', description: 'Leave at 0 unless you added a weight vest or belt' },
+      { label: 'BARBELL', description: "Include the bar's weight (usually 45 lb / 20 kg)" },
+      { label: 'OTHER EQUIPMENT', description: "Smith-machine bar is ~15 lb, EZ-bar is ~25 lb — add them to your loaded plates" },
     ],
   },
   reps: {
     tint: 'secondary',
     heading: 'COUNTING REPS',
     cards: [
-      { label: 'PER SIDE', description: 'Count one side, not both combined' },
-      { label: 'BREATHER MID-SET', description: "Same set if you didn't rack the weight" },
-      { label: 'WOBBLY REP', description: 'Counts if you finished it' },
-      { label: 'PARTIAL REP', description: "Usually doesn't count" },
+      { label: 'PER SIDE', description: 'For single-arm or single-leg work (unilateral), log the count of one side, not all combined' },
+      { label: 'BREATHER MID-SET', description: "If you paused briefly but didn't rack the weight, it still counts as one set" },
+      { label: 'WOBBLY REP', description: 'A shaky rep counts as long as you completed the full range of motion — careful to watch your form!' },
+      { label: 'PARTIAL REP', description: "Half reps usually don't count toward your set total" },
     ],
   },
 }
@@ -72,9 +73,12 @@ export function LoggingEducationPanel({ mode }: LoggingEducationPanelProps) {
 
   // Mirrors the carousel arrow on <MessageCard> — a right-edge chevron
   // with a soft gradient fade. No auto-advance; the user steps through.
+  // The carousel body is hidden below 700px viewport height; gate the
+  // overlay (chevron + counter) on the same query so we don't leave
+  // stray controls when only the heading remains.
   const carouselOverlay = hasMultiple ? (
-    <>
-      <span className="absolute bottom-1.5 left-3.5 text-[10px] text-muted-foreground/50 tabular-nums">
+    <div className="[@media(max-height:700px)]:hidden">
+      <span className="absolute bottom-1.5 left-3.5 text-xs font-semibold text-muted-foreground/70 tabular-nums">
         {index + 1}/{cards.length}
       </span>
       <button
@@ -89,7 +93,7 @@ export function LoggingEducationPanel({ mode }: LoggingEducationPanelProps) {
       >
         <ChevronRight size={18} className="text-muted-foreground/70" />
       </button>
-    </>
+    </div>
   ) : null
 
   return (
@@ -102,12 +106,12 @@ export function LoggingEducationPanel({ mode }: LoggingEducationPanelProps) {
       <div className={`text-base font-bold uppercase tracking-wider ${labelColorClass}`}>
         {content.heading}
       </div>
-      <div className="mt-2 min-h-[3.25rem] pr-10 [@media(max-height:700px)]:hidden">
+      <div className="mt-2 min-h-[4.5rem] pr-10 [@media(max-height:700px)]:hidden">
         <div key={current.label} className="animate-in fade-in duration-200">
-          <span className={`text-base font-bold uppercase tracking-wider ${labelColorClass}`}>
+          <span className={`text-lg font-bold uppercase tracking-wider ${labelColorClass}`}>
             {current.label}:
           </span>
-          <span className="text-base text-muted-foreground"> {current.description}</span>
+          <span className="text-lg text-foreground leading-snug"> {current.description}</span>
         </div>
       </div>
     </TipAnnotation>
