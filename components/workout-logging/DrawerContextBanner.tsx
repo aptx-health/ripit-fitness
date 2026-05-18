@@ -58,11 +58,20 @@ export default function DrawerContextBanner({
             </p>
           )}
         </div>
-        <div className="flex flex-col items-end gap-0.5 shrink-0">
+        {/* Right column: stacked when "Set N of M" needs the width
+            (prescribed mode); horizontal in adhoc mode where the set
+            label is just "Set N" and there's room for Edit beside it. */}
+        <div
+          className={`flex shrink-0 ${
+            typeof totalSets === 'number'
+              ? 'flex-col items-end gap-0.5'
+              : 'items-center gap-3'
+          }`}
+        >
           <span className="text-base text-muted-foreground font-bold uppercase tracking-wider tabular-nums">
             {setLabel}
           </span>
-          {menuActions && menuActions.length > 0 && (
+          {menuActions && menuActions.length > 0 && !isInputExpanded && (
             <ExerciseQuickActionsMenu
               actions={menuActions}
               triggerIcon={Settings}

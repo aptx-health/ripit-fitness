@@ -1,6 +1,7 @@
 'use client'
 
-import { Dumbbell, Hash } from 'lucide-react'
+import { ChevronRight, Dumbbell, Hash } from 'lucide-react'
+import { useState } from 'react'
 import { TipAnnotation } from '@/components/ui/TipAnnotation'
 
 /**
@@ -63,32 +64,52 @@ export function LoggingEducationPanel({ mode }: LoggingEducationPanelProps) {
       <Hash size={16} strokeWidth={2.2} aria-hidden="true" />
     )
 
-  return (
-    <div>
-      <TipAnnotation tint={content.tint} icon={icon} className="py-2 px-3">
-        <div className={`text-base font-bold uppercase tracking-wider ${labelColorClass}`}>
-          {content.heading}
-        </div>
-      </TipAnnotation>
+  const [index, setIndex] = useState(0)
+  const cards = content.cards
+  const current = cards[index]
+  const hasMultiple = cards.length > 1
+  const goNext = () => setIndex((i) => (i + 1) % cards.length)
 
-      {/* On short viewports (iPhone SE, mobile browser w/ URL bar) the
-          cards are hidden so the keypad stays reachable — the heading
-          above still identifies the mode. */}
-      <div className="mt-2 grid grid-cols-2 gap-2 [@media(max-height:700px)]:hidden">
-        {content.cards.map((card) => (
-          <div
-            key={card.label}
-            className="border border-border bg-card px-3 py-2"
-          >
-            <div
-              className={`text-sm font-bold uppercase tracking-wider ${labelColorClass}`}
-            >
-              {card.label}
-            </div>
-            <p className="mt-0.5 text-sm text-foreground leading-snug">{card.description}</p>
-          </div>
-        ))}
+  // Mirrors the carousel arrow on <MessageCard> — a right-edge chevron
+  // with a soft gradient fade. No auto-advance; the user steps through.
+  const carouselOverlay = hasMultiple ? (
+    <>
+      <span className="absolute bottom-1.5 left-3.5 text-[10px] text-muted-foreground/50 tabular-nums">
+        {index + 1}/{cards.length}
+      </span>
+      <button
+        type="button"
+        onClick={goNext}
+        className="absolute right-0 top-0 bottom-0 w-10 flex items-center justify-end pr-2 doom-focus-ring"
+        style={{
+          background:
+            'linear-gradient(to right, transparent, color-mix(in srgb, var(--muted) 85%, transparent) 40%)',
+        }}
+        aria-label="Next tip"
+      >
+        <ChevronRight size={18} className="text-muted-foreground/70" />
+      </button>
+    </>
+  ) : null
+
+  return (
+    <TipAnnotation
+      tint={content.tint}
+      icon={icon}
+      overlay={carouselOverlay}
+      className="py-2 px-3"
+    >
+      <div className={`text-base font-bold uppercase tracking-wider ${labelColorClass}`}>
+        {content.heading}
       </div>
-    </div>
+      <div className="mt-2 min-h-[3.25rem] pr-10 [@media(max-height:700px)]:hidden">
+        <div key={current.label} className="animate-in fade-in duration-200">
+          <span className={`text-base font-bold uppercase tracking-wider ${labelColorClass}`}>
+            {current.label}:
+          </span>
+          <span className="text-base text-muted-foreground"> {current.description}</span>
+        </div>
+      </div>
+    </TipAnnotation>
   )
 }

@@ -20,8 +20,8 @@ import { useThemeMode } from '@/hooks/useThemeMode'
 
 interface TipAnnotationProps {
   children: ReactNode
-  /** Custom icon. Defaults to <Lightbulb size={16} />. Ignored when variant="first-run" (the frog ornament replaces the icon). */
-  icon?: ReactNode
+  /** Custom icon. Defaults to <Lightbulb size={16} />. Pass `false` to omit the icon column entirely (e.g. when the caller renders its own centered icon inline). Ignored when variant="first-run" (the frog ornament replaces the icon). */
+  icon?: ReactNode | false
   /**
    * - `default`: dashed border + icon + content. Use for everyday tips.
    * - `first-run`: adds a TIP sticker overlap, swaps icon for a small inline frog ornament,
@@ -78,7 +78,7 @@ export function TipAnnotation({
       {isFirstRun && <TipSticker />}
       {isFirstRun ? (
         <StillFrog className="shrink-0 mt-[1px]" />
-      ) : (
+      ) : icon === false ? null : (
         <span className={`shrink-0 mt-[3px] ${iconColorClass} inline-flex`}>
           {icon ?? <Lightbulb size={16} strokeWidth={1.8} aria-hidden="true" />}
         </span>
