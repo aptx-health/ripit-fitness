@@ -355,6 +355,10 @@ export default function ExerciseLoggingModal({
   }, [])
 
   const swipeHandlers = useSwipeNavigation({
+    // Disable cross-exercise swipe while an input drawer is open — the
+    // carousel chevron and keypad are touch-heavy, swiping there would
+    // unintentionally jump to the next/prev exercise.
+    enabled: expandedInput === null,
     onSwipeLeft: () => {
       if (currentIndex < totalExercises - 1) {
         triggerSlide('left', handleNextExercise)
@@ -557,19 +561,6 @@ export default function ExerciseLoggingModal({
               startedAt={startedAt}
               onCompleteWorkout={() => setIsConfirming(true)}
               onClose={handleExitWorkout}
-              menuActions={[
-                { label: 'Edit this exercise', icon: Pencil, onClick: handleEditExercise },
-                { label: 'Add an exercise', icon: Plus, onClick: handleAddExercise },
-                { label: 'Swap this exercise', icon: RefreshCw, onClick: handleReplaceExercise },
-                {
-                  label: 'Delete this exercise',
-                  icon: Trash2,
-                  onClick: handleDeleteExercise,
-                  variant: 'danger',
-                  requiresConfirmation: true,
-                  confirmationMessage: `Are you sure you want to delete "${currentExercise?.name || 'this exercise'}"?`,
-                },
-              ] satisfies QuickAction[]}
             />
           )}
 
@@ -649,6 +640,19 @@ export default function ExerciseLoggingModal({
                   currentSetNumber={nextSetNumber}
                   totalSets={totalPrescribedSets}
                   prescribedSummary={prescribedSummary}
+                  menuActions={[
+                    { label: 'Edit this exercise', icon: Pencil, onClick: handleEditExercise },
+                    { label: 'Add an exercise', icon: Plus, onClick: handleAddExercise },
+                    { label: 'Swap this exercise', icon: RefreshCw, onClick: handleReplaceExercise },
+                    {
+                      label: 'Delete this exercise',
+                      icon: Trash2,
+                      onClick: handleDeleteExercise,
+                      variant: 'danger',
+                      requiresConfirmation: true,
+                      confirmationMessage: `Are you sure you want to delete "${currentExercise?.name || 'this exercise'}"?`,
+                    },
+                  ] satisfies QuickAction[]}
                   loggingForm={
                     <SetLoggingForm
                       prescribedSet={prescribedSet}

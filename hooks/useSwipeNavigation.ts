@@ -7,6 +7,8 @@ interface SwipeOptions {
   onSwipeRight?: () => void
   minDistance?: number
   maxVerticalRatio?: number
+  /** When false, the returned handlers no-op. Default true. */
+  enabled?: boolean
 }
 
 const DEFAULT_MIN_DISTANCE = 50
@@ -17,16 +19,22 @@ export function useSwipeNavigation({
   onSwipeRight,
   minDistance = DEFAULT_MIN_DISTANCE,
   maxVerticalRatio = DEFAULT_MAX_VERTICAL_RATIO,
+  enabled = true,
 }: SwipeOptions) {
   const touchStart = useRef<{ x: number; y: number } | null>(null)
 
   const onTouchStart = useCallback((e: React.TouchEvent) => {
+    if (!enabled) {
+      touchStart.current = null
+      return
+    }
     const touch = e.touches[0]
     touchStart.current = { x: touch.clientX, y: touch.clientY }
-  }, [])
+  }, [enabled])
 
   const onTouchEnd = useCallback(
     (e: React.TouchEvent) => {
+      if (!enabled) return
       if (!touchStart.current) return
 
       const touch = e.changedTouches[0]
@@ -49,7 +57,7 @@ export function useSwipeNavigation({
         onSwipeRight?.()
       }
     },
-    [minDistance, maxVerticalRatio, onSwipeLeft, onSwipeRight]
+    [enabled, minDistance, maxVerticalRatio, onSwipeLeft, onSwipeRight]
   )
 
   return { onTouchStart, onTouchEnd }

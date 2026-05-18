@@ -51,12 +51,10 @@ export function IntensitySelector({
         <button
           type="button"
           onClick={onExpand}
-          className="w-full h-12 px-4 flex items-center justify-center
-            hover:border-primary
+          className="readout-stamped w-full h-12 px-4 flex items-center justify-center
             transition-all duration-75"
-          style={{ backgroundColor: 'rgba(0,0,0,0.3)', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.50), inset 0 0 0 1px rgba(254,243,199,0.06)' }}
         >
-          <span className="text-2xl font-bold text-foreground tabular-nums">
+          <span className="readout-stamped-digit text-2xl font-bold">
             {value || '--'}
           </span>
         </button>
@@ -72,19 +70,22 @@ export function IntensitySelector({
       : 'How hard the last set felt, on a scale of 1 to 10.'
 
   return (
-    <div>
+    <div className="flex flex-1 flex-col min-h-0">
       <TipAnnotation
         tint="primary"
         icon={<Gauge size={16} strokeWidth={2.2} aria-hidden="true" />}
-        className="py-2 px-3"
+        className="flex-shrink-0 py-2 px-3"
       >
         <div className="text-base font-bold uppercase tracking-wider text-primary">
           {tipHeading}
         </div>
-        <p className="mt-0.5 text-base text-foreground">{tipBody}</p>
+        <p className="mt-0.5 text-base text-foreground [@media(max-height:700px)]:hidden">{tipBody}</p>
       </TipAnnotation>
 
-      <div className="mt-2 border border-border divide-y divide-border" style={{ boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.50), inset 0 0 0 1px rgba(254,243,199,0.06)' }}>
+      {/* Preset list sits at natural height below the tip; on tight
+          viewports it shrinks and scrolls internally so Cancel/Skip
+          stay reachable. */}
+      <div className="min-h-0 overflow-y-auto mt-2 border border-border divide-y divide-border" style={{ boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.50), inset 0 0 0 1px rgba(254,243,199,0.06)' }}>
         {presets.map((preset) => {
           const isSelected = numericValue === preset.value
           return (
@@ -92,7 +93,7 @@ export function IntensitySelector({
               key={preset.value}
               type="button"
               onClick={() => handleSelect(preset)}
-              className={`w-full px-3 py-3 flex items-center gap-3
+              className={`w-full px-3 py-2 flex items-center gap-3
                 transition-colors text-left
                 active:bg-primary active:text-primary-foreground
                 ${isSelected
@@ -115,7 +116,7 @@ export function IntensitySelector({
 
       {/* Cancel + Skip buttons — square-edged with a subtle tonal
           underline trace for tactility (no primary-color emphasis). */}
-      <div className="flex gap-px mt-2">
+      <div className="flex-shrink-0 flex gap-px mt-2" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 1rem)' }}>
         <button
           type="button"
           onClick={onCancel}

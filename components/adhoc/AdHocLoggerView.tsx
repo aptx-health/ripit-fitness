@@ -608,6 +608,10 @@ export default function AdHocLoggerView({
   )
 
   const swipeHandlers = useSwipeNavigation({
+    // Disable cross-exercise swipe while an input drawer is open — the
+    // carousel chevron and keypad are touch-heavy, swiping there would
+    // unintentionally jump to the next/prev exercise.
+    enabled: expandedInput === null,
     onSwipeLeft: () => {
       if (currentIndex < exercises.length - 1) {
         triggerSlide('left', () => goToExercise(currentIndex + 1))
@@ -632,31 +636,6 @@ export default function AdHocLoggerView({
           startedAt={startedAt}
           onCompleteWorkout={handleRequestComplete}
           onClose={handleClose}
-          menuActions={
-            hasExercises && currentExercise
-              ? ([
-                  {
-                    label: 'Add an exercise',
-                    icon: Plus,
-                    onClick: () => setPickerMode({ kind: 'add' }),
-                  },
-                  {
-                    label: 'Swap this exercise',
-                    icon: RefreshCw,
-                    onClick: () =>
-                      setPickerMode({ kind: 'swap', replacingName: currentExercise.name }),
-                  },
-                  {
-                    label: 'Delete this exercise',
-                    icon: Trash2,
-                    onClick: handleDeleteExercise,
-                    variant: 'danger',
-                    requiresConfirmation: true,
-                    confirmationMessage: `Are you sure you want to delete "${currentExercise.name}"? Any sets you've logged for it will be removed.`,
-                  },
-                ] satisfies QuickAction[])
-              : []
-          }
         />
 
         <div
@@ -703,6 +682,27 @@ export default function AdHocLoggerView({
               isInputExpanded={isInputExpanded}
               showIntensity={hasIntensityAccess}
               currentSetNumber={nextSetNumber}
+              menuActions={[
+                {
+                  label: 'Add an exercise',
+                  icon: Plus,
+                  onClick: () => setPickerMode({ kind: 'add' }),
+                },
+                {
+                  label: 'Swap this exercise',
+                  icon: RefreshCw,
+                  onClick: () =>
+                    setPickerMode({ kind: 'swap', replacingName: currentExercise.name }),
+                },
+                {
+                  label: 'Delete this exercise',
+                  icon: Trash2,
+                  onClick: handleDeleteExercise,
+                  variant: 'danger',
+                  requiresConfirmation: true,
+                  confirmationMessage: `Are you sure you want to delete "${currentExercise.name}"? Any sets you've logged for it will be removed.`,
+                },
+              ] satisfies QuickAction[]}
             />
           ) : (
             <EmptyState />
@@ -734,7 +734,7 @@ export default function AdHocLoggerView({
             <button
               type="button"
               onClick={() => setPickerMode({ kind: 'add' })}
-              className="w-full h-11 bg-primary text-primary-foreground text-sm font-medium uppercase tracking-widest transition-all doom-focus-ring inline-flex items-center justify-center gap-2"
+              className="w-full h-12 bg-primary text-primary-foreground text-base font-bold uppercase tracking-widest transition-all doom-focus-ring inline-flex items-center justify-center gap-2"
               style={{
                 boxShadow:
                   'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)',

@@ -45,24 +45,24 @@ export default function ExerciseActionsFooter({
         paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))',
       }}
     >
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-stretch">
         <button
           type="button"
           onClick={onPrevious}
           disabled={isFirst}
-          className="w-10 h-11 flex items-center justify-center text-secondary-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed doom-focus-ring"
+          className="w-16 h-12 flex items-center justify-center text-secondary-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed doom-focus-ring"
           style={{ backgroundColor: 'rgba(0,0,0,0.35)', boxShadow: RECESSED_SHADOW }}
           aria-label="Previous exercise"
         >
-          <ChevronLeft size={18} strokeWidth={2.5} />
+          <ChevronLeft size={22} strokeWidth={2.5} />
         </button>
 
-        <div className="flex-1 flex items-stretch gap-2">
+        <div className="flex-1 flex items-stretch gap-2 px-1">
           <button
             type="button"
             onClick={onLogSet}
             disabled={!canLogSet}
-            className={`${onAddExercise ? 'flex-[1.4]' : 'flex-1'} h-11 bg-accent text-accent-foreground text-sm font-medium uppercase tracking-widest transition-all disabled:opacity-40 disabled:cursor-not-allowed doom-focus-ring`}
+            className={`${onAddExercise ? 'flex-[1.4]' : 'flex-1'} h-12 bg-accent text-accent-foreground text-base font-bold uppercase tracking-widest transition-all disabled:opacity-40 disabled:cursor-not-allowed doom-focus-ring`}
             style={{ boxShadow: RAISED_SHADOW }}
           >
             LOG SET {nextSetNumber}
@@ -72,11 +72,11 @@ export default function ExerciseActionsFooter({
             <button
               type="button"
               onClick={onAddExercise}
-              className="flex-1 h-11 bg-primary text-primary-foreground text-sm font-medium uppercase tracking-widest transition-all doom-focus-ring inline-flex items-center justify-center gap-1"
+              className="flex-1 h-12 bg-primary text-primary-foreground text-base font-bold uppercase tracking-widest transition-all doom-focus-ring inline-flex items-center justify-center gap-1"
               style={{ boxShadow: RAISED_SHADOW }}
               aria-label="Add another exercise"
             >
-              <Plus size={16} strokeWidth={2.5} />
+              <Plus size={18} strokeWidth={2.5} />
               ADD
             </button>
           )}
@@ -86,11 +86,11 @@ export default function ExerciseActionsFooter({
           type="button"
           onClick={onNext}
           disabled={isLast}
-          className="w-10 h-11 flex items-center justify-center text-secondary-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed doom-focus-ring"
+          className="w-16 h-12 flex items-center justify-center text-secondary-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed doom-focus-ring"
           style={{ backgroundColor: 'rgba(0,0,0,0.35)', boxShadow: RECESSED_SHADOW }}
           aria-label="Next exercise"
         >
-          <ChevronRight size={18} strokeWidth={2.5} />
+          <ChevronRight size={22} strokeWidth={2.5} />
         </button>
       </div>
     </div>
