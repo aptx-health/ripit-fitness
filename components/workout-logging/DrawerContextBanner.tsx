@@ -49,7 +49,7 @@ export default function DrawerContextBanner({
     <div className="px-4 pt-2 pb-2 border-b border-border/60">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <h2 className="text-xl font-bold text-foreground doom-heading truncate">
+          <h2 className="text-xl font-bold text-foreground doom-heading leading-tight break-words">
             {exerciseName.toUpperCase()}
           </h2>
           {prescribed && !isInputExpanded && (
