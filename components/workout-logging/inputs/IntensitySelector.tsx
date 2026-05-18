@@ -51,12 +51,10 @@ export function IntensitySelector({
         <button
           type="button"
           onClick={onExpand}
-          className="w-full h-12 px-4 flex items-center justify-center
-            hover:border-primary
+          className="readout-stamped w-full h-12 px-4 flex items-center justify-center
             transition-all duration-75"
-          style={{ backgroundColor: 'rgba(0,0,0,0.3)', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.50), inset 0 0 0 1px rgba(254,243,199,0.06)' }}
         >
-          <span className="text-2xl font-bold text-foreground tabular-nums">
+          <span className="readout-stamped-digit text-2xl font-bold">
             {value || '--'}
           </span>
         </button>

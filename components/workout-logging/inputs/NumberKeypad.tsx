@@ -98,19 +98,14 @@ export function NumberKeypad({
         </span>
       )}
 
-      {/* Current value display - recessed LCD screen */}
+      {/* Current value display — stamped readout (prototype) */}
       <div
-        className="flex-shrink-0 w-full h-14 px-4 flex items-center justify-center
-          border-2 border-primary
-          text-3xl font-bold text-foreground tabular-nums bg-input"
-        style={{
-          boxShadow:
-            'inset 0 2px 3px rgba(58, 40, 23, 0.18), inset 0 0 0 1px rgba(255,255,255,0.4), 0 0 12px rgba(var(--primary-rgb), 0.25)',
-        }}
+        className="readout-stamped flex-shrink-0 w-full h-14 px-4 flex items-center justify-center
+          text-3xl font-bold"
       >
-        {value || '0'}
+        <span className="readout-stamped-digit">{value || '0'}</span>
         {unit && (
-          <span className="text-base font-semibold text-muted-foreground ml-2">
+          <span className="text-base font-semibold ml-2 readout-stamped-digit opacity-70">
             {unit}
           </span>
         )}

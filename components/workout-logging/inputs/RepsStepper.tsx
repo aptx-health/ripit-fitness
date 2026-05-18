@@ -5,7 +5,6 @@ import { LoggingEducationPanel } from './LoggingEducationPanel'
 import { NumberKeypad } from './NumberKeypad'
 
 const RAISED_SHADOW = 'inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)'
-const RECESSED_SHADOW = 'inset 0 1px 2px rgba(0,0,0,0.50), inset 0 0 0 1px rgba(254,243,199,0.06)'
 
 interface RepsStepperProps {
   value: string
@@ -64,11 +63,8 @@ export function RepsStepper({
           type="button"
           onClick={handleDecrement}
           disabled={!hasValue || numericValue <= 0}
-          className="flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center
-            text-foreground
-            disabled:opacity-30
-            transition-all duration-75"
-          style={{ backgroundColor: 'rgba(0,0,0,0.3)', boxShadow: RAISED_SHADOW }}
+          className="button-stamped flex-shrink-0 w-20 h-12 flex items-center justify-center
+            disabled:opacity-30"
           aria-label="Decrease reps"
         >
           <Minus size={24} strokeWidth={3} />
@@ -79,21 +75,20 @@ export function RepsStepper({
           onClick={onExpand}
           disabled={!onExpand}
           aria-label="Edit reps with keypad"
-          className="flex-1 min-h-[44px] flex items-center justify-center
-            text-2xl font-bold text-foreground tabular-nums min-w-[60px]
+          className="readout-stamped flex-1 h-12 flex items-center justify-center
+            text-2xl font-bold min-w-[60px]
             transition-all duration-75
             disabled:cursor-default"
-          style={{ backgroundColor: 'rgba(0,0,0,0.3)', boxShadow: RECESSED_SHADOW }}
         >
           {hasValue ? (
             <>
-              {numericValue}
-              <span className="text-sm font-semibold text-muted-foreground ml-2">
+              <span className="readout-stamped-digit">{numericValue}</span>
+              <span className="text-sm font-semibold ml-2 readout-stamped-digit opacity-70">
                 reps
               </span>
             </>
           ) : (
-            <span className="text-muted-foreground text-lg">
+            <span className="text-lg readout-stamped-digit opacity-60">
               {placeholder ? `${placeholder} reps` : '0 reps'}
             </span>
           )}
@@ -102,7 +97,7 @@ export function RepsStepper({
         <button
           type="button"
           onClick={handleIncrement}
-          className="flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center
+          className="flex-shrink-0 w-20 h-12 flex items-center justify-center
             bg-success-muted text-success-text
             hover:bg-success hover:text-success-foreground
             active:bg-success-hover active:text-success-foreground

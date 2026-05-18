@@ -25,6 +25,8 @@ type ExerciseQuickActionsMenuProps = {
   triggerAriaLabel?: string
   /** Tailwind classes to merge into the trigger button (color/state, etc). */
   triggerClassName?: string
+  /** Optional label rendered beside the trigger icon. */
+  triggerLabel?: string
 }
 
 export default function ExerciseQuickActionsMenu({
@@ -33,6 +35,7 @@ export default function ExerciseQuickActionsMenu({
   heading = 'Edit Workout',
   triggerAriaLabel = 'Edit workout',
   triggerClassName = '',
+  triggerLabel,
 }: ExerciseQuickActionsMenuProps) {
   const [confirming, setConfirming] = useState<QuickAction | null>(null)
 
@@ -52,9 +55,14 @@ export default function ExerciseQuickActionsMenu({
           <button
             type="button"
             aria-label={triggerAriaLabel}
-            className={`p-1 transition-colors doom-focus-ring ${triggerClassName}`}
+            className={`relative inline-flex items-center justify-center gap-1.5 p-1 transition-colors doom-focus-ring before:content-[''] before:absolute before:-inset-2 ${triggerClassName}`}
           >
-            <TriggerIcon size={20} strokeWidth={2.5} />
+            <TriggerIcon size={16} strokeWidth={2.5} />
+            {triggerLabel && (
+              <span className="text-sm font-bold uppercase tracking-wider">
+                {triggerLabel}
+              </span>
+            )}
           </button>
         </DropdownMenu.Trigger>
 

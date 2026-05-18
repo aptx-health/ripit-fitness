@@ -1,3 +1,6 @@
+import { Settings } from 'lucide-react'
+import ExerciseQuickActionsMenu, { type QuickAction } from './ExerciseQuickActionsMenu'
+
 /**
  * Persistent context banner shown between the segmented tab row and the input
  * area on the LOG SETS tab of the exercise logger. Surfaces:
@@ -5,16 +8,14 @@
  *   - The current exercise name (UPPERCASE, doom-heading)
  *   - The user's position within the set sequence ("Set 3 of 4")
  *   - The prescription for the current set ("Prescribed: 5 reps @ 135 lb, RIR 2")
+ *   - An optional gear menu for exercise-scoped actions (edit / swap / delete)
  *
- * Stays visible whether the weight/RIR drawer is open or closed, so the user
- * never loses sight of which set they are on while the input takes over.
+ * The gear lives here — beside the exercise name it modifies — rather than
+ * in the global header where it competed with the FINISH / X destination
+ * controls.
  *
  * Degrades cleanly when prescription data is missing (e.g. ad-hoc / freestyle
- * mode): `totalSets` and `prescribed` are both optional. When `totalSets` is
- * omitted the right-side label renders as just "Set N"; when `prescribed` is
- * omitted the prescribed line is dropped entirely (no placeholder).
- *
- * Read-only — no buttons, no actions. It is context, not control.
+ * mode): `totalSets` and `prescribed` are both optional.
  */
 type DrawerContextBannerProps = {
   exerciseName: string
@@ -29,6 +30,8 @@ type DrawerContextBannerProps = {
    * — the logger's own surface carries the immediate context.
    */
   isInputExpanded?: boolean
+  /** Exercise-scoped actions (edit, swap, delete...). Omit to hide the gear. */
+  menuActions?: QuickAction[]
 }
 
 export default function DrawerContextBanner({
@@ -37,25 +40,39 @@ export default function DrawerContextBanner({
   totalSets,
   prescribed,
   isInputExpanded = false,
+  menuActions,
 }: DrawerContextBannerProps) {
   const setLabel =
     typeof totalSets === 'number' ? `Set ${currentSet} of ${totalSets}` : `Set ${currentSet}`
 
   return (
     <div className="px-4 pt-2 pb-2 border-b border-border/60">
-      <div className="flex items-baseline justify-between gap-3">
-        <h2 className="text-xl font-bold text-foreground doom-heading truncate">
-          {exerciseName.toUpperCase()}
-        </h2>
-        <span className="text-base text-muted-foreground font-bold uppercase tracking-wider tabular-nums shrink-0">
-          {setLabel}
-        </span>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <h2 className="text-xl font-bold text-foreground doom-heading truncate">
+            {exerciseName.toUpperCase()}
+          </h2>
+          {prescribed && !isInputExpanded && (
+            <p className="mt-1 text-base text-muted-foreground tabular-nums">
+              Prescribed: <span className="text-foreground">{prescribed}</span>
+            </p>
+          )}
+        </div>
+        <div className="flex flex-col items-end gap-0.5 shrink-0">
+          <span className="text-base text-muted-foreground font-bold uppercase tracking-wider tabular-nums">
+            {setLabel}
+          </span>
+          {menuActions && menuActions.length > 0 && (
+            <ExerciseQuickActionsMenu
+              actions={menuActions}
+              triggerIcon={Settings}
+              triggerLabel="Edit"
+              triggerAriaLabel="Exercise options"
+              triggerClassName="text-muted-foreground hover:text-foreground"
+            />
+          )}
+        </div>
       </div>
-      {prescribed && !isInputExpanded && (
-        <p className="mt-1 text-base text-muted-foreground tabular-nums">
-          Prescribed: <span className="text-foreground">{prescribed}</span>
-        </p>
-      )}
     </div>
   )
 }
