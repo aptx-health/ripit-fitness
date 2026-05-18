@@ -85,18 +85,21 @@ export function NumberKeypad({
   }
 
   return (
-    <div className="mt-auto">
+    <div className="flex flex-1 flex-col min-h-0">
+      {/* Education panel is the only section that scrolls when viewport is
+          tight (e.g. iPhone SE, mobile browser with URL bar). LCD, keypad,
+          and action footer remain at their natural sizes. */}
       {educationPanel ? (
-        <div className="mb-2">{educationPanel}</div>
+        <div className="flex-1 min-h-0 overflow-y-auto mb-2">{educationPanel}</div>
       ) : (
-        <span className="block text-sm text-muted-foreground mb-1.5 font-bold uppercase tracking-wider">
+        <span className="block text-sm text-muted-foreground mb-1.5 font-bold uppercase tracking-wider mt-auto">
           {label}
         </span>
       )}
 
       {/* Current value display - recessed LCD screen */}
       <div
-        className="w-full h-14 px-4 flex items-center justify-center
+        className="flex-shrink-0 w-full h-14 px-4 flex items-center justify-center
           border-2 border-primary
           text-3xl font-bold text-foreground tabular-nums bg-input"
         style={{
@@ -113,7 +116,7 @@ export function NumberKeypad({
       </div>
 
       {/* Number keypad grid - tactile molded keys on hairline rules */}
-      <div className="grid grid-cols-3 gap-px mt-2 bg-border">
+      <div className="flex-shrink-0 grid grid-cols-3 gap-px mt-2 bg-border">
         {KEYPAD_KEYS.map((key) => (
           <button
             key={key}
@@ -139,10 +142,11 @@ export function NumberKeypad({
         ))}
       </div>
 
-      {/* Cancel + Done buttons — sticky so they're always reachable on
-          short viewports where the rest of the keypad scrolls. */}
+      {/* Cancel + Done buttons — pinned via flex layout so they're always
+          visible regardless of viewport height. Education panel above
+          scrolls internally to absorb any overflow. */}
       <div
-        className="sticky bottom-0 bg-card flex gap-px pt-2"
+        className="flex-shrink-0 bg-card flex gap-px pt-2"
         style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 1rem)' }}
       >
         <Button

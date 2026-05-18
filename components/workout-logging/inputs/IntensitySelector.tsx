@@ -72,11 +72,11 @@ export function IntensitySelector({
       : 'How hard the last set felt, on a scale of 1 to 10.'
 
   return (
-    <div>
+    <div className="flex flex-1 flex-col min-h-0">
       <TipAnnotation
         tint="primary"
         icon={<Gauge size={16} strokeWidth={2.2} aria-hidden="true" />}
-        className="py-2 px-3"
+        className="flex-shrink-0 py-2 px-3"
       >
         <div className="text-base font-bold uppercase tracking-wider text-primary">
           {tipHeading}
@@ -84,7 +84,9 @@ export function IntensitySelector({
         <p className="mt-0.5 text-base text-foreground">{tipBody}</p>
       </TipAnnotation>
 
-      <div className="mt-2 border border-border divide-y divide-border" style={{ boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.50), inset 0 0 0 1px rgba(254,243,199,0.06)' }}>
+      {/* Preset list scrolls internally when viewport is tight; Cancel/Skip
+          stay pinned below via the flex layout. */}
+      <div className="flex-1 min-h-0 overflow-y-auto mt-2 border border-border divide-y divide-border" style={{ boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.50), inset 0 0 0 1px rgba(254,243,199,0.06)' }}>
         {presets.map((preset) => {
           const isSelected = numericValue === preset.value
           return (
@@ -115,7 +117,7 @@ export function IntensitySelector({
 
       {/* Cancel + Skip buttons — square-edged with a subtle tonal
           underline trace for tactility (no primary-color emphasis). */}
-      <div className="flex gap-px mt-2">
+      <div className="flex-shrink-0 flex gap-px mt-2" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 1rem)' }}>
         <button
           type="button"
           onClick={onCancel}
