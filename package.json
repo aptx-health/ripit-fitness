@@ -92,5 +92,10 @@
   "//lint-staged-note": "Biome runs on staged files via .husky/pre-commit before lint-staged",
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+  },
+  "overrides": {
+    "fast-uri": "^3.1.2",
+    "fast-xml-builder": "^1.2.0",
+    "kysely": "^0.28.17"
   }
 }
