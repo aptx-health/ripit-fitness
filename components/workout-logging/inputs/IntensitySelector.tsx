@@ -81,12 +81,13 @@ export function IntensitySelector({
         <div className="text-base font-bold uppercase tracking-wider text-primary">
           {tipHeading}
         </div>
-        <p className="mt-0.5 text-base text-foreground">{tipBody}</p>
+        <p className="mt-0.5 text-base text-foreground [@media(max-height:700px)]:hidden">{tipBody}</p>
       </TipAnnotation>
 
-      {/* Preset list scrolls internally when viewport is tight; Cancel/Skip
-          stay pinned below via the flex layout. */}
-      <div className="flex-1 min-h-0 overflow-y-auto mt-2 border border-border divide-y divide-border" style={{ boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.50), inset 0 0 0 1px rgba(254,243,199,0.06)' }}>
+      {/* Preset list sits at natural height below the tip; on tight
+          viewports it shrinks and scrolls internally so Cancel/Skip
+          stay reachable. */}
+      <div className="min-h-0 overflow-y-auto mt-2 border border-border divide-y divide-border" style={{ boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.50), inset 0 0 0 1px rgba(254,243,199,0.06)' }}>
         {presets.map((preset) => {
           const isSelected = numericValue === preset.value
           return (

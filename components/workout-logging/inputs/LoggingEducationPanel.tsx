@@ -71,7 +71,10 @@ export function LoggingEducationPanel({ mode }: LoggingEducationPanelProps) {
         </div>
       </TipAnnotation>
 
-      <div className="mt-2 grid grid-cols-2 gap-2">
+      {/* On short viewports (iPhone SE, mobile browser w/ URL bar) the
+          cards are hidden so the keypad stays reachable — the heading
+          above still identifies the mode. */}
+      <div className="mt-2 grid grid-cols-2 gap-2 [@media(max-height:700px)]:hidden">
         {content.cards.map((card) => (
           <div
             key={card.label}

@@ -85,12 +85,13 @@ export function NumberKeypad({
   }
 
   return (
-    <div className="flex flex-1 flex-col min-h-0">
-      {/* Education panel is the only section that scrolls when viewport is
-          tight (e.g. iPhone SE, mobile browser with URL bar). LCD, keypad,
-          and action footer remain at their natural sizes. */}
+    <div className="flex flex-1 flex-col justify-end min-h-0">
+      {/* Content is bottom-anchored (thumb reach). Education panel takes its
+          natural height and sits just above the LCD; on tight viewports
+          (iPhone SE, mobile browser w/ URL bar) it shrinks and scrolls
+          internally so the LCD, keypad, and action footer stay visible. */}
       {educationPanel ? (
-        <div className="flex-1 min-h-0 overflow-y-auto mb-2">{educationPanel}</div>
+        <div className="min-h-0 overflow-y-auto mb-2">{educationPanel}</div>
       ) : (
         <span className="block text-sm text-muted-foreground mb-1.5 font-bold uppercase tracking-wider mt-auto">
           {label}
