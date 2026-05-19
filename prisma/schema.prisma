@@ -313,6 +313,7 @@ model UserSettings {
   seenMessageIds            String    @default("[]")
   pwaPromptShownCount       Int       @default(0)
   pwaPromptDismissedAt      DateTime?
+  signupIntent              String?
   createdAt                 DateTime  @default(now())
   updatedAt                 DateTime  @updatedAt
 

@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const redirect = experienceLevel === 'beginner' ? '/training?expand=first' : '/programs'
+    const redirect = experienceLevel === 'beginner' ? '/training?expand=first' : '/welcome'
 
     logger.info(
       { userId: user.id, experienceLevel, equipmentPreference, programId },

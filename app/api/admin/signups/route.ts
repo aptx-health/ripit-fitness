@@ -14,6 +14,9 @@ interface SignupRow {
   source: string | null
   experienceLevel: string | null
   firstWorkoutAt: Date | null
+  signupIntent: string | null
+  welcomePath: string | null
+  welcomeMsToChoice: number | null
 }
 
 export async function GET(request: NextRequest) {
@@ -36,7 +39,10 @@ export async function GET(request: NextRequest) {
         u."createdAt",
         ae.source,
         us."experienceLevel",
-        wc."firstWorkoutAt"
+        us."signupIntent",
+        wc."firstWorkoutAt",
+        wp.path AS "welcomePath",
+        wp."msToChoice" AS "welcomeMsToChoice"
       FROM "user" u
       LEFT JOIN LATERAL (
         SELECT (ae_inner.properties->>'source') AS source
@@ -53,6 +59,20 @@ export async function GET(request: NextRequest) {
         WHERE wc_inner."userId" = u.id
           AND wc_inner.status = 'completed'
       ) wc ON true
+      LEFT JOIN LATERAL (
+        SELECT
+          CASE
+            WHEN wp_inner.event = 'welcome_path_freestyle' THEN 'freestyle'
+            WHEN wp_inner.event = 'welcome_path_program' THEN 'program'
+            WHEN wp_inner.event = 'welcome_skipped' THEN 'skipped'
+          END AS path,
+          (wp_inner.properties->>'ms_to_choice')::int AS "msToChoice"
+        FROM "AppEvent" wp_inner
+        WHERE wp_inner."userId" = u.id
+          AND wp_inner.event IN ('welcome_path_freestyle', 'welcome_path_program', 'welcome_skipped')
+        ORDER BY wp_inner."createdAt" DESC
+        LIMIT 1
+      ) wp ON true
       WHERE u."createdAt" >= ${since}
         ${ONLY_END_USERS}
       ORDER BY u."createdAt" DESC
