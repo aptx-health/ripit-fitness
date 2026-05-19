@@ -9,6 +9,11 @@ argument-hint: [since-ref-or-days]
 
 Audit recently-changed code for fragility under poor network conditions (cellular dead spots, gym wifi, PWA backgrounding). Most "weird bugs at the gym" are not logic bugs — they're a fetch that failed silently, an optimistic UI mismatch, or a server route that does N round trips when one would do.
 
+## Invocation modes
+
+- **Standalone** (default) — produce the audit report described under "Output format" and stop. No code edits.
+- **Called from `quality-check` agent** — produce the same report, but the caller will split findings into "fix this run" (one surface, picked as the run's theme) and "file as `needs-review` issues" (everything else). Do not edit code yourself; the agent owns that step. Severity → urgency mapping: CRITICAL/HIGH → high, MEDIUM → medium, LOW → low.
+
 ## Scope
 
 1. **Determine what to audit:**
