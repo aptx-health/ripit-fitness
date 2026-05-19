@@ -8,10 +8,11 @@ import { useToast } from '@/components/ToastProvider'
 import { clientLogger } from '@/lib/client-logger'
 import { pluralize } from '@/lib/format/pluralize'
 import { formatSavedWorkoutDate } from '@/lib/format/savedWorkoutDate'
+import type { SavedWorkoutData } from '@/types/saved-workout'
 import type { SavedWorkoutListItem } from './SavedWorkoutRow'
 
 type SavedWorkoutDetail = SavedWorkoutListItem & {
-  workoutData: unknown
+  workoutData: SavedWorkoutData
 }
 
 type Props = {
@@ -19,31 +20,11 @@ type Props = {
   onOpenChange: (open: boolean) => void
 }
 
-/**
- * Best-effort extraction of exercise names from the persisted workoutData JSON.
- * Tolerates shape changes from #808 (save-from-completion) by checking common
- * locations and falling back to an empty list.
- */
-function extractExerciseNames(workoutData: unknown): string[] {
-  if (!workoutData || typeof workoutData !== 'object') return []
-  const root = workoutData as Record<string, unknown>
-  const candidate =
-    (Array.isArray(root.exercises) && root.exercises) ||
-    (Array.isArray(root.loggedExercises) && root.loggedExercises) ||
-    null
-  if (!candidate) return []
-  return candidate
-    .map((ex) => {
-      if (!ex || typeof ex !== 'object') return null
-      const obj = ex as Record<string, unknown>
-      if (typeof obj.name === 'string') return obj.name
-      if (obj.exercise && typeof obj.exercise === 'object') {
-        const inner = obj.exercise as Record<string, unknown>
-        if (typeof inner.name === 'string') return inner.name
-      }
-      return null
-    })
-    .filter((n): n is string => typeof n === 'string' && n.length > 0)
+function extractExerciseNames(workoutData: SavedWorkoutData): string[] {
+  if (!Array.isArray(workoutData)) return []
+  return workoutData
+    .map((ex) => (typeof ex?.name === 'string' ? ex.name : null))
+    .filter((n): n is string => !!n && n.length > 0)
 }
 
 export default function SavedWorkoutDetailDialog({ item, onOpenChange }: Props) {
@@ -83,9 +64,9 @@ export default function SavedWorkoutDetailDialog({ item, onOpenChange }: Props) 
         const data = (await res.json().catch(() => ({}))) as { error?: string }
         throw new Error(data.error || 'Could not start workout')
       }
-      const data = (await res.json()) as { completion?: { id: string } }
-      if (data.completion?.id) {
-        router.push(`/training/adhoc/${data.completion.id}`)
+      const data = (await res.json()) as { completionId?: string }
+      if (data.completionId) {
+        router.push(`/training/adhoc/${data.completionId}`)
         return
       }
       throw new Error('No completion returned')
