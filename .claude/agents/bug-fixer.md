@@ -5,7 +5,6 @@ description: >
   writes a regression test, then implements the fix.
 tools: Bash, Read, Edit, Write, Glob, Grep
 skills:
-  - webapp-testing
   - test-summary
 mode: reactive
 output: pr

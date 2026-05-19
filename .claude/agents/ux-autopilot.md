@@ -7,7 +7,6 @@ description: >
 tools: Bash, Read, Edit, Write, Glob, Grep
 skills:
   - impeccable
-  - webapp-testing
 mode: reactive
 output: pr
 stages:
