@@ -44,7 +44,7 @@ interface MessageCardProps {
 
 export function MessageCard({
   message,
-  variant,
+  variant: _variant,
   tipCount = 0,
   onNextTip,
   onDismiss,

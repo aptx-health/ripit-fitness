@@ -90,7 +90,7 @@ describe('rate-limit', () => {
 
   describe('checkRateLimit (backwards-compatible wrapper)', () => {
     beforeEach(() => {
-      // @ts-expect-error
+      // @ts-expect-error -- NODE_ENV is readonly in @types/node but we need to override it for this test
       process.env.NODE_ENV = 'development'
     })
 

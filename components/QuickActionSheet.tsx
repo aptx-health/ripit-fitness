@@ -330,8 +330,8 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
                   Freestyle is for logging
                 </h2>
                 <p className="text-base text-muted-foreground mt-2.5 leading-relaxed">
-                  It's a blank canvas where you pick exercises and log every
-                  set as you go. Worth a try if you're curious.
+                  It&apos;s a blank canvas where you pick exercises and log every
+                  set as you go. Worth a try if you&apos;re curious.
                 </p>
                 <p className="text-sm text-muted-foreground mt-3">
                   Prefer logging?{' '}
