@@ -56,6 +56,14 @@ Skim the recent commit log to understand what kinds of changes have been landing
 git log --oneline --since='7 days ago' HEAD
 ```
 
+Run the **network resilience audit** skill against the same window to surface fetch/transaction fragility. Treat its output as a survey signal, not a mandate — you'll decide in Step 2 whether to adopt it as the run's theme or file its findings as deferred issues.
+
+```
+Skill: network-resilience-audit  (argument: 7)
+```
+
+The skill's severity levels map directly to the deferred-issue urgency rubric: CRITICAL/HIGH → high, MEDIUM → medium, LOW → low.
+
 ## Step 2: Decide scope
 
 **Do not try to fix everything you find.** Pick ONE focused theme for this run based on the highest ratio of `(coverage × confidence) / (risk × effort)`.
@@ -77,6 +85,7 @@ Good themes for a single run:
 - Removing dead code from a coherent module
 - Fixing all instances of one specific lint rule
 - **Impeccable anti-pattern sweep** on changed UI files — pick ONE anti-pattern (e.g. side-stripe borders, gradient text, em dashes in copy, hardcoded hex colors that should be theme tokens) and remove every instance across the surveyed surface. See `.claude/skills/impeccable/SKILL.md` for the full list.
+- **Network resilience sweep** on one surface (e.g. "ad-hoc logger mutations", "draft context refetch path") — route raw `fetch(` calls through `fetchWithRetry`, add toast feedback on failure, collapse renumber loops into single SQL statements, etc. Drive this from the network-resilience-audit findings gathered in Step 1. Pick ONE surface; defer the rest.
 
 Bad scopes for a single run:
 - "Review every changed file"
