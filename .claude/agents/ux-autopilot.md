@@ -5,6 +5,9 @@ description: >
   responsiveness, and visual polish issues. Understands the DOOM theme system,
   PWA safe areas, touch targets, and theme token conventions.
 tools: Bash, Read, Edit, Write, Glob, Grep
+skills:
+  - impeccable
+  - webapp-testing
 mode: reactive
 output: pr
 stages:
