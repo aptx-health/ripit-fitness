@@ -1,8 +1,10 @@
 'use client'
 
-import { ChevronLeft, MessageSquarePlus, TrendingDown, TrendingUp, X } from 'lucide-react'
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { Bookmark, BookmarkCheck, ChevronLeft, MessageSquarePlus, TrendingDown, TrendingUp, X } from 'lucide-react'
+import Link from 'next/link'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
+import { buildSuggestedSavedWorkoutName } from '@/lib/saved-workouts/suggest-name'
 import type { RollupExercise, WorkoutRollup } from '@/lib/stats/workout-rollup'
 import { POST_SESSION_REFINEMENTS } from '@/types/feedback'
 
@@ -12,7 +14,10 @@ interface WorkoutRollupModalProps {
   onClose: () => void
 }
 
-type View = 'stats' | 'feedback'
+type View = 'stats' | 'feedback' | 'save'
+
+const MAX_SAVED_NAME_LENGTH = 100
+const MAX_SAVED_NOTES_LENGTH = 2000
 
 function formatDuration(seconds: number): string {
   const h = Math.floor(seconds / 3600)
@@ -129,6 +134,20 @@ export function WorkoutRollupModal({ open, rollup, onClose }: WorkoutRollupModal
   const [submitted, setSubmitted] = useState(false)
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const [showBottomFade, setShowBottomFade] = useState(false)
+  const [savedName, setSavedName] = useState('')
+  const [savedNotes, setSavedNotes] = useState('')
+  const [saveSubmitting, setSaveSubmitting] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [savedWorkoutId, setSavedWorkoutId] = useState<string | null>(null)
+
+  const suggestedName = useMemo(() => {
+    if (!rollup) return ''
+    return buildSuggestedSavedWorkoutName(rollup.exercises.map((e) => e.name))
+  }, [rollup])
+
+  const canSave = Boolean(
+    rollup && rollup.isAdHoc && !rollup.isMinimal && rollup.exercises.length > 0
+  )
 
   useEffect(() => {
     if (open) {
@@ -139,6 +158,11 @@ export function WorkoutRollupModal({ open, rollup, onClose }: WorkoutRollupModal
       setScope('app')
       setSubmitting(false)
       setSubmitted(false)
+      setSavedName('')
+      setSavedNotes('')
+      setSaveSubmitting(false)
+      setSaveError(null)
+      setSavedWorkoutId(null)
     }
   }, [open])
 
@@ -261,7 +285,60 @@ export function WorkoutRollupModal({ open, rollup, onClose }: WorkoutRollupModal
     submitFeedback(rating, selectedRefinements, message)
   }
 
-  const headerTitle = view === 'stats' ? 'Workout Complete' : submitted ? 'Thanks!' : 'Quick Feedback'
+  const handleOpenSave = () => {
+    setSavedName(suggestedName)
+    setSavedNotes('')
+    setSaveError(null)
+    setView('save')
+  }
+
+  const handleSaveSubmit = async () => {
+    if (!rollup) return
+    const trimmedName = savedName.trim()
+    if (!trimmedName) {
+      setSaveError('Name is required')
+      return
+    }
+    setSaveSubmitting(true)
+    setSaveError(null)
+    try {
+      const res = await fetch('/api/workouts/saved', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sourceCompletionId: rollup.completionId,
+          name: trimmedName,
+          notes: savedNotes.trim() || undefined,
+        }),
+      })
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string }
+        setSaveError(data.error || 'Failed to save workout')
+        return
+      }
+      const data = (await res.json()) as { savedWorkout?: { id: string } }
+      if (data.savedWorkout?.id) {
+        setSavedWorkoutId(data.savedWorkout.id)
+        setView('stats')
+      } else {
+        setSaveError('Failed to save workout')
+      }
+    } catch (err) {
+      clientLogger.error('Error saving workout from completion:', err)
+      setSaveError('Failed to save workout')
+    } finally {
+      setSaveSubmitting(false)
+    }
+  }
+
+  const headerTitle =
+    view === 'stats'
+      ? 'Workout Complete'
+      : view === 'save'
+        ? 'Save Workout'
+        : submitted
+          ? 'Thanks!'
+          : 'Quick Feedback'
 
   return (
     <div
@@ -283,7 +360,7 @@ export function WorkoutRollupModal({ open, rollup, onClose }: WorkoutRollupModal
       >
         {/* Header */}
         <div className="shrink-0 px-4 py-3 border-b-2 border-border flex items-center justify-between gap-2">
-          {view === 'feedback' && !submitted ? (
+          {(view === 'save' || (view === 'feedback' && !submitted)) ? (
             <button
               type="button"
               onClick={() => setView('stats')}
@@ -368,6 +445,53 @@ export function WorkoutRollupModal({ open, rollup, onClose }: WorkoutRollupModal
             <p className="px-5 py-10 text-base text-foreground text-center">
               Thanks for the feedback.
             </p>
+          )}
+
+          {view === 'save' && (
+            <div className="px-5 py-5 space-y-5">
+              <div>
+                <label
+                  htmlFor="rollup-save-name"
+                  className="block text-sm font-semibold text-foreground mb-2 uppercase tracking-wider"
+                >
+                  Name
+                </label>
+                <input
+                  id="rollup-save-name"
+                  type="text"
+                  value={savedName}
+                  onChange={(e) => setSavedName(e.target.value)}
+                  maxLength={MAX_SAVED_NAME_LENGTH}
+                  placeholder="WORKOUT NAME"
+                  className="w-full px-3 py-2 bg-input border-2 border-border text-foreground text-base placeholder:text-muted-foreground placeholder:uppercase placeholder:tracking-wider placeholder:text-xs focus:outline-none focus:border-primary"
+                />
+                <p className="mt-1.5 text-xs text-muted-foreground">
+                  Default suggested from your top exercises — rename freely.
+                </p>
+              </div>
+              <div>
+                <label
+                  htmlFor="rollup-save-notes"
+                  className="block text-sm font-semibold text-foreground mb-2 uppercase tracking-wider"
+                >
+                  Notes (optional)
+                </label>
+                <textarea
+                  id="rollup-save-notes"
+                  value={savedNotes}
+                  onChange={(e) => setSavedNotes(e.target.value)}
+                  rows={3}
+                  maxLength={MAX_SAVED_NOTES_LENGTH}
+                  placeholder="ANY CONTEXT YOU WANT TO REMEMBER"
+                  className="w-full px-3 py-2 bg-input border-2 border-border text-foreground text-sm placeholder:text-muted-foreground placeholder:uppercase placeholder:tracking-wider placeholder:text-xs resize-none focus:outline-none focus:border-primary"
+                />
+              </div>
+              {saveError && (
+                <p className="text-sm text-destructive" role="alert">
+                  {saveError}
+                </p>
+              )}
+            </div>
           )}
 
           {view === 'feedback' && !submitted && (
@@ -499,12 +623,52 @@ export function WorkoutRollupModal({ open, rollup, onClose }: WorkoutRollupModal
                 <MessageSquarePlus className="w-4 h-4" />
                 Got feedback?
               </button>
+              {canSave && (
+                savedWorkoutId ? (
+                  <Link
+                    href="/workouts/saved"
+                    className="ml-auto flex items-center gap-2 px-4 py-2.5 border-2 border-border bg-muted text-sm font-bold uppercase tracking-wider doom-focus-ring"
+                  >
+                    <BookmarkCheck className="w-4 h-4 text-primary" />
+                    Saved
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleOpenSave}
+                    className="ml-auto flex items-center gap-2 px-4 py-2.5 border-2 border-border bg-muted hover:bg-secondary/10 text-sm font-bold uppercase tracking-wider doom-focus-ring"
+                  >
+                    <Bookmark className="w-4 h-4" />
+                    Save
+                  </button>
+                )
+              )}
               <button
                 type="button"
                 onClick={onClose}
-                className="ml-auto px-6 py-3 bg-primary text-primary-foreground doom-button-3d font-bold text-base uppercase tracking-wider doom-focus-ring"
+                className={`${canSave ? '' : 'ml-auto'} px-6 py-3 bg-primary text-primary-foreground doom-button-3d font-bold text-base uppercase tracking-wider doom-focus-ring`}
               >
                 Done
+              </button>
+            </>
+          )}
+
+          {view === 'save' && (
+            <>
+              <button
+                type="button"
+                onClick={() => setView('stats')}
+                className="px-4 py-2.5 text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors doom-focus-ring"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveSubmit}
+                disabled={saveSubmitting || savedName.trim().length === 0}
+                className="ml-auto px-6 py-3 bg-primary text-primary-foreground doom-button-3d font-bold text-sm uppercase tracking-wider doom-focus-ring disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {saveSubmitting ? 'Saving…' : 'Save'}
               </button>
             </>
           )}
