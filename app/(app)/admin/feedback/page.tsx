@@ -1,12 +1,28 @@
 'use client'
 
-import { ArrowDown, ArrowUp, Check, CheckCheck, ExternalLink, Github, MessageSquarePlus, Tag } from 'lucide-react'
+import { ArrowDown, ArrowUp, Check, CheckCheck, ExternalLink, MessageSquarePlus, Tag } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 import { SegmentedControl } from '@/components/ui/SegmentedControl'
 import type { FeedbackStatus } from '@/types/feedback'
 import { POST_SESSION_REFINEMENTS } from '@/types/feedback'
+
+// GitHub brand icon was removed in lucide-react v1; inline SVG keeps the GitHub logo recognizable.
+function Github({ size = 16 }: { size?: number }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55 0-.27-.01-1-.02-1.96-3.2.7-3.87-1.54-3.87-1.54-.52-1.32-1.27-1.68-1.27-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.75 2.68 1.24 3.34.95.1-.74.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.04 0 0 .97-.31 3.18 1.18a11.04 11.04 0 015.79 0c2.2-1.49 3.18-1.18 3.18-1.18.62 1.58.23 2.75.11 3.04.74.81 1.18 1.84 1.18 3.1 0 4.42-2.69 5.4-5.25 5.69.41.35.78 1.05.78 2.11 0 1.52-.01 2.75-.01 3.13 0 .3.21.67.8.55C20.21 21.38 23.5 17.07 23.5 12 23.5 5.65 18.35.5 12 .5z" />
+    </svg>
+  )
+}
 
 interface FeedbackItem {
   id: string

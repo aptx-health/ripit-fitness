@@ -1,6 +1,6 @@
 'use client'
 
-import { Share, Plus, MoreVertical } from 'lucide-react'
+import { MoreVertical, Plus, Share } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import type { BeforeInstallPromptEvent } from '@/hooks/useBeforeInstallPrompt'
 import { trackEvent } from '@/lib/analytics'

@@ -271,10 +271,7 @@ export default function OnboardingPage() {
               ) : experienceLevel === 'experienced' ? (
                 <FadeIn key="completing-experienced" className="text-center max-w-sm">
                   <p className="mb-3 text-lg text-foreground">
-                    Taking you to <span className="font-semibold text-success">Programs</span>
-                  </p>
-                  <p className="text-[15px] leading-relaxed text-muted-foreground">
-                    Browse the library and find a program that fits your goals. Use filters to narrow by equipment, level, or focus area.
+                    Loading your <span className="font-semibold text-success">start screen</span>
                   </p>
                 </FadeIn>
               ) : (

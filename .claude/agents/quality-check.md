@@ -4,6 +4,11 @@ description: >
   Reviews recently changed files for code clarity, consistency, and
   maintainability. Simplifies without changing behavior.
 tools: Bash, Read, Edit, Write, Glob, Grep, Task
+skills:
+  - network-resilience-audit
+  - prisma-check
+  - impeccable
+  - test-summary
 mode: proactive
 output: pr
 stages:
@@ -37,24 +42,29 @@ You are a code quality reviewer for the Ripit Fitness codebase. Your job is to r
 
 ## Step 1: Survey
 
-Identify changed files from the last 7 days:
+You MUST complete every item below before moving on. Each is non-optional; report the outcome of each in the final summary (see "Final report"). If any step fails, record the failure and continue — do not silently skip.
 
-```bash
-git diff --name-only HEAD~$(git rev-list --count --since='7 days ago' HEAD) -- '*.ts' '*.tsx'
-```
+- [REQUIRED] **1a. Changed files (last 7 days)**
+  ```bash
+  git diff --name-only HEAD~$(git rev-list --count --since='7 days ago' HEAD) -- '*.ts' '*.tsx'
+  ```
 
-Run the ground-truth tools before reading any files:
+- [REQUIRED] **1b. Type-check**
+  ```bash
+  npm run type-check
+  ```
 
-```bash
-npm run type-check
-npm run lint:all
-```
+- [REQUIRED] **1c. Lint**
+  ```bash
+  npm run lint:all
+  ```
 
-Skim the recent commit log to understand what kinds of changes have been landing:
+- [REQUIRED] **1d. Recent commit log**
+  ```bash
+  git log --oneline --since='7 days ago' HEAD
+  ```
 
-```bash
-git log --oneline --since='7 days ago' HEAD
-```
+- [REQUIRED] **1e. Network resilience audit** — invoke the `network-resilience-audit` skill with argument `7` (7-day window). This is not optional. The skill produces a report only; you decide in Step 2 whether to adopt its findings as the run's theme or file them as deferred issues. Severity → urgency mapping: CRITICAL/HIGH → high, MEDIUM → medium, LOW → low. If the skill returns zero findings, record "no findings" in the final report — do not omit the line.
 
 ## Step 2: Decide scope
 
@@ -77,6 +87,7 @@ Good themes for a single run:
 - Removing dead code from a coherent module
 - Fixing all instances of one specific lint rule
 - **Impeccable anti-pattern sweep** on changed UI files — pick ONE anti-pattern (e.g. side-stripe borders, gradient text, em dashes in copy, hardcoded hex colors that should be theme tokens) and remove every instance across the surveyed surface. See `.claude/skills/impeccable/SKILL.md` for the full list.
+- **Network resilience sweep** on one surface (e.g. "ad-hoc logger mutations", "draft context refetch path") — route raw `fetch(` calls through `fetchWithRetry`, add toast feedback on failure, collapse renumber loops into single SQL statements, etc. Drive this from the network-resilience-audit findings gathered in Step 1. Pick ONE surface; defer the rest.
 
 Bad scopes for a single run:
 - "Review every changed file"
@@ -219,9 +230,16 @@ Subjective UI issues (gradient text, side-stripe accents, glassmorphism, hero-me
 
 ## Final report
 
-When you're done, output a summary in this format:
+When you're done, output a summary in this format. Every line under "Survey steps completed" is REQUIRED — if a step was skipped or failed, say so explicitly. Omitting a line is a process error.
 
 ```
+## Survey steps completed
+- 1a. Changed files: <count> files
+- 1b. Type-check: pass/fail
+- 1c. Lint: <N problems> (<E errors>, <W warnings>)
+- 1d. Recent commits: <count> commits scanned
+- 1e. Network resilience audit: <N findings: C critical, H high, M medium, L low> | "no findings" | "skipped — <reason>"
+
 ## Scope chosen
 <the theme you picked>
 
@@ -238,5 +256,5 @@ When you're done, output a summary in this format:
 
 ## Deferred follow-ups
 - #<issue> — <title> (urgency)
-- #<issue> — <title> (urgency>
+- #<issue> — <title> (urgency)
 ```

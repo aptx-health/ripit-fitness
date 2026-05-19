@@ -40,6 +40,17 @@ function getQueue(): Queue {
 }
 
 /**
+ * Closes the lazily-created singleton Queue and its Redis connection.
+ * Intended for test teardown — production never needs to call this.
+ */
+export async function closeCloneJobsQueue(): Promise<void> {
+  if (queue) {
+    await queue.close()
+    queue = null
+  }
+}
+
+/**
  * Publishes a program clone job to the BullMQ queue.
  * The worker picks this up and processes the clone.
  */

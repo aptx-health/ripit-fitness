@@ -9,6 +9,30 @@ interface SignupRow {
   source: string | null
   experienceLevel: string | null
   firstWorkoutAt: string | null
+  signupIntent: string | null
+  welcomePath: string | null
+  welcomeMsToChoice: number | null
+}
+
+const INTENT_LABELS: Record<string, string> = {
+  new_to_apps: 'New to apps',
+  from_another_app: 'From another app',
+  returning_to_training: 'Returning to training',
+  just_curious: 'Just curious',
+}
+
+const PATH_LABELS: Record<string, string> = {
+  freestyle: 'Freestyle',
+  program: 'Program',
+  skipped: 'Skipped',
+}
+
+function formatMsToChoice(ms: number | null): string {
+  if (ms === null || ms === undefined) return ''
+  if (ms < 1000) return `${ms}ms`
+  const s = ms / 1000
+  if (s < 60) return `${s.toFixed(1)}s`
+  return `${Math.round(s / 60)}m`
 }
 
 function relativeTime(dateStr: string): string {
@@ -100,7 +124,9 @@ export default function AdminSignupsPage() {
           No signups in the last 30 days.
         </div>
       ) : (
-        <div className="border border-border rounded-lg overflow-x-auto">
+        <>
+          <FunnelSummary rows={rows} />
+          <div className="border border-border rounded-lg overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-card">
@@ -115,6 +141,12 @@ export default function AdminSignupsPage() {
                 </th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground uppercase tracking-wider text-xs">
                   Experience
+                </th>
+                <th className="text-left px-4 py-3 font-semibold text-muted-foreground uppercase tracking-wider text-xs">
+                  Intent
+                </th>
+                <th className="text-left px-4 py-3 font-semibold text-muted-foreground uppercase tracking-wider text-xs">
+                  Welcome path
                 </th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground uppercase tracking-wider text-xs">
                   First workout?
@@ -153,15 +185,103 @@ export default function AdminSignupsPage() {
                     )}
                   </td>
                   <td className="px-4 py-3">
+                    {row.signupIntent ? (
+                      <span className="text-foreground">
+                        {INTENT_LABELS[row.signupIntent] ?? row.signupIntent}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">&mdash;</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    {row.welcomePath ? (
+                      <span className="text-foreground">
+                        {PATH_LABELS[row.welcomePath] ?? row.welcomePath}
+                        {row.welcomeMsToChoice !== null && (
+                          <span className="text-muted-foreground ml-1">
+                            ({formatMsToChoice(row.welcomeMsToChoice)})
+                          </span>
+                        )}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">&mdash;</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
                     <FirstWorkoutCell firstWorkoutAt={row.firstWorkoutAt} />
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+function FunnelSummary({ rows }: { rows: SignupRow[] }) {
+  const total = rows.length
+  const experienced = rows.filter((r) => r.experienceLevel === 'experienced').length
+  const freestyle = rows.filter((r) => r.welcomePath === 'freestyle').length
+  const program = rows.filter((r) => r.welcomePath === 'program').length
+  const skipped = rows.filter((r) => r.welcomePath === 'skipped').length
+  const noPath = rows.filter((r) => r.welcomePath === null).length
+  const firstWorkout = rows.filter((r) => r.firstWorkoutAt !== null).length
+
+  const intentCounts = rows.reduce<Record<string, number>>((acc, r) => {
+    if (r.signupIntent) acc[r.signupIntent] = (acc[r.signupIntent] || 0) + 1
+    return acc
+  }, {})
+  const intentAnswered = Object.values(intentCounts).reduce((a, b) => a + b, 0)
+
+  return (
+    <div className="border border-border rounded-lg p-4 bg-card space-y-4">
+      <div>
+        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+          Welcome funnel (experienced users only)
+        </h2>
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+          <Stat label="Experienced signups" value={experienced} />
+          <Stat label="Freestyle" value={freestyle} of={experienced} />
+          <Stat label="Program" value={program} of={experienced} />
+          <Stat label="Skipped" value={skipped} of={experienced} />
+          <Stat label="Never reached path" value={noPath} of={experienced} />
+          <Stat label="Completed first workout" value={firstWorkout} of={total} />
+        </div>
+      </div>
+      {intentAnswered > 0 && (
+        <div>
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+            Intent ({intentAnswered}/{experienced} answered)
+          </h2>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+            {Object.entries(intentCounts)
+              .sort((a, b) => b[1] - a[1])
+              .map(([key, count]) => (
+                <Stat
+                  key={key}
+                  label={INTENT_LABELS[key] ?? key}
+                  value={count}
+                  of={intentAnswered}
+                />
+              ))}
+          </div>
         </div>
       )}
     </div>
+  )
+}
+
+function Stat({ label, value, of }: { label: string; value: number; of?: number }) {
+  const pct = of && of > 0 ? Math.round((value / of) * 100) : null
+  return (
+    <span className="text-foreground">
+      <span className="font-semibold">{value}</span>
+      {pct !== null && <span className="text-muted-foreground"> ({pct}%)</span>}
+      <span className="text-muted-foreground ml-1">{label}</span>
+    </span>
   )
 }
 

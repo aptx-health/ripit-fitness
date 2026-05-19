@@ -3,7 +3,7 @@ name: security-scanner
 description: >
   Scans the codebase for security vulnerabilities, outdated
   dependencies with known CVEs, and common security anti-patterns.
-tools: Bash, Read, Edit, Write, Glob, Grep, Task
+tools: Bash, Read, Edit, Write, Glob, Grep, Task, WebFetch, WebSearch
 mode: proactive
 output: issue
 context:
@@ -54,6 +54,18 @@ fd -e ts -e tsx lib | wc -l
 # What's changed since the last scan
 gh issue list --label security --limit 5
 git log --oneline --since='14 days ago' -- app/api lib prisma next.config.ts package.json
+
+# Dedup corpus — build a list of recent security issues + PRs to check findings against
+# before filing. Save this output; you'll grep it in Step 3 before every `gh issue create`.
+gh issue list --label security --state all --limit 50 \
+  --json number,title,state,labels,updatedAt > /tmp/sec-recent-issues.json
+gh pr list --state all --limit 50 \
+  --search "label:security OR security in:title" \
+  --json number,title,state,headRefName,updatedAt > /tmp/sec-recent-prs.json
+
+# Snapshot key versions for the external CVE sweep (Step 3.1b)
+node -e 'const p=require("./package.json"); console.log(JSON.stringify({deps:p.dependencies,dev:p.devDependencies},null,2))' | head -80
+grep -hE "postgres:|redis:|node:" docker-compose*.yml Dockerfile* cloud-functions/*/Dockerfile 2>/dev/null | sort -u
 ```
 
 ## Step 2: Decide scope
@@ -168,6 +180,7 @@ gh issue edit <number> --title "Security Scan: $(date +%Y-%m-%d) - <N> findings"
 ## Scan categories
 
 - **Dependency vulnerabilities** (Step 3.1) — always run if `npm audit` shows high/critical
+- **External CVE feed sweep** (Step 3.1b) — always run; catches advisories npm audit misses
 - **Prisma / IDOR scoping** (Step 3.2) — always run if API routes changed recently
 - **Auth enforcement** (Step 3.3) — always run if API routes changed recently
 - **API route patterns** (Step 3.4) — periodic
@@ -179,6 +192,36 @@ Write a short scope note: which categories you'll scan this run and why.
 ## Step 3 — File issues immediately as findings surface
 
 **Do not batch findings to the end.** File each finding as a GitHub issue the moment you confirm it. If your run bails halfway through, the issues you already filed are safe.
+
+### Dedup check (REQUIRED before every `gh issue create`)
+
+The `recent_run:168` frontmatter dedup only stops a *whole agent run* from repeating within 7 days. It does NOT stop individual findings from duplicating existing issues or PRs. Before filing anything, check:
+
+```bash
+# 1. Search open + recently-closed issues for the same finding
+gh issue list --label security --state all --limit 100 \
+  --search "<keyword from finding, e.g. package name, CVE id, file path>"
+
+# 2. Search PRs — an open or recently-merged PR may already be fixing it
+gh pr list --state all --limit 50 \
+  --search "<same keyword>" \
+  --json number,title,state,headRefName,mergedAt
+
+# 3. For CVE-feed findings, also grep the cached corpus from Step 1
+grep -i "<CVE-id-or-package>" /tmp/sec-recent-issues.json /tmp/sec-recent-prs.json
+```
+
+**Dedup rules:**
+
+- **Open issue exists with same root cause** → do NOT file. Instead, post a comment on the existing issue with the new evidence (new file:line, new advisory link, fresh scan date). Bump urgency label only if your evidence is materially stronger.
+- **Closed issue (<90 days) with same root cause** → likely resolved or wont-fix. Read the closing reason. If the issue regressed (closed as fixed but finding is back), file a NEW issue titled `Regression: <original title>` and link the prior one. Otherwise skip and note in main scan body under "Previously triaged".
+- **Open or recently-merged PR addresses it** → do NOT file. Note in main scan body under "Fix in flight (#PR)".
+- **Closed/unmerged PR addressed it** → file the issue and reference why the prior PR didn't land (`#NNN closed without merge — re-surfacing`).
+- **Same category, different instance** (e.g., a *different* unscoped Prisma query than the one in an existing issue) → file separately, but cross-link the related issue.
+
+Match on root cause, not exact title. "Missing auth on /api/foo" and "Auth bypass in foo route" are the same finding.
+
+When in doubt: comment on the existing issue rather than opening a new one. Cleaning up duplicates costs more reviewer time than a missed finding costs.
 
 ### Urgency labels
 
@@ -244,6 +287,64 @@ npm audit --omit=dev --json
 ```
 
 File one issue per high/critical advisory (or group advisories by affected package if many come from the same dep). Include the advisory URL, affected package path (`npm explain <pkg>`), and fixed-in version.
+
+#### 3.1b External CVE feed sweep
+
+`npm audit` only knows about advisories that have landed in npm's feed and that map cleanly to packages in `package-lock.json`. It misses:
+
+- Newly-disclosed CVEs / zero-days before they propagate to npm's DB
+- Vulnerabilities in non-npm components: Postgres, Redis, Docker base images, k8s
+- Advisories in JS packages whose maintainer hasn't filed a GHSA yet but where a CVE or vendor advisory exists
+
+For each run, look up advisories published in the last **30 days** for these high-value targets and cross-reference against versions in this repo:
+
+**Target inventory** — extract current versions before searching:
+
+```bash
+# Direct deps + their installed versions
+jq -r '.dependencies, .devDependencies | to_entries[] | "\(.key) \(.value)"' package.json
+
+# Key packages worth a targeted lookup (versions resolved via npm ls)
+for pkg in next react prisma @prisma/client better-auth bullmq ioredis pino zod; do
+  npm ls "$pkg" --depth=0 2>/dev/null | grep -E "$pkg@" | head -1
+done
+
+# Container / infra versions
+grep -rE "postgres:|redis:" docker-compose*.yml Dockerfile* 2>/dev/null
+grep -rE "image:" cloud-functions/*/Dockerfile 2>/dev/null
+```
+
+**Lookups to perform** — use `WebFetch` against the GitHub Security Advisory API and `WebSearch` for vendor advisories / NVD:
+
+```
+# GHSA — authoritative, structured, free, no auth needed for public advisories
+WebFetch https://api.github.com/advisories?ecosystem=npm&package=<pkg>&severity=high
+WebFetch https://api.github.com/advisories?ecosystem=npm&package=<pkg>&severity=critical
+
+# For each non-npm component (Postgres 15, Redis 7, node:20 base image, etc.)
+WebSearch "<component> <major.minor> CVE 2026"
+WebSearch "<component> security advisory <current year>"
+```
+
+Targets to always sweep (adjust if package list changes):
+
+- `next` — Next.js has had several high-severity advisories (cache poisoning, SSRF in image optimizer); high-blast-radius
+- `better-auth` — relatively young auth library; check GHSA + repo security tab
+- `prisma` / `@prisma/client` — query engine and migration tooling
+- `bullmq` / `ioredis` — job queue handles user-triggered work
+- Postgres major version in `docker-compose*.yml` — check postgresql.org/support/security
+- Redis major version — check redis.io/docs/latest/operate/oss_and_stack/management/security/
+- Node base image tag in any Dockerfile — check nodejs.org/en/blog/vulnerability
+
+**What to file:**
+
+- An advisory whose **affected version range covers a version in this repo** → file an issue with `urgency:critical` if exploitable in our usage pattern, else `urgency:high`.
+- An advisory in the last 30 days for a package we use but whose range we're NOT in → note it in the main scan issue body under "Reviewed, not affected" (audit trail; no separate issue).
+- A CVE for Postgres/Redis/base image where we're behind the patched minor → `urgency:high`, infra remediation.
+
+**Caveats** — do NOT trust WebSearch summaries blindly. Always click through to the primary source (GHSA page, NVD entry, vendor advisory) via WebFetch and confirm the affected version range before filing. WebSearch results can be stale, hallucinated, or describe a different package with a similar name.
+
+If WebFetch / WebSearch is unavailable (tool error, rate-limited), record that in the main issue body and file a `needs-review` deferred issue so the next run picks up the sweep.
 
 #### 3.2 Prisma / IDOR scoping
 

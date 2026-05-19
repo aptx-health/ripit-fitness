@@ -35,7 +35,7 @@
     "bcrypt": "^6.0.0",
     "better-auth": "^1.4.19",
     "bullmq": "^5.76.2",
-    "lucide-react": "^0.577.0",
+    "lucide-react": "^1.16.0",
     "minio": "^8.0.7",
     "next": "16.2.6",
     "pg": "^8.20.0",
@@ -92,5 +92,10 @@
   "//lint-staged-note": "Biome runs on staged files via .husky/pre-commit before lint-staged",
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+  },
+  "overrides": {
+    "fast-uri": "^3.1.2",
+    "fast-xml-builder": "^1.2.0",
+    "kysely": "^0.28.17"
   }
 }

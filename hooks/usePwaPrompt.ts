@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import type { UserSettings } from '@/hooks/useUserSettings'
 
 const DAYS_BEFORE_REPROMPT = 14
