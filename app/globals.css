@@ -2607,36 +2607,3 @@ body > [data-training-widget] {
   animation: chip-gold-shine 7s ease-in-out infinite;
   pointer-events: none;
 }
-
-/* --- Pixel Drift Background (welcome screen ambient effect) --- */
-
-.pixel-drift-icon {
-  position: absolute;
-  bottom: -40px;
-  opacity: 0;
-  animation-name: pixel-drift;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-  will-change: transform, opacity;
-}
-
-.pixel-drift-icon svg {
-  display: block;
-  transform: scale(1.6);
-  transform-origin: center;
-  image-rendering: pixelated;
-  image-rendering: -moz-crisp-edges;
-  image-rendering: crisp-edges;
-  shape-rendering: crispEdges;
-}
-
-@keyframes pixel-drift {
-  0%   { transform: translate(0, 0);          opacity: 0; }
-  15%  { opacity: 0.22; }
-  85%  { transform: translate(60vw, -110vh);  opacity: 0.22; }
-  100% { transform: translate(70vw, -130vh);  opacity: 0; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .pixel-drift-icon { animation: none; opacity: 0; }
-}
