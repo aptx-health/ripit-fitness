@@ -3,10 +3,11 @@
 import { ArrowRight, CalendarDays, Zap } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
+import { PixelDriftBackground } from '@/components/effects/PixelDriftBackground'
 import { useToast } from '@/components/ToastProvider'
 import { LoadingFrog } from '@/components/ui/loading-frog'
-import { startFreestyleWorkout } from '@/lib/api/adhoc-workout'
 import { trackEvent } from '@/lib/analytics'
+import { startFreestyleWorkout } from '@/lib/api/adhoc-workout'
 import { clientLogger } from '@/lib/client-logger'
 
 const INTENT_OPTIONS = [
@@ -77,8 +78,9 @@ export default function WelcomePage() {
   }
 
   return (
-    <div className="bg-background min-h-[calc(100vh-4rem)] flex flex-col">
-      <div className="flex-1 max-w-md md:max-w-lg w-full mx-auto px-5 sm:px-6 py-10 flex flex-col">
+    <div className="bg-background min-h-[calc(100vh-4rem)] flex flex-col relative overflow-hidden">
+      <PixelDriftBackground />
+      <div className="flex-1 max-w-md md:max-w-lg w-full mx-auto px-5 sm:px-6 py-10 flex flex-col relative z-10">
         <header className="flex items-center gap-4 mb-12">
           <LoadingFrog size={44} speed={1.8} />
           <h1 className="text-4xl md:text-5xl font-bold text-foreground doom-title uppercase tracking-wider leading-none">
@@ -97,7 +99,39 @@ export default function WelcomePage() {
           />
         )}
       </div>
+      <ScrollHintFade key={step} />
     </div>
+  )
+}
+
+function ScrollHintFade() {
+  const [show, setShow] = useState(false)
+
+  useEffect(() => {
+    function update() {
+      const docHeight = document.documentElement.scrollHeight
+      const scrollBottom = window.innerHeight + window.scrollY
+      // Show when there's >40px of content below the current viewport bottom
+      setShow(docHeight - scrollBottom > 40)
+    }
+    update()
+    window.addEventListener('scroll', update, { passive: true })
+    window.addEventListener('resize', update)
+    return () => {
+      window.removeEventListener('scroll', update)
+      window.removeEventListener('resize', update)
+    }
+  }, [])
+
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none fixed left-0 right-0 h-16 bottom-[80px] md:bottom-0 z-20 transition-opacity duration-300"
+      style={{
+        opacity: show ? 1 : 0,
+        background: 'linear-gradient(to bottom, transparent, var(--background))',
+      }}
+    />
   )
 }
 

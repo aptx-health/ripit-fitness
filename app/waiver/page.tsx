@@ -1,8 +1,10 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Suspense, useState } from 'react'
 import { CURRENT_WAIVER_VERSION, WAIVER_TEXT } from '@/lib/constants/waiver'
+
+const SAFE_NEXT_PATH = /^\/[a-zA-Z0-9/_?=&%-]*$/
 
 /**
  * Waiver acceptance screen.
@@ -12,7 +14,20 @@ import { CURRENT_WAIVER_VERSION, WAIVER_TEXT } from '@/lib/constants/waiver'
  * that wires up the backend acceptance flow.
  */
 export default function WaiverPage() {
+  // useSearchParams must be inside a Suspense boundary for Next 15 static
+  // pre-rendering. The form itself is fast enough that null fallback is fine.
+  return (
+    <Suspense fallback={null}>
+      <WaiverForm />
+    </Suspense>
+  )
+}
+
+function WaiverForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const nextParam = searchParams.get('next')
+  const next = nextParam && SAFE_NEXT_PATH.test(nextParam) ? nextParam : '/'
   const [accepting, setAccepting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -33,8 +48,8 @@ export default function WaiverPage() {
         return
       }
 
-      // Navigate to the main app now that acceptance is stored
-      router.push('/')
+      // Navigate to the intended destination now that acceptance is stored
+      router.push(next)
       router.refresh()
     } catch {
       setError('Network error. Please try again.')

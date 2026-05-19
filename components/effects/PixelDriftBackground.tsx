@@ -1,0 +1,65 @@
+'use client'
+
+import { Dumbbell, Flame, Plus, Star, Trophy, Zap } from 'lucide-react'
+import type { CSSProperties } from 'react'
+
+interface DriftConfig {
+  Icon: typeof Dumbbell
+  size: number
+  color: string
+  duration: number
+  delay: number
+  startX: string
+}
+
+const DRIFT_ICONS: DriftConfig[] = [
+  { Icon: Dumbbell, size: 20, color: 'var(--primary)', duration: 18, delay: 0, startX: '8%' },
+  { Icon: Zap, size: 16, color: 'var(--accent)', duration: 22, delay: 2, startX: '22%' },
+  { Icon: Trophy, size: 24, color: 'var(--primary)', duration: 14, delay: 4, startX: '38%' },
+  { Icon: Flame, size: 16, color: 'var(--accent)', duration: 20, delay: 6, startX: '54%' },
+  { Icon: Star, size: 24, color: 'var(--primary)', duration: 16, delay: 8, startX: '68%' },
+  { Icon: Plus, size: 20, color: 'var(--accent)', duration: 19, delay: 10, startX: '82%' },
+  { Icon: Flame, size: 24, color: 'var(--accent)', duration: 17, delay: 12, startX: '15%' },
+  { Icon: Dumbbell, size: 16, color: 'var(--primary)', duration: 21, delay: 14, startX: '45%' },
+  { Icon: Flame, size: 20, color: 'var(--primary)', duration: 15, delay: 16, startX: '75%' },
+  { Icon: Trophy, size: 16, color: 'var(--accent)', duration: 18, delay: 18, startX: '30%' },
+  { Icon: Star, size: 20, color: 'var(--accent)', duration: 23, delay: 20, startX: '60%' },
+]
+
+export function PixelDriftBackground() {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none fixed inset-0 overflow-hidden z-0"
+    >
+      <style>{`
+        @keyframes pixel-drift {
+          0%   { transform: translate(0, 0); opacity: 0; }
+          15%  { opacity: 0.22; }
+          85%  { transform: translate(60vw, -110vh); opacity: 0.22; }
+          100% { transform: translate(70vw, -130vh); opacity: 0; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          [data-pixel-drift] { animation: none !important; opacity: 0 !important; }
+        }
+      `}</style>
+      {DRIFT_ICONS.map((cfg, i) => {
+        const style: CSSProperties = {
+          position: 'absolute',
+          bottom: '-40px',
+          left: cfg.startX,
+          opacity: 0,
+          color: cfg.color,
+          willChange: 'transform, opacity',
+          animation: `pixel-drift ${cfg.duration}s ${cfg.delay}s linear infinite`,
+        }
+        const Icon = cfg.Icon
+        return (
+          <span key={i} data-pixel-drift style={style}>
+            <Icon size={cfg.size} strokeWidth={2.5} />
+          </span>
+        )
+      })}
+    </div>
+  )
+}
