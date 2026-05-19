@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { CURRENT_WAIVER_VERSION, WAIVER_TEXT } from '@/lib/constants/waiver'
 
 const SAFE_NEXT_PATH = /^\/[a-zA-Z0-9/_?=&%-]*$/
@@ -14,6 +14,16 @@ const SAFE_NEXT_PATH = /^\/[a-zA-Z0-9/_?=&%-]*$/
  * that wires up the backend acceptance flow.
  */
 export default function WaiverPage() {
+  // useSearchParams must be inside a Suspense boundary for Next 15 static
+  // pre-rendering. The form itself is fast enough that null fallback is fine.
+  return (
+    <Suspense fallback={null}>
+      <WaiverForm />
+    </Suspense>
+  )
+}
+
+function WaiverForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const nextParam = searchParams.get('next')
