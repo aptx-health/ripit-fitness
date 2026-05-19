@@ -464,6 +464,15 @@ Helper functions in `/lib/test/factories.ts`:
 - Test authorization and validation
 - Avoid excessive permutations
 
+### Browser-Driven UI Verification (Playwright)
+
+For UI/UX changes — sizing, layout, mobile responsiveness, copy that depends on context — drive the actual flow in a real browser and screenshot before pushing. Visual problems often don't show up in diffs.
+
+- **Skill:** `webapp-testing` (`.claude/skills/webapp-testing/SKILL.md`) wraps the generic Playwright workflow.
+- **Project recipes:** See `/docs/PLAYWRIGHT_RECIPES.md` for Ripit-specific selectors (login form, chip sheet, bottom nav), common flows (e.g. reaching the post-workout rollup), and layout-measurement techniques. Add a recipe there any time you spend more than 5 minutes discovering a selector or flow that's likely to be reused.
+- **Example:** `.claude/skills/webapp-testing/examples/ripit-rollup.py` is a working script that logs in, seeds a freestyle via the API, completes it, and screenshots the rollup modal.
+- Dev server port: **3700**. Test user: `dmays@test.com / password`.
+
 ## Development Workflow
 
 ### Git Workflow
