@@ -23,7 +23,7 @@ const PAGES = [
           Just follow along and log what you did. No planning required.
         </p>
         <p className="text-muted-foreground">
-          Everything in your program uses equipment at this gym — no guesswork.
+          Everything in your program uses equipment at this gym. No guesswork.
         </p>
       </>
     ),
@@ -33,7 +33,7 @@ const PAGES = [
     content: (
       <>
         <p className="text-muted-foreground mb-3">
-          Controlled reps at moderate effort beat heavy weight with sloppy form. Your first week, pick weights that feel almost too easy — you&apos;ll dial it in.
+          Controlled reps at moderate effort beat heavy weight with sloppy form. Your first week, pick weights that feel almost too easy; you&apos;ll dial it in.
         </p>
         <p className="text-muted-foreground mb-4">
           A good rule of thumb: after each set, you should feel like you could have done 2-3 more reps. If you&apos;re grinding out every rep, go lighter.
@@ -52,7 +52,7 @@ const PAGES = [
           Everyone in the gym started somewhere. Nobody is watching you as closely as you think.
         </p>
         <p className="text-muted-foreground mb-3">
-          Wipe down equipment when you&apos;re done, rerack your weights, and don&apos;t camp on a machine while scrolling — that&apos;s really it.
+          Wipe down equipment when you&apos;re done, rerack your weights, and don&apos;t camp on a machine while scrolling. That&apos;s really it.
         </p>
         <p className="text-muted-foreground mb-4">
           If you&apos;re unsure how a machine works, ask someone. Gym regulars genuinely like helping.
@@ -68,7 +68,7 @@ const PAGES = [
     content: (
       <>
         <p className="text-muted-foreground mb-3">
-          Feeling sore a day or two after your first workout is completely normal — especially the first week.
+          Feeling sore a day or two after your first workout is completely normal, especially the first week.
         </p>
         <p className="text-muted-foreground mb-3">
           Sharp pain during a lift is not. Stop, lower the weight, or skip that exercise.

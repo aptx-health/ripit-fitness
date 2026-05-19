@@ -84,7 +84,7 @@ export function WarmupInterstitial({ open, onContinue, onCancel, onDismissPerman
               Your first sets are warm-ups
             </h3>
             <p className="text-sm text-muted-foreground">
-              Each exercise starts with warm-up sets — use a weight that feels easy. Focus on the movement, not the load. More complex lifts have more warm-up sets built in.
+              Each exercise starts with warm-up sets. Use a weight that feels easy and focus on the movement, not the load. More complex lifts have more warm-up sets built in.
             </p>
           </div>
         </div>

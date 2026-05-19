@@ -218,7 +218,7 @@ export default function AdHocLoggerView({
   const onRetryToast = useCallback(
     (label: string) =>
       ({ attempt }: { attempt: number }) => {
-        toast.warning('Slow connection', `${label} — retrying (attempt ${attempt + 1})…`)
+        toast.warning('Slow connection', `${label}: retrying (attempt ${attempt + 1})…`)
       },
     [toast]
   )
