@@ -23,7 +23,7 @@ If `doppler run` fails with "You must specify a project", this is why.
 ## Project-specific guidance
 
 - **Build**: `doppler run -- npm run build`
-- **Test**: `perl -e 'alarm 120; exec @ARGV' doppler run -- npm test` (2 min timeout -- if it hangs, move on)
+- **Test**: `perl -e 'alarm 120; exec @ARGV' npm test` (2 min timeout -- if it hangs, move on). No doppler needed — tests use Testcontainers for Postgres/Redis and manage their own env.
 - **Lint**: `npm run lint` (no doppler needed)
 - **Type-check**: `npm run type-check` (no doppler needed)
 - **Prisma generate**: `doppler run -- npx prisma@6.19.0 generate`
