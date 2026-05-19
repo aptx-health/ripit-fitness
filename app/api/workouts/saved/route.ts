@@ -7,7 +7,7 @@ import { logger } from '@/lib/logger'
 import { checkRateLimit, workoutActionLimiter } from '@/lib/rate-limit'
 import type { SavedWorkoutData, SavedWorkoutExercise } from '@/types/saved-workout'
 
-const MAX_NAME_LENGTH = 200
+const MAX_NAME_LENGTH = 100
 const MAX_NOTES_LENGTH = 2000
 
 interface SavePayload {

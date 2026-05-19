@@ -16,7 +16,7 @@ interface WorkoutRollupModalProps {
 
 type View = 'stats' | 'feedback' | 'save'
 
-const MAX_SAVED_NAME_LENGTH = 200
+const MAX_SAVED_NAME_LENGTH = 100
 const MAX_SAVED_NOTES_LENGTH = 2000
 
 function formatDuration(seconds: number): string {
