@@ -30,6 +30,7 @@ export type WorkoutRollup = {
   workoutId: string | null
   workoutName: string | null
   isCommunitySourced: boolean
+  isAdHoc: boolean
 }
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000
@@ -100,6 +101,7 @@ export async function computeWorkoutRollup(
       startedAt: true,
       workoutId: true,
       name: true,
+      isAdHoc: true,
       workout: {
         select: {
           name: true,
@@ -178,6 +180,7 @@ export async function computeWorkoutRollup(
       workoutId: completion.workoutId,
       workoutName,
       isCommunitySourced,
+      isAdHoc: completion.isAdHoc,
     }
   }
 
@@ -281,5 +284,6 @@ export async function computeWorkoutRollup(
     workoutId: completion.workoutId,
     workoutName,
     isCommunitySourced,
+    isAdHoc: completion.isAdHoc,
   }
 }
