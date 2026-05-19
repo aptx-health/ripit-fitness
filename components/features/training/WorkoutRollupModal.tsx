@@ -612,7 +612,30 @@ export function WorkoutRollupModal({ open, rollup, onClose }: WorkoutRollupModal
         </div>
 
         {/* Footer */}
-        <div className="shrink-0 px-4 py-3 border-t-2 border-border flex items-center gap-3">
+        <div className="shrink-0 border-t-2 border-border">
+          {view === 'stats' && canSave && (
+            <div className="px-4 pt-3">
+              {savedWorkoutId ? (
+                <Link
+                  href="/workouts/saved"
+                  className="flex w-full items-center justify-center gap-2 px-4 py-3 border-2 border-border bg-muted text-sm font-bold uppercase tracking-wider doom-focus-ring"
+                >
+                  <BookmarkCheck className="w-4 h-4 text-primary" />
+                  Workout Saved
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleOpenSave}
+                  className="flex w-full items-center justify-center gap-2 px-4 py-3 border-2 border-border bg-muted hover:bg-secondary/10 text-sm font-bold uppercase tracking-wider doom-focus-ring"
+                >
+                  <Bookmark className="w-4 h-4" />
+                  Save Workout
+                </button>
+              )}
+            </div>
+          )}
+          <div className="px-4 py-3 flex items-center gap-3">
           {view === 'stats' && (
             <>
               <button
@@ -623,30 +646,10 @@ export function WorkoutRollupModal({ open, rollup, onClose }: WorkoutRollupModal
                 <MessageSquarePlus className="w-4 h-4" />
                 Got feedback?
               </button>
-              {canSave && (
-                savedWorkoutId ? (
-                  <Link
-                    href="/workouts/saved"
-                    className="ml-auto flex items-center gap-2 px-5 py-3 border-2 border-border bg-muted text-sm font-bold uppercase tracking-wider whitespace-nowrap doom-focus-ring"
-                  >
-                    <BookmarkCheck className="w-4 h-4 text-primary" />
-                    Workout Saved
-                  </Link>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleOpenSave}
-                    className="ml-auto flex items-center gap-2 px-5 py-3 border-2 border-border bg-muted hover:bg-secondary/10 text-sm font-bold uppercase tracking-wider whitespace-nowrap doom-focus-ring"
-                  >
-                    <Bookmark className="w-4 h-4" />
-                    Save Workout
-                  </button>
-                )
-              )}
               <button
                 type="button"
                 onClick={onClose}
-                className={`${canSave ? '' : 'ml-auto'} px-6 py-3 bg-primary text-primary-foreground doom-button-3d font-bold text-base uppercase tracking-wider doom-focus-ring`}
+                className="ml-auto px-6 py-3 bg-primary text-primary-foreground doom-button-3d font-bold text-base uppercase tracking-wider doom-focus-ring"
               >
                 Done
               </button>
@@ -702,6 +705,7 @@ export function WorkoutRollupModal({ open, rollup, onClose }: WorkoutRollupModal
               Done
             </button>
           )}
+          </div>
         </div>
       </div>
     </div>
