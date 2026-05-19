@@ -627,19 +627,19 @@ export function WorkoutRollupModal({ open, rollup, onClose }: WorkoutRollupModal
                 savedWorkoutId ? (
                   <Link
                     href="/workouts/saved"
-                    className="ml-auto flex items-center gap-2 px-4 py-2.5 border-2 border-border bg-muted text-sm font-bold uppercase tracking-wider doom-focus-ring"
+                    className="ml-auto flex items-center gap-2 px-6 py-3 border-2 border-border bg-muted text-base font-bold uppercase tracking-wider doom-focus-ring"
                   >
-                    <BookmarkCheck className="w-4 h-4 text-primary" />
-                    Saved
+                    <BookmarkCheck className="w-5 h-5 text-primary" />
+                    Workout Saved
                   </Link>
                 ) : (
                   <button
                     type="button"
                     onClick={handleOpenSave}
-                    className="ml-auto flex items-center gap-2 px-4 py-2.5 border-2 border-border bg-muted hover:bg-secondary/10 text-sm font-bold uppercase tracking-wider doom-focus-ring"
+                    className="ml-auto flex items-center gap-2 px-6 py-3 border-2 border-border bg-muted hover:bg-secondary/10 text-base font-bold uppercase tracking-wider doom-focus-ring"
                   >
-                    <Bookmark className="w-4 h-4" />
-                    Save
+                    <Bookmark className="w-5 h-5" />
+                    Save Workout
                   </button>
                 )
               )}
