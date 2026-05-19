@@ -1,6 +1,6 @@
 'use client'
 
-import { Dumbbell, Plus, Zap } from 'lucide-react'
+import { Dumbbell, Flame, Plus, Star, Target, Trophy, Zap } from 'lucide-react'
 import type { CSSProperties } from 'react'
 
 interface DriftConfig {
@@ -15,13 +15,15 @@ interface DriftConfig {
 const DRIFT_ICONS: DriftConfig[] = [
   { Icon: Dumbbell, size: 20, color: 'var(--primary)', duration: 18, delay: 0, startX: '8%' },
   { Icon: Zap, size: 16, color: 'var(--accent)', duration: 22, delay: 2, startX: '22%' },
-  { Icon: Plus, size: 24, color: 'var(--primary)', duration: 14, delay: 4, startX: '38%' },
-  { Icon: Dumbbell, size: 16, color: 'var(--accent)', duration: 20, delay: 6, startX: '54%' },
-  { Icon: Zap, size: 24, color: 'var(--primary)', duration: 16, delay: 8, startX: '68%' },
+  { Icon: Trophy, size: 24, color: 'var(--primary)', duration: 14, delay: 4, startX: '38%' },
+  { Icon: Flame, size: 16, color: 'var(--accent)', duration: 20, delay: 6, startX: '54%' },
+  { Icon: Star, size: 24, color: 'var(--primary)', duration: 16, delay: 8, startX: '68%' },
   { Icon: Plus, size: 20, color: 'var(--accent)', duration: 19, delay: 10, startX: '82%' },
-  { Icon: Dumbbell, size: 24, color: 'var(--accent)', duration: 17, delay: 12, startX: '15%' },
-  { Icon: Zap, size: 20, color: 'var(--primary)', duration: 21, delay: 14, startX: '45%' },
-  { Icon: Plus, size: 16, color: 'var(--accent)', duration: 15, delay: 16, startX: '75%' },
+  { Icon: Target, size: 24, color: 'var(--accent)', duration: 17, delay: 12, startX: '15%' },
+  { Icon: Dumbbell, size: 16, color: 'var(--primary)', duration: 21, delay: 14, startX: '45%' },
+  { Icon: Flame, size: 20, color: 'var(--primary)', duration: 15, delay: 16, startX: '75%' },
+  { Icon: Trophy, size: 16, color: 'var(--accent)', duration: 18, delay: 18, startX: '30%' },
+  { Icon: Star, size: 20, color: 'var(--accent)', duration: 23, delay: 20, startX: '60%' },
 ]
 
 const SVG_STYLE: CSSProperties = {
