@@ -35,7 +35,7 @@
     "bcrypt": "^6.0.0",
     "better-auth": "^1.4.19",
     "bullmq": "^5.76.2",
-    "lucide-react": "^0.577.0",
+    "lucide-react": "^1.16.0",
     "minio": "^8.0.7",
     "next": "16.2.6",
     "pg": "^8.20.0",
