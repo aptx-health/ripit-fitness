@@ -4,6 +4,8 @@ description: >
   Specialized agent for fixing bugs. Reproduces the issue first,
   writes a regression test, then implements the fix.
 tools: Bash, Read, Edit, Write, Glob, Grep
+skills:
+  - test-summary
 mode: reactive
 output: pr
 context:

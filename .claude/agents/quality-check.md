@@ -6,6 +6,9 @@ description: >
 tools: Bash, Read, Edit, Write, Glob, Grep, Task
 skills:
   - network-resilience-audit
+  - prisma-check
+  - impeccable
+  - test-summary
 mode: proactive
 output: pr
 stages:
