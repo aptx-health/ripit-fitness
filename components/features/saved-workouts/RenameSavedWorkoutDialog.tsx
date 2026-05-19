@@ -84,7 +84,12 @@ export default function RenameSavedWorkoutDialog({ item, onOpenChange, onSuccess
               value={name}
               maxLength={NAME_MAX_LENGTH}
               onChange={(e) => setName(e.target.value)}
-              autoFocus
+              ref={(el) => {
+                if (el) {
+                  el.focus()
+                  el.select()
+                }
+              }}
               className="doom-focus-ring w-full border-2 border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary"
             />
             <div className="mt-1 flex justify-between text-xs text-muted-foreground">
