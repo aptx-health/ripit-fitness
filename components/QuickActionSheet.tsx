@@ -119,11 +119,11 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
   useEffect(() => {
     if (!open) return
     let cancelled = false
-    fetchJsonWithRetry<{ count: number }>('/api/workouts/saved', {
+    fetchJsonWithRetry<{ saved: Array<{ id: string }> }>('/api/workouts/saved', {
       cache: 'no-store',
     })
       .then((data) => {
-        if (!cancelled) setSavedWorkoutCount(data.count ?? 0)
+        if (!cancelled) setSavedWorkoutCount(data.saved?.length ?? 0)
       })
       .catch((err) => {
         clientLogger.error('Failed to load saved workouts count:', err)

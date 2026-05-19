@@ -18,39 +18,36 @@ interface SavePayload {
 
 /**
  * GET /api/workouts/saved
- *
- * Lightweight listing for the QuickActionSheet entrypoint and the future
- * `/workouts/saved` index. v1 only needs `count` for the sheet visibility
- * check, but we also return a slim listing so the index page can reuse it.
+ * Lists the current user's saved workouts, sorted by
+ * lastUsedAt DESC NULLS LAST, createdAt DESC.
  */
-export async function GET() {
+export async function GET(_request: NextRequest) {
   try {
     const { user, error } = await getCurrentUser()
+
     if (error || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const savedWorkouts = await prisma.savedWorkout.findMany({
+    const saved = await prisma.savedWorkout.findMany({
       where: { userId: user.id },
+      orderBy: [
+        { lastUsedAt: { sort: 'desc', nulls: 'last' } },
+        { createdAt: 'desc' },
+      ],
       select: {
         id: true,
         name: true,
+        notes: true,
         exerciseCount: true,
         lastUsedAt: true,
         createdAt: true,
       },
-      orderBy: [{ lastUsedAt: 'desc' }, { createdAt: 'desc' }],
     })
 
-    return NextResponse.json({
-      count: savedWorkouts.length,
-      savedWorkouts,
-    })
-  } catch (err) {
-    logger.error(
-      { error: err, context: 'saved-workout-list' },
-      'Failed to list saved workouts'
-    )
+    return NextResponse.json({ saved })
+  } catch (error) {
+    logger.error({ error, context: 'saved-workouts-list' }, 'Failed to list saved workouts')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
