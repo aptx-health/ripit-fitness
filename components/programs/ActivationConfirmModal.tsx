@@ -263,7 +263,7 @@ export default function ActivationConfirmModal({
 
         {hasHistory && (
           <p className="text-base text-muted-foreground mb-6">
-            {pluralize(historyState.completionCount, 'workout')} logged — continue or start fresh?
+            {pluralize(historyState.completionCount, 'workout')} logged. Continue or start fresh?
           </p>
         )}
 

@@ -255,7 +255,7 @@ export default function ConsolidatedProgramsView({
           ) : (
             <div className="border border-border border-l-4 border-l-muted-foreground bg-card doom-noise p-3 sm:p-4">
               <p className="text-sm text-muted-foreground">
-                No active program — activate or browse one below
+                No active program. Activate or browse one below.
               </p>
             </div>
           )}

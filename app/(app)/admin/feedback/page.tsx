@@ -392,7 +392,7 @@ export default function AdminFeedbackPage() {
                     )}
                     {item.refinements?.length > 0 && (
                       <span className="text-sm text-muted-foreground">
-                        — {item.refinements.map((r) => REFINEMENT_LABELS[r] || r.replace(/_/g, ' ')).join(', ')}
+                        ({item.refinements.map((r) => REFINEMENT_LABELS[r] || r.replace(/_/g, ' ')).join(', ')})
                       </span>
                     )}
                     {item.message ? (

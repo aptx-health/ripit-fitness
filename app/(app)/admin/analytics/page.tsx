@@ -115,7 +115,7 @@ export default function AdminAnalyticsPage() {
           <MetricCard
             label="Avg Workouts / User / Week"
             value={data.usage.avgWorkoutsPerUserPerWeek}
-            info="Average workouts each active user finished per week over the last 4 weeks. A casual lifter hits 2–3. Don't panic at low numbers early on — a handful of committed beta users is a win."
+            info="Average workouts each active user finished per week over the last 4 weeks. A casual lifter hits 2–3. Don't panic at low numbers early on; a handful of committed beta users is a win."
           />
           <MetricCard
             label="Completion Rate"
@@ -159,12 +159,12 @@ export default function AdminAnalyticsPage() {
           <MetricCard
             label="Daily Active"
             value={data.retention.dau}
-            info="DAU = Daily Active Users. How many different users finished a workout today. With a small beta, this will often be 0 or 1 — that's normal. Watch the trend over weeks, not day to day."
+            info="DAU = Daily Active Users. How many different users finished a workout today. With a small beta, this will often be 0 or 1, and that's normal. Watch the trend over weeks, not day to day."
           />
           <MetricCard
             label="Weekly Active"
             value={data.retention.wau}
-            info="WAU = Weekly Active Users. How many different users finished at least one workout in the last 7 days. This is the most useful number for a strength app — most people lift 2–4x/week, not daily."
+            info="WAU = Weekly Active Users. How many different users finished at least one workout in the last 7 days. This is the most useful number for a strength app, since most people lift 2–4x/week, not daily."
           />
           <MetricCard
             label="Monthly Active"
@@ -210,7 +210,7 @@ export default function AdminAnalyticsPage() {
                 <MetricCard
                   label="Slow 25%"
                   value={data.retention.timeToFirstWorkout.p75}
-                  info="p75 = '75th percentile.' Three quarters of users were faster than this. If this number is huge, a lot of people are signing up and then stalling before they ever lift — onboarding may need work."
+                  info="p75 = '75th percentile.' Three quarters of users were faster than this. If this number is huge, a lot of people are signing up and then stalling before they ever lift, and onboarding may need work."
                 />
               </div>
             )}
@@ -225,8 +225,8 @@ export default function AdminAnalyticsPage() {
           <p className="text-xs text-muted-foreground mb-3 max-w-2xl">
             A &ldquo;cohort&rdquo; is a group of users who signed up in the same week. This
             shows: of the people who signed up N weeks ago, what percent are
-            still lifting today? Retention in fitness apps is notoriously hard
-            — 10–20% is respectable, 30%+ is great.
+            still lifting today? Retention in fitness apps is notoriously hard;
+            10–20% is respectable, 30%+ is great.
           </p>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

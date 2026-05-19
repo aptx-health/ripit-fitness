@@ -135,7 +135,7 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
         onRetry: ({ attempt }) =>
           toast.warning(
             'Slow connection',
-            `Starting workout — retrying (attempt ${attempt + 1})…`
+            `Starting workout, retrying (attempt ${attempt + 1})…`
           ),
       })
       onOpenChange(false)
@@ -180,7 +180,7 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
       const onRetry = ({ attempt }: { attempt: number }) =>
         toast.warning(
           'Slow connection',
-          `Discarding draft — retrying (attempt ${attempt + 1})…`
+          `Discarding draft, retrying (attempt ${attempt + 1})…`
         )
       if (activeDraft.isAdHoc) {
         await discardAdHocWorkout(activeDraft.completionId, { onRetry })

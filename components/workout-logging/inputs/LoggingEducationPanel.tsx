@@ -32,11 +32,11 @@ const CONTENT: Record<Mode, ModeContent> = {
     tint: 'primary',
     heading: 'RECORDING WEIGHT',
     cards: [
-      { label: 'MACHINES', description: 'Read the number off the stack — plates are usually 10 lb / 5 kg each' },
+      { label: 'MACHINES', description: 'Read the number off the stack. Plates are usually 10 lb / 5 kg each.' },
       { label: 'DUMBBELLS', description: 'Log the weight of one dumbbell, not the pair combined' },
       { label: 'BODYWEIGHT', description: 'Leave at 0 unless you added a weight vest or belt' },
       { label: 'BARBELL', description: "Include the bar's weight (usually 45 lb / 20 kg)" },
-      { label: 'OTHER EQUIPMENT', description: "Smith-machine bar is ~15 lb, EZ-bar is ~25 lb — add them to your loaded plates" },
+      { label: 'OTHER EQUIPMENT', description: "Smith-machine bar is ~15 lb, EZ-bar is ~25 lb. Add them to your loaded plates." },
     ],
   },
   reps: {
@@ -45,7 +45,7 @@ const CONTENT: Record<Mode, ModeContent> = {
     cards: [
       { label: 'PER SIDE', description: 'For single-arm or single-leg work (unilateral), log the count of one side, not all combined' },
       { label: 'BREATHER MID-SET', description: "If you paused briefly but didn't rack the weight, it still counts as one set" },
-      { label: 'WOBBLY REP', description: 'A shaky rep counts as long as you completed the full range of motion — careful to watch your form!' },
+      { label: 'WOBBLY REP', description: 'A shaky rep counts as long as you completed the full range of motion. Careful to watch your form!' },
       { label: 'PARTIAL REP', description: "Half reps usually don't count toward your set total" },
     ],
   },
