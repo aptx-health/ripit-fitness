@@ -621,7 +621,7 @@ export function WorkoutRollupModal({ open, rollup, onClose }: WorkoutRollupModal
                   className="flex w-full items-center justify-center gap-2 px-4 py-3 border-2 border-border bg-muted text-sm font-bold uppercase tracking-wider doom-focus-ring"
                 >
                   <BookmarkCheck className="w-4 h-4 text-primary" />
-                  Workout Saved
+                  Saved to your workouts
                 </Link>
               ) : (
                 <button
@@ -630,7 +630,7 @@ export function WorkoutRollupModal({ open, rollup, onClose }: WorkoutRollupModal
                   className="flex w-full items-center justify-center gap-2 px-4 py-3 border-2 border-border bg-muted hover:bg-secondary/10 text-sm font-bold uppercase tracking-wider doom-focus-ring"
                 >
                   <Bookmark className="w-4 h-4" />
-                  Save Workout
+                  Save workout to repeat
                 </button>
               )}
             </div>
