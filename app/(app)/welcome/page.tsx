@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { useToast } from '@/components/ToastProvider'
 import { LoadingFrog } from '@/components/ui/loading-frog'
-import { startFreestyleWorkout } from '@/lib/api/adhoc-workout'
 import { trackEvent } from '@/lib/analytics'
+import { startFreestyleWorkout } from '@/lib/api/adhoc-workout'
 import { clientLogger } from '@/lib/client-logger'
 
 const INTENT_OPTIONS = [
@@ -97,7 +97,39 @@ export default function WelcomePage() {
           />
         )}
       </div>
+      <ScrollHintFade key={step} />
     </div>
+  )
+}
+
+function ScrollHintFade() {
+  const [show, setShow] = useState(false)
+
+  useEffect(() => {
+    function update() {
+      const docHeight = document.documentElement.scrollHeight
+      const scrollBottom = window.innerHeight + window.scrollY
+      // Show when there's >40px of content below the current viewport bottom
+      setShow(docHeight - scrollBottom > 40)
+    }
+    update()
+    window.addEventListener('scroll', update, { passive: true })
+    window.addEventListener('resize', update)
+    return () => {
+      window.removeEventListener('scroll', update)
+      window.removeEventListener('resize', update)
+    }
+  }, [])
+
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none fixed left-0 right-0 h-16 bottom-[80px] md:bottom-0 transition-opacity duration-300"
+      style={{
+        opacity: show ? 1 : 0,
+        background: 'linear-gradient(to bottom, transparent, var(--background))',
+      }}
+    />
   )
 }
 
