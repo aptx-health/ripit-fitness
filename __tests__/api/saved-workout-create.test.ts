@@ -1,6 +1,5 @@
 import type { PrismaClient, WorkoutCompletion } from '@prisma/client'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { buildSuggestedSavedWorkoutName } from '@/lib/saved-workouts/suggest-name'
 import { getTestDatabase } from '@/lib/test/database'
 import {
   createTestExerciseDefinition,
@@ -273,30 +272,5 @@ describe('POST /api/workouts/saved', () => {
     expect(res.ok).toBe(false)
     if (res.ok) return
     expect(res.status).toBe(404)
-  })
-})
-
-describe('buildSuggestedSavedWorkoutName', () => {
-  it('joins up to three names with middle dot', () => {
-    expect(
-      buildSuggestedSavedWorkoutName(['Bench Press', 'Row', 'OHP'])
-    ).toBe('Bench Press · Row · OHP')
-  })
-
-  it('appends "+ N more" when over the cap', () => {
-    expect(
-      buildSuggestedSavedWorkoutName(['A', 'B', 'C', 'D', 'E'])
-    ).toBe('A · B · C + 2 more')
-  })
-
-  it('falls back to "Saved Workout" on empty input', () => {
-    expect(buildSuggestedSavedWorkoutName([])).toBe('Saved Workout')
-  })
-
-  it('truncates over the max length', () => {
-    const longName = 'X'.repeat(80)
-    const out = buildSuggestedSavedWorkoutName([longName])
-    expect(out.length).toBeLessThanOrEqual(60)
-    expect(out.endsWith('…')).toBe(true)
   })
 })

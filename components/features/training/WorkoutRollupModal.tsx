@@ -4,9 +4,13 @@ import { Bookmark, BookmarkCheck, ChevronLeft, MessageSquarePlus, TrendingDown, 
 import Link from 'next/link'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
-import { buildSuggestedSavedWorkoutName } from '@/lib/saved-workouts/suggest-name'
 import type { RollupExercise, WorkoutRollup } from '@/lib/stats/workout-rollup'
 import { POST_SESSION_REFINEMENTS } from '@/types/feedback'
+
+const SAVED_NAME_DATE_FMT = new Intl.DateTimeFormat('en-US', {
+  month: 'long',
+  day: 'numeric',
+})
 
 interface WorkoutRollupModalProps {
   open: boolean
@@ -142,7 +146,7 @@ export function WorkoutRollupModal({ open, rollup, onClose }: WorkoutRollupModal
 
   const suggestedName = useMemo(() => {
     if (!rollup) return ''
-    return buildSuggestedSavedWorkoutName(rollup.exercises.map((e) => e.name))
+    return `Workout — ${SAVED_NAME_DATE_FMT.format(new Date())}`
   }, [rollup])
 
   const canSave = Boolean(
@@ -466,7 +470,7 @@ export function WorkoutRollupModal({ open, rollup, onClose }: WorkoutRollupModal
                   className="w-full px-3 py-2 bg-input border-2 border-border text-foreground text-base placeholder:text-muted-foreground placeholder:uppercase placeholder:tracking-wider placeholder:text-xs focus:outline-none focus:border-primary"
                 />
                 <p className="mt-1.5 text-xs text-muted-foreground">
-                  Default suggested from your top exercises — rename freely.
+                  Rename to something memorable so you can find it later.
                 </p>
               </div>
               <div>
