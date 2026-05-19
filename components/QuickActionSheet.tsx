@@ -13,6 +13,7 @@ import {
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useToast } from '@/components/ToastProvider'
+import { useUserSettings } from '@/hooks/useUserSettings'
 import {
   discardAdHocWorkout,
   startFreestyleWorkout,
@@ -21,7 +22,6 @@ import { FetchError, fetchJsonWithRetry } from '@/lib/api/fetch'
 import { discardDraft } from '@/lib/api/workout-sets'
 import { clientLogger } from '@/lib/client-logger'
 import { useDraftWorkout } from '@/lib/contexts/DraftWorkoutContext'
-import { useUserSettings } from '@/hooks/useUserSettings'
 
 type NextWorkout = {
   workoutId: string

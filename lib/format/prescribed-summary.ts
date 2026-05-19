@@ -70,7 +70,7 @@ export function formatPrescribedSummary(
   if (!repsLabel) return ''
 
   const intensity = showIntensity ? formatIntensity(set) : null
-  const weight = set.weight && set.weight.trim() ? set.weight.trim() : null
+  const weight = set.weight?.trim() ? set.weight.trim() : null
 
   if (weight && intensity) return `${repsLabel} @ ${weight}, ${intensity}`
   if (weight) return `${repsLabel} @ ${weight}`
