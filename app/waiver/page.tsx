@@ -1,8 +1,10 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { CURRENT_WAIVER_VERSION, WAIVER_TEXT } from '@/lib/constants/waiver'
+
+const SAFE_NEXT_PATH = /^\/[a-zA-Z0-9/_?=&%-]*$/
 
 /**
  * Waiver acceptance screen.
@@ -13,6 +15,9 @@ import { CURRENT_WAIVER_VERSION, WAIVER_TEXT } from '@/lib/constants/waiver'
  */
 export default function WaiverPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const nextParam = searchParams.get('next')
+  const next = nextParam && SAFE_NEXT_PATH.test(nextParam) ? nextParam : '/'
   const [accepting, setAccepting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -33,8 +38,8 @@ export default function WaiverPage() {
         return
       }
 
-      // Navigate to the main app now that acceptance is stored
-      router.push('/')
+      // Navigate to the intended destination now that acceptance is stored
+      router.push(next)
       router.refresh()
     } catch {
       setError('Network error. Please try again.')

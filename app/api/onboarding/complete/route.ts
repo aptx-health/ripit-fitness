@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { cloneCommunityProgram } from '@/lib/community/cloning'
+import { CURRENT_WAIVER_VERSION } from '@/lib/constants/waiver'
 import { prisma } from '@/lib/db'
 import { logger } from '@/lib/logger'
 import { checkRateLimit, programManagementLimiter } from '@/lib/rate-limit'
@@ -115,7 +116,19 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const redirect = experienceLevel === 'beginner' ? '/training?expand=first' : '/welcome'
+    const intended = experienceLevel === 'beginner' ? '/training?expand=first' : '/welcome'
+
+    // Route through waiver if the user hasn't accepted the current version
+    // yet. The waiver page reads ?next= and pushes there after acceptance,
+    // so fresh signups don't get short-circuited to Training by the
+    // post-waiver default redirect.
+    const waiverAccepted = await prisma.waiverAcceptance.findFirst({
+      where: { userId: user.id, waiverVersion: CURRENT_WAIVER_VERSION },
+      select: { id: true },
+    })
+    const redirect = waiverAccepted
+      ? intended
+      : `/waiver?next=${encodeURIComponent(intended)}`
 
     logger.info(
       { userId: user.id, experienceLevel, equipmentPreference, programId },
