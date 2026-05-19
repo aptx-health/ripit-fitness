@@ -26,14 +26,6 @@ const DRIFT_ICONS: DriftConfig[] = [
   { Icon: Star, size: 20, color: 'var(--accent)', duration: 23, delay: 20, startX: '60%' },
 ]
 
-const SVG_STYLE: CSSProperties = {
-  display: 'block',
-  transform: 'scale(1.6)',
-  transformOrigin: 'center',
-  shapeRendering: 'crispEdges',
-  imageRendering: 'pixelated',
-}
-
 export function PixelDriftBackground() {
   return (
     <div
@@ -52,7 +44,6 @@ export function PixelDriftBackground() {
         }
       `}</style>
       {DRIFT_ICONS.map((cfg, i) => {
-        const Icon = cfg.Icon
         const style: CSSProperties = {
           position: 'absolute',
           bottom: '-40px',
@@ -62,11 +53,10 @@ export function PixelDriftBackground() {
           willChange: 'transform, opacity',
           animation: `pixel-drift ${cfg.duration}s ${cfg.delay}s linear infinite`,
         }
+        const Icon = cfg.Icon
         return (
           <span key={i} data-pixel-drift style={style}>
-            <span style={SVG_STYLE}>
-              <Icon size={cfg.size} strokeWidth={2.5} />
-            </span>
+            <Icon size={cfg.size} strokeWidth={2.5} />
           </span>
         )
       })}
