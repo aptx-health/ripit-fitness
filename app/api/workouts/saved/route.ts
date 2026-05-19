@@ -17,6 +17,48 @@ interface SavePayload {
 }
 
 /**
+ * GET /api/workouts/saved
+ *
+ * Lightweight listing for the QuickActionSheet entrypoint and the future
+ * `/workouts/saved` index. v1 only needs `count` for the sheet visibility
+ * check, but we also return a slim listing so the index page can reuse it.
+ */
+export async function GET() {
+  try {
+    const { user, error } = await getCurrentUser()
+    if (error || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const savedWorkouts = await prisma.savedWorkout.findMany({
+      where: { userId: user.id },
+      select: {
+        id: true,
+        name: true,
+        exerciseCount: true,
+        lastUsedAt: true,
+        createdAt: true,
+      },
+      orderBy: [{ lastUsedAt: 'desc' }, { createdAt: 'desc' }],
+    })
+
+    return NextResponse.json({
+      count: savedWorkouts.length,
+      savedWorkouts,
+    })
+  } catch (err) {
+    logger.error(
+      { error: err, context: 'saved-workout-list' },
+      'Failed to list saved workouts'
+    )
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+/**
  * POST /api/workouts/saved
  *
  * Snapshot a completed freestyle WorkoutCompletion into a SavedWorkout the user

@@ -2,6 +2,7 @@
 
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import {
+  Bookmark,
   Dumbbell,
   LayoutGrid,
   Loader2,
@@ -51,6 +52,7 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
   const isFollowAlong = settings?.loggingMode === 'follow_along'
   const [nextWorkout, setNextWorkout] = useState<NextWorkout | null>(null)
   const [isLoadingNext, setIsLoadingNext] = useState(false)
+  const [savedWorkoutCount, setSavedWorkoutCount] = useState<number>(0)
   const [isStartingFreestyle, setIsStartingFreestyle] = useState(false)
   const [showFreestyleHeadsUp, setShowFreestyleHeadsUp] = useState(false)
   const [isDiscardingDraft, setIsDiscardingDraft] = useState(false)
@@ -111,6 +113,27 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
     }
   }, [open, activeDraft])
 
+  // Saved-workouts count drives whether the "My saved workouts" row appears.
+  // Hidden for users with zero saved workouts so the sheet doesn't dead-end
+  // new users into an empty list.
+  useEffect(() => {
+    if (!open) return
+    let cancelled = false
+    fetchJsonWithRetry<{ count: number }>('/api/workouts/saved', {
+      cache: 'no-store',
+    })
+      .then((data) => {
+        if (!cancelled) setSavedWorkoutCount(data.count ?? 0)
+      })
+      .catch((err) => {
+        clientLogger.error('Failed to load saved workouts count:', err)
+        if (!cancelled) setSavedWorkoutCount(0)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [open])
+
   const handleResumeDraft = useCallback(() => {
     if (!activeDraft) return
     onOpenChange(false)
@@ -126,6 +149,11 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
     onOpenChange(false)
     router.push(`/training?resume=${nextWorkout.workoutId}`)
   }, [nextWorkout, onOpenChange, router])
+
+  const handleOpenSavedWorkouts = useCallback(() => {
+    onOpenChange(false)
+    router.push('/workouts/saved')
+  }, [onOpenChange, router])
 
   const startFreestyle = useCallback(async () => {
     if (isStartingFreestyle) return
@@ -380,6 +408,18 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
                   onClick={!isStartingFreestyle ? handleFreestyleClick : undefined}
                   disabled={isStartingFreestyle}
                 />
+                {savedWorkoutCount > 0 && (
+                  <ActionRow
+                    icon={Bookmark}
+                    label="My saved workouts"
+                    subtitle={
+                      savedWorkoutCount === 1
+                        ? '1 saved'
+                        : `${savedWorkoutCount} saved`
+                    }
+                    onClick={handleOpenSavedWorkouts}
+                  />
+                )}
                 <ActionRow
                   icon={LayoutGrid}
                   label="Pick a workout"
