@@ -14,7 +14,7 @@ const INFO_GROUPS = [
     header: 'THE PROGRAM GUIDES YOU',
     bullets: [
       'Tells you what to do each day',
-      'Start lighter than feels right -- controlled reps beat heavy and sloppy',
+      'Start lighter than feels right; controlled reps beat heavy and sloppy',
     ],
   },
   {
@@ -22,14 +22,14 @@ const INFO_GROUPS = [
     bullets: [
       'Wipe down what you used',
       'Offer to work in if someone\u2019s waiting',
-      'Lower weights -- don\u2019t drop them',
+      'Lower weights, don\u2019t drop them',
     ],
   },
   {
     header: 'YOU BELONG HERE',
     bullets: [
       'Soreness 1\u20132 days after is normal; sharp pain during is not',
-      'Ask gym regulars if you\u2019re unsure -- they like helping',
+      'Ask gym regulars if you\u2019re unsure; they like helping',
       'Rest 2\u20133 minutes between heavier lifts',
     ],
   },
@@ -459,7 +459,7 @@ function EquipmentScreen({
         />
         <SelectionCard
           label="I'M NOT SURE"
-          description="We'll start you on machines -- the easiest way to begin."
+          description="We'll start you on machines, the easiest way to begin."
           isSelected={false}
           onClick={() => onSelect('machines')}
         />
