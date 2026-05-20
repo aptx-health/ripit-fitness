@@ -1,7 +1,7 @@
 'use client'
 
 import * as Dialog from '@radix-ui/react-dialog'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
 import type { SavedWorkoutListItem } from './SavedWorkoutRow'
 
@@ -17,11 +17,23 @@ export default function RenameSavedWorkoutDialog({ item, onOpenChange, onSuccess
   const [name, setName] = useState(item.name)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const inputRef = useRef<HTMLInputElement | null>(null)
+  const hasFocusedRef = useRef(false)
 
   useEffect(() => {
     setName(item.name)
     setError(null)
   }, [item.name])
+
+  useEffect(() => {
+    if (hasFocusedRef.current) return
+    const el = inputRef.current
+    if (el) {
+      el.focus()
+      el.select()
+      hasFocusedRef.current = true
+    }
+  }, [])
 
   const trimmed = name.trim()
   const canSave = trimmed.length > 0 && trimmed.length <= NAME_MAX_LENGTH && trimmed !== item.name
@@ -84,12 +96,7 @@ export default function RenameSavedWorkoutDialog({ item, onOpenChange, onSuccess
               value={name}
               maxLength={NAME_MAX_LENGTH}
               onChange={(e) => setName(e.target.value)}
-              ref={(el) => {
-                if (el) {
-                  el.focus()
-                  el.select()
-                }
-              }}
+              ref={inputRef}
               className="doom-focus-ring w-full border-2 border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary"
             />
             <div className="mt-1 flex justify-between text-xs text-muted-foreground">
