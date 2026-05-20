@@ -164,7 +164,11 @@ export default function SavedWorkoutDetailDialog({ item, onOpenChange }: Props) 
               type="button"
               onClick={handleStart}
               disabled={starting || detail === null}
-              className="doom-focus-ring flex min-h-12 w-full items-center justify-center bg-primary px-4 py-2 text-sm font-semibold uppercase tracking-wider text-primary-foreground transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+              className="doom-focus-ring flex min-h-12 w-full items-center justify-center bg-primary px-4 py-2 text-sm font-semibold uppercase tracking-wider text-primary-foreground transition-all hover:bg-primary-hover active:translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-50"
+              style={{
+                boxShadow:
+                  'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)',
+              }}
             >
               {starting ? 'Starting...' : 'Start this workout'}
             </button>
