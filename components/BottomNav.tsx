@@ -71,7 +71,7 @@ export default function BottomNav() {
                   strokeWidth={2.75}
                 />
                 <span className="text-[9px] font-black uppercase tracking-[0.1em] leading-none mt-0.5">
-                  Workout
+                  Lift
                 </span>
               </span>
             </span>

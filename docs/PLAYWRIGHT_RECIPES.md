@@ -47,7 +47,7 @@ After login, session cookies are attached to the browser context — any
 | Element | Selector | Notes |
 |---|---|---|
 | Chip sheet (mobile) | `button[aria-label="Quick actions"]` | Bottom nav. Use this on mobile viewports. |
-| Chip sheet (desktop) | `button[aria-label="Start a workout"]` | Header. Hidden on mobile viewport. There are TWO elements that match "Workout" text — filter by `aria-label`. |
+| Chip sheet (desktop) | `button[aria-label="Lift"]` | Header. Hidden on mobile viewport. There are TWO chip buttons — filter by `aria-label`. |
 | Bottom nav items | `nav a[aria-label="..."]` | "Training", "Programs", "Learn", "Settings" |
 | Workout finish | `button:has-text("Finish")` | On `/training/adhoc/[id]` |
 | Confirm dialog | `button:has-text("Confirm")` | Generic — appears after Finish |

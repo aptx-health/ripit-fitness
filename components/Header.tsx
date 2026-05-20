@@ -71,7 +71,7 @@ export default function Header({ userEmail }: Props) {
               aria-label={
                 activeDraft
                   ? `Resume draft workout: ${activeDraft.workoutName}`
-                  : 'Start a workout'
+                  : 'Lift'
               }
               className="relative inline-flex items-center gap-2 px-4 h-9 bg-accent text-accent-foreground transition-transform active:translate-y-[2px] doom-focus-ring overflow-hidden"
               style={{
@@ -89,7 +89,7 @@ export default function Header({ userEmail }: Props) {
               {activeDraft && <span aria-hidden="true" className="chip-gold-shine" />}
               <Dumbbell size={16} strokeWidth={2.75} className="relative" />
               <span className="relative text-xs font-black uppercase tracking-[0.1em]">
-                Workout
+                Lift
               </span>
             </button>
             <ThemeSelector />
