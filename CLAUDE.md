@@ -383,17 +383,17 @@ const weeks = await prisma.week.findMany({
 ### Running Tests
 
 ```bash
-# Run all tests
-doppler run --config dev_test -- npm test
+# Run all tests (no doppler needed — Testcontainers manages Postgres/Redis)
+npm test
 
 # Run specific test file
-doppler run --config dev_test -- npm test exercise-modifications
+npm test exercise-modifications
 
 # Run with UI
-doppler run --config dev_test -- npm run test:ui
+npm run test:ui
 ```
 
-**Note**: Docker must be running for Testcontainers to work.
+**Note**: Docker must be running for Testcontainers to work. Tests don't require Doppler — the `dev_test` config does not exist; tests stand up their own ephemeral Postgres/Redis containers.
 
 ### Test Structure
 
@@ -463,6 +463,15 @@ Helper functions in `/lib/test/factories.ts`:
 - Verify database state, not just API responses
 - Test authorization and validation
 - Avoid excessive permutations
+
+### Browser-Driven UI Verification (Playwright)
+
+For UI/UX changes — sizing, layout, mobile responsiveness, copy that depends on context — drive the actual flow in a real browser and screenshot before pushing. Visual problems often don't show up in diffs.
+
+- **Skill:** `webapp-testing` (`.claude/skills/webapp-testing/SKILL.md`) wraps the generic Playwright workflow.
+- **Project recipes:** See `/docs/PLAYWRIGHT_RECIPES.md` for Ripit-specific selectors (login form, chip sheet, bottom nav), common flows (e.g. reaching the post-workout rollup), and layout-measurement techniques. Add a recipe there any time you spend more than 5 minutes discovering a selector or flow that's likely to be reused.
+- **Example:** `.claude/skills/webapp-testing/examples/ripit-rollup.py` is a working script that logs in, seeds a freestyle via the API, completes it, and screenshots the rollup modal.
+- Dev server port: **3700**. Test user: `dmays@test.com / password`.
 
 ## Development Workflow
 
@@ -559,7 +568,7 @@ Self-hosted k8s infrastructure is operational (staging + production). PostgreSQL
 - **Git file paths with special characters**: Always wrap file paths containing brackets or other special characters in double quotes when using git commands to prevent shell glob expansion. Example: `git add "app/api/exercises/[exerciseId]/route.ts"` instead of `git add app/api/exercises/[exerciseId]/route.ts`
 - **Local development**: Use `./scripts/dev.sh` (primary) or `DOPPLER_CONFIG=dev_personal_worktree1 ./scripts/dev.sh start -l postgres,app` (worktree). The wrapper sources `scripts/worktree-env.sh` so `OVERMIND_SOCKET` lands in `/tmp` (avoids a Turbopack panic reading `.overmind.sock`) and each worktree gets isolated postgres/redis containers on unique ports. Test user `dmays@test.com / password` is auto-seeded.
 - **Prisma version**: Stay on v6.x. Use `npx prisma@6.19.0` to avoid installing v7
-- **Testing**: Use the `dev_test` doppler config: `doppler run --config dev_test -- npm test`
+- **Testing**: Run `npm test` directly — no Doppler config needed. Testcontainers spins up Postgres/Redis for the test run.
 
 ## GitHub Discussions
 
