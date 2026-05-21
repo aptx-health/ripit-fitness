@@ -7,16 +7,31 @@ import { useEffect, useState } from 'react'
 export type FilterChoiceOption = {
   value: string | null
   label: string
+  disabled?: boolean
+  disabledReason?: string
 }
 
-type Props = {
+type BaseProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   title: string
   options: FilterChoiceOption[]
+}
+
+type SingleProps = BaseProps & {
+  multi?: false
   selected: string | null
   onSelect: (value: string | null) => void
 }
+
+type MultiProps = BaseProps & {
+  multi: true
+  selected: string[]
+  onSelect: (values: string[]) => void
+  doneLabel?: string
+}
+
+type Props = SingleProps | MultiProps
 
 // Use inline styles for positioning. iOS Safari has had stacking-context
 // quirks combined with Tailwind v4's `translate` CSS property and
@@ -34,18 +49,25 @@ function useIsDesktop(): boolean {
   return isDesktop
 }
 
-export function FilterChoiceSheet({
-  open,
-  onOpenChange,
-  title,
-  options,
-  selected,
-  onSelect,
-}: Props) {
+export function FilterChoiceSheet(props: Props) {
+  const { open, onOpenChange, title, options } = props
+  const isMulti = props.multi === true
   const isDesktop = useIsDesktop()
 
+  const isSelected = (value: string | null) =>
+    isMulti ? value !== null && props.selected.includes(value) : value === props.selected
+
   const handlePick = (value: string | null) => {
-    onSelect(value)
+    if (isMulti) {
+      if (value === null) return
+      const current = props.selected
+      const next = current.includes(value)
+        ? current.filter((v) => v !== value)
+        : [...current, value]
+      props.onSelect(next)
+      return
+    }
+    props.onSelect(value)
     onOpenChange(false)
   }
 
@@ -109,21 +131,32 @@ export function FilterChoiceSheet({
               >
                 <ul className="py-1">
                 {options.map((option) => {
-                  const isSelected = option.value === selected
+                  const selected = isSelected(option.value)
+                  const disabled = option.disabled === true
                   return (
                     <li key={option.value ?? '__all__'}>
                       <button
                         type="button"
-                        onClick={() => handlePick(option.value)}
-                        aria-pressed={isSelected}
+                        onClick={() => !disabled && handlePick(option.value)}
+                        disabled={disabled}
+                        aria-pressed={selected}
                         className={`w-full flex items-center justify-between gap-3 px-4 py-3 text-left text-base font-bold border-b border-border/40 last:border-b-0 transition-colors ${
-                          isSelected
+                          disabled
+                            ? 'text-muted-foreground/50 cursor-not-allowed'
+                            : selected
                             ? 'bg-primary/10 text-primary'
                             : 'text-foreground hover:bg-muted/40 active:bg-muted/60'
                         }`}
                       >
-                        <span>{option.label}</span>
-                        {isSelected && <Check size={18} strokeWidth={3} />}
+                        <span className="flex items-center gap-2">
+                          {option.label}
+                          {disabled && option.disabledReason && (
+                            <span className="text-xs font-normal opacity-60">
+                              ({option.disabledReason})
+                            </span>
+                          )}
+                        </span>
+                        {selected && <Check size={18} strokeWidth={3} />}
                       </button>
                     </li>
                   )
@@ -146,6 +179,17 @@ export function FilterChoiceSheet({
                 }}
               />
             </div>
+            {isMulti && (
+              <div className="flex justify-end gap-2 px-4 py-3 border-t border-border bg-muted/20">
+                <button
+                  type="button"
+                  onClick={() => onOpenChange(false)}
+                  className="px-4 py-2 border-2 border-primary bg-primary text-primary-foreground font-bold uppercase tracking-wide text-sm hover:bg-primary/90 active:bg-primary/80 doom-focus-ring"
+                >
+                  {(props as MultiProps).doneLabel ?? 'Done'}
+                </button>
+              </div>
+            )}
           </div>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>

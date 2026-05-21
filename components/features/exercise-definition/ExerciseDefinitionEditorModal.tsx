@@ -1,5 +1,6 @@
 'use client';
 
+import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useToast } from '@/components/ToastProvider';
@@ -32,6 +33,13 @@ export interface ExerciseDefinitionEditorModalProps {
   initialName?: string;
   onSuccess?: (exerciseDefinition: ExerciseDefinition) => void;
   apiBasePath?: string;
+  /**
+   * When true, the editor exposes image URL management in the edit form and
+   * renders image previews in the Preview tab. Defaults to false so end users
+   * don't see picture entry until we ship a proper image upload flow; admins
+   * opt in via the admin editor.
+   */
+  showImages?: boolean;
 }
 
 export default function ExerciseDefinitionEditorModal({
@@ -42,6 +50,7 @@ export default function ExerciseDefinitionEditorModal({
   initialName = '',
   onSuccess,
   apiBasePath = '/api/exercise-definitions',
+  showImages = false,
 }: ExerciseDefinitionEditorModalProps) {
   const toast = useToast();
   const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
@@ -218,8 +227,6 @@ export default function ExerciseDefinitionEditorModal({
     onClose();
   }, [onClose]);
 
-  if (!isOpen) return null;
-
   const canSubmit =
     !isDuplicateName &&
     !isSubmitting &&
@@ -228,12 +235,22 @@ export default function ExerciseDefinitionEditorModal({
     formData.primaryFAUs.length > 0;
 
   return (
-    <div
-      style={{ position: 'fixed', inset: 0, zIndex: 80, pointerEvents: 'auto' }}
-      className="backdrop-blur-md bg-background/80 flex items-center justify-center p-0 sm:p-4 overflow-y-auto"
-    >
+    <DialogPrimitive.Root open={isOpen} onOpenChange={(o) => { if (!o) handleClose() }}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay
+          style={{ position: 'fixed', inset: 0, zIndex: 80 }}
+          className="backdrop-blur-md bg-background/80"
+        />
+        <DialogPrimitive.Content
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          style={{ position: 'fixed', inset: 0, zIndex: 81, display: 'flex', alignItems: 'center', justifyContent: 'center', overflowY: 'auto' }}
+          className="p-0 sm:p-4"
+        >
+          <DialogPrimitive.Title className="sr-only">
+            {mode === 'create' ? 'Create New Exercise' : 'Edit Exercise'}
+          </DialogPrimitive.Title>
       <div
-        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)', position: 'relative', zIndex: 81 }}
+        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}
         className="bg-card border-4 border-border w-full h-full sm:h-auto sm:max-h-[85vh] sm:w-[90vw] sm:max-w-4xl sm:my-8 flex flex-col doom-card"
       >
         {/* Header */}
@@ -262,7 +279,7 @@ export default function ExerciseDefinitionEditorModal({
             </div>
           ) : activeTab === 'preview' ? (
             <ExerciseInfoPreview
-              imageUrls={formData.imageUrls}
+              imageUrls={showImages ? formData.imageUrls : []}
               instructions={formData.instructions}
               primaryFAUs={formData.primaryFAUs}
               secondaryFAUs={formData.secondaryFAUs}
@@ -425,7 +442,8 @@ export default function ExerciseDefinitionEditorModal({
                 {errors.notes && <p className="text-sm text-error font-medium mt-1">{errors.notes}</p>}
               </div>
 
-              {/* Image URLs */}
+              {/* Image URLs (admin-only until user image upload ships) */}
+              {showImages && (
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <span className="block text-sm font-semibold text-foreground uppercase tracking-wide">
@@ -506,6 +524,7 @@ export default function ExerciseDefinitionEditorModal({
                 )}
                 {errors.imageUrls && <p className="text-sm text-error font-medium mt-1">{errors.imageUrls}</p>}
               </div>
+              )}
             </>
           )}
         </div>
@@ -526,6 +545,8 @@ export default function ExerciseDefinitionEditorModal({
           </Button>
         </div>
       </div>
-    </div>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 }

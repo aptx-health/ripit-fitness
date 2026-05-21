@@ -8,6 +8,7 @@ import {
   type ExerciseDefinition,
   ExerciseSearchInterface,
 } from '@/components/exercise-selection/ExerciseSearchInterface'
+import ExerciseDefinitionEditorModal from '@/components/features/exercise-definition/ExerciseDefinitionEditorModal'
 import { WorkoutRollupModal } from '@/components/features/training/WorkoutRollupModal'
 import { useToast } from '@/components/ToastProvider'
 import { Button } from '@/components/ui/Button'
@@ -852,6 +853,7 @@ function ExercisePickerModal({
   // Multi-select state used only in add mode.
   const [selectedDefs, setSelectedDefs] = useState<ExerciseDefinition[]>([])
   const selectedIds = new Set(selectedDefs.map((d) => d.id))
+  const [showCreateModal, setShowCreateModal] = useState(false)
 
   const handleAddToggle = useCallback((def: ExerciseDefinition) => {
     setSelectedDefs((prev) =>
@@ -912,19 +914,54 @@ function ExercisePickerModal({
               Cancel
             </Button>
             {isAdd && (
-              <Button
-                variant="primary"
-                onClick={() => onConfirm(selectedDefs)}
-                disabled={count === 0 || isBusy}
-                loading={isBusy}
-                doom
-              >
-                {count === 0 ? 'Add' : count === 1 ? 'Add 1 exercise' : `Add all (${count})`}
-              </Button>
+              <>
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowCreateModal(true)}
+                  doom
+                  disabled={isBusy}
+                >
+                  + Create New Exercise
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={() => onConfirm(selectedDefs)}
+                  disabled={count === 0 || isBusy}
+                  loading={isBusy}
+                  doom
+                >
+                  {count === 0 ? 'Add' : count === 1 ? 'Add 1 exercise' : `Add all (${count})`}
+                </Button>
+              </>
             )}
           </div>
         </DialogFooter>
       </DialogContent>
+      <ExerciseDefinitionEditorModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        mode="create"
+        onSuccess={(newExercise) => {
+          setShowCreateModal(false)
+          // Auto-select the newly created exercise so the user can add it
+          // straight away without having to re-find it in search results.
+          const def: ExerciseDefinition = {
+            id: newExercise.id,
+            name: newExercise.name,
+            primaryFAUs: newExercise.primaryFAUs,
+            secondaryFAUs: newExercise.secondaryFAUs,
+            equipment: newExercise.equipment,
+            instructions: newExercise.instructions,
+          }
+          if (isAdd) {
+            setSelectedDefs((prev) =>
+              prev.some((d) => d.id === def.id) ? prev : [...prev, def]
+            )
+          } else {
+            onConfirm([def])
+          }
+        }}
+      />
     </Dialog>
   )
 }
