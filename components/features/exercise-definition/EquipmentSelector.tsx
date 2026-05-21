@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/radix/popover';
+import { useMemo, useState } from 'react';
+import { FilterChoiceSheet } from '@/components/exercise-selection/FilterChoiceSheet';
 import { EQUIPMENT_GROUPS, EQUIPMENT_LABELS } from '@/lib/constants/program-metadata';
 
 export interface EquipmentSelectorProps {
@@ -17,82 +17,38 @@ export default function EquipmentSelector({
 }: EquipmentSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const selectEquipment = (equipment: string) => {
-    onChange([equipment]);
-    setIsOpen(false); // Close popover after selection
-  };
+  const options = useMemo(
+    () =>
+      [...EQUIPMENT_GROUPS.common, ...EQUIPMENT_GROUPS.specialized].map((eq) => ({
+        value: eq,
+        label: EQUIPMENT_LABELS[eq] || eq,
+      })),
+    [],
+  );
 
-  const isSelected = (equipment: string) => value.includes(equipment);
-
-  const getDisplayText = () => {
-    if (value.length === 0) return 'Select equipment...';
-    return EQUIPMENT_LABELS[value[0]];
-  };
-
-  const renderEquipmentButton = (equipment: string) => {
-    const selected = isSelected(equipment);
-
-    return (
-      <button
-        key={equipment}
-        type="button"
-        onClick={() => selectEquipment(equipment)}
-        className={`w-full px-3 py-2 text-sm border-2 transition-colors font-bold text-left ${
-          selected
-            ? 'bg-primary text-primary-foreground border-primary'
-            : 'bg-muted text-foreground border-input hover:border-primary'
-        }`}
-      >
-        {EQUIPMENT_LABELS[equipment]}
-      </button>
-    );
-  };
+  const displayText =
+    value.length === 0 ? 'Select equipment...' : EQUIPMENT_LABELS[value[0]] || value[0];
 
   return (
     <div className="space-y-2">
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
-        <PopoverTrigger asChild>
-          <button
-            type="button"
-            className={`w-full px-4 py-2 border-2 hover:border-primary focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-card text-foreground text-left font-bold ${
-              error ? 'border-error' : 'border-input'
-            }`}
-          >
-            {getDisplayText()}
-          </button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[500px] p-3" align="start">
-          <div className="space-y-3">
-            {/* Common Equipment */}
-            <div>
-              <div className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2">
-                Common Equipment
-              </div>
-              <div className="grid grid-cols-2 gap-1">
-                {EQUIPMENT_GROUPS.common.map((equipment) => renderEquipmentButton(equipment))}
-              </div>
-            </div>
-
-            {/* Specialized Equipment */}
-            <div>
-              <div className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2">
-                Specialized Equipment
-              </div>
-              <div className="relative">
-                <div className="grid grid-cols-2 gap-1 max-h-36 sm:max-h-48 overflow-y-auto">
-                  {EQUIPMENT_GROUPS.specialized.map((equipment) => renderEquipmentButton(equipment))}
-                </div>
-                <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-card to-transparent" />
-              </div>
-            </div>
-          </div>
-        </PopoverContent>
-      </Popover>
-
-      {/* Error message */}
-      {error && (
-        <p className="text-sm text-error font-medium">{error}</p>
-      )}
+      <button
+        type="button"
+        onClick={() => setIsOpen(true)}
+        className={`w-full px-4 py-2 border-2 hover:border-primary focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-card text-foreground text-left font-bold ${
+          error ? 'border-error' : 'border-input'
+        }`}
+      >
+        {displayText}
+      </button>
+      <FilterChoiceSheet
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        title="Select equipment"
+        options={options}
+        selected={value[0] ?? null}
+        onSelect={(next) => onChange(next ? [next] : [])}
+      />
+      {error && <p className="text-sm text-error font-medium">{error}</p>}
     </div>
   );
 }

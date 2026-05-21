@@ -1,5 +1,6 @@
 'use client';
 
+import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useToast } from '@/components/ToastProvider';
@@ -226,8 +227,6 @@ export default function ExerciseDefinitionEditorModal({
     onClose();
   }, [onClose]);
 
-  if (!isOpen) return null;
-
   const canSubmit =
     !isDuplicateName &&
     !isSubmitting &&
@@ -236,12 +235,22 @@ export default function ExerciseDefinitionEditorModal({
     formData.primaryFAUs.length > 0;
 
   return (
-    <div
-      style={{ position: 'fixed', inset: 0, zIndex: 80, pointerEvents: 'auto' }}
-      className="backdrop-blur-md bg-background/80 flex items-center justify-center p-0 sm:p-4 overflow-y-auto"
-    >
+    <DialogPrimitive.Root open={isOpen} onOpenChange={(o) => { if (!o) handleClose() }}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay
+          style={{ position: 'fixed', inset: 0, zIndex: 80 }}
+          className="backdrop-blur-md bg-background/80"
+        />
+        <DialogPrimitive.Content
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          style={{ position: 'fixed', inset: 0, zIndex: 81, display: 'flex', alignItems: 'center', justifyContent: 'center', overflowY: 'auto' }}
+          className="p-0 sm:p-4"
+        >
+          <DialogPrimitive.Title className="sr-only">
+            {mode === 'create' ? 'Create New Exercise' : 'Edit Exercise'}
+          </DialogPrimitive.Title>
       <div
-        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)', position: 'relative', zIndex: 81 }}
+        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}
         className="bg-card border-4 border-border w-full h-full sm:h-auto sm:max-h-[85vh] sm:w-[90vw] sm:max-w-4xl sm:my-8 flex flex-col doom-card"
       >
         {/* Header */}
@@ -536,6 +545,8 @@ export default function ExerciseDefinitionEditorModal({
           </Button>
         </div>
       </div>
-    </div>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 }
