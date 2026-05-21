@@ -32,6 +32,13 @@ export interface ExerciseDefinitionEditorModalProps {
   initialName?: string;
   onSuccess?: (exerciseDefinition: ExerciseDefinition) => void;
   apiBasePath?: string;
+  /**
+   * When true, the editor exposes image URL management in the edit form and
+   * renders image previews in the Preview tab. Defaults to false so end users
+   * don't see picture entry until we ship a proper image upload flow; admins
+   * opt in via the admin editor.
+   */
+  showImages?: boolean;
 }
 
 export default function ExerciseDefinitionEditorModal({
@@ -42,6 +49,7 @@ export default function ExerciseDefinitionEditorModal({
   initialName = '',
   onSuccess,
   apiBasePath = '/api/exercise-definitions',
+  showImages = false,
 }: ExerciseDefinitionEditorModalProps) {
   const toast = useToast();
   const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
@@ -262,7 +270,7 @@ export default function ExerciseDefinitionEditorModal({
             </div>
           ) : activeTab === 'preview' ? (
             <ExerciseInfoPreview
-              imageUrls={formData.imageUrls}
+              imageUrls={showImages ? formData.imageUrls : []}
               instructions={formData.instructions}
               primaryFAUs={formData.primaryFAUs}
               secondaryFAUs={formData.secondaryFAUs}
@@ -425,7 +433,8 @@ export default function ExerciseDefinitionEditorModal({
                 {errors.notes && <p className="text-sm text-error font-medium mt-1">{errors.notes}</p>}
               </div>
 
-              {/* Image URLs */}
+              {/* Image URLs (admin-only until user image upload ships) */}
+              {showImages && (
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <span className="block text-sm font-semibold text-foreground uppercase tracking-wide">
@@ -506,6 +515,7 @@ export default function ExerciseDefinitionEditorModal({
                 )}
                 {errors.imageUrls && <p className="text-sm text-error font-medium mt-1">{errors.imageUrls}</p>}
               </div>
+              )}
             </>
           )}
         </div>
