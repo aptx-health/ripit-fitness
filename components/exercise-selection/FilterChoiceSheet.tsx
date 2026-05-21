@@ -2,6 +2,7 @@
 
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { Check, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 export type FilterChoiceOption = {
   value: string | null
@@ -17,11 +18,21 @@ type Props = {
   onSelect: (value: string | null) => void
 }
 
-// Bottom-anchored on mobile, centered on desktop — same pattern as
-// QuickActionSheet. A bottom sheet handles long option lists on phones
-// far better than a popover trying to fit a 500px grid in a 375px viewport.
-const MOBILE_BOTTOM = 'bottom-[calc(env(safe-area-inset-bottom,0px)+12px)]'
-const DESKTOP_CENTER = 'md:bottom-auto md:top-1/2 md:-translate-y-1/2'
+// Use inline styles for positioning. iOS Safari has had stacking-context
+// quirks combined with Tailwind v4's `translate` CSS property and
+// backdrop-filter that left the content invisible even when paint-wise
+// nothing should obscure it. Explicit `transform` sidesteps the issue.
+function useIsDesktop(): boolean {
+  const [isDesktop, setIsDesktop] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 768px)')
+    const update = () => setIsDesktop(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
+  return isDesktop
+}
 
 export function FilterChoiceSheet({
   open,
@@ -31,10 +42,30 @@ export function FilterChoiceSheet({
   selected,
   onSelect,
 }: Props) {
+  const isDesktop = useIsDesktop()
+
   const handlePick = (value: string | null) => {
     onSelect(value)
     onOpenChange(false)
   }
+
+  const contentStyle: React.CSSProperties = isDesktop
+    ? {
+        position: 'fixed',
+        left: '50%',
+        top: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: 'min(96vw, 28rem)',
+        zIndex: 201,
+      }
+    : {
+        position: 'fixed',
+        left: '50%',
+        bottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)',
+        transform: 'translateX(-50%)',
+        width: 'min(96vw, 28rem)',
+        zIndex: 201,
+      }
 
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
@@ -45,13 +76,11 @@ export function FilterChoiceSheet({
             inset: 0,
             zIndex: 200,
             background: 'rgba(0,0,0,0.55)',
-            backdropFilter: 'blur(2px)',
           }}
         />
         <DialogPrimitive.Content
           aria-describedby={undefined}
-          style={{ zIndex: 201 }}
-          className={`fixed left-1/2 -translate-x-1/2 w-[min(96vw,28rem)] ${MOBILE_BOTTOM} ${DESKTOP_CENTER}`}
+          style={contentStyle}
         >
           <div
             className="flex flex-col bg-card border border-border doom-corners max-h-[min(80vh,32rem)]"
