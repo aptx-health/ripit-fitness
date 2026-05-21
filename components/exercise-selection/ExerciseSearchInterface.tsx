@@ -19,15 +19,13 @@ export type ExerciseDefinition = {
 
 // Cap popover width to viewport on mobile so the right column doesn't clip.
 // Radix collision detection can shift but not shrink a hardcoded width.
-// Cap height to the available viewport space so the inner list can scroll
-// (Radix exposes --radix-popover-content-available-height for this).
-const FILTER_POPOVER_CLASS =
-  'w-[min(500px,calc(100vw-1.5rem))] p-3 max-h-[min(var(--radix-popover-content-available-height),420px)] flex flex-col'
+const FILTER_POPOVER_CLASS = 'w-[min(500px,calc(100vw-1.5rem))] p-3'
 
-// iOS Safari needs explicit touch-action and -webkit-overflow-scrolling to
-// allow touch panning inside a portal-rendered popover.
+// Put max-h directly on the scroll container so the overflow trigger is
+// unambiguous — no flex pipe-through required. Touch props let iOS Safari
+// pan inside the portal-rendered popover.
 const FILTER_LIST_SCROLL_CLASS =
-  'flex-1 overflow-y-auto overscroll-contain [touch-action:pan-y] [-webkit-overflow-scrolling:touch]'
+  'max-h-[min(60vh,420px)] overflow-y-auto overscroll-contain [touch-action:pan-y] [-webkit-overflow-scrolling:touch]'
 
 interface ExerciseSearchInterfaceProps {
   onExerciseSelect: (exercise: ExerciseDefinition) => void
@@ -193,8 +191,8 @@ export function ExerciseSearchInterface({
               </button>
             </PopoverTrigger>
             <PopoverContent className={FILTER_POPOVER_CLASS} align="start" collisionPadding={8}>
-              <div className="space-y-2 flex flex-col min-h-0 flex-1">
-                <div className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-2 flex-shrink-0">
+              <div className="space-y-2">
+                <div className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-2">
                   Select Muscle Group
                 </div>
                 <div className={FILTER_LIST_SCROLL_CLASS}>
@@ -242,8 +240,8 @@ export function ExerciseSearchInterface({
               </button>
             </PopoverTrigger>
             <PopoverContent className={FILTER_POPOVER_CLASS} align="start" collisionPadding={8}>
-              <div className="space-y-2 flex flex-col min-h-0 flex-1">
-                <div className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-2 flex-shrink-0">
+              <div className="space-y-2">
+                <div className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-2">
                   Select Equipment
                 </div>
                 <div className={FILTER_LIST_SCROLL_CLASS}>
