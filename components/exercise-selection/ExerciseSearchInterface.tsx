@@ -1,7 +1,7 @@
 'use client'
 
 import { Check, Filter, Search } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
 import { EQUIPMENT_LABELS } from '@/lib/constants/program-metadata'
 import { FilterChoiceSheet } from './FilterChoiceSheet'
@@ -100,6 +100,7 @@ export function ExerciseSearchInterface({
   const [hasSearched, setHasSearched] = useState(preloadExercises)
   const [fauSheetOpen, setFauSheetOpen] = useState(false)
   const [equipmentSheetOpen, setEquipmentSheetOpen] = useState(false)
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
   const fauOptions = useMemo(
     () => [
@@ -115,6 +116,17 @@ export function ExerciseSearchInterface({
     ],
     [],
   )
+
+  // Auto-focus the search input on devices with a physical keyboard (desktop)
+  // but NOT on touch devices, where focusing pops up the on-screen keyboard
+  // and obscures the page. Touch users tap the field to bring it up.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const prefersKeyboard = window.matchMedia('(hover: hover) and (pointer: fine)').matches
+    if (prefersKeyboard) {
+      searchInputRef.current?.focus()
+    }
+  }, [])
 
   const searchExercises = useCallback(async () => {
     setIsLoading(true)
@@ -173,6 +185,7 @@ export function ExerciseSearchInterface({
         <div className="relative mb-3">
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
           <input
+            ref={searchInputRef}
             type="text"
             placeholder="Search exercises..."
             value={searchQuery}

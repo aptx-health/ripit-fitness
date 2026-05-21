@@ -532,8 +532,9 @@ export default function AdHocLoggerView({
   }, [isCompleting, loggedSets, completionId, router, onRetryToast, toast])
 
   const handleRollupClose = useCallback(() => {
-    setShowRollup(false)
-    setRollup(null)
+    // Navigate first and leave the modal visible so the workout logger
+    // beneath it doesn't flash briefly while the route transitions.
+    // The component unmounts on navigation, which tears down the modal.
     router.push('/training')
     router.refresh()
   }, [router])
@@ -879,6 +880,9 @@ function ExercisePickerModal({
       <DialogContent
         showClose={false}
         fullScreenMobile={true}
+        // Body renders ExerciseSearchInterface; prevent default Radix auto-focus
+        // so the mobile keyboard doesn't pop up automatically (issue #846).
+        onOpenAutoFocus={(e) => e.preventDefault()}
         className="w-full h-full sm:w-[90vw] sm:max-w-3xl sm:h-auto sm:max-h-[85vh] rounded-none sm:rounded-none border border-border bg-card"
       >
         <DialogHeader className="border-b border-border bg-primary py-2">
