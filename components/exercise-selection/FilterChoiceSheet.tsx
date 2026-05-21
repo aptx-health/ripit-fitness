@@ -83,10 +83,10 @@ export function FilterChoiceSheet({
           style={contentStyle}
         >
           <div
-            className="flex flex-col bg-card border border-border doom-corners max-h-[min(80vh,32rem)]"
+            className="bg-card border border-border doom-corners"
             style={{ boxShadow: '0 -8px 24px rgba(0,0,0,0.35)' }}
           >
-            <div className="flex items-center justify-between px-4 pt-3 pb-2.5 border-b border-border shrink-0">
+            <div className="flex items-center justify-between px-4 pt-3 pb-2.5 border-b border-border">
               <DialogPrimitive.Title className="doom-label text-foreground/80">
                 {title}
               </DialogPrimitive.Title>
@@ -98,7 +98,13 @@ export function FilterChoiceSheet({
               </DialogPrimitive.Close>
             </div>
             <div
-              className="overflow-y-auto overscroll-contain [touch-action:pan-y] [-webkit-overflow-scrolling:touch]"
+              className="overscroll-contain"
+              style={{
+                maxHeight: 'min(60vh, 420px)',
+                overflowY: 'auto',
+                WebkitOverflowScrolling: 'touch',
+                touchAction: 'pan-y',
+              }}
             >
               <ul className="py-1">
                 {options.map((option) => {
