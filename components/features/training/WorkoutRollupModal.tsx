@@ -348,8 +348,16 @@ export function WorkoutRollupModal({ open, rollup, onClose }: WorkoutRollupModal
     <div
       role="button"
       tabIndex={-1}
-      style={{ position: 'fixed', inset: 0, zIndex: 50 }}
-      className="flex items-center justify-center backdrop-blur-md bg-black/40 dark:bg-black/60 p-4"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 50,
+        paddingTop: 'max(env(safe-area-inset-top, 0px), 1rem)',
+        paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 1rem)',
+        paddingLeft: '1rem',
+        paddingRight: '1rem',
+      }}
+      className="flex items-center justify-center backdrop-blur-md bg-black/40 dark:bg-black/60"
       onClick={onClose}
       onKeyDown={(e) => { if (e.key === 'Escape') onClose() }}
       aria-label="Close workout summary"
@@ -357,7 +365,11 @@ export function WorkoutRollupModal({ open, rollup, onClose }: WorkoutRollupModal
       {/* biome-ignore lint/a11y/noStaticElementInteractions: presentation wrapper stops click propagation */}
       <div
         role="presentation"
-        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)', maxHeight: 'calc(100dvh - 2rem)' }}
+        style={{
+          boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+          maxHeight:
+            'calc(100dvh - max(env(safe-area-inset-top, 0px), 1rem) - max(env(safe-area-inset-bottom, 0px), 1rem))',
+        }}
         className="relative w-full max-w-md bg-card border-2 border-border doom-corners doom-noise flex flex-col"
         onClick={(e) => e.stopPropagation()}
         onKeyDown={(e) => e.stopPropagation()}

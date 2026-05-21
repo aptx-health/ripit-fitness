@@ -443,6 +443,7 @@ export default function ExerciseAdminTable() {
         mode="create"
         onSuccess={handleCreateSuccess}
         apiBasePath="/api/admin/exercise-definitions"
+        showImages
       />
 
       {/* Edit Modal */}
@@ -454,6 +455,7 @@ export default function ExerciseAdminTable() {
           exerciseId={editingExercise.id}
           onSuccess={handleEditSuccess}
           apiBasePath="/api/admin/exercise-definitions"
+          showImages
         />
       )}
 

@@ -60,10 +60,10 @@ export default function DeleteSavedWorkoutDialog({ item, onOpenChange, onSuccess
           </AlertDialog.Title>
 
           <AlertDialog.Description asChild>
-            <div className="mb-4 text-sm text-muted-foreground">
+            <div className="mb-4 text-base text-muted-foreground">
               This will permanently delete{' '}
               <span className="font-medium text-foreground">&quot;{item.name}&quot;</span>.
-              Past completions that referenced it are not affected.
+              Your past workouts and the sets and reps you logged will be preserved.
             </div>
           </AlertDialog.Description>
 

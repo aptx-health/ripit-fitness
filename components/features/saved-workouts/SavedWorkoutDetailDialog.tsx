@@ -143,9 +143,9 @@ export default function SavedWorkoutDetailDialog({ item, onOpenChange }: Props) 
                     {exerciseNames.map((name, idx) => (
                       <li
                         key={`${name}-${idx}`}
-                        className="flex items-center gap-3 border-b border-border py-2 text-sm text-foreground last:border-b-0"
+                        className="flex items-center gap-3 border-b border-border py-2.5 text-base text-foreground last:border-b-0"
                       >
-                        <span className="w-6 text-xs text-muted-foreground">{idx + 1}.</span>
+                        <span className="w-6 text-sm text-muted-foreground">{idx + 1}.</span>
                         <span className="flex-1">{name}</span>
                       </li>
                     ))}
