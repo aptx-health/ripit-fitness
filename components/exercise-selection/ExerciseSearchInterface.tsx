@@ -1,10 +1,10 @@
 'use client'
 
 import { Check, Filter, Search } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/radix/popover'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
 import { EQUIPMENT_LABELS } from '@/lib/constants/program-metadata'
+import { FilterChoiceSheet } from './FilterChoiceSheet'
 
 export type ExerciseDefinition = {
   id: string
@@ -16,16 +16,6 @@ export type ExerciseDefinition = {
   isSystem?: boolean
   createdBy?: string | null
 }
-
-// Cap popover width to viewport on mobile so the right column doesn't clip.
-// Radix collision detection can shift but not shrink a hardcoded width.
-const FILTER_POPOVER_CLASS = 'w-[min(500px,calc(100vw-1.5rem))] p-3'
-
-// Put max-h directly on the scroll container so the overflow trigger is
-// unambiguous — no flex pipe-through required. Touch props let iOS Safari
-// pan inside the portal-rendered popover.
-const FILTER_LIST_SCROLL_CLASS =
-  'max-h-[min(60vh,420px)] overflow-y-auto overscroll-contain [touch-action:pan-y] [-webkit-overflow-scrolling:touch]'
 
 interface ExerciseSearchInterfaceProps {
   onExerciseSelect: (exercise: ExerciseDefinition) => void
@@ -108,8 +98,23 @@ export function ExerciseSearchInterface({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [hasSearched, setHasSearched] = useState(preloadExercises)
-  const [fauPopoverOpen, setFauPopoverOpen] = useState(false)
-  const [equipmentPopoverOpen, setEquipmentPopoverOpen] = useState(false)
+  const [fauSheetOpen, setFauSheetOpen] = useState(false)
+  const [equipmentSheetOpen, setEquipmentSheetOpen] = useState(false)
+
+  const fauOptions = useMemo(
+    () => [
+      { value: null, label: 'All Muscle Groups' },
+      ...ALL_FAUS.map((fau) => ({ value: fau, label: FAU_DISPLAY_NAMES[fau] || fau })),
+    ],
+    [],
+  )
+  const equipmentOptions = useMemo(
+    () => [
+      { value: null, label: 'All Equipment' },
+      ...EQUIPMENT_TYPES.map((eq) => ({ value: eq, label: EQUIPMENT_DISPLAY_NAMES[eq] || eq })),
+    ],
+    [],
+  )
 
   const searchExercises = useCallback(async () => {
     setIsLoading(true)
@@ -155,12 +160,10 @@ export function ExerciseSearchInterface({
 
   const handleFAUSelect = useCallback((fau: string | null) => {
     setSelectedFAU(fau)
-    setFauPopoverOpen(false)
   }, [])
 
   const handleEquipmentSelect = useCallback((equipment: string | null) => {
     setSelectedEquipment(equipment)
-    setEquipmentPopoverOpen(false)
   }, [])
 
   return (
@@ -182,101 +185,44 @@ export function ExerciseSearchInterface({
         {/* FAU Filter */}
         <div>
           <div className="text-sm font-bold text-foreground mb-2 tracking-wide">Filter by Muscle Group:</div>
-          <Popover open={fauPopoverOpen} onOpenChange={setFauPopoverOpen}>
-            <PopoverTrigger asChild>
-              <button type="button"
-                className="w-full px-4 py-2 border-2 border-input hover:border-primary focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-card text-foreground text-left font-bold"
-              >
-                {selectedFAU ? FAU_DISPLAY_NAMES[selectedFAU] : 'All Muscle Groups'}
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className={FILTER_POPOVER_CLASS} align="start" collisionPadding={8}>
-              <div className="space-y-2">
-                <div className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-2">
-                  Select Muscle Group
-                </div>
-                <div className={FILTER_LIST_SCROLL_CLASS}>
-                  <div className="grid grid-cols-2 gap-1">
-                    <button type="button"
-                      onClick={() => handleFAUSelect(null)}
-                      className={`w-full px-3 py-2 text-sm border-2 transition-colors font-bold text-left ${
-                        selectedFAU === null
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'bg-muted text-foreground border-input hover:border-primary'
-                      }`}
-                    >
-                      All Muscle Groups
-                    </button>
-                    {ALL_FAUS.map((fau) => (
-                      <button
-                        type="button"
-                        key={fau}
-                        onClick={() => handleFAUSelect(fau)}
-                        className={`w-full px-3 py-2 text-sm border-2 transition-colors font-bold text-left ${
-                          selectedFAU === fau
-                            ? 'bg-primary text-primary-foreground border-primary'
-                            : 'bg-muted text-foreground border-input hover:border-primary'
-                        }`}
-                      >
-                        {FAU_DISPLAY_NAMES[fau] || fau}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
+          <button
+            type="button"
+            onClick={() => setFauSheetOpen(true)}
+            className="w-full px-4 py-2 border-2 border-input hover:border-primary focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-card text-foreground text-left font-bold"
+          >
+            {selectedFAU ? FAU_DISPLAY_NAMES[selectedFAU] : 'All Muscle Groups'}
+          </button>
         </div>
 
         {/* Equipment Filter */}
         <div className="mt-3">
           <div className="text-sm font-bold text-foreground mb-2 tracking-wide">Filter by Equipment:</div>
-          <Popover open={equipmentPopoverOpen} onOpenChange={setEquipmentPopoverOpen}>
-            <PopoverTrigger asChild>
-              <button type="button"
-                className="w-full px-4 py-2 border-2 border-input hover:border-primary focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-card text-foreground text-left font-bold"
-              >
-                {selectedEquipment ? EQUIPMENT_DISPLAY_NAMES[selectedEquipment] : 'All Equipment'}
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className={FILTER_POPOVER_CLASS} align="start" collisionPadding={8}>
-              <div className="space-y-2">
-                <div className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-2">
-                  Select Equipment
-                </div>
-                <div className={FILTER_LIST_SCROLL_CLASS}>
-                  <div className="grid grid-cols-2 gap-1">
-                    <button type="button"
-                      onClick={() => handleEquipmentSelect(null)}
-                      className={`w-full px-3 py-2 text-sm border-2 transition-colors font-bold text-left ${
-                        selectedEquipment === null
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'bg-muted text-foreground border-input hover:border-primary'
-                      }`}
-                    >
-                      All Equipment
-                    </button>
-                    {EQUIPMENT_TYPES.map((equipment) => (
-                      <button
-                        type="button"
-                        key={equipment}
-                        onClick={() => handleEquipmentSelect(equipment)}
-                        className={`w-full px-3 py-2 text-sm border-2 transition-colors font-bold text-left ${
-                          selectedEquipment === equipment
-                            ? 'bg-primary text-primary-foreground border-primary'
-                            : 'bg-muted text-foreground border-input hover:border-primary'
-                        }`}
-                      >
-                        {EQUIPMENT_DISPLAY_NAMES[equipment] || equipment}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
+          <button
+            type="button"
+            onClick={() => setEquipmentSheetOpen(true)}
+            className="w-full px-4 py-2 border-2 border-input hover:border-primary focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-card text-foreground text-left font-bold"
+          >
+            {selectedEquipment ? EQUIPMENT_DISPLAY_NAMES[selectedEquipment] : 'All Equipment'}
+          </button>
         </div>
       </div>
+
+      <FilterChoiceSheet
+        open={fauSheetOpen}
+        onOpenChange={setFauSheetOpen}
+        title="Filter by Muscle Group"
+        options={fauOptions}
+        selected={selectedFAU}
+        onSelect={handleFAUSelect}
+      />
+      <FilterChoiceSheet
+        open={equipmentSheetOpen}
+        onOpenChange={setEquipmentSheetOpen}
+        title="Filter by Equipment"
+        options={equipmentOptions}
+        selected={selectedEquipment}
+        onSelect={handleEquipmentSelect}
+      />
 
       {/* Results */}
       <div className="flex-1 overflow-auto px-4 sm:px-6 py-4 min-h-0">
