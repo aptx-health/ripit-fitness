@@ -532,8 +532,9 @@ export default function AdHocLoggerView({
   }, [isCompleting, loggedSets, completionId, router, onRetryToast, toast])
 
   const handleRollupClose = useCallback(() => {
-    setShowRollup(false)
-    setRollup(null)
+    // Navigate first and leave the modal visible so the workout logger
+    // beneath it doesn't flash briefly while the route transitions.
+    // The component unmounts on navigation, which tears down the modal.
     router.push('/training')
     router.refresh()
   }, [router])
