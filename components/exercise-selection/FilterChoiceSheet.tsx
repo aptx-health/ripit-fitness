@@ -40,18 +40,18 @@ export function FilterChoiceSheet({
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay
-          className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
           style={{
             position: 'fixed',
             inset: 0,
-            zIndex: 50,
+            zIndex: 200,
             background: 'rgba(0,0,0,0.55)',
             backdropFilter: 'blur(2px)',
           }}
         />
         <DialogPrimitive.Content
           aria-describedby={undefined}
-          className={`fixed left-1/2 -translate-x-1/2 z-[51] w-[min(96vw,28rem)] ${MOBILE_BOTTOM} ${DESKTOP_CENTER} data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom md:data-[state=closed]:fade-out-0 md:data-[state=open]:fade-in-0 data-[state=open]:duration-200 data-[state=closed]:duration-150`}
+          style={{ zIndex: 201 }}
+          className={`fixed left-1/2 -translate-x-1/2 w-[min(96vw,28rem)] ${MOBILE_BOTTOM} ${DESKTOP_CENTER}`}
         >
           <div
             className="flex flex-col bg-card border border-border doom-corners max-h-[min(80vh,32rem)]"
