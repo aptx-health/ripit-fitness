@@ -97,16 +97,17 @@ export function FilterChoiceSheet({
                 <X size={16} strokeWidth={2.5} />
               </DialogPrimitive.Close>
             </div>
-            <div
-              className="overscroll-contain"
-              style={{
-                maxHeight: 'min(60vh, 420px)',
-                overflowY: 'auto',
-                WebkitOverflowScrolling: 'touch',
-                touchAction: 'pan-y',
-              }}
-            >
-              <ul className="py-1">
+            <div className="relative">
+              <div
+                className="overscroll-contain"
+                style={{
+                  maxHeight: 'min(60vh, 420px)',
+                  overflowY: 'auto',
+                  WebkitOverflowScrolling: 'touch',
+                  touchAction: 'pan-y',
+                }}
+              >
+                <ul className="py-1">
                 {options.map((option) => {
                   const isSelected = option.value === selected
                   return (
@@ -128,6 +129,22 @@ export function FilterChoiceSheet({
                   )
                 })}
               </ul>
+              </div>
+              {/* Bottom fade — hint that the list scrolls past the cutoff.
+                  Pointer-events:none so it doesn't intercept the last row. */}
+              <div
+                aria-hidden
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  height: 24,
+                  pointerEvents: 'none',
+                  background:
+                    'linear-gradient(to bottom, color-mix(in srgb, var(--card) 0%, transparent), var(--card))',
+                }}
+              />
             </div>
           </div>
         </DialogPrimitive.Content>
