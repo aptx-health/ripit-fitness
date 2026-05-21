@@ -211,6 +211,9 @@ export function AddExerciseWizard({
       currentStep={currentStep}
       onStepChange={setCurrentStep}
       title="Add Exercise"
+      // First step is exercise search; prevent default Radix auto-focus so the
+      // mobile keyboard doesn't pop up automatically (issue #846).
+      onOpenAutoFocus={(e) => e.preventDefault()}
     />
   )
 }

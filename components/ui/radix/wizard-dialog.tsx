@@ -33,6 +33,12 @@ export interface WizardDialogProps {
   currentStep: number
   onStepChange: (step: number) => void
   title: string
+  /**
+   * Forwarded to Radix Dialog.Content. Use to prevent the default behavior of
+   * auto-focusing the first focusable child on open (e.g. to avoid popping
+   * up the mobile keyboard when a search input is the first focusable).
+   */
+  onOpenAutoFocus?: (event: Event) => void
 }
 
 export function WizardDialog({
@@ -42,6 +48,7 @@ export function WizardDialog({
   currentStep,
   onStepChange,
   title: _title,
+  onOpenAutoFocus,
 }: WizardDialogProps) {
   const [isProcessing, setIsProcessing] = React.useState(false)
 
@@ -82,7 +89,7 @@ export function WizardDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent showClose={false} fullScreenMobile={true} className="w-full h-full sm:w-[90vw] sm:max-w-3xl sm:h-auto sm:max-h-[85vh] rounded-none sm:rounded-none border border-border bg-card">
+      <DialogContent showClose={false} fullScreenMobile={true} onOpenAutoFocus={onOpenAutoFocus} className="w-full h-full sm:w-[90vw] sm:max-w-3xl sm:h-auto sm:max-h-[85vh] rounded-none sm:rounded-none border border-border bg-card">
         <DialogHeader className="border-b border-border bg-primary py-2">
           <div className="flex items-center justify-between">
             <div className="flex-1">
