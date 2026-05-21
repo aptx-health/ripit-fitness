@@ -880,6 +880,9 @@ function ExercisePickerModal({
       <DialogContent
         showClose={false}
         fullScreenMobile={true}
+        // Body renders ExerciseSearchInterface; prevent default Radix auto-focus
+        // so the mobile keyboard doesn't pop up automatically (issue #846).
+        onOpenAutoFocus={(e) => e.preventDefault()}
         className="w-full h-full sm:w-[90vw] sm:max-w-3xl sm:h-auto sm:max-h-[85vh] rounded-none sm:rounded-none border border-border bg-card"
       >
         <DialogHeader className="border-b border-border bg-primary py-2">
