@@ -6,10 +6,10 @@ import {
   getClientIp,
 } from "@/lib/rate-limit"
 import {
-  SIGNUP_ATTRIBUTION_COOKIE,
-  SIGNUP_ATTRIBUTION_TTL_SECONDS,
   encodeSignupAttribution,
   isValidSignupAttribution,
+  SIGNUP_ATTRIBUTION_COOKIE,
+  SIGNUP_ATTRIBUTION_TTL_SECONDS,
 } from "@/lib/signup-attribution-cookie"
 
 /**
