@@ -128,3 +128,37 @@ export function resolveSource(
   if (attribution.gymSlug) return 'qr'
   return attribution.source ?? 'organic'
 }
+
+/**
+ * Hands signup attribution to the server via cookie so the BetterAuth
+ * `user.create.after` hook can stamp it onto the `signup_completed`
+ * AppEvent. This is the durable path — the client-side `trackEvent` calls
+ * elsewhere are best-effort and frequently lost across OAuth round-trips
+ * on Safari / in-app browsers.
+ *
+ * Returns true on success, false otherwise. Callers should not block on
+ * the result — failing to post attribution still lets signup proceed; the
+ * server hook will fall back to `source: 'organic'`.
+ */
+export async function postSignupAttribution(
+  method: SignupMethod,
+  attribution: SignupAttribution
+): Promise<boolean> {
+  if (!isBrowser()) return false
+  const source = resolveSource(method, attribution)
+  const payload: Record<string, unknown> = { source, method }
+  if (attribution.gymSlug) payload.gymSlug = attribution.gymSlug
+  if (attribution.mode) payload.mode = attribution.mode
+  try {
+    const res = await fetch('/api/signup-attribution', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      credentials: 'same-origin',
+      keepalive: true,
+    })
+    return res.ok
+  } catch {
+    return false
+  }
+}

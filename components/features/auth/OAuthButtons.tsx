@@ -5,6 +5,7 @@ import { trackEvent } from '@/lib/analytics'
 import { signIn } from '@/lib/auth-client'
 import {
   getAttribution,
+  postSignupAttribution,
   resolveSource,
   setPendingOAuthSignup,
 } from '@/lib/signup-attribution'
@@ -36,6 +37,12 @@ export function OAuthButtons({ intent = 'login' }: OAuthButtonsProps = {}) {
       if (attribution.gymSlug) startedProps.gymSlug = attribution.gymSlug
       trackEvent('signup_started', startedProps)
       setPendingOAuthSignup(provider, attribution)
+      // Hand attribution to the server via cookie BEFORE the OAuth redirect
+      // so the BetterAuth user.create hook can stamp signup_completed even
+      // if the client-side tracker is lost across the round-trip (Safari
+      // ITP, in-app browser handoffs, etc.). Awaited so the Set-Cookie
+      // response is processed before the top-level navigation.
+      await postSignupAttribution(provider, attribution)
     }
 
     try {
