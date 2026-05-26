@@ -11,6 +11,7 @@ import { flushEvents, trackEvent } from '@/lib/analytics'
 import { signUp } from '@/lib/auth-client'
 import {
   getAttribution,
+  postSignupAttribution,
   resolveSource,
 } from '@/lib/signup-attribution'
 
@@ -49,6 +50,11 @@ export default function SignupPage() {
     trackEvent('signup_started', startedProps)
 
     setLoading(true)
+
+    // Server-side hook reads this cookie in databaseHooks.user.create.after
+    // to stamp signup_completed reliably. Done before signUp.email so the
+    // cookie is set when the user row is created.
+    await postSignupAttribution('email', attribution)
 
     try {
       const { error } = await signUp.email({

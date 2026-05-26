@@ -1,7 +1,9 @@
 import { betterAuth } from "better-auth"
 import { Pool } from "pg"
 import { Resend } from "resend"
+import { prisma } from "@/lib/db"
 import { logger } from "@/lib/logger"
+import { readSignupAttributionFromHeader } from "@/lib/signup-attribution-cookie"
 
 const isRelaxedRateLimits = process.env.RELAXED_RATE_LIMITS === "true"
 
@@ -89,6 +91,40 @@ export const auth = betterAuth({
         defaultValue: "user",
         required: false,
         input: false, // users cannot set their own role via signup
+      },
+    },
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user, ctx) => {
+          // Record signup_completed server-side so attribution doesn't depend
+          // on a client beacon surviving OAuth round-trips, Safari ITP, etc.
+          // Attribution (source/method/gymSlug/mode) is read from a cookie
+          // set by /api/signup-attribution before the auth flow began.
+          try {
+            const cookieHeader = ctx?.headers?.get("cookie") ?? null
+            const attribution = readSignupAttributionFromHeader(cookieHeader)
+            await prisma.appEvent.create({
+              data: {
+                userId: user.id,
+                event: "signup_completed",
+                properties: {
+                  source: attribution?.source ?? "organic",
+                  method: attribution?.method ?? "unknown",
+                  ...(attribution?.gymSlug ? { gymSlug: attribution.gymSlug } : {}),
+                  ...(attribution?.mode ? { mode: attribution.mode } : {}),
+                  recordedBy: "server-hook",
+                },
+              },
+            })
+          } catch (error) {
+            logger.error(
+              { error, userId: user.id },
+              "Failed to record server-side signup_completed event"
+            )
+          }
+        },
       },
     },
   },
