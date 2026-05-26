@@ -22,6 +22,7 @@ const exerciseInclude = {
       secondaryFAUs: true,
       equipment: true,
       instructions: true,
+      imageUrls: true,
     },
   },
 } satisfies Prisma.ExerciseInclude

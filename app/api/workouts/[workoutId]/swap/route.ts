@@ -116,6 +116,8 @@ export async function POST(
                 primaryFAUs: true,
                 secondaryFAUs: true,
                 equipment: true,
+                instructions: true,
+                imageUrls: true,
               }
             }
           },

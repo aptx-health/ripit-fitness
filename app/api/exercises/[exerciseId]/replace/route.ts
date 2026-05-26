@@ -140,7 +140,8 @@ export async function POST(
                 primaryFAUs: true,
                 secondaryFAUs: true,
                 equipment: true,
-                instructions: true
+                instructions: true,
+                imageUrls: true
               }
             }
           }
@@ -223,7 +224,8 @@ export async function POST(
                 primaryFAUs: true,
                 secondaryFAUs: true,
                 equipment: true,
-                instructions: true
+                instructions: true,
+                imageUrls: true
               }
             }
           }
