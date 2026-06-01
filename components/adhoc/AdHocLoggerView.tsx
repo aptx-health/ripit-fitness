@@ -1,28 +1,14 @@
 'use client'
 
-import { Plus, RefreshCw, Sparkles, Trash2 } from 'lucide-react'
+import { Plus, RefreshCw, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import {
-  type ExerciseDefinition,
-  ExerciseSearchInterface,
-} from '@/components/exercise-selection/ExerciseSearchInterface'
-import ExerciseDefinitionEditorModal from '@/components/features/exercise-definition/ExerciseDefinitionEditorModal'
+import type { ExerciseDefinition } from '@/components/exercise-selection/ExerciseSearchInterface'
 import { WorkoutRollupModal } from '@/components/features/training/WorkoutRollupModal'
 import { useToast } from '@/components/ToastProvider'
 import { Button } from '@/components/ui/Button'
 import { LoadingFrog } from '@/components/ui/loading-frog'
-import {
-  Dialog,
-  DialogBody,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/radix/dialog'
-import { TipAnnotation } from '@/components/ui/TipAnnotation'
 import ExerciseActionsFooter from '@/components/workout-logging/ExerciseActionsFooter'
 import ExerciseDisplayTabs from '@/components/workout-logging/ExerciseDisplayTabs'
 import ExerciseLoggingHeader from '@/components/workout-logging/ExerciseLoggingHeader'
@@ -31,6 +17,7 @@ import ExitWorkoutConfirm from '@/components/workout-logging/ExitWorkoutConfirm'
 import SetLoggingForm, {
   type ExpandedInput,
 } from '@/components/workout-logging/SetLoggingForm'
+import WorkoutPlanEditor from '@/components/workout-logging/WorkoutPlanEditor'
 import { useIntensityAccess } from '@/hooks/useIntensityAccess'
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
 import {
@@ -41,12 +28,18 @@ import {
   discardAdHocWorkout,
   fetchExerciseHistory,
   logAdHocSet,
+  reorderAdHocExercises,
   swapAdHocExercise,
 } from '@/lib/api/adhoc-workout'
 import { FetchError } from '@/lib/api/fetch'
 import { clientLogger } from '@/lib/client-logger'
 import type { WorkoutRollup } from '@/lib/stats/workout-rollup'
 import type { LoggedSet } from '@/types/workout'
+import {
+  AdHocEmptyState,
+  AdHocExercisePickerModal,
+  type PickerMode,
+} from './AdHocExercisePickerModal'
 
 export type AdHocExercise = {
   id: string
@@ -128,6 +121,7 @@ export default function AdHocLoggerView({
   const [currentSet, setCurrentSet] = useState(EMPTY_SET)
   const [expandedInput, setExpandedInput] = useState<ExpandedInput>(null)
   const [pickerMode, setPickerMode] = useState<PickerMode | null>(null)
+  const [planEditorOpen, setPlanEditorOpen] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
   const [isSwapping, setIsSwapping] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -272,7 +266,11 @@ export default function AdHocLoggerView({
 
   const handleSwapExercise = useCallback(
     async (definitions: ExerciseDefinition[]) => {
-      const target = exercises[currentIndex]
+      const targetId =
+        pickerMode?.kind === 'swap' && pickerMode.targetId
+          ? pickerMode.targetId
+          : exercises[currentIndex]?.id
+      const target = exercises.find((e) => e.id === targetId)
       const replacement = definitions[0]
       if (!target || !replacement || isSwapping) return
       setIsSwapping(true)
@@ -281,8 +279,8 @@ export default function AdHocLoggerView({
           onRetry: onRetryToast('Swapping exercise'),
         })
         setExercises((prev) =>
-          prev.map((ex, i) =>
-            i === currentIndex
+          prev.map((ex) =>
+            ex.id === target.id
               ? {
                   ...ex,
                   name: updated.name,
@@ -311,11 +309,13 @@ export default function AdHocLoggerView({
         setIsSwapping(false)
       }
     },
-    [currentIndex, exercises, isSwapping, onRetryToast, toast]
+    [currentIndex, exercises, isSwapping, onRetryToast, toast, pickerMode]
   )
 
-  const handleDeleteExercise = useCallback(async () => {
-    const target = exercises[currentIndex]
+  const handleDeleteExercise = useCallback(async (targetId?: string) => {
+    const target = targetId
+      ? exercises.find((e) => e.id === targetId)
+      : exercises[currentIndex]
     if (!target || isDeleting) return
     setIsDeleting(true)
     try {
@@ -324,9 +324,14 @@ export default function AdHocLoggerView({
       })
       setLoggedSets((prev) => prev.filter((s) => s.exerciseId !== target.id))
       setExercises((prev) => {
+        const removedIdx = prev.findIndex((ex) => ex.id === target.id)
         const next = prev.filter((ex) => ex.id !== target.id)
-        // Keep currentIndex in range; bias toward the previous exercise.
-        setCurrentIndex((idx) => Math.max(0, Math.min(idx, next.length - 1)))
+        // Keep currentIndex pointing at a valid exercise; bias toward previous.
+        setCurrentIndex((idx) => {
+          if (next.length === 0) return 0
+          if (removedIdx < idx) return Math.max(0, idx - 1)
+          return Math.min(idx, next.length - 1)
+        })
         return next
       })
       setCurrentSet(EMPTY_SET)
@@ -341,6 +346,69 @@ export default function AdHocLoggerView({
       setIsDeleting(false)
     }
   }, [currentIndex, exercises, isDeleting, onRetryToast, toast])
+
+  const handleReorderExercises = useCallback(
+    async (orderedIds: string[]) => {
+      const currentId = exercises[currentIndex]?.id
+      setExercises((prev) => {
+        const byId = new Map(prev.map((e) => [e.id, e] as const))
+        return orderedIds.map((id) => byId.get(id)).filter(Boolean) as AdHocExercise[]
+      })
+      if (currentId) {
+        const nextIdx = orderedIds.indexOf(currentId)
+        if (nextIdx >= 0) setCurrentIndex(nextIdx)
+      }
+      try {
+        await reorderAdHocExercises(completionId, orderedIds, {
+          onRetry: onRetryToast('Reordering exercises'),
+        })
+      } catch (err) {
+        clientLogger.error('Failed to reorder ad-hoc exercises:', err)
+        toast.error(
+          "Couldn't save order",
+          err instanceof FetchError && err.message
+            ? err.message
+            : 'Check your connection and try again.'
+        )
+      }
+    },
+    [completionId, currentIndex, exercises, onRetryToast, toast]
+  )
+
+  const handleJumpToExercise = useCallback(
+    (exerciseId: string) => {
+      const idx = exercises.findIndex((e) => e.id === exerciseId)
+      if (idx >= 0) {
+        setCurrentIndex(idx)
+        setCurrentSet(EMPTY_SET)
+        setExpandedInput(null)
+      }
+    },
+    [exercises]
+  )
+
+  const handlePlanSwap = useCallback(
+    (exerciseId: string) => {
+      const target = exercises.find((e) => e.id === exerciseId)
+      if (!target) return
+      setPlanEditorOpen(false)
+      setPickerMode({ kind: 'swap', replacingName: target.name, targetId: target.id })
+    },
+    [exercises]
+  )
+
+  const handlePlanDelete = useCallback(
+    (exerciseId: string) => {
+      setPlanEditorOpen(false)
+      void handleDeleteExercise(exerciseId)
+    },
+    [handleDeleteExercise]
+  )
+
+  const handlePlanAdd = useCallback(() => {
+    setPlanEditorOpen(false)
+    setPickerMode({ kind: 'add' })
+  }, [])
 
   const handleLogSet = useCallback(async () => {
     if (!currentExercise || isLoggingSet) return
@@ -638,6 +706,7 @@ export default function AdHocLoggerView({
           startedAt={startedAt}
           onCompleteWorkout={handleRequestComplete}
           onClose={handleClose}
+          onOpenPlanEditor={hasExercises ? () => setPlanEditorOpen(true) : undefined}
         />
 
         <div
@@ -707,7 +776,7 @@ export default function AdHocLoggerView({
               ] satisfies QuickAction[]}
             />
           ) : (
-            <EmptyState />
+            <AdHocEmptyState />
           )}
         </div>
 
@@ -751,13 +820,24 @@ export default function AdHocLoggerView({
       </div>
 
       {pickerMode && (
-        <ExercisePickerModal
+        <AdHocExercisePickerModal
           mode={pickerMode}
           onClose={() => setPickerMode(null)}
           onConfirm={pickerMode.kind === 'add' ? handleAddExercises : handleSwapExercise}
           isBusy={pickerMode.kind === 'add' ? isAdding : isSwapping}
         />
       )}
+      <WorkoutPlanEditor
+        open={planEditorOpen}
+        onClose={() => setPlanEditorOpen(false)}
+        exercises={exercises.map((e) => ({ id: e.id, name: e.name }))}
+        currentExerciseId={exercises[currentIndex]?.id}
+        onReorder={handleReorderExercises}
+        onJump={handleJumpToExercise}
+        onAdd={handlePlanAdd}
+        onSwap={handlePlanSwap}
+        onDelete={handlePlanDelete}
+      />
       {showExitConfirm && (
         <ExitWorkoutConfirm
           hasUnsavedWork={totalLoggedSets > 0 || exercises.length > 0}
@@ -817,151 +897,5 @@ export default function AdHocLoggerView({
         onClose={handleRollupClose}
       />
     </>
-  )
-}
-
-function EmptyState() {
-  return (
-    <div className="flex-1 flex items-center justify-center px-6 py-8">
-      <TipAnnotation
-        icon={<Sparkles aria-hidden="true" size={20} strokeWidth={1.8} />}
-      >
-        <span className="text-xl sm:text-2xl leading-relaxed text-foreground">
-          Pick your first exercise to start logging. Add as many as you want as you go.
-        </span>
-      </TipAnnotation>
-    </div>
-  )
-}
-
-type PickerMode =
-  | { kind: 'add' }
-  | { kind: 'swap'; replacingName: string }
-
-function ExercisePickerModal({
-  mode,
-  onClose,
-  onConfirm,
-  isBusy,
-}: {
-  mode: PickerMode
-  onClose: () => void
-  onConfirm: (defs: ExerciseDefinition[]) => void
-  isBusy: boolean
-}) {
-  const isAdd = mode.kind === 'add'
-  // Multi-select state used only in add mode.
-  const [selectedDefs, setSelectedDefs] = useState<ExerciseDefinition[]>([])
-  const selectedIds = new Set(selectedDefs.map((d) => d.id))
-  const [showCreateModal, setShowCreateModal] = useState(false)
-
-  const handleAddToggle = useCallback((def: ExerciseDefinition) => {
-    setSelectedDefs((prev) =>
-      prev.some((d) => d.id === def.id)
-        ? prev.filter((d) => d.id !== def.id)
-        : [...prev, def]
-    )
-  }, [])
-
-  const handleSwapSelect = useCallback(
-    (def: ExerciseDefinition) => {
-      if (isBusy) return
-      onConfirm([def])
-    },
-    [isBusy, onConfirm]
-  )
-
-  const count = selectedDefs.length
-  const title = isAdd ? 'Search Exercises' : 'Swap Exercise'
-  const description = isAdd
-    ? 'Pick one or more to add to your workout'
-    : `Pick a replacement for ${mode.kind === 'swap' ? mode.replacingName : ''}`
-
-  return (
-    <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
-      <DialogContent
-        showClose={false}
-        fullScreenMobile={true}
-        // Body renders ExerciseSearchInterface; prevent default Radix auto-focus
-        // so the mobile keyboard doesn't pop up automatically (issue #846).
-        onOpenAutoFocus={(e) => e.preventDefault()}
-        className="w-full h-full sm:w-[90vw] sm:max-w-3xl sm:h-auto sm:max-h-[85vh] rounded-none sm:rounded-none border border-border bg-card"
-      >
-        <DialogHeader className="border-b border-border bg-primary py-2">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <DialogTitle className="text-lg font-bold text-primary-foreground tracking-wider uppercase">
-                {title}
-              </DialogTitle>
-              <DialogDescription className="text-base font-bold text-primary-foreground/70 uppercase tracking-wide">
-                {description}
-              </DialogDescription>
-            </div>
-          </div>
-        </DialogHeader>
-
-        <DialogBody className="flex-1 min-h-0">
-          <ExerciseSearchInterface
-            onExerciseSelect={isAdd ? handleAddToggle : handleSwapSelect}
-            selectedIds={isAdd ? selectedIds : undefined}
-            preloadExercises
-          />
-        </DialogBody>
-
-        <DialogFooter className="border-t border-border bg-card py-2">
-          <div className="flex items-center justify-end gap-2 w-full">
-            <Button variant="secondary" onClick={onClose} doom disabled={isBusy}>
-              Cancel
-            </Button>
-            {isAdd && (
-              <>
-                <Button
-                  variant="secondary"
-                  onClick={() => setShowCreateModal(true)}
-                  doom
-                  disabled={isBusy}
-                >
-                  + Create New Exercise
-                </Button>
-                <Button
-                  variant="primary"
-                  onClick={() => onConfirm(selectedDefs)}
-                  disabled={count === 0 || isBusy}
-                  loading={isBusy}
-                  doom
-                >
-                  {count === 0 ? 'Add' : count === 1 ? 'Add 1 exercise' : `Add all (${count})`}
-                </Button>
-              </>
-            )}
-          </div>
-        </DialogFooter>
-      </DialogContent>
-      <ExerciseDefinitionEditorModal
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        mode="create"
-        onSuccess={(newExercise) => {
-          setShowCreateModal(false)
-          // Auto-select the newly created exercise so the user can add it
-          // straight away without having to re-find it in search results.
-          const def: ExerciseDefinition = {
-            id: newExercise.id,
-            name: newExercise.name,
-            primaryFAUs: newExercise.primaryFAUs,
-            secondaryFAUs: newExercise.secondaryFAUs,
-            equipment: newExercise.equipment,
-            instructions: newExercise.instructions,
-          }
-          if (isAdd) {
-            setSelectedDefs((prev) =>
-              prev.some((d) => d.id === def.id) ? prev : [...prev, def]
-            )
-          } else {
-            onConfirm([def])
-          }
-        }}
-      />
-    </Dialog>
   )
 }
