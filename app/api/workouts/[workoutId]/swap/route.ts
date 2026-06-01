@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { exerciseDefinitionSelectForLogger } from '@/lib/db/selects'
 import { logger } from '@/lib/logger'
 
 export async function POST(
@@ -109,17 +110,7 @@ export async function POST(
             prescribedSets: {
               orderBy: { setNumber: 'asc' }
             },
-            exerciseDefinition: {
-              select: {
-                id: true,
-                name: true,
-                primaryFAUs: true,
-                secondaryFAUs: true,
-                equipment: true,
-                instructions: true,
-                imageUrls: true,
-              }
-            }
+            exerciseDefinition: { select: exerciseDefinitionSelectForLogger }
           },
           orderBy: { order: 'asc' }
         },

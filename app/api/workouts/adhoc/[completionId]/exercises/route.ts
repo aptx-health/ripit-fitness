@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { findAdHocCompletion } from '@/lib/db/adhoc-completion'
+import { exerciseDefinitionSelectForLogger } from '@/lib/db/selects'
 import { logger } from '@/lib/logger'
 import { checkRateLimit, workoutActionLimiter } from '@/lib/rate-limit'
 
@@ -14,17 +15,7 @@ type AddAdHocExerciseRequest = {
 
 const exerciseInclude = {
   prescribedSets: { orderBy: { setNumber: 'asc' as const } },
-  exerciseDefinition: {
-    select: {
-      id: true,
-      name: true,
-      primaryFAUs: true,
-      secondaryFAUs: true,
-      equipment: true,
-      instructions: true,
-      imageUrls: true,
-    },
-  },
+  exerciseDefinition: { select: exerciseDefinitionSelectForLogger },
 } satisfies Prisma.ExerciseInclude
 
 export async function POST(

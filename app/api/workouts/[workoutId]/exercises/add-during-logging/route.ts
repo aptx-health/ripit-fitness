@@ -2,6 +2,7 @@ import type { Prisma } from '@prisma/client'
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { exerciseDefinitionSelectForLogger } from '@/lib/db/selects'
 import { logger } from '@/lib/logger'
 
 type AddDuringLoggingRequest = {
@@ -96,16 +97,7 @@ export async function POST(
       prescribedSets: {
         orderBy: { setNumber: 'asc' as const },
       },
-      exerciseDefinition: {
-        select: {
-          id: true,
-          name: true,
-          primaryFAUs: true,
-          secondaryFAUs: true,
-          equipment: true,
-          instructions: true,
-        },
-      },
+      exerciseDefinition: { select: exerciseDefinitionSelectForLogger },
     } satisfies Prisma.ExerciseInclude
 
     type ExerciseWithDetails = Prisma.ExerciseGetPayload<{
