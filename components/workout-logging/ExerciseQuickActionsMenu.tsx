@@ -71,7 +71,7 @@ export default function ExerciseQuickActionsMenu({
             sideOffset={8}
             align="end"
             collisionPadding={12}
-            className="z-[80] min-w-[260px] bg-card border-2 border-primary doom-corners shadow-[0_8px_32px_rgba(0,0,0,0.4)] overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
+            className="z-[100] min-w-[260px] bg-card border-2 border-primary doom-corners shadow-[0_8px_32px_rgba(0,0,0,0.4)] overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
           >
             {heading && (
               <div className="px-4 py-2.5 border-b-2 border-border bg-primary/10">

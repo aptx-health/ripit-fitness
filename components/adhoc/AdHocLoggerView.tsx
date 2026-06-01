@@ -28,6 +28,7 @@ import ExerciseDisplayTabs from '@/components/workout-logging/ExerciseDisplayTab
 import ExerciseLoggingHeader from '@/components/workout-logging/ExerciseLoggingHeader'
 import type { QuickAction } from '@/components/workout-logging/ExerciseQuickActionsMenu'
 import ExitWorkoutConfirm from '@/components/workout-logging/ExitWorkoutConfirm'
+import WorkoutPlanEditor from '@/components/workout-logging/WorkoutPlanEditor'
 import SetLoggingForm, {
   type ExpandedInput,
 } from '@/components/workout-logging/SetLoggingForm'
@@ -41,6 +42,7 @@ import {
   discardAdHocWorkout,
   fetchExerciseHistory,
   logAdHocSet,
+  reorderAdHocExercises,
   swapAdHocExercise,
 } from '@/lib/api/adhoc-workout'
 import { FetchError } from '@/lib/api/fetch'
@@ -128,6 +130,7 @@ export default function AdHocLoggerView({
   const [currentSet, setCurrentSet] = useState(EMPTY_SET)
   const [expandedInput, setExpandedInput] = useState<ExpandedInput>(null)
   const [pickerMode, setPickerMode] = useState<PickerMode | null>(null)
+  const [planEditorOpen, setPlanEditorOpen] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
   const [isSwapping, setIsSwapping] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -272,7 +275,11 @@ export default function AdHocLoggerView({
 
   const handleSwapExercise = useCallback(
     async (definitions: ExerciseDefinition[]) => {
-      const target = exercises[currentIndex]
+      const targetId =
+        pickerMode?.kind === 'swap' && pickerMode.targetId
+          ? pickerMode.targetId
+          : exercises[currentIndex]?.id
+      const target = exercises.find((e) => e.id === targetId)
       const replacement = definitions[0]
       if (!target || !replacement || isSwapping) return
       setIsSwapping(true)
@@ -281,8 +288,8 @@ export default function AdHocLoggerView({
           onRetry: onRetryToast('Swapping exercise'),
         })
         setExercises((prev) =>
-          prev.map((ex, i) =>
-            i === currentIndex
+          prev.map((ex) =>
+            ex.id === target.id
               ? {
                   ...ex,
                   name: updated.name,
@@ -311,11 +318,13 @@ export default function AdHocLoggerView({
         setIsSwapping(false)
       }
     },
-    [currentIndex, exercises, isSwapping, onRetryToast, toast]
+    [currentIndex, exercises, isSwapping, onRetryToast, toast, pickerMode]
   )
 
-  const handleDeleteExercise = useCallback(async () => {
-    const target = exercises[currentIndex]
+  const handleDeleteExercise = useCallback(async (targetId?: string) => {
+    const target = targetId
+      ? exercises.find((e) => e.id === targetId)
+      : exercises[currentIndex]
     if (!target || isDeleting) return
     setIsDeleting(true)
     try {
@@ -324,9 +333,14 @@ export default function AdHocLoggerView({
       })
       setLoggedSets((prev) => prev.filter((s) => s.exerciseId !== target.id))
       setExercises((prev) => {
+        const removedIdx = prev.findIndex((ex) => ex.id === target.id)
         const next = prev.filter((ex) => ex.id !== target.id)
-        // Keep currentIndex in range; bias toward the previous exercise.
-        setCurrentIndex((idx) => Math.max(0, Math.min(idx, next.length - 1)))
+        // Keep currentIndex pointing at a valid exercise; bias toward previous.
+        setCurrentIndex((idx) => {
+          if (next.length === 0) return 0
+          if (removedIdx < idx) return Math.max(0, idx - 1)
+          return Math.min(idx, next.length - 1)
+        })
         return next
       })
       setCurrentSet(EMPTY_SET)
@@ -341,6 +355,69 @@ export default function AdHocLoggerView({
       setIsDeleting(false)
     }
   }, [currentIndex, exercises, isDeleting, onRetryToast, toast])
+
+  const handleReorderExercises = useCallback(
+    async (orderedIds: string[]) => {
+      const currentId = exercises[currentIndex]?.id
+      setExercises((prev) => {
+        const byId = new Map(prev.map((e) => [e.id, e] as const))
+        return orderedIds.map((id) => byId.get(id)).filter(Boolean) as AdHocExercise[]
+      })
+      if (currentId) {
+        const nextIdx = orderedIds.indexOf(currentId)
+        if (nextIdx >= 0) setCurrentIndex(nextIdx)
+      }
+      try {
+        await reorderAdHocExercises(completionId, orderedIds, {
+          onRetry: onRetryToast('Reordering exercises'),
+        })
+      } catch (err) {
+        clientLogger.error('Failed to reorder ad-hoc exercises:', err)
+        toast.error(
+          "Couldn't save order",
+          err instanceof FetchError && err.message
+            ? err.message
+            : 'Check your connection and try again.'
+        )
+      }
+    },
+    [completionId, currentIndex, exercises, onRetryToast, toast]
+  )
+
+  const handleJumpToExercise = useCallback(
+    (exerciseId: string) => {
+      const idx = exercises.findIndex((e) => e.id === exerciseId)
+      if (idx >= 0) {
+        setCurrentIndex(idx)
+        setCurrentSet(EMPTY_SET)
+        setExpandedInput(null)
+      }
+    },
+    [exercises]
+  )
+
+  const handlePlanSwap = useCallback(
+    (exerciseId: string) => {
+      const target = exercises.find((e) => e.id === exerciseId)
+      if (!target) return
+      setPlanEditorOpen(false)
+      setPickerMode({ kind: 'swap', replacingName: target.name, targetId: target.id })
+    },
+    [exercises]
+  )
+
+  const handlePlanDelete = useCallback(
+    (exerciseId: string) => {
+      setPlanEditorOpen(false)
+      void handleDeleteExercise(exerciseId)
+    },
+    [handleDeleteExercise]
+  )
+
+  const handlePlanAdd = useCallback(() => {
+    setPlanEditorOpen(false)
+    setPickerMode({ kind: 'add' })
+  }, [])
 
   const handleLogSet = useCallback(async () => {
     if (!currentExercise || isLoggingSet) return
@@ -638,6 +715,7 @@ export default function AdHocLoggerView({
           startedAt={startedAt}
           onCompleteWorkout={handleRequestComplete}
           onClose={handleClose}
+          onOpenPlanEditor={hasExercises ? () => setPlanEditorOpen(true) : undefined}
         />
 
         <div
@@ -758,6 +836,17 @@ export default function AdHocLoggerView({
           isBusy={pickerMode.kind === 'add' ? isAdding : isSwapping}
         />
       )}
+      <WorkoutPlanEditor
+        open={planEditorOpen}
+        onClose={() => setPlanEditorOpen(false)}
+        exercises={exercises.map((e) => ({ id: e.id, name: e.name }))}
+        currentExerciseId={exercises[currentIndex]?.id}
+        onReorder={handleReorderExercises}
+        onJump={handleJumpToExercise}
+        onAdd={handlePlanAdd}
+        onSwap={handlePlanSwap}
+        onDelete={handlePlanDelete}
+      />
       {showExitConfirm && (
         <ExitWorkoutConfirm
           hasUnsavedWork={totalLoggedSets > 0 || exercises.length > 0}
@@ -836,7 +925,7 @@ function EmptyState() {
 
 type PickerMode =
   | { kind: 'add' }
-  | { kind: 'swap'; replacingName: string }
+  | { kind: 'swap'; replacingName: string; targetId?: string }
 
 function ExercisePickerModal({
   mode,

@@ -1,6 +1,6 @@
 'use client'
 
-import { X } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import { useMemo } from 'react'
 import { useWorkoutTimer } from '@/hooks/useWorkoutTimer'
 
@@ -11,6 +11,7 @@ interface ExerciseLoggingHeaderProps {
   startedAt?: string | null
   onCompleteWorkout: () => void
   onClose: () => void
+  onOpenPlanEditor?: () => void
   modeToggle?: React.ReactNode
 }
 
@@ -18,22 +19,25 @@ function ProgressIndicator({ current, total }: { current: number; total: number 
   const useDoubleRow = total > 5
   const topCount = useDoubleRow ? Math.ceil(total / 2) : total
   const bottomCount = useDoubleRow ? total - topCount : 0
+  const barHeight = useDoubleRow ? 5 : 12
 
   const renderRow = (count: number, startIndex: number) => (
     <div className="flex gap-[3px]" style={{ width: '110px' }}>
       {Array.from({ length: count }, (_, i) => {
         const exerciseIndex = startIndex + i
+        const lit = exerciseIndex <= current
         return (
           <div
             key={exerciseIndex}
-            className="h-[5px] flex-1 transition-colors"
+            className="flex-1 transition-colors"
             style={{
-              backgroundColor: exerciseIndex <= current
+              height: barHeight,
+              backgroundColor: lit
                 ? 'var(--primary)'
-                : 'rgba(0,0,0,0.25)',
-              boxShadow: exerciseIndex <= current
-                ? undefined
-                : 'inset 0 1px 0 rgba(0,0,0,0.20)',
+                : 'rgba(16, 185, 129, 0.14)',
+              boxShadow: lit
+                ? 'inset 0 1px 0 rgba(255,255,255,0.28), 0 0 4px rgba(16,185,129,0.45)'
+                : 'inset 0 1px 1px rgba(0,0,0,0.40)',
             }}
           />
         )
@@ -56,6 +60,7 @@ export default function ExerciseLoggingHeader({
   startedAt,
   onCompleteWorkout,
   onClose,
+  onOpenPlanEditor,
   modeToggle,
 }: ExerciseLoggingHeaderProps) {
   const initialElapsed = useMemo(() => {
@@ -71,9 +76,45 @@ export default function ExerciseLoggingHeader({
       style={{ paddingTop: 'env(safe-area-inset-top)', boxShadow: 'inset 0 -1px 0 rgba(0,0,0,0.25)' }}
     >
       <div className="px-3 py-2.5 grid items-center gap-3" style={{ gridTemplateColumns: '1fr auto 1fr' }}>
-        {/* Left: progress indicator */}
+        {/* Left: progress indicator (button when editor wired) */}
         <div className="flex items-center">
-          <ProgressIndicator current={currentExerciseIndex} total={totalExercises} />
+          {onOpenPlanEditor ? (
+            <button
+              type="button"
+              onClick={onOpenPlanEditor}
+              aria-label="Edit workout plan"
+              className="group inline-flex items-center gap-2 p-1.5 doom-focus-ring transition-transform active:translate-y-[2px]"
+              style={{
+                backgroundColor: 'rgba(254, 243, 199, 0.06)',
+                boxShadow:
+                  'inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(0,0,0,0.35), 0 2px 0 rgba(0,0,0,0.40)',
+              }}
+            >
+              <Menu
+                size={18}
+                strokeWidth={2.5}
+                className="text-secondary-foreground/85 ml-0.5 sm:hidden"
+                aria-hidden="true"
+              />
+              <span
+                className="inline-flex items-center px-1.5 py-1 max-[359px]:hidden"
+                style={{
+                  backgroundColor: 'rgba(0,0,0,0.45)',
+                  boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(0,0,0,0.25)',
+                }}
+              >
+                <ProgressIndicator current={currentExerciseIndex} total={totalExercises} />
+              </span>
+              <span
+                className="hidden sm:inline text-[10px] font-bold uppercase tracking-[0.15em] text-secondary-foreground/85 pr-1"
+                aria-hidden="true"
+              >
+                Plan
+              </span>
+            </button>
+          ) : (
+            <ProgressIndicator current={currentExerciseIndex} total={totalExercises} />
+          )}
           {failedSetCount > 0 && (
             <span className="ml-2 text-xs text-warning font-semibold">{failedSetCount} unsaved</span>
           )}
