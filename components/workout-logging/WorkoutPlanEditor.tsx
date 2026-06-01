@@ -14,14 +14,12 @@ import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  useSortable,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
-import { ChevronRight, GripVertical, Plus, RefreshCw, Settings, Trash2, X } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
-import ExerciseQuickActionsMenu, { type QuickAction } from './ExerciseQuickActionsMenu'
+import { WorkoutPlanEditorRow } from './WorkoutPlanEditorRow'
 
 export type WorkoutPlanEditorExercise = {
   id: string
@@ -60,14 +58,13 @@ export default function WorkoutPlanEditor({
     setLocalOrder(exercises)
   }, [exercises])
 
-  // Close on Escape, but defer to any nested popper (Radix DropdownMenu calls
-  // preventDefault on Escape when it dismisses its own content). Without this
-  // guard, opening the gear menu and pressing Escape closes the editor too.
+  // Close on Escape, but defer to any nested popper (Radix DropdownMenu
+  // calls preventDefault on its own Escape handling) — checking
+  // defaultPrevented keeps the gear menu's Escape from closing the editor.
   useEffect(() => {
     if (!open) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape' || e.defaultPrevented) return
-      onClose()
+      if (e.key === 'Escape' && !e.defaultPrevented) onClose()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -111,14 +108,20 @@ export default function WorkoutPlanEditor({
       role="dialog"
       aria-modal="true"
       aria-label="Workout plan editor"
-      className="fixed inset-0 z-[90] flex justify-start bg-black/40 backdrop-blur-md sm:items-center sm:justify-center"
+      className="fixed inset-0 z-[90] flex justify-start sm:items-center sm:justify-center"
       style={{ position: 'fixed', inset: 0 }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose()
-      }}
     >
+      {/* Backdrop as a real button so a11y rules are satisfied and screen
+          readers see an explicit dismissal target. The sheet sits above it. */}
+      <button
+        type="button"
+        aria-label="Close workout plan editor"
+        onClick={onClose}
+        className="absolute inset-0 bg-black/40 backdrop-blur-md cursor-default focus:outline-none"
+        tabIndex={-1}
+      />
       <div
-        className="bg-muted flex flex-col w-[88vw] max-w-[420px] h-[100dvh] border-r-2 border-border shadow-[8px_0_24px_rgba(0,0,0,0.25)] animate-in slide-in-from-left duration-200
+        className="relative bg-muted flex flex-col w-[88vw] max-w-[420px] h-[100dvh] border-r-2 border-border shadow-[8px_0_24px_rgba(0,0,0,0.25)] animate-in slide-in-from-left duration-200
                    sm:w-full sm:max-w-2xl sm:h-[85vh] sm:max-h-[85vh] sm:border-2 sm:shadow-xl sm:slide-in-from-bottom"
       >
       <EditorHeader onClose={onClose} />
@@ -135,7 +138,7 @@ export default function WorkoutPlanEditor({
             <SortableContext items={ids} strategy={verticalListSortingStrategy}>
               <ul className="flex flex-col gap-2.5" aria-busy={isReordering || undefined}>
                 {localOrder.map((exercise) => (
-                  <SortableRow
+                  <WorkoutPlanEditorRow
                     key={exercise.id}
                     exercise={exercise}
                     isCurrent={exercise.id === currentExerciseId}
@@ -158,18 +161,7 @@ export default function WorkoutPlanEditor({
           className="flex-shrink-0 bg-muted border-t-2 border-border px-3 pt-3"
           style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 12px)' }}
         >
-          <button
-            type="button"
-            onClick={onAdd}
-            className="w-full h-12 bg-primary text-primary-foreground font-bold uppercase tracking-wider text-base flex items-center justify-center gap-2 doom-focus-ring transition-colors hover:bg-primary-hover active:translate-y-[2px]"
-            style={{
-              boxShadow:
-                'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -2px 0 rgba(0,0,0,0.30), 0 3px 0 var(--primary-active, #047857)',
-            }}
-          >
-            <Plus size={20} strokeWidth={2.5} />
-            Add exercise
-          </button>
+          <AddExerciseButton onClick={onAdd} block />
         </div>
       )}
       </div>
@@ -213,122 +205,6 @@ function EditorHeader({ onClose }: { onClose: () => void }) {
   )
 }
 
-type SortableRowProps = {
-  exercise: WorkoutPlanEditorExercise
-  isCurrent: boolean
-  onJump: () => void
-  onSwap: () => void
-  onDelete: () => void
-}
-
-function SortableRow({ exercise, isCurrent, onJump, onSwap, onDelete }: SortableRowProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: exercise.id,
-  })
-
-  const style: React.CSSProperties = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    zIndex: isDragging ? 10 : undefined,
-  }
-
-  const menuActions: QuickAction[] = [
-    {
-      label: 'Swap exercise',
-      icon: RefreshCw,
-      onClick: onSwap,
-    },
-    {
-      label: 'Delete exercise',
-      icon: Trash2,
-      onClick: onDelete,
-      variant: 'danger',
-      requiresConfirmation: true,
-      confirmationMessage: `Are you sure you want to delete "${exercise.name}"?`,
-    },
-  ]
-
-  return (
-    <li
-      ref={setNodeRef}
-      style={style}
-      className={`relative select-none transition-shadow ${
-        isCurrent ? 'doom-corners' : ''
-      } ${
-        isDragging
-          ? 'border-2 border-primary bg-card shadow-[0_10px_24px_rgba(0,0,0,0.30)] scale-[1.01]'
-          : isCurrent
-            ? 'border-2 border-border'
-            : 'border-2 border-border bg-card'
-      }`}
-      data-current={isCurrent || undefined}
-    >
-      {isCurrent && (
-        <>
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 pointer-events-none"
-            style={{ backgroundColor: 'rgba(16, 185, 129, 0.06)' }}
-          />
-          <div
-            aria-hidden="true"
-            className="absolute top-0 bottom-0 left-0 w-[6px] bg-secondary"
-            style={{ marginLeft: '-2px' }}
-          />
-        </>
-      )}
-      <div
-        className="relative flex items-stretch min-h-[52px]"
-        style={{
-          boxShadow: isDragging ? undefined : '0 2px 0 rgba(58, 40, 23, 0.18)',
-        }}
-      >
-        <button
-          type="button"
-          aria-label={`Drag to reorder ${exercise.name}`}
-          {...attributes}
-          {...listeners}
-          className="relative flex-shrink-0 w-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors doom-focus-ring touch-none cursor-grab active:cursor-grabbing"
-          style={{
-            touchAction: 'none',
-            backgroundColor: 'rgba(58, 40, 23, 0.04)',
-            boxShadow: 'inset -1px 0 0 rgba(58, 40, 23, 0.12), inset 0 1px 1px rgba(58, 40, 23, 0.06)',
-          }}
-        >
-          <GripVertical size={20} strokeWidth={2.25} />
-        </button>
-
-        <button
-          type="button"
-          onClick={onJump}
-          className="flex-1 min-w-0 flex items-center py-2.5 pl-3 pr-2 text-left doom-focus-ring"
-        >
-          <span className="min-w-0 inline-flex items-baseline gap-1.5 max-w-full">
-            <span className="truncate text-base font-bold uppercase tracking-wider text-foreground">
-              {exercise.name}
-            </span>
-            <ChevronRight
-              size={16}
-              strokeWidth={2.5}
-              className="flex-shrink-0 text-muted-foreground/70 self-center"
-            />
-          </span>
-        </button>
-
-        <div className="flex-shrink-0 flex items-center pr-1">
-          <ExerciseQuickActionsMenu
-            actions={menuActions}
-            triggerIcon={Settings}
-            triggerAriaLabel={`Edit options for ${exercise.name}`}
-            heading={exercise.name.toUpperCase()}
-            triggerClassName="h-11 w-11 text-muted-foreground hover:text-foreground"
-          />
-        </div>
-      </div>
-    </li>
-  )
-}
-
 function EmptyState({ onAdd }: { onAdd: () => void }) {
   return (
     <div className="h-full flex flex-col items-center justify-center text-center px-6">
@@ -338,18 +214,27 @@ function EmptyState({ onAdd }: { onAdd: () => void }) {
       <p className="text-muted-foreground text-sm mb-6 max-w-[280px]">
         Add an exercise to get started. Changes apply to today&apos;s session only.
       </p>
-      <button
-        type="button"
-        onClick={onAdd}
-        className="h-12 px-6 bg-primary text-primary-foreground font-bold uppercase tracking-wider text-base flex items-center gap-2 doom-focus-ring transition-colors hover:bg-primary-hover active:translate-y-[2px]"
-        style={{
-          boxShadow:
-            'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -2px 0 rgba(0,0,0,0.30), 0 3px 0 var(--primary-active, #047857)',
-        }}
-      >
-        <Plus size={20} strokeWidth={2.5} />
-        Add exercise
-      </button>
+      <AddExerciseButton onClick={onAdd} />
     </div>
+  )
+}
+
+/** Primary "+ Add exercise" CTA. `block` stretches to fill its row (footer). */
+function AddExerciseButton({ onClick, block = false }: { onClick: () => void; block?: boolean }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`h-12 bg-primary text-primary-foreground font-bold uppercase tracking-wider text-base flex items-center gap-2 doom-focus-ring transition-colors hover:bg-primary-hover active:translate-y-[2px] ${
+        block ? 'w-full justify-center' : 'px-6'
+      }`}
+      style={{
+        boxShadow:
+          'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -2px 0 rgba(0,0,0,0.30), 0 3px 0 var(--primary-active, #047857)',
+      }}
+    >
+      <Plus size={20} strokeWidth={2.5} />
+      Add exercise
+    </button>
   )
 }

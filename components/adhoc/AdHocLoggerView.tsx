@@ -18,11 +18,6 @@ import SetLoggingForm, {
   type ExpandedInput,
 } from '@/components/workout-logging/SetLoggingForm'
 import WorkoutPlanEditor from '@/components/workout-logging/WorkoutPlanEditor'
-import {
-  AdHocEmptyState,
-  AdHocExercisePickerModal,
-  type PickerMode,
-} from './AdHocExercisePickerModal'
 import { useIntensityAccess } from '@/hooks/useIntensityAccess'
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
 import {
@@ -40,6 +35,11 @@ import { FetchError } from '@/lib/api/fetch'
 import { clientLogger } from '@/lib/client-logger'
 import type { WorkoutRollup } from '@/lib/stats/workout-rollup'
 import type { LoggedSet } from '@/types/workout'
+import {
+  AdHocEmptyState,
+  AdHocExercisePickerModal,
+  type PickerMode,
+} from './AdHocExercisePickerModal'
 
 export type AdHocExercise = {
   id: string
