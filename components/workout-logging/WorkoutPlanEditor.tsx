@@ -121,8 +121,8 @@ export default function WorkoutPlanEditor({
         tabIndex={-1}
       />
       <div
-        className="relative bg-muted flex flex-col w-[88vw] max-w-[420px] h-[100dvh] border-r-2 border-border shadow-[8px_0_24px_rgba(0,0,0,0.25)] animate-in slide-in-from-left duration-200
-                   sm:w-full sm:max-w-2xl sm:h-[85vh] sm:max-h-[85vh] sm:border-2 sm:shadow-xl sm:slide-in-from-bottom"
+        className="relative bg-muted flex flex-col w-[88vw] max-w-[420px] mt-[env(safe-area-inset-top)] h-[calc(100dvh-env(safe-area-inset-top))] border-r-2 border-border shadow-[8px_0_24px_rgba(0,0,0,0.25)] animate-in slide-in-from-left duration-200
+                   sm:w-full sm:max-w-2xl sm:h-[85vh] sm:max-h-[85vh] sm:mt-0 sm:border-2 sm:shadow-xl sm:slide-in-from-bottom"
       >
       <EditorHeader onClose={onClose} />
 
@@ -175,7 +175,6 @@ function EditorHeader({ onClose }: { onClose: () => void }) {
     <div
       className="bg-secondary text-secondary-foreground flex-shrink-0"
       style={{
-        paddingTop: 'env(safe-area-inset-top)',
         boxShadow: 'inset 0 -1px 0 rgba(0,0,0,0.25)',
       }}
     >
