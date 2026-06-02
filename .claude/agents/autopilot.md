@@ -35,6 +35,7 @@ If `doppler run` fails with "You must specify a project", this is why.
 - Use `fd` instead of `find` for file searching.
 - Next.js 15: Dynamic route params are Promise-based — `const { id } = await params;`
 - Wrap git file paths containing brackets in double quotes to prevent shell glob expansion.
+- When a route returns an entity that's read by multiple routes (e.g. `ExerciseDefinition`), use the canonical select constants from `lib/db/selects.ts` rather than inlining the `select` block. If a canonical select doesn't exist yet for the shape you need, define it there. See `docs/PRISMA_SELECT_PATTERN.md`.
 
 ## Your first steps
 

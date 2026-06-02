@@ -166,6 +166,7 @@ Commit with a clear message describing what was simplified and why. Open a PR wi
 - All Prisma queries must be scoped to the authenticated user: `where: { userId: user.id }`
 - Dynamic route params must be awaited: `const { id } = await params` (Next.js 15 pattern)
 - Use `select` to fetch only needed fields; avoid loading full records when a subset suffices
+- For entities consumed by multiple routes (e.g. `ExerciseDefinition`), use the canonical select constants from `lib/db/selects.ts`. Flag inline selects that duplicate a canonical shape — they're how drift bugs like PR #854 happen. See `docs/PRISMA_SELECT_PATTERN.md`.
 - Use `Promise.all([...])` for independent parallel queries
 - Use `prisma.$transaction(async (tx) => { ... })` for multi-step writes
 - Use `logger.error({ error, context: 'route-name' }, 'message')` — never `console.error`

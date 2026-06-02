@@ -160,9 +160,11 @@ Program
 - **Exercise**: Exercises within a workout
 - **PrescribedSet**: Template/plan (what program prescribes)
 - **LoggedSet**: Actual performance (what user logged)
-- **WorkoutCompletion**: Tracks completed/incomplete/abandoned workouts
+- **WorkoutCompletion**: Tracks completed/incomplete/abandoned workouts (also supports ad-hoc/freestyle workouts not tied to a program)
+- **SavedWorkout**: User-saved workout templates (snapshot `workoutData` JSON) created from a completed workout; replayable via `/api/workouts/saved/[id]/start` and surfaced in `/workouts/saved`
 - **InAppMessage**: Admin-managed messages shown in workout UI (carousel slides, lifecycle targeting, placement rules)
-- **AppEvent**: Client-side analytics events (signup source, page views)
+- **AppEvent**: Client-side analytics events (signup source, page views, server-side `signup_completed` via BetterAuth hook)
+- **User.signupIntent**: Captured during onboarding to drive `/welcome` two-step screen for experienced users
 
 **Important**: We store BOTH prescribed and logged sets to enable plan vs reality comparison.
 

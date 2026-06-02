@@ -97,6 +97,24 @@ export async function deleteAdHocExercise(
   )
 }
 
+export async function reorderAdHocExercises(
+  completionId: string,
+  orderedIds: string[],
+  retry: RetryOpts = {}
+): Promise<void> {
+  await fetchJsonWithRetry<{ success: boolean }>(
+    `/api/workouts/adhoc/${completionId}/exercises/reorder`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        exercises: orderedIds.map((exerciseId, idx) => ({ exerciseId, order: idx + 1 })),
+      }),
+    },
+    retry
+  )
+}
+
 export async function logAdHocSet(
   completionId: string,
   set: {

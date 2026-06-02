@@ -28,6 +28,7 @@ import FollowAlongFooter from './workout-logging/FollowAlongFooter'
 import FollowAlongHeader from './workout-logging/FollowAlongHeader'
 import FollowAlongTabs from './workout-logging/FollowAlongTabs'
 import SetLoggingForm, { type ExpandedInput } from './workout-logging/SetLoggingForm'
+import WorkoutPlanEditor, { type WorkoutPlanEditorExercise } from './workout-logging/WorkoutPlanEditor'
 import { AddExerciseWizard } from './workout-logging/wizards/AddExerciseWizard'
 import { DeleteExerciseWizard } from './workout-logging/wizards/DeleteExerciseWizard'
 import { EditExerciseWizard } from './workout-logging/wizards/EditExerciseWizard'
@@ -110,7 +111,9 @@ export default function ExerciseLoggingModal({
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ loggingMode: 'full' }),
-    }).catch(() => {})
+    }).catch((err) => {
+      clientLogger.error('Failed to persist loggingMode=full from switch-to-logging', err)
+    })
   }, [])
 
   // Tip rotation — sequential through array order, then random
@@ -140,8 +143,14 @@ export default function ExerciseLoggingModal({
 
   // Wizard state
   const [activeWizard, setActiveWizard] = useState<'add' | 'swap' | 'edit' | 'delete' | null>(null)
+  const [wizardTarget, setWizardTarget] = useState<{ id: string; name: string } | null>(null)
   const [navigateToLastExercise, setNavigateToLastExercise] = useState(false)
   const [editingExerciseDefinitionId, setEditingExerciseDefinitionId] = useState<string | null>(null)
+
+  // Workout plan editor state
+  const [planEditorOpen, setPlanEditorOpen] = useState(false)
+  const [planExercises, setPlanExercises] = useState<WorkoutPlanEditorExercise[]>([])
+  const [isReorderingPlan, setIsReorderingPlan] = useState(false)
 
   // Progressive loading of exercises
   const {
@@ -291,7 +300,10 @@ export default function ExerciseLoggingModal({
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ loggingMode: 'full' }),
-      }).catch(() => {}) // fire-and-forget
+      }).catch((err) => {
+        // fire-and-forget — log so we can diagnose persistence drift without surfacing to the user
+        clientLogger.error('Failed to auto-persist loggingMode=full after first logged set', err)
+      })
     }
 
     // Pre-fill for next set: reps from next prescribed, weight carried forward
@@ -377,10 +389,100 @@ export default function ExerciseLoggingModal({
     }
   }, [])
 
-  const handleReplaceExercise = () => setActiveWizard('swap')
-  const handleAddExercise = () => setActiveWizard('add')
-  const handleDeleteExercise = () => setActiveWizard('delete')
+  const handleReplaceExercise = () => {
+    setWizardTarget(null)
+    setActiveWizard('swap')
+  }
+  const handleAddExercise = () => {
+    setWizardTarget(null)
+    setActiveWizard('add')
+  }
+  const handleDeleteExercise = () => {
+    setWizardTarget(null)
+    setActiveWizard('delete')
+  }
   const handleEditExercise = () => setActiveWizard('edit')
+
+  // Plan editor: fetch full exercise list when opening
+  const handleOpenPlanEditor = useCallback(async () => {
+    setPlanEditorOpen(true)
+    try {
+      const res = await fetch(`/api/workouts/${workoutId}/exercises`)
+      if (!res.ok) throw new Error('Failed to load')
+      const data = (await res.json()) as { exercises: { id: string; name: string }[] }
+      setPlanExercises(data.exercises.map((e) => ({ id: e.id, name: e.name })))
+    } catch (err) {
+      clientLogger.error('Failed to load workout exercises for plan editor', err)
+    }
+  }, [workoutId])
+
+  const handleReorderPlan = useCallback(
+    async (orderedIds: string[]) => {
+      setIsReorderingPlan(true)
+      // Optimistic; editor already updated its own local order.
+      setPlanExercises((prev) => {
+        const byId = new Map(prev.map((e) => [e.id, e] as const))
+        return orderedIds.map((id) => byId.get(id)).filter(Boolean) as WorkoutPlanEditorExercise[]
+      })
+      try {
+        const res = await fetch(`/api/workouts/${workoutId}/exercises/reorder`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            exercises: orderedIds.map((exerciseId, idx) => ({ exerciseId, order: idx + 1 })),
+          }),
+        })
+        if (!res.ok) throw new Error('Reorder failed')
+        refreshExercises()
+        if (onRefresh) await onRefresh()
+      } catch (err) {
+        clientLogger.error('Reorder failed', err)
+      } finally {
+        setIsReorderingPlan(false)
+      }
+    },
+    [workoutId, refreshExercises, onRefresh],
+  )
+
+  const handleJumpToExercise = useCallback(
+    (exerciseId: string) => {
+      const index = planExercises.findIndex((e) => e.id === exerciseId)
+      if (index >= 0) {
+        lastPrefillKey.current = ''
+        setExtraSetsMode(false)
+        goToExercise(index)
+      }
+    },
+    [planExercises, goToExercise],
+  )
+
+  const handlePlanSwap = useCallback(
+    (exerciseId: string) => {
+      const target = planExercises.find((e) => e.id === exerciseId)
+      if (!target) return
+      setWizardTarget({ id: target.id, name: target.name })
+      setPlanEditorOpen(false)
+      setActiveWizard('swap')
+    },
+    [planExercises],
+  )
+
+  const handlePlanDelete = useCallback(
+    (exerciseId: string) => {
+      const target = planExercises.find((e) => e.id === exerciseId)
+      if (!target) return
+      setWizardTarget({ id: target.id, name: target.name })
+      setPlanEditorOpen(false)
+      setActiveWizard('delete')
+    },
+    [planExercises],
+  )
+
+  const handlePlanAdd = useCallback(() => {
+    setWizardTarget(null)
+    setPlanEditorOpen(false)
+    setActiveWizard('add')
+  }, [])
 
   const handleEditExerciseDefinition = () => {
     if (currentExercise?.exerciseDefinition && !currentExercise.exerciseDefinition.isSystem) {
@@ -422,6 +524,7 @@ export default function ExerciseLoggingModal({
       setNavigateToLastExercise(true)
     }
     setActiveWizard(null)
+    setWizardTarget(null)
   }
 
   const handleCompleteWorkout = async () => {
@@ -561,6 +664,7 @@ export default function ExerciseLoggingModal({
               startedAt={startedAt}
               onCompleteWorkout={() => setIsConfirming(true)}
               onClose={handleExitWorkout}
+              onOpenPlanEditor={handleOpenPlanEditor}
             />
           )}
 
@@ -792,6 +896,20 @@ export default function ExerciseLoggingModal({
         }}
       />
 
+      {/* Workout plan editor */}
+      <WorkoutPlanEditor
+        open={planEditorOpen}
+        onClose={() => setPlanEditorOpen(false)}
+        exercises={planExercises}
+        currentExerciseId={currentExercise?.id}
+        isReordering={isReorderingPlan}
+        onReorder={handleReorderPlan}
+        onJump={handleJumpToExercise}
+        onAdd={handlePlanAdd}
+        onSwap={handlePlanSwap}
+        onDelete={handlePlanDelete}
+      />
+
       {/* Wizards */}
       {activeWizard === 'add' && (
         <AddExerciseWizard
@@ -803,12 +921,17 @@ export default function ExerciseLoggingModal({
         />
       )}
 
-      {activeWizard === 'swap' && currentExercise && (
+      {activeWizard === 'swap' && (wizardTarget || currentExercise) && (
         <SwapExerciseWizard
           open={true}
-          onOpenChange={(open) => !open && setActiveWizard(null)}
-          currentExerciseId={currentExercise.id}
-          currentExerciseName={currentExercise.name}
+          onOpenChange={(open) => {
+            if (!open) {
+              setActiveWizard(null)
+              setWizardTarget(null)
+            }
+          }}
+          currentExerciseId={wizardTarget?.id ?? currentExercise!.id}
+          currentExerciseName={wizardTarget?.name ?? currentExercise!.name}
           onComplete={handleWizardComplete}
         />
       )}
@@ -824,12 +947,17 @@ export default function ExerciseLoggingModal({
         />
       )}
 
-      {activeWizard === 'delete' && currentExercise && (
+      {activeWizard === 'delete' && (wizardTarget || currentExercise) && (
         <DeleteExerciseWizard
           open={true}
-          onOpenChange={(open) => !open && setActiveWizard(null)}
-          exerciseId={currentExercise.id}
-          exerciseName={currentExercise.name}
+          onOpenChange={(open) => {
+            if (!open) {
+              setActiveWizard(null)
+              setWizardTarget(null)
+            }
+          }}
+          exerciseId={wizardTarget?.id ?? currentExercise!.id}
+          exerciseName={wizardTarget?.name ?? currentExercise!.name}
           onComplete={handleWizardComplete}
         />
       )}
