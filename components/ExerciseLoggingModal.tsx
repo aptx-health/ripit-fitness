@@ -111,7 +111,9 @@ export default function ExerciseLoggingModal({
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ loggingMode: 'full' }),
-    }).catch(() => {})
+    }).catch((err) => {
+      clientLogger.error('Failed to persist loggingMode=full from switch-to-logging', err)
+    })
   }, [])
 
   // Tip rotation — sequential through array order, then random
@@ -298,7 +300,10 @@ export default function ExerciseLoggingModal({
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ loggingMode: 'full' }),
-      }).catch(() => {}) // fire-and-forget
+      }).catch((err) => {
+        // fire-and-forget — log so we can diagnose persistence drift without surfacing to the user
+        clientLogger.error('Failed to auto-persist loggingMode=full after first logged set', err)
+      })
     }
 
     // Pre-fill for next set: reps from next prescribed, weight carried forward
