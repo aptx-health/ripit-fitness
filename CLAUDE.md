@@ -40,8 +40,8 @@ doppler run --config dev_personal -- npx prisma studio
 doppler run --config dev_personal -- npx prisma generate
 doppler run --config dev_personal -- npx prisma db push
 
-# Testing
-doppler run --config dev_test -- npm test
+# Testing (no Doppler needed — Testcontainers manages Postgres/Redis)
+npm test
 doppler run --config dev_personal -- npm run type-check
 doppler run --config dev_personal -- npm run lint
 ```
@@ -227,7 +227,7 @@ Integration tests in `__tests__/api/clone-worker.test.ts`:
 - **Testcontainers**: PostgreSQL 15 + Redis 7
 - Tests strength cloning, progressive loading, idempotency
 - Uses BullMQ Queue/Worker/QueueEvents for job processing
-- Run with: `doppler run --config dev_test -- npm test clone-worker`
+- Run with: `npm test clone-worker`
 
 ## Next.js 15 Specific Patterns
 
@@ -288,6 +288,10 @@ export async function GET(request: NextRequest) {
 ### File Size Limit
 
 **Max 1000 lines per file**. Enforced by Husky + lint-staged pre-commit hook. If exceeded, split into multiple files following Single Responsibility Principle.
+
+### Canonical Prisma Selects
+
+Reused `select` shapes for entities like `ExerciseDefinition` live in `lib/db/selects.ts` (e.g. `exerciseDefinitionSelectForLogger`). Use the named constant rather than hand-rolling a `select` block — drift caused PR #854's "missing imageUrls" bug. Contract tests in `__tests__/api/*-select-contract.test.ts` guard required fields. See `/docs/PRISMA_SELECT_PATTERN.md`.
 
 ### Import Organization
 
@@ -549,6 +553,7 @@ Self-hosted k8s infrastructure is operational (staging + production). PostgreSQL
 - `/docs/DATABASE_CONNECTIONS.md` - PgBouncer pooling, `DATABASE_URL` vs `DIRECT_URL`, health endpoints
 - `/docs/LOGGING.md` - Logging configuration and usage with Pino
 - `/docs/RATE_LIMITING.md` - Rate limiting tiers, patterns, and tuning guidance
+- `/docs/PRISMA_SELECT_PATTERN.md` - Canonical Prisma `select` shapes in `lib/db/selects.ts` + contract tests
 - `/docs/STYLING.md` - DOOM theme color system and styling guide
 - `/docs/ADDING_LEARN_ARTICLES.md` - Adding articles to the Learn tab (seed file + data migration pattern)
 - `/docs/IMAGE_TRACEABILITY.md` - Docker image SHA traceability
