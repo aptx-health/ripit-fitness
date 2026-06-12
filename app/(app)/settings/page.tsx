@@ -1,7 +1,7 @@
 'use client'
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { Heart, KeyRound, MessageSquarePlus, Moon, Palette, Shield, Sun } from 'lucide-react'
+import { Dumbbell, Heart, KeyRound, MessageSquarePlus, Moon, Palette, Shield, Sun } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import FeedbackModal from '@/components/features/FeedbackModal'
@@ -273,6 +273,31 @@ export default function SettingsPage() {
                 {error}
               </div>
             )}
+
+            <div className="pt-4 border-t border-border">
+              <span className="block text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
+                Training Targets
+              </span>
+              <Link
+                href="/settings/muscle-balance"
+                className="flex min-h-14 items-center justify-between gap-3 border-2 border-border bg-card px-4 py-3 text-foreground transition-colors doom-focus-ring hover:border-primary hover:bg-muted/50"
+              >
+                <span className="flex items-center gap-3">
+                  <Dumbbell size={18} aria-hidden="true" />
+                  <span>
+                    <span className="block text-sm font-bold uppercase tracking-wider">
+                      Muscle Balance
+                    </span>
+                    <span className="block text-sm text-muted-foreground">
+                      Set FAU ratios for ad-hoc exercise guidance.
+                    </span>
+                  </span>
+                </span>
+                <span className="text-lg font-bold" aria-hidden="true">
+                  &gt;
+                </span>
+              </Link>
+            </div>
 
             {/* Account Section */}
             <div className="pt-4 border-t border-border space-y-4">

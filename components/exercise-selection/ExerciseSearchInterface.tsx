@@ -4,6 +4,7 @@ import { Check, Filter, Search } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
 import { EQUIPMENT_LABELS } from '@/lib/constants/program-metadata'
+import { ALL_FAUS, FAU_DISPLAY_NAMES } from '@/lib/fau-volume'
 import { FilterChoiceSheet } from './FilterChoiceSheet'
 
 export type ExerciseDefinition = {
@@ -23,6 +24,7 @@ interface ExerciseSearchInterfaceProps {
   preloadExercises?: boolean
   onCreateExercise?: (searchQuery: string) => void
   onEditExercise?: (exercise: ExerciseDefinition) => void
+  initialFauFilter?: string | null
   /**
    * When provided, the picker switches to multi-select mode: cards highlight
    * when their id is in the set, and clicking a card (or its button) toggles
@@ -30,12 +32,6 @@ interface ExerciseSearchInterfaceProps {
    */
   selectedIds?: Set<string>
 }
-
-const ALL_FAUS = [
-  'chest', 'mid-back', 'lower-back', 'front-delts', 'side-delts', 'rear-delts',
-  'lats', 'traps', 'biceps', 'triceps', 'forearms',
-  'quads', 'adductors', 'hamstrings', 'glutes', 'calves', 'abs', 'obliques'
-]
 
 const EQUIPMENT_TYPES = [
   'barbell',
@@ -61,38 +57,18 @@ const EQUIPMENT_DISPLAY_NAMES: Record<string, string> = {
   'other': 'Other (specialized equipment)'
 }
 
-const FAU_DISPLAY_NAMES: Record<string, string> = {
-  'chest': 'Chest',
-  'mid-back': 'Mid Back',
-  'lower-back': 'Lower Back',
-  'front-delts': 'Front Delts',
-  'side-delts': 'Side Delts',
-  'rear-delts': 'Rear Delts',
-  'lats': 'Lats',
-  'traps': 'Traps',
-  'biceps': 'Biceps',
-  'triceps': 'Triceps',
-  'forearms': 'Forearms',
-  'quads': 'Quads',
-  'adductors': 'Adductors',
-  'hamstrings': 'Hamstrings',
-  'glutes': 'Glutes',
-  'calves': 'Calves',
-  'abs': 'Abs',
-  'obliques': 'Obliques'
-}
-
 export function ExerciseSearchInterface({
   onExerciseSelect,
   initialQuery = '',
   preloadExercises = false,
   onCreateExercise,
   onEditExercise,
+  initialFauFilter = null,
   selectedIds,
 }: ExerciseSearchInterfaceProps) {
   const isMultiSelect = selectedIds !== undefined
   const [searchQuery, setSearchQuery] = useState(initialQuery)
-  const [selectedFAU, setSelectedFAU] = useState<string | null>(null)
+  const [selectedFAU, setSelectedFAU] = useState<string | null>(initialFauFilter)
   const [selectedEquipment, setSelectedEquipment] = useState<string | null>(null)
   const [exercises, setExercises] = useState<ExerciseDefinition[]>([])
   const [isLoading, setIsLoading] = useState(false)

@@ -4,6 +4,7 @@ import AdHocLoggerView, { type AdHocExercise } from '@/components/adhoc/AdHocLog
 import { RestoringWorkoutSpinner } from '@/components/ui/RestoringWorkoutSpinner'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { getMuscleBalanceSnapshot } from '@/lib/muscle-balance'
 
 type Props = {
   params: Promise<{ completionId: string }>
@@ -40,49 +41,52 @@ async function AdHocLoggerLoader({ completionId }: { completionId: string }) {
     redirect('/login')
   }
 
-  const completion = await prisma.workoutCompletion.findUnique({
-    where: { id: completionId },
-    select: {
-      id: true,
-      userId: true,
-      status: true,
-      isAdHoc: true,
-      name: true,
-      startedAt: true,
-      exercises: {
-        orderBy: { order: 'asc' },
-        select: {
-          id: true,
-          name: true,
-          notes: true,
-          order: true,
-          exerciseDefinition: {
-            select: {
-              primaryFAUs: true,
-              secondaryFAUs: true,
-              equipment: true,
-              instructions: true,
-              imageUrls: true,
+  const [completion, muscleBalanceSnapshot] = await Promise.all([
+    prisma.workoutCompletion.findUnique({
+      where: { id: completionId },
+      select: {
+        id: true,
+        userId: true,
+        status: true,
+        isAdHoc: true,
+        name: true,
+        startedAt: true,
+        exercises: {
+          orderBy: { order: 'asc' },
+          select: {
+            id: true,
+            name: true,
+            notes: true,
+            order: true,
+            exerciseDefinition: {
+              select: {
+                primaryFAUs: true,
+                secondaryFAUs: true,
+                equipment: true,
+                instructions: true,
+                imageUrls: true,
+              },
             },
           },
         },
-      },
-      loggedSets: {
-        orderBy: [{ exerciseId: 'asc' }, { setNumber: 'asc' }],
-        select: {
-          id: true,
-          exerciseId: true,
-          setNumber: true,
-          reps: true,
-          weight: true,
-          weightUnit: true,
-          rpe: true,
-          rir: true,
-          isWarmup: true,
+        loggedSets: {
+          orderBy: [{ exerciseId: 'asc' }, { setNumber: 'asc' }],
+          select: {
+            id: true,
+            exerciseId: true,
+            setNumber: true,
+            reps: true,
+            weight: true,
+            weightUnit: true,
+            rpe: true,
+            rir: true,
+            isWarmup: true,
+          },
         },
       },
-    },
-  })
+    }),
+    getMuscleBalanceSnapshot(prisma, user.id),
+  ])
 
   if (!completion || completion.userId !== user.id || !completion.isAdHoc) {
     redirect('/training')
@@ -112,6 +116,7 @@ async function AdHocLoggerLoader({ completionId }: { completionId: string }) {
       startedAt={completion.startedAt?.toISOString() ?? null}
       initialExercises={exercises}
       initialLoggedSets={completion.loggedSets}
+      muscleBalanceSnapshot={muscleBalanceSnapshot}
     />
   )
 }
