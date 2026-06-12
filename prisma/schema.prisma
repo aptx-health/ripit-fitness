@@ -338,6 +338,20 @@ model UserSettings {
   @@index([userId])
 }
 
+model UserMuscleBalanceSettings {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  targets          Json
+  lookbackWorkouts Int      @default(8)
+  includeSecondary Boolean  @default(true)
+  secondaryWeight  Float    @default(0.5)
+  excludeWarmups   Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([userId])
+}
+
 model CommunityProgram {
   id                String   @id(map: "community_programs_pkey") @default(cuid())
   name              String
