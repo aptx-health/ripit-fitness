@@ -1,21 +1,15 @@
 'use client'
 
-import { Plus, RefreshCw, Sparkles, Trash2 } from 'lucide-react'
-import Link from 'next/link'
+import { Plus, RefreshCw, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import AdHocExercisePickerModal, {
-  type PickerMode,
-} from '@/components/adhoc/AdHocExercisePickerModal'
 import type { ExerciseDefinition } from '@/components/exercise-selection/ExerciseSearchInterface'
-import MuscleBalancePanel from '@/components/features/muscle-balance/MuscleBalancePanel'
 import type { MuscleBalanceSnapshot } from '@/components/features/muscle-balance/types'
 import { WorkoutRollupModal } from '@/components/features/training/WorkoutRollupModal'
 import { useToast } from '@/components/ToastProvider'
 import { Button } from '@/components/ui/Button'
 import { LoadingFrog } from '@/components/ui/loading-frog'
-import { TipAnnotation } from '@/components/ui/TipAnnotation'
 import ExerciseActionsFooter from '@/components/workout-logging/ExerciseActionsFooter'
 import ExerciseDisplayTabs from '@/components/workout-logging/ExerciseDisplayTabs'
 import ExerciseLoggingHeader from '@/components/workout-logging/ExerciseLoggingHeader'
@@ -24,6 +18,7 @@ import ExitWorkoutConfirm from '@/components/workout-logging/ExitWorkoutConfirm'
 import SetLoggingForm, {
   type ExpandedInput,
 } from '@/components/workout-logging/SetLoggingForm'
+import WorkoutPlanEditor from '@/components/workout-logging/WorkoutPlanEditor'
 import { useIntensityAccess } from '@/hooks/useIntensityAccess'
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
 import {
@@ -34,6 +29,7 @@ import {
   discardAdHocWorkout,
   fetchExerciseHistory,
   logAdHocSet,
+  reorderAdHocExercises,
   swapAdHocExercise,
 } from '@/lib/api/adhoc-workout'
 import { FetchError } from '@/lib/api/fetch'
@@ -41,6 +37,11 @@ import { clientLogger } from '@/lib/client-logger'
 import type { FAUKey } from '@/lib/fau-volume'
 import type { WorkoutRollup } from '@/lib/stats/workout-rollup'
 import type { LoggedSet } from '@/types/workout'
+import {
+  AdHocEmptyState,
+  AdHocExercisePickerModal,
+  type PickerMode,
+} from './AdHocExercisePickerModal'
 
 export type AdHocExercise = {
   id: string
@@ -124,6 +125,7 @@ export default function AdHocLoggerView({
   const [currentSet, setCurrentSet] = useState(EMPTY_SET)
   const [expandedInput, setExpandedInput] = useState<ExpandedInput>(null)
   const [pickerMode, setPickerMode] = useState<PickerMode | null>(null)
+  const [planEditorOpen, setPlanEditorOpen] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
   const [isSwapping, setIsSwapping] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -268,7 +270,11 @@ export default function AdHocLoggerView({
 
   const handleSwapExercise = useCallback(
     async (definitions: ExerciseDefinition[]) => {
-      const target = exercises[currentIndex]
+      const targetId =
+        pickerMode?.kind === 'swap' && pickerMode.targetId
+          ? pickerMode.targetId
+          : exercises[currentIndex]?.id
+      const target = exercises.find((e) => e.id === targetId)
       const replacement = definitions[0]
       if (!target || !replacement || isSwapping) return
       setIsSwapping(true)
@@ -277,8 +283,8 @@ export default function AdHocLoggerView({
           onRetry: onRetryToast('Swapping exercise'),
         })
         setExercises((prev) =>
-          prev.map((ex, i) =>
-            i === currentIndex
+          prev.map((ex) =>
+            ex.id === target.id
               ? {
                   ...ex,
                   name: updated.name,
@@ -307,11 +313,13 @@ export default function AdHocLoggerView({
         setIsSwapping(false)
       }
     },
-    [currentIndex, exercises, isSwapping, onRetryToast, toast]
+    [currentIndex, exercises, isSwapping, onRetryToast, toast, pickerMode]
   )
 
-  const handleDeleteExercise = useCallback(async () => {
-    const target = exercises[currentIndex]
+  const handleDeleteExercise = useCallback(async (targetId?: string) => {
+    const target = targetId
+      ? exercises.find((e) => e.id === targetId)
+      : exercises[currentIndex]
     if (!target || isDeleting) return
     setIsDeleting(true)
     try {
@@ -320,9 +328,14 @@ export default function AdHocLoggerView({
       })
       setLoggedSets((prev) => prev.filter((s) => s.exerciseId !== target.id))
       setExercises((prev) => {
+        const removedIdx = prev.findIndex((ex) => ex.id === target.id)
         const next = prev.filter((ex) => ex.id !== target.id)
-        // Keep currentIndex in range; bias toward the previous exercise.
-        setCurrentIndex((idx) => Math.max(0, Math.min(idx, next.length - 1)))
+        // Keep currentIndex pointing at a valid exercise; bias toward previous.
+        setCurrentIndex((idx) => {
+          if (next.length === 0) return 0
+          if (removedIdx < idx) return Math.max(0, idx - 1)
+          return Math.min(idx, next.length - 1)
+        })
         return next
       })
       setCurrentSet(EMPTY_SET)
@@ -337,6 +350,69 @@ export default function AdHocLoggerView({
       setIsDeleting(false)
     }
   }, [currentIndex, exercises, isDeleting, onRetryToast, toast])
+
+  const handleReorderExercises = useCallback(
+    async (orderedIds: string[]) => {
+      const currentId = exercises[currentIndex]?.id
+      setExercises((prev) => {
+        const byId = new Map(prev.map((e) => [e.id, e] as const))
+        return orderedIds.map((id) => byId.get(id)).filter(Boolean) as AdHocExercise[]
+      })
+      if (currentId) {
+        const nextIdx = orderedIds.indexOf(currentId)
+        if (nextIdx >= 0) setCurrentIndex(nextIdx)
+      }
+      try {
+        await reorderAdHocExercises(completionId, orderedIds, {
+          onRetry: onRetryToast('Reordering exercises'),
+        })
+      } catch (err) {
+        clientLogger.error('Failed to reorder ad-hoc exercises:', err)
+        toast.error(
+          "Couldn't save order",
+          err instanceof FetchError && err.message
+            ? err.message
+            : 'Check your connection and try again.'
+        )
+      }
+    },
+    [completionId, currentIndex, exercises, onRetryToast, toast]
+  )
+
+  const handleJumpToExercise = useCallback(
+    (exerciseId: string) => {
+      const idx = exercises.findIndex((e) => e.id === exerciseId)
+      if (idx >= 0) {
+        setCurrentIndex(idx)
+        setCurrentSet(EMPTY_SET)
+        setExpandedInput(null)
+      }
+    },
+    [exercises]
+  )
+
+  const handlePlanSwap = useCallback(
+    (exerciseId: string) => {
+      const target = exercises.find((e) => e.id === exerciseId)
+      if (!target) return
+      setPlanEditorOpen(false)
+      setPickerMode({ kind: 'swap', replacingName: target.name, targetId: target.id })
+    },
+    [exercises]
+  )
+
+  const handlePlanDelete = useCallback(
+    (exerciseId: string) => {
+      setPlanEditorOpen(false)
+      void handleDeleteExercise(exerciseId)
+    },
+    [handleDeleteExercise]
+  )
+
+  const handlePlanAdd = useCallback(() => {
+    setPlanEditorOpen(false)
+    setPickerMode({ kind: 'add' })
+  }, [])
 
   const handleLogSet = useCallback(async () => {
     if (!currentExercise || isLoggingSet) return
@@ -637,6 +713,7 @@ export default function AdHocLoggerView({
           startedAt={startedAt}
           onCompleteWorkout={handleRequestComplete}
           onClose={handleClose}
+          onOpenPlanEditor={hasExercises ? () => setPlanEditorOpen(true) : undefined}
         />
 
         <div
@@ -706,7 +783,7 @@ export default function AdHocLoggerView({
               ] satisfies QuickAction[]}
             />
           ) : (
-            <EmptyState
+            <AdHocEmptyState
               muscleBalanceSnapshot={muscleBalanceSnapshot}
               onSelectFAU={openPickerForFAU}
             />
@@ -761,6 +838,17 @@ export default function AdHocLoggerView({
           muscleBalanceSnapshot={muscleBalanceSnapshot}
         />
       )}
+      <WorkoutPlanEditor
+        open={planEditorOpen}
+        onClose={() => setPlanEditorOpen(false)}
+        exercises={exercises.map((e) => ({ id: e.id, name: e.name }))}
+        currentExerciseId={exercises[currentIndex]?.id}
+        onReorder={handleReorderExercises}
+        onJump={handleJumpToExercise}
+        onAdd={handlePlanAdd}
+        onSwap={handlePlanSwap}
+        onDelete={handlePlanDelete}
+      />
       {showExitConfirm && (
         <ExitWorkoutConfirm
           hasUnsavedWork={totalLoggedSets > 0 || exercises.length > 0}
@@ -820,78 +908,5 @@ export default function AdHocLoggerView({
         onClose={handleRollupClose}
       />
     </>
-  )
-}
-
-function EmptyState({
-  muscleBalanceSnapshot,
-  onSelectFAU,
-}: {
-  muscleBalanceSnapshot: MuscleBalanceSnapshot
-  onSelectFAU: (fau: FAUKey) => void
-}) {
-  const [balanceOpen, setBalanceOpen] = useState(false)
-  const topNeglected = muscleBalanceSnapshot.neglected.slice(0, 3)
-  const neglectedLabel =
-    topNeglected.length > 0
-      ? topNeglected.map((item) => item.label).join(', ')
-      : 'No clear laggards yet'
-
-  return (
-    <div className="flex-1 overflow-auto px-5 py-6">
-      <div className="mx-auto flex min-h-full max-w-xl flex-col justify-center gap-5">
-        <div className="flex min-h-[34vh] items-center">
-          <TipAnnotation
-            icon={<Sparkles aria-hidden="true" size={20} strokeWidth={1.8} />}
-          >
-            <span className="text-2xl sm:text-3xl leading-relaxed text-foreground">
-              Pick your first exercise to start logging. Add as many as you want as you go.
-            </span>
-          </TipAnnotation>
-        </div>
-
-        <section className="border-t-2 border-border pt-4">
-          <button
-            type="button"
-            onClick={() => setBalanceOpen((open) => !open)}
-            className="flex min-h-12 w-full items-center justify-between gap-3 text-left doom-focus-ring"
-            aria-expanded={balanceOpen}
-          >
-            <span>
-              <span className="block text-lg font-bold uppercase tracking-wider text-accent sm:text-xl">
-                Muscle Balance
-              </span>
-              <span className="block text-sm text-muted-foreground">
-                Suggested focus: {neglectedLabel}
-              </span>
-            </span>
-            <span className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-              {balanceOpen ? 'Hide' : 'Show'}
-            </span>
-          </button>
-
-          <p className="mt-3 text-sm text-muted-foreground">
-            Edit targets in{' '}
-            <Link
-              href="/settings/muscle-balance"
-              className="font-bold uppercase tracking-wider text-foreground underline decoration-border underline-offset-4 doom-focus-ring hover:text-primary"
-            >
-              Settings &gt; Muscle Balance
-            </Link>
-            .
-          </p>
-
-          {balanceOpen && (
-            <div className="mt-4">
-              <MuscleBalancePanel
-                snapshot={muscleBalanceSnapshot}
-                compact
-                onSelectFAU={onSelectFAU}
-              />
-            </div>
-          )}
-        </section>
-      </div>
-    </div>
   )
 }

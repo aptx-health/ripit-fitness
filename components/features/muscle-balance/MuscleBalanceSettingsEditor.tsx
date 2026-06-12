@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/Button'
+import { clientLogger } from '@/lib/client-logger'
 import { ALL_FAUS, FAU_DISPLAY_NAMES, type FAUKey } from '@/lib/fau-volume'
 import {
   DEFAULT_LOOKBACK_WORKOUTS,
@@ -12,7 +13,6 @@ import {
   getDefaultMuscleBalanceTargets,
   updateMuscleBalanceSnapshotSettings,
 } from '@/lib/muscle-balance'
-import { clientLogger } from '@/lib/client-logger'
 import MuscleBalancePanel from './MuscleBalancePanel'
 import type {
   MuscleBalanceSettingsDTO,

@@ -5,8 +5,8 @@ import { logger } from '@/lib/logger'
 import {
   getMuscleBalanceSnapshot,
   isFAUKey,
-  updateMuscleBalanceSettings,
   type MuscleBalanceTargets,
+  updateMuscleBalanceSettings,
 } from '@/lib/muscle-balance'
 import {
   checkRateLimitWithHeaders,
