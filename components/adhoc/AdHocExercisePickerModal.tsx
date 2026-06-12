@@ -1,14 +1,12 @@
 'use client'
 
 import { Sparkles } from 'lucide-react'
-import Link from 'next/link'
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import {
   type ExerciseDefinition,
   ExerciseSearchInterface,
 } from '@/components/exercise-selection/ExerciseSearchInterface'
 import ExerciseDefinitionEditorModal from '@/components/features/exercise-definition/ExerciseDefinitionEditorModal'
-import MuscleBalancePanel from '@/components/features/muscle-balance/MuscleBalancePanel'
 import type { MuscleBalanceSnapshot } from '@/components/features/muscle-balance/types'
 import { Button } from '@/components/ui/Button'
 import {
@@ -21,29 +19,18 @@ import {
   DialogTitle,
 } from '@/components/ui/radix/dialog'
 import { TipAnnotation } from '@/components/ui/TipAnnotation'
-import type { FAUKey } from '@/lib/fau-volume'
+import { ALL_FAUS, type FAUKey } from '@/lib/fau-volume'
+
+const HYPOTHETICAL_SETS_PER_EXERCISE = 3
 
 export type PickerMode =
-  | { kind: 'add'; initialFau?: FAUKey }
+  | { kind: 'add' }
   | { kind: 'swap'; replacingName: string; targetId?: string }
 
-export function AdHocEmptyState({
-  muscleBalanceSnapshot,
-  onSelectFAU,
-}: {
-  muscleBalanceSnapshot: MuscleBalanceSnapshot
-  onSelectFAU: (fau: FAUKey) => void
-}) {
-  const [balanceOpen, setBalanceOpen] = useState(false)
-  const topNeglected = muscleBalanceSnapshot.neglected.slice(0, 3)
-  const neglectedLabel =
-    topNeglected.length > 0
-      ? topNeglected.map((item) => item.label).join(', ')
-      : 'No clear laggards yet'
-
+export function AdHocEmptyState() {
   return (
     <div className="flex-1 overflow-auto px-5 py-6">
-      <div className="mx-auto flex min-h-full max-w-xl flex-col justify-center gap-5">
+      <div className="mx-auto flex min-h-full max-w-xl items-center">
         <div className="flex min-h-[34vh] items-center">
           <TipAnnotation
             icon={<Sparkles aria-hidden="true" size={20} strokeWidth={1.8} />}
@@ -53,48 +40,6 @@ export function AdHocEmptyState({
             </span>
           </TipAnnotation>
         </div>
-
-        <section className="border-t-2 border-border pt-4">
-          <button
-            type="button"
-            onClick={() => setBalanceOpen((open) => !open)}
-            className="flex min-h-12 w-full items-center justify-between gap-3 text-left doom-focus-ring"
-            aria-expanded={balanceOpen}
-          >
-            <span>
-              <span className="block text-lg font-bold uppercase tracking-wider text-accent sm:text-xl">
-                Muscle Balance
-              </span>
-              <span className="block text-sm text-muted-foreground">
-                Suggested focus: {neglectedLabel}
-              </span>
-            </span>
-            <span className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-              {balanceOpen ? 'Hide' : 'Show'}
-            </span>
-          </button>
-
-          <p className="mt-3 text-sm text-muted-foreground">
-            Edit targets in{' '}
-            <Link
-              href="/settings/muscle-balance"
-              className="font-bold uppercase tracking-wider text-foreground underline decoration-border underline-offset-4 doom-focus-ring hover:text-primary"
-            >
-              Settings &gt; Muscle Balance
-            </Link>
-            .
-          </p>
-
-          {balanceOpen && (
-            <div className="mt-4">
-              <MuscleBalancePanel
-                snapshot={muscleBalanceSnapshot}
-                compact
-                onSelectFAU={onSelectFAU}
-              />
-            </div>
-          )}
-        </section>
       </div>
     </div>
   )
@@ -106,6 +51,10 @@ type Props = {
   onConfirm: (defs: ExerciseDefinition[]) => void
   isBusy: boolean
   muscleBalanceSnapshot: MuscleBalanceSnapshot
+  plannedExerciseDefinitions?: Array<{
+    primaryFAUs: string[]
+    secondaryFAUs: string[]
+  }>
 }
 
 export function AdHocExercisePickerModal({
@@ -114,14 +63,19 @@ export function AdHocExercisePickerModal({
   onConfirm,
   isBusy,
   muscleBalanceSnapshot,
+  plannedExerciseDefinitions = [],
 }: Props) {
   const isAdd = mode.kind === 'add'
   const [selectedDefs, setSelectedDefs] = useState<ExerciseDefinition[]>([])
   const selectedIds = new Set(selectedDefs.map((d) => d.id))
   const [showCreateModal, setShowCreateModal] = useState(false)
-  const [balanceOpen, setBalanceOpen] = useState(isAdd && !!mode.initialFau)
-  const [activeFau, setActiveFau] = useState<FAUKey | null>(
-    mode.kind === 'add' ? mode.initialFau ?? null : null
+  const plannedFAUVolume = useMemo(
+    () =>
+      calculatePlannedFAUVolume(
+        [...plannedExerciseDefinitions, ...selectedDefs],
+        muscleBalanceSnapshot
+      ),
+    [plannedExerciseDefinitions, selectedDefs, muscleBalanceSnapshot]
   )
 
   const handleAddToggle = useCallback((def: ExerciseDefinition) => {
@@ -170,38 +124,12 @@ export function AdHocExercisePickerModal({
         </DialogHeader>
 
         <DialogBody className="flex-1 min-h-0">
-          {isAdd && (
-            <div className="border-b border-border bg-muted/30 px-4 py-3 sm:px-6">
-              <button
-                type="button"
-                onClick={() => setBalanceOpen((value) => !value)}
-                className="flex min-h-11 w-full items-center justify-between gap-3 text-left font-bold uppercase tracking-wider text-foreground doom-focus-ring"
-              >
-                <span>Muscle Balance</span>
-                <span className="text-sm text-muted-foreground">
-                  {balanceOpen ? 'Hide' : 'Show'}
-                </span>
-              </button>
-              {balanceOpen && (
-                <div className="mt-3">
-                  <MuscleBalancePanel
-                    snapshot={muscleBalanceSnapshot}
-                    compact
-                    onSelectFAU={(fau) => {
-                      setActiveFau(fau)
-                      setBalanceOpen(false)
-                    }}
-                  />
-                </div>
-              )}
-            </div>
-          )}
           <ExerciseSearchInterface
-            key={activeFau ?? 'all'}
             onExerciseSelect={isAdd ? handleAddToggle : handleSwapSelect}
             selectedIds={isAdd ? selectedIds : undefined}
             preloadExercises
-            initialFauFilter={activeFau}
+            muscleBalanceSnapshot={isAdd ? muscleBalanceSnapshot : undefined}
+            plannedFAUVolume={isAdd ? plannedFAUVolume : undefined}
           />
         </DialogBody>
 
@@ -261,4 +189,37 @@ export function AdHocExercisePickerModal({
       />
     </Dialog>
   )
+}
+
+function calculatePlannedFAUVolume(
+  definitions: Array<{ primaryFAUs: string[]; secondaryFAUs: string[] }>,
+  snapshot: MuscleBalanceSnapshot
+): Partial<Record<FAUKey, number>> {
+  const volume = ALL_FAUS.reduce((acc, fau) => {
+    acc[fau] = 0
+    return acc
+  }, {} as Record<FAUKey, number>)
+
+  for (const definition of definitions) {
+    for (const fau of definition.primaryFAUs) {
+      if (isFAUKey(fau)) {
+        volume[fau] += HYPOTHETICAL_SETS_PER_EXERCISE
+      }
+    }
+
+    if (snapshot.settings.includeSecondary) {
+      for (const fau of definition.secondaryFAUs) {
+        if (isFAUKey(fau)) {
+          volume[fau] +=
+            HYPOTHETICAL_SETS_PER_EXERCISE * snapshot.settings.secondaryWeight
+        }
+      }
+    }
+  }
+
+  return volume
+}
+
+function isFAUKey(value: string): value is FAUKey {
+  return (ALL_FAUS as readonly string[]).includes(value)
 }

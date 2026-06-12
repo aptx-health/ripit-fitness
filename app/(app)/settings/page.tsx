@@ -293,9 +293,6 @@ export default function SettingsPage() {
                     </span>
                   </span>
                 </span>
-                <span className="text-lg font-bold" aria-hidden="true">
-                  &gt;
-                </span>
               </Link>
             </div>
 

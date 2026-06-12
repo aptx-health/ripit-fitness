@@ -4,7 +4,8 @@ import { Check, Filter, Search } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
 import { EQUIPMENT_LABELS } from '@/lib/constants/program-metadata'
-import { ALL_FAUS, FAU_DISPLAY_NAMES } from '@/lib/fau-volume'
+import { ALL_FAUS, FAU_DISPLAY_NAMES, type FAUKey } from '@/lib/fau-volume'
+import type { MuscleBalanceSnapshot } from '@/lib/muscle-balance'
 import { FilterChoiceSheet } from './FilterChoiceSheet'
 
 export type ExerciseDefinition = {
@@ -25,6 +26,8 @@ interface ExerciseSearchInterfaceProps {
   onCreateExercise?: (searchQuery: string) => void
   onEditExercise?: (exercise: ExerciseDefinition) => void
   initialFauFilter?: string | null
+  muscleBalanceSnapshot?: MuscleBalanceSnapshot
+  plannedFAUVolume?: Partial<Record<FAUKey, number>>
   /**
    * When provided, the picker switches to multi-select mode: cards highlight
    * when their id is in the set, and clicking a card (or its button) toggles
@@ -64,6 +67,8 @@ export function ExerciseSearchInterface({
   onCreateExercise,
   onEditExercise,
   initialFauFilter = null,
+  muscleBalanceSnapshot,
+  plannedFAUVolume = {},
   selectedIds,
 }: ExerciseSearchInterfaceProps) {
   const isMultiSelect = selectedIds !== undefined
@@ -76,15 +81,61 @@ export function ExerciseSearchInterface({
   const [hasSearched, setHasSearched] = useState(preloadExercises)
   const [fauSheetOpen, setFauSheetOpen] = useState(false)
   const [equipmentSheetOpen, setEquipmentSheetOpen] = useState(false)
+  const [fauSort, setFauSort] = useState<'alphabetical' | 'neglected'>('alphabetical')
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  const fauOptions = useMemo(
-    () => [
+  const balanceByFau = useMemo(() => {
+    if (!muscleBalanceSnapshot) return new Map<FAUKey, MuscleBalanceSnapshot['items'][number]>()
+    return new Map(muscleBalanceSnapshot.items.map((item) => [item.fau, item]))
+  }, [muscleBalanceSnapshot])
+
+  const fauOptions = useMemo(() => {
+    const scoreFAU = (fau: FAUKey) => {
+      const item = balanceByFau.get(fau)
+      if (!item || !muscleBalanceSnapshot) return 0
+      const plannedSets = plannedFAUVolume[fau] ?? 0
+      const adjustedSets = item.actualSets + plannedSets
+      const totalEffectiveSets = muscleBalanceSnapshot.lookback.totalEffectiveSets
+      const adjustedShare = totalEffectiveSets > 0 ? adjustedSets / totalEffectiveSets : 0
+      return item.targetShare - adjustedShare
+    }
+
+    const sortedFaus = [...ALL_FAUS].sort((a, b) => {
+      if (fauSort === 'neglected' && muscleBalanceSnapshot) {
+        const byAdjustedDeficit = scoreFAU(b) - scoreFAU(a)
+        if (byAdjustedDeficit !== 0) return byAdjustedDeficit
+      }
+      return (FAU_DISPLAY_NAMES[a] || a).localeCompare(FAU_DISPLAY_NAMES[b] || b)
+    })
+
+    return [
       { value: null, label: 'All Muscle Groups' },
-      ...ALL_FAUS.map((fau) => ({ value: fau, label: FAU_DISPLAY_NAMES[fau] || fau })),
-    ],
-    [],
-  )
+      ...sortedFaus.map((fau) => {
+        const item = balanceByFau.get(fau)
+        const plannedSets = plannedFAUVolume[fau] ?? 0
+        const adjustedSets = (item?.actualSets ?? 0) + plannedSets
+        const desiredSets =
+          item && muscleBalanceSnapshot
+            ? item.targetShare * muscleBalanceSnapshot.lookback.totalEffectiveSets
+            : null
+        const adjustedFulfillment =
+          item && desiredSets && desiredSets > 0
+            ? Math.min(adjustedSets / desiredSets, 9.99)
+            : item?.fulfillment
+        return {
+          value: fau,
+          label: FAU_DISPLAY_NAMES[fau] || fau,
+          description:
+            item && desiredSets !== null
+              ? `${formatSets(adjustedSets)} / ${formatSets(desiredSets)} target sets`
+              : undefined,
+          badge: item ? `${Math.round((adjustedFulfillment ?? item.fulfillment) * 100)}%` : undefined,
+          meta: plannedSets > 0 ? `+${formatSets(plannedSets)} planned` : undefined,
+          progress: item ? Math.min(100, (adjustedFulfillment ?? item.fulfillment) * 100) : undefined,
+        }
+      }),
+    ]
+  }, [balanceByFau, fauSort, muscleBalanceSnapshot, plannedFAUVolume])
   const equipmentOptions = useMemo(
     () => [
       { value: null, label: 'All Equipment' },
@@ -203,6 +254,39 @@ export function ExerciseSearchInterface({
         options={fauOptions}
         selected={selectedFAU}
         onSelect={handleFAUSelect}
+        headerContent={
+          muscleBalanceSnapshot ? (
+            <div>
+              <div className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                Sort muscle groups
+              </div>
+              <div className="grid grid-cols-2 border-2 border-border bg-muted/20">
+                <button
+                  type="button"
+                  onClick={() => setFauSort('alphabetical')}
+                  className={`min-h-10 px-3 text-sm font-bold uppercase tracking-wider transition-colors doom-focus-ring ${
+                    fauSort === 'alphabetical'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-foreground hover:bg-muted/50'
+                  }`}
+                >
+                  A-Z
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFauSort('neglected')}
+                  className={`min-h-10 border-l-2 border-border px-3 text-sm font-bold uppercase tracking-wider transition-colors doom-focus-ring ${
+                    fauSort === 'neglected'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-foreground hover:bg-muted/50'
+                  }`}
+                >
+                  Neglected
+                </button>
+              </div>
+            </div>
+          ) : undefined
+        }
       />
       <FilterChoiceSheet
         open={equipmentSheetOpen}
@@ -342,4 +426,8 @@ export function ExerciseSearchInterface({
       )}
     </div>
   )
+}
+
+function formatSets(value: number): string {
+  return Number.isInteger(value) ? String(value) : value.toFixed(1)
 }

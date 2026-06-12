@@ -2,11 +2,16 @@
 
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { Check, X } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { useEffect, useState } from 'react'
 
 export type FilterChoiceOption = {
   value: string | null
   label: string
+  description?: string
+  badge?: string
+  meta?: string
+  progress?: number
   disabled?: boolean
   disabledReason?: string
 }
@@ -16,6 +21,7 @@ type BaseProps = {
   onOpenChange: (open: boolean) => void
   title: string
   options: FilterChoiceOption[]
+  headerContent?: ReactNode
 }
 
 type SingleProps = BaseProps & {
@@ -129,6 +135,11 @@ export function FilterChoiceSheet(props: Props) {
                   touchAction: 'pan-y',
                 }}
               >
+                {props.headerContent && (
+                  <div className="border-b border-border/50 px-4 py-3">
+                    {props.headerContent}
+                  </div>
+                )}
                 <ul className="py-1">
                 {options.map((option) => {
                   const selected = isSelected(option.value)
@@ -148,15 +159,42 @@ export function FilterChoiceSheet(props: Props) {
                             : 'text-foreground hover:bg-muted/40 active:bg-muted/60'
                         }`}
                       >
-                        <span className="flex items-center gap-2">
-                          {option.label}
-                          {disabled && option.disabledReason && (
-                            <span className="text-xs font-normal opacity-60">
-                              ({option.disabledReason})
+                        <span className="min-w-0 flex-1">
+                          <span className="flex items-center gap-2">
+                            <span>{option.label}</span>
+                            {disabled && option.disabledReason && (
+                              <span className="text-xs font-normal opacity-60">
+                                ({option.disabledReason})
+                              </span>
+                            )}
+                          </span>
+                          {option.description && (
+                            <span className="mt-0.5 block text-sm font-semibold text-muted-foreground">
+                              {option.description}
+                            </span>
+                          )}
+                          {option.meta && (
+                            <span className="mt-0.5 block text-xs font-bold uppercase tracking-wider text-primary">
+                              {option.meta}
+                            </span>
+                          )}
+                          {option.progress !== undefined && (
+                            <span className="mt-2 block h-1.5 w-full border border-border bg-muted">
+                              <span
+                                className="block h-full bg-primary"
+                                style={{ width: `${Math.min(100, Math.max(0, option.progress))}%` }}
+                              />
                             </span>
                           )}
                         </span>
-                        {selected && <Check size={18} strokeWidth={3} />}
+                        <span className="flex flex-shrink-0 items-center gap-2">
+                          {option.badge && (
+                            <span className="text-sm font-bold tabular-nums text-accent">
+                              {option.badge}
+                            </span>
+                          )}
+                          {selected && <Check size={18} strokeWidth={3} />}
+                        </span>
                       </button>
                     </li>
                   )

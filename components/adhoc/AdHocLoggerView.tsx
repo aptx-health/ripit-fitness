@@ -34,7 +34,6 @@ import {
 } from '@/lib/api/adhoc-workout'
 import { FetchError } from '@/lib/api/fetch'
 import { clientLogger } from '@/lib/client-logger'
-import type { FAUKey } from '@/lib/fau-volume'
 import type { WorkoutRollup } from '@/lib/stats/workout-rollup'
 import type { LoggedSet } from '@/types/workout'
 import {
@@ -655,9 +654,6 @@ export default function AdHocLoggerView({
 
   const isInputExpanded = expandedInput !== null
   const hasExercises = exercises.length > 0
-  const openPickerForFAU = useCallback((fau: FAUKey) => {
-    setPickerMode({ kind: 'add', initialFau: fau })
-  }, [])
 
   // Swipe + slide-out animation, mirroring the programmed logger.
   const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(
@@ -783,10 +779,7 @@ export default function AdHocLoggerView({
               ] satisfies QuickAction[]}
             />
           ) : (
-            <AdHocEmptyState
-              muscleBalanceSnapshot={muscleBalanceSnapshot}
-              onSelectFAU={openPickerForFAU}
-            />
+            <AdHocEmptyState />
           )}
         </div>
 
@@ -836,6 +829,10 @@ export default function AdHocLoggerView({
           onConfirm={pickerMode.kind === 'add' ? handleAddExercises : handleSwapExercise}
           isBusy={pickerMode.kind === 'add' ? isAdding : isSwapping}
           muscleBalanceSnapshot={muscleBalanceSnapshot}
+          plannedExerciseDefinitions={exercises.map((exercise) => ({
+            primaryFAUs: exercise.exerciseDefinition.primaryFAUs,
+            secondaryFAUs: exercise.exerciseDefinition.secondaryFAUs,
+          }))}
         />
       )}
       <WorkoutPlanEditor
