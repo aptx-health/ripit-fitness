@@ -29,6 +29,29 @@ export type VolumeOptions = {
   secondaryWeight: number // 0.1 to 1.0
 }
 
+export const ALL_FAUS = [
+  'chest',
+  'mid-back',
+  'lower-back',
+  'front-delts',
+  'side-delts',
+  'rear-delts',
+  'lats',
+  'traps',
+  'biceps',
+  'triceps',
+  'forearms',
+  'quads',
+  'adductors',
+  'hamstrings',
+  'glutes',
+  'calves',
+  'abs',
+  'obliques',
+] as const
+
+export type FAUKey = (typeof ALL_FAUS)[number]
+
 /**
  * Calculate FAU volume for a single week
  */

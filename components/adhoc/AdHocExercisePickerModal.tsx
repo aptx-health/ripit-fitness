@@ -1,12 +1,13 @@
 'use client'
 
 import { Sparkles } from 'lucide-react'
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import {
   type ExerciseDefinition,
   ExerciseSearchInterface,
 } from '@/components/exercise-selection/ExerciseSearchInterface'
 import ExerciseDefinitionEditorModal from '@/components/features/exercise-definition/ExerciseDefinitionEditorModal'
+import type { MuscleBalanceSnapshot } from '@/components/features/muscle-balance/types'
 import { Button } from '@/components/ui/Button'
 import {
   Dialog,
@@ -18,6 +19,9 @@ import {
   DialogTitle,
 } from '@/components/ui/radix/dialog'
 import { TipAnnotation } from '@/components/ui/TipAnnotation'
+import { ALL_FAUS, type FAUKey } from '@/lib/fau-volume'
+
+const HYPOTHETICAL_SETS_PER_EXERCISE = 3
 
 export type PickerMode =
   | { kind: 'add' }
@@ -25,14 +29,18 @@ export type PickerMode =
 
 export function AdHocEmptyState() {
   return (
-    <div className="flex-1 flex items-center justify-center px-6 py-8">
-      <TipAnnotation
-        icon={<Sparkles aria-hidden="true" size={20} strokeWidth={1.8} />}
-      >
-        <span className="text-xl sm:text-2xl leading-relaxed text-foreground">
-          Pick your first exercise to start logging. Add as many as you want as you go.
-        </span>
-      </TipAnnotation>
+    <div className="flex-1 overflow-auto px-5 py-6">
+      <div className="mx-auto flex min-h-full max-w-xl items-center">
+        <div className="flex min-h-[34vh] items-center">
+          <TipAnnotation
+            icon={<Sparkles aria-hidden="true" size={20} strokeWidth={1.8} />}
+          >
+            <span className="text-2xl sm:text-3xl leading-relaxed text-foreground">
+              Pick your first exercise to start logging. Add as many as you want as you go.
+            </span>
+          </TipAnnotation>
+        </div>
+      </div>
     </div>
   )
 }
@@ -42,13 +50,33 @@ type Props = {
   onClose: () => void
   onConfirm: (defs: ExerciseDefinition[]) => void
   isBusy: boolean
+  muscleBalanceSnapshot: MuscleBalanceSnapshot
+  plannedExerciseDefinitions?: Array<{
+    primaryFAUs: string[]
+    secondaryFAUs: string[]
+  }>
 }
 
-export function AdHocExercisePickerModal({ mode, onClose, onConfirm, isBusy }: Props) {
+export function AdHocExercisePickerModal({
+  mode,
+  onClose,
+  onConfirm,
+  isBusy,
+  muscleBalanceSnapshot,
+  plannedExerciseDefinitions = [],
+}: Props) {
   const isAdd = mode.kind === 'add'
   const [selectedDefs, setSelectedDefs] = useState<ExerciseDefinition[]>([])
   const selectedIds = new Set(selectedDefs.map((d) => d.id))
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const plannedFAUVolume = useMemo(
+    () =>
+      calculatePlannedFAUVolume(
+        [...plannedExerciseDefinitions, ...selectedDefs],
+        muscleBalanceSnapshot
+      ),
+    [plannedExerciseDefinitions, selectedDefs, muscleBalanceSnapshot]
+  )
 
   const handleAddToggle = useCallback((def: ExerciseDefinition) => {
     setSelectedDefs((prev) =>
@@ -100,6 +128,8 @@ export function AdHocExercisePickerModal({ mode, onClose, onConfirm, isBusy }: P
             onExerciseSelect={isAdd ? handleAddToggle : handleSwapSelect}
             selectedIds={isAdd ? selectedIds : undefined}
             preloadExercises
+            muscleBalanceSnapshot={isAdd ? muscleBalanceSnapshot : undefined}
+            plannedFAUVolume={isAdd ? plannedFAUVolume : undefined}
           />
         </DialogBody>
 
@@ -159,4 +189,37 @@ export function AdHocExercisePickerModal({ mode, onClose, onConfirm, isBusy }: P
       />
     </Dialog>
   )
+}
+
+function calculatePlannedFAUVolume(
+  definitions: Array<{ primaryFAUs: string[]; secondaryFAUs: string[] }>,
+  snapshot: MuscleBalanceSnapshot
+): Partial<Record<FAUKey, number>> {
+  const volume = ALL_FAUS.reduce((acc, fau) => {
+    acc[fau] = 0
+    return acc
+  }, {} as Record<FAUKey, number>)
+
+  for (const definition of definitions) {
+    for (const fau of definition.primaryFAUs) {
+      if (isFAUKey(fau)) {
+        volume[fau] += HYPOTHETICAL_SETS_PER_EXERCISE
+      }
+    }
+
+    if (snapshot.settings.includeSecondary) {
+      for (const fau of definition.secondaryFAUs) {
+        if (isFAUKey(fau)) {
+          volume[fau] +=
+            HYPOTHETICAL_SETS_PER_EXERCISE * snapshot.settings.secondaryWeight
+        }
+      }
+    }
+  }
+
+  return volume
+}
+
+function isFAUKey(value: string): value is FAUKey {
+  return (ALL_FAUS as readonly string[]).includes(value)
 }

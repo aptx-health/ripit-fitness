@@ -2,9 +2,9 @@
 -- Comprehensive exercise definitions with FAU (Functional Aesthetic Unit) mappings
 -- Run this in Supabase SQL Editor to populate the ExerciseDefinition table
 --
--- FAU Categories (19):
--- chest, mid-back, lower-back, traps, front-delts, mid-delts, rear-delts, lats,
--- biceps, triceps, forearms, neck, quads, adductors, hamstrings,
+-- FAU Categories (18):
+-- chest, mid-back, lower-back, traps, front-delts, side-delts, rear-delts, lats,
+-- biceps, triceps, forearms, quads, adductors, hamstrings,
 -- glutes, calves, abs, obliques
 
 -- ============================================================================

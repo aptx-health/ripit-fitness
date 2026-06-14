@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { ExerciseDefinition } from '@/components/exercise-selection/ExerciseSearchInterface'
+import type { MuscleBalanceSnapshot } from '@/components/features/muscle-balance/types'
 import { WorkoutRollupModal } from '@/components/features/training/WorkoutRollupModal'
 import { useToast } from '@/components/ToastProvider'
 import { Button } from '@/components/ui/Button'
@@ -83,6 +84,7 @@ type Props = {
     rir: number | null
     isWarmup: boolean
   }>
+  muscleBalanceSnapshot: MuscleBalanceSnapshot
 }
 
 const EMPTY_SET = {
@@ -98,6 +100,7 @@ export default function AdHocLoggerView({
   startedAt,
   initialExercises,
   initialLoggedSets,
+  muscleBalanceSnapshot,
 }: Props) {
   const router = useRouter()
   const toast = useToast()
@@ -825,6 +828,11 @@ export default function AdHocLoggerView({
           onClose={() => setPickerMode(null)}
           onConfirm={pickerMode.kind === 'add' ? handleAddExercises : handleSwapExercise}
           isBusy={pickerMode.kind === 'add' ? isAdding : isSwapping}
+          muscleBalanceSnapshot={muscleBalanceSnapshot}
+          plannedExerciseDefinitions={exercises.map((exercise) => ({
+            primaryFAUs: exercise.exerciseDefinition.primaryFAUs,
+            secondaryFAUs: exercise.exerciseDefinition.secondaryFAUs,
+          }))}
         />
       )}
       <WorkoutPlanEditor
