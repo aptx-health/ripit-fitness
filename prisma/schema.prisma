@@ -55,18 +55,36 @@ model Week {
 }
 
 model Workout {
-  id          String              @id @default(cuid())
-  name        String
-  dayNumber   Int
-  weekId      String
-  userId      String
-  exercises   Exercise[]
-  week        Week                @relation(fields: [weekId], references: [id], onDelete: Cascade)
-  completions WorkoutCompletion[]
+  id                 String              @id @default(cuid())
+  name               String
+  dayNumber          Int
+  weekId             String
+  userId             String
+  sourceSuggestionId String?
+  exercises          Exercise[]
+  week               Week                @relation(fields: [weekId], references: [id], onDelete: Cascade)
+  sourceSuggestion   Suggestion?         @relation(fields: [sourceSuggestionId], references: [id])
+  completions        WorkoutCompletion[]
 
   @@unique([weekId, dayNumber])
   @@index([weekId])
   @@index([userId])
+  @@index([sourceSuggestionId])
+}
+
+model Suggestion {
+  id                 String    @id @default(cuid())
+  userId             String
+  createdAt          DateTime  @default(now())
+  requestPayload     Json
+  responsePayload    Json
+  model              String
+  provider           String
+  latencyMs          Int
+  validationFailures Int       @default(0)
+  workouts           Workout[]
+
+  @@index([userId, createdAt(sort: Desc)])
 }
 
 model ExerciseDefinition {
