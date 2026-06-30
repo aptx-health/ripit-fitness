@@ -55,18 +55,21 @@ model Week {
 }
 
 model Workout {
-  id          String              @id @default(cuid())
-  name        String
-  dayNumber   Int
-  weekId      String
-  userId      String
-  exercises   Exercise[]
-  week        Week                @relation(fields: [weekId], references: [id], onDelete: Cascade)
-  completions WorkoutCompletion[]
+  id                  String              @id @default(cuid())
+  name                String
+  dayNumber           Int
+  weekId              String
+  userId              String
+  sourceSuggestionId  String?             @unique
+  exercises           Exercise[]
+  week                Week                @relation(fields: [weekId], references: [id], onDelete: Cascade)
+  completions         WorkoutCompletion[]
+  sourceSuggestion    Suggestion?         @relation("WorkoutSourceSuggestion", fields: [sourceSuggestionId], references: [id], onDelete: SetNull)
 
   @@unique([weekId, dayNumber])
   @@index([weekId])
   @@index([userId])
+  @@index([sourceSuggestionId])
 }
 
 model ExerciseDefinition {
@@ -614,4 +617,33 @@ model InAppMessage {
   @@index([placement, active])
   @@index([placement, userType, active])
   @@index([ownerType, ownerId])
+}
+
+enum SuggestionStatus {
+  queued
+  in_progress
+  ready
+  failed
+}
+
+model Suggestion {
+  id                 String           @id @default(cuid())
+  userId             String
+  status             SuggestionStatus @default(queued)
+  progressStep       String?
+  errorMessage       String?
+  requestPayload     Json
+  responsePayload    Json?
+  model              String?
+  provider           String?
+  latencyMs          Int?
+  validationFailures Int              @default(0)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  workout            Workout?         @relation("WorkoutSourceSuggestion")
+
+  @@index([userId])
+  @@index([userId, status])
+  @@index([status, createdAt])
 }
