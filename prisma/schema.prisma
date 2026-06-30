@@ -352,6 +352,21 @@ model UserMuscleBalanceSettings {
   @@index([userId])
 }
 
+model UserTrainingProfile {
+  id                          String   @id @default(cuid())
+  userId                      String   @unique
+  goalSentences               String[] @default([])
+  weeklyIntent                String[] @default([])
+  equipmentAvailable          String[] @default([])
+  bannedExerciseIds           String[] @default([])
+  ratioTargets                Json
+  defaultIntensityPreference  String?
+  createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt
+
+  @@index([userId])
+}
+
 model CommunityProgram {
   id                String   @id(map: "community_programs_pkey") @default(cuid())
   name              String
