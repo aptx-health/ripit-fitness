@@ -98,6 +98,7 @@ type WorkoutMetadata = {
       weightUnit: string
       rpe: number | null
       rir: number | null
+      isWarmup: boolean
     }>
   } | null
   resumeExerciseIndex?: number

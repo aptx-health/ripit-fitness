@@ -11,6 +11,7 @@ import type { LoadState } from '@/hooks/useProgressiveExercises'
 import type { LoggedSet } from '@/types/workout'
 import DrawerContextBanner from './DrawerContextBanner'
 import ExerciseInfoContent from './ExerciseInfoContent'
+import LastSessionReference from './LastSessionReference'
 import SetList from './SetList'
 
 interface PrescribedSet {
@@ -43,6 +44,7 @@ interface ExerciseHistorySet {
   weightUnit: string
   rpe: number | null
   rir: number | null
+  isWarmup: boolean
 }
 
 interface ExerciseHistory {
@@ -168,6 +170,12 @@ export default function ExerciseDisplayTabs({
           menuActions={menuActions}
         />
         <div className="px-4 pt-4 flex-1 flex flex-col gap-2">
+          {!isInputExpanded && (
+            <LastSessionReference
+              history={exerciseHistory}
+              isLoading={historyState === 'loading' || historyState === 'pending'}
+            />
+          )}
           {loggingForm}
           {!isInputExpanded && (
             <>
