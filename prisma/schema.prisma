@@ -9,28 +9,28 @@ datasource db {
 }
 
 model Program {
-  id                String    @id @default(cuid())
-  name              String
-  description       String?
-  userId            String
-  isActive          Boolean   @default(false)
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  isUserCreated     Boolean   @default(false)
-  programType       String    @default("strength")
-  isArchived        Boolean   @default(false)
-  archivedAt        DateTime?
-  deletedAt         DateTime?
-  copyStatus        String?   @default("ready")
-  goals             String[]  @default([])
-  level             String?
-  durationWeeks     Int?
-  durationDisplay   String?
-  targetDaysPerWeek Int?
-  equipmentNeeded   String[]  @default([])
-  focusAreas            String[]  @default([])
+  id                       String    @id @default(cuid())
+  name                     String
+  description              String?
+  userId                   String
+  isActive                 Boolean   @default(false)
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
+  isUserCreated            Boolean   @default(false)
+  programType              String    @default("strength")
+  isArchived               Boolean   @default(false)
+  archivedAt               DateTime?
+  deletedAt                DateTime?
+  copyStatus               String?   @default("ready")
+  goals                    String[]  @default([])
+  level                    String?
+  durationWeeks            Int?
+  durationDisplay          String?
+  targetDaysPerWeek        Int?
+  equipmentNeeded          String[]  @default([])
+  focusAreas               String[]  @default([])
   sourceCommunityProgramId String?
-  weeks                 Week[]
+  weeks                    Week[]
 
   @@index([userId, isActive])
   @@index([userId])
@@ -55,40 +55,43 @@ model Week {
 }
 
 model Workout {
-  id          String              @id @default(cuid())
-  name        String
-  dayNumber   Int
-  weekId      String
-  userId      String
-  exercises   Exercise[]
-  week        Week                @relation(fields: [weekId], references: [id], onDelete: Cascade)
-  completions WorkoutCompletion[]
+  id                 String              @id @default(cuid())
+  name               String
+  dayNumber          Int
+  weekId             String
+  userId             String
+  sourceSuggestionId String?
+  exercises          Exercise[]
+  week               Week                @relation(fields: [weekId], references: [id], onDelete: Cascade)
+  completions        WorkoutCompletion[]
+  sourceSuggestion   Suggestion?         @relation(fields: [sourceSuggestionId], references: [id], onDelete: SetNull)
 
   @@unique([weekId, dayNumber])
   @@index([weekId])
   @@index([userId])
+  @@index([sourceSuggestionId])
 }
 
 model ExerciseDefinition {
-  id             String     @id @default(cuid())
-  name           String
-  normalizedName String     @unique
-  aliases        String[]
-  category       String?
-  isSystem       Boolean    @default(false)
-  createdBy      String?
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-  equipment      String[]   @default([])
-  instructions   String?
-  notes          String?
-  imageUrls      String[]   @default([])
-  primaryFAUs    String[]   @default([])
-  secondaryFAUs  String[]   @default([])
-  force          String?
-  mechanic       String?
-  level          String?
-  userId         String
+  id              String     @id @default(cuid())
+  name            String
+  normalizedName  String     @unique
+  aliases         String[]
+  category        String?
+  isSystem        Boolean    @default(false)
+  createdBy       String?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  equipment       String[]   @default([])
+  instructions    String?
+  notes           String?
+  imageUrls       String[]   @default([])
+  primaryFAUs     String[]   @default([])
+  secondaryFAUs   String[]   @default([])
+  force           String?
+  mechanic        String?
+  level           String?
+  userId          String
   // Auto-tagged classification (LLM-bootstrapped). See lib/exercises/auto-tag.ts
   // movementPattern: squat | hinge | vertical_push | horizontal_push | vertical_pull | horizontal_pull | lunge | carry | isolation | accessory
   movementPattern String?
@@ -96,7 +99,7 @@ model ExerciseDefinition {
   intensityClass  String?
   taggedAt        DateTime?
   taggedBy        String?
-  exercises      Exercise[]
+  exercises       Exercise[]
 
   @@index([normalizedName])
   @@index([isSystem])
@@ -148,21 +151,21 @@ model PrescribedSet {
 }
 
 model WorkoutCompletion {
-  id              String      @id @default(cuid())
-  workoutId       String?
-  savedWorkoutId  String?
-  userId          String
-  completedAt     DateTime    @default(now())
-  startedAt       DateTime?
-  status          String
-  notes           String?
-  isArchived      Boolean     @default(false)
-  cycleNumber     Int         @default(1)
-  isAdHoc         Boolean     @default(false)
-  name            String?
-  exercises       Exercise[]
-  loggedSets      LoggedSet[]
-  workout         Workout?    @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  id             String      @id @default(cuid())
+  workoutId      String?
+  savedWorkoutId String?
+  userId         String
+  completedAt    DateTime    @default(now())
+  startedAt      DateTime?
+  status         String
+  notes          String?
+  isArchived     Boolean     @default(false)
+  cycleNumber    Int         @default(1)
+  isAdHoc        Boolean     @default(false)
+  name           String?
+  exercises      Exercise[]
+  loggedSets     LoggedSet[]
+  workout        Workout?    @relation(fields: [workoutId], references: [id], onDelete: Cascade)
 
   @@index([workoutId, userId])
   @@index([userId, completedAt])
@@ -319,30 +322,30 @@ model UserCardioMetricPreferences {
 }
 
 model UserSettings {
-  id                        String    @id @default(cuid())
-  userId                    String    @unique
-  displayName               String?
-  defaultWeightUnit         String    @default("lbs")
-  defaultIntensityRating    String    @default("rir")
-  dismissedPrimer           Boolean   @default(false)
-  dismissedWarmup           Boolean   @default(false)
-  dismissedStickNudge       Boolean   @default(false)
-  completedTours            String    @default("[]")
-  postSessionPromptCount    Int       @default(0)
-  lastPostSessionPromptAt   DateTime?
-  experienceLevel           String?
-  equipmentPreference       String?
-  onboardingCompleted       Boolean   @default(false)
-  customProgramLimitBypass  Boolean   @default(false)
-  intensityEnabled          Boolean   @default(false)
-  loggingMode               String    @default("full")
-  dismissedMessageIds       String    @default("[]")
-  seenMessageIds            String    @default("[]")
-  pwaPromptShownCount       Int       @default(0)
-  pwaPromptDismissedAt      DateTime?
-  signupIntent              String?
-  createdAt                 DateTime  @default(now())
-  updatedAt                 DateTime  @updatedAt
+  id                       String    @id @default(cuid())
+  userId                   String    @unique
+  displayName              String?
+  defaultWeightUnit        String    @default("lbs")
+  defaultIntensityRating   String    @default("rir")
+  dismissedPrimer          Boolean   @default(false)
+  dismissedWarmup          Boolean   @default(false)
+  dismissedStickNudge      Boolean   @default(false)
+  completedTours           String    @default("[]")
+  postSessionPromptCount   Int       @default(0)
+  lastPostSessionPromptAt  DateTime?
+  experienceLevel          String?
+  equipmentPreference      String?
+  onboardingCompleted      Boolean   @default(false)
+  customProgramLimitBypass Boolean   @default(false)
+  intensityEnabled         Boolean   @default(false)
+  loggingMode              String    @default("full")
+  dismissedMessageIds      String    @default("[]")
+  seenMessageIds           String    @default("[]")
+  pwaPromptShownCount      Int       @default(0)
+  pwaPromptDismissedAt     DateTime?
+  signupIntent             String?
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
 
   @@index([userId])
 }
@@ -362,16 +365,16 @@ model UserMuscleBalanceSettings {
 }
 
 model UserTrainingProfile {
-  id                          String   @id @default(cuid())
-  userId                      String   @unique
-  goalSentences               String[] @default([])
-  weeklyIntent                String[] @default([])
-  equipmentAvailable          String[] @default([])
-  bannedExerciseIds           String[] @default([])
-  ratioTargets                Json
-  defaultIntensityPreference  String?
-  createdAt                   DateTime @default(now())
-  updatedAt                   DateTime @updatedAt
+  id                         String   @id @default(cuid())
+  userId                     String   @unique
+  goalSentences              String[] @default([])
+  weeklyIntent               String[] @default([])
+  equipmentAvailable         String[] @default([])
+  bannedExerciseIds          String[] @default([])
+  ratioTargets               Json
+  defaultIntensityPreference String?
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
 
   @@index([userId])
 }
@@ -410,10 +413,10 @@ model CommunityProgram {
 }
 
 model ExercisePerformanceLog {
-  id                   String   @id @default(cuid())
-  userId               String
-  completedAt          DateTime
-  type                 String
+  id          String   @id @default(cuid())
+  userId      String
+  completedAt DateTime
+  type        String
 
   // Exercise reference
   exerciseDefinitionId String?
@@ -421,22 +424,22 @@ model ExercisePerformanceLog {
   exerciseName         String
 
   // Strength metrics
-  totalSets            Int?
-  totalReps            Int?
-  totalVolumeLbs       Float?
-  maxWeightLbs         Float?
-  estimated1RMLbs      Float?
-  avgRPE               Float?
+  totalSets       Int?
+  totalReps       Int?
+  totalVolumeLbs  Float?
+  maxWeightLbs    Float?
+  estimated1RMLbs Float?
+  avgRPE          Float?
 
   // Cardio metrics
-  distance             Float?
-  distanceUnit         String?
-  duration             Int?
-  avgPaceSeconds       Int?
+  distance       Float?
+  distanceUnit   String?
+  duration       Int?
+  avgPaceSeconds Int?
 
   // Reference back to source
-  workoutCompletionId  String?
-  cardioSessionId      String?
+  workoutCompletionId String?
+  cardioSessionId     String?
 
   @@index([userId, completedAt])
   @@index([userId, exerciseDefinitionId, completedAt])
@@ -593,14 +596,14 @@ model WaiverAcceptance {
 // -- User Feedback --
 
 model Feedback {
-  id        String   @id @default(cuid())
-  userId    String
-  category  String   // "bug" | "feature" | "confusion" | "general" | "post_session"
-  message   String   @default("")
-  pageUrl   String
-  userAgent String?
-  properties     String?  // JSON blob for extra context (e.g. question shown for post_session)
-  rating         Int?     // 1-5 experience rating (post_session)
+  id             String   @id @default(cuid())
+  userId         String
+  category       String // "bug" | "feature" | "confusion" | "general" | "post_session"
+  message        String   @default("")
+  pageUrl        String
+  userAgent      String?
+  properties     String? // JSON blob for extra context (e.g. question shown for post_session)
+  rating         Int? // 1-5 experience rating (post_session)
   refinements    String[] // ["confusing", "buggy", etc.] (post_session)
   status         String   @default("new") // "new" | "reviewed" | "resolved"
   adminNote      String?
@@ -616,9 +619,9 @@ model Feedback {
 
 model InAppMessage {
   id               String   @id @default(cuid())
-  name             String?  // admin-only label, not shown to users
-  content          String   // primary slide content (used when slides is null)
-  slides           String?  // JSON: [{ content: string, icon: string }] for multi-slide carousel
+  name             String? // admin-only label, not shown to users
+  content          String // primary slide content (used when slides is null)
+  slides           String? // JSON: [{ content: string, icon: string }] for multi-slide carousel
   placement        String
   userType         String   @default("all")
   icon             String   @default("Lightbulb")
@@ -638,4 +641,29 @@ model InAppMessage {
   @@index([placement, active])
   @@index([placement, userType, active])
   @@index([ownerType, ownerId])
+}
+
+/// Durable job record for the async Suggest Workout worker.
+/// Captures the LLM request/response so we can debug, replay, and later
+/// distinguish "user edited their own workout" from "user edited an AI suggestion."
+model Suggestion {
+  id                 String   @id @default(cuid())
+  userId             String
+  status             String // 'queued' | 'in_progress' | 'ready' | 'failed'
+  progressStep       String? // 'analyzing' | 'planning' | 'finalizing'
+  errorMessage       String? // populated on terminal failure
+  requestPayload     Json // full LLM input (locked at enqueue)
+  responsePayload    Json? // null until 'ready'
+  model              String? // null until worker records it
+  provider           String?
+  latencyMs          Int?
+  validationFailures Int      @default(0)
+  workoutId          String? // set when worker creates the workout
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  workouts Workout[]
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([status])
 }
