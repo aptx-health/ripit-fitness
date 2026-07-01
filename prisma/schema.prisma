@@ -365,11 +365,33 @@ model UserTrainingProfile {
   id                          String   @id @default(cuid())
   userId                      String   @unique
   goalSentences               String[] @default([])
-  weeklyIntent                String[] @default([])
+  weeklyIntent                Json     @default("[]")
   equipmentAvailable          String[] @default([])
   bannedExerciseIds           String[] @default([])
   ratioTargets                Json
   defaultIntensityPreference  String?
+
+  // Demographics (nullable, skippable)
+  age                         Int?
+  biologicalSex               String?
+  heightCm                    Float?
+  weightKg                    Float?
+
+  // Injury data
+  injuryAreas                 Json?
+  injuryFreeNotes             String?
+
+  // Goal categories with importance
+  goalCategories              Json?
+
+  // Other physical activities with importance
+  otherActivities             Json?
+
+  // Training rhythm
+  targetSessionsPerWeek       Int?
+  targetMinutesPerSession     Int?
+  patternPreference           String?
+
   createdAt                   DateTime @default(now())
   updatedAt                   DateTime @updatedAt
 
