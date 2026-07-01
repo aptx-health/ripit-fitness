@@ -39,6 +39,9 @@ yarn-error.log*
 # doppler
 .doppler.yaml
 
+# msv milestone graphs (local scratch)
+/milestones
+
 # vercel
 .vercel
 
