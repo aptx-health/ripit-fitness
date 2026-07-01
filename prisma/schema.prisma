@@ -89,6 +89,13 @@ model ExerciseDefinition {
   mechanic       String?
   level          String?
   userId         String
+  // Auto-tagged classification (LLM-bootstrapped). See lib/exercises/auto-tag.ts
+  // movementPattern: squat | hinge | vertical_push | horizontal_push | vertical_pull | horizontal_pull | lunge | carry | isolation | accessory
+  movementPattern String?
+  // intensityClass: heavy | moderate | light (typical fatigue cost)
+  intensityClass  String?
+  taggedAt        DateTime?
+  taggedBy        String?
   exercises      Exercise[]
 
   @@index([normalizedName])
@@ -96,6 +103,8 @@ model ExerciseDefinition {
   @@index([createdBy])
   @@index([primaryFAUs])
   @@index([userId])
+  @@index([movementPattern])
+  @@index([intensityClass])
 }
 
 model Exercise {
