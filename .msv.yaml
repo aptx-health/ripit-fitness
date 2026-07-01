@@ -1,0 +1,4 @@
+owner: aptx-health
+repo: ripit-fitness
+milestone: Suggest Workout (LLM-powered)
+graph_file: milestones/suggest-workout.md
