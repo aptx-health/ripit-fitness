@@ -1,4 +1,4 @@
-import type { SuggestWorkoutPayload, SuggestionResponse } from './schemas'
+import type { SuggestionResponse, SuggestWorkoutPayload } from './schemas'
 
 /**
  * Few-shot examples for the Suggest Workout prompt.

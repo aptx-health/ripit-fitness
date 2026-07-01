@@ -11,46 +11,13 @@
  * Design rationale: docs/SUGGEST_PROMPT_DESIGN.md
  */
 
-export {
-  buildSuggestionResponseSchema,
-  exerciseCountRange,
-  suggestionResponseBaseSchema,
-  suggestWorkoutPayloadSchema,
-  wildCardNoveltyFloor,
-  OPTION_IDS,
-  INTENSITY_VIBES,
-  type CandidateExercise,
-  type ExerciseCountRange,
-  type IntensityVibe,
-  type OptionId,
-  type SuggestedExercise,
-  type SuggestionResponse,
-  type SuggestWorkoutPayload,
-  type WeeklyIntent,
-  type WorkoutOption,
-} from './schemas'
-
-export {
-  assembleSuggestWorkoutPrompt,
-  estimateTokens,
-  SUGGEST_WORKOUT_SYSTEM_PROMPT,
-  type AssembledSuggestPrompt,
-  type AssembleOptions,
-} from './system-prompt'
 
 export {
   FEW_SHOT_EXAMPLES,
+  type FewShotExample,
   renderFewShotExample,
   selectFewShotExample,
-  type FewShotExample,
 } from './few-shot-examples'
-
-export {
-  buildSuggestRetryPrompt,
-  summarizeValidationError,
-  type SuggestRetryContext,
-} from './retry-prompt'
-
 export {
   buildAnthropicToolRequest,
   buildJsonModeRequest,
@@ -61,3 +28,33 @@ export {
   SUGGEST_TOOL_NAME,
   SUGGESTION_RESPONSE_JSON_SCHEMA,
 } from './provider-variants'
+export {
+  buildSuggestRetryPrompt,
+  type SuggestRetryContext,
+  summarizeValidationError,
+} from './retry-prompt'
+export {
+  buildSuggestionResponseSchema,
+  type CandidateExercise,
+  type ExerciseCountRange,
+  exerciseCountRange,
+  INTENSITY_VIBES,
+  type IntensityVibe,
+  OPTION_IDS,
+  type OptionId,
+  type SuggestedExercise,
+  type SuggestionResponse,
+  type SuggestWorkoutPayload,
+  suggestionResponseBaseSchema,
+  suggestWorkoutPayloadSchema,
+  type WeeklyIntent,
+  type WorkoutOption,
+  wildCardNoveltyFloor,
+} from './schemas'
+export {
+  type AssembledSuggestPrompt,
+  type AssembleOptions,
+  assembleSuggestWorkoutPrompt,
+  estimateTokens,
+  SUGGEST_WORKOUT_SYSTEM_PROMPT,
+} from './system-prompt'

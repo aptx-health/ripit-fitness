@@ -1,16 +1,4 @@
-import { describe, it, expect } from 'vitest'
-
-import {
-  buildSuggestionResponseSchema,
-  exerciseCountRange,
-  suggestWorkoutPayloadSchema,
-  type SuggestionResponse,
-  type SuggestWorkoutPayload,
-} from '@/lib/llm/prompts/suggest-workout/schemas'
-import {
-  assembleSuggestWorkoutPrompt,
-  estimateTokens,
-} from '@/lib/llm/prompts/suggest-workout/system-prompt'
+import { describe, expect, it } from 'vitest'
 import {
   FEW_SHOT_EXAMPLES,
   selectFewShotExample,
@@ -19,6 +7,17 @@ import {
   buildSuggestRetryPrompt,
   summarizeValidationError,
 } from '@/lib/llm/prompts/suggest-workout/retry-prompt'
+import {
+  buildSuggestionResponseSchema,
+  exerciseCountRange,
+  type SuggestionResponse,
+  type SuggestWorkoutPayload,
+  suggestWorkoutPayloadSchema,
+} from '@/lib/llm/prompts/suggest-workout/schemas'
+import {
+  assembleSuggestWorkoutPrompt,
+  estimateTokens,
+} from '@/lib/llm/prompts/suggest-workout/system-prompt'
 
 function buildTestPayload(
   overrides: {

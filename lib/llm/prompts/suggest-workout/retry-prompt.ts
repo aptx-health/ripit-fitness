@@ -1,4 +1,4 @@
-import { type ExerciseCountRange } from './schemas'
+import type { ExerciseCountRange } from './schemas'
 
 /**
  * Worker-level retry prompt for the Suggest Workout call.

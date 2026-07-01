@@ -1,15 +1,15 @@
 import {
-  exerciseCountRange,
+  type FewShotExample,
+  renderFewShotExample,
+  selectFewShotExample,
+} from './few-shot-examples'
+import {
   type CandidateExercise,
   type ExerciseCountRange,
+  exerciseCountRange,
   type SuggestWorkoutPayload,
   type WeeklyIntent,
 } from './schemas'
-import {
-  renderFewShotExample,
-  selectFewShotExample,
-  type FewShotExample,
-} from './few-shot-examples'
 
 /**
  * Suggest Workout prompt assembly.
