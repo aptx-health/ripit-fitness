@@ -94,6 +94,11 @@ model ExerciseDefinition {
   movementPattern String?
   // intensityClass: heavy | moderate | light (typical fatigue cost)
   intensityClass  String?
+  // True for bodyweight-loaded exercises (weight logged as 0). Their sets count
+  // toward FAU volume but their weights are excluded from calibration EWMAs
+  // (SUGGEST_PAYLOAD_SPEC global rule 3). Backfilled from equipment containing
+  // "bodyweight"; downstream consumers use this column, never re-infer.
+  isBodyweight    Boolean   @default(false)
   taggedAt        DateTime?
   taggedBy        String?
   exercises      Exercise[]
@@ -658,4 +663,37 @@ model InAppMessage {
   @@index([placement, active])
   @@index([placement, userType, active])
   @@index([ownerType, ownerId])
+}
+
+/// Precomputed training-state layer for the Suggest Workout planner.
+/// One row per user, refreshed off the request path by the aggregates
+/// recompute job (event-triggered on workout completion). Shaped for Suggest
+/// only per docs/SUGGEST_PAYLOAD_SPEC.md (v2). Replaces the dropped
+/// ExercisePerformanceLog: e1RM / effort are computed here. Full recompute per
+/// user (no incremental bookkeeping); timestamps stored absolute, the builder
+/// converts to days_ago at request time.
+model UserTrainingAggregates {
+  userId    String   @id
+  computedAt DateTime
+
+  // ---- whole-body freshness & load (top-level training_state fields) ----
+  sessionsLast7d          Int
+  daysSinceAnySession     Int?
+  lastSessionAt           DateTime?
+  firstSessionAt          DateTime?
+  qualifyingSessionsTotal Int      @default(0)
+  totalWeeklySetsBaseline Float?
+  acuteChronicRatio       Float?
+  detrainingGapDays       Int?
+  // "cold_start" | "partial" | "established" — derived from qualifying-session
+  // counts; the builder may re-derive against exact request time.
+  dataMaturity            String
+
+  // ---- sectioned blobs (shapes defined in lib/aggregates/types.ts) ----
+  // PerFauAggregate[]: per-FAU rolling sets, baseline, sessions_14d, low_data
+  perFau                  Json
+  // MovementCalibration[]: gap-decayed EWMA e1RM, staleness, typical effort
+  perMovementCalibration  Json
+
+  @@index([computedAt])
 }
