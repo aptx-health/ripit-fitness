@@ -71,7 +71,9 @@ export async function publishAggregatesRecomputeJob(
 
   const bullJob = await Promise.race([
     q.add('recompute', job, {
-      jobId: `aggregates:${job.userId}`,
+      // BullMQ rejects a custom jobId containing ':' (its Redis key separator),
+      // so use '-'. A stable per-user id coalesces bursts.
+      jobId: `aggregates-${job.userId}`,
       attempts: 3,
       backoff: { type: 'exponential', delay: 5000 },
       // Remove terminal jobs from Redis immediately. The stable per-user jobId
