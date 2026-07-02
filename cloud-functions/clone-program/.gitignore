@@ -1,5 +1,7 @@
 node_modules/
 dist/
+# Local copy of the canonical root schema (see prisma:generate script)
+prisma/
 *.log
 .env
 .env.local
