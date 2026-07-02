@@ -74,8 +74,13 @@ export async function publishAggregatesRecomputeJob(
       jobId: `aggregates:${job.userId}`,
       attempts: 3,
       backoff: { type: 'exponential', delay: 5000 },
-      removeOnComplete: 100,
-      removeOnFail: 500,
+      // Remove terminal jobs from Redis immediately. The stable per-user jobId
+      // still coalesces bursts (BullMQ ignores a re-add while a job with that
+      // id is waiting/active), but a *retained* completed/failed job with that
+      // id would block every future enqueue for the user — so aggregates would
+      // stop updating after the first recompute. Must be true, not a count.
+      removeOnComplete: true,
+      removeOnFail: true,
     }),
     timeout,
   ])
