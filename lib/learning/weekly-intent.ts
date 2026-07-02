@@ -26,7 +26,7 @@
  * (Risk 4) and issue #908.
  */
 
-import type { WeeklyIntent } from '@/lib/llm/prompts/suggest-workout/schemas'
+import type { WeeklyIntent } from '@/lib/llm/prompts/suggest-workout/types'
 import { epleyE1RM } from './math'
 
 export type { WeeklyIntent }

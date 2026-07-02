@@ -1,5 +1,11 @@
 import { z } from 'zod'
 
+import type { WeeklyIntent } from './types'
+
+// Re-exported for existing importers; the canonical definition is the zod-free
+// `./types` so type-only consumers never pull zod into their build graph.
+export type { WeeklyIntent }
+
 /**
  * Zod schemas for the Suggest Workout LLM call.
  *
@@ -47,7 +53,18 @@ export const weeklyIntentSchema = z.discriminatedUnion('type', [
     text: z.string(),
   }),
 ])
-export type WeeklyIntent = z.infer<typeof weeklyIntentSchema>
+
+// Compile-time guard: the hand-written `WeeklyIntent` (in ./types) must stay
+// structurally identical to what this schema infers. Any drift is a type error
+// here rather than a silent divergence between the type and the validator.
+type _WeeklyIntentInSync =
+  [WeeklyIntent] extends [z.infer<typeof weeklyIntentSchema>]
+    ? [z.infer<typeof weeklyIntentSchema>] extends [WeeklyIntent]
+      ? true
+      : false
+    : false
+const _weeklyIntentInSync: _WeeklyIntentInSync = true
+void _weeklyIntentInSync
 
 export const durableProfileSchema = z.object({
   goal_sentences: z.array(z.string()),
