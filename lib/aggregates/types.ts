@@ -66,7 +66,8 @@ export interface GoalProgress {
   /** Trend classified from the per-session e1RM (Epley) series; `"new"` when
    * fewer than `goalProgressMinWeeks` distinct weeks were observed. */
   trend: GoalTrend
-  /** Distinct calendar-week buckets with an observation in the window. */
+  /** Distinct rolling 7-day buckets (floor(days_ago / 7)) with an observation
+   * in the calibration window. */
   weeks_observed: number
 }
 
