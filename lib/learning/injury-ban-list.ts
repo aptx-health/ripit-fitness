@@ -16,10 +16,17 @@
  *                        exclude.
  *   - `recovered`     -> NO EFFECT (historical context only).
  *
- * An exercise "loads" an injured area when its `movementPattern` is one of the
- * area's patterns, OR its `primaryFAUs` intersect the area's FAUs. Untagged
- * exercises (null `movementPattern`, empty FAUs) are never banned by pattern —
- * consistent with the auto-tag contract ("treat untagged as no constraint").
+ * An exercise "loads" an injured area (for the hard-ban path) when its
+ * `movementPattern` is one of the area's patterns, OR its `primaryFAUs` intersect
+ * the area's FAUs. Untagged exercises (null `movementPattern`, empty FAUs) are
+ * never banned by pattern — consistent with the auto-tag contract ("treat
+ * untagged as no constraint").
+ *
+ * Secondary loading is deliberately NOT a hard ban (product decision, #918): an
+ * exercise whose *primary* pattern/FAU is elsewhere but which loads the injured
+ * area via `secondaryFAUs` (e.g. a barbell row loading the lower back
+ * isometrically) is routed into the cautioned soft-flag fields so the planner
+ * down-weights it rather than excluding it outright.
  */
 
 import type { MovementPattern } from '@/lib/exercises/auto-tag'
@@ -96,6 +103,11 @@ export interface InjuryBanExercise {
   id: string
   movementPattern: string | null
   primaryFAUs: string[]
+  /**
+   * Secondary movers/stabilizers. A match here on a hard-ban injury drives a
+   * *caution* (down-weight), never an exclusion — see module docs.
+   */
+  secondaryFAUs?: string[]
 }
 
 /**
@@ -120,7 +132,8 @@ function isKnownArea(area: string): area is InjuryArea {
 }
 
 /**
- * Does this exercise load the given area (by movement pattern or primary FAU)?
+ * Does this exercise load the given area as a PRIMARY mover — by movement
+ * pattern or primary FAU? This is the hard-ban predicate.
  */
 function exerciseLoadsArea(
   exercise: InjuryBanExercise,
@@ -132,6 +145,20 @@ function exerciseLoadsArea(
   }
   const faus = load.faus as readonly string[]
   return exercise.primaryFAUs.some((fau) => faus.includes(fau))
+}
+
+/**
+ * The injured-area FAUs this exercise loads as a SECONDARY mover/stabilizer.
+ * These drive a caution (soft flag), never a hard ban.
+ */
+function secondaryLoadedFAUs(
+  exercise: InjuryBanExercise,
+  load: AreaLoadProfile
+): FAUKey[] {
+  const areaFAUs = load.faus as readonly string[]
+  return (exercise.secondaryFAUs ?? []).filter((fau) =>
+    areaFAUs.includes(fau)
+  ) as FAUKey[]
 }
 
 /**
@@ -187,10 +214,15 @@ export function computeInjuryBanList(
       continue
     }
 
-    // avoid_loading -> hard ban every exercise that loads the area.
+    // avoid_loading -> hard ban every exercise that PRIMARILY loads the area.
+    // Secondary-only loaders are down-weighted (cautioned), not excluded.
     for (const exercise of exercises) {
       if (exerciseLoadsArea(exercise, load)) {
         banned.add(exercise.id)
+        continue
+      }
+      for (const fau of secondaryLoadedFAUs(exercise, load)) {
+        cautionedFAUs.add(fau)
       }
     }
   }

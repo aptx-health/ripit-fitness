@@ -147,6 +147,65 @@ describe('computeInjuryBanList — caution (soft flags)', () => {
   })
 })
 
+describe('computeInjuryBanList — secondary loading (product decision #918)', () => {
+  // Reviewer's example: a barbell row loads the lower back isometrically as a
+  // secondary mover, but its primary pattern/FAU is elsewhere. For a
+  // `lower_back` avoid_loading injury it must NOT be hard-banned — it is
+  // down-weighted via the cautioned soft-flag fields instead.
+  const rowLoadingLowBack: InjuryBanExercise = {
+    id: 'barbell-row',
+    movementPattern: 'horizontal_pull',
+    primaryFAUs: ['mid-back'],
+    secondaryFAUs: ['lower-back'],
+  }
+
+  it('routes a secondary-only loader to caution, not the hard ban', () => {
+    const result = computeInjuryBanList(
+      [injury({ area: 'lower_back', severity: 'avoid_loading' })],
+      [rowLoadingLowBack]
+    )
+    // lower_back -> patterns [hinge, squat, carry], faus [lower-back, glutes,
+    // hamstrings]. The row matches none of those as a PRIMARY loader.
+    expect(result.bannedExerciseIds).not.toContain('barbell-row')
+    expect(result.bannedExerciseIds).toEqual([])
+    // ...but its secondary lower-back load is flagged for down-weighting.
+    expect(result.cautionedFAUs).toContain('lower-back')
+  })
+
+  it('prefers the hard ban when an exercise loads the area both ways', () => {
+    // A deadlift primarily hinges (hard ban for lower_back) and also lists
+    // lower-back as a secondary FAU — it must land in the ban, not just caution.
+    const deadlift: InjuryBanExercise = {
+      id: 'deadlift',
+      movementPattern: 'hinge',
+      primaryFAUs: ['hamstrings'],
+      secondaryFAUs: ['lower-back'],
+    }
+    const result = computeInjuryBanList(
+      [injury({ area: 'lower_back', severity: 'avoid_loading' })],
+      [deadlift]
+    )
+    expect(result.bannedExerciseIds).toEqual(['deadlift'])
+    // No double-counting into caution for an already-banned exercise.
+    expect(result.cautionedFAUs).toEqual([])
+  })
+
+  it('ignores secondary FAUs that do not load the injured area', () => {
+    const benchWithTricepSecondary: InjuryBanExercise = {
+      id: 'bench',
+      movementPattern: 'horizontal_push',
+      primaryFAUs: ['chest'],
+      secondaryFAUs: ['triceps'],
+    }
+    const result = computeInjuryBanList(
+      [injury({ area: 'knee', severity: 'avoid_loading' })],
+      [benchWithTricepSecondary]
+    )
+    expect(result.bannedExerciseIds).toEqual([])
+    expect(result.cautionedFAUs).toEqual([])
+  })
+})
+
 describe('computeInjuryBanList — recovered & degradation', () => {
   it('produces zero entries for a recovered injury', () => {
     const result = computeInjuryBanList(
