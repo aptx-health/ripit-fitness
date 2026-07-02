@@ -370,6 +370,37 @@ model UserTrainingProfile {
   bannedExerciseIds           String[] @default([])
   ratioTargets                Json
   defaultIntensityPreference  String?
+
+  // Demographics (all optional, skippable)
+  birthYear                   Int?
+  // biologicalSex: female | male | prefer_not_to_say
+  biologicalSex               String?
+  heightCm                    Float?
+  weightKg                    Float?
+
+  // Injuries: [{ area, severity, notes?, reportedAt? }]
+  // area: neck | shoulder | elbow | wrist | upper_back | lower_back | hip | knee | ankle
+  // severity: avoid_loading | caution | recovered
+  // Source for the injury -> exercise ban-list mapping (areas align with
+  // ExerciseDefinition.movementPattern / FAU taxonomy).
+  injuryAreas                 Json     @default("[]")
+
+  // Importance ratings (1-5)
+  // goalCategories: [{ category, importance }]
+  goalCategories              Json     @default("[]")
+  // otherActivities: [{ activity, importance, cadence? }]
+  otherActivities             Json     @default("[]")
+  // fauImportance: { [fauKey]: 1..5 } — per-FAU weighting (keys from lib/fau-volume ALL_FAUS)
+  fauImportance               Json     @default("{}")
+
+  // Training rhythm
+  targetSessionsPerWeek       Int?
+  targetMinutesPerSession     Int?
+  // patternPreference: no_preference | full_body | upper_lower | push_pull_legs | body_part_split | custom
+  patternPreference           String?
+  // preferredDays: monday..sunday
+  preferredDays               String[] @default([])
+
   createdAt                   DateTime @default(now())
   updatedAt                   DateTime @updatedAt
 
