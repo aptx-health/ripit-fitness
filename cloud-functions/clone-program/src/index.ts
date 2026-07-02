@@ -1,6 +1,9 @@
 import http from 'node:http'
 import { PrismaClient } from '@prisma/client'
 import { type Job, Worker } from 'bullmq'
+// Shared code from the repo root lib/ — resolved via the @/* path alias
+// (see tsconfig.json). Proves worker containers can consume lib/ modules.
+import { logger } from '@/lib/logger'
 import { cloneStrengthProgramData, type ProgramCloneJob } from './cloning'
 
 const QUEUE_NAME = 'program-clone-jobs'
@@ -260,7 +263,7 @@ const healthServer = http.createServer(async (req, res) => {
 
 const port = process.env.PORT || 8080
 healthServer.listen(port, () => {
-  console.log(`Clone worker started, health server on port ${port}`)
+  logger.info({ port }, 'Clone worker started, health server listening')
 })
 
 // Graceful shutdown

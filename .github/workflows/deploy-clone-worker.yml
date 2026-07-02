@@ -7,11 +7,13 @@ on:
       - main
     paths:
       - 'cloud-functions/clone-program/**'
+      - 'lib/**'
       - 'prisma/schema.prisma'
       - '.github/workflows/deploy-clone-worker.yml'
   pull_request:
     paths:
       - 'cloud-functions/clone-program/**'
+      - 'lib/**'
       - 'prisma/schema.prisma'
       - '.github/workflows/deploy-clone-worker.yml'
 
@@ -38,11 +40,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Copy Prisma schema into worker build context
-        run: |
-          mkdir -p cloud-functions/clone-program/prisma
-          cp prisma/schema.prisma cloud-functions/clone-program/prisma/schema.prisma
-
       - name: Determine image tags
         id: tags
         run: |
@@ -58,10 +55,14 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      # Build context is the repo root so the image can include shared lib/
+      # code and the canonical prisma/schema.prisma. Context ignores come from
+      # cloud-functions/clone-program/Dockerfile.dockerignore (BuildKit).
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: ./cloud-functions/clone-program
+          context: .
+          file: cloud-functions/clone-program/Dockerfile
           push: true
           tags: ${{ env.IMAGE_NAME }}:${{ steps.tags.outputs.tag }}
           labels: |
@@ -115,15 +116,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Copy Prisma schema into worker build context
-        run: |
-          mkdir -p cloud-functions/clone-program/prisma
-          cp prisma/schema.prisma cloud-functions/clone-program/prisma/schema.prisma
-
       - name: Build clone worker image
         run: |
+          # Repo-root context so the image can include shared lib/ code
           docker build -t clone-worker-smoke \
-            ./cloud-functions/clone-program
+            -f cloud-functions/clone-program/Dockerfile .
 
       - name: Smoke test — worker boots and health endpoint responds
         run: |
