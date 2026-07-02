@@ -694,6 +694,8 @@ model UserTrainingAggregates {
   perFau                  Json
   // MovementCalibration[]: gap-decayed EWMA e1RM, staleness, typical effort
   perMovementCalibration  Json
+  // GoalProgress[]: per-goal e1RM (Epley) trend series + classification
+  goalProgress            Json     @default("[]")
 
   @@index([computedAt])
 }

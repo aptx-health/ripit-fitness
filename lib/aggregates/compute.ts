@@ -19,6 +19,11 @@ import {
   epleyE1RM,
   gapDecayedEwma,
 } from '@/lib/learning/math'
+import {
+  type MovementEwma,
+  type MovementEwmaMap,
+  determineMovementHeavy,
+} from '@/lib/learning/weekly-intent'
 import { normalizeWeightToLbs } from '@/lib/stats/exercise-performance'
 import type {
   AggregateSessionInput,
@@ -27,6 +32,9 @@ import type {
   CalibrationObservation,
   ComputeInput,
   DataMaturity,
+  FauStatus,
+  GoalProgress,
+  GoalTrend,
   MovementCalibration,
   PerFauAggregate,
   TrainingAggregates,
@@ -53,6 +61,9 @@ export const DEFAULT_AGGREGATES_OPTIONS: AggregatesOptions = {
   coldStartMinSessions: 3,
   establishedMinSessions: 10,
   maturityMinSpanDays: 28,
+  fauStatusDeadband: 0.03,
+  goalTrendStallBand: 0.02,
+  goalProgressMinWeeks: 2,
 }
 
 /** Merge caller overrides over the production defaults. */
@@ -93,6 +104,34 @@ function round(value: number, decimals = 1): number {
   return Math.round(value * f) / f
 }
 
+const round4 = (value: number): number => round(value, 4)
+
+/**
+ * Keyword -> movement pattern interpretation for goal sentences. Deterministic
+ * substring match against the lowercased goal; first hit (in array order) wins.
+ * Not exhaustive by design — goals with no lift-specific interpretation are
+ * simply omitted from goal_progress.
+ */
+const GOAL_PATTERN_KEYWORDS: ReadonlyArray<[RegExp, string]> = [
+  [/\bdead ?lift/, 'hinge'],
+  [/\brdl\b|romanian|hip ?thrust|good ?morning|\bhinge/, 'hinge'],
+  [/\bsquat/, 'squat'],
+  [/\blunge|split ?squat|bulgarian/, 'lunge'],
+  [/\bbench|chest ?press|\bpush ?up|horizontal ?push/, 'horizontal_push'],
+  [/overhead|\bohp\b|shoulder ?press|military|vertical ?push/, 'vertical_push'],
+  [/pull ?up|chin ?up|lat ?pull|vertical ?pull/, 'vertical_pull'],
+  [/\brow\b|horizontal ?pull/, 'horizontal_pull'],
+]
+
+/** Map a goal sentence to a movement pattern, or null when uninterpretable. */
+function interpretGoalPattern(goal: string): string | null {
+  const g = goal.toLowerCase()
+  for (const [re, pattern] of GOAL_PATTERN_KEYWORDS) {
+    if (re.test(g)) return pattern
+  }
+  return null
+}
+
 /** Start (00:00:00.000 UTC) of the Monday-based week containing `d`. */
 function startOfIsoWeekUtc(d: Date): Date {
   const out = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()))
@@ -119,15 +158,96 @@ function tallyFauSets(sessions: AggregateSessionInput[]): Map<string, number> {
   return counts
 }
 
+/** Most recent (min days-ago) session with an effective set for each FAU. */
+function lastSessionByFau(now: Date, sessions: AggregateSessionInput[]): Map<string, number> {
+  const out = new Map<string, number>()
+  for (const session of sessions) {
+    const daysAgo = Math.floor(ageDays(now, session.completedAt))
+    const faus = new Set<string>()
+    for (const set of effectiveSets(session)) {
+      for (const fau of set.primaryFAUs) faus.add(fau)
+    }
+    for (const fau of faus) {
+      const prev = out.get(fau)
+      if (prev == null || daysAgo < prev) out.set(fau, daysAgo)
+    }
+  }
+  return out
+}
+
+/**
+ * Most recent (min days-ago) **session-relative-heavy** session for each FAU.
+ * A session is heavy for a FAU when it contains a movement (grouped by pattern)
+ * that `determineMovementHeavy` flags AND that movement's sets attribute to the
+ * FAU. Effort (RPE >= 8) fires regardless of pattern; the EWMA branch needs a
+ * calibrated pattern; the intensityClass tag is the cold-start fallback.
+ */
+function lastHeavyByFau(
+  now: Date,
+  sessions: AggregateSessionInput[],
+  ewmaMap: MovementEwmaMap
+): Map<string, number> {
+  const out = new Map<string, number>()
+  for (const session of sessions) {
+    const daysAgo = Math.floor(ageDays(now, session.completedAt))
+
+    // Group this session's sets by movement pattern (null key allowed —
+    // effort-based heaviness applies even to untagged movements).
+    const byPattern = new Map<string, AggregateSetInput[]>()
+    for (const set of session.sets) {
+      const key = set.movementPattern ?? '__NULL__'
+      const list = byPattern.get(key) ?? []
+      list.push(set)
+      byPattern.set(key, list)
+    }
+
+    for (const [key, sets] of byPattern) {
+      const pattern = key === '__NULL__' ? null : key
+      const intensityClass = sets.find((s) => s.intensityClass === 'heavy')
+        ? 'heavy'
+        : (sets.find((s) => s.intensityClass != null)?.intensityClass ?? null)
+      const verdict = determineMovementHeavy(
+        {
+          movementPattern: pattern,
+          intensityClass,
+          sets: sets.map((s) => ({
+            // Bodyweight-exercise weights are excluded from e1RM (mirror
+            // calibration); effort still counts.
+            weightLbs: s.isBodyweight ? 0 : normalizeWeightToLbs(s.weight, s.weightUnit),
+            reps: s.reps,
+            rpe: s.rpe,
+            rir: s.rir,
+            isWarmup: s.isWarmup,
+          })),
+        },
+        pattern != null ? ewmaMap[pattern] : undefined
+      )
+      if (!verdict.isHeavy) continue
+      const faus = new Set<string>()
+      for (const set of sets) {
+        if (set.isWarmup) continue
+        for (const fau of set.primaryFAUs) faus.add(fau)
+      }
+      for (const fau of faus) {
+        const prev = out.get(fau)
+        if (prev == null || daysAgo < prev) out.set(fau, daysAgo)
+      }
+    }
+  }
+  return out
+}
+
 function computePerFau(
   input: ComputeInput,
   opts: AggregatesOptions,
   lowData: boolean,
   eightWeekStart: Date,
-  currentWeekStart: Date
+  currentWeekStart: Date,
+  ewmaMap: MovementEwmaMap
 ): PerFauAggregate[] {
   const { now, detailSessions } = input
   const baselineWeeks = opts.baselineWeeks
+  const ratioTargets = input.ratioTargets ?? null
 
   const within = (days: number) =>
     detailSessions.filter((s) => ageDays(now, s.completedAt) <= days)
@@ -176,6 +296,19 @@ function computePerFau(
     }
   }
 
+  const lastSession = lastSessionByFau(now, within(baselineWeeks * 7 + 14))
+  const lastHeavy = lastHeavyByFau(now, within(baselineWeeks * 7 + 14), ewmaMap)
+
+  // Zero-sum shares: target_share (from ratioTargets, default weight 1.0) and
+  // actual_14d_share are both normalized over the emitted (present) FAUs so
+  // they each sum to 1 and deficit_share cancels total volume out.
+  const presentList = [...presentFaus]
+  const targetWeightSum = presentList.reduce(
+    (sum, fau) => sum + (ratioTargets?.[fau] ?? 1.0),
+    0
+  )
+  const total14d = presentList.reduce((sum, fau) => sum + (sets14d.get(fau) ?? 0), 0)
+
   const order = new Map(ALL_FAUS.map((f, i) => [f as string, i]))
   const result: PerFauAggregate[] = []
   for (const fau of presentFaus) {
@@ -185,13 +318,26 @@ function computePerFau(
       if (c > 0) weekly.push(c)
     }
     const baseline = weekly.length >= BASELINE_MIN_NONZERO_WEEKS ? median(weekly) : null
+
+    const targetShare = targetWeightSum > 0 ? round4((ratioTargets?.[fau] ?? 1.0) / targetWeightSum) : 0
+    const actualShare = total14d > 0 ? round4((sets14d.get(fau) ?? 0) / total14d) : 0
+    const deficit = round4(targetShare - actualShare)
+    const status: FauStatus = deficit > opts.fauStatusDeadband ? 'neglected' : deficit < -opts.fauStatusDeadband ? 'over' : 'balanced'
+
     result.push({
       fau,
+      last_session_days_ago: lastSession.get(fau) ?? null,
+      last_heavy_days_ago: lastHeavy.get(fau) ?? null,
       rolling_7d_sets: sets7d.get(fau) ?? 0,
       rolling_14d_sets: sets14d.get(fau) ?? 0,
       sessions_14d: sessions14dByFau.get(fau) ?? 0,
       baseline_weekly_sets: baseline,
+      target_share: targetShare,
+      actual_14d_share: actualShare,
+      deficit_share: deficit,
       low_data: lowData,
+      // Suppressed under low data — a cheap model echoes whatever label it gets.
+      ...(lowData ? {} : { status }),
     })
   }
 
@@ -216,13 +362,16 @@ interface TopSetObservation {
   effort: number | null
 }
 
-function computeCalibration(
+/**
+ * Per movement pattern, the top (max-e1RM) qualifying set from each session
+ * within the calibration window. Shared by calibration and goal_progress.
+ * Excludes warmups, bodyweight-exercise weights, and untagged movements.
+ */
+function collectTopSetsByPattern(
   input: ComputeInput,
   opts: AggregatesOptions
-): MovementCalibration[] {
+): Map<string, TopSetObservation[]> {
   const { now, detailSessions } = input
-
-  // Per movement pattern: the top (max-e1RM) qualifying set from each session.
   const byPattern = new Map<string, TopSetObservation[]>()
 
   for (const session of detailSessions) {
@@ -255,7 +404,13 @@ function computeCalibration(
       byPattern.set(pattern, list)
     }
   }
+  return byPattern
+}
 
+function computeCalibration(
+  byPattern: Map<string, TopSetObservation[]>,
+  opts: AggregatesOptions
+): MovementCalibration[] {
   const result: MovementCalibration[] = []
   for (const [pattern, observations] of byPattern) {
     if (observations.length < opts.calibrationMinObservations) continue
@@ -295,6 +450,69 @@ function computeCalibration(
   }
 
   result.sort((a, b) => a.movement_pattern.localeCompare(b.movement_pattern))
+  return result
+}
+
+/**
+ * Field adapter: build the movement-pattern EWMA map the weekly-intent heavy
+ * machinery consumes. Calibration emits `ewma_e1rm_lbs` / `observation_count`;
+ * `determineMovementHeavy` wants `ewmaE1RMLbs` / `observationCount`. Only
+ * patterns with >= calibrationMinObservations appear (they were the only ones
+ * emitted); everything else falls back to effort/tag heaviness by construction.
+ */
+function buildEwmaMap(calibration: MovementCalibration[]): MovementEwmaMap {
+  const map: MovementEwmaMap = {}
+  for (const c of calibration) {
+    const ewma: MovementEwma = {
+      ewmaE1RMLbs: c.ewma_e1rm_lbs,
+      observationCount: c.observation_count,
+    }
+    map[c.movement_pattern] = ewma
+  }
+  return map
+}
+
+// ---------------------------------------------------------------------------
+// goal_progress
+// ---------------------------------------------------------------------------
+
+/** Classify the e1RM series' first->last relative change into a trend. */
+function classifyTrend(e1rmSeries: number[], weeksObserved: number, opts: AggregatesOptions): GoalTrend {
+  if (weeksObserved < opts.goalProgressMinWeeks || e1rmSeries.length < 2) return 'new'
+  const first = e1rmSeries[0]
+  const last = e1rmSeries[e1rmSeries.length - 1]
+  if (!(first > 0)) return 'new'
+  const rel = (last - first) / first
+  if (rel > opts.goalTrendStallBand) return 'progressing'
+  if (rel < -opts.goalTrendStallBand) return 'regressing'
+  return 'stalled'
+}
+
+function computeGoalProgress(
+  goals: string[],
+  byPattern: Map<string, TopSetObservation[]>,
+  opts: AggregatesOptions
+): GoalProgress[] {
+  const result: GoalProgress[] = []
+  for (const goal of goals) {
+    const pattern = interpretGoalPattern(goal)
+    if (!pattern) continue // uninterpretable goals are omitted
+
+    // Oldest -> newest observations for the mapped pattern (may be empty).
+    const observations = [...(byPattern.get(pattern) ?? [])].sort((a, b) => b.daysAgo - a.daysAgo)
+    const e1rmSeries = observations.map((o) => o.e1rm)
+    const recentTopSets = observations.slice(-5).map((o) => round(o.weightLbs))
+    // Distinct 7-day buckets observed within the calibration window.
+    const weeksObserved = new Set(observations.map((o) => Math.floor(o.daysAgo / 7))).size
+
+    result.push({
+      goal,
+      interpretation: `${pattern} EWMA + e1RM trend`,
+      recent_top_sets_lbs: recentTopSets,
+      trend: classifyTrend(e1rmSeries, weeksObserved, opts),
+      weeks_observed: weeksObserved,
+    })
+  }
   return result
 }
 
@@ -386,8 +604,11 @@ export function computeAggregates(
       ? null
       : round(sets7d / (sets28d / 4), 2)
 
-  const perFau = computePerFau(input, opts, lowData, eightWeekStart, currentWeekStart)
-  const perMovementCalibration = computeCalibration(input, opts)
+  const topSetsByPattern = collectTopSetsByPattern(input, opts)
+  const perMovementCalibration = computeCalibration(topSetsByPattern, opts)
+  const ewmaMap = buildEwmaMap(perMovementCalibration)
+  const perFau = computePerFau(input, opts, lowData, eightWeekStart, currentWeekStart, ewmaMap)
+  const goalProgress = computeGoalProgress(input.goals ?? [], topSetsByPattern, opts)
 
   return {
     computedAt: now,
@@ -407,5 +628,6 @@ export function computeAggregates(
     ),
     perFau,
     perMovementCalibration,
+    goalProgress,
   }
 }
