@@ -1,12 +1,17 @@
 import http from 'node:http'
 import { PrismaClient } from '@prisma/client'
 import { type Job, Worker } from 'bullmq'
+import { recomputeUserAggregates } from '@/lib/aggregates/recompute'
 // Shared code from the repo root lib/ — resolved via the @/* path alias
 // (see tsconfig.json). Proves worker containers can consume lib/ modules.
 import { logger } from '@/lib/logger'
 import { cloneStrengthProgramData, type ProgramCloneJob } from './cloning'
 
 const QUEUE_NAME = 'program-clone-jobs'
+// Second queue served by this same worker container (issue #919, topology
+// option A). Recompute is short and DB-bound; it shares the direct-Postgres
+// connection the clone worker already uses.
+const AGGREGATES_QUEUE_NAME = 'user-training-aggregates'
 const LOG_LEVEL = process.env.CLONE_WORKER_LOG_LEVEL || 'info' // 'debug' for heartbeat + redis lifecycle
 const HEARTBEAT_INTERVAL = LOG_LEVEL === 'debug' ? 30_000 : 300_000 // 30s debug, 5min otherwise
 
@@ -193,6 +198,42 @@ if (LOG_LEVEL === 'debug') {
   })
 }
 
+// ---------------------------------------------------------------------------
+// UserTrainingAggregates recompute worker (issue #919)
+// ---------------------------------------------------------------------------
+
+interface AggregatesRecomputeJob {
+  userId: string
+}
+
+async function processAggregatesJob(job: Job<AggregatesRecomputeJob>): Promise<void> {
+  const { userId } = job.data
+  if (!userId) {
+    throw new Error('Invalid aggregates job payload: missing userId')
+  }
+  console.log(`[aggregates ${job.id}] recomputing for user=${userId}`)
+  await recomputeUserAggregates(prisma, userId)
+  console.log(`[aggregates ${job.id}] done user=${userId}`)
+}
+
+const aggregatesWorker = new Worker(AGGREGATES_QUEUE_NAME, processAggregatesJob, {
+  connection: connectionOpts,
+  concurrency: 3,
+})
+
+aggregatesWorker.on('ready', () => {
+  console.log('[aggregates] connected to Redis, polling for jobs')
+})
+
+aggregatesWorker.on('failed', (job, error) => {
+  const attempt = job ? `attempt ${job.attemptsMade}/${job.opts.attempts}` : 'unknown attempt'
+  console.error(`[aggregates] job ${job?.id} failed (${attempt}): ${error.message}`)
+})
+
+aggregatesWorker.on('error', (error) => {
+  console.error('[aggregates] worker error:', error.message || error)
+})
+
 // Catch unhandled errors that could silently kill the worker loop
 process.on('unhandledRejection', (reason) => {
   console.error('[process] unhandledRejection:', reason)
@@ -269,7 +310,7 @@ healthServer.listen(port, () => {
 // Graceful shutdown
 async function shutdown() {
   console.log('[shutdown] shutting down clone worker...')
-  await worker.close()
+  await Promise.all([worker.close(), aggregatesWorker.close()])
   healthServer.close()
   await prisma.$disconnect()
   process.exit(0)

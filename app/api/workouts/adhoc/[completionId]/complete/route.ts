@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db'
 import { findAdHocCompletion } from '@/lib/db/adhoc-completion'
 import { recordEvent } from '@/lib/events'
 import { logger } from '@/lib/logger'
+import { enqueueAggregatesRecompute } from '@/lib/queue/aggregates-jobs'
 import { checkRateLimit, workoutActionLimiter } from '@/lib/rate-limit'
 import { computeWorkoutRollup } from '@/lib/stats/workout-rollup'
 
@@ -50,6 +51,8 @@ export async function POST(
     })
 
     recordEvent(user.id, 'adhoc_workout_completed', { completionId })
+    // Refresh the Suggest training-state layer off the request path (#919).
+    void enqueueAggregatesRecompute(user.id)
 
     logger.info(
       { userId: user.id, completionId, setCount },

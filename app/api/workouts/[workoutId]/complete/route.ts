@@ -3,6 +3,7 @@ import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { recordEvent } from '@/lib/events'
 import { logger } from '@/lib/logger'
+import { enqueueAggregatesRecompute } from '@/lib/queue/aggregates-jobs'
 import { checkRateLimit, workoutActionLimiter } from '@/lib/rate-limit'
 import { computeWorkoutRollup } from '@/lib/stats/workout-rollup'
 
@@ -162,6 +163,8 @@ export async function POST(
     })
 
     recordEvent(user.id, 'workout_completed', { workoutId })
+    // Refresh the Suggest training-state layer off the request path (#919).
+    void enqueueAggregatesRecompute(user.id)
 
     let rollup = null
     try {
