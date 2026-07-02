@@ -58,3 +58,6 @@ public/swe-worker*
 # generated scripts output
 scripts/update-image-urls.sql
 scripts/test-exercise-mapping.json
+
+# Eval loop state (dev tooling, see docs/EVAL_LOOP_DESIGN.md)
+.eval/

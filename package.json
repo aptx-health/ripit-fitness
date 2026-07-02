@@ -13,6 +13,8 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
+    "eval-suggest": "tsx scripts/eval-suggest.ts",
+    "rate-suggestions": "tsx scripts/rate-suggestions.ts",
     "prepare": "husky"
   },
   "dependencies": {
@@ -74,6 +76,7 @@
     "tailwindcss": "^4.2.4",
     "testcontainers": "^10.28.0",
     "ts-node": "^10.9.2",
+    "tsx": "^4.22.4",
     "typescript": "^5.9.3",
     "vitest": "^2.1.9"
   },
