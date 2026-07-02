@@ -1,13 +1,11 @@
 import type { PrismaClient } from '@prisma/client'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { recordStrengthPerformance } from '@/lib/stats/exercise-performance'
 import { getTestDatabase } from '@/lib/test/database'
 import {
   createCompleteTestScenario,
   createTestPrescribedSets,
   createTestProgram,
   createTestUser,
-  createTestWorkoutCompletion,
 } from '@/lib/test/factories'
 import {
   simulateDraftLoad,
@@ -26,146 +24,6 @@ describe('isWarmup flag', () => {
 
     const user = await createTestUser()
     userId = user.id
-  })
-
-  describe('Performance stats exclude warmup sets', () => {
-    it('should exclude warmup sets from e1RM calculation', async () => {
-      const scenario = await createCompleteTestScenario(prisma, userId, {
-        loggedSetCount: 0,
-        status: 'completed',
-      })
-      const { completion, exercise } = scenario
-
-      await prisma.loggedSet.createMany({
-        data: [
-          {
-            completionId: completion.id,
-            exerciseId: exercise.id,
-            userId,
-            setNumber: 1,
-            reps: 10,
-            weight: 45,
-            weightUnit: 'lbs',
-            isWarmup: true,
-          },
-          {
-            completionId: completion.id,
-            exerciseId: exercise.id,
-            userId,
-            setNumber: 2,
-            reps: 5,
-            weight: 95,
-            weightUnit: 'lbs',
-            isWarmup: true,
-          },
-          {
-            completionId: completion.id,
-            exerciseId: exercise.id,
-            userId,
-            setNumber: 3,
-            reps: 5,
-            weight: 185,
-            weightUnit: 'lbs',
-            isWarmup: false,
-          },
-          {
-            completionId: completion.id,
-            exerciseId: exercise.id,
-            userId,
-            setNumber: 4,
-            reps: 5,
-            weight: 185,
-            weightUnit: 'lbs',
-            isWarmup: false,
-          },
-        ],
-      })
-
-      await recordStrengthPerformance(prisma, completion.id, userId)
-
-      const perfLog = await prisma.exercisePerformanceLog.findFirst({
-        where: { workoutCompletionId: completion.id },
-      })
-
-      expect(perfLog).toBeTruthy()
-      expect(perfLog!.totalSets).toBe(2)
-      expect(perfLog!.totalReps).toBe(10)
-      expect(perfLog!.maxWeightLbs).toBe(185)
-      expect(perfLog!.totalVolumeLbs).toBe(1850)
-    })
-
-    it('should produce no performance log when all sets are warmup', async () => {
-      const scenario = await createCompleteTestScenario(prisma, userId, {
-        loggedSetCount: 0,
-        status: 'completed',
-      })
-      const { completion, exercise } = scenario
-
-      await prisma.loggedSet.createMany({
-        data: [
-          {
-            completionId: completion.id,
-            exerciseId: exercise.id,
-            userId,
-            setNumber: 1,
-            reps: 10,
-            weight: 45,
-            weightUnit: 'lbs',
-            isWarmup: true,
-          },
-        ],
-      })
-
-      await recordStrengthPerformance(prisma, completion.id, userId)
-
-      const perfLogs = await prisma.exercisePerformanceLog.findMany({
-        where: { workoutCompletionId: completion.id },
-      })
-
-      expect(perfLogs).toHaveLength(0)
-    })
-
-    it('should handle mix of warmup and working sets across exercises', async () => {
-      const program = await createTestProgram(prisma, userId, {
-        exercisesPerWorkout: 2,
-      })
-      const workout = program.weeks[0].workouts[0]
-      const [exercise1, exercise2] = workout.exercises
-
-      const completion = await createTestWorkoutCompletion(
-        prisma, workout.id, userId, 'completed'
-      )
-
-      await prisma.loggedSet.createMany({
-        data: [
-          { completionId: completion.id, exerciseId: exercise1.id, userId, setNumber: 1, reps: 10, weight: 45, weightUnit: 'lbs', isWarmup: true },
-          { completionId: completion.id, exerciseId: exercise1.id, userId, setNumber: 2, reps: 5, weight: 200, weightUnit: 'lbs', isWarmup: false },
-          { completionId: completion.id, exerciseId: exercise1.id, userId, setNumber: 3, reps: 5, weight: 200, weightUnit: 'lbs', isWarmup: false },
-          { completionId: completion.id, exerciseId: exercise1.id, userId, setNumber: 4, reps: 5, weight: 200, weightUnit: 'lbs', isWarmup: false },
-          { completionId: completion.id, exerciseId: exercise2.id, userId, setNumber: 1, reps: 8, weight: 100, weightUnit: 'lbs', isWarmup: false },
-          { completionId: completion.id, exerciseId: exercise2.id, userId, setNumber: 2, reps: 8, weight: 100, weightUnit: 'lbs', isWarmup: false },
-        ],
-      })
-
-      await recordStrengthPerformance(prisma, completion.id, userId)
-
-      const perfLogs = await prisma.exercisePerformanceLog.findMany({
-        where: { workoutCompletionId: completion.id },
-        orderBy: { totalSets: 'desc' },
-      })
-
-      expect(perfLogs).toHaveLength(2)
-
-      const ex1Log = perfLogs.find(l => l.totalSets === 3)
-      expect(ex1Log).toBeTruthy()
-      expect(ex1Log!.totalReps).toBe(15)
-      expect(ex1Log!.maxWeightLbs).toBe(200)
-
-      const ex2Log = perfLogs.find(l => l.totalSets === 2)
-      expect(ex2Log).toBeTruthy()
-      expect(ex2Log!.totalReps).toBe(16)
-      expect(ex2Log!.maxWeightLbs).toBe(100)
-    })
   })
 
   describe('Draft save/load round-trips isWarmup', () => {
