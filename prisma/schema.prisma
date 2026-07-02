@@ -97,6 +97,7 @@ model ExerciseDefinition {
   taggedAt        DateTime?
   taggedBy        String?
   exercises      Exercise[]
+  userPreferences UserExercisePreference[]
 
   @@index([normalizedName])
   @@index([isSystem])
@@ -105,6 +106,29 @@ model ExerciseDefinition {
   @@index([userId])
   @@index([movementPattern])
   @@index([intensityClass])
+}
+
+// Per-user, per-exercise preference learning (decayed Beta distribution).
+// Written by implicit-feedback hooks; read (with decay-on-read) by the
+// training-state builder. See lib/learning/math.ts and lib/learning/preference-store.ts.
+model UserExercisePreference {
+  id                   String             @id @default(cuid())
+  userId               String
+  exerciseDefinitionId String
+  // Beta(alpha, beta) evidence counts. Both > 0 (relax toward the uniform
+  // prior on decay rather than collapsing below 1).
+  alpha                Float              @default(1)
+  beta                 Float              @default(1)
+  // Drives decay-on-read: elapsed weeks since this stamp determine how far the
+  // stored evidence has decayed toward the prior.
+  lastUpdatedAt        DateTime           @default(now())
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  exerciseDefinition   ExerciseDefinition @relation(fields: [exerciseDefinitionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, exerciseDefinitionId])
+  @@index([userId])
+  @@index([exerciseDefinitionId])
 }
 
 model Exercise {
