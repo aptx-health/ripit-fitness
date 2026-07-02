@@ -13,11 +13,17 @@
  */
 
 import { ALL_FAUS } from '@/lib/fau-volume'
-import { epleyE1RM, gapDecayedEwma } from '@/lib/learning/math'
+import {
+  DEFAULT_EWMA_ALPHA,
+  DEFAULT_TYPICAL_GAP_DAYS,
+  epleyE1RM,
+  gapDecayedEwma,
+} from '@/lib/learning/math'
 import { normalizeWeightToLbs } from '@/lib/stats/exercise-performance'
 import type {
   AggregateSessionInput,
   AggregateSetInput,
+  AggregatesOptions,
   CalibrationObservation,
   ComputeInput,
   DataMaturity,
@@ -27,17 +33,37 @@ import type {
 } from './types'
 
 const DAY_MS = 24 * 60 * 60 * 1000
-const CALIBRATION_WINDOW_DAYS = 30
-const CALIBRATION_MIN_OBSERVATIONS = 3
-const BASELINE_WEEKS = 8
-const DETRAINING_MIN_DAYS = 10
-const DETRAINING_MIN_PRIOR_SESSIONS = 3
-const LOW_DATA_MIN_SESSIONS = 3
-const LOW_DATA_MIN_SETS = 20
-const ACR_MIN_28D_SETS = 20
-const ESTABLISHED_MIN_SESSIONS = 10
-const COLD_START_MIN_SESSIONS = 3
-const MATURITY_MIN_SPAN_DAYS = 28
+
+/**
+ * Production threshold defaults. These are today's values; #937 will override
+ * individual fields from an admin-editable config. Change behavior here, not by
+ * editing call sites.
+ */
+export const DEFAULT_AGGREGATES_OPTIONS: AggregatesOptions = {
+  lowDataMinSessions: 3,
+  lowDataMinSets: 20,
+  detrainingMinDays: 10,
+  detrainingMinPriorSessions: 3,
+  acrMin28dSets: 20,
+  baselineWeeks: 8,
+  calibrationWindowDays: 30,
+  calibrationMinObservations: 3,
+  ewmaAlpha: DEFAULT_EWMA_ALPHA,
+  ewmaTypicalGapDays: DEFAULT_TYPICAL_GAP_DAYS,
+  coldStartMinSessions: 3,
+  establishedMinSessions: 10,
+  maturityMinSpanDays: 28,
+}
+
+/** Merge caller overrides over the production defaults. */
+export function resolveAggregatesOptions(
+  overrides?: Partial<AggregatesOptions>
+): AggregatesOptions {
+  return overrides ? { ...DEFAULT_AGGREGATES_OPTIONS, ...overrides } : DEFAULT_AGGREGATES_OPTIONS
+}
+
+/** Minimum non-zero weeks required before a baseline median is emitted (structural). */
+const BASELINE_MIN_NONZERO_WEEKS = 2
 
 /** Days between an earlier date and `now` (float, non-negative). */
 function ageDays(now: Date, when: Date): number {
@@ -95,11 +121,13 @@ function tallyFauSets(sessions: AggregateSessionInput[]): Map<string, number> {
 
 function computePerFau(
   input: ComputeInput,
+  opts: AggregatesOptions,
   lowData: boolean,
   eightWeekStart: Date,
   currentWeekStart: Date
 ): PerFauAggregate[] {
   const { now, detailSessions } = input
+  const baselineWeeks = opts.baselineWeeks
 
   const within = (days: number) =>
     detailSessions.filter((s) => ageDays(now, s.completedAt) <= days)
@@ -122,14 +150,14 @@ function computePerFau(
   // Per-FAU weekly set totals across the 8 complete Mon-Sun weeks (zero weeks
   // excluded from the baseline median).
   const weekFauCounts: Map<string, number>[] = Array.from(
-    { length: BASELINE_WEEKS },
+    { length: baselineWeeks },
     () => new Map<string, number>()
   )
   for (const session of detailSessions) {
     const t = session.completedAt.getTime()
     if (t < eightWeekStart.getTime() || t >= currentWeekStart.getTime()) continue
     const weekIndex = Math.floor((t - eightWeekStart.getTime()) / (7 * DAY_MS))
-    if (weekIndex < 0 || weekIndex >= BASELINE_WEEKS) continue
+    if (weekIndex < 0 || weekIndex >= baselineWeeks) continue
     for (const set of effectiveSets(session)) {
       for (const fau of set.primaryFAUs) {
         const wk = weekFauCounts[weekIndex]
@@ -156,7 +184,7 @@ function computePerFau(
       const c = wk.get(fau) ?? 0
       if (c > 0) weekly.push(c)
     }
-    const baseline = weekly.length >= 2 ? median(weekly) : null
+    const baseline = weekly.length >= BASELINE_MIN_NONZERO_WEEKS ? median(weekly) : null
     result.push({
       fau,
       rolling_7d_sets: sets7d.get(fau) ?? 0,
@@ -188,14 +216,17 @@ interface TopSetObservation {
   effort: number | null
 }
 
-function computeCalibration(input: ComputeInput): MovementCalibration[] {
+function computeCalibration(
+  input: ComputeInput,
+  opts: AggregatesOptions
+): MovementCalibration[] {
   const { now, detailSessions } = input
 
   // Per movement pattern: the top (max-e1RM) qualifying set from each session.
   const byPattern = new Map<string, TopSetObservation[]>()
 
   for (const session of detailSessions) {
-    if (ageDays(now, session.completedAt) > CALIBRATION_WINDOW_DAYS) continue
+    if (ageDays(now, session.completedAt) > opts.calibrationWindowDays) continue
     const daysAgo = ageDays(now, session.completedAt)
 
     // Best set per pattern within this single session.
@@ -227,10 +258,11 @@ function computeCalibration(input: ComputeInput): MovementCalibration[] {
 
   const result: MovementCalibration[] = []
   for (const [pattern, observations] of byPattern) {
-    if (observations.length < CALIBRATION_MIN_OBSERVATIONS) continue
+    if (observations.length < opts.calibrationMinObservations) continue
 
     const estimate = gapDecayedEwma(
-      observations.map((o) => ({ weightLbs: o.e1rm, daysAgo: o.daysAgo }))
+      observations.map((o) => ({ weightLbs: o.e1rm, daysAgo: o.daysAgo })),
+      { alpha: opts.ewmaAlpha, typicalGapDays: opts.ewmaTypicalGapDays }
     )
     // Guaranteed non-null: observations.length >= 3.
     const ewma = estimate.estimateLbs ?? 0
@@ -273,25 +305,32 @@ function computeCalibration(input: ComputeInput): MovementCalibration[] {
 function computeDataMaturity(
   now: Date,
   qualifyingSessionsTotal: number,
-  firstSessionAt: Date | null
+  firstSessionAt: Date | null,
+  opts: AggregatesOptions
 ): DataMaturity {
-  if (qualifyingSessionsTotal < COLD_START_MIN_SESSIONS) return 'cold_start'
+  if (qualifyingSessionsTotal < opts.coldStartMinSessions) return 'cold_start'
   const spanDays = firstSessionAt ? ageDays(now, firstSessionAt) : 0
-  if (qualifyingSessionsTotal >= ESTABLISHED_MIN_SESSIONS && spanDays >= MATURITY_MIN_SPAN_DAYS) {
+  if (qualifyingSessionsTotal >= opts.establishedMinSessions && spanDays >= opts.maturityMinSpanDays) {
     return 'established'
   }
   return 'partial'
 }
 
 /**
- * Compute the full aggregates row for a user.
+ * Compute the full aggregates row for a user. Pure and I/O-free — the same core
+ * serves both the persisting recompute job and #937's dry-run payload preview.
  *
  * `input.detailSessions` must be the trailing detail-window (>= ~70d) qualifying
  * sessions; `input.allTime` carries the all-time first/last/count needed for
- * freshness and maturity that may reach beyond that window.
+ * freshness and maturity that may reach beyond that window. `options` overrides
+ * individual thresholds; omit for today's production defaults.
  */
-export function computeAggregates(input: ComputeInput): TrainingAggregates {
+export function computeAggregates(
+  input: ComputeInput,
+  options?: Partial<AggregatesOptions>
+): TrainingAggregates {
   const { now, detailSessions, allTime } = input
+  const opts = resolveAggregatesOptions(options)
 
   const within = (days: number) =>
     detailSessions.filter((s) => ageDays(now, s.completedAt) <= days)
@@ -308,7 +347,7 @@ export function computeAggregates(input: ComputeInput): TrainingAggregates {
   const sets14d = countEffective(sessions14d)
 
   // Whole-body low-data flag (shared across all per-FAU rows).
-  const lowData = sessions14d.length < LOW_DATA_MIN_SESSIONS || sets14d < LOW_DATA_MIN_SETS
+  const lowData = sessions14d.length < opts.lowDataMinSessions || sets14d < opts.lowDataMinSets
 
   // Freshness.
   const daysSinceAnySession = allTime.lastSessionAt
@@ -318,36 +357,37 @@ export function computeAggregates(input: ComputeInput): TrainingAggregates {
   // Detraining gap: only when the gap is real and there was prior training.
   const detrainingGapDays =
     daysSinceAnySession != null &&
-    daysSinceAnySession >= DETRAINING_MIN_DAYS &&
-    allTime.qualifyingSessionsTotal >= DETRAINING_MIN_PRIOR_SESSIONS
+    daysSinceAnySession >= opts.detrainingMinDays &&
+    allTime.qualifyingSessionsTotal >= opts.detrainingMinPriorSessions
       ? daysSinceAnySession
       : null
 
-  // Calendar-week windows for the 8-week baselines.
+  // Calendar-week windows for the baseline (default 8 complete Mon-Sun weeks).
   const currentWeekStart = startOfIsoWeekUtc(now)
-  const eightWeekStart = new Date(currentWeekStart.getTime() - BASELINE_WEEKS * 7 * DAY_MS)
+  const eightWeekStart = new Date(currentWeekStart.getTime() - opts.baselineWeeks * 7 * DAY_MS)
 
-  // Whole-body weekly totals across the 8 complete weeks (zero weeks excluded).
-  const weekTotals = new Array<number>(BASELINE_WEEKS).fill(0)
+  // Whole-body weekly totals across the complete weeks (zero weeks excluded).
+  const weekTotals = new Array<number>(opts.baselineWeeks).fill(0)
   for (const session of detailSessions) {
     const t = session.completedAt.getTime()
     if (t < eightWeekStart.getTime() || t >= currentWeekStart.getTime()) continue
     const weekIndex = Math.floor((t - eightWeekStart.getTime()) / (7 * DAY_MS))
-    if (weekIndex < 0 || weekIndex >= BASELINE_WEEKS) continue
+    if (weekIndex < 0 || weekIndex >= opts.baselineWeeks) continue
     weekTotals[weekIndex] += effectiveSets(session).length
   }
   const nonZeroWeeks = weekTotals.filter((c) => c > 0)
-  const totalWeeklySetsBaseline = nonZeroWeeks.length >= 2 ? median(nonZeroWeeks) : null
+  const totalWeeklySetsBaseline =
+    nonZeroWeeks.length >= BASELINE_MIN_NONZERO_WEEKS ? median(nonZeroWeeks) : null
 
   // Acute:chronic ratio — null until the chronic denominator is meaningful.
   const firstSessionSpanDays = allTime.firstSessionAt ? ageDays(now, allTime.firstSessionAt) : 0
   const acuteChronicRatio =
-    sets28d < ACR_MIN_28D_SETS || firstSessionSpanDays < MATURITY_MIN_SPAN_DAYS
+    sets28d < opts.acrMin28dSets || firstSessionSpanDays < opts.maturityMinSpanDays
       ? null
       : round(sets7d / (sets28d / 4), 2)
 
-  const perFau = computePerFau(input, lowData, eightWeekStart, currentWeekStart)
-  const perMovementCalibration = computeCalibration(input)
+  const perFau = computePerFau(input, opts, lowData, eightWeekStart, currentWeekStart)
+  const perMovementCalibration = computeCalibration(input, opts)
 
   return {
     computedAt: now,
@@ -359,7 +399,12 @@ export function computeAggregates(input: ComputeInput): TrainingAggregates {
     totalWeeklySetsBaseline,
     acuteChronicRatio,
     detrainingGapDays,
-    dataMaturity: computeDataMaturity(now, allTime.qualifyingSessionsTotal, allTime.firstSessionAt),
+    dataMaturity: computeDataMaturity(
+      now,
+      allTime.qualifyingSessionsTotal,
+      allTime.firstSessionAt,
+      opts
+    ),
     perFau,
     perMovementCalibration,
   }

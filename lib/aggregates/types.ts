@@ -114,3 +114,38 @@ export interface ComputeInput {
     qualifyingSessionsTotal: number
   }
 }
+
+/**
+ * Tunable thresholds for the aggregates computation. Every field has a
+ * production default (DEFAULT_AGGREGATES_OPTIONS); callers pass a Partial to
+ * override individual values. #937 (TuningConfig + payload preview) supplies
+ * overrides from an admin-editable config; today all values are the defaults.
+ */
+export interface AggregatesOptions {
+  /** low_data: fewer than this many qualifying sessions in 14d flags low data. */
+  lowDataMinSessions: number
+  /** low_data: fewer than this many effective sets in 14d flags low data. */
+  lowDataMinSets: number
+  /** detraining_gap floor: gap must be >= this many days to populate. */
+  detrainingMinDays: number
+  /** detraining_gap: user must have had >= this many qualifying sessions before the gap. */
+  detrainingMinPriorSessions: number
+  /** acute:chronic ratio is null until the trailing-28d window holds >= this many sets. */
+  acrMin28dSets: number
+  /** Number of complete Mon-Sun weeks in the baseline window. */
+  baselineWeeks: number
+  /** Movement-pattern observations are drawn from this trailing window (days). */
+  calibrationWindowDays: number
+  /** A movement pattern needs >= this many observations to emit a calibration entry. */
+  calibrationMinObservations: number
+  /** Base EWMA smoothing factor (see lib/learning/math gapDecayedEwma). */
+  ewmaAlpha: number
+  /** Expected days between observations for the gap-decayed EWMA. */
+  ewmaTypicalGapDays: number
+  /** data_maturity: below this many qualifying sessions is cold_start. */
+  coldStartMinSessions: number
+  /** data_maturity: at/above this many sessions (with span) is established. */
+  establishedMinSessions: number
+  /** data_maturity / ACR: minimum first-session span (days) for established / non-null ACR. */
+  maturityMinSpanDays: number
+}

@@ -1,6 +1,6 @@
 import type { PrismaClient } from '@prisma/client'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { recomputeUserAggregates } from '@/lib/aggregates/recompute'
+import { computeUserAggregates, recomputeUserAggregates } from '@/lib/aggregates/recompute'
 import { getTestDatabase } from '@/lib/test/database'
 import { createTestUser } from '@/lib/test/factories'
 
@@ -126,6 +126,35 @@ describe('UserTrainingAggregates recompute', () => {
     expect(row).not.toBeNull()
     expect(row?.dataMaturity).toBe('cold_start')
     expect(row?.perFau).toEqual([])
+  })
+
+  it('computeUserAggregates returns aggregates without persisting (dry run)', async () => {
+    const chest = await createDef(prisma, { primaryFAUs: ['chest'] })
+    for (const daysAgo of [2, 5, 9]) {
+      await seedSession(prisma, userId, chest, { daysAgo, sets: chestSets(7) })
+    }
+
+    const agg = await computeUserAggregates(prisma, userId, NOW)
+    expect(agg.perFau.find((f) => f.fau === 'chest')?.rolling_14d_sets).toBe(21)
+
+    // Nothing written.
+    const row = await prisma.userTrainingAggregates.findUnique({ where: { userId } })
+    expect(row).toBeNull()
+  })
+
+  it('honors threshold overrides from the options object', async () => {
+    const chest = await createDef(prisma, { primaryFAUs: ['chest'] })
+    // 3 sessions, 20 sets -> low_data false at defaults...
+    await seedSession(prisma, userId, chest, { daysAgo: 2, sets: chestSets(7) })
+    await seedSession(prisma, userId, chest, { daysAgo: 5, sets: chestSets(7) })
+    await seedSession(prisma, userId, chest, { daysAgo: 9, sets: chestSets(6) })
+
+    const dflt = await computeUserAggregates(prisma, userId, NOW)
+    expect(dflt.perFau.find((f) => f.fau === 'chest')?.low_data).toBe(false)
+
+    // ...but low_data true when the set floor is raised past 20.
+    const strict = await computeUserAggregates(prisma, userId, NOW, { lowDataMinSets: 25 })
+    expect(strict.perFau.find((f) => f.fau === 'chest')?.low_data).toBe(true)
   })
 
   it('is idempotent — a double run yields an identical row', async () => {

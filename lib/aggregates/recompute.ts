@@ -1,9 +1,13 @@
 /**
- * Orchestrator for the UserTrainingAggregates recompute (issue #919).
+ * Orchestrator for the UserTrainingAggregates layer (issue #919).
  *
- * Owns all DB access: fetches a user's qualifying training history, hands it to
- * the pure compute layer, and upserts the single per-user row. Full recompute
- * every run (no incremental bookkeeping) — idempotent for a fixed `now`.
+ * Two seams:
+ *   - computeUserAggregates: fetches a user's qualifying history and runs the
+ *     pure compute core, returning the aggregates WITHOUT persisting. This is
+ *     the dry-run path #937 (TuningConfig + payload preview) needs.
+ *   - recomputeUserAggregates: the thin persisting wrapper — calls the above
+ *     and upserts the single per-user row. Full recompute every run (no
+ *     incremental bookkeeping); idempotent for a fixed `now`.
  *
  * Called from the BullMQ aggregates worker on workout completion; safe to call
  * directly (integration tests do).
@@ -11,15 +15,9 @@
 
 import type { Prisma, PrismaClient } from '@prisma/client'
 import { logger } from '@/lib/logger'
-import { computeAggregates } from './compute'
-import type { AggregateSessionInput, TrainingAggregates } from './types'
+import { computeAggregates, resolveAggregatesOptions } from './compute'
+import type { AggregateSessionInput, AggregatesOptions, TrainingAggregates } from './types'
 
-/**
- * Detail-fetch window. Covers everything the rolling (7/14/28d) and 8-week
- * Mon-Sun baseline computations need (worst case ~62 days back) with margin.
- * All-time first/last/count are fetched separately and reach beyond this.
- */
-const DETAIL_WINDOW_DAYS = 75
 const QUALIFYING_STATUSES = ['completed', 'abandoned']
 
 function toJson(value: unknown): Prisma.InputJsonValue {
@@ -27,15 +25,28 @@ function toJson(value: unknown): Prisma.InputJsonValue {
 }
 
 /**
- * Recompute and persist the aggregates row for a single user.
- * Returns the computed aggregates (also useful for tests).
+ * Trailing detail-fetch window (days). Must cover the rolling (7/14/28d) and
+ * baseline (N complete Mon-Sun weeks) computations with margin for the current
+ * partial week; all-time first/last/count are fetched separately and reach
+ * beyond it. Derived from the resolved baseline width so a config override that
+ * widens the baseline also widens the fetch.
  */
-export async function recomputeUserAggregates(
+function detailWindowDays(opts: AggregatesOptions): number {
+  return Math.max(35, opts.baselineWeeks * 7 + 14, opts.calibrationWindowDays + 7)
+}
+
+/**
+ * Fetch a user's qualifying history and compute their aggregates in-memory.
+ * Does NOT persist — see recomputeUserAggregates for the writing wrapper.
+ */
+export async function computeUserAggregates(
   prisma: PrismaClient,
   userId: string,
-  now: Date = new Date()
+  now: Date = new Date(),
+  options?: Partial<AggregatesOptions>
 ): Promise<TrainingAggregates> {
-  const detailWindowStart = new Date(now.getTime() - DETAIL_WINDOW_DAYS * 24 * 60 * 60 * 1000)
+  const opts = resolveAggregatesOptions(options)
+  const detailWindowStart = new Date(now.getTime() - detailWindowDays(opts) * 24 * 60 * 60 * 1000)
 
   // Detailed sessions in the trailing window: full set data + exercise tags.
   const detailCompletions = await prisma.workoutCompletion.findMany({
@@ -108,15 +119,31 @@ export async function recomputeUserAggregates(
   const firstSessionAt = qualifyingTimes.length ? new Date(Math.min(...qualifyingTimes)) : null
   const lastSessionAt = qualifyingTimes.length ? new Date(Math.max(...qualifyingTimes)) : null
 
-  const aggregates = computeAggregates({
-    now,
-    detailSessions,
-    allTime: {
-      firstSessionAt,
-      lastSessionAt,
-      qualifyingSessionsTotal: qualifyingTimes.length,
+  return computeAggregates(
+    {
+      now,
+      detailSessions,
+      allTime: {
+        firstSessionAt,
+        lastSessionAt,
+        qualifyingSessionsTotal: qualifyingTimes.length,
+      },
     },
-  })
+    opts
+  )
+}
+
+/**
+ * Recompute and persist the aggregates row for a single user (the BullMQ
+ * processor's thin wrapper). Returns the computed aggregates.
+ */
+export async function recomputeUserAggregates(
+  prisma: PrismaClient,
+  userId: string,
+  now: Date = new Date(),
+  options?: Partial<AggregatesOptions>
+): Promise<TrainingAggregates> {
+  const aggregates = await computeUserAggregates(prisma, userId, now, options)
 
   const row = {
     computedAt: aggregates.computedAt,
