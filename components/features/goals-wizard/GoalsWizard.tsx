@@ -142,9 +142,9 @@ export function GoalsWizard({
             >
               <Wrench size={16} aria-hidden="true" className="shrink-0" />
               <span>
-                Equipment: assuming a full gym —{' '}
+                Equipment: assuming a full gym.{' '}
                 <span className="font-medium text-foreground underline">
-                  tap to adjust
+                  Tap to adjust
                 </span>
               </span>
             </Link>

@@ -52,9 +52,12 @@ export default function EquipmentChecklistEditor({ initialEquipment }: Props) {
     setSelected([...values])
   }
 
-  // Debounced auto-save after any user change
+  // Debounced auto-save after any user change. The cleanup aborts any
+  // in-flight request so a superseded save can't report "Saved" (or write
+  // stale state updates) after a newer change queued its own save.
   useEffect(() => {
     if (!dirtyRef.current || selected === null) return
+    const controller = new AbortController()
     const timeout = setTimeout(async () => {
       setSaveState('saving')
       try {
@@ -62,15 +65,20 @@ export default function EquipmentChecklistEditor({ initialEquipment }: Props) {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ equipmentAvailable: selected }),
+          signal: controller.signal,
         })
         if (!res.ok) throw new Error(`Save failed (${res.status})`)
         setSaveState('saved')
       } catch (err) {
+        if (controller.signal.aborted) return
         clientLogger.error('Failed to save equipment availability', err)
         setSaveState('error')
       }
     }, 500)
-    return () => clearTimeout(timeout)
+    return () => {
+      clearTimeout(timeout)
+      controller.abort()
+    }
   }, [selected])
 
   return (
@@ -92,7 +100,7 @@ export default function EquipmentChecklistEditor({ initialEquipment }: Props) {
 
         {isUnset && (
           <div className="border-2 border-primary/40 bg-primary/10 px-4 py-3 text-sm text-foreground">
-            Assuming a full gym — toggle off anything you&apos;re missing, or
+            Assuming a full gym. Toggle off anything you&apos;re missing, or
             start from a preset.
           </div>
         )}
@@ -130,7 +138,7 @@ export default function EquipmentChecklistEditor({ initialEquipment }: Props) {
               {saveState === 'saving' && 'Saving...'}
               {saveState === 'saved' && 'Saved'}
               {saveState === 'error' && (
-                <span className="text-error">Save failed — retry a change</span>
+                <span className="text-error">Save failed, retry a change</span>
               )}
             </span>
           </div>
