@@ -1,7 +1,7 @@
 'use client'
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { Dumbbell, Heart, KeyRound, MessageSquarePlus, Moon, Palette, Shield, Sun, Target } from 'lucide-react'
+import { Dumbbell, Gauge, Heart, KeyRound, MessageSquarePlus, Moon, Palette, Shield, Sun, Target } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import FeedbackModal from '@/components/features/FeedbackModal'
@@ -306,6 +306,22 @@ export default function SettingsPage() {
                     </span>
                     <span className="block text-sm text-muted-foreground">
                       Set FAU ratios for ad-hoc exercise guidance.
+                    </span>
+                  </span>
+                </span>
+              </Link>
+              <Link
+                href="/settings/training-focus"
+                className="flex min-h-14 items-center justify-between gap-3 border-2 border-border bg-card px-4 py-3 text-foreground transition-colors doom-focus-ring hover:border-primary hover:bg-muted/50"
+              >
+                <span className="flex items-center gap-3">
+                  <Gauge size={18} aria-hidden="true" />
+                  <span>
+                    <span className="block text-sm font-bold uppercase tracking-wider">
+                      Training Focus
+                    </span>
+                    <span className="block text-sm text-muted-foreground">
+                      Start from a preset, then tune how much each muscle matters.
                     </span>
                   </span>
                 </span>
