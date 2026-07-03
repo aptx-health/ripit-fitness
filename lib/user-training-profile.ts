@@ -93,7 +93,6 @@ export const MAX_GOAL_SENTENCES = 10
 export const MAX_GOAL_SENTENCE_LENGTH = 280
 export const MAX_WEEKLY_INTENTS = 10
 export const MAX_WEEKLY_INTENT_LENGTH = 280
-export const MAX_EQUIPMENT_ITEMS = 32
 export const MAX_BANNED_EXERCISE_IDS = 500
 export const MAX_INJURY_ENTRIES = INJURY_AREAS.length
 export const MAX_INJURY_NOTE_LENGTH = 500
