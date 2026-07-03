@@ -1,4 +1,5 @@
 import type { Prisma, PrismaClient } from '@prisma/client'
+import { normalizeEquipmentAvailability } from '@/lib/equipment-availability'
 import { ALL_FAUS, type FAUKey } from '@/lib/fau-volume'
 import {
   getDefaultMuscleBalanceTargets,
@@ -349,10 +350,8 @@ export function normalizeUserTrainingProfile(
       MAX_WEEKLY_INTENTS,
       MAX_WEEKLY_INTENT_LENGTH
     ),
-    equipmentAvailable: normalizeStringList(
-      profile?.equipmentAvailable,
-      MAX_EQUIPMENT_ITEMS,
-      64
+    equipmentAvailable: normalizeEquipmentAvailability(
+      profile?.equipmentAvailable
     ),
     bannedExerciseIds: normalizeStringList(
       profile?.bannedExerciseIds,
@@ -480,10 +479,10 @@ export async function updateUserTrainingProfile(
     )
   }
   if ('equipmentAvailable' in update) {
-    data.equipmentAvailable = normalizeStringList(
-      update.equipmentAvailable,
-      MAX_EQUIPMENT_ITEMS,
-      64
+    // Filtered to canonical ExerciseDefinition.equipment values; an empty
+    // list means "no equipment record" (builder assumes full commercial gym).
+    data.equipmentAvailable = normalizeEquipmentAvailability(
+      update.equipmentAvailable
     )
   }
   if ('bannedExerciseIds' in update) {
