@@ -153,8 +153,9 @@ async function simulateLogSet(
 async function simulateComplete(
   prisma: PrismaClient,
   completionId: string,
-  userId: string
-): Promise<SimResult<{ status: string }>> {
+  userId: string,
+  now: Date = new Date()
+): Promise<SimResult<{ status: string; durationSeconds: number | null }>> {
   const completion = await prisma.workoutCompletion.findUnique({
     where: { id: completionId },
   })
@@ -168,11 +169,19 @@ async function simulateComplete(
   if (setCount === 0)
     return { ok: false, status: 400, error: 'Log at least one set before completing.' }
 
+  const durationSeconds = completion.startedAt
+    ? Math.max(0, Math.round((now.getTime() - completion.startedAt.getTime()) / 1000))
+    : null
+
   const updated = await prisma.workoutCompletion.update({
     where: { id: completionId },
-    data: { status: 'completed', completedAt: new Date() },
+    data: { status: 'completed', completedAt: now, durationSeconds },
   })
-  return { ok: true, status: 200, data: { status: updated.status } }
+  return {
+    ok: true,
+    status: 200,
+    data: { status: updated.status, durationSeconds: updated.durationSeconds },
+  }
 }
 
 describe('Ad-hoc Workout API', () => {
@@ -260,6 +269,71 @@ describe('Ad-hoc Workout API', () => {
 
       expect(added1.data.order).toBe(1)
       expect(added2.data.order).toBe(2)
+    })
+  })
+
+  describe('Duration persistence (#933)', () => {
+    it('persists durationSeconds from startedAt on completion', async () => {
+      const exerciseDef = await createTestExerciseDefinition(prisma, { name: 'Press' })
+      const startedAt = new Date('2026-07-03T10:00:00Z')
+      const created = await simulateCreateAdHoc(prisma, userId, startedAt)
+      expect(created.ok).toBe(true)
+      if (!created.ok) return
+      const completionId = created.data.completion.id
+
+      const added = await simulateAddExercise(prisma, completionId, userId, exerciseDef.id)
+      expect(added.ok).toBe(true)
+      if (!added.ok) return
+      await simulateLogSet(prisma, completionId, userId, {
+        exerciseId: added.data.exerciseId,
+        setNumber: 1,
+        reps: 5,
+        weight: 100,
+        weightUnit: 'lbs',
+      })
+
+      // Complete 25 minutes later
+      const completedAt = new Date('2026-07-03T10:25:00Z')
+      const completed = await simulateComplete(prisma, completionId, userId, completedAt)
+      expect(completed.ok).toBe(true)
+      if (!completed.ok) return
+      expect(completed.data.durationSeconds).toBe(25 * 60)
+
+      const row = await prisma.workoutCompletion.findUnique({ where: { id: completionId } })
+      expect(row?.durationSeconds).toBe(25 * 60)
+    })
+
+    it('persists null durationSeconds when startedAt is null', async () => {
+      const exerciseDef = await createTestExerciseDefinition(prisma, { name: 'Fly' })
+      // Create an ad-hoc completion without startedAt
+      const completion = await prisma.workoutCompletion.create({
+        data: {
+          workoutId: null,
+          userId,
+          status: 'draft',
+          isAdHoc: true,
+          name: 'Open Workout — no start',
+          startedAt: null,
+        },
+      })
+      const added = await simulateAddExercise(prisma, completion.id, userId, exerciseDef.id)
+      expect(added.ok).toBe(true)
+      if (!added.ok) return
+      await simulateLogSet(prisma, completion.id, userId, {
+        exerciseId: added.data.exerciseId,
+        setNumber: 1,
+        reps: 8,
+        weight: 50,
+        weightUnit: 'lbs',
+      })
+
+      const completed = await simulateComplete(prisma, completion.id, userId)
+      expect(completed.ok).toBe(true)
+      if (!completed.ok) return
+      expect(completed.data.durationSeconds).toBeNull()
+
+      const row = await prisma.workoutCompletion.findUnique({ where: { id: completion.id } })
+      expect(row?.durationSeconds).toBeNull()
     })
   })
 

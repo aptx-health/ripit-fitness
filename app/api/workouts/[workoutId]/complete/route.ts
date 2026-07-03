@@ -72,6 +72,16 @@ export async function POST(
 
       const draftSetCount = draft?.loggedSets?.length ?? 0
 
+      // Persist elapsed session time when the draft recorded a start (#933).
+      // Create branches have no draft, so duration is null there.
+      const completedAt = new Date()
+      const durationSeconds = draft?.startedAt
+        ? Math.max(
+            0,
+            Math.round((completedAt.getTime() - draft.startedAt.getTime()) / 1000)
+          )
+        : null
+
       // If we have a draft with sets, just flip the status
       if (draft && draftSetCount > 0) {
         // Safety fallback: if client reports more sets than DB has, use fallback
@@ -99,7 +109,7 @@ export async function POST(
 
         return tx.workoutCompletion.update({
           where: { id: draft.id },
-          data: { status: 'completed', completedAt: new Date() },
+          data: { status: 'completed', completedAt, durationSeconds },
         })
       }
 
@@ -109,10 +119,10 @@ export async function POST(
         const completionRecord = draft
           ? await tx.workoutCompletion.update({
               where: { id: draft.id },
-              data: { status: 'completed', completedAt: new Date() },
+              data: { status: 'completed', completedAt, durationSeconds },
             })
           : await tx.workoutCompletion.create({
-              data: { workoutId, userId: user.id, status: 'completed', completedAt: new Date() },
+              data: { workoutId, userId: user.id, status: 'completed', completedAt, durationSeconds },
             })
         return completionRecord
       }
@@ -126,10 +136,10 @@ export async function POST(
       const completionRecord = draft
         ? await tx.workoutCompletion.update({
             where: { id: draft.id },
-            data: { status: 'completed', completedAt: new Date() },
+            data: { status: 'completed', completedAt, durationSeconds },
           })
         : await tx.workoutCompletion.create({
-            data: { workoutId, userId: user.id, status: 'completed', completedAt: new Date() },
+            data: { workoutId, userId: user.id, status: 'completed', completedAt, durationSeconds },
           })
 
       await tx.loggedSet.createMany({
