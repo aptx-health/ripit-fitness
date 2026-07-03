@@ -16,6 +16,7 @@ async function createDef(
     primaryFAUs: string[]
     movementPattern?: string | null
     isBodyweight?: boolean
+    intensityClass?: string | null
   }
 ): Promise<string> {
   defCounter += 1
@@ -32,9 +33,25 @@ async function createDef(
       userId: '00000000-0000-0000-0000-000000000000',
       movementPattern: opts.movementPattern ?? null,
       isBodyweight: opts.isBodyweight ?? false,
+      intensityClass: opts.intensityClass ?? null,
     },
   })
   return def.id
+}
+
+/** Seed the user's training profile (ratioTargets drives shares; goalSentences drives goal_progress). */
+async function seedProfile(
+  prisma: PrismaClient,
+  userId: string,
+  opts: { ratioTargets?: Record<string, number>; goalSentences?: string[] }
+): Promise<void> {
+  await prisma.userTrainingProfile.create({
+    data: {
+      userId,
+      ratioTargets: opts.ratioTargets ?? {},
+      goalSentences: opts.goalSentences ?? [],
+    },
+  })
 }
 
 interface SetSpec {
@@ -349,5 +366,273 @@ describe('UserTrainingAggregates recompute', () => {
     // oldest -> newest ordering.
     const daysAgoSeries = cal!.recent_observations.map((o) => o.days_ago)
     expect(daysAgoSeries).toEqual([...daysAgoSeries].sort((a, b) => b - a))
+  })
+
+  // -------------------------------------------------------------------------
+  // per_fau shares + status (#941)
+  // -------------------------------------------------------------------------
+
+  it('emits zero-sum shares that normalize across present FAUs', async () => {
+    const chest = await createDef(prisma, { primaryFAUs: ['chest'] })
+    const lats = await createDef(prisma, { primaryFAUs: ['lats'] })
+    // 3 sessions, 20 effective sets in 14d -> not low_data. chest 15, lats 5.
+    await seedSession(prisma, userId, chest, { daysAgo: 2, sets: chestSets(8) })
+    await seedSession(prisma, userId, chest, { daysAgo: 5, sets: chestSets(7) })
+    await seedSession(prisma, userId, lats, { daysAgo: 9, sets: chestSets(5) })
+
+    const agg = await recomputeUserAggregates(prisma, userId, NOW)
+    const shares = agg.perFau
+
+    // Shares are defined over present FAUs and each set sums to 1.
+    const targetSum = shares.reduce((s, f) => s + f.target_share, 0)
+    const actualSum = shares.reduce((s, f) => s + f.actual_14d_share, 0)
+    const deficitSum = shares.reduce((s, f) => s + f.deficit_share, 0)
+    expect(targetSum).toBeCloseTo(1, 3)
+    expect(actualSum).toBeCloseTo(1, 3)
+    expect(deficitSum).toBeCloseTo(0, 3)
+
+    // Default preset (uniform weight 1.0) -> equal target shares.
+    const chestFau = shares.find((f) => f.fau === 'chest')!
+    const latsFau = shares.find((f) => f.fau === 'lats')!
+    expect(chestFau.target_share).toBeCloseTo(0.5, 4)
+    expect(latsFau.target_share).toBeCloseTo(0.5, 4)
+    // 15 / 20 vs 5 / 20 effective sets in 14d.
+    expect(chestFau.actual_14d_share).toBeCloseTo(0.75, 4)
+    expect(latsFau.actual_14d_share).toBeCloseTo(0.25, 4)
+    // deficit = target - actual: chest over-trained, lats neglected.
+    expect(chestFau.deficit_share).toBeCloseTo(-0.25, 4)
+    expect(latsFau.deficit_share).toBeCloseTo(0.25, 4)
+  })
+
+  it('honors ratioTargets weights when deriving target_share', async () => {
+    const chest = await createDef(prisma, { primaryFAUs: ['chest'] })
+    const lats = await createDef(prisma, { primaryFAUs: ['lats'] })
+    // Weight lats 3x chest -> target shares 0.25 / 0.75 over the two present FAUs.
+    await seedProfile(prisma, userId, { ratioTargets: { chest: 1, lats: 3 } })
+    await seedSession(prisma, userId, chest, { daysAgo: 2, sets: chestSets(7) })
+    await seedSession(prisma, userId, chest, { daysAgo: 5, sets: chestSets(7) })
+    await seedSession(prisma, userId, lats, { daysAgo: 9, sets: chestSets(6) })
+
+    const agg = await recomputeUserAggregates(prisma, userId, NOW)
+    const chestFau = agg.perFau.find((f) => f.fau === 'chest')!
+    const latsFau = agg.perFau.find((f) => f.fau === 'lats')!
+    expect(chestFau.target_share).toBeCloseTo(0.25, 4)
+    expect(latsFau.target_share).toBeCloseTo(0.75, 4)
+  })
+
+  it('handles a zero-14d-volume present FAU (share 0, deficit = full target)', async () => {
+    const chest = await createDef(prisma, { primaryFAUs: ['chest'] })
+    const lats = await createDef(prisma, { primaryFAUs: ['lats'] })
+    // chest trained recently; lats only trained 30d ago (present in 8wk window,
+    // but zero volume in the rolling 14d window).
+    await seedSession(prisma, userId, chest, { daysAgo: 2, sets: chestSets(8) })
+    await seedSession(prisma, userId, chest, { daysAgo: 5, sets: chestSets(7) })
+    await seedSession(prisma, userId, chest, { daysAgo: 9, sets: chestSets(6) })
+    await seedSession(prisma, userId, lats, { daysAgo: 30, sets: chestSets(5) })
+
+    const agg = await recomputeUserAggregates(prisma, userId, NOW)
+    const latsFau = agg.perFau.find((f) => f.fau === 'lats')
+    expect(latsFau).toBeDefined()
+    expect(latsFau?.rolling_14d_sets).toBe(0)
+    expect(latsFau?.actual_14d_share).toBe(0)
+    // target_share still defined (present FAU); deficit is the full target.
+    expect(latsFau?.target_share).toBeGreaterThan(0)
+    expect(latsFau?.deficit_share).toBeCloseTo(latsFau!.target_share, 4)
+  })
+
+  it('labels status neglected / over / balanced by the deadband', async () => {
+    const chest = await createDef(prisma, { primaryFAUs: ['chest'] })
+    const lats = await createDef(prisma, { primaryFAUs: ['lats'] })
+    // Skewed volume: chest over target, lats under. Deadband 0.03 default.
+    await seedSession(prisma, userId, chest, { daysAgo: 2, sets: chestSets(8) })
+    await seedSession(prisma, userId, chest, { daysAgo: 5, sets: chestSets(7) })
+    await seedSession(prisma, userId, lats, { daysAgo: 9, sets: chestSets(5) })
+
+    const agg = await recomputeUserAggregates(prisma, userId, NOW)
+    expect(agg.perFau.find((f) => f.fau === 'chest')?.status).toBe('over')
+    expect(agg.perFau.find((f) => f.fau === 'lats')?.status).toBe('neglected')
+  })
+
+  it('labels status balanced when actual matches target within the deadband', async () => {
+    const chest = await createDef(prisma, { primaryFAUs: ['chest'] })
+    const lats = await createDef(prisma, { primaryFAUs: ['lats'] })
+    // Equal volume across two default-weighted FAUs -> deficit ~0 -> balanced.
+    await seedSession(prisma, userId, chest, { daysAgo: 2, sets: chestSets(5) })
+    await seedSession(prisma, userId, chest, { daysAgo: 5, sets: chestSets(5) })
+    await seedSession(prisma, userId, lats, { daysAgo: 6, sets: chestSets(5) })
+    await seedSession(prisma, userId, lats, { daysAgo: 9, sets: chestSets(5) })
+
+    const agg = await recomputeUserAggregates(prisma, userId, NOW)
+    expect(agg.perFau.find((f) => f.fau === 'chest')?.status).toBe('balanced')
+    expect(agg.perFau.find((f) => f.fau === 'lats')?.status).toBe('balanced')
+  })
+
+  it('omits status under low_data', async () => {
+    const chest = await createDef(prisma, { primaryFAUs: ['chest'] })
+    // Only 2 sessions -> low_data -> status suppressed.
+    await seedSession(prisma, userId, chest, { daysAgo: 2, sets: chestSets(8) })
+    await seedSession(prisma, userId, chest, { daysAgo: 5, sets: chestSets(8) })
+
+    const agg = await recomputeUserAggregates(prisma, userId, NOW)
+    const chestFau = agg.perFau.find((f) => f.fau === 'chest')
+    expect(chestFau?.low_data).toBe(true)
+    expect(chestFau?.status).toBeUndefined()
+  })
+
+  // -------------------------------------------------------------------------
+  // per_fau last_heavy_days_ago (#941)
+  // -------------------------------------------------------------------------
+
+  it('computes last_heavy_days_ago via the EWMA branch', async () => {
+    // Calibrated pattern (>= 3 obs in 30d). Low logged effort (rir 4 -> effort 6)
+    // so the effort branch never fires — heaviness comes from the EWMA compare.
+    const bench = await createDef(prisma, {
+      primaryFAUs: ['chest'],
+      movementPattern: 'horizontal_push',
+    })
+    for (const daysAgo of [3, 10, 17]) {
+      await seedSession(prisma, userId, bench, {
+        daysAgo,
+        sets: [{ weight: 185, reps: 5, rpe: null, rir: 4 }],
+      })
+    }
+
+    const agg = await recomputeUserAggregates(prisma, userId, NOW)
+    // EWMA ~ e1RM(185,5); each session's top set >= 85% of it -> heavy.
+    expect(agg.perMovementCalibration.find((c) => c.movement_pattern === 'horizontal_push')).toBeDefined()
+    expect(agg.perFau.find((f) => f.fau === 'chest')?.last_heavy_days_ago).toBe(3)
+  })
+
+  it('computes last_heavy_days_ago via the intensityClass tag fallback (cold start)', async () => {
+    // < 3 observations -> no EWMA; low effort (rir 4) -> effort branch silent;
+    // intensityClass 'heavy' is the only signal that fires.
+    const heavyLift = await createDef(prisma, {
+      primaryFAUs: ['quads'],
+      movementPattern: 'squat',
+      intensityClass: 'heavy',
+    })
+    await seedSession(prisma, userId, heavyLift, {
+      daysAgo: 4,
+      sets: [{ weight: 225, reps: 5, rpe: null, rir: 4 }],
+    })
+
+    const agg = await recomputeUserAggregates(prisma, userId, NOW)
+    // No calibration entry (too few obs), but tag fallback marks it heavy.
+    expect(agg.perMovementCalibration).toEqual([])
+    expect(agg.perFau.find((f) => f.fau === 'quads')?.last_heavy_days_ago).toBe(4)
+  })
+
+  it('leaves last_heavy_days_ago null when no session was heavy', async () => {
+    // Light intensityClass, low effort, no EWMA -> never heavy.
+    const light = await createDef(prisma, {
+      primaryFAUs: ['biceps'],
+      movementPattern: 'elbow_flexion',
+      intensityClass: 'light',
+    })
+    await seedSession(prisma, userId, light, {
+      daysAgo: 4,
+      sets: [{ weight: 30, reps: 12, rpe: null, rir: 4 }],
+    })
+
+    const agg = await recomputeUserAggregates(prisma, userId, NOW)
+    const biceps = agg.perFau.find((f) => f.fau === 'biceps')
+    expect(biceps?.last_session_days_ago).toBe(4)
+    expect(biceps?.last_heavy_days_ago).toBeNull()
+  })
+
+  // -------------------------------------------------------------------------
+  // goal_progress (#941)
+  // -------------------------------------------------------------------------
+
+  it('classifies a progressing goal from a rising e1RM series', async () => {
+    const bench = await createDef(prisma, {
+      primaryFAUs: ['chest'],
+      movementPattern: 'horizontal_push',
+    })
+    await seedProfile(prisma, userId, { goalSentences: ['Increase my bench press'] })
+    // Rising top-set weights across 4 distinct weeks.
+    await seedSession(prisma, userId, bench, { daysAgo: 22, sets: [{ weight: 135, reps: 5 }] })
+    await seedSession(prisma, userId, bench, { daysAgo: 15, sets: [{ weight: 155, reps: 5 }] })
+    await seedSession(prisma, userId, bench, { daysAgo: 8, sets: [{ weight: 175, reps: 5 }] })
+    await seedSession(prisma, userId, bench, { daysAgo: 1, sets: [{ weight: 185, reps: 5 }] })
+
+    const agg = await recomputeUserAggregates(prisma, userId, NOW)
+    expect(agg.goalProgress).toHaveLength(1)
+    const goal = agg.goalProgress[0]
+    expect(goal.goal).toBe('Increase my bench press')
+    expect(goal.trend).toBe('progressing')
+    expect(goal.weeks_observed).toBe(4)
+    // Oldest -> newest top sets.
+    expect(goal.recent_top_sets_lbs).toEqual([135, 155, 175, 185])
+  })
+
+  it('classifies a regressing goal from a falling e1RM series', async () => {
+    const squat = await createDef(prisma, {
+      primaryFAUs: ['quads'],
+      movementPattern: 'squat',
+    })
+    await seedProfile(prisma, userId, { goalSentences: ['Get a bigger squat'] })
+    await seedSession(prisma, userId, squat, { daysAgo: 22, sets: [{ weight: 275, reps: 5 }] })
+    await seedSession(prisma, userId, squat, { daysAgo: 15, sets: [{ weight: 255, reps: 5 }] })
+    await seedSession(prisma, userId, squat, { daysAgo: 8, sets: [{ weight: 235, reps: 5 }] })
+    await seedSession(prisma, userId, squat, { daysAgo: 1, sets: [{ weight: 225, reps: 5 }] })
+
+    const agg = await recomputeUserAggregates(prisma, userId, NOW)
+    expect(agg.goalProgress[0]?.trend).toBe('regressing')
+  })
+
+  it('classifies a stalled goal from a flat e1RM series', async () => {
+    const bench = await createDef(prisma, {
+      primaryFAUs: ['chest'],
+      movementPattern: 'horizontal_push',
+    })
+    await seedProfile(prisma, userId, { goalSentences: ['Improve bench press'] })
+    for (const daysAgo of [22, 15, 8, 1]) {
+      await seedSession(prisma, userId, bench, { daysAgo, sets: [{ weight: 185, reps: 5 }] })
+    }
+
+    const agg = await recomputeUserAggregates(prisma, userId, NOW)
+    expect(agg.goalProgress[0]?.trend).toBe('stalled')
+  })
+
+  it('classifies a cold-start goal as "new" with too few observed weeks', async () => {
+    const squat = await createDef(prisma, {
+      primaryFAUs: ['quads'],
+      movementPattern: 'squat',
+    })
+    await seedProfile(prisma, userId, { goalSentences: ['Squat more weight'] })
+    // Only one session -> a single observed week -> below goalProgressMinWeeks.
+    await seedSession(prisma, userId, squat, { daysAgo: 2, sets: [{ weight: 225, reps: 5 }] })
+
+    const agg = await recomputeUserAggregates(prisma, userId, NOW)
+    expect(agg.goalProgress[0]?.trend).toBe('new')
+    expect(agg.goalProgress[0]?.weeks_observed).toBe(1)
+  })
+
+  it('omits uninterpretable goals and yields none when no goals are set', async () => {
+    const bench = await createDef(prisma, {
+      primaryFAUs: ['chest'],
+      movementPattern: 'horizontal_push',
+    })
+    await seedProfile(prisma, userId, {
+      goalSentences: ['Feel healthier and more energetic'],
+    })
+    await seedSession(prisma, userId, bench, { daysAgo: 2, sets: chestSets(5) })
+
+    const agg = await recomputeUserAggregates(prisma, userId, NOW)
+    // The goal maps to no movement pattern -> omitted entirely.
+    expect(agg.goalProgress).toEqual([])
+  })
+
+  it('emits an empty goalProgress when the user has no profile', async () => {
+    const chest = await createDef(prisma, { primaryFAUs: ['chest'] })
+    await seedSession(prisma, userId, chest, { daysAgo: 2, sets: chestSets(5) })
+
+    const agg = await recomputeUserAggregates(prisma, userId, NOW)
+    expect(agg.goalProgress).toEqual([])
+
+    // Persisted column round-trips as an empty array.
+    const row = await prisma.userTrainingAggregates.findUnique({ where: { userId } })
+    expect(row?.goalProgress).toEqual([])
   })
 })

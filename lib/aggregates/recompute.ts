@@ -70,7 +70,12 @@ export async function computeUserAggregates(
           exercise: {
             select: {
               exerciseDefinition: {
-                select: { movementPattern: true, isBodyweight: true, primaryFAUs: true },
+                select: {
+                  movementPattern: true,
+                  intensityClass: true,
+                  isBodyweight: true,
+                  primaryFAUs: true,
+                },
               },
             },
           },
@@ -91,6 +96,7 @@ export async function computeUserAggregates(
         rir: s.rir,
         isWarmup: s.isWarmup,
         movementPattern: s.exercise.exerciseDefinition.movementPattern,
+        intensityClass: s.exercise.exerciseDefinition.intensityClass,
         isBodyweight: s.exercise.exerciseDefinition.isBodyweight,
         primaryFAUs: s.exercise.exerciseDefinition.primaryFAUs,
       })),
@@ -119,6 +125,14 @@ export async function computeUserAggregates(
   const firstSessionAt = qualifyingTimes.length ? new Date(Math.min(...qualifyingTimes)) : null
   const lastSessionAt = qualifyingTimes.length ? new Date(Math.max(...qualifyingTimes)) : null
 
+  // Profile inputs for shares (ratioTargets) and goal_progress (goalSentences).
+  // Absent profile => default preset shares and no goal_progress.
+  const profile = await prisma.userTrainingProfile.findUnique({
+    where: { userId },
+    select: { ratioTargets: true, goalSentences: true },
+  })
+  const ratioTargets = normalizeRatioTargets(profile?.ratioTargets)
+
   return computeAggregates(
     {
       now,
@@ -128,9 +142,21 @@ export async function computeUserAggregates(
         lastSessionAt,
         qualifyingSessionsTotal: qualifyingTimes.length,
       },
+      ratioTargets,
+      goals: profile?.goalSentences ?? [],
     },
     opts
   )
+}
+
+/** Coerce a stored ratioTargets JSON blob into a numeric FAU->weight record. */
+function normalizeRatioTargets(value: unknown): Record<string, number> | null {
+  if (value == null || typeof value !== 'object' || Array.isArray(value)) return null
+  const out: Record<string, number> = {}
+  for (const [key, raw] of Object.entries(value as Record<string, unknown>)) {
+    if (typeof raw === 'number' && Number.isFinite(raw) && raw > 0) out[key] = raw
+  }
+  return Object.keys(out).length > 0 ? out : null
 }
 
 /**
@@ -158,6 +184,7 @@ export async function recomputeUserAggregates(
     dataMaturity: aggregates.dataMaturity,
     perFau: toJson(aggregates.perFau),
     perMovementCalibration: toJson(aggregates.perMovementCalibration),
+    goalProgress: toJson(aggregates.goalProgress),
   }
 
   await prisma.userTrainingAggregates.upsert({

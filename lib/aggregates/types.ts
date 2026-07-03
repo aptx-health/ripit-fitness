@@ -10,9 +10,18 @@
 
 export type DataMaturity = 'cold_start' | 'partial' | 'established'
 
+/** Pre-chewed balance label for a FAU; omitted (undefined) when low_data. */
+export type FauStatus = 'neglected' | 'balanced' | 'over'
+
 /** One entry per FAU with at least one effective set in the trailing 8 weeks. */
 export interface PerFauAggregate {
   fau: string
+  /** Days since the most recent qualifying session with an effective set for
+   * this FAU; null when no such session falls in the detail window. */
+  last_session_days_ago: number | null
+  /** Days since the most recent session-relative-heavy session for this FAU;
+   * null when never heavy in the window (see lib/learning/weekly-intent). */
+  last_heavy_days_ago: number | null
   /** Effective (non-warmup) sets attributed to this FAU's primary muscles, rolling 7d. */
   rolling_7d_sets: number
   /** Effective sets, rolling 14d. */
@@ -25,10 +34,41 @@ export interface PerFauAggregate {
    */
   baseline_weekly_sets: number | null
   /**
+   * Target share of total effective volume, derived from the user's
+   * `ratioTargets` (default preset weight 1.0 per FAU when unset), normalized
+   * over the emitted (present) FAUs so shares sum to 1.
+   */
+  target_share: number
+  /** This FAU's share of total rolling-14d effective sets (0 when 14d volume is 0). */
+  actual_14d_share: number
+  /** `target_share - actual_14d_share`; positive = under-trained vs target. */
+  deficit_share: number
+  /**
    * Whole-body low-data flag (identical across all FAUs on a row): true when
    * the rolling 14d window holds < 3 qualifying sessions or < 20 effective sets.
    */
   low_data: boolean
+  /** Pre-chewed balance label; omitted (undefined) whenever `low_data` is true. */
+  status?: FauStatus
+}
+
+/** e1RM trend classification for a goal (spec §goal_progress). */
+export type GoalTrend = 'progressing' | 'stalled' | 'regressing' | 'new'
+
+/** One entry per interpretable goal sentence (mapped to a movement pattern). */
+export interface GoalProgress {
+  /** The goal sentence (pass-through from the profile). */
+  goal: string
+  /** How the goal was mapped to a measurable signal. */
+  interpretation: string
+  /** Last <= 5 top-set weights (lbs) for the mapped pattern, oldest -> newest. */
+  recent_top_sets_lbs: number[]
+  /** Trend classified from the per-session e1RM (Epley) series; `"new"` when
+   * fewer than `goalProgressMinWeeks` distinct weeks were observed. */
+  trend: GoalTrend
+  /** Distinct rolling 7-day buckets (floor(days_ago / 7)) with an observation
+   * in the calibration window. */
+  weeks_observed: number
 }
 
 /** A single timestamped top-set observation for a movement pattern. */
@@ -74,6 +114,7 @@ export interface TrainingAggregates {
   dataMaturity: DataMaturity
   perFau: PerFauAggregate[]
   perMovementCalibration: MovementCalibration[]
+  goalProgress: GoalProgress[]
 }
 
 // ---------------------------------------------------------------------------
@@ -90,6 +131,9 @@ export interface AggregateSetInput {
   isWarmup: boolean
   /** ExerciseDefinition.movementPattern; null when untagged (excluded from calibration). */
   movementPattern: string | null
+  /** ExerciseDefinition.intensityClass ('heavy'|'moderate'|'light'); cold-start
+   * fallback signal for session-relative heaviness. */
+  intensityClass: string | null
   /** ExerciseDefinition.isBodyweight; bodyweight weights are excluded from EWMAs. */
   isBodyweight: boolean
   /** ExerciseDefinition.primaryFAUs; sets attribute to these for FAU volume. */
@@ -113,6 +157,12 @@ export interface ComputeInput {
     lastSessionAt: Date | null
     qualifyingSessionsTotal: number
   }
+  /** Per-FAU ratio targets (from the profile); null/absent = default preset
+   * (uniform weight 1.0). Drives `target_share` / `deficit_share` / `status`. */
+  ratioTargets?: Record<string, number> | null
+  /** Goal sentences (from the profile); each interpretable one yields a
+   * `goal_progress[]` entry. Absent/empty = no goal_progress. */
+  goals?: string[]
 }
 
 /**
@@ -148,4 +198,11 @@ export interface AggregatesOptions {
   establishedMinSessions: number
   /** data_maturity / ACR: minimum first-session span (days) for established / non-null ACR. */
   maturityMinSpanDays: number
+  /** per_fau status: |deficit_share| within this band is 'balanced'; above =>
+   * 'neglected' (deficit > band) or 'over' (deficit < -band). */
+  fauStatusDeadband: number
+  /** goal_progress: relative e1RM change within +/- this band is 'stalled'. */
+  goalTrendStallBand: number
+  /** goal_progress: below this many distinct observed weeks => trend 'new'. */
+  goalProgressMinWeeks: number
 }
