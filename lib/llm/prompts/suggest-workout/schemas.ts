@@ -10,9 +10,10 @@ export type { WeeklyIntent }
  * Zod schemas for the Suggest Workout LLM call.
  *
  * Input side: `suggestWorkoutPayloadSchema` validates the training-state
- * builder's output (locked contract — issue #877 comment) BEFORE we spend
- * LLM tokens on it. It is deliberately tolerant of extra keys so the
- * payload can grow without breaking the prompt layer.
+ * builder's output (authoritative contract — docs/SUGGEST_PAYLOAD_SPEC.md v2,
+ * which supersedes the historical #877 comment) BEFORE we spend LLM tokens on
+ * it. It is deliberately tolerant of extra keys so the payload can grow
+ * without breaking the prompt layer.
  *
  * Output side: `buildSuggestionResponseSchema` produces a per-request
  * schema whose refinement messages are written FOR THE MODEL — the LLM
@@ -91,31 +92,65 @@ export const perFauStateSchema = z.object({
   last_heavy_days_ago: z.number().nullable(),
   rolling_7d_sets: z.number(),
   rolling_14d_sets: z.number(),
+  /** Qualifying sessions in rolling 14d with >= 1 effective set for this FAU. */
+  sessions_14d: z.number(),
+  /** Trailing-8-week median weekly effective sets; null until >= 2 non-zero weeks. */
+  baseline_weekly_sets: z.number().nullable(),
   target_share: z.number(),
   actual_14d_share: z.number(),
   /** Positive = under-trained relative to target. */
   deficit_share: z.number(),
-  status: z.enum(['neglected', 'balanced', 'over']),
+  /** Whole-body low-data flag (identical across FAUs on a row). */
+  low_data: z.boolean(),
+  /**
+   * Pre-chewed balance label. OMITTED (key absent) whenever `low_data` is true
+   * (spec rule 12) — a cheap model echoes whatever label it is handed, so we
+   * suppress it under low data rather than emit a misleading one.
+   */
+  status: z.enum(['neglected', 'balanced', 'over']).optional(),
+})
+
+export const calibrationObservationSchema = z.object({
+  weight_lbs: z.number(),
+  days_ago: z.number(),
 })
 
 export const movementCalibrationSchema = z.object({
   movement_pattern: z.string(),
   current_ewma_top_weight_lbs: z.number(),
-  recent_observations: z.array(z.number()),
+  /** Days since the observation the EWMA was last updated with (#907). */
+  estimate_staleness_days: z.number(),
+  // v2 breaking shape change: timestamped observations. A bare-number array is
+  // indistinguishable between "5 sessions in 12 days" and "5 in 3 months".
+  recent_observations: z.array(calibrationObservationSchema),
   typical_rep_range: z.string(),
-  // Nullable (deviation from the #877 sample, which showed a bare number):
-  // RPE logging is opt-in, so the builder cannot always produce one.
+  // Nullable (amendment 2): RPE/RIR logging is opt-in, so the builder cannot
+  // always produce an effort figure.
   typical_rpe: z.number().nullable(),
   last_session_days_ago: z.number(),
 })
 
 export const weeklyIntentStatusSchema = z.object({
   intent_summary: z.string(),
-  satisfied_this_week: z.boolean(),
-  /** Populated iff satisfied_this_week === true (spec rule 3). */
+  // v2 rename + semantics: satisfaction is a rolling 7-day window ending at
+  // `now`, not the Mon-Sun calendar week (M16 decision 3).
+  satisfied_last_7d: z.boolean(),
+  /** Populated iff satisfied_last_7d === true (spec rule 3). */
   evidence: z.string().optional(),
-  /** Populated iff satisfied_this_week === false (spec rule 4). */
+  /** Populated iff satisfied_last_7d === false (spec rule 4). */
   last_satisfied_days_ago: z.number().nullable().optional(),
+})
+
+export const recentSessionSchema = z.object({
+  days_ago: z.number(),
+  /** completedAt - startedAt, rounded to minutes; null when startedAt missing. */
+  duration_min: z.number().nullable(),
+  /** Effective (non-warmup) sets, incl. abandoned sessions. */
+  total_sets: z.number(),
+  abandoned: z.boolean(),
+  /** OMITTED (key absent) when not logged — no sessionRpe column exists yet. */
+  session_rpe: z.number().optional(),
+  notes: z.array(z.object({ exercise: z.string(), text: z.string() })),
 })
 
 export const goalProgressSchema = z.object({
@@ -145,10 +180,22 @@ export const preferencesSummarySchema = z.object({
 export const trainingStateSchema = z.object({
   now: z.string(),
   today_dow: z.string(),
+  // ---- whole-body freshness & load (v2, data-audit findings 1-3, 6) ----
+  sessions_last_7d: z.number(),
+  /** null when no sessions ever. */
+  days_since_any_session: z.number().nullable(),
+  /** null until >= 2 qualifying (non-zero) weeks. */
+  total_weekly_sets_baseline: z.number().nullable(),
+  /** null until the trailing-28d denominator is meaningful. */
+  acute_chronic_ratio: z.number().nullable(),
+  /** { days } iff days_since_any_session >= 10 and >= 3 prior sessions; else null. */
+  detraining_gap: z.object({ days: z.number() }).nullable(),
   per_fau: z.array(perFauStateSchema),
   per_movement_calibration: z.array(movementCalibrationSchema),
   weekly_intent_status: z.array(weeklyIntentStatusSchema),
   goal_progress: z.array(goalProgressSchema),
+  /** Last <= 10 qualifying sessions, newest first (v2). */
+  recent_sessions: z.array(recentSessionSchema),
   recent_feedback: recentFeedbackSchema,
   preferences_summary: preferencesSummarySchema,
 })
@@ -168,7 +215,12 @@ export const candidateExerciseSchema = z.object({
 })
 export type CandidateExercise = z.infer<typeof candidateExerciseSchema>
 
+export const DATA_MATURITIES = ['cold_start', 'partial', 'established'] as const
+export type DataMaturity = (typeof DATA_MATURITIES)[number]
+
 export const suggestWorkoutPayloadSchema = z.object({
+  /** Drives cold-start prompt instruction + honest option relabeling (v2). */
+  data_maturity: z.enum(DATA_MATURITIES),
   durable_profile: durableProfileSchema,
   ephemeral_context: ephemeralContextSchema,
   training_state: trainingStateSchema,
