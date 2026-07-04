@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { DemographicsStep } from './steps/DemographicsStep'
+import { FocusStep } from './steps/FocusStep'
 import { GoalsStep } from './steps/GoalsStep'
 import { InjuriesStep } from './steps/InjuriesStep'
 import { RhythmStep } from './steps/RhythmStep'
@@ -120,6 +121,9 @@ export function GoalsWizard({
         <div className="flex-1 pb-40">
           {step.id === 'goals' && (
             <GoalsStep answers={answers} patchLocal={patchLocal} />
+          )}
+          {step.id === 'focus' && (
+            <FocusStep answers={answers} patchLocal={patchLocal} />
           )}
           {step.id === 'rhythm' && (
             <RhythmStep answers={answers} patchLocal={patchLocal} />

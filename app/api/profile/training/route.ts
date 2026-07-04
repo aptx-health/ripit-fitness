@@ -15,8 +15,9 @@ import {
 /**
  * Fields the Goals Wizard is allowed to write. Deliberately excludes
  * interview-owned (`goalSentences`, `weeklyIntent`) and separately-owned
- * fields (`equipmentAvailable` -> #927, `ratioTargets` -> #928,
- * `bannedExerciseIds`). Keeping `goalSentences` empty here is what lets the
+ * fields (`equipmentAvailable` -> #927, `ratioTargets` -> muscle-balance
+ * settings, `bannedExerciseIds`). `fauImportance`/`fauImportancePreset` ARE
+ * written here (importance presets, #928). Keeping `goalSentences` empty here is what lets the
  * training-state builder synthesize cold-start sentences from these fields
  * (see docs/SUGGEST_PAYLOAD_SPEC.md § Goal-sentence synthesis).
  */
@@ -24,6 +25,7 @@ const WRITABLE_FIELDS = [
   'goalCategories',
   'otherActivities',
   'fauImportance',
+  'fauImportancePreset',
   'defaultIntensityPreference',
   'targetSessionsPerWeek',
   'targetMinutesPerSession',

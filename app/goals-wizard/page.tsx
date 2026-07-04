@@ -23,6 +23,7 @@ export default async function GoalsWizardPage() {
     goalCategories: profile.goalCategories,
     otherActivities: profile.otherActivities,
     fauImportance: profile.fauImportance,
+    fauImportancePreset: profile.fauImportancePreset,
     defaultIntensityPreference: profile.defaultIntensityPreference,
     targetSessionsPerWeek: profile.targetSessionsPerWeek,
     targetMinutesPerSession: profile.targetMinutesPerSession,
