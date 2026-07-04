@@ -30,6 +30,7 @@ function buildTestPayload(
 ): SuggestWorkoutPayload {
   const candidateCount = overrides.candidateCount ?? 12
   const payload: SuggestWorkoutPayload = {
+    data_maturity: 'established',
     durable_profile: {
       goal_sentences: overrides.goalSentences ?? ['Upper-body hypertrophy focus'],
       weekly_intent: [
@@ -53,6 +54,11 @@ function buildTestPayload(
     training_state: {
       now: '2026-06-29T18:00:00Z',
       today_dow: 'monday',
+      sessions_last_7d: 3,
+      days_since_any_session: 3,
+      total_weekly_sets_baseline: 58,
+      acute_chronic_ratio: 1.1,
+      detraining_gap: null,
       per_fau: [
         {
           fau: 'chest',
@@ -60,9 +66,12 @@ function buildTestPayload(
           last_heavy_days_ago: 3,
           rolling_7d_sets: 12,
           rolling_14d_sets: 21,
+          sessions_14d: 4,
+          baseline_weekly_sets: 11,
           target_share: 0.1,
           actual_14d_share: 0.07,
           deficit_share: 0.03,
+          low_data: false,
           status: 'neglected',
         },
         {
@@ -71,9 +80,12 @@ function buildTestPayload(
           last_heavy_days_ago: null,
           rolling_7d_sets: 0,
           rolling_14d_sets: 4,
+          sessions_14d: 1,
+          baseline_weekly_sets: null,
           target_share: 0.08,
           actual_14d_share: 0.03,
           deficit_share: 0.05,
+          low_data: false,
           status: 'neglected',
         },
       ],
@@ -83,7 +95,14 @@ function buildTestPayload(
             {
               movement_pattern: 'horizontal_push',
               current_ewma_top_weight_lbs: 192,
-              recent_observations: [185, 190, 190, 195, 195],
+              estimate_staleness_days: 3,
+              recent_observations: [
+                { weight_lbs: 185, days_ago: 12 },
+                { weight_lbs: 190, days_ago: 9 },
+                { weight_lbs: 190, days_ago: 7 },
+                { weight_lbs: 195, days_ago: 5 },
+                { weight_lbs: 195, days_ago: 3 },
+              ],
               typical_rep_range: '5-8',
               typical_rpe: 8,
               last_session_days_ago: 3,
@@ -92,11 +111,20 @@ function buildTestPayload(
       weekly_intent_status: [
         {
           intent_summary: 'At least 1 heavy legs session per week',
-          satisfied_this_week: false,
+          satisfied_last_7d: false,
           last_satisfied_days_ago: 8,
         },
       ],
       goal_progress: [],
+      recent_sessions: [
+        {
+          days_ago: 3,
+          duration_min: 52,
+          total_sets: 18,
+          abandoned: false,
+          notes: [],
+        },
+      ],
       recent_feedback: {
         suggestions_last_30d: 0,
         swap_rate: 0,
@@ -185,6 +213,59 @@ describe('few-shot examples', () => {
       prioritize: 'biking tomorrow',
     })
     expect(selectFewShotExample(payload).archetype).toBe('cyclist')
+  })
+})
+
+describe('suggestWorkoutPayloadSchema (v2 input contract)', () => {
+  // A loosely-typed mirror of the payload so hand-broken fixtures can mutate
+  // nested fields without `any`. buildTestPayload has no omitted (undefined)
+  // keys, so the JSON round-trip is lossless.
+  type LooseRecord = Record<string, unknown>
+  interface MutablePayload extends LooseRecord {
+    training_state: {
+      per_fau: LooseRecord[]
+      per_movement_calibration: LooseRecord[]
+      weekly_intent_status: LooseRecord[]
+    } & LooseRecord
+    candidate_exercises: unknown[]
+  }
+  const clone = (): MutablePayload =>
+    JSON.parse(JSON.stringify(buildTestPayload())) as MutablePayload
+
+  it('accepts a well-formed payload', () => {
+    expect(suggestWorkoutPayloadSchema.safeParse(buildTestPayload()).success).toBe(true)
+  })
+
+  it('rejects a payload missing the top-level data_maturity', () => {
+    const p = clone()
+    delete p.data_maturity
+    expect(suggestWorkoutPayloadSchema.safeParse(p).success).toBe(false)
+  })
+
+  it('rejects a per_fau entry with an out-of-vocabulary status', () => {
+    const p = clone()
+    p.training_state.per_fau[0].status = 'super-neglected'
+    expect(suggestWorkoutPayloadSchema.safeParse(p).success).toBe(false)
+  })
+
+  it('rejects the retired bare-number recent_observations shape', () => {
+    const p = clone()
+    p.training_state.per_movement_calibration[0].recent_observations = [185, 190, 195]
+    expect(suggestWorkoutPayloadSchema.safeParse(p).success).toBe(false)
+  })
+
+  it('rejects the renamed satisfied_this_week (must be satisfied_last_7d)', () => {
+    const p = clone()
+    const status = p.training_state.weekly_intent_status[0]
+    status.satisfied_this_week = status.satisfied_last_7d
+    delete status.satisfied_last_7d
+    expect(suggestWorkoutPayloadSchema.safeParse(p).success).toBe(false)
+  })
+
+  it('rejects an empty candidate list', () => {
+    const p = clone()
+    p.candidate_exercises = []
+    expect(suggestWorkoutPayloadSchema.safeParse(p).success).toBe(false)
   })
 })
 
