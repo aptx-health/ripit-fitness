@@ -141,6 +141,32 @@ export function renderTrainingState(payload: SuggestWorkoutPayload): string {
 
   sections.push(`TRAINING STATE (as of ${t.today_dow} ${t.now.slice(0, 10)})`)
 
+  // Whole-body freshness & load (v2). Rendered here so the new fields are not
+  // silently dropped by the tolerant input schema.
+  const freshness: string[] = [
+    `Sessions last 7d: ${t.sessions_last_7d}.`,
+    t.days_since_any_session === null
+      ? 'No sessions logged yet.'
+      : `Last session ${formatDays(t.days_since_any_session)} ago.`,
+  ]
+  if (t.total_weekly_sets_baseline !== null) {
+    freshness.push(`Baseline ~${Math.round(t.total_weekly_sets_baseline)} sets/week.`)
+  }
+  if (t.acute_chronic_ratio !== null) {
+    freshness.push(`Acute:chronic load ratio ${t.acute_chronic_ratio.toFixed(2)}.`)
+  }
+  if (t.detraining_gap !== null) {
+    freshness.push(
+      `Detraining gap: ${t.detraining_gap.days}d off — ramp loads (~85-90% of prior) and reduce volume.`,
+    )
+  }
+  if (payload.data_maturity === 'cold_start') {
+    freshness.push(
+      'COLD START: little to no history. Plan from goals + candidates; keep rationales free of history claims.',
+    )
+  }
+  sections.push(freshness.join(' '))
+
   const fauLines = [
     'Muscle groups — sets and share of total volume vs target:',
     'muscle | last trained | last heavy | sets 7d | sets 14d | target | actual | deficit(+=under) | status',
@@ -154,7 +180,9 @@ export function renderTrainingState(payload: SuggestWorkoutPayload): string {
         formatShare(f.target_share),
         formatShare(f.actual_14d_share),
         formatDeficit(f.deficit_share),
-        f.status,
+        // status is omitted under low_data (spec rule 12) — show a marker so
+        // the column stays aligned without inventing a label.
+        f.status ?? 'low-data',
       ].join(' | '),
     ),
   ]
@@ -164,7 +192,7 @@ export function renderTrainingState(payload: SuggestWorkoutPayload): string {
     const calLines = [
       'Movement calibration (top working weight, lb):',
       ...t.per_movement_calibration.map((c) =>
-        `${c.movement_pattern}: ~${c.current_ewma_top_weight_lbs} (recent ${c.recent_observations.join(',')}), ${c.typical_rep_range} reps${c.typical_rpe !== null ? ` @ RPE ${c.typical_rpe}` : ''}, last ${formatDays(c.last_session_days_ago)} ago`,
+        `${c.movement_pattern}: ~${c.current_ewma_top_weight_lbs} (recent ${c.recent_observations.map((o) => o.weight_lbs).join(',')}), ${c.typical_rep_range} reps${c.typical_rpe !== null ? ` @ RPE ${c.typical_rpe}` : ''}, last ${formatDays(c.last_session_days_ago)} ago`,
       ),
     ]
     sections.push(calLines.join('\n'))
@@ -176,9 +204,9 @@ export function renderTrainingState(payload: SuggestWorkoutPayload): string {
 
   if (t.weekly_intent_status.length > 0) {
     const intentLines = [
-      'Weekly intent status (Mon-Sun week):',
+      'Weekly intent status (rolling 7-day window):',
       ...t.weekly_intent_status.map((s) => {
-        if (s.satisfied_this_week) {
+        if (s.satisfied_last_7d) {
           return `- satisfied: ${s.intent_summary}${s.evidence ? ` (${s.evidence})` : ''}`
         }
         const ago =
@@ -201,6 +229,24 @@ export function renderTrainingState(payload: SuggestWorkoutPayload): string {
       ),
     ]
     sections.push(goalLines.join('\n'))
+  }
+
+  if (t.recent_sessions.length > 0) {
+    const sessionLines = [
+      'Recent sessions (newest first):',
+      ...t.recent_sessions.map((s) => {
+        const bits = [`${formatDays(s.days_ago)} ago`, `${s.total_sets} sets`]
+        if (s.duration_min !== null) bits.push(`${s.duration_min} min`)
+        if (s.abandoned) bits.push('abandoned')
+        if (s.session_rpe !== undefined) bits.push(`session RPE ${s.session_rpe}`)
+        const notes =
+          s.notes.length > 0
+            ? ` — notes: ${s.notes.map((n) => `${n.exercise}: ${n.text}`).join('; ')}`
+            : ''
+        return `- ${bits.join(', ')}${notes}`
+      }),
+    ]
+    sections.push(sessionLines.join('\n'))
   }
 
   const fb = t.recent_feedback

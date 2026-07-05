@@ -44,9 +44,19 @@ export async function POST(
       )
     }
 
+    const completedAt = new Date()
+    const durationSeconds = lookup.completion.startedAt
+      ? Math.max(
+          0,
+          Math.round(
+            (completedAt.getTime() - lookup.completion.startedAt.getTime()) / 1000
+          )
+        )
+      : null
+
     const completion = await prisma.workoutCompletion.update({
       where: { id: completionId },
-      data: { status: 'completed', completedAt: new Date() },
+      data: { status: 'completed', completedAt, durationSeconds },
       select: { id: true, completedAt: true, status: true },
     })
 
