@@ -205,4 +205,10 @@ export interface AggregatesOptions {
   goalTrendStallBand: number
   /** goal_progress: below this many distinct observed weeks => trend 'new'. */
   goalProgressMinWeeks: number
+  /** last_heavy: top-set e1RM >= this fraction of the movement EWMA is heavy
+   * (mirrors lib/learning/weekly-intent HEAVY_E1RM_FRACTION; #937-tunable). */
+  heavyE1rmFraction: number
+  /** last_heavy: logged effort (RPE-equiv) >= this counts as heavy regardless of
+   * load (mirrors HEAVY_EFFORT_RPE; #937-tunable). */
+  heavyEffortCutoff: number
 }

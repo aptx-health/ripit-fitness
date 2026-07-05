@@ -5,6 +5,10 @@ import { recomputeUserAggregates } from '@/lib/aggregates/recompute'
 // Shared code from the repo root lib/ — resolved via the @/* path alias
 // (see tsconfig.json). Proves worker containers can consume lib/ modules.
 import { logger } from '@/lib/logger'
+// TuningConfig read path (#937). MUST stay zod-free — it is reachable here in
+// the worker image; write-time validation lives in the admin API route.
+import { toAggregatesOptions } from '@/lib/tuning/config'
+import { loadTuningConfig } from '@/lib/tuning/store'
 import { cloneStrengthProgramData, type ProgramCloneJob } from './cloning'
 
 const QUEUE_NAME = 'program-clone-jobs'
@@ -212,7 +216,10 @@ async function processAggregatesJob(job: Job<AggregatesRecomputeJob>): Promise<v
     throw new Error('Invalid aggregates job payload: missing userId')
   }
   console.log(`[aggregates ${job.id}] recomputing for user=${userId}`)
-  await recomputeUserAggregates(prisma, userId)
+  // Apply admin-editable tuning knobs (#937); a missing/malformed config row
+  // falls back to code defaults inside loadTuningConfig.
+  const tuning = await loadTuningConfig(prisma)
+  await recomputeUserAggregates(prisma, userId, undefined, toAggregatesOptions(tuning))
   console.log(`[aggregates ${job.id}] done user=${userId}`)
 }
 

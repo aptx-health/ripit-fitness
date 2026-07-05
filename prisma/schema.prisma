@@ -699,3 +699,17 @@ model UserTrainingAggregates {
 
   @@index([computedAt])
 }
+
+/// Singleton row holding the admin-editable learning-pipeline knobs (issue
+/// #937). One row (id = "singleton"). `values` is a JSON blob of the TuningConfig
+/// knob set (lib/tuning/config.ts). Writes are zod-validated at the admin API
+/// layer; the read path (lib/tuning/store.ts, reachable from the clone-worker)
+/// parses the blob with per-field code-default fallback and NO zod import, so a
+/// malformed/missing row never breaks the pipeline.
+model TuningConfig {
+  id        String   @id
+  values    Json
+  updatedAt DateTime @updatedAt
+  /// User id of the admin who last saved the config (audit trail only).
+  updatedBy String?
+}
