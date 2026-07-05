@@ -11,6 +11,7 @@ function makeProfile(o: Partial<UserTrainingProfileDTO> = {}): UserTrainingProfi
     goalSentences: [],
     weeklyIntent: [],
     equipmentAvailable: [],
+    equipmentAvailableSet: false,
     bannedExerciseIds: [],
     ratioTargets: getDefaultMuscleBalanceTargets(),
     defaultIntensityPreference: null,

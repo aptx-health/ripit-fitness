@@ -163,8 +163,8 @@ exports[`buildTrainingStatePayload — golden archetype canaries > assembles a v
     "banned_exercise_ids": [],
     "default_intensity_preference": null,
     "equipment_available": [
-      "dumbbells",
-      "machines",
+      "dumbbell",
+      "machine",
       "bodyweight",
     ],
     "goal_sentences": [
@@ -664,11 +664,11 @@ exports[`buildTrainingStatePayload — golden archetype canaries > assembles a v
     "default_intensity_preference": "hypertrophy",
     "equipment_available": [
       "barbell",
-      "dumbbells",
+      "dumbbell",
       "cable",
-      "machines",
-      "bands",
+      "machine",
       "bodyweight",
+      "bands",
     ],
     "goal_sentences": [
       "Balanced hypertrophy everywhere",
@@ -1528,11 +1528,11 @@ exports[`buildTrainingStatePayload — golden archetype canaries > assembles a v
     "default_intensity_preference": "hypertrophy",
     "equipment_available": [
       "barbell",
-      "dumbbells",
+      "dumbbell",
       "cable",
-      "machines",
-      "bands",
+      "machine",
       "bodyweight",
+      "bands",
     ],
     "goal_sentences": [
       "Upper-body hypertrophy focus",
@@ -2276,11 +2276,11 @@ exports[`buildTrainingStatePayload — golden archetype canaries > assembles a v
     "default_intensity_preference": "balanced",
     "equipment_available": [
       "barbell",
-      "dumbbells",
+      "dumbbell",
       "cable",
-      "machines",
-      "bands",
+      "machine",
       "bodyweight",
+      "bands",
     ],
     "goal_sentences": [
       "Get back into a routine",
@@ -2812,11 +2812,11 @@ exports[`buildTrainingStatePayload — golden archetype canaries > assembles a v
     "default_intensity_preference": "strength",
     "equipment_available": [
       "barbell",
-      "dumbbells",
+      "dumbbell",
       "cable",
-      "machines",
-      "bands",
+      "machine",
       "bodyweight",
+      "bands",
     ],
     "goal_sentences": [
       "Add 50 lbs to my squat this year",

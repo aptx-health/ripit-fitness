@@ -13,18 +13,51 @@ export const EQUIPMENT_AVAILABILITY_VALUES = Object.keys(
 const EQUIPMENT_VALUE_SET = new Set(EQUIPMENT_AVAILABILITY_VALUES)
 
 /**
- * Normalize an equipmentAvailable list: trim, drop unknown values, dedupe,
- * and return in canonical enum order. An empty result means "no equipment
- * record" — the training-state builder degrades to assuming a full
- * commercial gym (SUGGEST_PAYLOAD_SPEC data_maturity-style degradation).
+ * Loose equipment vocabulary reconciled to canonical `EQUIPMENT_LABELS` keys:
+ * plurals (`dumbbells`), spacing, and the `bands`/`resistance_band` split. This
+ * mirrors the intent of `lib/suggest/candidates.ts` EQUIPMENT_ALIASES so the
+ * durable profile the planner reads and the settings checklist agree on one
+ * spelling — without it, `normalizeEquipmentAvailability` would silently DROP
+ * legitimate stored values (e.g. the synthetic seeder's `dumbbells`), stranding
+ * the candidate filter. Band aliases collapse onto `resistance_band` (the value
+ * the exercise catalog actually uses); candidates.ts re-aliases that to its own
+ * `bands` token when matching.
+ */
+const EQUIPMENT_ALIASES: Record<string, string> = {
+  dumbbells: 'dumbbell',
+  machines: 'machine',
+  kettlebells: 'kettlebell',
+  cables: 'cable',
+  bodyweights: 'bodyweight',
+  'body weight': 'bodyweight',
+  'body only': 'bodyweight',
+  band: 'resistance_band',
+  'resistance band': 'resistance_band',
+}
+
+function canonicalizeEquipmentToken(raw: string): string {
+  const trimmed = raw.trim()
+  // An exact canonical key passes through untouched (preserves enum parity —
+  // e.g. `bands` stays `bands`, not folded into `resistance_band`).
+  if (EQUIPMENT_VALUE_SET.has(trimmed)) return trimmed
+  const lower = trimmed.toLowerCase()
+  return EQUIPMENT_ALIASES[lower] ?? lower.replace(/[\s-]/g, '_')
+}
+
+/**
+ * Normalize an equipmentAvailable list: reconcile loose vocab to canonical
+ * keys, drop unknown values, dedupe, and return in canonical enum order. An
+ * empty result means "no equipment record" — the training-state builder
+ * degrades to assuming a full commercial gym (SUGGEST_PAYLOAD_SPEC
+ * data_maturity-style degradation).
  */
 export function normalizeEquipmentAvailability(value: unknown): string[] {
   if (!Array.isArray(value)) return []
   const provided = new Set<string>()
   for (const raw of value) {
     if (typeof raw !== 'string') continue
-    const trimmed = raw.trim()
-    if (EQUIPMENT_VALUE_SET.has(trimmed)) provided.add(trimmed)
+    const token = canonicalizeEquipmentToken(raw)
+    if (EQUIPMENT_VALUE_SET.has(token)) provided.add(token)
   }
   return EQUIPMENT_AVAILABILITY_VALUES.filter((v) => provided.has(v))
 }
