@@ -20,12 +20,12 @@ import {
   gapDecayedEwma,
 } from '@/lib/learning/math'
 import {
-  type HeavyThresholds,
+  determineMovementHeavy,
   HEAVY_E1RM_FRACTION,
   HEAVY_EFFORT_RPE,
+  type HeavyThresholds,
   type MovementEwma,
   type MovementEwmaMap,
-  determineMovementHeavy,
 } from '@/lib/learning/weekly-intent'
 import { normalizeWeightToLbs } from '@/lib/stats/exercise-performance'
 import type {

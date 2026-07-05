@@ -66,17 +66,17 @@ import {
   type MovementEwmaMap,
 } from '@/lib/learning/weekly-intent'
 import {
-  type TuningConfig,
-  toAggregatesOptions,
-  toHeavyOptions,
-} from '@/lib/tuning/config'
-import { loadTuningConfig } from '@/lib/tuning/store'
-import {
   type SuggestWorkoutPayload,
   suggestWorkoutPayloadSchema,
 } from '@/lib/llm/prompts/suggest-workout/schemas'
 import type { WeeklyIntent } from '@/lib/llm/prompts/suggest-workout/types'
 import { normalizeWeightToLbs } from '@/lib/stats/exercise-performance'
+import {
+  type TuningConfig,
+  toAggregatesOptions,
+  toHeavyOptions,
+} from '@/lib/tuning/config'
+import { loadTuningConfig } from '@/lib/tuning/store'
 import {
   normalizeUserTrainingProfile,
   type UserTrainingProfileDTO,
