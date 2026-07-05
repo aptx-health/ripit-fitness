@@ -136,6 +136,13 @@ export type UserTrainingProfileDTO = {
   goalSentences: string[]
   weeklyIntent: string[]
   equipmentAvailable: string[]
+  /**
+   * Whether the user has an explicit equipment record. `false` means "no
+   * record" and the planner assumes a full commercial gym; `true` means the
+   * `equipmentAvailable` list is the user's real selection, even if empty
+   * (owns almost nothing). See #927.
+   */
+  equipmentAvailableSet: boolean
   bannedExerciseIds: string[]
   ratioTargets: MuscleBalanceTargets
   defaultIntensityPreference: IntensityPreference | null
@@ -318,6 +325,7 @@ type ProfileLike = {
   goalSentences: string[]
   weeklyIntent: string[]
   equipmentAvailable: string[]
+  equipmentAvailableSet?: boolean
   bannedExerciseIds: string[]
   ratioTargets: Prisma.JsonValue
   defaultIntensityPreference: string | null
@@ -352,6 +360,11 @@ export function normalizeUserTrainingProfile(
     equipmentAvailable: normalizeEquipmentAvailability(
       profile?.equipmentAvailable
     ),
+    // A non-empty list always counts as "set" — this backfills legacy rows
+    // written before the flag existed (whose column defaults to false).
+    equipmentAvailableSet:
+      (profile?.equipmentAvailableSet ?? false) ||
+      normalizeEquipmentAvailability(profile?.equipmentAvailable).length > 0,
     bannedExerciseIds: normalizeStringList(
       profile?.bannedExerciseIds,
       MAX_BANNED_EXERCISE_IDS,
@@ -478,11 +491,13 @@ export async function updateUserTrainingProfile(
     )
   }
   if ('equipmentAvailable' in update) {
-    // Filtered to canonical ExerciseDefinition.equipment values; an empty
-    // list means "no equipment record" (builder assumes full commercial gym).
+    // Filtered to canonical ExerciseDefinition.equipment values. Writing this
+    // field marks the record as explicitly set, so an intentional empty list
+    // ("I own almost nothing") no longer reads back as "no record → full gym".
     data.equipmentAvailable = normalizeEquipmentAvailability(
       update.equipmentAvailable
     )
+    data.equipmentAvailableSet = true
   }
   if ('bannedExerciseIds' in update) {
     data.bannedExerciseIds = normalizeStringList(

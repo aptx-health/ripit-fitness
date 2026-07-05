@@ -14,6 +14,9 @@ export default async function EquipmentSettingsPage() {
   const profile = await getOrCreateUserTrainingProfile(prisma, user.id)
 
   return (
-    <EquipmentChecklistEditor initialEquipment={profile.equipmentAvailable} />
+    <EquipmentChecklistEditor
+      initialEquipment={profile.equipmentAvailable}
+      initialSet={profile.equipmentAvailableSet}
+    />
   )
 }

@@ -29,6 +29,76 @@ export function normalizeEquipmentAvailability(value: unknown): string[] {
   return EQUIPMENT_AVAILABILITY_VALUES.filter((v) => provided.has(v))
 }
 
+export type EquipmentChecklistGroup = {
+  id: string
+  label: string
+  values: readonly string[]
+}
+
+/**
+ * Curated, grouped layout the settings checklist renders (#927). This is a
+ * subset of {@link EQUIPMENT_AVAILABILITY_VALUES} chosen for what a real user
+ * would recognize and own — every value the exercise database actually uses,
+ * plus a few common items. Niche/duplicate enum values (climbing boards,
+ * `bands` alias of `resistance_band`, chains, sled, etc.) stay in the enum for
+ * `ExerciseDefinition.equipment` validation but are omitted from the UI.
+ *
+ * Enum-parity requirement (issue #927) still holds via
+ * {@link EQUIPMENT_AVAILABILITY_VALUES}: every equipment value remains
+ * representable/normalizable even if it isn't offered as a toggle.
+ */
+export const EQUIPMENT_CHECKLIST_GROUPS: readonly EquipmentChecklistGroup[] = [
+  {
+    id: 'barbells',
+    label: 'Barbells & Bars',
+    values: ['barbell', 'ez_bar', 'trap_bar'],
+  },
+  {
+    id: 'dumbbells',
+    label: 'Dumbbells & Kettlebells',
+    values: ['dumbbell', 'kettlebell'],
+  },
+  {
+    id: 'machines',
+    label: 'Machines & Cables',
+    values: [
+      'cable',
+      'machine',
+      'smith_machine',
+      'functional_trainer',
+      'assisted_pullup_dip',
+    ],
+  },
+  {
+    id: 'benches',
+    label: 'Benches & Racks',
+    values: ['bench', 'incline_bench', 'decline_bench', 'preacher_bench'],
+  },
+  {
+    id: 'bodyweight',
+    label: 'Bodyweight & Bars',
+    values: ['bodyweight', 'pull_up_bar', 'dip_bars', 'suspension_trainer'],
+  },
+  {
+    id: 'accessories',
+    label: 'Bands & Accessories',
+    values: [
+      'resistance_band',
+      'ab_wheel',
+      'foam_roller',
+      'plyo_box',
+      'medicine_ball',
+    ],
+  },
+]
+
+/**
+ * Flat list of the values offered as toggles, in group order. Used as the
+ * "full gym" default when the user has no saved record.
+ */
+export const EQUIPMENT_CHECKLIST_VALUES: readonly string[] =
+  EQUIPMENT_CHECKLIST_GROUPS.flatMap((group) => group.values)
+
 export type EquipmentPresetId =
   | 'commercial_gym'
   | 'home_dumbbells_bands'
@@ -47,40 +117,24 @@ export type EquipmentPreset = {
 export const EQUIPMENT_PRESETS: readonly EquipmentPreset[] = [
   {
     id: 'commercial_gym',
+    // A full commercial gym has every toggle we offer.
     label: 'Commercial Gym',
-    values: [
-      'barbell',
-      'dumbbell',
-      'kettlebell',
-      'cable',
-      'machine',
-      'bodyweight',
-      'bench',
-      'pull_up_bar',
-      'smith_machine',
-      'resistance_band',
-      'ez_bar',
-      'dip_bars',
-      'incline_bench',
-      'decline_bench',
-      'preacher_bench',
-      'ab_wheel',
-      'foam_roller',
-      'weight_belt',
-      'parallel_bars',
-      'roman_chair',
-      'trap_bar',
-      'bands',
-    ],
+    values: [...EQUIPMENT_CHECKLIST_VALUES],
   },
   {
     id: 'home_dumbbells_bands',
     label: 'Home: Dumbbells + Bands',
-    values: ['dumbbell', 'bodyweight', 'resistance_band', 'bands', 'bench'],
+    values: [
+      'dumbbell',
+      'bodyweight',
+      'resistance_band',
+      'bench',
+      'suspension_trainer',
+    ],
   },
   {
     id: 'bodyweight_only',
     label: 'Bodyweight Only',
-    values: ['bodyweight', 'pull_up_bar'],
+    values: ['bodyweight', 'pull_up_bar', 'dip_bars'],
   },
 ]

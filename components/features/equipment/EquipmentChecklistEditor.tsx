@@ -6,26 +6,37 @@ import { useEffect, useRef, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
 import { EQUIPMENT_LABELS } from '@/lib/constants/program-metadata'
 import {
-  EQUIPMENT_AVAILABILITY_VALUES,
+  EQUIPMENT_CHECKLIST_GROUPS,
+  EQUIPMENT_CHECKLIST_VALUES,
   EQUIPMENT_PRESETS,
 } from '@/lib/equipment-availability'
 
 type Props = {
-  /** Saved equipment list. Empty means "no record" — full gym assumed. */
+  /** Saved equipment list (may be empty if the user owns almost nothing). */
   initialEquipment: string[]
+  /**
+   * Whether the user has an explicit equipment record. `false` = no record,
+   * so the planner assumes a full gym and the checklist starts all-on behind
+   * a banner. `true` = show the saved selection verbatim, even if empty.
+   */
+  initialSet: boolean
 }
 
 /**
- * Equipment availability checklist (issue #927). Empty saved list = no
- * record, which the planner treats as "assume full commercial gym", so the
- * unset state renders every toggle ON behind an explanatory banner. The
- * first interaction materializes the full list minus whatever was toggled
- * off, then changes auto-save (debounced).
+ * Equipment availability checklist (issue #927). With no record
+ * (`initialSet === false`), the planner assumes a full commercial gym, so the
+ * unset state renders every toggle ON behind an explanatory banner. The first
+ * interaction materializes the full list minus whatever was toggled off, then
+ * changes auto-save (debounced) and mark the record as set — so an intentional
+ * empty selection persists instead of snapping back to "full gym" on reload.
  */
-export default function EquipmentChecklistEditor({ initialEquipment }: Props) {
-  // null = no saved record (assume full gym)
+export default function EquipmentChecklistEditor({
+  initialEquipment,
+  initialSet,
+}: Props) {
+  // null = no saved record (assume full gym). An empty-but-set record stays [].
   const [selected, setSelected] = useState<string[] | null>(
-    initialEquipment.length > 0 ? initialEquipment : null
+    initialSet ? initialEquipment : null
   )
   const [saveState, setSaveState] = useState<
     'idle' | 'saving' | 'saved' | 'error'
@@ -33,13 +44,13 @@ export default function EquipmentChecklistEditor({ initialEquipment }: Props) {
   const dirtyRef = useRef(false)
 
   const isUnset = selected === null
-  const effective = selected ?? [...EQUIPMENT_AVAILABILITY_VALUES]
+  const effective = selected ?? [...EQUIPMENT_CHECKLIST_VALUES]
 
   const toggle = (value: string) => {
     dirtyRef.current = true
     setSaveState('idle')
     setSelected((current) => {
-      const base = current ?? [...EQUIPMENT_AVAILABILITY_VALUES]
+      const base = current ?? [...EQUIPMENT_CHECKLIST_VALUES]
       return base.includes(value)
         ? base.filter((v) => v !== value)
         : [...base, value]
@@ -125,8 +136,8 @@ export default function EquipmentChecklistEditor({ initialEquipment }: Props) {
         </div>
 
         {/* Checklist */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
+        <div className="space-y-5">
+          <div className="flex items-center justify-between">
             <span className="block text-sm font-semibold text-muted-foreground uppercase tracking-wider">
               Available Equipment
             </span>
@@ -142,38 +153,46 @@ export default function EquipmentChecklistEditor({ initialEquipment }: Props) {
               )}
             </span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {EQUIPMENT_AVAILABILITY_VALUES.map((value) => {
-              const checked = effective.includes(value)
-              return (
-                <button
-                  key={value}
-                  type="button"
-                  role="checkbox"
-                  aria-checked={checked}
-                  aria-label={`${EQUIPMENT_LABELS[value]} available`}
-                  onClick={() => toggle(value)}
-                  className={`flex min-h-11 items-center gap-3 border-2 px-3 py-2 text-left text-sm font-semibold uppercase tracking-wider transition-colors doom-focus-ring ${
-                    checked
-                      ? 'border-primary bg-primary/10 text-foreground'
-                      : 'border-border bg-muted text-muted-foreground hover:border-primary'
-                  }`}
-                >
-                  <span
-                    aria-hidden="true"
-                    className={`flex h-5 w-5 shrink-0 items-center justify-center border-2 ${
-                      checked
-                        ? 'border-primary bg-primary text-primary-foreground'
-                        : 'border-border bg-background'
-                    }`}
-                  >
-                    {checked && <Check size={14} strokeWidth={3} />}
-                  </span>
-                  {EQUIPMENT_LABELS[value]}
-                </button>
-              )
-            })}
-          </div>
+
+          {EQUIPMENT_CHECKLIST_GROUPS.map((group) => (
+            <div key={group.id}>
+              <span className="block text-xs font-semibold text-muted-foreground/80 mb-2 uppercase tracking-wider">
+                {group.label}
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {group.values.map((value) => {
+                  const checked = effective.includes(value)
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      role="checkbox"
+                      aria-checked={checked}
+                      aria-label={`${EQUIPMENT_LABELS[value]} available`}
+                      onClick={() => toggle(value)}
+                      className={`flex min-h-11 items-center gap-3 border-2 px-3 py-2 text-left text-sm font-semibold uppercase tracking-wider transition-colors doom-focus-ring ${
+                        checked
+                          ? 'border-primary bg-primary/10 text-foreground'
+                          : 'border-border bg-muted text-muted-foreground hover:border-primary'
+                      }`}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center border-2 ${
+                          checked
+                            ? 'border-primary bg-primary text-primary-foreground'
+                            : 'border-border bg-background'
+                        }`}
+                      >
+                        {checked && <Check size={14} strokeWidth={3} />}
+                      </span>
+                      {EQUIPMENT_LABELS[value]}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

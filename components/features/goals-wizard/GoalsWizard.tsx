@@ -15,10 +15,13 @@ export function GoalsWizard({
   userId,
   initialAnswers,
   doneHref = '/settings',
+  equipmentSet = false,
 }: {
   userId: string
   initialAnswers: WizardAnswers
   doneHref?: string
+  /** Whether the user already has an explicit equipment record (#927). */
+  equipmentSet?: boolean
 }) {
   const router = useRouter()
   const {
@@ -142,9 +145,9 @@ export function GoalsWizard({
             >
               <Wrench size={16} aria-hidden="true" className="shrink-0" />
               <span>
-                Equipment: assuming a full gym.{' '}
+                {equipmentSet ? 'Equipment saved.' : 'Equipment: assuming a full gym.'}{' '}
                 <span className="font-medium text-foreground underline">
-                  Tap to adjust
+                  {equipmentSet ? 'Tap to review' : 'Tap to adjust'}
                 </span>
               </span>
             </Link>

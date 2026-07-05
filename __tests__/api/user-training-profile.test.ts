@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { EQUIPMENT_LABELS } from '@/lib/constants/program-metadata'
 import {
   EQUIPMENT_AVAILABILITY_VALUES,
+  EQUIPMENT_CHECKLIST_GROUPS,
+  EQUIPMENT_CHECKLIST_VALUES,
   EQUIPMENT_PRESETS,
   normalizeEquipmentAvailability,
 } from '@/lib/equipment-availability'
@@ -231,6 +233,27 @@ describe('equipment availability normalization', () => {
       )
     }
   })
+
+  it('checklist groups render only canonical values with no duplicates', () => {
+    for (const group of EQUIPMENT_CHECKLIST_GROUPS) {
+      for (const value of group.values) {
+        expect(EQUIPMENT_AVAILABILITY_VALUES).toContain(value)
+      }
+    }
+    // No value appears in more than one group.
+    expect(new Set(EQUIPMENT_CHECKLIST_VALUES).size).toBe(
+      EQUIPMENT_CHECKLIST_VALUES.length
+    )
+  })
+
+  it('every preset value is offered as a checklist toggle', () => {
+    const offered = new Set(EQUIPMENT_CHECKLIST_VALUES)
+    for (const preset of EQUIPMENT_PRESETS) {
+      for (const value of preset.values) {
+        expect(offered).toContain(value)
+      }
+    }
+  })
 })
 
 describe('UserTrainingProfile persistence', () => {
@@ -252,6 +275,7 @@ describe('UserTrainingProfile persistence', () => {
     expect(profile.goalSentences).toEqual([])
     expect(profile.weeklyIntent).toEqual([])
     expect(profile.equipmentAvailable).toEqual([])
+    expect(profile.equipmentAvailableSet).toBe(false)
     expect(profile.bannedExerciseIds).toEqual([])
     expect(profile.defaultIntensityPreference).toBeNull()
     expect(profile.ratioTargets).toEqual(getDefaultMuscleBalanceTargets())
@@ -282,11 +306,43 @@ describe('UserTrainingProfile persistence', () => {
     })
     expect(afterJunk.equipmentAvailable).toEqual(['barbell'])
 
-    // Clearing back to "no record" (assume full gym)
+    // An intentional empty selection persists as a real (set) record — it is
+    // NOT re-interpreted as "no record → full gym".
     const cleared = await updateUserTrainingProfile(prisma, userId, {
       equipmentAvailable: [],
     })
     expect(cleared.equipmentAvailable).toEqual([])
+    expect(cleared.equipmentAvailableSet).toBe(true)
+  })
+
+  it('tracks equipmentAvailableSet: unset by default, set once written', async () => {
+    // Default (untouched) profile has no record.
+    const fresh = await getOrCreateUserTrainingProfile(prisma, userId)
+    expect(fresh.equipmentAvailableSet).toBe(false)
+
+    // Writing a non-empty list marks the record as set.
+    const afterSave = await updateUserTrainingProfile(prisma, userId, {
+      equipmentAvailable: ['dumbbell'],
+    })
+    expect(afterSave.equipmentAvailableSet).toBe(true)
+
+    // The flag survives a round-trip read.
+    const readBack = await getOrCreateUserTrainingProfile(prisma, userId)
+    expect(readBack.equipmentAvailableSet).toBe(true)
+  })
+
+  it('backfills equipmentAvailableSet for legacy non-empty rows', () => {
+    // A row written before the flag existed: list present, flag still false.
+    const legacy = normalizeUserTrainingProfile({
+      goalSentences: [],
+      weeklyIntent: [],
+      equipmentAvailable: ['barbell', 'dumbbell'],
+      equipmentAvailableSet: false,
+      bannedExerciseIds: [],
+      ratioTargets: getDefaultMuscleBalanceTargets(),
+      defaultIntensityPreference: null,
+    })
+    expect(legacy.equipmentAvailableSet).toBe(true)
   })
 
   it('is idempotent on repeated calls', async () => {
