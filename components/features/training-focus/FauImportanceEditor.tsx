@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ALL_FAUS, FAU_DISPLAY_NAMES } from '@/lib/fau-volume'
+import { ALL_FAUS, FAU_DISPLAY_NAMES, type FAUKey } from '@/lib/fau-volume'
 import {
   getRatioPreset,
   RATIO_PRESETS,
@@ -72,7 +72,7 @@ export function FauImportanceEditor({
     }
   }
 
-  const setRating = (fau: string, importance: number) => {
+  const setRating = (fau: FAUKey, importance: number) => {
     onChange({
       fauImportance: { ...ratings, [fau]: importance },
       // Keep the preset id: editing refines a preset, it doesn't abandon it.
