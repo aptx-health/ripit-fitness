@@ -1,6 +1,7 @@
 import type { Prisma, PrismaClient } from '@prisma/client'
 import { normalizeEquipmentAvailability } from '@/lib/equipment-availability'
 import { ALL_FAUS, type FAUKey } from '@/lib/fau-volume'
+import { isRatioPresetId, type RatioPresetId } from '@/lib/learning/ratio-presets'
 import {
   getDefaultMuscleBalanceTargets,
   type MuscleBalanceTargets,
@@ -157,6 +158,8 @@ export type UserTrainingProfileDTO = {
   goalCategories: GoalCategoryEntry[]
   otherActivities: OtherActivityEntry[]
   fauImportance: FauImportance
+  // Id of the last applied importance preset, or null (attribution only).
+  fauImportancePreset: RatioPresetId | null
   // Training rhythm
   targetSessionsPerWeek: number | null
   targetMinutesPerSession: number | null
@@ -312,6 +315,13 @@ export function normalizeFauImportance(value: unknown): FauImportance {
   return result
 }
 
+/** Accept a known preset id, else null (unknown ids are dropped, not thrown). */
+export function normalizeFauImportancePreset(
+  value: unknown
+): RatioPresetId | null {
+  return isRatioPresetId(value) ? value : null
+}
+
 export function normalizePreferredDays(value: unknown): PreferredDay[] {
   if (!Array.isArray(value)) return []
   const result: PreferredDay[] = []
@@ -337,6 +347,7 @@ type ProfileLike = {
   goalCategories?: Prisma.JsonValue
   otherActivities?: Prisma.JsonValue
   fauImportance?: Prisma.JsonValue
+  fauImportancePreset?: string | null
   targetSessionsPerWeek?: number | null
   targetMinutesPerSession?: number | null
   patternPreference?: string | null
@@ -390,6 +401,9 @@ export function normalizeUserTrainingProfile(
     goalCategories: normalizeGoalCategories(profile?.goalCategories),
     otherActivities: normalizeOtherActivities(profile?.otherActivities),
     fauImportance: normalizeFauImportance(profile?.fauImportance),
+    fauImportancePreset: normalizeFauImportancePreset(
+      profile?.fauImportancePreset ?? null
+    ),
     targetSessionsPerWeek: clampInt(
       profile?.targetSessionsPerWeek ?? null,
       MIN_SESSIONS_PER_WEEK,
@@ -537,6 +551,11 @@ export async function updateUserTrainingProfile(
   }
   if ('fauImportance' in update) {
     data.fauImportance = normalizeFauImportance(update.fauImportance)
+  }
+  if ('fauImportancePreset' in update) {
+    data.fauImportancePreset = normalizeFauImportancePreset(
+      update.fauImportancePreset
+    )
   }
   if ('targetSessionsPerWeek' in update) {
     data.targetSessionsPerWeek = clampInt(

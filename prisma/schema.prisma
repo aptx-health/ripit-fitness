@@ -427,6 +427,10 @@ model UserTrainingProfile {
   otherActivities             Json     @default("[]")
   // fauImportance: { [fauKey]: 1..5 } — per-FAU weighting (keys from lib/fau-volume ALL_FAUS)
   fauImportance               Json     @default("{}")
+  // fauImportancePreset: id of the last applied importance preset (lib/learning
+  // ratio-presets RATIO_PRESET_IDS), or null. Attribution only — ratings above
+  // stay editable, so this survives per-FAU tweaks for "based on your X preset" copy.
+  fauImportancePreset         String?
 
   // Training rhythm
   targetSessionsPerWeek       Int?

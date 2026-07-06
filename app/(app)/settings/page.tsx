@@ -326,6 +326,22 @@ export default function SettingsPage() {
                   </span>
                 </span>
               </Link>
+              <Link
+                href="/settings/training-focus"
+                className="flex min-h-14 items-center justify-between gap-3 border-2 border-border bg-card px-4 py-3 text-foreground transition-colors doom-focus-ring hover:border-primary hover:bg-muted/50"
+              >
+                <span className="flex items-center gap-3">
+                  <Target size={18} aria-hidden="true" />
+                  <span>
+                    <span className="block text-sm font-bold uppercase tracking-wider">
+                      Training Focus
+                    </span>
+                    <span className="block text-sm text-muted-foreground">
+                      Rate which muscles matter, or pick a preset.
+                    </span>
+                  </span>
+                </span>
+              </Link>
             </div>
 
             {/* Account Section */}

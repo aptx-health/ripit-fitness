@@ -15,11 +15,13 @@ import {
 /**
  * Fields the Goals Wizard and settings surfaces are allowed to write.
  * Deliberately excludes interview-owned (`goalSentences`, `weeklyIntent`) and
- * separately-owned fields (`ratioTargets` -> #928, `bannedExerciseIds`).
- * `equipmentAvailable` is written by the equipment checklist (#927) and is
- * normalized to canonical ExerciseDefinition.equipment values. Keeping
- * `goalSentences` empty here is what lets the training-state builder
- * synthesize cold-start sentences from these fields
+ * separately-owned fields (`ratioTargets` -> muscle-balance settings,
+ * `bannedExerciseIds`). `equipmentAvailable` is written by the equipment
+ * checklist (#927) and normalized to canonical ExerciseDefinition.equipment
+ * values. `fauImportance`/`fauImportancePreset` are written here by the
+ * importance presets / training-focus surfaces (#928). Keeping `goalSentences`
+ * empty here is what lets the training-state builder synthesize cold-start
+ * sentences from these fields
  * (see docs/SUGGEST_PAYLOAD_SPEC.md § Goal-sentence synthesis).
  */
 const WRITABLE_FIELDS = [
@@ -27,6 +29,7 @@ const WRITABLE_FIELDS = [
   'goalCategories',
   'otherActivities',
   'fauImportance',
+  'fauImportancePreset',
   'defaultIntensityPreference',
   'targetSessionsPerWeek',
   'targetMinutesPerSession',
