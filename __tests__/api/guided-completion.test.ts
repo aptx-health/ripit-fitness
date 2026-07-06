@@ -22,9 +22,10 @@ async function simulateCompleteAPI(
       rir: number | null
     }>
     guidedCompletion?: boolean
+    now?: Date
   } = {}
 ) {
-  const { fallbackSets, guidedCompletion } = options
+  const { fallbackSets, guidedCompletion, now = new Date() } = options
 
   const workout = await prisma.workout.findUnique({
     where: { id: workoutId },
@@ -51,10 +52,18 @@ async function simulateCompleteAPI(
 
       const draftSetCount = draft?.loggedSets?.length ?? 0
 
+      const completedAt = now
+      const durationSeconds = draft?.startedAt
+        ? Math.max(
+            0,
+            Math.round((completedAt.getTime() - draft.startedAt.getTime()) / 1000)
+          )
+        : null
+
       if (draft && draftSetCount > 0) {
         return tx.workoutCompletion.update({
           where: { id: draft.id },
-          data: { status: 'completed', completedAt: new Date() },
+          data: { status: 'completed', completedAt, durationSeconds },
         })
       }
 
@@ -63,10 +72,10 @@ async function simulateCompleteAPI(
         const completionRecord = draft
           ? await tx.workoutCompletion.update({
               where: { id: draft.id },
-              data: { status: 'completed', completedAt: new Date() },
+              data: { status: 'completed', completedAt, durationSeconds },
             })
           : await tx.workoutCompletion.create({
-              data: { workoutId, userId, status: 'completed', completedAt: new Date() },
+              data: { workoutId, userId, status: 'completed', completedAt, durationSeconds },
             })
         return completionRecord
       }
@@ -78,10 +87,10 @@ async function simulateCompleteAPI(
       const completionRecord = draft
         ? await tx.workoutCompletion.update({
             where: { id: draft.id },
-            data: { status: 'completed', completedAt: new Date() },
+            data: { status: 'completed', completedAt, durationSeconds },
           })
         : await tx.workoutCompletion.create({
-            data: { workoutId, userId, status: 'completed', completedAt: new Date() },
+            data: { workoutId, userId, status: 'completed', completedAt, durationSeconds },
           })
 
       await tx.loggedSet.createMany({
@@ -201,6 +210,56 @@ describe('Guided Completion (Follow Along Mode)', () => {
     expect(result.success).toBe(true)
     expect(result.completion!.id).toBe(draft!.id) // Same record, flipped status
     expect(result.completion!.status).toBe('completed')
+  })
+
+  it('persists durationSeconds from draft startedAt on completion (#933)', async () => {
+    const scenario = await createCompleteTestScenario(prisma, userId, {
+      loggedSetCount: 2,
+      status: 'draft',
+    })
+
+    const startedAt = new Date('2026-07-03T09:00:00Z')
+    await prisma.workoutCompletion.updateMany({
+      where: { workoutId: scenario.workout.id, userId, status: 'draft' },
+      data: { startedAt },
+    })
+
+    // Complete 40 minutes later
+    const completedAt = new Date('2026-07-03T09:40:00Z')
+    const result = await simulateCompleteAPI(prisma, scenario.workout.id, userId, {
+      now: completedAt,
+    })
+
+    expect(result.success).toBe(true)
+    expect(result.completion!.durationSeconds).toBe(40 * 60)
+
+    const row = await prisma.workoutCompletion.findUnique({
+      where: { id: result.completion!.id },
+    })
+    expect(row?.durationSeconds).toBe(40 * 60)
+  })
+
+  it('persists null durationSeconds when draft startedAt is null (#933)', async () => {
+    const scenario = await createCompleteTestScenario(prisma, userId, {
+      loggedSetCount: 2,
+      status: 'draft',
+    })
+
+    // Factory leaves startedAt null; ensure it stays null
+    await prisma.workoutCompletion.updateMany({
+      where: { workoutId: scenario.workout.id, userId, status: 'draft' },
+      data: { startedAt: null },
+    })
+
+    const result = await simulateCompleteAPI(prisma, scenario.workout.id, userId)
+
+    expect(result.success).toBe(true)
+    expect(result.completion!.durationSeconds).toBeNull()
+
+    const row = await prisma.workoutCompletion.findUnique({
+      where: { id: result.completion!.id },
+    })
+    expect(row?.durationSeconds).toBeNull()
   })
 
   it('should not allow guided completion on already-completed workout', async () => {
