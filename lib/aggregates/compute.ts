@@ -20,9 +20,12 @@ import {
   gapDecayedEwma,
 } from '@/lib/learning/math'
 import {
+  determineMovementHeavy,
+  HEAVY_E1RM_FRACTION,
+  HEAVY_EFFORT_RPE,
+  type HeavyThresholds,
   type MovementEwma,
   type MovementEwmaMap,
-  determineMovementHeavy,
 } from '@/lib/learning/weekly-intent'
 import { normalizeWeightToLbs } from '@/lib/stats/exercise-performance'
 import type {
@@ -64,6 +67,8 @@ export const DEFAULT_AGGREGATES_OPTIONS: AggregatesOptions = {
   fauStatusDeadband: 0.03,
   goalTrendStallBand: 0.02,
   goalProgressMinWeeks: 2,
+  heavyE1rmFraction: HEAVY_E1RM_FRACTION,
+  heavyEffortCutoff: HEAVY_EFFORT_RPE,
 }
 
 /** Merge caller overrides over the production defaults. */
@@ -185,7 +190,8 @@ function lastSessionByFau(now: Date, sessions: AggregateSessionInput[]): Map<str
 function lastHeavyByFau(
   now: Date,
   sessions: AggregateSessionInput[],
-  ewmaMap: MovementEwmaMap
+  ewmaMap: MovementEwmaMap,
+  thresholds: HeavyThresholds
 ): Map<string, number> {
   const out = new Map<string, number>()
   for (const session of sessions) {
@@ -220,7 +226,8 @@ function lastHeavyByFau(
             isWarmup: s.isWarmup,
           })),
         },
-        pattern != null ? ewmaMap[pattern] : undefined
+        pattern != null ? ewmaMap[pattern] : undefined,
+        thresholds
       )
       if (!verdict.isHeavy) continue
       const faus = new Set<string>()
@@ -297,7 +304,10 @@ function computePerFau(
   }
 
   const lastSession = lastSessionByFau(now, within(baselineWeeks * 7 + 14))
-  const lastHeavy = lastHeavyByFau(now, within(baselineWeeks * 7 + 14), ewmaMap)
+  const lastHeavy = lastHeavyByFau(now, within(baselineWeeks * 7 + 14), ewmaMap, {
+    heavyE1rmFraction: opts.heavyE1rmFraction,
+    heavyEffortCutoff: opts.heavyEffortCutoff,
+  })
 
   // Zero-sum shares: target_share (from ratioTargets, default weight 1.0) and
   // actual_14d_share are both normalized over the emitted (present) FAUs so

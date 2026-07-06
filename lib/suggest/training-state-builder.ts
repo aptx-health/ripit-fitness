@@ -55,12 +55,11 @@
 import type { PrismaClient } from '@prisma/client'
 
 import { computeUserAggregates } from '@/lib/aggregates/recompute'
-import type { AggregatesOptions, MovementCalibration } from '@/lib/aggregates/types'
+import type { MovementCalibration } from '@/lib/aggregates/types'
 import {
   computeInjuryBanList,
   type InjuryBanExercise,
 } from '@/lib/learning/injury-ban-list'
-import { WEEKLY_DECAY_FACTOR } from '@/lib/learning/math'
 import {
   type EvaluatedSession,
   evaluateWeeklyIntents,
@@ -72,6 +71,12 @@ import {
 } from '@/lib/llm/prompts/suggest-workout/schemas'
 import type { WeeklyIntent } from '@/lib/llm/prompts/suggest-workout/types'
 import { normalizeWeightToLbs } from '@/lib/stats/exercise-performance'
+import {
+  type TuningConfig,
+  toAggregatesOptions,
+  toHeavyOptions,
+} from '@/lib/tuning/config'
+import { loadTuningConfig } from '@/lib/tuning/store'
 import {
   normalizeUserTrainingProfile,
   type UserTrainingProfileDTO,
@@ -241,13 +246,26 @@ function toCalibrationPayload(c: MovementCalibration) {
 }
 
 /**
+ * The builder's return: the validated payload plus the effective knob values it
+ * was built with. #921 embeds `configStamp` into `Suggestion.requestPayload` so
+ * every persisted suggestion is self-describing regardless of later config edits.
+ */
+export interface TrainingStateBuildResult {
+  payload: SuggestWorkoutPayload
+  configStamp: TuningConfig
+}
+
+/**
  * Build and validate the complete Suggest payload for a user at request time.
  *
  * @param prisma   Prisma client (or transaction handle).
  * @param userId   The requesting user.
  * @param request  Ephemeral request-modal fields.
  * @param now      Request time. Injectable for deterministic tests/snapshots.
- * @param options  Aggregates tuning overrides (#937); production uses defaults.
+ * @param tuning   Effective tuning knobs (#937). Omit to load the saved config
+ *                 (code defaults when no row exists); pass an ephemeral config
+ *                 for the admin preview's unsaved overrides.
+ * @returns The validated payload and the effective config stamp.
  * @throws ZodError if the assembled payload violates the payload contract.
  */
 export async function buildTrainingStatePayload(
@@ -255,8 +273,9 @@ export async function buildTrainingStatePayload(
   userId: string,
   request: SuggestRequestInput,
   now: Date = new Date(),
-  options?: Partial<AggregatesOptions>,
-): Promise<SuggestWorkoutPayload> {
+  tuning?: TuningConfig,
+): Promise<TrainingStateBuildResult> {
+  const config = tuning ?? (await loadTuningConfig(prisma))
   const [profileRow, settings, aggregates, sessionRows, catalogRows, prefRows] =
     await Promise.all([
       prisma.userTrainingProfile.findUnique({ where: { userId } }),
@@ -264,7 +283,7 @@ export async function buildTrainingStatePayload(
         where: { userId },
         select: { signupIntent: true },
       }),
-      computeUserAggregates(prisma, userId, now, options),
+      computeUserAggregates(prisma, userId, now, toAggregatesOptions(config)),
       prisma.workoutCompletion.findMany({
         where: {
           userId,
@@ -339,6 +358,7 @@ export async function buildTrainingStatePayload(
     weeklyIntents,
     evaluatedSessions,
     toEwmaMap(aggregates.perMovementCalibration),
+    toHeavyOptions(config),
   )
   const weeklyIntentStatus = toWeeklyIntentStatuses(verdicts)
 
@@ -356,7 +376,7 @@ export async function buildTrainingStatePayload(
   const { available, unconstrained } = resolveAvailableEquipment(
     request.equipment_override ?? profile.equipmentAvailable,
   )
-  const preferences = decayPreferences(prefRows, now, WEEKLY_DECAY_FACTOR)
+  const preferences = decayPreferences(prefRows, now, config.betaWeeklyDecay)
   const candidateExercises = buildCandidateExercises(catalog, {
     available,
     unconstrained,
@@ -414,5 +434,8 @@ export async function buildTrainingStatePayload(
 
   // Validate against the payload contract BEFORE it reaches the prompt layer.
   // A failure here is a builder bug, not a user error — surface it loudly.
-  return suggestWorkoutPayloadSchema.parse(payload)
+  return {
+    payload: suggestWorkoutPayloadSchema.parse(payload),
+    configStamp: config,
+  }
 }

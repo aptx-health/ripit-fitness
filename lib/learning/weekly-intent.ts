@@ -53,6 +53,22 @@ export const HEAVY_EFFORT_RPE = 8
  * fall back to the static `intensityClass` tag (cold start only). */
 export const MIN_EWMA_OBSERVATIONS = 3
 
+/**
+ * Tunable heaviness thresholds (issue #937). `HEAVY_E1RM_FRACTION` and
+ * `HEAVY_EFFORT_RPE` are the code defaults; the admin TuningConfig can override
+ * them per request. Callers pass the resolved values through; omitting the
+ * argument reproduces today's constants exactly.
+ */
+export interface HeavyThresholds {
+  heavyE1rmFraction: number
+  heavyEffortCutoff: number
+}
+
+export const DEFAULT_HEAVY_THRESHOLDS: HeavyThresholds = {
+  heavyE1rmFraction: HEAVY_E1RM_FRACTION,
+  heavyEffortCutoff: HEAVY_EFFORT_RPE,
+}
+
 /** muscle_group → movement patterns that count toward a "heavy X day". Movement
  * patterns follow ExerciseDefinition.movementPattern (see schema.prisma). */
 export const MUSCLE_GROUP_PATTERNS: Record<string, string[]> = {
@@ -201,14 +217,15 @@ function topSetE1RMOf(sets: IntentLoggedSet[]): number | null {
  */
 export function determineMovementHeavy(
   movement: SessionMovement,
-  ewma: MovementEwma | undefined
+  ewma: MovementEwma | undefined,
+  thresholds: HeavyThresholds = DEFAULT_HEAVY_THRESHOLDS
 ): HeavyDetermination {
   const sets = workingSets(movement)
   const peakEffort = peakEffortOf(sets)
   const topSetE1RM = topSetE1RMOf(sets)
 
   // Effort is a direct, calibration-free signal; check it first.
-  if (peakEffort != null && peakEffort >= HEAVY_EFFORT_RPE) {
+  if (peakEffort != null && peakEffort >= thresholds.heavyEffortCutoff) {
     return { isHeavy: true, reason: 'effort', topSetE1RM, peakEffort }
   }
 
@@ -222,7 +239,7 @@ export function determineMovementHeavy(
     // EWMA branch: compare measured load against the user's own estimate.
     if (
       topSetE1RM != null &&
-      topSetE1RM >= HEAVY_E1RM_FRACTION * (ewma!.ewmaE1RMLbs as number)
+      topSetE1RM >= thresholds.heavyE1rmFraction * (ewma!.ewmaE1RMLbs as number)
     ) {
       return { isHeavy: true, reason: 'ewma', topSetE1RM, peakEffort }
     }
@@ -244,14 +261,17 @@ export function determineMovementHeavy(
 export function isSessionHeavyForPatterns(
   session: EvaluatedSession,
   patterns: string[],
-  ewmaMap: MovementEwmaMap
+  ewmaMap: MovementEwmaMap,
+  thresholds: HeavyThresholds = DEFAULT_HEAVY_THRESHOLDS
 ): boolean {
   const wanted = new Set(patterns)
   for (const movement of session.movements) {
     if (movement.movementPattern == null || !wanted.has(movement.movementPattern)) {
       continue
     }
-    if (determineMovementHeavy(movement, ewmaMap[movement.movementPattern]).isHeavy) {
+    if (
+      determineMovementHeavy(movement, ewmaMap[movement.movementPattern], thresholds).isHeavy
+    ) {
       return true
     }
   }
@@ -306,16 +326,17 @@ function findLastSatisfiedDaysAgo(
 function evaluateHeavySession(
   intent: Extract<WeeklyIntent, { type: 'heavy_session' }>,
   sessions: EvaluatedSession[],
-  ewmaMap: MovementEwmaMap
+  ewmaMap: MovementEwmaMap,
+  thresholds: HeavyThresholds
 ): WeeklyIntentVerdict {
   const patterns = MUSCLE_GROUP_PATTERNS[intent.muscle_group] ?? []
   const predicate = (windowSessions: EvaluatedSession[]) =>
-    windowSessions.filter((s) => isSessionHeavyForPatterns(s, patterns, ewmaMap))
+    windowSessions.filter((s) => isSessionHeavyForPatterns(s, patterns, ewmaMap, thresholds))
       .length >= intent.min_per_week
 
   const current = sessionsInWindow(sessions, 0)
   const heavyNow = current.filter((s) =>
-    isSessionHeavyForPatterns(s, patterns, ewmaMap)
+    isSessionHeavyForPatterns(s, patterns, ewmaMap, thresholds)
   ).length
   const satisfiedLast7d = heavyNow >= intent.min_per_week
 
@@ -406,11 +427,12 @@ function evaluateVolumeTilt(
 export function evaluateWeeklyIntent(
   intent: WeeklyIntent,
   sessions: EvaluatedSession[],
-  ewmaMap: MovementEwmaMap = {}
+  ewmaMap: MovementEwmaMap = {},
+  thresholds: HeavyThresholds = DEFAULT_HEAVY_THRESHOLDS
 ): WeeklyIntentVerdict {
   switch (intent.type) {
     case 'heavy_session':
-      return evaluateHeavySession(intent, sessions, ewmaMap)
+      return evaluateHeavySession(intent, sessions, ewmaMap, thresholds)
     case 'movement_frequency':
       return evaluateMovementFrequency(intent, sessions)
     case 'volume_tilt':
@@ -430,7 +452,8 @@ export function evaluateWeeklyIntent(
 export function evaluateWeeklyIntents(
   intents: WeeklyIntent[],
   sessions: EvaluatedSession[],
-  ewmaMap: MovementEwmaMap = {}
+  ewmaMap: MovementEwmaMap = {},
+  thresholds: HeavyThresholds = DEFAULT_HEAVY_THRESHOLDS
 ): WeeklyIntentVerdict[] {
-  return intents.map((intent) => evaluateWeeklyIntent(intent, sessions, ewmaMap))
+  return intents.map((intent) => evaluateWeeklyIntent(intent, sessions, ewmaMap, thresholds))
 }

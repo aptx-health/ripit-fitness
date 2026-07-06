@@ -180,7 +180,7 @@ const EXPECTED_BEGINNER_GOAL_SENTENCES = [
   SIGNUP_INTENT_SENTENCES.new_to_apps,
 ]
 
-type Payload = Awaited<ReturnType<typeof buildTrainingStatePayload>>
+type Payload = Awaited<ReturnType<typeof buildTrainingStatePayload>>['payload']
 
 const ARCHETYPE_ASSERTIONS: Record<ArchetypeKey, (p: Payload) => void> = {
   beginner: (p) => {
@@ -233,7 +233,7 @@ describe('buildTrainingStatePayload — golden archetype canaries', () => {
     await seedProfile(prisma, user.id, archetype)
     await seedArchetypeHistory(prisma, user.id, archetype, lookup)
 
-    const payload = await buildTrainingStatePayload(prisma, user.id, REQUEST, NOW)
+    const { payload } = await buildTrainingStatePayload(prisma, user.id, REQUEST, NOW)
 
     // The builder validates internally; re-assert the contract explicitly.
     expect(suggestWorkoutPayloadSchema.safeParse(payload).success).toBe(true)
@@ -301,7 +301,7 @@ describe('buildTrainingStatePayload — golden archetype canaries', () => {
       })
     }
 
-    const payload = await buildTrainingStatePayload(prisma, user.id, REQUEST, NOW)
+    const { payload } = await buildTrainingStatePayload(prisma, user.id, REQUEST, NOW)
     const recent = payload.training_state.recent_sessions
     expect(recent).toHaveLength(1)
     expect(recent[0].notes).toHaveLength(5) // capped at 5 per session
