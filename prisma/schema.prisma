@@ -397,6 +397,10 @@ model UserTrainingProfile {
   goalSentences               String[] @default([])
   weeklyIntent                String[] @default([])
   equipmentAvailable          String[] @default([])
+  // false = no record (planner assumes a full commercial gym); true = the
+  // user's real selection, even if minimal/empty (#927). Distinguishes an
+  // intentional "I own almost nothing" from "never set".
+  equipmentAvailableSet       Boolean  @default(false)
   bannedExerciseIds           String[] @default([])
   ratioTargets                Json
   defaultIntensityPreference  String?

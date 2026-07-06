@@ -1,5 +1,7 @@
 'use client'
 
+import { Wrench } from 'lucide-react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { DemographicsStep } from './steps/DemographicsStep'
@@ -14,10 +16,13 @@ export function GoalsWizard({
   userId,
   initialAnswers,
   doneHref = '/settings',
+  equipmentSet = false,
 }: {
   userId: string
   initialAnswers: WizardAnswers
   doneHref?: string
+  /** Whether the user already has an explicit equipment record (#927). */
+  equipmentSet?: boolean
 }) {
   const router = useRouter()
   const {
@@ -133,6 +138,23 @@ export function GoalsWizard({
           )}
           {step.id === 'demographics' && (
             <DemographicsStep answers={answers} patchLocal={patchLocal} />
+          )}
+
+          {/* Equipment fallback (#927): default-with-banner, never blocks
+              the wizard. No equipment record = planner assumes a full gym. */}
+          {isLast && (
+            <Link
+              href="/settings/equipment"
+              className="mt-8 flex min-h-11 items-center gap-2 border border-border bg-muted/50 px-4 py-3 text-[13px] leading-snug text-muted-foreground transition-colors hover:border-primary hover:text-foreground doom-focus-ring"
+            >
+              <Wrench size={16} aria-hidden="true" className="shrink-0" />
+              <span>
+                {equipmentSet ? 'Equipment saved.' : 'Equipment: assuming a full gym.'}{' '}
+                <span className="font-medium text-foreground underline">
+                  {equipmentSet ? 'Tap to review' : 'Tap to adjust'}
+                </span>
+              </span>
+            </Link>
           )}
         </div>
       </div>

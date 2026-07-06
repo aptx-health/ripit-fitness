@@ -13,15 +13,19 @@ import {
 } from '@/lib/user-training-profile'
 
 /**
- * Fields the Goals Wizard is allowed to write. Deliberately excludes
- * interview-owned (`goalSentences`, `weeklyIntent`) and separately-owned
- * fields (`equipmentAvailable` -> #927, `ratioTargets` -> muscle-balance
- * settings, `bannedExerciseIds`). `fauImportance`/`fauImportancePreset` ARE
- * written here (importance presets, #928). Keeping `goalSentences` empty here is what lets the
- * training-state builder synthesize cold-start sentences from these fields
+ * Fields the Goals Wizard and settings surfaces are allowed to write.
+ * Deliberately excludes interview-owned (`goalSentences`, `weeklyIntent`) and
+ * separately-owned fields (`ratioTargets` -> muscle-balance settings,
+ * `bannedExerciseIds`). `equipmentAvailable` is written by the equipment
+ * checklist (#927) and normalized to canonical ExerciseDefinition.equipment
+ * values. `fauImportance`/`fauImportancePreset` are written here by the
+ * importance presets / training-focus surfaces (#928). Keeping `goalSentences`
+ * empty here is what lets the training-state builder synthesize cold-start
+ * sentences from these fields
  * (see docs/SUGGEST_PAYLOAD_SPEC.md § Goal-sentence synthesis).
  */
 const WRITABLE_FIELDS = [
+  'equipmentAvailable',
   'goalCategories',
   'otherActivities',
   'fauImportance',
