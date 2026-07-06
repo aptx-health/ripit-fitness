@@ -35,5 +35,11 @@ export default async function GoalsWizardPage() {
     weightKg: profile.weightKg,
   }
 
-  return <GoalsWizard userId={user.id} initialAnswers={initialAnswers} />
+  return (
+    <GoalsWizard
+      userId={user.id}
+      initialAnswers={initialAnswers}
+      equipmentSet={profile.equipmentAvailableSet}
+    />
+  )
 }

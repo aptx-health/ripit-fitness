@@ -13,14 +13,17 @@ import {
 } from '@/lib/user-training-profile'
 
 /**
- * Fields the Goals Wizard is allowed to write. Deliberately excludes
- * interview-owned (`goalSentences`, `weeklyIntent`) and separately-owned
- * fields (`equipmentAvailable` -> #927, `ratioTargets` -> #928,
- * `bannedExerciseIds`). Keeping `goalSentences` empty here is what lets the
- * training-state builder synthesize cold-start sentences from these fields
+ * Fields the Goals Wizard and settings surfaces are allowed to write.
+ * Deliberately excludes interview-owned (`goalSentences`, `weeklyIntent`) and
+ * separately-owned fields (`ratioTargets` -> #928, `bannedExerciseIds`).
+ * `equipmentAvailable` is written by the equipment checklist (#927) and is
+ * normalized to canonical ExerciseDefinition.equipment values. Keeping
+ * `goalSentences` empty here is what lets the training-state builder
+ * synthesize cold-start sentences from these fields
  * (see docs/SUGGEST_PAYLOAD_SPEC.md § Goal-sentence synthesis).
  */
 const WRITABLE_FIELDS = [
+  'equipmentAvailable',
   'goalCategories',
   'otherActivities',
   'fauImportance',

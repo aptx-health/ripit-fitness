@@ -1,4 +1,5 @@
 import type { Prisma, PrismaClient } from '@prisma/client'
+import { normalizeEquipmentAvailability } from '@/lib/equipment-availability'
 import { ALL_FAUS, type FAUKey } from '@/lib/fau-volume'
 import {
   getDefaultMuscleBalanceTargets,
@@ -92,7 +93,6 @@ export const MAX_GOAL_SENTENCES = 10
 export const MAX_GOAL_SENTENCE_LENGTH = 280
 export const MAX_WEEKLY_INTENTS = 10
 export const MAX_WEEKLY_INTENT_LENGTH = 280
-export const MAX_EQUIPMENT_ITEMS = 32
 export const MAX_BANNED_EXERCISE_IDS = 500
 export const MAX_INJURY_ENTRIES = INJURY_AREAS.length
 export const MAX_INJURY_NOTE_LENGTH = 500
@@ -136,6 +136,13 @@ export type UserTrainingProfileDTO = {
   goalSentences: string[]
   weeklyIntent: string[]
   equipmentAvailable: string[]
+  /**
+   * Whether the user has an explicit equipment record. `false` means "no
+   * record" and the planner assumes a full commercial gym; `true` means the
+   * `equipmentAvailable` list is the user's real selection, even if empty
+   * (owns almost nothing). See #927.
+   */
+  equipmentAvailableSet: boolean
   bannedExerciseIds: string[]
   ratioTargets: MuscleBalanceTargets
   defaultIntensityPreference: IntensityPreference | null
@@ -318,6 +325,7 @@ type ProfileLike = {
   goalSentences: string[]
   weeklyIntent: string[]
   equipmentAvailable: string[]
+  equipmentAvailableSet?: boolean
   bannedExerciseIds: string[]
   ratioTargets: Prisma.JsonValue
   defaultIntensityPreference: string | null
@@ -349,11 +357,14 @@ export function normalizeUserTrainingProfile(
       MAX_WEEKLY_INTENTS,
       MAX_WEEKLY_INTENT_LENGTH
     ),
-    equipmentAvailable: normalizeStringList(
-      profile?.equipmentAvailable,
-      MAX_EQUIPMENT_ITEMS,
-      64
+    equipmentAvailable: normalizeEquipmentAvailability(
+      profile?.equipmentAvailable
     ),
+    // A non-empty list always counts as "set" — this backfills legacy rows
+    // written before the flag existed (whose column defaults to false).
+    equipmentAvailableSet:
+      (profile?.equipmentAvailableSet ?? false) ||
+      normalizeEquipmentAvailability(profile?.equipmentAvailable).length > 0,
     bannedExerciseIds: normalizeStringList(
       profile?.bannedExerciseIds,
       MAX_BANNED_EXERCISE_IDS,
@@ -480,11 +491,13 @@ export async function updateUserTrainingProfile(
     )
   }
   if ('equipmentAvailable' in update) {
-    data.equipmentAvailable = normalizeStringList(
-      update.equipmentAvailable,
-      MAX_EQUIPMENT_ITEMS,
-      64
+    // Filtered to canonical ExerciseDefinition.equipment values. Writing this
+    // field marks the record as explicitly set, so an intentional empty list
+    // ("I own almost nothing") no longer reads back as "no record → full gym".
+    data.equipmentAvailable = normalizeEquipmentAvailability(
+      update.equipmentAvailable
     )
+    data.equipmentAvailableSet = true
   }
   if ('bannedExerciseIds' in update) {
     data.bannedExerciseIds = normalizeStringList(
