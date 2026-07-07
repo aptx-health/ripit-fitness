@@ -137,6 +137,7 @@ function daysAgoOf(now: Date, when: Date): number {
 interface SessionRow {
   completedAt: Date
   startedAt: Date | null
+  durationSeconds: number | null
   status: string
   exercises: {
     name: string
@@ -185,6 +186,24 @@ function toEvaluatedSession(now: Date, session: SessionRow): EvaluatedSession {
   }
 }
 
+/**
+ * Session length in whole minutes. Prefers the persisted
+ * `WorkoutCompletion.durationSeconds` (#933/#945) — the authoritative logged
+ * duration — and falls back to the live `completedAt − startedAt` derivation.
+ * Returns null when neither is available.
+ */
+function sessionDurationMinutes(session: SessionRow): number | null {
+  if (session.durationSeconds != null) {
+    return Math.round(session.durationSeconds / 60)
+  }
+  if (session.startedAt) {
+    return Math.round(
+      (session.completedAt.getTime() - session.startedAt.getTime()) / 60000,
+    )
+  }
+  return null
+}
+
 /** Build the newest-first recent_sessions block from qualifying completions. */
 function toRecentSessions(now: Date, qualifying: SessionRow[]) {
   return qualifying.slice(0, MAX_RECENT_SESSIONS).map((session) => {
@@ -202,10 +221,7 @@ function toRecentSessions(now: Date, qualifying: SessionRow[]) {
 
     return {
       days_ago: daysAgoOf(now, session.completedAt),
-      // duration_min is null when the workout has no recorded start time.
-      duration_min: session.startedAt
-        ? Math.round((session.completedAt.getTime() - session.startedAt.getTime()) / 60000)
-        : null,
+      duration_min: sessionDurationMinutes(session),
       total_sets: totalSets,
       abandoned: session.status === 'abandoned',
       // session_rpe is OMITTED (no sessionRpe column exists yet).
@@ -296,6 +312,7 @@ export async function buildTrainingStatePayload(
         select: {
           completedAt: true,
           startedAt: true,
+          durationSeconds: true,
           status: true,
           exercises: {
             select: {
@@ -373,8 +390,12 @@ export async function buildTrainingStatePayload(
   const bannedIds = new Set<string>([...profile.bannedExerciseIds, ...banResult.bannedExerciseIds])
 
   const catalog: CatalogExercise[] = catalogRows
+  // An explicit request override is authoritative (even when empty = bodyweight
+  // only); otherwise fall back to the durable list and its explicit-record flag.
+  const equipmentOverride = request.equipment_override ?? null
   const { available, unconstrained } = resolveAvailableEquipment(
-    request.equipment_override ?? profile.equipmentAvailable,
+    equipmentOverride ?? profile.equipmentAvailable,
+    equipmentOverride != null ? true : profile.equipmentAvailableSet,
   )
   const preferences = decayPreferences(prefRows, now, config.betaWeeklyDecay)
   const candidateExercises = buildCandidateExercises(catalog, {

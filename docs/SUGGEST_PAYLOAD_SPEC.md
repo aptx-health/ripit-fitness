@@ -416,7 +416,7 @@ notes, session RPE) in one block.
 [
   {
     "days_ago": 2,
-    "duration_min": 52,                     // null when start time is missing
+    "duration_min": 52,                     // persisted durationSeconds preferred; null when neither it nor a start time exists
     "total_sets": 18,                       // effective (non-warmup) sets, incl. abandoned sessions
     "abandoned": false,
     "session_rpe": 4,                       // OMITTED when not logged (opt-in 1-tap, may not exist)
@@ -430,11 +430,11 @@ notes, session RPE) in one block.
 | Field | Type | Nullable | Producer | Rules |
 |---|---|---|---|---|
 | `days_ago` | `number` (int) | no | aggregates + builder | |
-| `duration_min` | `number` (int) | yes | aggregates | `completedAt − startedAt`, rounded to minutes; `null` when `startedAt` is missing |
+| `duration_min` | `number` (int) | yes | builder | prefers persisted `WorkoutCompletion.durationSeconds` (÷60, rounded); falls back to `completedAt − startedAt` rounded to minutes; `null` when neither is available |
 | `total_sets` | `number` (int) | no | aggregates | effective sets in the session |
 | `abandoned` | `boolean` | no | aggregates | `true` for `status: 'abandoned'` completions |
 | `session_rpe` | `number` (int, 1–5) | omitted when absent | aggregates | from `WorkoutCompletion.sessionRpe` if/when the 1-tap rollup chip ships; **omitted**, not nulled, when not logged |
-| `notes` | `{ exercise: string, text: string }[]` | no (may be `[]`) | aggregates | non-empty `Exercise.notes`, each truncated to ~120 chars, ≤ 5 notes per session |
+| `notes` | `{ exercise: string, text: string }[]` | no (may be `[]`) | builder | non-empty `Exercise.notes`, each truncated to ~120 chars, ≤ 5 notes per session (tightened from the 10 originally floated in #920 — 5 keeps the block token-cheap while still surfacing the exercises a user actually annotated) |
 
 Cold-start: contains whatever sessions exist (0–2 entries). This block is the
 one place a nearly-new user's actual behavior is visible to the model.
@@ -490,6 +490,8 @@ Cold-start: empty arrays + the low-confidence note.
 Producer: **builder** (deterministic pre-filter: equipment match, FAU
 relevance, not in `banned_exercise_ids`). ~80–150 entries typical. Sent
 unordered — the LLM ranks (spec rule 10). Unchanged from v1.
+
+Equipment gating honors the explicit-record flag (`UserTrainingProfile.equipmentAvailableSet`, #927): when the user has an explicit equipment record, the list is authoritative and an **empty** list yields bodyweight-only candidates. Without an explicit record (or a request `equipment_override`, which is always authoritative), an empty list means "unconstrained — assume full access" so a user who never filled in equipment isn't stranded.
 
 ```jsonc
 {
