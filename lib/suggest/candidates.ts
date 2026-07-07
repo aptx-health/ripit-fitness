@@ -92,19 +92,26 @@ function normalizeEquipmentToken(token: string): string {
 
 /**
  * Build the set of available equipment tokens. `equipment_override` (from the
- * request) wins over the durable profile list. An EMPTY list is treated as "no
- * constraint" (assume full access) rather than "nothing available" — the latter
- * would strand a user who never filled in equipment with a bodyweight-only
- * (possibly empty) candidate list.
+ * request) wins over the durable profile list.
+ *
+ * `equipmentSet` records whether the list is authoritative (#927):
+ * - `false` (no explicit record): an EMPTY list means "no constraint" (assume
+ *   full access) rather than "nothing available" — the latter would strand a
+ *   user who never filled in equipment with a bodyweight-only candidate list.
+ * - `true` (explicit record): the list is the user's real selection. An empty
+ *   list means bodyweight-only, NOT unconstrained.
  */
-export function resolveAvailableEquipment(equipment: readonly string[]): {
+export function resolveAvailableEquipment(
+  equipment: readonly string[],
+  equipmentSet = false,
+): {
   available: Set<string>
   unconstrained: boolean
 } {
   const normalized = equipment.map(normalizeEquipmentToken).filter(Boolean)
   const available = new Set(normalized)
   available.add('bodyweight')
-  return { available, unconstrained: normalized.length === 0 }
+  return { available, unconstrained: !equipmentSet && normalized.length === 0 }
 }
 
 /** Does the user have the equipment this exercise requires? */

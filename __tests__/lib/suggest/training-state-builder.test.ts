@@ -309,4 +309,102 @@ describe('buildTrainingStatePayload — golden archetype canaries', () => {
     expect(recent[0].total_sets).toBe(6)
     expect(recent[0].duration_min).toBe(60)
   })
+
+  it('prefers persisted durationSeconds over the completedAt − startedAt derivation', async () => {
+    const user = await createTestUser()
+    await prisma.userTrainingProfile.create({
+      data: {
+        userId: user.id,
+        goalSentences: ['Stay healthy'],
+        weeklyIntent: [],
+        equipmentAvailable: ['dumbbells', 'machines'],
+        bannedExerciseIds: [],
+        ratioTargets: {},
+        defaultIntensityPreference: null,
+      },
+    })
+
+    const completedAt = new Date(NOW.getTime() - 2 * DAY_MS)
+    const completion = await prisma.workoutCompletion.create({
+      data: {
+        userId: user.id,
+        status: 'completed',
+        isAdHoc: true,
+        name: 'Duration Test',
+        // startedAt derivation would give 60 min; the persisted value wins.
+        startedAt: new Date(completedAt.getTime() - 60 * 60 * 1000),
+        durationSeconds: 45 * 60,
+        completedAt,
+      },
+    })
+    const defId = lookup.get(normalizeName('Goblet Squat')) as string
+    await prisma.exercise.create({
+      data: {
+        name: 'Goblet Squat',
+        exerciseDefinitionId: defId,
+        order: 1,
+        userId: user.id,
+        workoutCompletionId: completion.id,
+        loggedSets: {
+          create: [
+            {
+              setNumber: 1,
+              reps: 10,
+              weight: 100,
+              weightUnit: 'lbs',
+              isWarmup: false,
+              completionId: completion.id,
+              userId: user.id,
+              createdAt: completedAt,
+            },
+          ],
+        },
+      },
+    })
+
+    const { payload } = await buildTrainingStatePayload(prisma, user.id, REQUEST, NOW)
+    expect(payload.training_state.recent_sessions[0].duration_min).toBe(45)
+  })
+
+  it('restricts candidates to bodyweight when equipment record is explicit and empty', async () => {
+    const user = await createTestUser()
+    await prisma.userTrainingProfile.create({
+      data: {
+        userId: user.id,
+        goalSentences: ['Stay healthy'],
+        weeklyIntent: [],
+        equipmentAvailable: [],
+        equipmentAvailableSet: true, // authoritative empty list = bodyweight only
+        bannedExerciseIds: [],
+        ratioTargets: {},
+        defaultIntensityPreference: null,
+      },
+    })
+
+    const { payload } = await buildTrainingStatePayload(prisma, user.id, REQUEST, NOW)
+    const names = payload.candidate_exercises.map((c) => c.name).sort()
+    // Only bodyweight fixtures survive (pull_up_bar is ambient, not gating).
+    expect(names).toEqual(['Pull-Up', 'Standard Push-Up'])
+  })
+
+  it('leaves candidates unconstrained when no explicit equipment record exists', async () => {
+    const user = await createTestUser()
+    await prisma.userTrainingProfile.create({
+      data: {
+        userId: user.id,
+        goalSentences: ['Stay healthy'],
+        weeklyIntent: [],
+        equipmentAvailable: [],
+        equipmentAvailableSet: false, // no record → assume full access
+        bannedExerciseIds: [],
+        ratioTargets: {},
+        defaultIntensityPreference: null,
+      },
+    })
+
+    const { payload } = await buildTrainingStatePayload(prisma, user.id, REQUEST, NOW)
+    const names = payload.candidate_exercises.map((c) => c.name)
+    // A barbell-only exercise survives when equipment is unconstrained.
+    expect(names).toContain('Barbell Back Squat')
+  })
 })
