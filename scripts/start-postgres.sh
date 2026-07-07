@@ -106,6 +106,17 @@ for f in "$SEEDS_DIR"/0[0-8]_*.sql; do
 done
 echo "Exercise definitions seeded"
 
+# Seed synthetic archetype users with workout history (requires exercise
+# definitions above). Idempotent per archetype (deterministic synthetic-<key>
+# ids, delete-and-recreate) and seeded-RNG deterministic relative to "now", so
+# re-running on every startup is intended — no run-once guard. A failure here
+# must not abort postgres startup, so warn and continue.
+echo "Seeding synthetic archetype users..."
+DATABASE_URL="$LOCAL_DB_URL" DIRECT_URL="$LOCAL_DB_URL" \
+  npx tsx "$SCRIPT_DIR/seed-synthetic-users.ts" 2>&1 \
+  || echo "Warning: synthetic user seeding failed (continuing)"
+echo "Synthetic archetype users seeded"
+
 # Seed curated community programs (idempotent — skips if already present)
 echo "Seeding community programs..."
 DATABASE_URL="$LOCAL_DB_URL" DIRECT_URL="$LOCAL_DB_URL" \
