@@ -81,3 +81,100 @@ describe('buildCandidateExercises equipment gating', () => {
     expect(result.map((c) => c.id)).toEqual(['ex-pushup'])
   })
 })
+
+describe('buildCandidateExercises gated primary implements (#958)', () => {
+  const PULL_UP: CatalogExercise = {
+    id: 'ex-pullup',
+    name: 'Pull-Up',
+    equipment: ['pull_up_bar'],
+    primaryFAUs: ['lats'],
+    secondaryFAUs: ['biceps'],
+    movementPattern: 'vertical_pull',
+    intensityClass: 'moderate',
+  }
+  const DIPS: CatalogExercise = {
+    id: 'ex-dips',
+    name: 'Dips',
+    equipment: ['dip_bars'],
+    primaryFAUs: ['chest'],
+    secondaryFAUs: ['triceps'],
+    movementPattern: 'vertical_push',
+    intensityClass: 'moderate',
+  }
+  const EZ_CURL: CatalogExercise = {
+    id: 'ex-ezcurl',
+    name: 'EZ Bar Curl',
+    equipment: ['ez_bar'],
+    primaryFAUs: ['biceps'],
+    secondaryFAUs: [],
+    movementPattern: 'elbow_flexion',
+    intensityClass: 'light',
+  }
+  const AB_WHEEL: CatalogExercise = {
+    id: 'ex-abwheel',
+    name: 'Ab Wheel',
+    equipment: ['ab_wheel'],
+    primaryFAUs: ['abs'],
+    secondaryFAUs: [],
+    movementPattern: 'anti_extension',
+    intensityClass: 'moderate',
+  }
+  const DB_BENCH: CatalogExercise = {
+    id: 'ex-dbbench',
+    name: 'Dumbbell Bench Press',
+    equipment: ['dumbbell', 'bench'],
+    primaryFAUs: ['chest'],
+    secondaryFAUs: ['triceps'],
+    movementPattern: 'horizontal_push',
+    intensityClass: 'moderate',
+  }
+
+  const catalog = [PULL_UP, DIPS, EZ_CURL, AB_WHEEL, DB_BENCH]
+
+  it('excludes gated primary implements a dumbbell/machine user does not own', () => {
+    const { available, unconstrained } = resolveAvailableEquipment(
+      ['dumbbell', 'machine', 'bodyweight'],
+      true,
+    )
+    const result = buildCandidateExercises(catalog, {
+      available,
+      unconstrained,
+      bannedIds: NO_BANS,
+      preferences: NO_PREFS,
+    })
+    const ids = result.map((c) => c.id)
+    expect(ids).not.toContain('ex-pullup')
+    expect(ids).not.toContain('ex-dips')
+    expect(ids).not.toContain('ex-ezcurl')
+    expect(ids).not.toContain('ex-abwheel')
+    // bench is ambient + dumbbell owned → still passes
+    expect(ids).toContain('ex-dbbench')
+  })
+
+  it('includes pull-up exercises when the user explicitly lists pull_up_bar', () => {
+    const { available, unconstrained } = resolveAvailableEquipment(
+      ['pull_up_bar'],
+      true,
+    )
+    const result = buildCandidateExercises(catalog, {
+      available,
+      unconstrained,
+      bannedIds: NO_BANS,
+      preferences: NO_PREFS,
+    })
+    expect(result.map((c) => c.id)).toContain('ex-pullup')
+  })
+
+  it('passes everything for unconstrained users', () => {
+    const { available, unconstrained } = resolveAvailableEquipment([])
+    const result = buildCandidateExercises(catalog, {
+      available,
+      unconstrained,
+      bannedIds: NO_BANS,
+      preferences: NO_PREFS,
+    })
+    expect(result.map((c) => c.id).sort()).toEqual(
+      ['ex-abwheel', 'ex-dbbench', 'ex-dips', 'ex-ezcurl', 'ex-pullup'].sort(),
+    )
+  })
+})

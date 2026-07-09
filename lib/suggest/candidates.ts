@@ -65,23 +65,23 @@ const EQUIPMENT_ALIASES: Record<string, string> = {
 }
 
 /**
- * Accessory equipment that never gates availability: benches, bars and small
- * tools are assumed present whenever the user has any primary equipment, so a
- * "dumbbell + bench" exercise isn't excluded just because the profile lists
- * only `dumbbells`.
+ * Accessory equipment that never gates availability on its own: benches and
+ * small support gear are assumed present whenever the user has any primary
+ * equipment, so a "dumbbell + bench" exercise isn't excluded just because the
+ * profile lists only `dumbbells`. These genuinely co-occur with owned weights.
+ *
+ * NOTE: primary implements you either own or you don't — `pull_up_bar`,
+ * `dip_bars`, `parallel_bars`, `ab_wheel`, `roman_chair`, `ez_bar` — are
+ * deliberately NOT ambient (#958). Treating them as ambient let an exercise
+ * whose ONLY requirement was such a token pass for every user (e.g. a beginner
+ * with dumbbells/machines got 13 pull-up-bar exercises).
  */
 const AMBIENT_EQUIPMENT = new Set<string>([
   'bench',
   'incline_bench',
   'decline_bench',
   'preacher_bench',
-  'pull_up_bar',
-  'dip_bars',
-  'parallel_bars',
-  'ez_bar',
-  'ab_wheel',
   'foam_roller',
-  'roman_chair',
   'weight_belt',
 ])
 
@@ -121,9 +121,14 @@ export function isEquipmentAvailable(
   unconstrained: boolean,
 ): boolean {
   if (unconstrained) return true
-  const required = exercise.equipment
-    .map(normalizeEquipmentToken)
-    .filter((token) => !AMBIENT_EQUIPMENT.has(token))
+  const normalized = exercise.equipment.map(normalizeEquipmentToken)
+  const required = normalized.filter((token) => !AMBIENT_EQUIPMENT.has(token))
+  // Backstop (#958): if every required token is ambient, the exercise would
+  // otherwise pass for everyone. Demand that at least one ambient token is
+  // actually owned so a future ambient addition can't reintroduce the leak.
+  if (normalized.length > 0 && required.length === 0) {
+    return normalized.some((token) => available.has(token))
+  }
   return required.every((token) => available.has(token))
 }
 

@@ -383,8 +383,9 @@ describe('buildTrainingStatePayload — golden archetype canaries', () => {
 
     const { payload } = await buildTrainingStatePayload(prisma, user.id, REQUEST, NOW)
     const names = payload.candidate_exercises.map((c) => c.name).sort()
-    // Only bodyweight fixtures survive (pull_up_bar is ambient, not gating).
-    expect(names).toEqual(['Pull-Up', 'Standard Push-Up'])
+    // Only pure-bodyweight fixtures survive. Pull-Up requires pull_up_bar, a
+    // gated primary implement (#958), so it's excluded for a bodyweight-only user.
+    expect(names).toEqual(['Standard Push-Up'])
   })
 
   it('leaves candidates unconstrained when no explicit equipment record exists', async () => {
