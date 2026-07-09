@@ -131,20 +131,6 @@ exports[`buildTrainingStatePayload — golden archetype canaries > assembles a v
     },
     {
       "equipment": "bodyweight",
-      "id": "def-pull-up",
-      "intensity_class": "heavy",
-      "movement_pattern": "vertical_pull",
-      "name": "Pull-Up",
-      "primary_faus": [
-        "lats",
-      ],
-      "secondary_faus": [
-        "biceps",
-        "mid-back",
-      ],
-    },
-    {
-      "equipment": "bodyweight",
       "id": "def-standard-push-up",
       "intensity_class": "moderate",
       "movement_pattern": "horizontal_push",
@@ -588,20 +574,6 @@ exports[`buildTrainingStatePayload — golden archetype canaries > assembles a v
       ],
       "secondary_faus": [
         "triceps",
-      ],
-    },
-    {
-      "equipment": "bodyweight",
-      "id": "def-pull-up",
-      "intensity_class": "heavy",
-      "movement_pattern": "vertical_pull",
-      "name": "Pull-Up",
-      "primary_faus": [
-        "lats",
-      ],
-      "secondary_faus": [
-        "biceps",
-        "mid-back",
       ],
     },
     {
@@ -1455,20 +1427,6 @@ exports[`buildTrainingStatePayload — golden archetype canaries > assembles a v
       ],
     },
     {
-      "equipment": "bodyweight",
-      "id": "def-pull-up",
-      "intensity_class": "heavy",
-      "movement_pattern": "vertical_pull",
-      "name": "Pull-Up",
-      "primary_faus": [
-        "lats",
-      ],
-      "secondary_faus": [
-        "biceps",
-        "mid-back",
-      ],
-    },
-    {
       "equipment": "barbell",
       "id": "def-romanian-deadlift",
       "intensity_class": "heavy",
@@ -2203,20 +2161,6 @@ exports[`buildTrainingStatePayload — golden archetype canaries > assembles a v
       ],
     },
     {
-      "equipment": "bodyweight",
-      "id": "def-pull-up",
-      "intensity_class": "heavy",
-      "movement_pattern": "vertical_pull",
-      "name": "Pull-Up",
-      "primary_faus": [
-        "lats",
-      ],
-      "secondary_faus": [
-        "biceps",
-        "mid-back",
-      ],
-    },
-    {
       "equipment": "barbell",
       "id": "def-romanian-deadlift",
       "intensity_class": "heavy",
@@ -2736,20 +2680,6 @@ exports[`buildTrainingStatePayload — golden archetype canaries > assembles a v
       ],
       "secondary_faus": [
         "triceps",
-      ],
-    },
-    {
-      "equipment": "bodyweight",
-      "id": "def-pull-up",
-      "intensity_class": "heavy",
-      "movement_pattern": "vertical_pull",
-      "name": "Pull-Up",
-      "primary_faus": [
-        "lats",
-      ],
-      "secondary_faus": [
-        "biceps",
-        "mid-back",
       ],
     },
     {
