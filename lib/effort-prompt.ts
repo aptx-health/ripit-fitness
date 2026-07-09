@@ -18,6 +18,17 @@ export const EFFORT_OPTIONS = [
 export const MIN_SESSION_RPE = 6
 export const MAX_SESSION_RPE = 10
 
+/**
+ * Map a stored session RPE (6–10) to its word label (Easy → Maximal). Returns
+ * null for null/out-of-range values so callers can omit the effort chip rather
+ * than render a placeholder.
+ */
+export function sessionEffortLabel(rpe: number | null | undefined): string | null {
+  if (rpe == null) return null
+  const match = EFFORT_OPTIONS.find(option => option.rpe === rpe)
+  return match?.label ?? null
+}
+
 export function isValidSessionRpe(value: unknown): value is number {
   return (
     typeof value === 'number' &&
