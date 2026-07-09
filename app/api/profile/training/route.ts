@@ -18,18 +18,19 @@ import {
  * separately-owned fields (`ratioTargets` -> muscle-balance settings,
  * `bannedExerciseIds`). `equipmentAvailable` is written by the equipment
  * checklist (#927) and normalized to canonical ExerciseDefinition.equipment
- * values. `fauImportance`/`fauImportancePreset` are written here by the
- * importance presets / training-focus surfaces (#928). Keeping `goalSentences`
- * empty here is what lets the training-state builder synthesize cold-start
- * sentences from these fields
+ * values. `fauImportance`/`fauImportancePreset` are intentionally NOT writable
+ * here: the Training Focus / FAU-importance surfaces were retired in #960
+ * (descope of the LLM suggest flow, see #957). Muscle Balance ratios are the
+ * single muscle-priority source going forward. The columns remain in the DB,
+ * but writes to these fields are ignored (dropped by this whitelist). Keeping
+ * `goalSentences` empty here is what lets the training-state builder synthesize
+ * cold-start sentences from these fields
  * (see docs/SUGGEST_PAYLOAD_SPEC.md § Goal-sentence synthesis).
  */
 const WRITABLE_FIELDS = [
   'equipmentAvailable',
   'goalCategories',
   'otherActivities',
-  'fauImportance',
-  'fauImportancePreset',
   'defaultIntensityPreference',
   'targetSessionsPerWeek',
   'targetMinutesPerSession',

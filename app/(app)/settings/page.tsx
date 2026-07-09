@@ -1,7 +1,7 @@
 'use client'
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { Dumbbell, Heart, KeyRound, MessageSquarePlus, Moon, Palette, Shield, Sun, Target, Wrench } from 'lucide-react'
+import { Dumbbell, Heart, KeyRound, MessageSquarePlus, Moon, Palette, Shield, Sun } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import FeedbackModal from '@/components/features/FeedbackModal'
@@ -279,38 +279,6 @@ export default function SettingsPage() {
                 Training Targets
               </span>
               <Link
-                href="/goals-wizard"
-                className="flex min-h-14 items-center justify-between gap-3 border-2 border-border bg-card px-4 py-3 text-foreground transition-colors doom-focus-ring hover:border-primary hover:bg-muted/50"
-              >
-                <span className="flex items-center gap-3">
-                  <Target size={18} aria-hidden="true" />
-                  <span>
-                    <span className="block text-sm font-bold uppercase tracking-wider">
-                      Goals &amp; Profile
-                    </span>
-                    <span className="block text-sm text-muted-foreground">
-                      Tell us your goals, schedule, and anything to work around.
-                    </span>
-                  </span>
-                </span>
-              </Link>
-              <Link
-                href="/settings/equipment"
-                className="flex min-h-14 items-center justify-between gap-3 border-2 border-border bg-card px-4 py-3 text-foreground transition-colors doom-focus-ring hover:border-primary hover:bg-muted/50"
-              >
-                <span className="flex items-center gap-3">
-                  <Wrench size={18} aria-hidden="true" />
-                  <span>
-                    <span className="block text-sm font-bold uppercase tracking-wider">
-                      Equipment
-                    </span>
-                    <span className="block text-sm text-muted-foreground">
-                      Tell us what gear you have access to.
-                    </span>
-                  </span>
-                </span>
-              </Link>
-              <Link
                 href="/settings/muscle-balance"
                 className="flex min-h-14 items-center justify-between gap-3 border-2 border-border bg-card px-4 py-3 text-foreground transition-colors doom-focus-ring hover:border-primary hover:bg-muted/50"
               >
@@ -322,22 +290,6 @@ export default function SettingsPage() {
                     </span>
                     <span className="block text-sm text-muted-foreground">
                       Set FAU ratios for ad-hoc exercise guidance.
-                    </span>
-                  </span>
-                </span>
-              </Link>
-              <Link
-                href="/settings/training-focus"
-                className="flex min-h-14 items-center justify-between gap-3 border-2 border-border bg-card px-4 py-3 text-foreground transition-colors doom-focus-ring hover:border-primary hover:bg-muted/50"
-              >
-                <span className="flex items-center gap-3">
-                  <Target size={18} aria-hidden="true" />
-                  <span>
-                    <span className="block text-sm font-bold uppercase tracking-wider">
-                      Training Focus
-                    </span>
-                    <span className="block text-sm text-muted-foreground">
-                      Rate which muscles matter, or pick a preset.
                     </span>
                   </span>
                 </span>

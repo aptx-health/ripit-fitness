@@ -10,8 +10,6 @@ export type WizardAnswers = Pick<
   UserTrainingProfileDTO,
   | 'goalCategories'
   | 'otherActivities'
-  | 'fauImportance'
-  | 'fauImportancePreset'
   | 'defaultIntensityPreference'
   | 'targetSessionsPerWeek'
   | 'targetMinutesPerSession'
@@ -26,7 +24,6 @@ export type WizardAnswers = Pick<
 
 export const WIZARD_STEP_IDS = [
   'goals',
-  'focus',
   'rhythm',
   'injuries',
   'demographics',
@@ -39,12 +36,7 @@ export const WIZARD_STEPS: { id: WizardStepId; title: string; blurb: string }[] 
     {
       id: 'goals',
       title: 'What are you here for?',
-      blurb: 'Pick what matters — you can choose more than one.',
-    },
-    {
-      id: 'focus',
-      title: 'Where should we focus?',
-      blurb: 'Pick a preset to start, then fine-tune any muscle. Skip for balanced.',
+      blurb: 'Pick what matters, you can choose more than one.',
     },
     {
       id: 'rhythm',
@@ -68,8 +60,6 @@ export function emptyAnswers(): WizardAnswers {
   return {
     goalCategories: [],
     otherActivities: [],
-    fauImportance: {},
-    fauImportancePreset: null,
     defaultIntensityPreference: null,
     targetSessionsPerWeek: null,
     targetMinutesPerSession: null,
@@ -86,7 +76,6 @@ export function emptyAnswers(): WizardAnswers {
 /** Which answer fields each step owns — used to PATCH only that step's slice. */
 export const STEP_FIELDS: Record<WizardStepId, (keyof WizardAnswers)[]> = {
   goals: ['goalCategories', 'otherActivities', 'defaultIntensityPreference'],
-  focus: ['fauImportance', 'fauImportancePreset'],
   rhythm: [
     'targetSessionsPerWeek',
     'targetMinutesPerSession',
