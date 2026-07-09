@@ -1,4 +1,4 @@
 owner: aptx-health
 repo: ripit-fitness
-milestone: "Suggest Workout: build phase"
-graph_file: milestones/suggest-workout-build.md
+milestone: "Mechanical recommendations v1"
+graph_file: milestones/mechanical-recommendations.md
