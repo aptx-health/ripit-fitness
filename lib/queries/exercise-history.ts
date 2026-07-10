@@ -115,6 +115,77 @@ export async function getBatchExercisePerformance(
 }
 
 /**
+ * Get the most recent N performances for an exercise definition, newest first.
+ * Single query (no N+1) — nested `loggedSets` are filtered to this exercise
+ * definition and ordered by set number.
+ *
+ * @param exerciseDefinitionId - The exercise definition ID to look up
+ * @param userId - The user ID to filter by
+ * @param limit - Maximum number of sessions to return (default 4)
+ * @param beforeDate - Optional date to only include sessions completed before it
+ * @returns Array of ExerciseHistory, most recent first (empty if no history)
+ */
+export async function getRecentExercisePerformances(
+  exerciseDefinitionId: string,
+  userId: string,
+  limit = 4,
+  beforeDate?: Date
+): Promise<ExerciseHistory[]> {
+  const completions = await prisma.workoutCompletion.findMany({
+    where: {
+      userId,
+      status: 'completed',
+      completedAt: beforeDate ? { lt: beforeDate } : undefined,
+      loggedSets: {
+        some: {
+          exercise: { exerciseDefinitionId }
+        }
+      }
+    },
+    orderBy: { completedAt: 'desc' },
+    take: limit,
+    select: {
+      completedAt: true,
+      name: true,
+      workout: { select: { name: true } },
+      loggedSets: {
+        where: {
+          exercise: { exerciseDefinitionId }
+        },
+        orderBy: { setNumber: 'asc' },
+        select: {
+          setNumber: true,
+          reps: true,
+          weight: true,
+          weightUnit: true,
+          rpe: true,
+          rir: true,
+          isWarmup: true
+        }
+      }
+    }
+  });
+
+  // Defensive: the `some` filter guarantees at least one matching set, but keep
+  // the guard so an empty session never slips into the panel.
+  return completions
+    .filter(completion => completion.loggedSets.length > 0)
+    .map(completion => ({
+      completedAt: completion.completedAt,
+      workoutName: completion.workout?.name ?? completion.name ?? 'Open Workout',
+      sets: completion.loggedSets.map(set => ({
+        setNumber: set.setNumber,
+        reps: set.reps,
+        weight: set.weight,
+        weightUnit: set.weightUnit,
+        rpe: set.rpe,
+        rir: set.rir,
+        isWarmup: set.isWarmup
+      }))
+    }));
+}
+
+/**
  * Get last performance for an exercise definition
  * Returns most recent completed workout's sets for this exercise
  *
