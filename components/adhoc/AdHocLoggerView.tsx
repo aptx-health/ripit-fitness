@@ -65,6 +65,7 @@ type ExerciseHistory = {
     weightUnit: string
     rpe: number | null
     rir: number | null
+    isWarmup: boolean
   }>
 }
 

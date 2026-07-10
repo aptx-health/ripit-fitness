@@ -143,7 +143,9 @@ export class TestDatabase {
       'CommunityProgram',
       'UserSettings',
       'InAppMessage',
-      'WaiverAcceptance'
+      'WaiverAcceptance',
+      // Singleton row — must be cleared or it leaks across tests (id collision).
+      'TuningConfig'
     ]
 
     for (const table of tablesToClear) {

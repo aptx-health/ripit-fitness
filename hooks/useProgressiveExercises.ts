@@ -41,6 +41,7 @@ export type ExerciseHistorySet = {
   weightUnit: string
   rpe: number | null
   rir: number | null
+  isWarmup: boolean
 }
 
 export type ExerciseHistory = {

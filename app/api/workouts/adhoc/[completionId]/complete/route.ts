@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db'
 import { findAdHocCompletion } from '@/lib/db/adhoc-completion'
 import { recordEvent } from '@/lib/events'
 import { logger } from '@/lib/logger'
+import { enqueueAggregatesRecompute } from '@/lib/queue/aggregates-jobs'
 import { checkRateLimit, workoutActionLimiter } from '@/lib/rate-limit'
 import { computeWorkoutRollup } from '@/lib/stats/workout-rollup'
 
@@ -43,13 +44,25 @@ export async function POST(
       )
     }
 
+    const completedAt = new Date()
+    const durationSeconds = lookup.completion.startedAt
+      ? Math.max(
+          0,
+          Math.round(
+            (completedAt.getTime() - lookup.completion.startedAt.getTime()) / 1000
+          )
+        )
+      : null
+
     const completion = await prisma.workoutCompletion.update({
       where: { id: completionId },
-      data: { status: 'completed', completedAt: new Date() },
+      data: { status: 'completed', completedAt, durationSeconds },
       select: { id: true, completedAt: true, status: true },
     })
 
     recordEvent(user.id, 'adhoc_workout_completed', { completionId })
+    // Refresh the Suggest training-state layer off the request path (#919).
+    void enqueueAggregatesRecompute(user.id)
 
     logger.info(
       { userId: user.id, completionId, setCount },

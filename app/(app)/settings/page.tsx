@@ -274,7 +274,7 @@ export default function SettingsPage() {
               </div>
             )}
 
-            <div className="pt-4 border-t border-border">
+            <div className="pt-4 border-t border-border space-y-3">
               <span className="block text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
                 Training Targets
               </span>

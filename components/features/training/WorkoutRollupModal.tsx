@@ -6,6 +6,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
 import type { RollupExercise, WorkoutRollup } from '@/lib/stats/workout-rollup'
 import { POST_SESSION_REFINEMENTS } from '@/types/feedback'
+import { EffortChips } from './EffortChips'
 
 const SAVED_NAME_DATE_FMT = new Intl.DateTimeFormat('en-US', {
   month: 'long',
@@ -454,6 +455,9 @@ export function WorkoutRollupModal({ open, rollup, onClose }: WorkoutRollupModal
                   Marked complete. Nice work.
                 </p>
               )}
+
+              {/* Session effort rating — one-tap, skippable, throttled. */}
+              <EffortChips completionId={rollup.completionId} />
             </div>
           )}
 
