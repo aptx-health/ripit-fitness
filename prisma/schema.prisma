@@ -383,6 +383,10 @@ model UserMuscleBalanceSettings {
   userId           String   @unique
   targets          Json
   lookbackWorkouts Int      @default(8)
+  // Days-based lookback window for the neglected calculator (v2). Replaces
+  // lookbackWorkouts as the driver of which logged sets count; lookbackWorkouts
+  // is retained for read-compat with existing rows/consumers.
+  lookbackDays     Int      @default(14)
   includeSecondary Boolean  @default(true)
   secondaryWeight  Float    @default(0.5)
   excludeWarmups   Boolean  @default(true)
