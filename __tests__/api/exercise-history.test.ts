@@ -79,7 +79,7 @@ describe('getRecentExercisePerformances', () => {
       ])
     }
 
-    const sessions = await getRecentExercisePerformances(exerciseDefinitionId, userId, 4)
+    const sessions = await getRecentExercisePerformances(exerciseDefinitionId, userId, 4, undefined, prisma)
 
     expect(sessions).toHaveLength(4)
     // Newest first: Jan 5, 4, 3, 2 (Jan 1 dropped by the limit).
@@ -99,7 +99,7 @@ describe('getRecentExercisePerformances', () => {
       { setNumber: 3, reps: 3, weight: 185, rpe: undefined, rir: 1, isWarmup: false },
     ])
 
-    const [session] = await getRecentExercisePerformances(exerciseDefinitionId, userId, 4)
+    const [session] = await getRecentExercisePerformances(exerciseDefinitionId, userId, 4, undefined, prisma)
 
     expect(session.sets.map(s => s.setNumber)).toEqual([1, 2, 3])
     expect(session.sets[0].isWarmup).toBe(true)
@@ -142,13 +142,13 @@ describe('getRecentExercisePerformances', () => {
       },
     })
 
-    const [session] = await getRecentExercisePerformances(exerciseDefinitionId, userId, 4)
+    const [session] = await getRecentExercisePerformances(exerciseDefinitionId, userId, 4, undefined, prisma)
     expect(session.sets).toHaveLength(1)
     expect(session.sets[0].weight).toBe(200)
   })
 
   it('returns an empty array when there is no history', async () => {
-    const sessions = await getRecentExercisePerformances(exerciseDefinitionId, userId, 4)
+    const sessions = await getRecentExercisePerformances(exerciseDefinitionId, userId, 4, undefined, prisma)
     expect(sessions).toEqual([])
   })
 
@@ -160,8 +160,8 @@ describe('getRecentExercisePerformances', () => {
       { setNumber: 1, reps: 5, weight: 135, rir: 2 },
     ])
 
-    const sessions = await getRecentExercisePerformances(exerciseDefinitionId, userId, 4)
-    const legacy = await getLastExercisePerformance(exerciseDefinitionId, userId)
+    const sessions = await getRecentExercisePerformances(exerciseDefinitionId, userId, 4, undefined, prisma)
+    const legacy = await getLastExercisePerformance(exerciseDefinitionId, userId, undefined, prisma)
 
     expect(legacy).not.toBeNull()
     expect(sessions[0]).toEqual(legacy)
@@ -175,7 +175,8 @@ describe('getRecentExercisePerformances', () => {
       exerciseDefinitionId,
       userId,
       4,
-      new Date('2026-05-05T00:00:00Z')
+      new Date('2026-05-05T00:00:00Z'),
+      prisma
     )
 
     expect(sessions).toHaveLength(1)

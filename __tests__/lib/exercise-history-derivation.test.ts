@@ -59,12 +59,9 @@ describe('bestWorkingSet', () => {
   })
 
   it('breaks ties toward the earliest qualifying set', () => {
-    const best = bestWorkingSet([
-      set({ reps: 5, weight: 100 }),
-      set({ reps: 5, weight: 100 }),
-    ])
-    // Same e1RM — first one wins (strict >).
-    expect(best).toBe(bestWorkingSet([set({ reps: 5, weight: 100 })]))
+    const sets = [set({ reps: 5, weight: 100 }), set({ reps: 5, weight: 100 })]
+    // Same e1RM — first one wins (strict >): returns that exact set reference.
+    expect(bestWorkingSet(sets)).toBe(sets[0])
   })
 })
 

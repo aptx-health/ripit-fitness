@@ -1,5 +1,6 @@
 // Exercise History Queries
 
+import type { PrismaClient } from '@prisma/client';
 import { prisma } from '@/lib/db';
 
 export interface ExerciseHistorySet {
@@ -123,15 +124,17 @@ export async function getBatchExercisePerformance(
  * @param userId - The user ID to filter by
  * @param limit - Maximum number of sessions to return (default 4)
  * @param beforeDate - Optional date to only include sessions completed before it
+ * @param client - Prisma client (defaults to the app singleton; injectable for tests)
  * @returns Array of ExerciseHistory, most recent first (empty if no history)
  */
 export async function getRecentExercisePerformances(
   exerciseDefinitionId: string,
   userId: string,
   limit = 4,
-  beforeDate?: Date
+  beforeDate?: Date,
+  client: PrismaClient = prisma
 ): Promise<ExerciseHistory[]> {
-  const completions = await prisma.workoutCompletion.findMany({
+  const completions = await client.workoutCompletion.findMany({
     where: {
       userId,
       status: 'completed',
@@ -192,15 +195,17 @@ export async function getRecentExercisePerformances(
  * @param exerciseDefinitionId - The exercise definition ID to look up
  * @param userId - The user ID to filter by
  * @param beforeDate - Optional date to get history before (useful for "last time" before current workout)
+ * @param client - Prisma client (defaults to the app singleton; injectable for tests)
  * @returns Exercise history or null if no previous performance found
  */
 export async function getLastExercisePerformance(
   exerciseDefinitionId: string,
   userId: string,
-  beforeDate?: Date
+  beforeDate?: Date,
+  client: PrismaClient = prisma
 ): Promise<ExerciseHistory | null> {
   // Find most recent completion with this exercise
-  const lastCompletion = await prisma.workoutCompletion.findFirst({
+  const lastCompletion = await client.workoutCompletion.findFirst({
     where: {
       userId,
       status: 'completed',
