@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, Sparkles } from 'lucide-react'
+import { Sparkles } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import type { MessageData } from '@/components/ui/MessageCard'
@@ -10,6 +10,7 @@ import { TipAnnotation } from '@/components/ui/TipAnnotation'
 import type { LoadState } from '@/hooks/useProgressiveExercises'
 import type { LoggedSet } from '@/types/workout'
 import DrawerContextBanner from './DrawerContextBanner'
+import ExerciseHistoryPanel from './ExerciseHistoryPanel'
 import ExerciseInfoContent from './ExerciseInfoContent'
 import LastSessionReference from './LastSessionReference'
 import SetList from './SetList'
@@ -58,6 +59,9 @@ interface ExerciseDisplayTabsProps {
   prescribedSets: PrescribedSet[]
   loggedSets: LoggedSet[]
   exerciseHistory: ExerciseHistory | null
+  /** Recent sessions (newest first) for the multi-session History panel.
+      Falls back to `[exerciseHistory]` when omitted. */
+  sessions?: ExerciseHistory[]
   historyState?: LoadState
   hasHistoryIndicator?: boolean // Pre-computed indicator for dot (updates reactively)
   onDeleteSet: (setNumber: number) => void
@@ -111,6 +115,7 @@ export default function ExerciseDisplayTabs({
   prescribedSets,
   loggedSets,
   exerciseHistory,
+  sessions,
   historyState = 'loaded',
   hasHistoryIndicator = false,
   onDeleteSet,
@@ -127,6 +132,11 @@ export default function ExerciseDisplayTabs({
 }: ExerciseDisplayTabsProps) {
   const hasNotes = !!exercise.notes
   const [activeTab, setActiveTab] = useState('log-sets')
+
+  // Prefer the full sessions list; fall back to the single last session so
+  // callers that only wire `exerciseHistory` still render a one-session panel.
+  const historySessions: ExerciseHistory[] =
+    sessions ?? (exerciseHistory ? [exerciseHistory] : [])
 
   // When the exercise changes, reset to "log-sets" if the current tab is
   // unavailable on the new exercise (e.g. "notes" tab when there are no notes).
@@ -182,7 +192,7 @@ export default function ExerciseDisplayTabs({
               <SetList
                 prescribedSets={prescribedSets}
                 loggedSets={loggedSets}
-                exerciseHistory={null}
+                exerciseHistory={exerciseHistory}
                 onDeleteSet={onDeleteSet}
                 exerciseId={exercise.id}
                 showIntensity={showIntensity}
@@ -230,7 +240,7 @@ export default function ExerciseDisplayTabs({
           <div className="flex flex-col items-center justify-center h-full py-12">
             <p className="text-base sm:text-lg text-error">Failed to load history</p>
           </div>
-        ) : !exerciseHistory ? (
+        ) : historySessions.length === 0 ? (
           <div className="flex items-center justify-center h-full py-12">
             <TipAnnotation
               icon={<Sparkles aria-hidden="true" size={16} strokeWidth={1.8} />}
@@ -241,51 +251,7 @@ export default function ExerciseDisplayTabs({
             </TipAnnotation>
           </div>
         ) : (
-          <div className="space-y-4">
-            {/* Last performed header */}
-            <div className="border border-border border-l-4 border-l-success bg-card doom-noise p-3">
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">
-                LAST PERFORMED
-              </p>
-              <p className="text-base font-bold text-foreground doom-heading">
-                {new Date(exerciseHistory.completedAt).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric',
-                })}
-              </p>
-              <p className="text-sm text-muted-foreground">{exerciseHistory.workoutName}</p>
-            </div>
-
-            {/* Sets completed — matching logged set row format */}
-            <div>
-              <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
-                SETS COMPLETED
-              </h4>
-              <div className="divide-y divide-border/30">
-                {exerciseHistory.sets.map((set) => {
-                  const weight = set.weight === 0 ? 'Bodyweight' : `${set.weight} ${set.weightUnit}`
-                  const intensity = set.rir !== null ? `RIR ${set.rir}` : set.rpe !== null ? `RPE ${set.rpe}` : null
-                  return (
-                    <div key={set.setNumber} className="px-2 py-2">
-                      <div className="flex items-start gap-2">
-                        <Check size={16} className="text-success flex-shrink-0 mt-0.5" />
-                        <div>
-                          <span className="block text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                            Set {set.setNumber}
-                          </span>
-                          <span className="block text-base font-bold text-foreground">
-                            {weight} &times; {set.reps}
-                            {intensity ? ` \u00b7 ${intensity}` : ''}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          </div>
+          <ExerciseHistoryPanel sessions={historySessions} />
         )}
       </TabsContent>
     </Tabs>

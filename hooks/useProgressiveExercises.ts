@@ -68,6 +68,8 @@ export interface UseProgressiveExercisesResult {
   goToPrevious: () => void
   loadedExercises: Map<number, Exercise>
   currentExerciseHistory: ExerciseHistory | null
+  /** Recent sessions (newest first) for the current exercise's History panel. */
+  currentExerciseSessions: ExerciseHistory[]
   currentHistoryState: LoadState
   hasHistoryForCurrentExercise: boolean
   refreshExercises: () => void
@@ -83,6 +85,14 @@ interface ExerciseApiResponse {
 
 interface HistoryApiResponse {
   history: ExerciseHistory | null
+  sessions?: ExerciseHistory[]
+}
+
+/** Combined history payload: the last session (for prefill/reference) plus the
+    recent-sessions list (for the History panel). */
+interface HistoryBundle {
+  history: ExerciseHistory | null
+  sessions: ExerciseHistory[]
 }
 
 /**
@@ -118,6 +128,13 @@ export function useProgressiveExercises(
   const [historyByExerciseId, setHistoryByExerciseId] = useState<Map<string, ExerciseHistory | null>>(() => {
     if (initialExercise) {
       return new Map([[initialExercise.id, initialHistory ?? null]])
+    }
+    return new Map()
+  })
+
+  const [sessionsByExerciseId, setSessionsByExerciseId] = useState<Map<string, ExerciseHistory[]>>(() => {
+    if (initialExercise) {
+      return new Map([[initialExercise.id, initialHistory ? [initialHistory] : []]])
     }
     return new Map()
   })
@@ -167,16 +184,18 @@ export function useProgressiveExercises(
     }
   }, [workoutId, completionId, totalExercises])
 
-  const fetchHistory = useCallback(async (exerciseId: string): Promise<ExerciseHistory | null> => {
+  const fetchHistory = useCallback(async (exerciseId: string): Promise<HistoryBundle> => {
     try {
       const response = await fetch(`/api/exercises/${exerciseId}/history`)
-      if (!response.ok) return null
+      if (!response.ok) return { history: null, sessions: [] }
 
       const data: HistoryApiResponse = await response.json()
-      return data.history
+      // Tolerate older payloads without `sessions` by deriving from `history`.
+      const sessions = data.sessions ?? (data.history ? [data.history] : [])
+      return { history: data.history, sessions }
     } catch (error) {
       clientLogger.error(`Error fetching history for exercise ${exerciseId}:`, error)
-      return null
+      return { history: null, sessions: [] }
     }
   }, [])
 
@@ -194,10 +213,11 @@ export function useProgressiveExercises(
           prefetchingRef.current.add(historyKey)
           setHistoryLoadStates(prev => new Map(prev).set(exercise.id, 'loading'))
 
-          const history = await fetchHistory(exercise.id)
+          const { history, sessions } = await fetchHistory(exercise.id)
 
           if (mountedRef.current) {
             setHistoryByExerciseId(prev => new Map(prev).set(exercise.id, history))
+            setSessionsByExerciseId(prev => new Map(prev).set(exercise.id, sessions))
             setHistoryLoadStates(prev => new Map(prev).set(exercise.id, 'loaded'))
           }
           prefetchingRef.current.delete(historyKey)
@@ -224,10 +244,11 @@ export function useProgressiveExercises(
       prefetchingRef.current.add(historyKey)
       setHistoryLoadStates(prev => new Map(prev).set(exercise.id, 'loading'))
 
-      const history = await fetchHistory(exercise.id)
+      const { history, sessions } = await fetchHistory(exercise.id)
 
       if (mountedRef.current) {
         setHistoryByExerciseId(prev => new Map(prev).set(exercise.id, history))
+        setSessionsByExerciseId(prev => new Map(prev).set(exercise.id, sessions))
         setHistoryLoadStates(prev => new Map(prev).set(exercise.id, 'loaded'))
       }
       prefetchingRef.current.delete(historyKey)
@@ -282,6 +303,7 @@ export function useProgressiveExercises(
     setLoadedExercises(new Map())
     setExerciseLoadStates(new Map())
     setHistoryByExerciseId(new Map())
+    setSessionsByExerciseId(new Map())
     setHistoryLoadStates(new Map())
     prefetchingRef.current.clear()
 
@@ -294,6 +316,9 @@ export function useProgressiveExercises(
   const currentExerciseHistory = currentExercise
     ? historyByExerciseId.get(currentExercise.id) ?? null
     : null
+  const currentExerciseSessions = currentExercise
+    ? sessionsByExerciseId.get(currentExercise.id) ?? []
+    : []
   const currentHistoryState = currentExercise
     ? historyLoadStates.get(currentExercise.id) || 'pending'
     : 'pending'
@@ -314,6 +339,7 @@ export function useProgressiveExercises(
     goToPrevious,
     loadedExercises,
     currentExerciseHistory,
+    currentExerciseSessions,
     currentHistoryState,
     hasHistoryForCurrentExercise,
     refreshExercises,

@@ -175,14 +175,36 @@ export async function discardAdHocWorkout(
   )
 }
 
+type ExerciseHistoryPayload = {
+  completedAt: string
+  workoutName: string
+  sets: Array<{
+    setNumber: number
+    reps: number
+    weight: number
+    weightUnit: string
+    rpe: number | null
+    rir: number | null
+    isWarmup: boolean
+  }>
+}
+
+/**
+ * Fetch recent history for an exercise. Returns the last session (`history`,
+ * used for prefill + the last-session reference) plus the recent-sessions list
+ * (`sessions`, used for the History panel). Tolerates older payloads that only
+ * carry `history` by deriving a single-session list.
+ */
 export async function fetchExerciseHistory(
   exerciseId: string,
   retry: RetryOpts = {}
-): Promise<unknown | null> {
-  const result = await fetchJsonWithRetry<{ history: unknown | null }>(
-    `/api/exercises/${exerciseId}/history`,
-    { method: 'GET' },
-    retry
-  )
-  return result.history ?? null
+): Promise<{ history: ExerciseHistoryPayload | null; sessions: ExerciseHistoryPayload[] }> {
+  const result = await fetchJsonWithRetry<{
+    history: ExerciseHistoryPayload | null
+    sessions?: ExerciseHistoryPayload[]
+  }>(`/api/exercises/${exerciseId}/history`, { method: 'GET' }, retry)
+
+  const history = result.history ?? null
+  const sessions = result.sessions ?? (history ? [history] : [])
+  return { history, sessions }
 }

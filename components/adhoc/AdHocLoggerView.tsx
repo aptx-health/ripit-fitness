@@ -136,6 +136,9 @@ export default function AdHocLoggerView({
   const [historyByExerciseId, setHistoryByExerciseId] = useState<
     Map<string, ExerciseHistory | null>
   >(new Map())
+  const [sessionsByExerciseId, setSessionsByExerciseId] = useState<
+    Map<string, ExerciseHistory[]>
+  >(new Map())
   const [historyLoadingIds, setHistoryLoadingIds] = useState<Set<string>>(new Set())
   const [showExitConfirm, setShowExitConfirm] = useState(false)
   const [rollup, setRollup] = useState<WorkoutRollup | null>(null)
@@ -160,10 +163,15 @@ export default function AdHocLoggerView({
     const exerciseId = currentExercise.id
     setHistoryLoadingIds((prev) => new Set(prev).add(exerciseId))
     fetchExerciseHistory(exerciseId)
-      .then((history) => {
+      .then(({ history, sessions }) => {
         setHistoryByExerciseId((prev) => {
           const next = new Map(prev)
           next.set(exerciseId, (history as ExerciseHistory | null) ?? null)
+          return next
+        })
+        setSessionsByExerciseId((prev) => {
+          const next = new Map(prev)
+          next.set(exerciseId, (sessions as unknown as ExerciseHistory[]) ?? [])
           return next
         })
       })
@@ -173,6 +181,11 @@ export default function AdHocLoggerView({
         setHistoryByExerciseId((prev) => {
           const next = new Map(prev)
           next.set(exerciseId, null)
+          return next
+        })
+        setSessionsByExerciseId((prev) => {
+          const next = new Map(prev)
+          next.set(exerciseId, [])
           return next
         })
       })
@@ -729,6 +742,7 @@ export default function AdHocLoggerView({
               prescribedSets={[]}
               loggedSets={currentExerciseSets}
               exerciseHistory={historyByExerciseId.get(currentExercise.id) ?? null}
+              sessions={sessionsByExerciseId.get(currentExercise.id) ?? []}
               historyState={
                 historyLoadingIds.has(currentExercise.id)
                   ? 'loading'
