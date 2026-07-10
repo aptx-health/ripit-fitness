@@ -6,7 +6,10 @@ import { clientLogger } from '@/lib/client-logger'
 import { EQUIPMENT_LABELS } from '@/lib/constants/program-metadata'
 import { ALL_FAUS, FAU_DISPLAY_NAMES, type FAUKey } from '@/lib/fau-volume'
 import type { MuscleBalanceSnapshot } from '@/lib/muscle-balance'
+import type { FauNeed } from '@/lib/recommendations/fau-score'
 import { FilterChoiceSheet } from './FilterChoiceSheet'
+
+type FauSort = 'alphabetical' | 'neglected' | 'recovery'
 
 export type ExerciseDefinition = {
   id: string
@@ -27,6 +30,12 @@ interface ExerciseSearchInterfaceProps {
   onEditExercise?: (exercise: ExerciseDefinition) => void
   initialFauFilter?: string | null
   muscleBalanceSnapshot?: MuscleBalanceSnapshot
+  /**
+   * Recovery-aware FAU ranking (#963). When present, the muscle-group sort gains
+   * a third "Recovery" mode ordering FAUs by composite need and showing a short
+   * reason chip per row. Absent = the mode is not offered (graceful degrade).
+   */
+  recoveryRanking?: FauNeed[]
   plannedFAUVolume?: Partial<Record<FAUKey, number>>
   /**
    * When provided, the picker switches to multi-select mode: cards highlight
@@ -68,6 +77,7 @@ export function ExerciseSearchInterface({
   onEditExercise,
   initialFauFilter = null,
   muscleBalanceSnapshot,
+  recoveryRanking,
   plannedFAUVolume = {},
   selectedIds,
 }: ExerciseSearchInterfaceProps) {
@@ -81,13 +91,33 @@ export function ExerciseSearchInterface({
   const [hasSearched, setHasSearched] = useState(preloadExercises)
   const [fauSheetOpen, setFauSheetOpen] = useState(false)
   const [equipmentSheetOpen, setEquipmentSheetOpen] = useState(false)
-  const [fauSort, setFauSort] = useState<'alphabetical' | 'neglected'>('alphabetical')
+  const [fauSort, setFauSort] = useState<FauSort>('alphabetical')
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   const balanceByFau = useMemo(() => {
     if (!muscleBalanceSnapshot) return new Map<FAUKey, MuscleBalanceSnapshot['items'][number]>()
     return new Map(muscleBalanceSnapshot.items.map((item) => [item.fau, item]))
   }, [muscleBalanceSnapshot])
+
+  const hasRecovery = recoveryRanking !== undefined && recoveryRanking.length > 0
+  const recoveryByFau = useMemo(
+    () => new Map((recoveryRanking ?? []).map((entry) => [entry.fau, entry])),
+    [recoveryRanking],
+  )
+  // The recovery mode can only be active when its data is present; if the prop
+  // disappears, fall back so the sort never silently produces an empty order.
+  const effectiveSort: FauSort =
+    fauSort === 'recovery' && !hasRecovery ? 'neglected' : fauSort
+
+  const sortModes = useMemo(
+    () =>
+      [
+        { key: 'alphabetical' as const, label: 'A-Z' },
+        { key: 'neglected' as const, label: 'Neglected' },
+        ...(hasRecovery ? [{ key: 'recovery' as const, label: 'Recovery' }] : []),
+      ] satisfies Array<{ key: FauSort; label: string }>,
+    [hasRecovery],
+  )
 
   const fauOptions = useMemo(() => {
     const scoreFAU = (fau: FAUKey) => {
@@ -101,7 +131,11 @@ export function ExerciseSearchInterface({
     }
 
     const sortedFaus = [...ALL_FAUS].sort((a, b) => {
-      if (fauSort === 'neglected' && muscleBalanceSnapshot) {
+      if (effectiveSort === 'recovery' && hasRecovery) {
+        const needA = recoveryByFau.get(a)?.need ?? Number.NEGATIVE_INFINITY
+        const needB = recoveryByFau.get(b)?.need ?? Number.NEGATIVE_INFINITY
+        if (needB !== needA) return needB - needA
+      } else if (effectiveSort === 'neglected' && muscleBalanceSnapshot) {
         const byAdjustedDeficit = scoreFAU(b) - scoreFAU(a)
         if (byAdjustedDeficit !== 0) return byAdjustedDeficit
       }
@@ -130,12 +164,26 @@ export function ExerciseSearchInterface({
               ? `${formatSets(adjustedSets)} / ${formatSets(desiredSets)} target sets`
               : undefined,
           badge: item ? `${Math.round((adjustedFulfillment ?? item.fulfillment) * 100)}%` : undefined,
-          meta: plannedSets > 0 ? `+${formatSets(plannedSets)} planned` : undefined,
+          // In recovery mode the row surfaces its "why" chip instead of the
+          // planning-flow "+N planned" hint.
+          meta:
+            effectiveSort === 'recovery'
+              ? recoveryByFau.get(fau)?.reason?.label
+              : plannedSets > 0
+                ? `+${formatSets(plannedSets)} planned`
+                : undefined,
           progress: item ? Math.min(100, (adjustedFulfillment ?? item.fulfillment) * 100) : undefined,
         }
       }),
     ]
-  }, [balanceByFau, fauSort, muscleBalanceSnapshot, plannedFAUVolume])
+  }, [
+    balanceByFau,
+    effectiveSort,
+    hasRecovery,
+    muscleBalanceSnapshot,
+    plannedFAUVolume,
+    recoveryByFau,
+  ])
   const equipmentOptions = useMemo(
     () => [
       { value: null, label: 'All Equipment' },
@@ -260,29 +308,28 @@ export function ExerciseSearchInterface({
               <div className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
                 Sort muscle groups
               </div>
-              <div className="grid grid-cols-2 border-2 border-border bg-muted/20">
-                <button
-                  type="button"
-                  onClick={() => setFauSort('alphabetical')}
-                  className={`min-h-10 px-3 text-sm font-bold uppercase tracking-wider transition-colors doom-focus-ring ${
-                    fauSort === 'alphabetical'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-foreground hover:bg-muted/50'
-                  }`}
-                >
-                  A-Z
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFauSort('neglected')}
-                  className={`min-h-10 border-l-2 border-border px-3 text-sm font-bold uppercase tracking-wider transition-colors doom-focus-ring ${
-                    fauSort === 'neglected'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-foreground hover:bg-muted/50'
-                  }`}
-                >
-                  Neglected
-                </button>
+              <div
+                className="grid border-2 border-border bg-muted/20"
+                style={{
+                  gridTemplateColumns: `repeat(${sortModes.length}, minmax(0, 1fr))`,
+                }}
+              >
+                {sortModes.map((mode, index) => (
+                  <button
+                    key={mode.key}
+                    type="button"
+                    onClick={() => setFauSort(mode.key)}
+                    className={`min-h-10 px-3 text-sm font-bold uppercase tracking-wider transition-colors doom-focus-ring ${
+                      index > 0 ? 'border-l-2 border-border' : ''
+                    } ${
+                      effectiveSort === mode.key
+                        ? 'bg-primary text-primary-foreground'
+                        : 'text-foreground hover:bg-muted/50'
+                    }`}
+                  >
+                    {mode.label}
+                  </button>
+                ))}
               </div>
             </div>
           ) : undefined

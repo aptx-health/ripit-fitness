@@ -34,6 +34,7 @@ import {
 } from '@/lib/api/adhoc-workout'
 import { FetchError } from '@/lib/api/fetch'
 import { clientLogger } from '@/lib/client-logger'
+import type { FauNeed } from '@/lib/recommendations/fau-score'
 import type { WorkoutRollup } from '@/lib/stats/workout-rollup'
 import type { LoggedSet } from '@/types/workout'
 import {
@@ -86,6 +87,8 @@ type Props = {
     isWarmup: boolean
   }>
   muscleBalanceSnapshot: MuscleBalanceSnapshot
+  /** Recovery-aware FAU ranking (#963) for the picker's third sort mode. */
+  recoveryRanking?: FauNeed[]
 }
 
 const EMPTY_SET = {
@@ -102,6 +105,7 @@ export default function AdHocLoggerView({
   initialExercises,
   initialLoggedSets,
   muscleBalanceSnapshot,
+  recoveryRanking,
 }: Props) {
   const router = useRouter()
   const toast = useToast()
@@ -830,6 +834,7 @@ export default function AdHocLoggerView({
           onConfirm={pickerMode.kind === 'add' ? handleAddExercises : handleSwapExercise}
           isBusy={pickerMode.kind === 'add' ? isAdding : isSwapping}
           muscleBalanceSnapshot={muscleBalanceSnapshot}
+          recoveryRanking={recoveryRanking}
           plannedExerciseDefinitions={exercises.map((exercise) => ({
             primaryFAUs: exercise.exerciseDefinition.primaryFAUs,
             secondaryFAUs: exercise.exerciseDefinition.secondaryFAUs,

@@ -5,6 +5,7 @@ import { RestoringWorkoutSpinner } from '@/components/ui/RestoringWorkoutSpinner
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { getMuscleBalanceSnapshot } from '@/lib/muscle-balance'
+import { getFauRecoveryRanking } from '@/lib/recommendations/fau-recovery-data'
 
 type Props = {
   params: Promise<{ completionId: string }>
@@ -96,6 +97,15 @@ async function AdHocLoggerLoader({ completionId }: { completionId: string }) {
     redirect('/training')
   }
 
+  // Recovery-aware FAU ranking (#963) for the picker's third sort mode. Derived
+  // from the snapshot above plus aggregates + recent session effort; degrades to
+  // a deficit-only ranking when those are absent, and never blocks the page.
+  const recoveryRanking = await getFauRecoveryRanking(
+    prisma,
+    user.id,
+    muscleBalanceSnapshot
+  )
+
   const exercises: AdHocExercise[] = completion.exercises.map((e) => ({
     id: e.id,
     name: e.name,
@@ -117,6 +127,7 @@ async function AdHocLoggerLoader({ completionId }: { completionId: string }) {
       initialExercises={exercises}
       initialLoggedSets={completion.loggedSets}
       muscleBalanceSnapshot={muscleBalanceSnapshot}
+      recoveryRanking={recoveryRanking ?? undefined}
     />
   )
 }
