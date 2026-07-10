@@ -89,13 +89,51 @@ model ExerciseDefinition {
   mechanic       String?
   level          String?
   userId         String
+  // Auto-tagged classification (LLM-bootstrapped). See lib/exercises/auto-tag.ts
+  // movementPattern: squat | hinge | vertical_push | horizontal_push | vertical_pull | horizontal_pull | lunge | carry | isolation | accessory
+  movementPattern String?
+  // intensityClass: heavy | moderate | light (typical fatigue cost)
+  intensityClass  String?
+  // True for bodyweight-loaded exercises (weight logged as 0). Their sets count
+  // toward FAU volume but their weights are excluded from calibration EWMAs
+  // (SUGGEST_PAYLOAD_SPEC global rule 3). Backfilled from equipment containing
+  // "bodyweight"; downstream consumers use this column, never re-infer.
+  isBodyweight    Boolean   @default(false)
+  taggedAt        DateTime?
+  taggedBy        String?
   exercises      Exercise[]
+  userPreferences UserExercisePreference[]
 
   @@index([normalizedName])
   @@index([isSystem])
   @@index([createdBy])
   @@index([primaryFAUs])
   @@index([userId])
+  @@index([movementPattern])
+  @@index([intensityClass])
+}
+
+// Per-user, per-exercise preference learning (decayed Beta distribution).
+// Written by implicit-feedback hooks; read (with decay-on-read) by the
+// training-state builder. See lib/learning/math.ts and lib/learning/preference-store.ts.
+model UserExercisePreference {
+  id                   String             @id @default(cuid())
+  userId               String
+  exerciseDefinitionId String
+  // Beta(alpha, beta) evidence counts. Both > 0 (relax toward the uniform
+  // prior on decay rather than collapsing below 1).
+  alpha                Float              @default(1)
+  beta                 Float              @default(1)
+  // Drives decay-on-read: elapsed weeks since this stamp determine how far the
+  // stored evidence has decayed toward the prior.
+  lastUpdatedAt        DateTime           @default(now())
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  exerciseDefinition   ExerciseDefinition @relation(fields: [exerciseDefinitionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, exerciseDefinitionId])
+  @@index([userId])
+  @@index([exerciseDefinitionId])
 }
 
 model Exercise {
@@ -151,6 +189,8 @@ model WorkoutCompletion {
   cycleNumber     Int         @default(1)
   isAdHoc         Boolean     @default(false)
   name            String?
+  durationSeconds Int?
+  sessionRpe      Int?
   exercises       Exercise[]
   loggedSets      LoggedSet[]
   workout         Workout?    @relation(fields: [workoutId], references: [id], onDelete: Cascade)
@@ -352,6 +392,60 @@ model UserMuscleBalanceSettings {
   @@index([userId])
 }
 
+model UserTrainingProfile {
+  id                          String   @id @default(cuid())
+  userId                      String   @unique
+  goalSentences               String[] @default([])
+  weeklyIntent                String[] @default([])
+  equipmentAvailable          String[] @default([])
+  // false = no record (planner assumes a full commercial gym); true = the
+  // user's real selection, even if minimal/empty (#927). Distinguishes an
+  // intentional "I own almost nothing" from "never set".
+  equipmentAvailableSet       Boolean  @default(false)
+  bannedExerciseIds           String[] @default([])
+  ratioTargets                Json
+  defaultIntensityPreference  String?
+
+  // Demographics (all optional, skippable)
+  birthYear                   Int?
+  // biologicalSex: female | male | prefer_not_to_say
+  biologicalSex               String?
+  heightCm                    Float?
+  weightKg                    Float?
+
+  // Injuries: [{ area, severity, notes?, reportedAt? }]
+  // area: neck | shoulder | elbow | wrist | upper_back | lower_back | hip | knee | ankle
+  // severity: avoid_loading | caution | recovered
+  // Source for the injury -> exercise ban-list mapping (areas align with
+  // ExerciseDefinition.movementPattern / FAU taxonomy).
+  injuryAreas                 Json     @default("[]")
+
+  // Importance ratings (1-5)
+  // goalCategories: [{ category, importance }]
+  goalCategories              Json     @default("[]")
+  // otherActivities: [{ activity, importance, cadence? }]
+  otherActivities             Json     @default("[]")
+  // fauImportance: { [fauKey]: 1..5 } — per-FAU weighting (keys from lib/fau-volume ALL_FAUS)
+  fauImportance               Json     @default("{}")
+  // fauImportancePreset: id of the last applied importance preset (lib/learning
+  // ratio-presets RATIO_PRESET_IDS), or null. Attribution only — ratings above
+  // stay editable, so this survives per-FAU tweaks for "based on your X preset" copy.
+  fauImportancePreset         String?
+
+  // Training rhythm
+  targetSessionsPerWeek       Int?
+  targetMinutesPerSession     Int?
+  // patternPreference: no_preference | full_body | upper_lower | push_pull_legs | body_part_split | custom
+  patternPreference           String?
+  // preferredDays: monday..sunday
+  preferredDays               String[] @default([])
+
+  createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt
+
+  @@index([userId])
+}
+
 model CommunityProgram {
   id                String   @id(map: "community_programs_pkey") @default(cuid())
   name              String
@@ -383,41 +477,6 @@ model CommunityProgram {
   @@index([equipmentNeeded], type: Gin)
   @@index([programType, publishedAt(sort: Desc)])
   @@index([curated])
-}
-
-model ExercisePerformanceLog {
-  id                   String   @id @default(cuid())
-  userId               String
-  completedAt          DateTime
-  type                 String
-
-  // Exercise reference
-  exerciseDefinitionId String?
-  equipment            String?
-  exerciseName         String
-
-  // Strength metrics
-  totalSets            Int?
-  totalReps            Int?
-  totalVolumeLbs       Float?
-  maxWeightLbs         Float?
-  estimated1RMLbs      Float?
-  avgRPE               Float?
-
-  // Cardio metrics
-  distance             Float?
-  distanceUnit         String?
-  duration             Int?
-  avgPaceSeconds       Int?
-
-  // Reference back to source
-  workoutCompletionId  String?
-  cardioSessionId      String?
-
-  @@index([userId, completedAt])
-  @@index([userId, exerciseDefinitionId, completedAt])
-  @@index([userId, equipment, completedAt])
-  @@index([userId, type, completedAt])
 }
 
 // -- Learning Infrastructure --
@@ -614,4 +673,53 @@ model InAppMessage {
   @@index([placement, active])
   @@index([placement, userType, active])
   @@index([ownerType, ownerId])
+}
+
+/// Precomputed training-state layer for the Suggest Workout planner.
+/// One row per user, refreshed off the request path by the aggregates
+/// recompute job (event-triggered on workout completion). Shaped for Suggest
+/// only per docs/SUGGEST_PAYLOAD_SPEC.md (v2). Replaces the dropped
+/// ExercisePerformanceLog: e1RM / effort are computed here. Full recompute per
+/// user (no incremental bookkeeping); timestamps stored absolute, the builder
+/// converts to days_ago at request time.
+model UserTrainingAggregates {
+  userId    String   @id
+  computedAt DateTime
+
+  // ---- whole-body freshness & load (top-level training_state fields) ----
+  sessionsLast7d          Int
+  daysSinceAnySession     Int?
+  lastSessionAt           DateTime?
+  firstSessionAt          DateTime?
+  qualifyingSessionsTotal Int      @default(0)
+  totalWeeklySetsBaseline Float?
+  acuteChronicRatio       Float?
+  detrainingGapDays       Int?
+  // "cold_start" | "partial" | "established" — derived from qualifying-session
+  // counts; the builder may re-derive against exact request time.
+  dataMaturity            String
+
+  // ---- sectioned blobs (shapes defined in lib/aggregates/types.ts) ----
+  // PerFauAggregate[]: per-FAU rolling sets, baseline, sessions_14d, low_data
+  perFau                  Json
+  // MovementCalibration[]: gap-decayed EWMA e1RM, staleness, typical effort
+  perMovementCalibration  Json
+  // GoalProgress[]: per-goal e1RM (Epley) trend series + classification
+  goalProgress            Json     @default("[]")
+
+  @@index([computedAt])
+}
+
+/// Singleton row holding the admin-editable learning-pipeline knobs (issue
+/// #937). One row (id = "singleton"). `values` is a JSON blob of the TuningConfig
+/// knob set (lib/tuning/config.ts). Writes are zod-validated at the admin API
+/// layer; the read path (lib/tuning/store.ts, reachable from the clone-worker)
+/// parses the blob with per-field code-default fallback and NO zod import, so a
+/// malformed/missing row never breaks the pipeline.
+model TuningConfig {
+  id        String   @id
+  values    Json
+  updatedAt DateTime @updatedAt
+  /// User id of the admin who last saved the config (audit trail only).
+  updatedBy String?
 }

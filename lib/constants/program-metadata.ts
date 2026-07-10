@@ -94,6 +94,11 @@ export const SPECIALIZED_EQUIPMENT = {
   CHAINS: 'chains',
   BANDS: 'bands',
   SLED: 'sled',
+  SUSPENSION_TRAINER: 'suspension_trainer',
+  PLYO_BOX: 'plyo_box',
+  MEDICINE_BALL: 'medicine_ball',
+  FUNCTIONAL_TRAINER: 'functional_trainer',
+  ASSISTED_PULLUP_DIP: 'assisted_pullup_dip',
   OTHER: 'other',
 } as const;
 
@@ -128,6 +133,11 @@ export const EQUIPMENT_LABELS: Record<string, string> = {
   chains: 'Chains',
   bands: 'Bands',
   sled: 'Sled',
+  suspension_trainer: 'Suspension Trainer',
+  plyo_box: 'Plyo Box',
+  medicine_ball: 'Medicine Ball',
+  functional_trainer: 'Functional Trainer (Dual-Pulley)',
+  assisted_pullup_dip: 'Assisted Pull-Up / Dip',
   other: 'Other',
 };
 
@@ -181,6 +191,11 @@ export const EQUIPMENT_GROUPS = {
     'climbing_wall',
     'foam_roller',
     'weight_belt',
+    'suspension_trainer',
+    'plyo_box',
+    'medicine_ball',
+    'functional_trainer',
+    'assisted_pullup_dip',
     'other',
   ],
 } as const;

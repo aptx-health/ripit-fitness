@@ -2,7 +2,7 @@
   {
     "name": "3/4 Sit-Up",
     "primaryFAUs": ["abs"],
-    "secondaryFAUs": ["hip-flexors"]
+    "secondaryFAUs": ["quads"]
   },
   {
     "name": "Ab Crunch Machine",
@@ -22,7 +22,7 @@
   {
     "name": "Air Bike",
     "primaryFAUs": ["abs", "obliques"],
-    "secondaryFAUs": ["hip-flexors"]
+    "secondaryFAUs": ["quads"]
   },
   {
     "name": "Alternate Heel Touchers",
@@ -52,7 +52,7 @@
   {
     "name": "Bent-Knee Hip Raise",
     "primaryFAUs": ["abs"],
-    "secondaryFAUs": ["hip-flexors"]
+    "secondaryFAUs": ["quads"]
   },
   {
     "name": "Bent Press",
@@ -67,7 +67,7 @@
   {
     "name": "Bottoms Up",
     "primaryFAUs": ["abs"],
-    "secondaryFAUs": ["hip-flexors"]
+    "secondaryFAUs": ["quads"]
   },
   {
     "name": "Butt-Ups",
@@ -87,7 +87,7 @@
   {
     "name": "Cable Reverse Crunch",
     "primaryFAUs": ["abs"],
-    "secondaryFAUs": ["hip-flexors"]
+    "secondaryFAUs": ["quads"]
   },
   {
     "name": "Cable Russian Twists",
@@ -102,7 +102,7 @@
   {
     "name": "Cocoons",
     "primaryFAUs": ["abs"],
-    "secondaryFAUs": ["hip-flexors"]
+    "secondaryFAUs": ["quads"]
   },
   {
     "name": "Cross-Body Crunch",
@@ -127,22 +127,22 @@
   {
     "name": "Dead Bug",
     "primaryFAUs": ["abs"],
-    "secondaryFAUs": ["obliques", "hip-flexors"]
+    "secondaryFAUs": ["obliques", "quads"]
   },
   {
     "name": "Decline Crunch",
     "primaryFAUs": ["abs"],
-    "secondaryFAUs": ["hip-flexors"]
+    "secondaryFAUs": ["quads"]
   },
   {
     "name": "Decline Oblique Crunch",
     "primaryFAUs": ["abs", "obliques"],
-    "secondaryFAUs": ["hip-flexors"]
+    "secondaryFAUs": ["quads"]
   },
   {
     "name": "Decline Reverse Crunch",
     "primaryFAUs": ["abs"],
-    "secondaryFAUs": ["hip-flexors"]
+    "secondaryFAUs": ["quads"]
   },
   {
     "name": "Double Kettlebell Windmill",
@@ -157,7 +157,7 @@
   {
     "name": "Elbow to Knee",
     "primaryFAUs": ["abs", "obliques"],
-    "secondaryFAUs": ["hip-flexors"]
+    "secondaryFAUs": ["quads"]
   },
   {
     "name": "Exercise Ball Crunch",
@@ -167,17 +167,17 @@
   {
     "name": "Exercise Ball Pull-In",
     "primaryFAUs": ["abs"],
-    "secondaryFAUs": ["hip-flexors"]
+    "secondaryFAUs": ["quads"]
   },
   {
     "name": "Flat Bench Leg Pull-In",
     "primaryFAUs": ["abs"],
-    "secondaryFAUs": ["hip-flexors"]
+    "secondaryFAUs": ["quads"]
   },
   {
     "name": "Flat Bench Lying Leg Raise",
     "primaryFAUs": ["abs"],
-    "secondaryFAUs": ["hip-flexors"]
+    "secondaryFAUs": ["quads"]
   },
   {
     "name": "Frog Sit-Ups",
@@ -192,17 +192,17 @@
   {
     "name": "Hanging Leg Raise",
     "primaryFAUs": ["abs"],
-    "secondaryFAUs": ["hip-flexors"]
+    "secondaryFAUs": ["quads"]
   },
   {
     "name": "Hanging Pike",
     "primaryFAUs": ["abs"],
-    "secondaryFAUs": ["hip-flexors"]
+    "secondaryFAUs": ["quads"]
   },
   {
     "name": "Jackknife Sit-Up",
     "primaryFAUs": ["abs"],
-    "secondaryFAUs": ["hip-flexors"]
+    "secondaryFAUs": ["quads"]
   },
   {
     "name": "Janda Sit-Up",
@@ -227,7 +227,7 @@
   {
     "name": "Knee/Hip Raise On Parallel Bars",
     "primaryFAUs": ["abs"],
-    "secondaryFAUs": ["hip-flexors"]
+    "secondaryFAUs": ["quads"]
   },
   {
     "name": "Kneeling Cable Crunch With Alternating Oblique Twists",
@@ -242,7 +242,7 @@
   {
     "name": "Leg Pull-In",
     "primaryFAUs": ["abs"],
-    "secondaryFAUs": ["hip-flexors"]
+    "secondaryFAUs": ["quads"]
   },
   {
     "name": "Lower Back Curl",
@@ -312,7 +312,7 @@
   {
     "name": "Reverse Crunch",
     "primaryFAUs": ["abs"],
-    "secondaryFAUs": ["hip-flexors"]
+    "secondaryFAUs": ["quads"]
   },
   {
     "name": "Rope Crunch",
@@ -327,7 +327,7 @@
   {
     "name": "Scissor Kick",
     "primaryFAUs": ["abs"],
-    "secondaryFAUs": ["hip-flexors"]
+    "secondaryFAUs": ["quads"]
   },
   {
     "name": "Seated Barbell Twist",
@@ -337,12 +337,12 @@
   {
     "name": "Seated Flat Bench Leg Pull-In",
     "primaryFAUs": ["abs"],
-    "secondaryFAUs": ["hip-flexors"]
+    "secondaryFAUs": ["quads"]
   },
   {
     "name": "Seated Leg Tucks",
     "primaryFAUs": ["abs"],
-    "secondaryFAUs": ["hip-flexors"]
+    "secondaryFAUs": ["quads"]
   },
   {
     "name": "Seated Overhead Stretch",
@@ -362,7 +362,7 @@
   {
     "name": "Sit-Up",
     "primaryFAUs": ["abs"],
-    "secondaryFAUs": ["hip-flexors"]
+    "secondaryFAUs": ["quads"]
   },
   {
     "name": "Sledgehammer Swings",
@@ -372,7 +372,7 @@
   {
     "name": "Smith Machine Hip Raise",
     "primaryFAUs": ["abs"],
-    "secondaryFAUs": ["hip-flexors"]
+    "secondaryFAUs": ["quads"]
   },
   {
     "name": "Spell Caster",
@@ -427,7 +427,7 @@
   {
     "name": "Suspended Reverse Crunch",
     "primaryFAUs": ["abs"],
-    "secondaryFAUs": ["hip-flexors"]
+    "secondaryFAUs": ["quads"]
   },
   {
     "name": "Toe Touchers",
@@ -442,7 +442,7 @@
   {
     "name": "Tuck Crunch",
     "primaryFAUs": ["abs"],
-    "secondaryFAUs": ["hip-flexors"]
+    "secondaryFAUs": ["quads"]
   },
   {
     "name": "Weighted Ball Side Bend",
@@ -457,7 +457,7 @@
   {
     "name": "Weighted Sit-Ups - With Bands",
     "primaryFAUs": ["abs"],
-    "secondaryFAUs": ["hip-flexors"]
+    "secondaryFAUs": ["quads"]
   },
   {
     "name": "Wind Sprints",

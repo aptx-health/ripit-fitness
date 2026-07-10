@@ -3,6 +3,7 @@ import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { recordEvent } from '@/lib/events'
 import { logger } from '@/lib/logger'
+import { enqueueAggregatesRecompute } from '@/lib/queue/aggregates-jobs'
 import { checkRateLimit, workoutActionLimiter } from '@/lib/rate-limit'
 import { computeWorkoutRollup } from '@/lib/stats/workout-rollup'
 
@@ -71,6 +72,16 @@ export async function POST(
 
       const draftSetCount = draft?.loggedSets?.length ?? 0
 
+      // Persist elapsed session time when the draft recorded a start (#933).
+      // Create branches have no draft, so duration is null there.
+      const completedAt = new Date()
+      const durationSeconds = draft?.startedAt
+        ? Math.max(
+            0,
+            Math.round((completedAt.getTime() - draft.startedAt.getTime()) / 1000)
+          )
+        : null
+
       // If we have a draft with sets, just flip the status
       if (draft && draftSetCount > 0) {
         // Safety fallback: if client reports more sets than DB has, use fallback
@@ -98,7 +109,7 @@ export async function POST(
 
         return tx.workoutCompletion.update({
           where: { id: draft.id },
-          data: { status: 'completed', completedAt: new Date() },
+          data: { status: 'completed', completedAt, durationSeconds },
         })
       }
 
@@ -108,10 +119,10 @@ export async function POST(
         const completionRecord = draft
           ? await tx.workoutCompletion.update({
               where: { id: draft.id },
-              data: { status: 'completed', completedAt: new Date() },
+              data: { status: 'completed', completedAt, durationSeconds },
             })
           : await tx.workoutCompletion.create({
-              data: { workoutId, userId: user.id, status: 'completed', completedAt: new Date() },
+              data: { workoutId, userId: user.id, status: 'completed', completedAt, durationSeconds },
             })
         return completionRecord
       }
@@ -125,10 +136,10 @@ export async function POST(
       const completionRecord = draft
         ? await tx.workoutCompletion.update({
             where: { id: draft.id },
-            data: { status: 'completed', completedAt: new Date() },
+            data: { status: 'completed', completedAt, durationSeconds },
           })
         : await tx.workoutCompletion.create({
-            data: { workoutId, userId: user.id, status: 'completed', completedAt: new Date() },
+            data: { workoutId, userId: user.id, status: 'completed', completedAt, durationSeconds },
           })
 
       await tx.loggedSet.createMany({
@@ -162,6 +173,8 @@ export async function POST(
     })
 
     recordEvent(user.id, 'workout_completed', { workoutId })
+    // Refresh the Suggest training-state layer off the request path (#919).
+    void enqueueAggregatesRecompute(user.id)
 
     let rollup = null
     try {
