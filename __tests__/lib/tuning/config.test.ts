@@ -3,6 +3,13 @@ import { DEFAULT_AGGREGATES_OPTIONS } from '@/lib/aggregates/compute'
 import { DEFAULT_EWMA_ALPHA, DEFAULT_TYPICAL_GAP_DAYS, WEEKLY_DECAY_FACTOR } from '@/lib/learning/math'
 import { HEAVY_E1RM_FRACTION, HEAVY_EFFORT_RPE } from '@/lib/learning/weekly-intent'
 import {
+  DEFAULT_FAU_HEAVY_STALENESS_WEIGHT,
+  DEFAULT_FAU_RECOVERY_PENALTY_WEIGHT,
+  DEFAULT_FAU_RECOVERY_RPE_CUTOFF,
+  DEFAULT_FAU_RECOVERY_WINDOW_HOURS,
+  DEFAULT_FAU_STALENESS_WEIGHT,
+} from '@/lib/recommendations/fau-score'
+import {
   DEFAULT_TUNING_CONFIG,
   parseTuningConfig,
   TUNING_KNOBS,
@@ -22,6 +29,11 @@ describe('TuningConfig defaults', () => {
       lowDataMinSessions: DEFAULT_AGGREGATES_OPTIONS.lowDataMinSessions,
       lowDataMinSets: DEFAULT_AGGREGATES_OPTIONS.lowDataMinSets,
       detrainingGapDays: DEFAULT_AGGREGATES_OPTIONS.detrainingMinDays,
+      fauStalenessWeight: DEFAULT_FAU_STALENESS_WEIGHT,
+      fauHeavyStalenessWeight: DEFAULT_FAU_HEAVY_STALENESS_WEIGHT,
+      fauRecoveryPenaltyWeight: DEFAULT_FAU_RECOVERY_PENALTY_WEIGHT,
+      fauRecoveryWindowHours: DEFAULT_FAU_RECOVERY_WINDOW_HOURS,
+      fauRecoveryRpeCutoff: DEFAULT_FAU_RECOVERY_RPE_CUTOFF,
     })
   })
 

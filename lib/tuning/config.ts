@@ -28,6 +28,13 @@ import {
   WEEKLY_DECAY_FACTOR,
 } from '@/lib/learning/math'
 import { HEAVY_E1RM_FRACTION, HEAVY_EFFORT_RPE } from '@/lib/learning/weekly-intent'
+import {
+  DEFAULT_FAU_HEAVY_STALENESS_WEIGHT,
+  DEFAULT_FAU_RECOVERY_PENALTY_WEIGHT,
+  DEFAULT_FAU_RECOVERY_RPE_CUTOFF,
+  DEFAULT_FAU_RECOVERY_WINDOW_HOURS,
+  DEFAULT_FAU_STALENESS_WEIGHT,
+} from '@/lib/recommendations/fau-score'
 
 /** The curated v1 knob set. All values are plain numbers. */
 export interface TuningConfig {
@@ -47,6 +54,16 @@ export interface TuningConfig {
   lowDataMinSets: number
   /** A gap of at least this many days since the last session populates detraining_gap. */
   detrainingGapDays: number
+  /** Recovery-aware FAU score (#963), w1: weight on last-session staleness. */
+  fauStalenessWeight: number
+  /** Recovery-aware FAU score (#963), w2: weight on last-heavy staleness. */
+  fauHeavyStalenessWeight: number
+  /** Recovery-aware FAU score (#963), w3: recovery penalty for recently-hammered FAUs. */
+  fauRecoveryPenaltyWeight: number
+  /** Recovery-aware FAU score (#963): recovery penalty window in hours. */
+  fauRecoveryWindowHours: number
+  /** Recovery-aware FAU score (#963): min session RPE-equiv for a recovery penalty. */
+  fauRecoveryRpeCutoff: number
 }
 
 /**
@@ -62,6 +79,11 @@ export const DEFAULT_TUNING_CONFIG: TuningConfig = {
   lowDataMinSessions: DEFAULT_AGGREGATES_OPTIONS.lowDataMinSessions,
   lowDataMinSets: DEFAULT_AGGREGATES_OPTIONS.lowDataMinSets,
   detrainingGapDays: DEFAULT_AGGREGATES_OPTIONS.detrainingMinDays,
+  fauStalenessWeight: DEFAULT_FAU_STALENESS_WEIGHT,
+  fauHeavyStalenessWeight: DEFAULT_FAU_HEAVY_STALENESS_WEIGHT,
+  fauRecoveryPenaltyWeight: DEFAULT_FAU_RECOVERY_PENALTY_WEIGHT,
+  fauRecoveryWindowHours: DEFAULT_FAU_RECOVERY_WINDOW_HOURS,
+  fauRecoveryRpeCutoff: DEFAULT_FAU_RECOVERY_RPE_CUTOFF,
 }
 
 /** Per-knob metadata for validation (ranges) and the admin form (label/effect). */
@@ -164,6 +186,56 @@ export const TUNING_KNOBS: readonly KnobMeta[] = [
     integer: true,
     effect:
       'A gap of at least this many days since the last session (with prior training) populates detraining_gap.',
+  },
+  {
+    key: 'fauStalenessWeight',
+    label: 'FAU staleness weight (w1)',
+    min: 0,
+    max: 0.5,
+    step: 0.01,
+    integer: false,
+    effect:
+      'Recovery-aware FAU sort: how much days-since-last-trained lifts a muscle group up the picker ranking. 0 disables the staleness term.',
+  },
+  {
+    key: 'fauHeavyStalenessWeight',
+    label: 'FAU heavy-staleness weight (w2)',
+    min: 0,
+    max: 0.5,
+    step: 0.01,
+    integer: false,
+    effect:
+      'Recovery-aware FAU sort: how much days-since-last-HEAVY work lifts a muscle group up the ranking ("heavy overdue"). 0 disables it.',
+  },
+  {
+    key: 'fauRecoveryPenaltyWeight',
+    label: 'FAU recovery penalty weight (w3)',
+    min: 0,
+    max: 0.5,
+    step: 0.01,
+    integer: false,
+    effect:
+      'Recovery-aware FAU sort: how far a just-hammered muscle group is pushed down the ranking ("recovering"). 0 disables the penalty.',
+  },
+  {
+    key: 'fauRecoveryWindowHours',
+    label: 'FAU recovery window (hours)',
+    min: 0,
+    max: 168,
+    step: 1,
+    integer: true,
+    effect:
+      'Recovery-aware FAU sort: a hard session this many hours ago (or fewer) triggers the recovery penalty on the muscle groups it trained.',
+  },
+  {
+    key: 'fauRecoveryRpeCutoff',
+    label: 'FAU recovery RPE cutoff',
+    min: 5,
+    max: 10,
+    step: 0.5,
+    integer: false,
+    effect:
+      'Recovery-aware FAU sort: only sessions logged at or above this session RPE count as "hard" for the recovery penalty.',
   },
 ] as const
 
