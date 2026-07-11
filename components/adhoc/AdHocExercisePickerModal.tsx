@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/radix/dialog'
 import { TipAnnotation } from '@/components/ui/TipAnnotation'
 import { ALL_FAUS, type FAUKey } from '@/lib/fau-volume'
+import type { AnchorStalenessRow } from '@/lib/recommendations/anchor-staleness'
 import type { FauNeed } from '@/lib/recommendations/fau-score'
 
 const HYPOTHETICAL_SETS_PER_EXERCISE = 3
@@ -53,6 +54,7 @@ type Props = {
   isBusy: boolean
   muscleBalanceSnapshot: MuscleBalanceSnapshot
   recoveryRanking?: FauNeed[]
+  anchors?: AnchorStalenessRow[]
   plannedExerciseDefinitions?: Array<{
     primaryFAUs: string[]
     secondaryFAUs: string[]
@@ -66,6 +68,7 @@ export function AdHocExercisePickerModal({
   isBusy,
   muscleBalanceSnapshot,
   recoveryRanking,
+  anchors,
   plannedExerciseDefinitions = [],
 }: Props) {
   const isAdd = mode.kind === 'add'
@@ -133,6 +136,7 @@ export function AdHocExercisePickerModal({
             preloadExercises
             muscleBalanceSnapshot={isAdd ? muscleBalanceSnapshot : undefined}
             recoveryRanking={isAdd ? recoveryRanking : undefined}
+            anchors={isAdd ? anchors : undefined}
             plannedFAUVolume={isAdd ? plannedFAUVolume : undefined}
           />
         </DialogBody>

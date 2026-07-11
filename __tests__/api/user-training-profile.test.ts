@@ -19,6 +19,7 @@ import {
   normalizeInjuryAreas,
   normalizeOtherActivities,
   normalizePreferredDays,
+  normalizeTargetMovements,
   normalizeUserTrainingProfile,
   updateUserTrainingProfile,
 } from '@/lib/user-training-profile'
@@ -485,5 +486,50 @@ describe('UserTrainingProfile persistence', () => {
     expect(after.updatedAt.getTime()).toBeGreaterThan(
       before.updatedAt.getTime()
     )
+  })
+})
+
+describe('normalizeTargetMovements', () => {
+  it('returns {} for non-object / array / nullish input', () => {
+    expect(normalizeTargetMovements(null)).toEqual({})
+    expect(normalizeTargetMovements(undefined)).toEqual({})
+    expect(normalizeTargetMovements('nope')).toEqual({})
+    expect(normalizeTargetMovements(42)).toEqual({})
+    expect(normalizeTargetMovements([])).toEqual({})
+  })
+
+  it('keeps only known anchor patterns, dropping unknown keys', () => {
+    const result = normalizeTargetMovements({
+      hinge: ['ex_dl'],
+      lunge: ['ex_lunge'], // valid MovementPattern but not an anchor
+      bogus: ['ex_x'],
+    })
+    expect(result).toEqual({ hinge: ['ex_dl'] })
+  })
+
+  it('coerces values: trims, drops non-strings/blanks, dedupes, caps at 5', () => {
+    const result = normalizeTargetMovements({
+      squat: [
+        '  ex_a ',
+        'ex_a', // dupe of trimmed ex_a
+        '',
+        42, // non-string
+        'ex_b',
+        'ex_c',
+        'ex_d',
+        'ex_e',
+        'ex_f', // 6th distinct -> dropped by the cap
+      ],
+    })
+    expect(result.squat).toEqual(['ex_a', 'ex_b', 'ex_c', 'ex_d', 'ex_e'])
+  })
+
+  it('drops patterns that normalize to an empty list', () => {
+    const result = normalizeTargetMovements({
+      hinge: [],
+      squat: ['', 7],
+      vertical_push: ['ex_ohp'],
+    })
+    expect(result).toEqual({ vertical_push: ['ex_ohp'] })
   })
 })
