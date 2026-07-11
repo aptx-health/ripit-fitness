@@ -46,10 +46,41 @@ leave enabled in every environment.
 
 ## CI wiring
 
-`.github/workflows/smoke-test-staging.yml` runs after "Build and Push App Image"
-completes on `dev`, waits for staging readiness (ArgoCD rollout is async
-relative to the image push), then runs the script. Also runnable on demand via
-`workflow_dispatch`.
+`.github/workflows/smoke-test-staging.yml` triggers on **`push` to `dev`** and
+runs against staging. Also runnable on demand via `workflow_dispatch`.
+
+### Why `push: [dev]` and not `workflow_run`
+
+The obvious trigger — `workflow_run` gated on the build workflow — is a trap
+here:
+
+- `workflow_run` only fires from the workflow file on the repo's **default
+  branch** (`main`). A merge to `dev` would never auto-run it.
+- Its job executes on `main`'s ref. The `staging` GitHub environment is
+  branch-restricted to `dev`, so requesting `environment: staging` from a
+  `main`-ref run is **denied** — the secrets never resolve.
+- `actions/checkout` would grab `main`'s copy of the script, not the just-merged
+  `dev` version.
+
+`push: [dev]` sidesteps all three: the job runs on the `dev` ref, so the
+`staging` environment grants normally (**no branch-policy change needed**) and
+checkout gets the merged script.
+
+### Gating on the rollout (avoiding a false green)
+
+A `push` fires *before* the image is built and *before* ArgoCD rolls it out, and
+`/api/health/ready` returns 200 from the **old** pods — so a naive readiness
+poll can pass against the previous image. The workflow instead polls
+`GET /api/health/version` until it reports the triggering commit
+(`github.sha`) before driving the test. The SHA is baked into the image at build
+time (`build-app.yml` passes `--build-arg GIT_SHA`; the Dockerfile promotes it
+to the `APP_GIT_SHA` runtime env). This both waits for the deploy and proves the
+**new** image is live. On `workflow_dispatch` the SHA gate is skipped (the
+operator chooses when to run) and the served SHA is echoed into the log.
+
+`paths-ignore` mirrors `build-app.yml`: a doc-only push produces no new image,
+so the version gate could never match — skipping those pushes avoids a
+guaranteed timeout.
 
 Configure these in the GitHub **`staging`** environment:
 

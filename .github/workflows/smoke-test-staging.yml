@@ -1,36 +1,49 @@
 name: Staging Smoke — Aggregates Pipeline
 
 # Post-deploy smoke test for the UserTrainingAggregates recompute pipeline
-# (issue #940). Runs against the *deployed* staging stack after the app image
-# for `dev` is built. It drives a real workout completion and asserts the
-# aggregates row refreshes end-to-end (app -> publisher -> Redis -> worker ->
-# DB) — the class of failures in-process tests (PR #939) cannot see.
+# (issue #940). Runs against the *deployed* staging stack after a merge to
+# `dev`. It drives a real workout completion and asserts the aggregates row
+# refreshes end-to-end (app -> publisher -> Redis -> worker -> DB) — the class
+# of failures in-process tests (PR #939) cannot see.
 #
-# Trigger model: `workflow_run` fires when "Build and Push App Image" finishes
-# on `dev`. The image push is not the same as the ArgoCD rollout completing, so
-# this job waits for staging readiness (bounded) plus a short rollout grace
-# before driving the flow. Also runnable on demand via workflow_dispatch.
+# Trigger model: `push` to `dev`. This deliberately does NOT use `workflow_run`
+# on the build workflow — `workflow_run` only fires from the workflow file on
+# the repo's *default branch* (`main`), so it would never auto-run for a merge
+# to `dev`, and its job would execute on `main`'s ref, which the `dev`-restricted
+# `staging` environment rejects. A `push: [dev]` trigger runs on the `dev` ref,
+# so `environment: staging` is granted normally (no branch-policy change needed)
+# and `actions/checkout` gets the just-merged `dev` copy of the script.
+#
+# The push fires immediately — before the image is built and before ArgoCD rolls
+# it out. So the job GATES on staging actually serving this commit: it polls
+# /api/health/version until it reports `github.sha`. That both waits for the
+# deploy and closes the rollout race (old pods answer /api/health/ready with the
+# previous image; only the version match proves the NEW image is live).
+#
+# paths-ignore mirrors build-app.yml: a doc-only push produces no new image, so
+# the version gate could never match. Skipping those pushes avoids a guaranteed
+# timeout.
 #
 # Required configuration (GitHub `staging` environment):
 #   vars.NEXT_PUBLIC_APP_URL   Base URL of staging (falls back to staging.ripit.fit)
 #   secrets.SMOKE_USER_EMAIL   Dedicated staging smoke-test user
 #   secrets.SMOKE_USER_PASSWORD
+#   secrets.DISCORD_WEBHOOK_URL  Optional — failure alert
 
 on:
-  workflow_run:
-    workflows: ['Build and Push App Image']
-    types: [completed]
+  push:
     branches: [dev]
+    paths-ignore:
+      - '.claude/**'
+      - '.agent-minder/**'
+      - 'docs/**'
+      - '*.md'
   workflow_dispatch:
 
 jobs:
   smoke-aggregates:
-    # Only after a successful build on dev (or a manual dispatch).
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 25
     environment: staging
 
     env:
@@ -38,11 +51,12 @@ jobs:
       SMOKE_USER_EMAIL: ${{ secrets.SMOKE_USER_EMAIL }}
       SMOKE_USER_PASSWORD: ${{ secrets.SMOKE_USER_PASSWORD }}
       DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-      # ArgoCD rollout is asynchronous relative to the image push. Give the new
-      # pods time to roll before asserting; the aggregates path is version-
-      # agnostic so we only need staging to be up and healthy.
-      ROLLOUT_GRACE_SECS: '60'
-      READY_TIMEOUT_SECS: '180'
+      # Commit this run must observe live on staging before asserting. On
+      # workflow_dispatch there is no push SHA, so we fall back to whatever
+      # staging currently serves (best-effort — the manual operator picks when).
+      EXPECTED_SHA: ${{ github.sha }}
+      # Build + ArgoCD sync can take several minutes; poll generously.
+      DEPLOY_TIMEOUT_SECS: '900'
 
     steps:
       - name: Checkout code
@@ -55,20 +69,30 @@ jobs:
             exit 1
           fi
 
-      - name: Wait for staging readiness
+      - name: Wait for staging to serve this commit
         run: |
-          echo "Giving the ArgoCD rollout ${ROLLOUT_GRACE_SECS}s to progress..."
-          sleep "${ROLLOUT_GRACE_SECS}"
-          deadline=$(( $(date +%s) + READY_TIMEOUT_SECS ))
-          until curl -sf "${BASE_URL%/}/api/health/ready" >/dev/null 2>&1; do
+          BASE="${BASE_URL%/}"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "Manual dispatch — skipping SHA gate; asserting against whatever staging serves now."
+            live=$(curl -sf "${BASE}/api/health/version" | jq -r '.sha // "unknown"' || echo unreachable)
+            echo "Staging is currently serving: ${live}"
+            exit 0
+          fi
+
+          echo "Waiting up to ${DEPLOY_TIMEOUT_SECS}s for staging to serve ${EXPECTED_SHA}..."
+          deadline=$(( $(date +%s) + DEPLOY_TIMEOUT_SECS ))
+          last="<none>"
+          until [ "$last" = "$EXPECTED_SHA" ]; do
             if [ "$(date +%s)" -ge "$deadline" ]; then
-              echo "::error::Staging readiness probe did not pass within ${READY_TIMEOUT_SECS}s"
+              echo "::error::staging never served ${EXPECTED_SHA} within ${DEPLOY_TIMEOUT_SECS}s (last seen: ${last}). Build or ArgoCD rollout likely stalled."
               exit 1
             fi
-            echo "Not ready yet; retrying in 5s..."
-            sleep 5
+            last=$(curl -sf "${BASE}/api/health/version" | jq -r '.sha // "unknown"' 2>/dev/null || echo unreachable)
+            if [ "$last" = "$EXPECTED_SHA" ]; then break; fi
+            echo "  serving ${last}; want ${EXPECTED_SHA} — retrying in 10s..."
+            sleep 10
           done
-          echo "Staging is ready."
+          echo "Staging is serving ${EXPECTED_SHA}. Proceeding."
 
       - name: Drive aggregates pipeline smoke test
         run: ./scripts/smoke-test-aggregates.sh
@@ -82,6 +106,7 @@ jobs:
               \"description\": \"The post-deploy aggregates recompute pipeline did not refresh end-to-end on staging.\",
               \"color\": 15158332,
               \"fields\": [
+                {\"name\": \"Commit\", \"value\": \"[\`${EXPECTED_SHA:0:7}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})\", \"inline\": true},
                 {\"name\": \"Workflow run\", \"value\": \"[#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\", \"inline\": true},
                 {\"name\": \"Base URL\", \"value\": \"${BASE_URL}\", \"inline\": true}
               ]

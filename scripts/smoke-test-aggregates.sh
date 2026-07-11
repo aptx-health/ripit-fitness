@@ -123,6 +123,7 @@ call POST "/api/workouts/adhoc/${COMPLETION_ID}/complete"
 log "Polling aggregates-status for up to ${POLL_TIMEOUT_SECS}s (baseline=${BASELINE:-<none>})"
 DEADLINE=$(( $(date +%s) + POLL_TIMEOUT_SECS ))
 LAST_STATE=""
+LAST_ERR=""
 while [ "$(date +%s)" -lt "$DEADLINE" ]; do
   call GET /api/debug/aggregates-status
   if [ "$RESP_CODE" = "200" ]; then
@@ -134,6 +135,11 @@ while [ "$(date +%s)" -lt "$DEADLINE" ]; do
       log "State: $(printf '%s' "$RESP_BODY" | jq -c '{dataMaturity, qualifyingSessionsTotal, sessionsLast7d}')"
       exit 0
     fi
+  else
+    # A persistent 401 (session expiry) or 5xx during polling would otherwise
+    # surface only as the generic timeout — capture it so the diagnostics can
+    # point at the real cause.
+    LAST_ERR="HTTP $RESP_CODE: $RESP_BODY"
   fi
   sleep "$POLL_INTERVAL_SECS"
 done
@@ -143,6 +149,7 @@ done
   echo "TIMEOUT: aggregates row did not refresh within ${POLL_TIMEOUT_SECS}s."
   echo "  baseline computedAt : ${BASELINE:-<none>}"
   echo "  last status body    : ${LAST_STATE:-<no successful read>}"
+  echo "  last non-200 read   : ${LAST_ERR:-<none>}"
   echo
   echo "Interpreting this failure:"
   echo "  * row still absent / computedAt unchanged, worker healthy in other"
