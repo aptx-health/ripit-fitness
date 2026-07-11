@@ -24,6 +24,7 @@ function makeProfile(o: Partial<UserTrainingProfileDTO> = {}): UserTrainingProfi
     otherActivities: [],
     fauImportance: {},
     fauImportancePreset: null,
+    targetMovements: {},
     targetSessionsPerWeek: null,
     targetMinutesPerSession: null,
     patternPreference: null,
