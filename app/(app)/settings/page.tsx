@@ -1,7 +1,7 @@
 'use client'
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { Dumbbell, Heart, KeyRound, MessageSquarePlus, Moon, Palette, Shield, Sun } from 'lucide-react'
+import { Anchor, Dumbbell, Heart, KeyRound, MessageSquarePlus, Moon, Palette, Shield, Sun } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import FeedbackModal from '@/components/features/FeedbackModal'
@@ -274,7 +274,7 @@ export default function SettingsPage() {
               </div>
             )}
 
-            <div className="pt-4 border-t border-border">
+            <div className="pt-4 border-t border-border space-y-3">
               <span className="block text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
                 Training Targets
               </span>
@@ -290,6 +290,22 @@ export default function SettingsPage() {
                     </span>
                     <span className="block text-sm text-muted-foreground">
                       Set FAU ratios for ad-hoc exercise guidance.
+                    </span>
+                  </span>
+                </span>
+              </Link>
+              <Link
+                href="/settings/target-movements"
+                className="flex min-h-14 items-center justify-between gap-3 border-2 border-border bg-card px-4 py-3 text-foreground transition-colors doom-focus-ring hover:border-primary hover:bg-muted/50"
+              >
+                <span className="flex items-center gap-3">
+                  <Anchor size={18} aria-hidden="true" />
+                  <span>
+                    <span className="block text-sm font-bold uppercase tracking-wider">
+                      Target Movements
+                    </span>
+                    <span className="block text-sm text-muted-foreground">
+                      Pin compound lifts to track in the picker's Anchors view.
                     </span>
                   </span>
                 </span>

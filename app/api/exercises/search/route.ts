@@ -18,10 +18,18 @@ export async function GET(request: NextRequest) {
     const query = searchParams.get('query') || ''
     const fauFilters = searchParams.get('faus')?.split(',').filter(Boolean) || []
     const equipmentFilters = searchParams.get('equipment')?.split(',').filter(Boolean) || []
+    // Explicit id set (Anchors view, #976): restrict results to these exercise
+    // definitions. Capped so a hand-built query can't request an unbounded IN().
+    const idFilters = (searchParams.get('ids')?.split(',').filter(Boolean) || []).slice(0, 50)
     const limit = Math.min(parseInt(searchParams.get('limit') || '50', 10), 100) // Max 100 results
 
     // Build where conditions
     const whereConditions: Record<string, unknown>[] = []
+
+    // Filter to an explicit id set (curated anchor exercises)
+    if (idFilters.length > 0) {
+      whereConditions.push({ id: { in: idFilters } })
+    }
 
     // Text search on name and aliases
     if (query.trim()) {

@@ -56,6 +56,7 @@ export default function MuscleBalanceSettingsEditor({ initialSnapshot }: Props) 
     () => ({
       targets,
       lookbackWorkouts: lookbackWorkouts ?? snapshot.settings.lookbackWorkouts,
+      lookbackDays: snapshot.settings.lookbackDays,
       includeSecondary,
       secondaryWeight,
       excludeWarmups,
@@ -64,6 +65,7 @@ export default function MuscleBalanceSettingsEditor({ initialSnapshot }: Props) 
       targets,
       lookbackWorkouts,
       snapshot.settings.lookbackWorkouts,
+      snapshot.settings.lookbackDays,
       includeSecondary,
       secondaryWeight,
       excludeWarmups,
@@ -100,6 +102,7 @@ export default function MuscleBalanceSettingsEditor({ initialSnapshot }: Props) 
       const payload: MuscleBalanceSettingsDTO = {
         targets,
         lookbackWorkouts,
+        lookbackDays: snapshot.settings.lookbackDays,
         includeSecondary,
         secondaryWeight,
         excludeWarmups,

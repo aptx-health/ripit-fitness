@@ -99,6 +99,7 @@ export async function computeWorkoutRollup(
       id: true,
       completedAt: true,
       startedAt: true,
+      durationSeconds: true,
       workoutId: true,
       name: true,
       isAdHoc: true,
@@ -155,14 +156,15 @@ export async function computeWorkoutRollup(
   ])
 
   const durationSeconds =
-    completion.startedAt && completion.completedAt
+    completion.durationSeconds ??
+    (completion.startedAt && completion.completedAt
       ? Math.max(
           0,
           Math.round(
             (completion.completedAt.getTime() - completion.startedAt.getTime()) / 1000
           )
         )
-      : null
+      : null)
 
   if (workingSets.length === 0) {
     return {

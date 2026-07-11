@@ -1,12 +1,21 @@
 'use client'
 
 import { Check, Filter, Search } from 'lucide-react'
+import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
 import { EQUIPMENT_LABELS } from '@/lib/constants/program-metadata'
+import type { AnchorPattern } from '@/lib/exercises/anchor-patterns'
 import { ALL_FAUS, FAU_DISPLAY_NAMES, type FAUKey } from '@/lib/fau-volume'
 import type { MuscleBalanceSnapshot } from '@/lib/muscle-balance'
+import type { AnchorStalenessRow } from '@/lib/recommendations/anchor-staleness'
+import type { FauNeed } from '@/lib/recommendations/fau-score'
+import { daysSinceLabel } from '@/lib/recommendations/staleness'
 import { FilterChoiceSheet } from './FilterChoiceSheet'
+
+// A-Z / Neglected / Recovery reorder the same muscle-group list; 'anchors' is a
+// view swap — the sheet lists the user's curated movements by staleness instead.
+type FauSort = 'alphabetical' | 'neglected' | 'recovery' | 'anchors'
 
 export type ExerciseDefinition = {
   id: string
@@ -27,6 +36,20 @@ interface ExerciseSearchInterfaceProps {
   onEditExercise?: (exercise: ExerciseDefinition) => void
   initialFauFilter?: string | null
   muscleBalanceSnapshot?: MuscleBalanceSnapshot
+  /**
+   * Recovery-aware FAU ranking (#963). When present, the muscle-group sort gains
+   * a third "Recovery" mode ordering FAUs by composite need and showing a short
+   * reason chip per row. Absent = the mode is not offered (graceful degrade).
+   */
+  recoveryRanking?: FauNeed[]
+  /**
+   * Curated "anchor" movements with staleness (#976). When provided (even as an
+   * empty array), the view toggle gains an "Anchors" mode that swaps the sheet's
+   * muscle-group rows for movement rows sorted by days-since-last-logged; picking
+   * one filters the exercise list to that movement's curated ids. Absent = the
+   * mode is not offered.
+   */
+  anchors?: AnchorStalenessRow[]
   plannedFAUVolume?: Partial<Record<FAUKey, number>>
   /**
    * When provided, the picker switches to multi-select mode: cards highlight
@@ -68,6 +91,8 @@ export function ExerciseSearchInterface({
   onEditExercise,
   initialFauFilter = null,
   muscleBalanceSnapshot,
+  recoveryRanking,
+  anchors,
   plannedFAUVolume = {},
   selectedIds,
 }: ExerciseSearchInterfaceProps) {
@@ -81,13 +106,81 @@ export function ExerciseSearchInterface({
   const [hasSearched, setHasSearched] = useState(preloadExercises)
   const [fauSheetOpen, setFauSheetOpen] = useState(false)
   const [equipmentSheetOpen, setEquipmentSheetOpen] = useState(false)
-  const [fauSort, setFauSort] = useState<'alphabetical' | 'neglected'>('alphabetical')
+  const [fauSort, setFauSort] = useState<FauSort>('alphabetical')
+  // Anchors view (#976): which curated movement is filtering the list, if any.
+  const [selectedAnchorPattern, setSelectedAnchorPattern] = useState<string | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   const balanceByFau = useMemo(() => {
     if (!muscleBalanceSnapshot) return new Map<FAUKey, MuscleBalanceSnapshot['items'][number]>()
     return new Map(muscleBalanceSnapshot.items.map((item) => [item.fau, item]))
   }, [muscleBalanceSnapshot])
+
+  const hasRecovery = recoveryRanking !== undefined && recoveryRanking.length > 0
+  const recoveryByFau = useMemo(
+    () => new Map((recoveryRanking ?? []).map((entry) => [entry.fau, entry])),
+    [recoveryRanking],
+  )
+
+  // Anchors mode is offered whenever the caller passes the prop (even empty — an
+  // empty list renders a "set up" CTA rather than hiding the feature).
+  const anchorsAvailable = anchors !== undefined
+  const anchorByPattern = useMemo(
+    () => new Map((anchors ?? []).map((a) => [a.pattern, a] as const)),
+    [anchors],
+  )
+  const selectedAnchorIds = useMemo(() => {
+    if (selectedAnchorPattern === null) return [] as string[]
+    return anchorByPattern.get(selectedAnchorPattern as AnchorPattern)?.exerciseIds ?? []
+  }, [selectedAnchorPattern, anchorByPattern])
+
+  // A selected sort/view mode can only be active when its data is present; if the
+  // prop disappears, fall back so the sheet never produces an empty order/list.
+  const effectiveSort: FauSort =
+    fauSort === 'recovery' && !hasRecovery
+      ? 'neglected'
+      : fauSort === 'anchors' && !anchorsAvailable
+        ? 'alphabetical'
+        : fauSort
+  const inAnchorsView = effectiveSort === 'anchors'
+
+  const sortModes = useMemo(
+    () =>
+      [
+        { key: 'alphabetical' as const, label: 'A-Z' },
+        { key: 'neglected' as const, label: 'Neglected' },
+        ...(hasRecovery ? [{ key: 'recovery' as const, label: 'Recovery' }] : []),
+        ...(anchorsAvailable ? [{ key: 'anchors' as const, label: 'Anchors' }] : []),
+      ] satisfies Array<{ key: FauSort; label: string }>,
+    [hasRecovery, anchorsAvailable],
+  )
+
+  const anchorOptions = useMemo(
+    () => [
+      { value: null, label: 'All configured movements' },
+      ...(anchors ?? []).map((a) => ({
+        value: a.pattern,
+        label: a.displayName,
+        // Days-since as a left-aligned "why" line so long copy ("New — never
+        // logged") wraps cleanly instead of crowding the right-side badge slot.
+        meta: daysSinceLabel(a.lastLoggedDaysAgo),
+      })),
+    ],
+    [anchors],
+  )
+
+  const handleSortModeChange = useCallback((mode: FauSort) => {
+    setFauSort(mode)
+    // Switching dimensions clears the other's filter so stale predicates don't
+    // linger: leaving Anchors drops the id filter; entering it drops the FAU one.
+    if (mode === 'anchors') setSelectedFAU(null)
+    else setSelectedAnchorPattern(null)
+  }, [])
+
+  const handleAnchorSelect = useCallback((pattern: string | null) => {
+    setSelectedAnchorPattern(pattern)
+    if (pattern !== null) setSelectedFAU(null)
+  }, [])
 
   const fauOptions = useMemo(() => {
     const scoreFAU = (fau: FAUKey) => {
@@ -101,7 +194,11 @@ export function ExerciseSearchInterface({
     }
 
     const sortedFaus = [...ALL_FAUS].sort((a, b) => {
-      if (fauSort === 'neglected' && muscleBalanceSnapshot) {
+      if (effectiveSort === 'recovery' && hasRecovery) {
+        const needA = recoveryByFau.get(a)?.need ?? Number.NEGATIVE_INFINITY
+        const needB = recoveryByFau.get(b)?.need ?? Number.NEGATIVE_INFINITY
+        if (needB !== needA) return needB - needA
+      } else if (effectiveSort === 'neglected' && muscleBalanceSnapshot) {
         const byAdjustedDeficit = scoreFAU(b) - scoreFAU(a)
         if (byAdjustedDeficit !== 0) return byAdjustedDeficit
       }
@@ -130,12 +227,26 @@ export function ExerciseSearchInterface({
               ? `${formatSets(adjustedSets)} / ${formatSets(desiredSets)} target sets`
               : undefined,
           badge: item ? `${Math.round((adjustedFulfillment ?? item.fulfillment) * 100)}%` : undefined,
-          meta: plannedSets > 0 ? `+${formatSets(plannedSets)} planned` : undefined,
+          // In recovery mode the row surfaces its "why" chip instead of the
+          // planning-flow "+N planned" hint.
+          meta:
+            effectiveSort === 'recovery'
+              ? recoveryByFau.get(fau)?.reason?.label
+              : plannedSets > 0
+                ? `+${formatSets(plannedSets)} planned`
+                : undefined,
           progress: item ? Math.min(100, (adjustedFulfillment ?? item.fulfillment) * 100) : undefined,
         }
       }),
     ]
-  }, [balanceByFau, fauSort, muscleBalanceSnapshot, plannedFAUVolume])
+  }, [
+    balanceByFau,
+    effectiveSort,
+    hasRecovery,
+    muscleBalanceSnapshot,
+    plannedFAUVolume,
+    recoveryByFau,
+  ])
   const equipmentOptions = useMemo(
     () => [
       { value: null, label: 'All Equipment' },
@@ -171,6 +282,10 @@ export function ExerciseSearchInterface({
       if (selectedEquipment) {
         params.append('equipment', selectedEquipment)
       }
+      // Anchors view: restrict to the picked movement's curated exercise ids.
+      if (selectedAnchorIds.length > 0) {
+        params.append('ids', selectedAnchorIds.join(','))
+      }
       params.append('limit', '50')
 
       const response = await fetch(`/api/exercises/search?${params}`)
@@ -188,14 +303,27 @@ export function ExerciseSearchInterface({
     } finally {
       setIsLoading(false)
     }
-  }, [searchQuery, selectedFAU, selectedEquipment])
+  }, [searchQuery, selectedFAU, selectedEquipment, selectedAnchorIds])
 
   // Search when query/filters change (respecting preloadExercises)
   useEffect(() => {
-    if (preloadExercises || searchQuery.trim() || selectedFAU || selectedEquipment) {
+    if (
+      preloadExercises ||
+      searchQuery.trim() ||
+      selectedFAU ||
+      selectedEquipment ||
+      selectedAnchorIds.length > 0
+    ) {
       searchExercises()
     }
-  }, [searchQuery, selectedFAU, selectedEquipment, preloadExercises, searchExercises])
+  }, [
+    searchQuery,
+    selectedFAU,
+    selectedEquipment,
+    selectedAnchorIds,
+    preloadExercises,
+    searchExercises,
+  ])
 
   const handleFAUSelect = useCallback((fau: string | null) => {
     setSelectedFAU(fau)
@@ -222,15 +350,24 @@ export function ExerciseSearchInterface({
           />
         </div>
 
-        {/* FAU Filter */}
+        {/* FAU / Anchors Filter */}
         <div>
-          <div className="text-sm font-bold text-foreground mb-2 tracking-wide">Filter by Muscle Group:</div>
+          <div className="text-sm font-bold text-foreground mb-2 tracking-wide">
+            {inAnchorsView ? 'Filter by Movement:' : 'Filter by Muscle Group:'}
+          </div>
           <button
             type="button"
             onClick={() => setFauSheetOpen(true)}
             className="w-full px-4 py-2 border-2 border-input hover:border-primary focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-card text-foreground text-left font-bold"
           >
-            {selectedFAU ? FAU_DISPLAY_NAMES[selectedFAU] : 'All Muscle Groups'}
+            {inAnchorsView
+              ? selectedAnchorPattern
+                ? (anchorByPattern.get(selectedAnchorPattern as AnchorPattern)?.displayName ??
+                  'Movement')
+                : 'All configured movements'
+              : selectedFAU
+                ? FAU_DISPLAY_NAMES[selectedFAU]
+                : 'All Muscle Groups'}
           </button>
         </div>
 
@@ -250,40 +387,58 @@ export function ExerciseSearchInterface({
       <FilterChoiceSheet
         open={fauSheetOpen}
         onOpenChange={setFauSheetOpen}
-        title="Filter by Muscle Group"
-        options={fauOptions}
-        selected={selectedFAU}
-        onSelect={handleFAUSelect}
+        title={inAnchorsView ? 'Filter by Movement' : 'Filter by Muscle Group'}
+        options={inAnchorsView ? anchorOptions : fauOptions}
+        selected={inAnchorsView ? selectedAnchorPattern : selectedFAU}
+        onSelect={inAnchorsView ? handleAnchorSelect : handleFAUSelect}
         headerContent={
-          muscleBalanceSnapshot ? (
+          muscleBalanceSnapshot || anchorsAvailable ? (
             <div>
               <div className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                Sort muscle groups
+                View
               </div>
-              <div className="grid grid-cols-2 border-2 border-border bg-muted/20">
-                <button
-                  type="button"
-                  onClick={() => setFauSort('alphabetical')}
-                  className={`min-h-10 px-3 text-sm font-bold uppercase tracking-wider transition-colors doom-focus-ring ${
-                    fauSort === 'alphabetical'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-foreground hover:bg-muted/50'
-                  }`}
-                >
-                  A-Z
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFauSort('neglected')}
-                  className={`min-h-10 border-l-2 border-border px-3 text-sm font-bold uppercase tracking-wider transition-colors doom-focus-ring ${
-                    fauSort === 'neglected'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-foreground hover:bg-muted/50'
-                  }`}
-                >
-                  Neglected
-                </button>
+              <div
+                className="grid border-2 border-border bg-muted/20"
+                style={{
+                  // All modes share a single row; type shrinks below so up to
+                  // four labels ("Neglected") still fit without clipping.
+                  gridTemplateColumns: `repeat(${sortModes.length}, minmax(0, 1fr))`,
+                }}
+              >
+                {sortModes.map((mode, index) => (
+                  <button
+                    key={mode.key}
+                    type="button"
+                    onClick={() => handleSortModeChange(mode.key)}
+                    className={`min-h-10 whitespace-nowrap px-2 text-center text-xs font-bold uppercase tracking-wide transition-colors doom-focus-ring ${
+                      index > 0 ? 'border-l-2 border-border' : ''
+                    } ${
+                      effectiveSort === mode.key
+                        ? 'bg-primary text-primary-foreground'
+                        : 'text-foreground hover:bg-muted/50'
+                    }`}
+                  >
+                    {mode.label}
+                  </button>
+                ))}
               </div>
+              {inAnchorsView && (anchors?.length ?? 0) === 0 && (
+                <div className="mt-3 border-2 border-dashed border-border bg-muted/20 p-3 text-sm text-muted-foreground">
+                  <p className="mb-2 font-semibold text-foreground">
+                    No target movements yet.
+                  </p>
+                  <p className="mb-2">
+                    Pin the compound lifts you want to keep hitting, then this view
+                    ranks them by how long it's been.
+                  </p>
+                  <Link
+                    href="/settings/target-movements"
+                    className="inline-flex items-center gap-1 font-bold uppercase tracking-wider text-primary hover:underline"
+                  >
+                    Set up Target Movements →
+                  </Link>
+                </div>
+              )}
             </div>
           ) : undefined
         }

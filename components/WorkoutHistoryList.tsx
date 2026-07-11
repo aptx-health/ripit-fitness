@@ -1,10 +1,11 @@
 'use client'
 
-import { ChevronDown, ChevronRight } from 'lucide-react'
+import { ChevronDown, ChevronRight, Clock, Dumbbell, Flame } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 
 import { clientLogger } from '@/lib/client-logger'
+import { sessionEffortLabel } from '@/lib/effort-prompt'
 
 type Exercise = {
   name: string
@@ -18,7 +19,14 @@ type LoggedSet = {
   reps: number
   weight: number
   weightUnit: string
+  isWarmup: boolean
   exercise: Exercise
+}
+
+type FauChip = {
+  fau: string
+  label: string
+  count: number
 }
 
 type WorkoutCompletion = {
@@ -27,6 +35,11 @@ type WorkoutCompletion = {
   status: string
   isAdHoc: boolean
   name: string | null
+  durationSeconds: number | null
+  sessionRpe: number | null
+  workingSets: number
+  fauChips: FauChip[]
+  fauOverflow: number
   workout: {
     id: string
     name: string
@@ -40,6 +53,15 @@ type WorkoutCompletion = {
   _count: {
     loggedSets: number
   }
+}
+
+/** Format a duration in seconds as a compact "45 min" / "1h 05m" label. */
+function formatDuration(totalSeconds: number): string {
+  const totalMinutes = Math.max(1, Math.round(totalSeconds / 60))
+  if (totalMinutes < 60) return `${totalMinutes} min`
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+  return `${hours}h ${minutes.toString().padStart(2, '0')}m`
 }
 
 type Props = {
@@ -153,6 +175,13 @@ export default function WorkoutHistoryList({ count, compact = false }: Props) {
       return orderA - orderB
     })
 
+    const effortLabel = sessionEffortLabel(completion.sessionRpe)
+    const durationLabel =
+      completion.durationSeconds != null
+        ? formatDuration(completion.durationSeconds)
+        : null
+    const workingSets = completion.workingSets
+
     return (
       <div
         key={completion.id}
@@ -197,9 +226,47 @@ export default function WorkoutHistoryList({ count, compact = false }: Props) {
               )}
             </div>
           </div>
-          <div className="mt-3 text-sm text-muted-foreground">
-            {completion._count.loggedSets} {completion._count.loggedSets === 1 ? 'set' : 'sets'} logged
+          {/* Session meta: duration, effort, working sets. Each part is
+              omitted when its data is null so rows degrade gracefully. */}
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
+            {durationLabel && (
+              <span className="inline-flex items-center gap-1.5">
+                <Clock aria-hidden="true" className="w-4 h-4 shrink-0" />
+                {durationLabel}
+              </span>
+            )}
+            {effortLabel && (
+              <span className="inline-flex items-center gap-1.5">
+                <Flame aria-hidden="true" className="w-4 h-4 shrink-0" />
+                {effortLabel}
+              </span>
+            )}
+            {workingSets > 0 && (
+              <span className="inline-flex items-center gap-1.5">
+                <Dumbbell aria-hidden="true" className="w-4 h-4 shrink-0" />
+                {workingSets} {workingSets === 1 ? 'set' : 'sets'}
+              </span>
+            )}
           </div>
+
+          {/* Primary FAUs worked this session (warmups excluded). */}
+          {completion.fauChips.length > 0 && (
+            <div className="mt-2.5 flex flex-wrap gap-1.5">
+              {completion.fauChips.map((chip) => (
+                <span
+                  key={chip.fau}
+                  className="bg-muted text-foreground border border-border text-xs font-semibold uppercase tracking-wide px-2 py-0.5"
+                >
+                  {chip.label}
+                </span>
+              ))}
+              {completion.fauOverflow > 0 && (
+                <span className="bg-muted/60 text-muted-foreground border border-border text-xs font-semibold uppercase tracking-wide px-2 py-0.5">
+                  +{completion.fauOverflow}
+                </span>
+              )}
+            </div>
+          )}
         </button>
 
         {/* Expanded Exercise Details */}

@@ -163,6 +163,7 @@ export default function ExerciseLoggingModal({
     goToPrevious,
     loadedExercises,
     currentExerciseHistory,
+    currentExerciseSessions,
     currentHistoryState,
     hasHistoryForCurrentExercise,
     refreshExercises,
@@ -733,6 +734,7 @@ export default function ExerciseLoggingModal({
                   prescribedSets={currentPrescribedSets}
                   loggedSets={currentExerciseLoggedSets}
                   exerciseHistory={currentExerciseHistory}
+                  sessions={currentExerciseSessions}
                   historyState={currentHistoryState}
                   hasHistoryIndicator={hasHistoryForCurrentExercise}
                   onDeleteSet={handleDeleteSet}

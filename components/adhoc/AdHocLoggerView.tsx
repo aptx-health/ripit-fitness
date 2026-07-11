@@ -34,6 +34,8 @@ import {
 } from '@/lib/api/adhoc-workout'
 import { FetchError } from '@/lib/api/fetch'
 import { clientLogger } from '@/lib/client-logger'
+import type { AnchorStalenessRow } from '@/lib/recommendations/anchor-staleness'
+import type { FauNeed } from '@/lib/recommendations/fau-score'
 import type { WorkoutRollup } from '@/lib/stats/workout-rollup'
 import type { LoggedSet } from '@/types/workout'
 import {
@@ -65,6 +67,7 @@ type ExerciseHistory = {
     weightUnit: string
     rpe: number | null
     rir: number | null
+    isWarmup: boolean
   }>
 }
 
@@ -85,6 +88,10 @@ type Props = {
     isWarmup: boolean
   }>
   muscleBalanceSnapshot: MuscleBalanceSnapshot
+  /** Recovery-aware FAU ranking (#963) for the picker's third sort mode. */
+  recoveryRanking?: FauNeed[]
+  /** Curated anchor movements + staleness (#976) for the picker's Anchors view. */
+  anchors?: AnchorStalenessRow[]
 }
 
 const EMPTY_SET = {
@@ -101,6 +108,8 @@ export default function AdHocLoggerView({
   initialExercises,
   initialLoggedSets,
   muscleBalanceSnapshot,
+  recoveryRanking,
+  anchors,
 }: Props) {
   const router = useRouter()
   const toast = useToast()
@@ -135,6 +144,9 @@ export default function AdHocLoggerView({
   const [historyByExerciseId, setHistoryByExerciseId] = useState<
     Map<string, ExerciseHistory | null>
   >(new Map())
+  const [sessionsByExerciseId, setSessionsByExerciseId] = useState<
+    Map<string, ExerciseHistory[]>
+  >(new Map())
   const [historyLoadingIds, setHistoryLoadingIds] = useState<Set<string>>(new Set())
   const [showExitConfirm, setShowExitConfirm] = useState(false)
   const [rollup, setRollup] = useState<WorkoutRollup | null>(null)
@@ -159,10 +171,15 @@ export default function AdHocLoggerView({
     const exerciseId = currentExercise.id
     setHistoryLoadingIds((prev) => new Set(prev).add(exerciseId))
     fetchExerciseHistory(exerciseId)
-      .then((history) => {
+      .then(({ history, sessions }) => {
         setHistoryByExerciseId((prev) => {
           const next = new Map(prev)
           next.set(exerciseId, (history as ExerciseHistory | null) ?? null)
+          return next
+        })
+        setSessionsByExerciseId((prev) => {
+          const next = new Map(prev)
+          next.set(exerciseId, (sessions as unknown as ExerciseHistory[]) ?? [])
           return next
         })
       })
@@ -172,6 +189,11 @@ export default function AdHocLoggerView({
         setHistoryByExerciseId((prev) => {
           const next = new Map(prev)
           next.set(exerciseId, null)
+          return next
+        })
+        setSessionsByExerciseId((prev) => {
+          const next = new Map(prev)
+          next.set(exerciseId, [])
           return next
         })
       })
@@ -728,6 +750,7 @@ export default function AdHocLoggerView({
               prescribedSets={[]}
               loggedSets={currentExerciseSets}
               exerciseHistory={historyByExerciseId.get(currentExercise.id) ?? null}
+              sessions={sessionsByExerciseId.get(currentExercise.id) ?? []}
               historyState={
                 historyLoadingIds.has(currentExercise.id)
                   ? 'loading'
@@ -829,6 +852,8 @@ export default function AdHocLoggerView({
           onConfirm={pickerMode.kind === 'add' ? handleAddExercises : handleSwapExercise}
           isBusy={pickerMode.kind === 'add' ? isAdding : isSwapping}
           muscleBalanceSnapshot={muscleBalanceSnapshot}
+          recoveryRanking={recoveryRanking}
+          anchors={anchors}
           plannedExerciseDefinitions={exercises.map((exercise) => ({
             primaryFAUs: exercise.exerciseDefinition.primaryFAUs,
             secondaryFAUs: exercise.exerciseDefinition.secondaryFAUs,

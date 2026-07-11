@@ -5,6 +5,9 @@ import { RestoringWorkoutSpinner } from '@/components/ui/RestoringWorkoutSpinner
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { getMuscleBalanceSnapshot } from '@/lib/muscle-balance'
+import { getAnchorStaleness } from '@/lib/recommendations/anchor-staleness'
+import { getFauRecoveryRanking } from '@/lib/recommendations/fau-recovery-data'
+import { normalizeTargetMovements } from '@/lib/user-training-profile'
 
 type Props = {
   params: Promise<{ completionId: string }>
@@ -41,7 +44,7 @@ async function AdHocLoggerLoader({ completionId }: { completionId: string }) {
     redirect('/login')
   }
 
-  const [completion, muscleBalanceSnapshot] = await Promise.all([
+  const [completion, muscleBalanceSnapshot, trainingProfile] = await Promise.all([
     prisma.workoutCompletion.findUnique({
       where: { id: completionId },
       select: {
@@ -86,6 +89,10 @@ async function AdHocLoggerLoader({ completionId }: { completionId: string }) {
       },
     }),
     getMuscleBalanceSnapshot(prisma, user.id),
+    prisma.userTrainingProfile.findUnique({
+      where: { userId: user.id },
+      select: { targetMovements: true },
+    }),
   ])
 
   if (!completion || completion.userId !== user.id || !completion.isAdHoc) {
@@ -95,6 +102,23 @@ async function AdHocLoggerLoader({ completionId }: { completionId: string }) {
   if (completion.status !== 'draft') {
     redirect('/training')
   }
+
+  // Recovery-aware FAU ranking (#963) for the picker's third sort mode. Derived
+  // from the snapshot above plus aggregates + recent session effort; degrades to
+  // a deficit-only ranking when those are absent, and never blocks the page.
+  const recoveryRanking = await getFauRecoveryRanking(
+    prisma,
+    user.id,
+    muscleBalanceSnapshot
+  )
+
+  // Curated "anchor" movements ranked by staleness (#976) for the picker's
+  // Anchors view. Pure days-since-last-logged — independent of the recovery
+  // ranking above. Empty when the user hasn't configured any (picker shows a CTA).
+  const targetMovements = normalizeTargetMovements(
+    trainingProfile?.targetMovements
+  )
+  const anchors = await getAnchorStaleness(user.id, targetMovements)
 
   const exercises: AdHocExercise[] = completion.exercises.map((e) => ({
     id: e.id,
@@ -117,6 +141,8 @@ async function AdHocLoggerLoader({ completionId }: { completionId: string }) {
       initialExercises={exercises}
       initialLoggedSets={completion.loggedSets}
       muscleBalanceSnapshot={muscleBalanceSnapshot}
+      recoveryRanking={recoveryRanking ?? undefined}
+      anchors={anchors}
     />
   )
 }

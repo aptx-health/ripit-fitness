@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { flushEvents, trackEvent } from '@/lib/analytics'
-import { useSession } from '@/lib/auth-client'
+import { authClient } from '@/lib/auth-client'
 import {
   clearAttribution,
   consumePendingOAuthSignup,
@@ -26,34 +26,55 @@ import {
 const FRESH_SIGNUP_WINDOW_MS = 5 * 60 * 1000
 
 export function SignupCompletedTracker() {
-  const { data: session, isPending } = useSession()
-
+  // Read the session imperatively on mount rather than via the reactive
+  // `useSession` hook. This is a fire-once side effect that renders nothing, so
+  // it never needs to re-render on session changes — and calling BetterAuth's
+  // render-phase hook here pulled its internal `useStore`/`useRef` into the
+  // client boundary in a way that crashed with an invalid hook call on some
+  // server-rendered routes (issue #971).
   useEffect(() => {
-    if (isPending) return
-    if (!session?.user) return
+    let cancelled = false
 
-    const pending = consumePendingOAuthSignup()
-    if (!pending) return
+    void authClient
+      .getSession()
+      .then(({ data }) => {
+        if (cancelled) return
 
-    // Verify the account is genuinely new (avoids re-firing for repeat OAuth
-    // sign-ins that the click handler can't distinguish from real signups).
-    const createdAtMs = session.user.createdAt
-      ? new Date(session.user.createdAt).getTime()
-      : 0
-    if (!createdAtMs || Date.now() - createdAtMs > FRESH_SIGNUP_WINDOW_MS) return
+        const user = data?.user
+        if (!user) return
 
-    const source = resolveSource(pending.method, pending.attribution)
-    const props: Record<string, unknown> = {
-      source,
-      method: pending.method,
+        const pending = consumePendingOAuthSignup()
+        if (!pending) return
+
+        // Verify the account is genuinely new (avoids re-firing for repeat OAuth
+        // sign-ins that the click handler can't distinguish from real signups).
+        const createdAtMs = user.createdAt
+          ? new Date(user.createdAt).getTime()
+          : 0
+        if (!createdAtMs || Date.now() - createdAtMs > FRESH_SIGNUP_WINDOW_MS) {
+          return
+        }
+
+        const source = resolveSource(pending.method, pending.attribution)
+        const props: Record<string, unknown> = {
+          source,
+          method: pending.method,
+        }
+        if (pending.attribution.gymSlug) {
+          props.gymSlug = pending.attribution.gymSlug
+        }
+        trackEvent('signup_completed', props)
+        clearAttribution()
+        void flushEvents(true)
+      })
+      .catch(() => {
+        // Session lookup failed — nothing to attribute, stay silent.
+      })
+
+    return () => {
+      cancelled = true
     }
-    if (pending.attribution.gymSlug) {
-      props.gymSlug = pending.attribution.gymSlug
-    }
-    trackEvent('signup_completed', props)
-    clearAttribution()
-    void flushEvents(true)
-  }, [session, isPending])
+  }, [])
 
   return null
 }

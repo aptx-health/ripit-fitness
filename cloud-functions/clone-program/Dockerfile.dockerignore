@@ -1,0 +1,21 @@
+# BuildKit per-Dockerfile ignore file — applies when building with
+# `docker build -f cloud-functions/clone-program/Dockerfile .` (repo root context).
+# Overrides the root .dockerignore (which excludes cloud-functions entirely).
+.git
+.next
+node_modules
+cloud-functions/clone-program/node_modules
+cloud-functions/clone-program/dist
+cloud-functions/clone-program/prisma
+.env
+.env*.local
+.env*.test
+.doppler.yaml
+coverage
+__tests__
+docs
+public
+supabase
+fitcsv-wt*
+*.pem
+npm-debug.log*

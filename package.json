@@ -13,6 +13,8 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
+    "eval-suggest": "tsx scripts/eval-suggest.ts",
+    "rate-suggestions": "tsx scripts/rate-suggestions.ts",
     "prepare": "husky"
   },
   "dependencies": {
@@ -38,6 +40,7 @@
     "lucide-react": "^1.16.0",
     "minio": "^8.0.7",
     "next": "16.2.6",
+    "openai": "^6.45.0",
     "pg": "^8.20.0",
     "pino": "^10.3.1",
     "rate-limiter-flexible": "^11.0.1",
@@ -46,7 +49,8 @@
     "react-markdown": "^10.1.0",
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",
-    "resend": "^6.12.2"
+    "resend": "^6.12.2",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.13",
@@ -72,6 +76,7 @@
     "tailwindcss": "^4.2.4",
     "testcontainers": "^10.28.0",
     "ts-node": "^10.9.2",
+    "tsx": "^4.22.4",
     "typescript": "^5.9.3",
     "vitest": "^2.1.9"
   },

@@ -16,6 +16,7 @@ import {
 type UpdateMuscleBalanceRequest = {
   targets?: Record<string, unknown>
   lookbackWorkouts?: unknown
+  lookbackDays?: unknown
   includeSecondary?: unknown
   secondaryWeight?: unknown
   excludeWarmups?: unknown
@@ -65,6 +66,7 @@ export async function PUT(request: NextRequest) {
     await updateMuscleBalanceSettings(prisma, user.id, {
       targets: body.targets as MuscleBalanceTargets | undefined,
       lookbackWorkouts: body.lookbackWorkouts as number | undefined,
+      lookbackDays: body.lookbackDays as number | undefined,
       includeSecondary: body.includeSecondary as boolean | undefined,
       secondaryWeight: body.secondaryWeight as number | undefined,
       excludeWarmups: body.excludeWarmups as boolean | undefined,
@@ -107,6 +109,15 @@ function validateUpdateRequest(body: UpdateMuscleBalanceRequest): string | null 
       (body.lookbackWorkouts as number) > 52)
   ) {
     return 'Lookback workouts must be an integer between 1 and 52'
+  }
+
+  if (
+    body.lookbackDays !== undefined &&
+    (!Number.isInteger(body.lookbackDays) ||
+      (body.lookbackDays as number) < 1 ||
+      (body.lookbackDays as number) > 365)
+  ) {
+    return 'Lookback days must be an integer between 1 and 365'
   }
 
   if (
