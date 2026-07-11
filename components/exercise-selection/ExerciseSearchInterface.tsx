@@ -400,11 +400,9 @@ export function ExerciseSearchInterface({
               <div
                 className="grid border-2 border-border bg-muted/20"
                 style={{
-                  // 4+ modes wrap to two rows so labels ("Neglected") don't clip
-                  // on narrow phones; up to 3 stay in a single row.
-                  gridTemplateColumns: `repeat(${
-                    sortModes.length > 3 ? 2 : sortModes.length
-                  }, minmax(0, 1fr))`,
+                  // All modes share a single row; type shrinks below so up to
+                  // four labels ("Neglected") still fit without clipping.
+                  gridTemplateColumns: `repeat(${sortModes.length}, minmax(0, 1fr))`,
                 }}
               >
                 {sortModes.map((mode, index) => (
@@ -412,7 +410,7 @@ export function ExerciseSearchInterface({
                     key={mode.key}
                     type="button"
                     onClick={() => handleSortModeChange(mode.key)}
-                    className={`min-h-10 px-3 text-sm font-bold uppercase tracking-wider transition-colors doom-focus-ring ${
+                    className={`min-h-10 whitespace-nowrap px-2 text-center text-xs font-bold uppercase tracking-wide transition-colors doom-focus-ring ${
                       index > 0 ? 'border-l-2 border-border' : ''
                     } ${
                       effectiveSort === mode.key
