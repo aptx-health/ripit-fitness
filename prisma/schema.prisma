@@ -436,6 +436,11 @@ model UserTrainingProfile {
   // stay editable, so this survives per-FAU tweaks for "based on your X preset" copy.
   fauImportancePreset         String?
 
+  // targetMovements: curated "anchor" compounds (#976) — { [anchorPattern]: exerciseId[] }
+  // Keys from lib/exercises/anchor-patterns ANCHOR_PATTERNS (subset of MovementPattern),
+  // values up to 5 ExerciseDefinition ids. Drives the picker's "Anchors" staleness view.
+  targetMovements             Json?
+
   // Training rhythm
   targetSessionsPerWeek       Int?
   targetMinutesPerSession     Int?

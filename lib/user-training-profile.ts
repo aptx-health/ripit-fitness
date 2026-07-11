@@ -1,5 +1,10 @@
 import type { Prisma, PrismaClient } from '@prisma/client'
 import { normalizeEquipmentAvailability } from '@/lib/equipment-availability'
+import {
+  ANCHOR_PATTERNS,
+  MAX_ANCHOR_EXERCISES,
+  type TargetMovements,
+} from '@/lib/exercises/anchor-patterns'
 import { ALL_FAUS, type FAUKey } from '@/lib/fau-volume'
 import { isRatioPresetId, type RatioPresetId } from '@/lib/learning/ratio-presets'
 import {
@@ -133,6 +138,8 @@ export type OtherActivityEntry = {
 
 export type FauImportance = Partial<Record<FAUKey, number>>
 
+export type { TargetMovements }
+
 export type UserTrainingProfileDTO = {
   goalSentences: string[]
   weeklyIntent: string[]
@@ -160,6 +167,8 @@ export type UserTrainingProfileDTO = {
   fauImportance: FauImportance
   // Id of the last applied importance preset, or null (attribution only).
   fauImportancePreset: RatioPresetId | null
+  // Curated compound movements ("anchors", #976): pattern -> up to 5 exercise ids.
+  targetMovements: TargetMovements
   // Training rhythm
   targetSessionsPerWeek: number | null
   targetMinutesPerSession: number | null
@@ -315,6 +324,41 @@ export function normalizeFauImportance(value: unknown): FauImportance {
   return result
 }
 
+/**
+ * Structural normalization of the target-movements map: keep only known anchor
+ * patterns, coerce values to a deduped list of non-empty string ids, cap each
+ * to {@link MAX_ANCHOR_EXERCISES}, and drop patterns that end up empty. Mirrors
+ * {@link normalizeFauImportance} — pure and DB-free. Exercise-id *existence* is
+ * validated separately at the API write path (where a Prisma client is on hand)
+ * so deleted ids don't linger; unknown ids that slip through simply read as
+ * "never logged" and self-heal.
+ */
+export function normalizeTargetMovements(value: unknown): TargetMovements {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {}
+  const record = value as Record<string, unknown>
+  const result: TargetMovements = {}
+  for (const pattern of ANCHOR_PATTERNS) {
+    const ids = normalizeExerciseIdList(record[pattern])
+    if (ids.length > 0) result[pattern] = ids
+  }
+  return result
+}
+
+function normalizeExerciseIdList(value: unknown): string[] {
+  if (!Array.isArray(value)) return []
+  const seen = new Set<string>()
+  const result: string[] = []
+  for (const raw of value) {
+    if (typeof raw !== 'string') continue
+    const trimmed = raw.trim()
+    if (!trimmed || seen.has(trimmed)) continue
+    seen.add(trimmed)
+    result.push(trimmed)
+    if (result.length >= MAX_ANCHOR_EXERCISES) break
+  }
+  return result
+}
+
 /** Accept a known preset id, else null (unknown ids are dropped, not thrown). */
 export function normalizeFauImportancePreset(
   value: unknown
@@ -348,6 +392,7 @@ type ProfileLike = {
   otherActivities?: Prisma.JsonValue
   fauImportance?: Prisma.JsonValue
   fauImportancePreset?: string | null
+  targetMovements?: Prisma.JsonValue
   targetSessionsPerWeek?: number | null
   targetMinutesPerSession?: number | null
   patternPreference?: string | null
@@ -404,6 +449,7 @@ export function normalizeUserTrainingProfile(
     fauImportancePreset: normalizeFauImportancePreset(
       profile?.fauImportancePreset ?? null
     ),
+    targetMovements: normalizeTargetMovements(profile?.targetMovements),
     targetSessionsPerWeek: clampInt(
       profile?.targetSessionsPerWeek ?? null,
       MIN_SESSIONS_PER_WEEK,
@@ -556,6 +602,9 @@ export async function updateUserTrainingProfile(
     data.fauImportancePreset = normalizeFauImportancePreset(
       update.fauImportancePreset
     )
+  }
+  if ('targetMovements' in update) {
+    data.targetMovements = normalizeTargetMovements(update.targetMovements)
   }
   if ('targetSessionsPerWeek' in update) {
     data.targetSessionsPerWeek = clampInt(

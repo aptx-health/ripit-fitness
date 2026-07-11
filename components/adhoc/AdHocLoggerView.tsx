@@ -34,6 +34,7 @@ import {
 } from '@/lib/api/adhoc-workout'
 import { FetchError } from '@/lib/api/fetch'
 import { clientLogger } from '@/lib/client-logger'
+import type { AnchorStalenessRow } from '@/lib/recommendations/anchor-staleness'
 import type { FauNeed } from '@/lib/recommendations/fau-score'
 import type { WorkoutRollup } from '@/lib/stats/workout-rollup'
 import type { LoggedSet } from '@/types/workout'
@@ -89,6 +90,8 @@ type Props = {
   muscleBalanceSnapshot: MuscleBalanceSnapshot
   /** Recovery-aware FAU ranking (#963) for the picker's third sort mode. */
   recoveryRanking?: FauNeed[]
+  /** Curated anchor movements + staleness (#976) for the picker's Anchors view. */
+  anchors?: AnchorStalenessRow[]
 }
 
 const EMPTY_SET = {
@@ -106,6 +109,7 @@ export default function AdHocLoggerView({
   initialLoggedSets,
   muscleBalanceSnapshot,
   recoveryRanking,
+  anchors,
 }: Props) {
   const router = useRouter()
   const toast = useToast()
@@ -849,6 +853,7 @@ export default function AdHocLoggerView({
           isBusy={pickerMode.kind === 'add' ? isAdding : isSwapping}
           muscleBalanceSnapshot={muscleBalanceSnapshot}
           recoveryRanking={recoveryRanking}
+          anchors={anchors}
           plannedExerciseDefinitions={exercises.map((exercise) => ({
             primaryFAUs: exercise.exerciseDefinition.primaryFAUs,
             secondaryFAUs: exercise.exerciseDefinition.secondaryFAUs,

@@ -28,6 +28,11 @@ export const MOVEMENT_PATTERNS = [
 
 export type MovementPattern = (typeof MOVEMENT_PATTERNS)[number];
 
+// The user-curated "anchor" movement patterns (Target Movements, #976) live in
+// `./anchor-patterns` — a zero-dependency module so client components can import
+// the taxonomy without pulling this module's Prisma/logger deps into the bundle.
+// They are a deliberate subset of MOVEMENT_PATTERNS; see that file.
+
 export const INTENSITY_CLASSES = ['heavy', 'moderate', 'light'] as const;
 export type IntensityClass = (typeof INTENSITY_CLASSES)[number];
 
