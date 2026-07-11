@@ -1,0 +1,89 @@
+name: Staging Smoke — Aggregates Pipeline
+
+# Post-deploy smoke test for the UserTrainingAggregates recompute pipeline
+# (issue #940). Runs against the *deployed* staging stack after the app image
+# for `dev` is built. It drives a real workout completion and asserts the
+# aggregates row refreshes end-to-end (app -> publisher -> Redis -> worker ->
+# DB) — the class of failures in-process tests (PR #939) cannot see.
+#
+# Trigger model: `workflow_run` fires when "Build and Push App Image" finishes
+# on `dev`. The image push is not the same as the ArgoCD rollout completing, so
+# this job waits for staging readiness (bounded) plus a short rollout grace
+# before driving the flow. Also runnable on demand via workflow_dispatch.
+#
+# Required configuration (GitHub `staging` environment):
+#   vars.NEXT_PUBLIC_APP_URL   Base URL of staging (falls back to staging.ripit.fit)
+#   secrets.SMOKE_USER_EMAIL   Dedicated staging smoke-test user
+#   secrets.SMOKE_USER_PASSWORD
+
+on:
+  workflow_run:
+    workflows: ['Build and Push App Image']
+    types: [completed]
+    branches: [dev]
+  workflow_dispatch:
+
+jobs:
+  smoke-aggregates:
+    # Only after a successful build on dev (or a manual dispatch).
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: staging
+
+    env:
+      BASE_URL: ${{ vars.NEXT_PUBLIC_APP_URL || 'https://staging.ripit.fit' }}
+      SMOKE_USER_EMAIL: ${{ secrets.SMOKE_USER_EMAIL }}
+      SMOKE_USER_PASSWORD: ${{ secrets.SMOKE_USER_PASSWORD }}
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+      # ArgoCD rollout is asynchronous relative to the image push. Give the new
+      # pods time to roll before asserting; the aggregates path is version-
+      # agnostic so we only need staging to be up and healthy.
+      ROLLOUT_GRACE_SECS: '60'
+      READY_TIMEOUT_SECS: '180'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Guard — required secrets present
+        run: |
+          if [ -z "${SMOKE_USER_EMAIL}" ] || [ -z "${SMOKE_USER_PASSWORD}" ]; then
+            echo "::error::SMOKE_USER_EMAIL / SMOKE_USER_PASSWORD are not configured in the 'staging' environment."
+            exit 1
+          fi
+
+      - name: Wait for staging readiness
+        run: |
+          echo "Giving the ArgoCD rollout ${ROLLOUT_GRACE_SECS}s to progress..."
+          sleep "${ROLLOUT_GRACE_SECS}"
+          deadline=$(( $(date +%s) + READY_TIMEOUT_SECS ))
+          until curl -sf "${BASE_URL%/}/api/health/ready" >/dev/null 2>&1; do
+            if [ "$(date +%s)" -ge "$deadline" ]; then
+              echo "::error::Staging readiness probe did not pass within ${READY_TIMEOUT_SECS}s"
+              exit 1
+            fi
+            echo "Not ready yet; retrying in 5s..."
+            sleep 5
+          done
+          echo "Staging is ready."
+
+      - name: Drive aggregates pipeline smoke test
+        run: ./scripts/smoke-test-aggregates.sh
+
+      - name: Notify Discord on failure
+        if: failure() && env.DISCORD_WEBHOOK_URL != ''
+        run: |
+          curl -s -H "Content-Type: application/json" -d "{
+            \"embeds\": [{
+              \"title\": \"Staging aggregates smoke test FAILED\",
+              \"description\": \"The post-deploy aggregates recompute pipeline did not refresh end-to-end on staging.\",
+              \"color\": 15158332,
+              \"fields\": [
+                {\"name\": \"Workflow run\", \"value\": \"[#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\", \"inline\": true},
+                {\"name\": \"Base URL\", \"value\": \"${BASE_URL}\", \"inline\": true}
+              ]
+            }]
+          }" "${{ secrets.DISCORD_WEBHOOK_URL }}"
