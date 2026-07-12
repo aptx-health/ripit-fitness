@@ -17,7 +17,7 @@ import { completeDraft, discardDraft } from '@/lib/api/workout-sets'
 import { clientLogger } from '@/lib/client-logger'
 import { parseRepsFromPrescribed } from '@/lib/constants/intensity-presets'
 import { formatPrescribedSummary } from '@/lib/format/prescribed-summary'
-import { computePrefillValues } from '@/lib/workout/prefill'
+import { type PrefillFormState, resolvePrefill } from '@/lib/workout/prefill'
 import type { LoggedSet } from '@/types/workout'
 import ExerciseDefinitionEditorModal from './features/exercise-definition/ExerciseDefinitionEditorModal'
 import ExerciseActionsFooter from './workout-logging/ExerciseActionsFooter'
@@ -248,35 +248,33 @@ export default function ExerciseLoggingModal({
   const hasRpe = hasIntensityAccess && currentPrescribedSets.some((s) => s.rpe !== null)
   const hasRir = hasIntensityAccess && currentPrescribedSets.some((s) => s.rir !== null)
 
-  // Pre-fill form when exercise loads or set number changes.
-  //
-  // Priority: carry forward the last set completed *this session* for the
-  // exercise (so swiping away and back during supersets keeps your numbers),
-  // then fall back to the previous workout's last set (history), and only then
-  // to the prescribed plan / zeros. Previous performance wins over the plan.
+  // Pre-fill the form when the exercise or set changes. Priority and the
+  // untouched/upgrade rules live in resolvePrefill; `lastPrefillKey` tracks the
+  // exercise/set we prefilled and `prefilledSnapshot` records what we wrote so
+  // an untouched form can be told from an edited one.
   const lastPrefillKey = useRef<string>('')
+  const prefilledSnapshot = useRef<PrefillFormState | null>(null)
   useEffect(() => {
     if (!currentExercise) return
 
-    // History loads asynchronously after we land on an exercise. If there are
-    // no session sets to carry forward yet, wait for history to settle before
-    // prefilling so a late-arriving previous workout isn't dropped in favor of
-    // the prescribed fallback.
-    const sessionHasSets = currentExerciseLoggedSets.length > 0
-    const historySettled =
-      currentHistoryState === 'loaded' || currentHistoryState === 'error'
-    if (!sessionHasSets && !historySettled) return
-
     const prefillKey = `${currentExercise.id}-${nextSetNumber}`
-    if (lastPrefillKey.current === prefillKey) return
+    const values = resolvePrefill({
+      isNewTarget: lastPrefillKey.current !== prefillKey,
+      current: currentSet,
+      snapshot: prefilledSnapshot.current,
+      sessionSets: currentExerciseLoggedSets,
+      historySets: currentExerciseHistory?.sets,
+      prescribed: currentPrescribedSets.find(s => s.setNumber === nextSetNumber),
+    })
+    if (!values) return
+
     lastPrefillKey.current = prefillKey
-
-    const values = computePrefillValues(
-      currentExerciseLoggedSets,
-      currentExerciseHistory?.sets,
-      currentPrescribedSets.find(s => s.setNumber === nextSetNumber)
-    )
-
+    prefilledSnapshot.current = {
+      reps: values.reps,
+      weight: values.weight,
+      rpe: values.rpe,
+      rir: values.rir,
+    }
     setCurrentSet(prev => ({
       ...prev,
       reps: values.reps,
@@ -291,7 +289,7 @@ export default function ExerciseLoggingModal({
     currentPrescribedSets,
     currentExerciseLoggedSets,
     currentExerciseHistory,
-    currentHistoryState,
+    currentSet,
   ])
 
   const handleLogSet = useCallback(() => {
