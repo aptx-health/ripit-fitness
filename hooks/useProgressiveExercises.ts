@@ -207,7 +207,10 @@ export function useProgressiveExercises(
     if (loadedExercises.has(index) && exerciseLoadStates.get(index) === 'loaded') {
       // Exercise already loaded, check if we need history
       const exercise = loadedExercises.get(index)
-      if (exercise && !historyByExerciseId.has(exercise.id) && historyLoadStates.get(exercise.id) !== 'loading') {
+      // Retry whenever history isn't loaded yet — gate concurrency on
+      // prefetchingRef, not the load state, so a previously dropped fetch (e.g.
+      // interrupted by fast navigation) isn't stranded in "loading" forever.
+      if (exercise && !historyByExerciseId.has(exercise.id)) {
         const historyKey = `history-${exercise.id}`
         if (!prefetchingRef.current.has(historyKey)) {
           prefetchingRef.current.add(historyKey)
@@ -257,7 +260,7 @@ export function useProgressiveExercises(
     }
 
     prefetchingRef.current.delete(prefetchKey)
-  }, [loadedExercises, exerciseLoadStates, historyByExerciseId, historyLoadStates, fetchExercise, fetchHistory])
+  }, [loadedExercises, exerciseLoadStates, historyByExerciseId, fetchExercise, fetchHistory])
 
   const prefetchSequentially = useCallback(async (startIndex: number) => {
     const indicesToLoad = [startIndex, startIndex + 1, startIndex + 2, startIndex + 3]
@@ -270,15 +273,23 @@ export function useProgressiveExercises(
     }
   }, [totalExercises, loadExerciseWithHistory])
 
-  // Prefetch exercises on navigation — see #196
-  /* eslint-disable react-hooks/set-state-in-effect */
+  // Track true mount/unmount so async fetches don't set state after the hook
+  // unmounts. This MUST be separate from the prefetch effect below: that effect
+  // re-runs on every navigation (and whenever prefetchSequentially's identity
+  // changes), so folding this in flipped mountedRef to false mid-navigation and
+  // caused in-flight history fetches to be dropped — stranding exercises in a
+  // permanent "loading" state and blanking their prefilled sets.
   useEffect(() => {
     mountedRef.current = true
-    prefetchSequentially(currentIndex)
-
     return () => {
       mountedRef.current = false
     }
+  }, [])
+
+  // Prefetch exercises on navigation — see #196
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    prefetchSequentially(currentIndex)
   }, [currentIndex, prefetchSequentially])
   /* eslint-enable react-hooks/set-state-in-effect */
 

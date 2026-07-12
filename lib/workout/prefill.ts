@@ -102,3 +102,54 @@ export function computePrefillValues(
     rir: prescribed?.rir != null ? String(prescribed.rir) : '',
   }
 }
+
+/** The reps/weight/intensity currently shown in (or last written to) the form. */
+export type PrefillFormState = {
+  reps: string
+  weight: string
+  rpe: string
+  rir: string
+}
+
+function sameForm(a: PrefillFormState, b: PrefillFormState): boolean {
+  return a.reps === b.reps && a.weight === b.weight && a.rpe === b.rpe && a.rir === b.rir
+}
+
+/**
+ * Decide whether to (re)prefill the logging form and with what values.
+ *
+ * Previous-workout history arrives asynchronously, so the form is prefilled
+ * immediately with the best data available and *upgraded* once history loads.
+ * To avoid clobbering the user's own input (or the in-exercise set progression),
+ * a re-apply only happens while the form is untouched — i.e. still equal to the
+ * `snapshot` of what we last wrote.
+ *
+ * @returns the values to apply, or null to leave the form as-is.
+ */
+export function resolvePrefill(params: {
+  /** True when this is a freshly-entered exercise/set we haven't prefilled. */
+  isNewTarget: boolean
+  /** Current form values. */
+  current: PrefillFormState
+  /** What we last prefilled for this target (null if none yet). */
+  snapshot: PrefillFormState | null
+  sessionSets: PrefillCandidateSet[]
+  historySets?: PrefillCandidateSet[] | null
+  prescribed: PrefillPrescribedTarget | undefined
+}): PrefillValues | null {
+  const { isNewTarget, current, snapshot, sessionSets, historySets, prescribed } = params
+
+  // Already prefilled this target: only re-apply if the user hasn't touched it.
+  if (!isNewTarget && (snapshot == null || !sameForm(snapshot, current))) {
+    return null
+  }
+
+  const values = computePrefillValues(sessionSets, historySets, prescribed)
+
+  // Nothing new to show — skip a redundant re-render.
+  if (!isNewTarget && snapshot != null && sameForm(snapshot, values)) {
+    return null
+  }
+
+  return values
+}
