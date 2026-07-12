@@ -111,6 +111,34 @@ export type PrefillFormState = {
   rir: string
 }
 
+/** A set the user tapped to copy into the form (history or logged set). */
+export type ApplicableSet = {
+  reps: number
+  weight: number
+  weightUnit?: string | null
+  rpe: number | null
+  rir: number | null
+}
+
+/**
+ * Map a tapped set to form field strings. Intensity is dropped when the user
+ * doesn't have intensity tracking enabled. `weightUnit` is null when the source
+ * unit is unknown, meaning "keep the current unit".
+ */
+export function appliedSetToForm(
+  source: ApplicableSet,
+  includeIntensity: boolean
+): PrefillFormState & { weightUnit: 'lbs' | 'kg' | null } {
+  const unit = source.weightUnit === 'lbs' || source.weightUnit === 'kg' ? source.weightUnit : null
+  return {
+    reps: String(source.reps),
+    weight: String(source.weight),
+    weightUnit: unit,
+    rpe: includeIntensity && source.rpe != null ? String(source.rpe) : '',
+    rir: includeIntensity && source.rir != null ? String(source.rir) : '',
+  }
+}
+
 function sameForm(a: PrefillFormState, b: PrefillFormState): boolean {
   return a.reps === b.reps && a.weight === b.weight && a.rpe === b.rpe && a.rir === b.rir
 }

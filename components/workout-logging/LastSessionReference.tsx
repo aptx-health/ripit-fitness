@@ -2,6 +2,7 @@
 
 import { History, Sparkles } from 'lucide-react'
 import { formatLastSessionSummary, type LastSessionSet } from '@/lib/format/last-session-reference'
+import { type ApplicableSet, pickPrefillSourceSet } from '@/lib/workout/prefill'
 
 interface ExerciseHistoryForReference {
   completedAt: Date | string
@@ -12,6 +13,8 @@ interface LastSessionReferenceProps {
   history: ExerciseHistoryForReference | null
   /** When true, the parent is still fetching history — render nothing to avoid flicker. */
   isLoading?: boolean
+  /** Tap the row to prefill the form with the previous workout's last set. */
+  onApply?: (set: ApplicableSet) => void
 }
 
 /**
@@ -26,17 +29,20 @@ interface LastSessionReferenceProps {
 export default function LastSessionReference({
   history,
   isLoading = false,
+  onApply,
 }: LastSessionReferenceProps) {
   if (isLoading) return null
 
   const { summary, relative, emptyReason } = formatLastSessionSummary(history)
 
   if (summary) {
-    return (
-      <div
-        className="flex items-baseline gap-2 px-3 py-2 border-l-4 border-success bg-success/5 text-sm"
-        data-testid="last-session-reference"
-      >
+    // Prefill from the previous workout's last working set (matches the number
+    // shown in the summary's right-hand side).
+    const applicableSet = history ? pickPrefillSourceSet([], history.sets) : null
+    const canApply = !!onApply && !!applicableSet
+
+    const content = (
+      <>
         <History
           aria-hidden="true"
           size={14}
@@ -49,6 +55,29 @@ export default function LastSessionReference({
         {relative && (
           <span className="text-xs text-muted-foreground ml-auto">({relative})</span>
         )}
+      </>
+    )
+
+    if (canApply) {
+      return (
+        <button
+          type="button"
+          onClick={() => applicableSet && onApply?.(applicableSet)}
+          className="flex w-full items-baseline gap-2 px-3 py-2 border-l-4 border-success bg-success/5 text-sm text-left transition-colors hover:bg-success/10 active:bg-success/15 doom-focus-ring"
+          data-testid="last-session-reference"
+          aria-label={`Use last time's set: ${summary}`}
+        >
+          {content}
+        </button>
+      )
+    }
+
+    return (
+      <div
+        className="flex items-baseline gap-2 px-3 py-2 border-l-4 border-success bg-success/5 text-sm"
+        data-testid="last-session-reference"
+      >
+        {content}
       </div>
     )
   }
