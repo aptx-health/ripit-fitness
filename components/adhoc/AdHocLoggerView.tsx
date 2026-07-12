@@ -37,6 +37,7 @@ import { clientLogger } from '@/lib/client-logger'
 import type { AnchorStalenessRow } from '@/lib/recommendations/anchor-staleness'
 import type { FauNeed } from '@/lib/recommendations/fau-score'
 import type { WorkoutRollup } from '@/lib/stats/workout-rollup'
+import { type ApplicableSet, appliedSetToForm } from '@/lib/workout/prefill'
 import type { LoggedSet } from '@/types/workout'
 import {
   AdHocEmptyState,
@@ -232,6 +233,20 @@ export default function AdHocLoggerView({
     currentSet.reps,
     currentSet.weight,
   ])
+
+  // Tap-to-prefill: copy a set's numbers into the form. Used by the "Last time"
+  // reference (previous workout) and by tapping an already-logged set this
+  // session. Mark the exercise as prefilled so the history effect above won't
+  // fire over the tapped-in values.
+  const applySetToForm = useCallback(
+    (source: ApplicableSet) => {
+      if (!currentExercise) return
+      prefilledFromHistoryIds.current.add(currentExercise.id)
+      const v = appliedSetToForm(source, hasIntensityAccess)
+      setCurrentSet(prev => ({ ...prev, ...v, weightUnit: v.weightUnit ?? prev.weightUnit }))
+    },
+    [currentExercise, hasIntensityAccess]
+  )
 
   // Shared onRetry callback so users see a "reconnecting…" toast on slow links
   // before the request either succeeds or terminally fails.
@@ -759,6 +774,7 @@ export default function AdHocLoggerView({
                     : 'pending'
               }
               onDeleteSet={handleDeleteSet}
+              onApplySet={applySetToForm}
               loggingForm={
                 <SetLoggingForm
                   prescribedSet={undefined}
