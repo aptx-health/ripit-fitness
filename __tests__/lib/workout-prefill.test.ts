@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { type PrefillCandidateSet, pickPrefillSourceSet } from '@/lib/workout/prefill'
+import {
+  type PrefillCandidateSet,
+  pickPrefillSourceSet,
+  resolvePrefill,
+} from '@/lib/workout/prefill'
 
 function set(partial: Partial<PrefillCandidateSet> & { setNumber: number }): PrefillCandidateSet {
   return {
@@ -89,5 +93,92 @@ describe('pickPrefillSourceSet', () => {
 
     expect(result?.rpe).toBe(8)
     expect(result?.rir).toBe(2)
+  })
+})
+
+describe('resolvePrefill', () => {
+  const blank = { reps: '', weight: '', rpe: '', rir: '' }
+  const prescribed = { reps: '5', rpe: null, rir: null }
+
+  it('prefills a freshly-entered exercise from history', () => {
+    const history = [set({ setNumber: 1, reps: 5, weight: 200 })]
+
+    const values = resolvePrefill({
+      isNewTarget: true,
+      current: blank,
+      snapshot: null,
+      sessionSets: [],
+      historySets: history,
+      prescribed,
+    })
+
+    expect(values).not.toBeNull()
+    expect(values?.weight).toBe('200')
+    expect(values?.reps).toBe('5')
+  })
+
+  it('upgrades a prescribed fallback to history once it arrives (form untouched)', () => {
+    // First pass: history not loaded yet — falls back to prescribed reps + 0.
+    const fallback = resolvePrefill({
+      isNewTarget: true,
+      current: blank,
+      snapshot: null,
+      sessionSets: [],
+      historySets: null,
+      prescribed,
+    })
+    expect(fallback?.reps).toBe('5')
+    expect(fallback?.weight).toBe('0')
+
+    const snapshot = {
+      reps: fallback!.reps,
+      weight: fallback!.weight,
+      rpe: fallback!.rpe,
+      rir: fallback!.rir,
+    }
+
+    // History arrives; the form still shows the fallback (untouched).
+    const upgraded = resolvePrefill({
+      isNewTarget: false,
+      current: snapshot,
+      snapshot,
+      sessionSets: [],
+      historySets: [set({ setNumber: 1, reps: 8, weight: 315 })],
+      prescribed,
+    })
+
+    expect(upgraded?.weight).toBe('315')
+    expect(upgraded?.reps).toBe('8')
+  })
+
+  it('does not clobber the form after the user edits it', () => {
+    const snapshot = { reps: '5', weight: '0', rpe: '', rir: '' }
+    const edited = { reps: '5', weight: '185', rpe: '', rir: '' } // user typed weight
+
+    const values = resolvePrefill({
+      isNewTarget: false,
+      current: edited,
+      snapshot,
+      sessionSets: [],
+      historySets: [set({ setNumber: 1, reps: 8, weight: 315 })],
+      prescribed,
+    })
+
+    expect(values).toBeNull()
+  })
+
+  it('skips a redundant re-apply when nothing changed', () => {
+    const snapshot = { reps: '5', weight: '200', rpe: '', rir: '' }
+
+    const values = resolvePrefill({
+      isNewTarget: false,
+      current: snapshot,
+      snapshot,
+      sessionSets: [],
+      historySets: [set({ setNumber: 1, reps: 5, weight: 200 })],
+      prescribed,
+    })
+
+    expect(values).toBeNull()
   })
 })
