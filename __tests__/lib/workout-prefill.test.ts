@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  appliedSetToForm,
   type PrefillCandidateSet,
   pickPrefillSourceSet,
   resolvePrefill,
@@ -180,5 +181,34 @@ describe('resolvePrefill', () => {
     })
 
     expect(values).toBeNull()
+  })
+})
+
+describe('appliedSetToForm (tap-to-prefill)', () => {
+  it('maps a set to string form values with intensity', () => {
+    const v = appliedSetToForm(
+      { reps: 9, weight: 60, weightUnit: 'lbs', rpe: null, rir: 2 },
+      true
+    )
+
+    expect(v).toEqual({ reps: '9', weight: '60', weightUnit: 'lbs', rpe: '', rir: '2' })
+  })
+
+  it('drops intensity when the user has it disabled', () => {
+    const v = appliedSetToForm(
+      { reps: 5, weight: 225, weightUnit: 'kg', rpe: 8, rir: 2 },
+      false
+    )
+
+    expect(v.rpe).toBe('')
+    expect(v.rir).toBe('')
+    expect(v.weightUnit).toBe('kg')
+  })
+
+  it('returns null weightUnit when the source unit is unknown (keep current)', () => {
+    const v = appliedSetToForm({ reps: 10, weight: 0, rpe: null, rir: null }, true)
+
+    expect(v.weightUnit).toBeNull()
+    expect(v.weight).toBe('0')
   })
 })

@@ -8,6 +8,7 @@ import { MessageCard } from '@/components/ui/MessageCard'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/radix/tabs'
 import { TipAnnotation } from '@/components/ui/TipAnnotation'
 import type { LoadState } from '@/hooks/useProgressiveExercises'
+import type { ApplicableSet } from '@/lib/workout/prefill'
 import type { LoggedSet } from '@/types/workout'
 import DrawerContextBanner from './DrawerContextBanner'
 import ExerciseHistoryPanel from './ExerciseHistoryPanel'
@@ -65,6 +66,8 @@ interface ExerciseDisplayTabsProps {
   historyState?: LoadState
   hasHistoryIndicator?: boolean // Pre-computed indicator for dot (updates reactively)
   onDeleteSet: (setNumber: number) => void
+  /** Copy a set's numbers into the logging form (tap-to-prefill). */
+  onApplySet?: (set: ApplicableSet) => void
   loggingForm: React.ReactNode
   isInputExpanded?: boolean
   showIntensity?: boolean
@@ -119,6 +122,7 @@ export default function ExerciseDisplayTabs({
   historyState = 'loaded',
   hasHistoryIndicator = false,
   onDeleteSet,
+  onApplySet,
   loggingForm,
   isInputExpanded = false,
   showIntensity = true,
@@ -184,6 +188,7 @@ export default function ExerciseDisplayTabs({
             <LastSessionReference
               history={exerciseHistory}
               isLoading={historyState === 'loading' || historyState === 'pending'}
+              onApply={onApplySet}
             />
           )}
           {loggingForm}
@@ -194,6 +199,7 @@ export default function ExerciseDisplayTabs({
                 loggedSets={loggedSets}
                 exerciseHistory={exerciseHistory}
                 onDeleteSet={onDeleteSet}
+                onApplySet={onApplySet}
                 exerciseId={exercise.id}
                 showIntensity={showIntensity}
               />
