@@ -17,7 +17,7 @@ import { completeDraft, discardDraft } from '@/lib/api/workout-sets'
 import { clientLogger } from '@/lib/client-logger'
 import { parseRepsFromPrescribed } from '@/lib/constants/intensity-presets'
 import { formatPrescribedSummary } from '@/lib/format/prescribed-summary'
-import { type PrefillFormState, resolvePrefill } from '@/lib/workout/prefill'
+import { type ApplicableSet, appliedSetToForm, type PrefillFormState, resolvePrefill } from '@/lib/workout/prefill'
 import type { LoggedSet } from '@/types/workout'
 import ExerciseDefinitionEditorModal from './features/exercise-definition/ExerciseDefinitionEditorModal'
 import ExerciseActionsFooter from './workout-logging/ExerciseActionsFooter'
@@ -292,6 +292,20 @@ export default function ExerciseLoggingModal({
     currentSet,
   ])
 
+  // Tap-to-prefill from the "Last time" row or an already-logged set. Pin the
+  // prefill key / clear the snapshot so the auto-prefill effect treats the form
+  // as user-controlled and won't overwrite the tapped-in values.
+  const applySetToForm = useCallback(
+    (source: ApplicableSet) => {
+      if (!currentExercise) return
+      lastPrefillKey.current = `${currentExercise.id}-${nextSetNumber}`
+      prefilledSnapshot.current = null
+      const v = appliedSetToForm(source, hasIntensityAccess)
+      setCurrentSet(prev => ({ ...prev, ...v, weightUnit: v.weightUnit ?? prev.weightUnit }))
+    },
+    [currentExercise, nextSetNumber, hasIntensityAccess]
+  )
+
   const handleLogSet = useCallback(() => {
     if (!currentSet.reps || !currentSet.weight || !currentExercise) return
 
@@ -343,13 +357,7 @@ export default function ExerciseLoggingModal({
     setExtraSetsMode(false)
     goToNext()
     rotateTip()
-    setCurrentSet(prev => ({
-      reps: '',
-      weight: '',
-      weightUnit: prev.weightUnit,
-      rpe: '',
-      rir: '',
-    }))
+    setCurrentSet(prev => ({ reps: '', weight: '', weightUnit: prev.weightUnit, rpe: '', rir: '' }))
   }
 
   const handlePreviousExercise = () => {
@@ -357,13 +365,7 @@ export default function ExerciseLoggingModal({
     setExtraSetsMode(false)
     goToPrevious()
     rotateTip()
-    setCurrentSet(prev => ({
-      reps: '',
-      weight: '',
-      weightUnit: prev.weightUnit,
-      rpe: '',
-      rir: '',
-    }))
+    setCurrentSet(prev => ({ reps: '', weight: '', weightUnit: prev.weightUnit, rpe: '', rir: '' }))
   }
 
   // Swipe navigation between exercises
@@ -750,6 +752,7 @@ export default function ExerciseLoggingModal({
                   historyState={currentHistoryState}
                   hasHistoryIndicator={hasHistoryForCurrentExercise}
                   onDeleteSet={handleDeleteSet}
+                  onApplySet={applySetToForm}
                   isInputExpanded={expandedInput !== null}
                   showIntensity={hasIntensityAccess}
                   message={currentMessage}

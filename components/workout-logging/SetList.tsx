@@ -35,6 +35,8 @@ interface SetListProps {
   loggedSets: LoggedSet[]
   exerciseHistory: ExerciseHistory | null
   onDeleteSet: (setNumber: number) => void
+  /** Tap a logged set to copy its numbers into the form (prefill this set). */
+  onApplySet?: (set: LoggedSet) => void
   exerciseId?: string
   showIntensity?: boolean
 }
@@ -87,6 +89,7 @@ export default function SetList({
   loggedSets,
   exerciseHistory,
   onDeleteSet,
+  onApplySet,
   exerciseId,
   showIntensity = true,
 }: SetListProps) {
@@ -151,34 +154,50 @@ export default function SetList({
       const isFailed = logged._syncStatus === 'error'
       const isPending = logged._syncStatus === 'pending'
       const intensity = formatIntensity(logged, showIntensity)
+      const rowInner = (
+        <>
+          <span className="w-6 text-muted-foreground font-bold">{logged.setNumber}</span>
+          <span
+            className={`flex-1 font-semibold ${isFailed ? 'text-warning' : 'text-foreground'}`}
+          >
+            {logged.reps} reps <span className="text-muted-foreground">×</span>{' '}
+            {formatWeight(logged.weight, logged.weightUnit)}
+            {isPending && (
+              <span className="ml-2 text-xs font-normal text-muted-foreground normal-case tracking-normal">
+                saving...
+              </span>
+            )}
+            {isFailed && (
+              <AlertCircle
+                aria-hidden="true"
+                size={12}
+                className="inline-block ml-2 -mt-0.5 text-warning"
+              />
+            )}
+          </span>
+          {intensity ? (
+            <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+              {intensity}
+            </span>
+          ) : (
+            <span aria-hidden="true" />
+          )}
+        </>
+      )
       rows.push(
         <div key={`logged-${logged.exerciseId}-${logged.setNumber}`} className="py-1">
           <div className="flex items-center gap-3 px-3 text-sm tabular-nums">
-            <span className="w-6 text-muted-foreground font-bold">{logged.setNumber}</span>
-            <span
-              className={`flex-1 font-semibold ${isFailed ? 'text-warning' : 'text-foreground'}`}
-            >
-              {logged.reps} reps <span className="text-muted-foreground">×</span>{' '}
-              {formatWeight(logged.weight, logged.weightUnit)}
-              {isPending && (
-                <span className="ml-2 text-xs font-normal text-muted-foreground normal-case tracking-normal">
-                  saving...
-                </span>
-              )}
-              {isFailed && (
-                <AlertCircle
-                  aria-hidden="true"
-                  size={12}
-                  className="inline-block ml-2 -mt-0.5 text-warning"
-                />
-              )}
-            </span>
-            {intensity ? (
-              <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">
-                {intensity}
-              </span>
+            {onApplySet ? (
+              <button
+                type="button"
+                onClick={() => onApplySet(logged)}
+                className="flex flex-1 items-center gap-3 text-left transition-colors hover:text-accent active:opacity-70 doom-focus-ring"
+                aria-label={`Use set ${logged.setNumber}: ${logged.reps} reps × ${formatWeight(logged.weight, logged.weightUnit)}`}
+              >
+                {rowInner}
+              </button>
             ) : (
-              <span aria-hidden="true" />
+              <div className="flex flex-1 items-center gap-3">{rowInner}</div>
             )}
             <button
               type="button"
