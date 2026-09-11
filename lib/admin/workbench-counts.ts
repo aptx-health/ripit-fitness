@@ -1,6 +1,6 @@
 import { cache } from 'react'
-import { prisma } from '@/lib/db'
 import type { WorkbenchCounts } from '@/lib/admin/navigation'
+import { prisma } from '@/lib/db'
 
 /**
  * Cheap aggregate counts for the Workbench nav (tiles, groups, sidebar).

@@ -1,7 +1,7 @@
 import { Dumbbell, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
-import { pluralize } from '@/lib/format/pluralize'
 import type { WorkbenchCounts } from '@/lib/admin/navigation'
+import { pluralize } from '@/lib/format/pluralize'
 
 export default function Tier1Tiles({ counts }: { counts: WorkbenchCounts }) {
   return (
