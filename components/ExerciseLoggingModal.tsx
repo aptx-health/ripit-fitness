@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle, Info, Pencil, Plus, RefreshCw, Trash2, X } from 'lucide-react'
+import { AlertTriangle, Info, Pencil, Plus, RefreshCw, Trash2, Wrench, X } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Button } from '@/components/ui/Button'
@@ -20,6 +20,7 @@ import { formatPrescribedSummary } from '@/lib/format/prescribed-summary'
 import { type ApplicableSet, appliedSetToForm, type PrefillFormState, resolvePrefill } from '@/lib/workout/prefill'
 import type { LoggedSet } from '@/types/workout'
 import ExerciseDefinitionEditorModal from './features/exercise-definition/ExerciseDefinitionEditorModal'
+import QuickEditExerciseSheet from './features/exercise-definition/QuickEditExerciseSheet'
 import ExerciseActionsFooter from './workout-logging/ExerciseActionsFooter'
 import ExerciseDisplayTabs from './workout-logging/ExerciseDisplayTabs'
 import ExerciseLoggingHeader from './workout-logging/ExerciseLoggingHeader'
@@ -57,6 +58,8 @@ type Props = {
   loggingMode?: 'full' | 'follow_along'
   onComplete: (result?: { completionId: string; rollup: import('@/lib/stats/workout-rollup').WorkoutRollup | null }) => Promise<void>
   onRefresh?: () => Promise<void>
+  /** Gates the "Quick Edit" action, which can edit system exercises unlike the owner-only edit wizard. */
+  isEditorRole?: boolean
 }
 
 export default function ExerciseLoggingModal({
@@ -76,6 +79,7 @@ export default function ExerciseLoggingModal({
   loggingMode: loggingModeProp = 'full',
   onComplete,
   onRefresh,
+  isEditorRole = false,
 }: Props) {
   const [currentSet, setCurrentSet] = useState({
     reps: '',
@@ -147,6 +151,7 @@ export default function ExerciseLoggingModal({
   const [wizardTarget, setWizardTarget] = useState<{ id: string; name: string } | null>(null)
   const [navigateToLastExercise, setNavigateToLastExercise] = useState(false)
   const [editingExerciseDefinitionId, setEditingExerciseDefinitionId] = useState<string | null>(null)
+  const [quickEditExerciseId, setQuickEditExerciseId] = useState<string | null>(null)
 
   // Workout plan editor state
   const [planEditorOpen, setPlanEditorOpen] = useState(false)
@@ -505,6 +510,12 @@ export default function ExerciseLoggingModal({
     }
   }
 
+  const handleQuickEditExercise = () => {
+    if (currentExercise?.exerciseDefinition) {
+      setQuickEditExerciseId(currentExercise.exerciseDefinition.id)
+    }
+  }
+
   const handleExitWorkout = () => setShowExitConfirm(true)
 
   const handleExitSaveAsDraft = async () => {
@@ -763,6 +774,9 @@ export default function ExerciseLoggingModal({
                   prescribedSummary={prescribedSummary}
                   menuActions={[
                     { label: 'Edit this exercise', icon: Pencil, onClick: handleEditExercise },
+                    ...(isEditorRole && currentExercise?.exerciseDefinition
+                      ? [{ label: 'Quick Edit (Admin)', icon: Wrench, onClick: handleQuickEditExercise }]
+                      : []),
                     { label: 'Add an exercise', icon: Plus, onClick: handleAddExercise },
                     { label: 'Swap this exercise', icon: RefreshCw, onClick: handleReplaceExercise },
                     {
@@ -912,6 +926,17 @@ export default function ExerciseLoggingModal({
           if (onRefresh) onRefresh()
         }}
       />
+
+      {/* Quick Edit sheet (editor role only) */}
+      {quickEditExerciseId && (
+        <QuickEditExerciseSheet
+          isOpen={true}
+          onClose={() => setQuickEditExerciseId(null)}
+          exerciseId={quickEditExerciseId}
+          context="workout"
+          onSaved={() => onRefresh?.()}
+        />
+      )}
 
       {/* Workout plan editor */}
       <WorkoutPlanEditor

@@ -3,6 +3,7 @@
 import { Plus } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import AdjacencyRail from '@/components/admin/AdjacencyRail'
 
 interface Tag {
   id: string
@@ -78,7 +79,8 @@ export default function AdminArticlesPage() {
   }
 
   return (
-    <div>
+    <div className="xl:flex xl:gap-6 xl:items-start">
+      <div className="min-w-0 flex-1">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold uppercase tracking-wider">Articles</h1>
         <Link
@@ -169,6 +171,9 @@ export default function AdminArticlesPage() {
           ))}
         </div>
       )}
+      </div>
+
+      <AdjacencyRail />
     </div>
   )
 }

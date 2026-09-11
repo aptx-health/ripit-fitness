@@ -22,6 +22,8 @@ export async function GET() {
         workout: {
           select: {
             name: true,
+            dayNumber: true,
+            week: { select: { weekNumber: true } },
           },
         },
       },
@@ -37,6 +39,8 @@ export async function GET() {
         workoutId: draft.workoutId,
         workoutName: draft.workout?.name ?? draft.name ?? 'Open Workout',
         isAdHoc: draft.isAdHoc,
+        weekNumber: draft.workout?.week.weekNumber ?? null,
+        dayNumber: draft.workout?.dayNumber ?? null,
       },
     })
   } catch (err) {
