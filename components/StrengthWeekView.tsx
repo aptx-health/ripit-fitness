@@ -46,6 +46,7 @@ type Props = {
   week: Week
   totalWeeks: number
   historyCount: number
+  isEditorRole?: boolean
 }
 
 type ModalMode = 'logging' | null
@@ -110,6 +111,7 @@ export default function StrengthWeekView({
   week,
   totalWeeks,
   historyCount,
+  isEditorRole = false,
 }: Props) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -616,6 +618,7 @@ export default function StrengthWeekView({
             } catch { /* dismiss failed silently */ }
           }}
           loggingMode={loggingMode}
+          isEditorRole={isEditorRole}
           onComplete={handleCompleteWorkout}
           onRefresh={handleRefreshMetadata}
         />

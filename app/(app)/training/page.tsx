@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
 import StrengthWeekView from '@/components/StrengthWeekView'
 import { RestoringWorkoutSpinner } from '@/components/ui/RestoringWorkoutSpinner'
+import { isEditorRole } from '@/lib/admin/auth'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { getCurrentStrengthWeek } from '@/lib/db/current-week'
@@ -90,6 +91,7 @@ async function TrainingPageContent({
           week={weekData.week}
           totalWeeks={weekData.totalWeeks}
           historyCount={workoutHistoryCount}
+          isEditorRole={isEditorRole(user.role)}
         />
       ) : (
         <NoActiveProgram />

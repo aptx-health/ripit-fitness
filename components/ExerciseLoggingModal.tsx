@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle, Info, Pencil, Plus, RefreshCw, Trash2, X } from 'lucide-react'
+import { AlertTriangle, Info, Pencil, Plus, RefreshCw, Trash2, Wrench, X } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Button } from '@/components/ui/Button'
@@ -20,6 +20,9 @@ import { formatPrescribedSummary } from '@/lib/format/prescribed-summary'
 import { type ApplicableSet, appliedSetToForm, type PrefillFormState, resolvePrefill } from '@/lib/workout/prefill'
 import type { LoggedSet } from '@/types/workout'
 import ExerciseDefinitionEditorModal from './features/exercise-definition/ExerciseDefinitionEditorModal'
+import QuickEditExerciseSheet from './features/exercise-definition/QuickEditExerciseSheet'
+import CompleteWorkoutConfirm from './workout-logging/CompleteWorkoutConfirm'
+import DeleteSetConfirm from './workout-logging/DeleteSetConfirm'
 import ExerciseActionsFooter from './workout-logging/ExerciseActionsFooter'
 import ExerciseDisplayTabs from './workout-logging/ExerciseDisplayTabs'
 import ExerciseLoggingHeader from './workout-logging/ExerciseLoggingHeader'
@@ -57,6 +60,8 @@ type Props = {
   loggingMode?: 'full' | 'follow_along'
   onComplete: (result?: { completionId: string; rollup: import('@/lib/stats/workout-rollup').WorkoutRollup | null }) => Promise<void>
   onRefresh?: () => Promise<void>
+  /** Gates the "Quick Edit" action, which can edit system exercises unlike the owner-only edit wizard. */
+  isEditorRole?: boolean
 }
 
 export default function ExerciseLoggingModal({
@@ -76,6 +81,7 @@ export default function ExerciseLoggingModal({
   loggingMode: loggingModeProp = 'full',
   onComplete,
   onRefresh,
+  isEditorRole = false,
 }: Props) {
   const [currentSet, setCurrentSet] = useState({
     reps: '',
@@ -147,6 +153,7 @@ export default function ExerciseLoggingModal({
   const [wizardTarget, setWizardTarget] = useState<{ id: string; name: string } | null>(null)
   const [navigateToLastExercise, setNavigateToLastExercise] = useState(false)
   const [editingExerciseDefinitionId, setEditingExerciseDefinitionId] = useState<string | null>(null)
+  const [quickEditExerciseId, setQuickEditExerciseId] = useState<string | null>(null)
 
   // Workout plan editor state
   const [planEditorOpen, setPlanEditorOpen] = useState(false)
@@ -505,6 +512,12 @@ export default function ExerciseLoggingModal({
     }
   }
 
+  const handleQuickEditExercise = () => {
+    if (currentExercise?.exerciseDefinition) {
+      setQuickEditExerciseId(currentExercise.exerciseDefinition.id)
+    }
+  }
+
   const handleExitWorkout = () => setShowExitConfirm(true)
 
   const handleExitSaveAsDraft = async () => {
@@ -763,6 +776,9 @@ export default function ExerciseLoggingModal({
                   prescribedSummary={prescribedSummary}
                   menuActions={[
                     { label: 'Edit this exercise', icon: Pencil, onClick: handleEditExercise },
+                    ...(isEditorRole && currentExercise?.exerciseDefinition
+                      ? [{ label: 'Quick Edit (Admin)', icon: Wrench, onClick: handleQuickEditExercise }]
+                      : []),
                     { label: 'Add an exercise', icon: Plus, onClick: handleAddExercise },
                     { label: 'Swap this exercise', icon: RefreshCw, onClick: handleReplaceExercise },
                     {
@@ -822,81 +838,20 @@ export default function ExerciseLoggingModal({
 
           {/* Workout completion confirmation */}
           {isConfirming && (
-            <div className="fixed inset-0 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center z-60">
-              <div className="bg-card border-2 border-border p-6 sm:p-8 text-center min-w-[300px] shadow-xl doom-corners">
-                {!isSubmitting ? (
-                  <>
-                    <p className="text-lg sm:text-xl mb-6 text-foreground font-bold uppercase tracking-wider">
-                      {isFollowAlong ? 'Nice work! Mark this workout as done?' : 'Complete this workout?'}
-                    </p>
-                    <div className="flex justify-center gap-3">
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        doom
-                        onClick={() => setIsConfirming(false)}
-                        className="px-4 sm:px-6 py-2.5 sm:py-3 text-base font-bold uppercase tracking-wider border-2 border-border hover:border-primary"
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="success"
-                        doom
-                        onClick={isFollowAlong ? handleGuidedComplete : handleCompleteWorkout}
-                        className="px-4 sm:px-6 py-2.5 sm:py-3 text-base font-bold uppercase tracking-wider"
-                      >
-                        {isFollowAlong ? 'Finish' : 'Confirm'}
-                      </Button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="mb-3 flex justify-center">
-                      <LoadingFrog size={64} speed={0.8} />
-                    </div>
-                    <p className="text-foreground uppercase tracking-wider font-bold">Completing workout...</p>
-                  </>
-                )}
-              </div>
-            </div>
+            <CompleteWorkoutConfirm
+              isFollowAlong={isFollowAlong}
+              isSubmitting={isSubmitting}
+              onCancel={() => setIsConfirming(false)}
+              onConfirm={isFollowAlong ? handleGuidedComplete : handleCompleteWorkout}
+            />
           )}
 
           {/* Deletion confirmation */}
           {showDeleteConfirm.show && (
-            <div className="fixed inset-0 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center z-60">
-              <div className="bg-card border-2 border-error p-6 sm:p-8 text-center max-w-sm shadow-xl doom-corners">
-                <div className="text-warning mb-4">
-                  <svg aria-hidden="true" className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 15.5c-.77.833.192 2.5 1.732 2.5z" />
-                  </svg>
-                </div>
-                <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2 uppercase tracking-wider">Delete Last Set?</h3>
-                <p className="text-sm sm:text-base text-muted-foreground mb-6">
-                  This will remove the only remaining set for this exercise. Are you sure?
-                </p>
-                <div className="flex justify-center gap-3">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    doom
-                    onClick={() => setShowDeleteConfirm({ show: false })}
-                    className="px-4 sm:px-6 py-2.5 sm:py-3 text-base font-bold uppercase tracking-wider border-2 border-border hover:border-primary"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="danger"
-                    doom
-                    onClick={handleConfirmDelete}
-                    className="px-4 sm:px-6 py-2.5 sm:py-3 text-base font-bold uppercase tracking-wider"
-                  >
-                    Delete Set
-                  </Button>
-                </div>
-              </div>
-            </div>
+            <DeleteSetConfirm
+              onCancel={() => setShowDeleteConfirm({ show: false })}
+              onConfirm={handleConfirmDelete}
+            />
           )}
         </div>
       </div>
@@ -912,6 +867,17 @@ export default function ExerciseLoggingModal({
           if (onRefresh) onRefresh()
         }}
       />
+
+      {/* Quick Edit sheet (editor role only) */}
+      {quickEditExerciseId && (
+        <QuickEditExerciseSheet
+          isOpen={true}
+          onClose={() => setQuickEditExerciseId(null)}
+          exerciseId={quickEditExerciseId}
+          context="workout"
+          onSaved={() => onRefresh?.()}
+        />
+      )}
 
       {/* Workout plan editor */}
       <WorkoutPlanEditor

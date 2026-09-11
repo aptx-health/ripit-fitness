@@ -1,6 +1,10 @@
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import AdminContentPadding from '@/components/admin/AdminContentPadding'
+import AdminMobileHeader from '@/components/admin/AdminMobileHeader'
+import AdminSidebar from '@/components/admin/AdminSidebar'
+import ReturnToWorkoutStrip from '@/components/admin/ReturnToWorkoutStrip'
 import { isEditorRole } from '@/lib/admin/auth'
+import { getWorkbenchCounts } from '@/lib/admin/workbench-counts'
 import { getCurrentUser } from '@/lib/auth/server'
 
 export default async function AdminLayout({
@@ -18,50 +22,17 @@ export default async function AdminLayout({
     redirect('/settings')
   }
 
-  const navItems = [
-    { href: '/admin/articles', label: 'Articles' },
-    { href: '/admin/tags', label: 'Tags' },
-    { href: '/admin/collections', label: 'Collections' },
-    { href: '/admin/exercises', label: 'Exercises' },
-    { href: '/admin/community-programs', label: 'Programs' },
-    { href: '/admin/messages', label: 'Messages' },
-    { href: '/admin/tuning', label: 'Tuning' },
-    { href: '/admin/feedback', label: 'Feedback' },
-    { href: '/admin/analytics', label: 'Analytics' },
-    { href: '/admin/signups', label: 'Signups' },
-    { href: '/dev/theme-validator?view=grid', label: 'Themes' },
-  ]
+  const counts = await getWorkbenchCounts()
 
   return (
-    <div className="bg-background">
-      <nav className="border-b-2 border-border bg-card">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center gap-6 h-12 overflow-x-auto">
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider shrink-0">
-              Admin
-            </span>
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors uppercase tracking-wider shrink-0"
-              >
-                {item.label}
-              </Link>
-            ))}
-            <div className="ml-auto shrink-0">
-              <Link
-                href="/settings"
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Back to Settings
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        {children}
+    <div className="min-h-screen bg-background lg:flex">
+      <AdminSidebar counts={counts} />
+      <div className="min-w-0 flex-1 flex flex-col min-h-screen">
+        <AdminMobileHeader />
+        <ReturnToWorkoutStrip />
+        <main className="flex-1 min-w-0">
+          <AdminContentPadding>{children}</AdminContentPadding>
+        </main>
       </div>
     </div>
   )
