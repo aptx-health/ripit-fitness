@@ -551,6 +551,8 @@ Self-hosted k8s infrastructure is operational (staging + production). PostgreSQL
 - `/docs/RATE_LIMITING.md` - Rate limiting tiers, patterns, and tuning guidance
 - `/docs/STYLING.md` - DOOM theme color system and styling guide
 - `/docs/ADDING_LEARN_ARTICLES.md` - Adding articles to the Learn tab (seed file + data migration pattern)
+- `/docs/LEARNING_NOTES.md` - Design rationale for the per-user learning layer (gap-decayed EWMA, Beta preferences, effort normalization, session-relative "heavy", `data_maturity`, eval-gated promotion, deferred ML directions)
+- `/docs/EVAL_LOOP_DESIGN.md` - Suggest Workout prompt-refinement eval loop (scenarios, gates, LLM judge, human calibration)
 - `/docs/IMAGE_TRACEABILITY.md` - Docker image SHA traceability
 - `/docs/features/PROGRAM_MANAGEMENT_IMPROVEMENTS.md` - Program management enhancements
 - `/docs/features/PERFORMANCE_ANALYSIS.md` - Performance analysis and optimizations
