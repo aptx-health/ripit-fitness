@@ -57,7 +57,7 @@ doppler run --config dev_personal -- npx prisma generate
 DOPPLER_CONFIG=dev_personal_worktree1 ./scripts/dev.sh start -l postgres,app
 ```
 
-Startup auto-applies schema, creates BetterAuth tables, and seeds a test user: **dmays@test.com / password**.
+Startup auto-applies schema, creates BetterAuth tables, seeds a test user (**dmays@test.com / password**), and seeds synthetic archetype users with workout history (`scripts/seed-synthetic-users.ts`, idempotent, re-run every startup).
 
 See `/WORKTREE_SETUP.md` for full details and troubleshooting.
 

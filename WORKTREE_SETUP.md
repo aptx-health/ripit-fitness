@@ -36,6 +36,7 @@ The startup automatically:
 - Applies Prisma schema (`prisma db push`)
 - Creates BetterAuth tables
 - Seeds a test user: **dmays@test.com** / **password**
+- Seeds synthetic archetype users with workout history (`scripts/seed-synthetic-users.ts`, idempotent)
 
 ### Primary Repo (no worktree)
 
@@ -49,7 +50,7 @@ No `DOPPLER_CONFIG` needed — defaults to `dev_personal`.
 ## Key Files
 
 - `scripts/worktree-env.sh` — Detects worktree slot, exports `PG_PORT`, `REDIS_PORT`, container names
-- `scripts/start-postgres.sh` — Starts Docker postgres, applies schema, seeds test user
+- `scripts/start-postgres.sh` — Starts Docker postgres, applies schema, seeds test user + synthetic archetype users
 - `scripts/start-redis.sh` — Starts Docker redis with worktree-aware names/ports
 - `Procfile` — Sources `worktree-env.sh`, overrides `DATABASE_URL`/`DIRECT_URL`/`REDIS_URL` after Doppler
 
