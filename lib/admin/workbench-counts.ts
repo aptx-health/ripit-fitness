@@ -9,7 +9,16 @@ import { prisma } from '@/lib/db'
  * instead of issuing it twice.
  */
 export const getWorkbenchCounts = cache(async (): Promise<WorkbenchCounts> => {
-  const [exercises, feedbackUnresolved, articles, tags, collections, communityPrograms, messages] =
+  const [
+    exercises,
+    feedbackUnresolved,
+    articles,
+    tags,
+    collections,
+    communityPrograms,
+    messages,
+    proposalsPending,
+  ] =
     await Promise.all([
       prisma.exerciseDefinition.count(),
       prisma.feedback.count({ where: { status: { in: ['new', 'reviewed'] } } }),
@@ -18,7 +27,17 @@ export const getWorkbenchCounts = cache(async (): Promise<WorkbenchCounts> => {
       prisma.collection.count(),
       prisma.communityProgram.count(),
       prisma.inAppMessage.count(),
+      prisma.proposal.count({ where: { status: 'pending' } }),
     ])
 
-  return { exercises, feedbackUnresolved, articles, tags, collections, communityPrograms, messages }
+  return {
+    exercises,
+    feedbackUnresolved,
+    articles,
+    tags,
+    collections,
+    communityPrograms,
+    messages,
+    proposalsPending,
+  }
 })

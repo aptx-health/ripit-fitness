@@ -46,7 +46,7 @@ export default function AdminSidebar({ counts }: { counts: WorkbenchCounts }) {
         {count !== undefined && (
           <span
             className={`shrink-0 text-xs font-bold tabular-nums px-1.5 py-0.5 ${
-              item.key === 'feedback' && count > 0
+              item.alertCount && count > 0
                 ? 'bg-accent text-accent-foreground'
                 : 'text-muted-foreground'
             }`}

@@ -732,3 +732,44 @@ model TuningConfig {
   /// User id of the admin who last saved the config (audit trail only).
   updatedBy String?
 }
+
+/// Personal access token for an agent calling the MCP server (/api/mcp).
+/// Only the SHA-256 hex of the token is stored; the plaintext is shown once.
+model AgentToken {
+  id         String     @id @default(cuid())
+  userId     String
+  name       String
+  tokenHash  String     @unique
+  createdAt  DateTime   @default(now())
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+  proposals  Proposal[]
+
+  @@index([userId])
+}
+
+/// A change an agent proposed. Nothing is applied until an admin approves it
+/// (lib/proposals/service.ts). kind: exercise_definition.create | .update.
+/// status: pending | applied | rejected | reverted | conflict.
+model Proposal {
+  id           String     @id @default(cuid())
+  userId       String
+  agentTokenId String
+  kind         String
+  status       String     @default("pending")
+  summary      String
+  rationale    String
+  payload      Json
+  targetId     String?
+  /// Update proposals: full definition at propose time (staleness check + revert).
+  before       Json?
+  /// Set on approve: what revert needs to undo the change.
+  inverse      Json?
+  error        String?
+  createdAt    DateTime   @default(now())
+  decidedAt    DateTime?
+  agentToken   AgentToken @relation(fields: [agentTokenId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status, createdAt])
+  @@index([agentTokenId])
+}

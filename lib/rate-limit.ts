@@ -148,6 +148,12 @@ export const eventIngestionLimiter = lazyLimiter({
   duration: 60,
 })
 
+/**
+ * Agent MCP endpoint (/api/mcp), keyed by agent token.
+ * An agent loop can burst tool calls: 60 req / 60s per token.
+ */
+export const agentMcpLimiter = lazyLimiter({ keyPrefix: 'agent-mcp', points: 60, duration: 60 })
+
 export type LimiterGetter = () => RateLimiterRedis | RateLimiterMemory
 
 /**

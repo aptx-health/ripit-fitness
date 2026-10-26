@@ -127,6 +127,8 @@ export class TestDatabase {
 
     // Clear all data in reverse order to handle foreign key constraints
     const tablesToClear = [
+      'Proposal',
+      'AgentToken',
       'LoggedCardioSession',
       'PrescribedCardioSession',
       'CardioWeek',

@@ -1,8 +1,10 @@
 import {
   BarChart3,
   Bell,
+  Bot,
   Dumbbell,
   FileText,
+  KeyRound,
   Library,
   type LucideIcon,
   MessageSquare,
@@ -15,7 +17,7 @@ import {
 
 export type NavTier = 1 | 2 | 3
 
-export type NavGroup = 'Learn Content' | 'Training' | 'App'
+export type NavGroup = 'Learn Content' | 'Training' | 'App' | 'Agents'
 
 export interface WorkbenchCounts {
   exercises: number
@@ -25,6 +27,7 @@ export interface WorkbenchCounts {
   collections: number
   communityPrograms: number
   messages: number
+  proposalsPending: number
 }
 
 export interface NavItem {
@@ -36,6 +39,8 @@ export interface NavItem {
   group?: NavGroup
   countKey?: keyof WorkbenchCounts
   devChip?: boolean
+  /** Highlight the count badge when it is above zero (work waiting). */
+  alertCount?: boolean
 }
 
 /**
@@ -45,7 +50,7 @@ export interface NavItem {
  */
 export const NAV_ITEMS: NavItem[] = [
   { key: 'exercises', label: 'Exercises', href: '/admin/exercises', icon: Dumbbell, tier: 1, countKey: 'exercises' },
-  { key: 'feedback', label: 'Feedback', href: '/admin/feedback', icon: MessageSquare, tier: 1, countKey: 'feedbackUnresolved' },
+  { key: 'feedback', label: 'Feedback', href: '/admin/feedback', icon: MessageSquare, tier: 1, countKey: 'feedbackUnresolved', alertCount: true },
 
   { key: 'articles', label: 'Articles', href: '/admin/articles', icon: FileText, tier: 2, group: 'Learn Content', countKey: 'articles' },
   { key: 'tags', label: 'Tags', href: '/admin/tags', icon: Tags, tier: 2, group: 'Learn Content', countKey: 'tags' },
@@ -54,6 +59,9 @@ export const NAV_ITEMS: NavItem[] = [
   { key: 'community-programs', label: 'Community Programs', href: '/admin/community-programs', icon: Trophy, tier: 2, group: 'Training', countKey: 'communityPrograms' },
 
   { key: 'messages', label: 'Messages', href: '/admin/messages', icon: Bell, tier: 2, group: 'App', countKey: 'messages' },
+  { key: 'proposals', label: 'Proposals', href: '/admin/proposals', icon: Bot, tier: 2, group: 'Agents', countKey: 'proposalsPending', alertCount: true },
+  { key: 'agent-tokens', label: 'Agent Tokens', href: '/admin/agent-tokens', icon: KeyRound, tier: 2, group: 'Agents' },
+
   { key: 'tuning', label: 'Tuning', href: '/admin/tuning', icon: SlidersHorizontal, tier: 2, group: 'App' },
 
   { key: 'analytics', label: 'Analytics', href: '/admin/analytics', icon: BarChart3, tier: 3 },
@@ -61,7 +69,7 @@ export const NAV_ITEMS: NavItem[] = [
   { key: 'themes', label: 'Themes', href: '/dev/theme-validator?view=grid', icon: Palette, tier: 3, devChip: true },
 ]
 
-export const NAV_GROUPS_ORDER: NavGroup[] = ['Learn Content', 'Training', 'App']
+export const NAV_GROUPS_ORDER: NavGroup[] = ['Learn Content', 'Training', 'App', 'Agents']
 
 export const TIER1_ITEMS = NAV_ITEMS.filter((item) => item.tier === 1)
 export const TIER2_ITEMS = NAV_ITEMS.filter((item) => item.tier === 2)
