@@ -8,3 +8,6 @@ Append-only. Newest at the bottom.
 - 2026-10-25 21:07 MDT: Notification route decided: Discord #proposals (`DISCORD_PROPOSALS_WEBHOOK_URL`, added to Doppler by Dustin), with Bark kept optional. Items 005 (tests) and 006 (implementation) confirmed; 005 dispatched to test-builder. 003 is in review; 004 is running with implementer.
 - 2026-10-25 21:17 MDT: Dustin accepted 003, 004 and 005. 006 (Discord notifier) resumed with implementer.
 - 2026-10-25 21:31 MDT: 006 accepted, so slice 1 is complete. Opening a PR to dev.
+- 2026-10-25 21:45 MDT: PR #995 merged into dev, so slice 1 is deploying to staging. ROADMAP.md added as the backlog; next up is `list_feedback`.
+- 2026-10-25 21:49 MDT: Agents reading feedback (007 and 008) started. Dustin pre-approved the specs and work items; the lead accepts items and opens the PR, and Dustin merges.
+- 2026-10-25 21:58 MDT: 008 accepted (agents read feedback, link proposals to it, and approve resolves it). PR opened to dev.

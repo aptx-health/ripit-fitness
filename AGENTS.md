@@ -6,7 +6,7 @@ remote: github-personal  # org: github.com/aptx-health
 
 Ripit Fitness: a strength-training tracker. Users build programs and log workouts without rigid app constraints. Single user per account, no multi-tenancy. Stack: see `package.json` (Next.js 16 App Router, React 19, Prisma 6, Postgres, BetterAuth, BullMQ/Redis, Tailwind). Deployed to self-hosted k8s via ArgoCD.
 
-Project state and active work: `STATE.md`, `initiatives/`, `work/`, `deferred/`.
+Project state and active work: `STATE.md` (now), `ROADMAP.md` (what's next), `initiatives/`, `work/`.
 
 ## Commands
 
@@ -93,7 +93,7 @@ Connection pooling (`DATABASE_URL` vs `DIRECT_URL`, PgBouncer): `docs/DATABASE_C
 - Tests call lib functions directly with a `PrismaClient` (no HTTP) and assert database state.
 - Factories live in `lib/test/factories.ts` and the harness in `lib/test/database.ts`. Patterns: `docs/TESTING.md`.
 - Behaviour specs are Gherkin files in `features/`, run through `@amiceli/vitest-cucumber`. Write a spec only when its work item is about to be dispatched, never ahead of time.
-- **UI changes:** drive the real flow and take a screenshot before pushing. Use the `webapp-testing` skill and `docs/PLAYWRIGHT_RECIPES.md`, and add a recipe whenever discovering a flow took more than 5 minutes.
+- **UI changes:** drive the real flow and take a screenshot before pushing. Use the `webapp-testing` skill and `docs/PLAYWRIGHT_RECIPES.md`, and add a recipe whenever discovering a flow took more than 5 minutes. When seeding agent proposals for screenshots, blank `DISCORD_PROPOSALS_WEBHOOK_URL`; `dev_personal` points at Dustin's real #proposals channel.
 
 ## Git, CI, deploy
 

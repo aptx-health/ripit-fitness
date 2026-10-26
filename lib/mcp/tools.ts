@@ -4,6 +4,7 @@ import { logger } from '@/lib/logger'
 import type { Notify } from '@/lib/notify'
 import { visibleTo } from '@/lib/proposals/exercise-definition'
 import { createProposal, PROPOSAL_STATUSES } from '@/lib/proposals/service'
+import { VALID_CATEGORIES, VALID_STATUSES } from '@/types/feedback'
 
 /**
  * MCP tools for agents (slice 1). Read tools are scoped to the token's user;
@@ -43,6 +44,8 @@ const definitionFields = {
   imageUrls: z.array(z.string()).optional(),
 }
 
+const feedbackId = z.string().min(1).optional().describe('Id of the feedback (from list_feedback) this proposal addresses')
+
 const rationale = z.string().trim().min(1).max(2000).describe('Why this change is worth making')
 
 const schemas = {
@@ -59,13 +62,20 @@ const schemas = {
   propose_exercise_create: z.object({
     definition: z.object(definitionFields).strict(),
     rationale,
+    feedbackId,
   }),
   propose_exercise_update: z.object({
     id: z.string().min(1),
     changes: z.object(definitionFields).partial().strict(),
     rationale,
+    feedbackId,
   }),
   list_proposals: z.object({ status: z.enum(PROPOSAL_STATUSES).optional() }),
+  list_feedback: z.object({
+    status: z.enum(VALID_STATUSES).optional().describe('Defaults to new'),
+    category: z.enum(VALID_CATEGORIES).optional(),
+    limit: z.number().int().min(1).max(50).optional().describe('Defaults to 20'),
+  }),
 }
 
 type ToolName = keyof typeof schemas
@@ -81,6 +91,8 @@ const descriptions: Record<ToolName, string> = {
   propose_exercise_update:
     'Propose changes to an existing exercise definition. Nothing changes until the user approves it.',
   list_proposals: "List the user's proposals and their status.",
+  list_feedback:
+    "List the user's app feedback, newest first (status defaults to new). Pass a feedback id as feedbackId on a propose tool to link the proposal; approving it resolves the feedback.",
 }
 
 class ToolError extends Error {
@@ -213,10 +225,17 @@ const handlers: { [N in ToolName]: Handler<N> } = {
     return { workouts }
   },
 
-  async propose_exercise_create(prisma, ctx, { definition, rationale }) {
+  async propose_exercise_create(prisma, ctx, { definition, rationale, feedbackId }) {
     const result = await createProposal(
       prisma,
-      { userId: ctx.userId, agentTokenId: ctx.tokenId, kind: 'exercise_definition.create', definition, rationale },
+      {
+        userId: ctx.userId,
+        agentTokenId: ctx.tokenId,
+        kind: 'exercise_definition.create',
+        definition,
+        rationale,
+        feedbackId,
+      },
       ctx.notify
     )
     if (!result.ok) throw new ToolError(result.error, { field: result.field, existingId: result.existingId })
@@ -224,10 +243,18 @@ const handlers: { [N in ToolName]: Handler<N> } = {
     return { proposalId: id, status, summary }
   },
 
-  async propose_exercise_update(prisma, ctx, { id, changes, rationale }) {
+  async propose_exercise_update(prisma, ctx, { id, changes, rationale, feedbackId }) {
     const result = await createProposal(
       prisma,
-      { userId: ctx.userId, agentTokenId: ctx.tokenId, kind: 'exercise_definition.update', id, changes, rationale },
+      {
+        userId: ctx.userId,
+        agentTokenId: ctx.tokenId,
+        kind: 'exercise_definition.update',
+        id,
+        changes,
+        rationale,
+        feedbackId,
+      },
       ctx.notify
     )
     if (!result.ok) throw new ToolError(result.error, { field: result.field, existingId: result.existingId })
@@ -249,9 +276,30 @@ const handlers: { [N in ToolName]: Handler<N> } = {
         error: true,
         createdAt: true,
         decidedAt: true,
+        feedbackId: true,
       },
     })
     return { proposals }
+  },
+
+  async list_feedback(prisma, ctx, { status, category, limit }) {
+    const feedback = await prisma.feedback.findMany({
+      where: { userId: ctx.userId, status: status ?? 'new', ...(category && { category }) },
+      orderBy: { createdAt: 'desc' },
+      take: limit ?? 20,
+      select: {
+        id: true,
+        category: true,
+        message: true,
+        pageUrl: true,
+        rating: true,
+        refinements: true,
+        status: true,
+        adminNote: true,
+        createdAt: true,
+      },
+    })
+    return { feedback }
   },
 }
 

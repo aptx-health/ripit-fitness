@@ -35,6 +35,7 @@ export type CreateProposalInput =
       kind: 'exercise_definition.create'
       rationale: string
       definition: CreateExerciseDefinitionInput
+      feedbackId?: string
     }
   | {
       userId: string
@@ -43,6 +44,7 @@ export type CreateProposalInput =
       rationale: string
       id: string
       changes: UpdateExerciseDefinitionInput
+      feedbackId?: string
     }
 
 export type CreateProposalResult =
@@ -77,6 +79,27 @@ class Refusal extends Error {
   }
 }
 
+/** Appended to the feedback's admin note when a linked proposal is applied. */
+export function resolvedNote(existingNote: string | null, proposalId: string): string {
+  const line = `Resolved by agent proposal ${proposalId}`
+  return existingNote?.trim() ? `${existingNote}\n\n${line}` : line
+}
+
+// Approving a proposal linked to feedback resolves that feedback, inside the
+// approve transaction. A deleted feedback row (feedbackId set to null) is skipped.
+async function resolveLinkedFeedback(tx: Prisma.TransactionClient, proposal: Proposal, userId: string) {
+  if (!proposal.feedbackId) return
+  const feedback = await tx.feedback.findFirst({
+    where: { id: proposal.feedbackId, userId },
+    select: { id: true, adminNote: true },
+  })
+  if (!feedback) return
+  await tx.feedback.update({
+    where: { id: feedback.id },
+    data: { status: 'resolved', adminNote: resolvedNote(feedback.adminNote, proposal.id) },
+  })
+}
+
 function proposalUrl(id: string): string {
   return `${process.env.NEXT_PUBLIC_APP_URL ?? ''}/admin/proposals/${id}`
 }
@@ -91,6 +114,14 @@ export async function createProposal(
   notify: Notify = defaultNotify
 ): Promise<CreateProposalResult> {
   let data: Prisma.ProposalUncheckedCreateInput
+
+  if (input.feedbackId !== undefined) {
+    const feedback = await prisma.feedback.findFirst({
+      where: { id: input.feedbackId, userId: input.userId },
+      select: { id: true },
+    })
+    if (!feedback) return { ok: false, code: 'not_found', error: 'feedback not found', field: 'feedbackId' }
+  }
 
   if (input.kind === 'exercise_definition.create') {
     const definition = pickEditable(input.definition as unknown as Record<string, unknown>)
@@ -125,7 +156,9 @@ export async function createProposal(
     }
   }
 
-  const proposal = await prisma.proposal.create({ data })
+  const proposal = await prisma.proposal.create({
+    data: { ...data, ...(input.feedbackId && { feedbackId: input.feedbackId }) },
+  })
   logger.info({ proposalId: proposal.id, kind: proposal.kind, userId: input.userId }, 'Proposal created')
 
   try {
@@ -174,6 +207,7 @@ export async function approveProposal(
         if (!check.ok) throw new Refusal('invalid', check.error)
         const created = await tx.exerciseDefinition.create({ data: createData(input, userId) })
         const inverse: CreateInverse = { op: 'delete', id: created.id }
+        await resolveLinkedFeedback(tx, existing, userId)
         return tx.proposal.update({
           where: { id: proposalId },
           data: { targetId: created.id, inverse: inverse as unknown as Prisma.InputJsonObject, error: null },
@@ -207,6 +241,7 @@ export async function approveProposal(
         data: restore,
         appliedUpdatedAt: updatedAt.toISOString(),
       }
+      await resolveLinkedFeedback(tx, existing, userId)
       return tx.proposal.update({
         where: { id: proposalId },
         data: { inverse: inverse as unknown as Prisma.InputJsonObject, error: null },
