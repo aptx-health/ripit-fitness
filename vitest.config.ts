@@ -1,9 +1,11 @@
 import path from 'node:path'
-import { defineConfig } from 'vitest/config'
+import { configDefaults, defineConfig } from 'vitest/config'
 
 export default defineConfig({
   test: {
     globals: true,
+    // Gherkin step files (vitest-cucumber) live next to the features they bind
+    include: [...configDefaults.include, '__tests__/features/**/*.steps.ts'],
     environment: 'jsdom',
     globalSetup: [path.resolve(__dirname, './lib/test/global-setup.ts')],
     setupFiles: [path.resolve(__dirname, './lib/test/setup.ts')],

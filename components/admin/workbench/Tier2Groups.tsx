@@ -23,7 +23,13 @@ export default function Tier2Groups({ counts }: { counts: WorkbenchCounts }) {
                     {item.label}
                   </span>
                   {count !== undefined && (
-                    <span className="shrink-0 text-sm tabular-nums text-muted-foreground">
+                    <span
+                      className={`shrink-0 text-sm tabular-nums ${
+                        item.alertCount && count > 0
+                          ? 'px-1.5 font-bold bg-accent text-accent-foreground'
+                          : 'text-muted-foreground'
+                      }`}
+                    >
                       {count}
                     </span>
                   )}
