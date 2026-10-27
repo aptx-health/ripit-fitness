@@ -13,6 +13,9 @@ export default function AdminMobileHeader() {
   const pathname = usePathname()
   const isHome = pathname === '/admin'
   const navItem = findNavItemForPath(pathname)
+  // A detail page (e.g. /admin/proposals/<id>) goes back to its section; a section goes back to the Workbench.
+  const sectionPath = navItem?.href.split('?')[0]
+  const backHref = sectionPath && pathname !== sectionPath ? navItem.href : '/admin'
 
   return (
     <header className="flex items-center h-12 px-4 shrink-0 border-b-[3px] border-accent bg-card lg:hidden">
@@ -33,8 +36,8 @@ export default function AdminMobileHeader() {
       ) : (
         <>
           <Link
-            href="/admin"
-            aria-label="Back to Workbench"
+            href={backHref}
+            aria-label={backHref === '/admin' ? 'Back to Workbench' : `Back to ${navItem?.label}`}
             className="flex items-center justify-center -ml-1 mr-2 w-9 h-9 text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft size={20} />

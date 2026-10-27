@@ -15,9 +15,16 @@ import {
   updateData,
   visibleTo,
 } from './exercise-definition'
+import { checkProgram, createProgram, programSummary } from './program'
 
-export const PROPOSAL_KINDS = ['exercise_definition.create', 'exercise_definition.update'] as const
+export const PROPOSAL_KINDS = ['exercise_definition.create', 'exercise_definition.update', 'program.create'] as const
 export type ProposalKind = (typeof PROPOSAL_KINDS)[number]
+
+export const PROPOSAL_KIND_LABELS: Record<ProposalKind, string> = {
+  'exercise_definition.create': 'New exercise',
+  'exercise_definition.update': 'Exercise edit',
+  'program.create': 'New program',
+}
 
 export const PROPOSAL_STATUSES = ['pending', 'applied', 'rejected', 'reverted', 'conflict'] as const
 export type ProposalStatus = (typeof PROPOSAL_STATUSES)[number]
@@ -44,6 +51,14 @@ export type CreateProposalInput =
       rationale: string
       id: string
       changes: UpdateExerciseDefinitionInput
+      feedbackId?: string
+    }
+  | {
+      userId: string
+      agentTokenId: string
+      kind: 'program.create'
+      rationale: string
+      program: unknown
       feedbackId?: string
     }
 
@@ -135,6 +150,17 @@ export async function createProposal(
       rationale: input.rationale,
       payload: definition as Prisma.InputJsonObject,
     }
+  } else if (input.kind === 'program.create') {
+    const check = await checkProgram(prisma, input.program, input.userId)
+    if (!check.ok) return check
+    data = {
+      userId: input.userId,
+      agentTokenId: input.agentTokenId,
+      kind: input.kind,
+      summary: programSummary(check.program),
+      rationale: input.rationale,
+      payload: check.program as unknown as Prisma.InputJsonObject,
+    }
   } else {
     const current = await prisma.exerciseDefinition.findFirst({
       where: { id: input.id, ...visibleTo(input.userId) },
@@ -192,6 +218,7 @@ export async function approveProposal(
   }
 
   try {
+    // A large program is many nested inserts; the 5 s default timeout is too short.
     const proposal = await prisma.$transaction(async (tx) => {
       const decidedAt = new Date()
       // Claim the proposal; a concurrent approve/reject loses here.
@@ -211,6 +238,18 @@ export async function approveProposal(
         return tx.proposal.update({
           where: { id: proposalId },
           data: { targetId: created.id, inverse: inverse as unknown as Prisma.InputJsonObject, error: null },
+        })
+      }
+
+      if (existing.kind === 'program.create') {
+        const check = await checkProgram(tx, existing.payload, userId)
+        if (!check.ok) throw new Refusal('invalid', check.error)
+        const created = await createProgram(tx, check.program, check.definitionNames, userId)
+        await resolveLinkedFeedback(tx, existing, userId)
+        // No inverse: an approved program is an ordinary program and can't be reverted.
+        return tx.proposal.update({
+          where: { id: proposalId },
+          data: { targetId: created.id, error: null },
         })
       }
 
@@ -246,7 +285,7 @@ export async function approveProposal(
         where: { id: proposalId },
         data: { inverse: inverse as unknown as Prisma.InputJsonObject, error: null },
       })
-    })
+    }, { timeout: 30000 })
 
     logger.info({ proposalId, userId, kind: proposal.kind }, 'Proposal applied')
     return { ok: true, proposal }
@@ -254,6 +293,13 @@ export async function approveProposal(
     if (error instanceof Refusal) return refuseApproval(prisma, proposalId, error.code, error.message)
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
       return refuseApproval(prisma, proposalId, 'invalid', 'an exercise with this name already exists')
+    }
+    // A referenced exercise definition was deleted between the check and the create.
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003') {
+      return refuseApproval(prisma, proposalId, 'invalid', 'a referenced exercise no longer exists')
+    }
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2028') {
+      return refuseApproval(prisma, proposalId, 'invalid', 'approve timed out before it finished; nothing was applied')
     }
     throw error
   }
@@ -299,7 +345,8 @@ export async function rejectProposal(
 /**
  * Undo an applied proposal. An update restores the fields it changed, unless the
  * definition was edited since approve (conflict); a create
- * deletes the definition unless a workout already uses it.
+ * deletes the definition unless a workout already uses it. A program create
+ * can't be reverted; the program is deleted from Programs like any other.
  */
 export async function revertProposal(
   prisma: PrismaClient,
@@ -308,9 +355,17 @@ export async function revertProposal(
 ): Promise<DecisionResult> {
   const existing = await findOwned(prisma, proposalId, userId)
   if (!existing) return { ok: false, code: 'not_found', error: 'proposal not found' }
-  if (existing.status !== 'applied' || !existing.inverse) {
+  if (existing.status !== 'applied') {
     return { ok: false, code: 'not_applied', error: 'proposal is not applied' }
   }
+  if (existing.kind === 'program.create') {
+    return {
+      ok: false,
+      code: 'invalid',
+      error: "program proposals can't be reverted; delete the program from Programs instead",
+    }
+  }
+  if (!existing.inverse) return { ok: false, code: 'not_applied', error: 'proposal is not applied' }
 
   try {
     const proposal = await prisma.$transaction(async (tx) => {
