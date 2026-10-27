@@ -28,7 +28,10 @@ export default async function ProposalDetailPage({ params }: { params: Promise<{
 
   const proposal = await prisma.proposal.findFirst({
     where: { id, userId: user.id },
-    include: { agentToken: { select: { name: true } } },
+    include: {
+      agentToken: { select: { name: true } },
+      feedback: { select: { id: true, category: true, message: true, status: true, createdAt: true } },
+    },
   })
   if (!proposal) notFound()
 
@@ -84,6 +87,33 @@ export default async function ProposalDetailPage({ params }: { params: Promise<{
           {proposal.rationale}
         </p>
       </section>
+
+      {proposal.feedback && (
+        <section className="space-y-1.5" data-testid="linked-feedback">
+          <h2 className="doom-label text-secondary">Addresses feedback</h2>
+          <div className="border-2 border-border bg-card p-3 space-y-2">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+              <span className="px-1.5 py-0.5 border border-border font-semibold uppercase">
+                {proposal.feedback.category}
+              </span>
+              <span className="uppercase tracking-wider">{proposal.feedback.status}</span>
+              <span>· {proposal.feedback.createdAt.toLocaleString('en-US', DATE_FORMAT)}</span>
+            </div>
+            <p className="text-sm text-foreground whitespace-pre-wrap break-words">
+              {proposal.feedback.message || 'No message'}
+            </p>
+            <Link
+              href={`/admin/feedback?expand=${proposal.feedback.id}`}
+              className="inline-block text-xs font-semibold uppercase tracking-wider text-primary hover:underline"
+            >
+              Open in Feedback →
+            </Link>
+          </div>
+          {proposal.status === 'pending' && (
+            <p className="text-xs text-muted-foreground">Approving this proposal marks the feedback resolved.</p>
+          )}
+        </section>
+      )}
 
       {proposal.error && (
         <div className="border-2 border-error-border bg-error-muted text-error-text p-3 text-sm break-words">

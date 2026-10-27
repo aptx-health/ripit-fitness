@@ -81,6 +81,20 @@ There is deliberately **no** approve, reject or revert tool.
 - `lib/notify/index.ts` exports `notify: Notify`. It sends to every configured channel in parallel, each failure isolated. `createProposal`'s default and `app/api/mcp/route.ts` use it instead of importing `bark` directly.
 - The existing `lib/discord.ts` (feedback, `DISCORD_WEBHOOK_URL`) is left alone.
 
+## Feedback (added 2026-10-25 for items 007 and 008)
+
+- New read tool: `list_feedback({ status?, category?, limit? })`.
+  - `status` defaults to `new`; `limit` defaults to 20, max 50. Newest first, scoped to the token's user.
+  - Each item: `{ id, category, message, pageUrl, rating, refinements, status, adminNote, createdAt }`. No `userAgent`.
+  - Valid `status` values: `new`, `reviewed`, `resolved`. Valid `category` values are the ones in `app/api/feedback/route.ts`. Bad values return a tool error with `field`.
+- `propose_exercise_create` and `propose_exercise_update` accept an optional `feedbackId`.
+  - It must be the token user's feedback. Otherwise the tool errors with `field: 'feedbackId'` and creates no proposal.
+  - It is stored as `Proposal.feedbackId`, a nullable column added by an additive migration.
+- When `approveProposal` applies a linked proposal, it sets the feedback's `status` to `resolved` in the same transaction. It also appends `Resolved by agent proposal <id>` to `adminNote`, keeping any existing note.
+- Reject, conflict and revert leave the feedback unchanged.
+- Agents get no tool that writes feedback.
+- The admin proposal detail page shows the linked feedback's message, with a link to `/admin/feedback`.
+
 ## Not in slice 1
 
 OAuth for claude.ai/mobile connectors, MCP Apps UI, program proposals,
