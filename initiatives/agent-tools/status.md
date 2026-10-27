@@ -32,3 +32,19 @@ Append-only. Newest at the bottom.
 - 2026-10-26 21:39 MDT: 015 complete (239/239 re-run by lead). Second re-review sent to the reviewer, covering the lead's inline back-button fix too, so no lead-written code skips independent review.
 - 2026-10-26 21:41 MDT: second re-review: ready to accept. Review page r3 published: https://dustins-macbook-pro.tailc29f1d.ts.net:8443/Projects/ripit-fitness/slice2-program-proposals-review-r3/index. Items 009–015 waiting on Dustin.
 - 2026-10-26 21:46 MDT: Dustin accepted slice 2 (009–015). Preview stopped, phone-test token revoked. Committing and opening a PR to dev.
+- 2026-10-26: PR #997 opened to dev: https://github.com/aptx-health/ripit-fitness/pull/997
+- 2026-10-26: V3 RETRO (evidence for the next V3 revision).
+  - Coaching Dustin still had to do:
+    - (1) agents weren't checking in, so the 009 packet sat in a pane;
+    - (2) the phone preview was his idea, and it surfaced the no-revert product decision that tests and review missed.
+  - Where V3 got in the way or had gaps:
+    - (a) the work-item `dispatch` script hard-codes the handoff-implementer skill;
+    - (b) there's no reviewer role skill;
+    - (c) handback files in `work/` are readable by the reviewer, so independence relies on an instruction;
+    - (d) the brief doesn't say how a packet reaches the lead;
+    - (e) the lead's own inline fixes need a rule to go through review too (done here by adding them to the re-review).
+  - What worked:
+    - one plan form up front, and no other approvals needed;
+    - the reviewer's first pass caught a real defect (5s approve timeout);
+    - the test pass-proof caught nothing wrong this time but cost little;
+    - the saved handbacks made each step resumable.
