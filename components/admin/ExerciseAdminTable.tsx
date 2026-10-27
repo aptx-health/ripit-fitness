@@ -3,6 +3,7 @@
 import { Check, ChevronDown, Pencil, Plus, Search, Trash2, X } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import ExerciseDefinitionEditorModal from '@/components/features/exercise-definition/ExerciseDefinitionEditorModal'
+import QuickEditExerciseSheet from '@/components/features/exercise-definition/QuickEditExerciseSheet'
 import {
   Popover,
   PopoverContent,
@@ -60,6 +61,7 @@ export default function ExerciseAdminTable() {
   // Modal states
   const [isCreating, setIsCreating] = useState(false)
   const [editingExercise, setEditingExercise] = useState<ExerciseDefinition | null>(null)
+  const [quickEditingExercise, setQuickEditingExercise] = useState<ExerciseDefinition | null>(null)
   const [deletingExercise, setDeletingExercise] = useState<ExerciseDefinition | null>(null)
 
   // Debounce search query
@@ -387,8 +389,15 @@ export default function ExerciseAdminTable() {
                   <td className="px-4 py-3 text-right">
                     <div className="flex gap-2 justify-end">
                       <button type="button"
+                        onClick={() => setQuickEditingExercise(exercise)}
+                        className="p-2 border-2 border-border text-foreground hover:border-primary hover:text-primary transition-colors doom-focus-ring md:hidden"
+                        title="Quick Edit"
+                      >
+                        <Pencil size={16} />
+                      </button>
+                      <button type="button"
                         onClick={() => setEditingExercise(exercise)}
-                        className="p-2 border-2 border-border text-foreground hover:border-primary hover:text-primary transition-colors doom-focus-ring"
+                        className="hidden md:inline-flex p-2 border-2 border-border text-foreground hover:border-primary hover:text-primary transition-colors doom-focus-ring"
                         title="Edit"
                       >
                         <Pencil size={16} />
@@ -456,6 +465,17 @@ export default function ExerciseAdminTable() {
           onSuccess={handleEditSuccess}
           apiBasePath="/api/admin/exercise-definitions"
           showImages
+        />
+      )}
+
+      {/* Quick Edit sheet (phone viewport) */}
+      {quickEditingExercise && (
+        <QuickEditExerciseSheet
+          isOpen={true}
+          onClose={() => setQuickEditingExercise(null)}
+          exerciseId={quickEditingExercise.id}
+          context="admin"
+          onSaved={fetchExercises}
         />
       )}
 

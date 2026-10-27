@@ -1,0 +1,50 @@
+# Agent tools: status log
+
+Append-only. Newest at the bottom.
+
+- 2026-10-25 20:23 MDT: Initiative started. Research landscape in [docs/2026-10-25-agents-in-apps-research.md](docs/2026-10-25-agents-in-apps-research.md): build a typed MCP tool layer, have agents propose and never write, and let Dustin approve with undo. Slice 1 scope set (Proposal core + exercise DB; programs in slice 2) and runner chosen (vitest-cucumber). Spec in [docs/spec.md](docs/spec.md). Work items `001` (tests) and `002` (implementation) await confirmation.
+- 2026-10-25 20:55 MDT: AGENTS.md trimmed from 602 to 114 lines after an independent review. Detail moved to docs/TESTING.md, docs/DEPLOYMENT.md and docs/CLONE_WORKER.md. Work items 001 and 002 confirmed by Dustin; 001 dispatched to a Sonnet test-builder. Rule set: specs are written only when an item is about to be dispatched.
+- 2026-10-25 20:34 MDT: correction: the lead wrote the 20:41, 20:55 and 21:10 timestamps above as estimates. The real times were earlier (about 20:25 to 20:34 MDT).
+- 2026-10-25 21:07 MDT: Notification route decided: Discord #proposals (`DISCORD_PROPOSALS_WEBHOOK_URL`, added to Doppler by Dustin), with Bark kept optional. Items 005 (tests) and 006 (implementation) confirmed; 005 dispatched to test-builder. 003 is in review; 004 is running with implementer.
+- 2026-10-25 21:17 MDT: Dustin accepted 003, 004 and 005. 006 (Discord notifier) resumed with implementer.
+- 2026-10-25 21:31 MDT: 006 accepted, so slice 1 is complete. Opening a PR to dev.
+- 2026-10-25 21:45 MDT: PR #995 merged into dev, so slice 1 is deploying to staging. ROADMAP.md added as the backlog; next up is `list_feedback`.
+- 2026-10-25 21:49 MDT: Agents reading feedback (007 and 008) started. Dustin pre-approved the specs and work items; the lead accepts items and opens the PR, and Dustin merges.
+- 2026-10-25 21:58 MDT: 008 accepted (agents read feedback, link proposals to it, and approve resolves it). PR opened to dev.
+- 2026-10-26: PR #996 (items 007/008) merged to dev by Dustin. Slice 2 will run under Project Structure V3 (v0.2.0, from process-experiments).
+- 2026-10-26: Slice 2 started under Project Structure V3. Request: agents propose new programs (weeks, workouts, exercises, sets) for Dustin to approve. Size: standard. Lead: lead-ripit-mcp (herdr w1:p1). Branch `feature/agent-programs` from `dev`. Discovery done by the lead inline (read schema, `app/api/programs/route.ts`, `lib/proposals/service.ts`); no separate scoping note, since the pattern repeats slice 1.
+- 2026-10-26: Spec "Programs" section and `features/agent-tools/program-proposals.feature` (13 scenarios) drafted for the plan form.
+- 2026-10-26 20:07 MDT: Plan form confirmed by Dustin (all recommended answers). Items 009–011 written. Doppler checked in the worktree. 009 dispatched to test-builder. V3 friction: the work-item `dispatch` script hard-codes the handoff-implementer skill in its prompt, so I set the state by hand and sent the V3 brief with `herdr agent prompt`.
+- 2026-10-26 20:21 MDT: 009 handback (complete) saved; lead re-ran and saw red for the right reasons (24 failed in program-proposals, 216 passed). 010 dispatched to implementer. Correction: the feature has 11 scenarios, not 13 as the plan form said (lead miscount); the test-builder's packet says 10 (its miscount); all 11 are bound.
+- 2026-10-26 20:27 MDT: 010 handback (complete) arrived as a cross-session message and was saved to work/010-handback.md. Lead re-ran: 240/240, type-check clean. 011 dispatched to a new visible reviewer agent (w3:t4). V3 friction: no reviewer role skill exists, so the brief points at the item's steps. The reviewer can read the handback files in work/, so the item tells it not to open them before its first pass.
+- 2026-10-26 20:31 MDT: reviewer asked 3 questions (provisional: meets spec). Lead answered from the spec: Q1 (5s approve-transaction timeout at max program size) gets a 30s timeout plus P2028 mapped to a refusal, as follow-up work; Q2 (revert of an active but untrained program) is allowed per spec and flagged for Dustin; Q3 (field name for unknown keys) left as is. Small fixes: biome import order and a duplicate assertion in the steps file; weight "" stored as null. Waiting on the revised verdict.
+- 2026-10-26 20:31 MDT: 011 revised verdict needs 4 changes; packet saved as work/011-handback.md. Wrote 012 (test-builder, red tests plus steps-file cleanup) and 013 (implementer, waiting); dispatched 012. Re-review is logged as a retry of 011. V3 note: the reviewer messages the lead through cross-session messages, which works, and it waited for the lead's answers as designed.
+- 2026-10-26 20:32 MDT: COACHING (V3 evidence): Dustin noticed agents weren't reliably checking in. The 009 packet sat in the test-builder's pane until he asked "Hows it going?"; the implementer and reviewer messaged on their own. V3's brief says to hand back a packet but not how it reaches the lead. Fix applied: briefs now add 'send the packet and any questions to lead-ripit-mcp with SendMessage', and the lead subscribes to each agent's idle notice (notify_when_idle) at dispatch. Suggest V3 put both into the standard brief.
+- 2026-10-26 20:35 MDT: 012 complete (red for the right reasons, re-run by lead); 013 dispatched to implementer with the check-in line.
+- 2026-10-26 20:38 MDT: 013 complete (246/246 re-run by lead). Re-review sent to the reviewer.
+- 2026-10-26 20:39 MDT: reviewer's final verdict: ready to accept. 009–013 are in review, waiting for Dustin's Hub review.
+- 2026-10-26 20:39 MDT: Hub review page published (initiatives/agent-tools/docs/2026-10-26-slice2-review.md): https://dustins-macbook-pro.tailc29f1d.ts.net:8443/Projects/ripit-fitness/slice2-program-proposals-review/index. Waiting on Dustin to accept.
+- 2026-10-26 21:24 MDT: Dustin's idea: a live phone preview of the branch over Tailscale (:10000, production build, notifiers blanked). Added repo skill .claude/skills/phone-preview (start/stop/status), and the review pack now carries the live link: r2 https://dustins-macbook-pro.tailc29f1d.ts.net:8443/Projects/ripit-fitness/slice2-program-proposals-review-r2/index. Seeded pending proposal cmvq4g9er0002vr5uku2hvckq via MCP with token 'phone-test' (revoke after testing). Suggest V3 adds 'live preview link in the review pack' when the work has UI.
+- 2026-10-26 21:28 MDT: Dustin asked for a bigger test proposal. Seeded cmvq4m2sd002svr5uf12g3gaj, "12-Week Upper/Lower Peaking Block": 12 weeks, 4 days, 295 exercises, 1014 sets, with warm-ups, %/RPE/RIR, deloads and a test week. It was accepted at propose time.
+- 2026-10-26 21:32 MDT: Dustin found a redundant back link on the proposal detail page while testing on his phone. Sized small; the lead fixed it inline rather than delegating, since dispatching would cost more than the change. The admin mobile header's back arrow now goes to the section (e.g. /admin/proposals) from a detail page instead of to /admin, and the in-page '< Proposals' link is removed. Type-check and biome are clean. Preview restarted with the phone-preview skill's start command (first real run), which works.
+- 2026-10-26 21:34 MDT: Dustin's phone test: revert on a program proposal left him unsure what had happened. The revert had worked, but the program still on his Programs page was the implementer's demo, and he may also have seen pages cached by the PWA service worker. Decision (Dustin): remove Revert for program proposals; approved programs are ordinary programs. Feature (10 scenarios now) and spec updated by the lead. Items 014 (test-builder) and 015 (implementer) written; 014 dispatched. Evidence for V3: the phone preview surfaced a product decision that tests and review didn't.
+- 2026-10-26 21:36 MDT: 014 complete (4 red for the right reasons, re-run by lead). 015 dispatched with the check-order note.
+- 2026-10-26 21:39 MDT: 015 complete (239/239 re-run by lead). Second re-review sent to the reviewer, covering the lead's inline back-button fix too, so no lead-written code skips independent review.
+- 2026-10-26 21:41 MDT: second re-review: ready to accept. Review page r3 published: https://dustins-macbook-pro.tailc29f1d.ts.net:8443/Projects/ripit-fitness/slice2-program-proposals-review-r3/index. Items 009–015 waiting on Dustin.
+- 2026-10-26 21:46 MDT: Dustin accepted slice 2 (009–015). Preview stopped, phone-test token revoked. Committing and opening a PR to dev.
+- 2026-10-26: PR #997 opened to dev: https://github.com/aptx-health/ripit-fitness/pull/997
+- 2026-10-26: V3 RETRO (evidence for the next V3 revision).
+  - Coaching Dustin still had to do:
+    - (1) agents weren't checking in, so the 009 packet sat in a pane;
+    - (2) the phone preview was his idea, and it surfaced the no-revert product decision that tests and review missed.
+  - Where V3 got in the way or had gaps:
+    - (a) the work-item `dispatch` script hard-codes the handoff-implementer skill;
+    - (b) there's no reviewer role skill;
+    - (c) handback files in `work/` are readable by the reviewer, so independence relies on an instruction;
+    - (d) the brief doesn't say how a packet reaches the lead;
+    - (e) the lead's own inline fixes need a rule to go through review too (done here by adding them to the re-review).
+  - What worked:
+    - one plan form up front, and no other approvals needed;
+    - the reviewer's first pass caught a real defect (5s approve timeout);
+    - the test pass-proof caught nothing wrong this time but cost little;
+    - the saved handbacks made each step resumable.

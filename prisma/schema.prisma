@@ -9,28 +9,28 @@ datasource db {
 }
 
 model Program {
-  id                String    @id @default(cuid())
-  name              String
-  description       String?
-  userId            String
-  isActive          Boolean   @default(false)
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  isUserCreated     Boolean   @default(false)
-  programType       String    @default("strength")
-  isArchived        Boolean   @default(false)
-  archivedAt        DateTime?
-  deletedAt         DateTime?
-  copyStatus        String?   @default("ready")
-  goals             String[]  @default([])
-  level             String?
-  durationWeeks     Int?
-  durationDisplay   String?
-  targetDaysPerWeek Int?
-  equipmentNeeded   String[]  @default([])
-  focusAreas            String[]  @default([])
+  id                       String    @id @default(cuid())
+  name                     String
+  description              String?
+  userId                   String
+  isActive                 Boolean   @default(false)
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
+  isUserCreated            Boolean   @default(false)
+  programType              String    @default("strength")
+  isArchived               Boolean   @default(false)
+  archivedAt               DateTime?
+  deletedAt                DateTime?
+  copyStatus               String?   @default("ready")
+  goals                    String[]  @default([])
+  level                    String?
+  durationWeeks            Int?
+  durationDisplay          String?
+  targetDaysPerWeek        Int?
+  equipmentNeeded          String[]  @default([])
+  focusAreas               String[]  @default([])
   sourceCommunityProgramId String?
-  weeks                 Week[]
+  weeks                    Week[]
 
   @@index([userId, isActive])
   @@index([userId])
@@ -70,25 +70,25 @@ model Workout {
 }
 
 model ExerciseDefinition {
-  id             String     @id @default(cuid())
-  name           String
-  normalizedName String     @unique
-  aliases        String[]
-  category       String?
-  isSystem       Boolean    @default(false)
-  createdBy      String?
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-  equipment      String[]   @default([])
-  instructions   String?
-  notes          String?
-  imageUrls      String[]   @default([])
-  primaryFAUs    String[]   @default([])
-  secondaryFAUs  String[]   @default([])
-  force          String?
-  mechanic       String?
-  level          String?
-  userId         String
+  id              String                   @id @default(cuid())
+  name            String
+  normalizedName  String                   @unique
+  aliases         String[]
+  category        String?
+  isSystem        Boolean                  @default(false)
+  createdBy       String?
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+  equipment       String[]                 @default([])
+  instructions    String?
+  notes           String?
+  imageUrls       String[]                 @default([])
+  primaryFAUs     String[]                 @default([])
+  secondaryFAUs   String[]                 @default([])
+  force           String?
+  mechanic        String?
+  level           String?
+  userId          String
   // Auto-tagged classification (LLM-bootstrapped). See lib/exercises/auto-tag.ts
   // movementPattern: squat | hinge | vertical_push | horizontal_push | vertical_pull | horizontal_pull | lunge | carry | isolation | accessory
   movementPattern String?
@@ -98,10 +98,10 @@ model ExerciseDefinition {
   // toward FAU volume but their weights are excluded from calibration EWMAs
   // (SUGGEST_PAYLOAD_SPEC global rule 3). Backfilled from equipment containing
   // "bodyweight"; downstream consumers use this column, never re-infer.
-  isBodyweight    Boolean   @default(false)
+  isBodyweight    Boolean                  @default(false)
   taggedAt        DateTime?
   taggedBy        String?
-  exercises      Exercise[]
+  exercises       Exercise[]
   userPreferences UserExercisePreference[]
 
   @@index([normalizedName])
@@ -350,30 +350,30 @@ model UserCardioMetricPreferences {
 }
 
 model UserSettings {
-  id                        String    @id @default(cuid())
-  userId                    String    @unique
-  displayName               String?
-  defaultWeightUnit         String    @default("lbs")
-  defaultIntensityRating    String    @default("rir")
-  dismissedPrimer           Boolean   @default(false)
-  dismissedWarmup           Boolean   @default(false)
-  dismissedStickNudge       Boolean   @default(false)
-  completedTours            String    @default("[]")
-  postSessionPromptCount    Int       @default(0)
-  lastPostSessionPromptAt   DateTime?
-  experienceLevel           String?
-  equipmentPreference       String?
-  onboardingCompleted       Boolean   @default(false)
-  customProgramLimitBypass  Boolean   @default(false)
-  intensityEnabled          Boolean   @default(false)
-  loggingMode               String    @default("full")
-  dismissedMessageIds       String    @default("[]")
-  seenMessageIds            String    @default("[]")
-  pwaPromptShownCount       Int       @default(0)
-  pwaPromptDismissedAt      DateTime?
-  signupIntent              String?
-  createdAt                 DateTime  @default(now())
-  updatedAt                 DateTime  @updatedAt
+  id                       String    @id @default(cuid())
+  userId                   String    @unique
+  displayName              String?
+  defaultWeightUnit        String    @default("lbs")
+  defaultIntensityRating   String    @default("rir")
+  dismissedPrimer          Boolean   @default(false)
+  dismissedWarmup          Boolean   @default(false)
+  dismissedStickNudge      Boolean   @default(false)
+  completedTours           String    @default("[]")
+  postSessionPromptCount   Int       @default(0)
+  lastPostSessionPromptAt  DateTime?
+  experienceLevel          String?
+  equipmentPreference      String?
+  onboardingCompleted      Boolean   @default(false)
+  customProgramLimitBypass Boolean   @default(false)
+  intensityEnabled         Boolean   @default(false)
+  loggingMode              String    @default("full")
+  dismissedMessageIds      String    @default("[]")
+  seenMessageIds           String    @default("[]")
+  pwaPromptShownCount      Int       @default(0)
+  pwaPromptDismissedAt     DateTime?
+  signupIntent             String?
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
 
   @@index([userId])
 }
@@ -397,60 +397,60 @@ model UserMuscleBalanceSettings {
 }
 
 model UserTrainingProfile {
-  id                          String   @id @default(cuid())
-  userId                      String   @unique
-  goalSentences               String[] @default([])
-  weeklyIntent                String[] @default([])
-  equipmentAvailable          String[] @default([])
+  id                         String   @id @default(cuid())
+  userId                     String   @unique
+  goalSentences              String[] @default([])
+  weeklyIntent               String[] @default([])
+  equipmentAvailable         String[] @default([])
   // false = no record (planner assumes a full commercial gym); true = the
   // user's real selection, even if minimal/empty (#927). Distinguishes an
   // intentional "I own almost nothing" from "never set".
-  equipmentAvailableSet       Boolean  @default(false)
-  bannedExerciseIds           String[] @default([])
-  ratioTargets                Json
-  defaultIntensityPreference  String?
+  equipmentAvailableSet      Boolean  @default(false)
+  bannedExerciseIds          String[] @default([])
+  ratioTargets               Json
+  defaultIntensityPreference String?
 
   // Demographics (all optional, skippable)
-  birthYear                   Int?
+  birthYear     Int?
   // biologicalSex: female | male | prefer_not_to_say
-  biologicalSex               String?
-  heightCm                    Float?
-  weightKg                    Float?
+  biologicalSex String?
+  heightCm      Float?
+  weightKg      Float?
 
   // Injuries: [{ area, severity, notes?, reportedAt? }]
   // area: neck | shoulder | elbow | wrist | upper_back | lower_back | hip | knee | ankle
   // severity: avoid_loading | caution | recovered
   // Source for the injury -> exercise ban-list mapping (areas align with
   // ExerciseDefinition.movementPattern / FAU taxonomy).
-  injuryAreas                 Json     @default("[]")
+  injuryAreas Json @default("[]")
 
   // Importance ratings (1-5)
   // goalCategories: [{ category, importance }]
-  goalCategories              Json     @default("[]")
+  goalCategories      Json    @default("[]")
   // otherActivities: [{ activity, importance, cadence? }]
-  otherActivities             Json     @default("[]")
+  otherActivities     Json    @default("[]")
   // fauImportance: { [fauKey]: 1..5 } — per-FAU weighting (keys from lib/fau-volume ALL_FAUS)
-  fauImportance               Json     @default("{}")
+  fauImportance       Json    @default("{}")
   // fauImportancePreset: id of the last applied importance preset (lib/learning
   // ratio-presets RATIO_PRESET_IDS), or null. Attribution only — ratings above
   // stay editable, so this survives per-FAU tweaks for "based on your X preset" copy.
-  fauImportancePreset         String?
+  fauImportancePreset String?
 
   // targetMovements: curated "anchor" compounds (#976) — { [anchorPattern]: exerciseId[] }
   // Keys from lib/exercises/anchor-patterns ANCHOR_PATTERNS (subset of MovementPattern),
   // values up to 5 ExerciseDefinition ids. Drives the picker's "Anchors" staleness view.
-  targetMovements             Json?
+  targetMovements Json?
 
   // Training rhythm
-  targetSessionsPerWeek       Int?
-  targetMinutesPerSession     Int?
+  targetSessionsPerWeek   Int?
+  targetMinutesPerSession Int?
   // patternPreference: no_preference | full_body | upper_lower | push_pull_legs | body_part_split | custom
-  patternPreference           String?
+  patternPreference       String?
   // preferredDays: monday..sunday
-  preferredDays               String[] @default([])
+  preferredDays           String[] @default([])
 
-  createdAt                   DateTime @default(now())
-  updatedAt                   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
 }
@@ -637,20 +637,21 @@ model WaiverAcceptance {
 // -- User Feedback --
 
 model Feedback {
-  id        String   @id @default(cuid())
-  userId    String
-  category  String   // "bug" | "feature" | "confusion" | "general" | "post_session"
-  message   String   @default("")
-  pageUrl   String
-  userAgent String?
-  properties     String?  // JSON blob for extra context (e.g. question shown for post_session)
-  rating         Int?     // 1-5 experience rating (post_session)
+  id             String     @id @default(cuid())
+  userId         String
+  category       String // "bug" | "feature" | "confusion" | "general" | "post_session"
+  message        String     @default("")
+  pageUrl        String
+  userAgent      String?
+  properties     String? // JSON blob for extra context (e.g. question shown for post_session)
+  rating         Int? // 1-5 experience rating (post_session)
   refinements    String[] // ["confusing", "buggy", etc.] (post_session)
-  status         String   @default("new") // "new" | "reviewed" | "resolved"
+  status         String     @default("new") // "new" | "reviewed" | "resolved"
   adminNote      String?
   githubIssueUrl String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  proposals      Proposal[]
 
   @@index([userId])
   @@index([status])
@@ -660,9 +661,9 @@ model Feedback {
 
 model InAppMessage {
   id               String   @id @default(cuid())
-  name             String?  // admin-only label, not shown to users
-  content          String   // primary slide content (used when slides is null)
-  slides           String?  // JSON: [{ content: string, icon: string }] for multi-slide carousel
+  name             String? // admin-only label, not shown to users
+  content          String // primary slide content (used when slides is null)
+  slides           String? // JSON: [{ content: string, icon: string }] for multi-slide carousel
   placement        String
   userType         String   @default("all")
   icon             String   @default("Lightbulb")
@@ -692,7 +693,7 @@ model InAppMessage {
 /// user (no incremental bookkeeping); timestamps stored absolute, the builder
 /// converts to days_ago at request time.
 model UserTrainingAggregates {
-  userId    String   @id
+  userId     String   @id
   computedAt DateTime
 
   // ---- whole-body freshness & load (top-level training_state fields) ----
@@ -700,7 +701,7 @@ model UserTrainingAggregates {
   daysSinceAnySession     Int?
   lastSessionAt           DateTime?
   firstSessionAt          DateTime?
-  qualifyingSessionsTotal Int      @default(0)
+  qualifyingSessionsTotal Int       @default(0)
   totalWeeklySetsBaseline Float?
   acuteChronicRatio       Float?
   detrainingGapDays       Int?
@@ -710,11 +711,11 @@ model UserTrainingAggregates {
 
   // ---- sectioned blobs (shapes defined in lib/aggregates/types.ts) ----
   // PerFauAggregate[]: per-FAU rolling sets, baseline, sessions_14d, low_data
-  perFau                  Json
+  perFau                 Json
   // MovementCalibration[]: gap-decayed EWMA e1RM, staleness, typical effort
-  perMovementCalibration  Json
+  perMovementCalibration Json
   // GoalProgress[]: per-goal e1RM (Epley) trend series + classification
-  goalProgress            Json     @default("[]")
+  goalProgress           Json @default("[]")
 
   @@index([computedAt])
 }
@@ -731,4 +732,49 @@ model TuningConfig {
   updatedAt DateTime @updatedAt
   /// User id of the admin who last saved the config (audit trail only).
   updatedBy String?
+}
+
+/// Personal access token for an agent calling the MCP server (/api/mcp).
+/// Only the SHA-256 hex of the token is stored; the plaintext is shown once.
+model AgentToken {
+  id         String     @id @default(cuid())
+  userId     String
+  name       String
+  tokenHash  String     @unique
+  createdAt  DateTime   @default(now())
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+  proposals  Proposal[]
+
+  @@index([userId])
+}
+
+/// A change an agent proposed. Nothing is applied until an admin approves it
+/// (lib/proposals/service.ts). kind: exercise_definition.create | .update.
+/// status: pending | applied | rejected | reverted | conflict.
+model Proposal {
+  id           String     @id @default(cuid())
+  userId       String
+  agentTokenId String
+  kind         String
+  status       String     @default("pending")
+  summary      String
+  rationale    String
+  payload      Json
+  targetId     String?
+  /// Update proposals: full definition at propose time (staleness check + revert).
+  before       Json?
+  /// Set on approve: what revert needs to undo the change.
+  inverse      Json?
+  error        String?
+  createdAt    DateTime   @default(now())
+  decidedAt    DateTime?
+  /// The user feedback this proposal addresses. Approving resolves it.
+  feedbackId   String?
+  agentToken   AgentToken @relation(fields: [agentTokenId], references: [id], onDelete: Cascade)
+  feedback     Feedback?  @relation(fields: [feedbackId], references: [id], onDelete: SetNull)
+
+  @@index([userId, status, createdAt])
+  @@index([agentTokenId])
+  @@index([feedbackId])
 }
