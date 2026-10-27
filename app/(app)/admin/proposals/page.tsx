@@ -5,6 +5,7 @@ import ProposalStatusBadge from '@/components/admin/proposals/ProposalStatusBadg
 import { isAdminRole } from '@/lib/admin/auth'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { PROPOSAL_KIND_LABELS, type ProposalKind } from '@/lib/proposals/service'
 
 export const revalidate = 0
 
@@ -56,7 +57,7 @@ export default async function ProposalsPage() {
                   <div className="text-sm font-semibold text-foreground break-words">{p.summary}</div>
                   <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                     <ProposalStatusBadge status={p.status} />
-                    <span>{p.kind === 'exercise_definition.create' ? 'New exercise' : 'Exercise edit'}</span>
+                    <span>{PROPOSAL_KIND_LABELS[p.kind as ProposalKind] ?? p.kind}</span>
                     <span>·</span>
                     <span>{p.agentToken.name}</span>
                     <span>·</span>

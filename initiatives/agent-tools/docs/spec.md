@@ -95,6 +95,33 @@ There is deliberately **no** approve, reject or revert tool.
 - Agents get no tool that writes feedback.
 - The admin proposal detail page shows the linked feedback's message, with a link to `/admin/feedback`.
 
+## Programs (added 2026-10-26 for slice 2, items 009–011)
+
+Agents can propose a **new** program. Editing an existing program is a later slice.
+
+- New read tool: `get_program({ id })`.
+  - Returns `{ program: { id, name, description, isActive, weeks: [{ weekNumber, name, workouts: [{ dayNumber, name, exercises: [{ order, exerciseDefinitionId, name, notes, prescribedSets: [{ setNumber, reps, weight, rpe, rir, isWarmup }] }] }] }] } }`, ordered by week, day, order and set number.
+  - Programs that aren't the token user's, or that are soft-deleted, return a tool error `program not found`.
+- New write tool: `propose_program_create({ program, rationale, feedbackId? })`, with kind `program.create`.
+  - `program` is `{ name, description?, weeks: [{ name?, workouts: [{ name, exercises: [{ exerciseDefinitionId, notes?, prescribedSets: [{ reps, weight?, rpe?, rir?, isWarmup? }] }] }] }] }`.
+  - Week numbers, day numbers, exercise order and set numbers come from array position, starting at 1. Agents don't send them.
+  - `feedbackId` behaves as it does for exercise proposals.
+- Validation runs at propose time and again at approve time. The first failure returns a tool error with `field` set to the offending key name:
+  - `name` is required, at most 100 characters.
+  - Limits: 1–16 weeks, 1–7 workouts per week, 1–15 exercises per workout, 1–10 sets per exercise. An empty list errors with `field` set to `weeks`, `workouts`, `exercises` or `prescribedSets`.
+  - Each `exerciseDefinitionId` must exist and be visible to the user (system or theirs).
+  - `reps` is a required non-empty string, at most 20 characters. `weight` is an optional string, at most 20 characters.
+  - `rpe` is an integer 1–10, and `rir` an integer 0–10, both optional.
+- Approve creates everything in one transaction:
+  - The Program is created with `isActive: false`, `isUserCreated: true`, `programType: 'strength'` and `copyStatus: 'ready'`.
+  - Every row gets the user's `userId`, and Exercise `name` is copied from its definition.
+  - `targetId` is set to the program id. `inverse` stays null.
+  - The program-count limit (`MAX_PROGRAMS`) is not applied, because only admins approve.
+  - If a referenced definition has gone, approve returns `invalid`, nothing is created, and the proposal stays `pending` with `error` set (same as exercise proposals).
+- Revert is refused for `program.create`: it returns `invalid` with the error `program proposals can't be reverted; delete the program from Programs instead`, and the proposal stays `applied`. (Changed 2026-10-26 after Dustin's phone test. An approved program is an ordinary program.)
+- Admin detail page: for `program.create`, it shows a read-only outline (weeks → workouts → exercises with a compact set summary such as `3 × 5 @ RPE 8`) in place of the field diff. After approval it links to the created program and shows no Revert button.
+- Notifications work as before. The summary is `New program: <name> (<n> weeks)`.
+
 ## Not in slice 1
 
 OAuth for claude.ai/mobile connectors, MCP Apps UI, program proposals,

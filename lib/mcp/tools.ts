@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { logger } from '@/lib/logger'
 import type { Notify } from '@/lib/notify'
 import { visibleTo } from '@/lib/proposals/exercise-definition'
+import { issueField, programInput, programTreeSelect } from '@/lib/proposals/program'
 import { createProposal, PROPOSAL_STATUSES } from '@/lib/proposals/service'
 import { VALID_CATEGORIES, VALID_STATUSES } from '@/types/feedback'
 
@@ -55,6 +56,7 @@ const schemas = {
   }),
   get_exercise: z.object({ id: z.string().min(1) }),
   list_programs: z.object({}),
+  get_program: z.object({ id: z.string().min(1) }),
   get_workout_history: z.object({
     limit: z.number().int().min(1).max(50).optional(),
     since: z.iso.datetime({ offset: true }).or(z.iso.date()).optional().describe('ISO date; only workouts completed on or after it'),
@@ -67,6 +69,11 @@ const schemas = {
   propose_exercise_update: z.object({
     id: z.string().min(1),
     changes: z.object(definitionFields).partial().strict(),
+    rationale,
+    feedbackId,
+  }),
+  propose_program_create: z.object({
+    program: programInput,
     rationale,
     feedbackId,
   }),
@@ -85,11 +92,14 @@ const descriptions: Record<ToolName, string> = {
   search_exercises: 'Search the exercise library by name or alias.',
   get_exercise: 'Get one exercise definition by id.',
   list_programs: "List the user's training programs with active flag and week count.",
+  get_program: "Get one of the user's programs in full: weeks, workouts, exercises and prescribed sets.",
   get_workout_history: 'List completed workouts, newest first, with exercises and logged sets.',
   propose_exercise_create:
     'Propose a new exercise definition. Nothing changes until the user approves it in the admin Workbench.',
   propose_exercise_update:
     'Propose changes to an existing exercise definition. Nothing changes until the user approves it.',
+  propose_program_create:
+    'Propose a new program (weeks > workouts > exercises > prescribed sets). Week, day, order and set numbers come from array position. Nothing is created until the user approves it; it is created inactive.',
   list_proposals: "List the user's proposals and their status.",
   list_feedback:
     "List the user's app feedback, newest first (status defaults to new). Pass a feedback id as feedbackId on a propose tool to link the proposal; approving it resolves the feedback.",
@@ -171,6 +181,21 @@ const handlers: { [N in ToolName]: Handler<N> } = {
     return {
       programs: programs.map(({ _count, ...p }) => ({ ...p, weekCount: _count.weeks })),
     }
+  },
+
+  async get_program(prisma, ctx, { id }) {
+    const program = await prisma.program.findFirst({
+      where: { id, userId: ctx.userId, deletedAt: null },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        isActive: true,
+        weeks: { orderBy: { weekNumber: 'asc' }, select: programTreeSelect },
+      },
+    })
+    if (!program) throw new ToolError('program not found', { field: 'id' })
+    return { program }
   },
 
   async get_workout_history(prisma, ctx, { limit, since }) {
@@ -262,6 +287,17 @@ const handlers: { [N in ToolName]: Handler<N> } = {
     return { proposalId, status, summary }
   },
 
+  async propose_program_create(prisma, ctx, { program, rationale, feedbackId }) {
+    const result = await createProposal(
+      prisma,
+      { userId: ctx.userId, agentTokenId: ctx.tokenId, kind: 'program.create', program, rationale, feedbackId },
+      ctx.notify
+    )
+    if (!result.ok) throw new ToolError(result.error, { field: result.field, existingId: result.existingId })
+    const { id, status, summary } = result.proposal
+    return { proposalId: id, status, summary }
+  },
+
   async list_proposals(prisma, ctx, { status }) {
     const proposals = await prisma.proposal.findMany({
       where: { userId: ctx.userId, ...(status && { status }) },
@@ -330,9 +366,9 @@ export async function callTool(
   const parsed = schemas[name].safeParse(args ?? {})
   if (!parsed.success) {
     const issue = parsed.error.issues[0]
-    const path = issue.path.map(String)
-    // Report the field itself, not its container (definition.primaryFAUs -> primaryFAUs).
-    const field = (path[0] === 'definition' || path[0] === 'changes' ? path[1] : path[0]) ?? path[0]
+    // Report the field itself, not its container (definition.primaryFAUs -> primaryFAUs,
+    // program.weeks.0.workouts -> workouts).
+    const field = issueField(issue.path)
     return text({ error: issue.message, ...(field && { field }) }, true)
   }
 

@@ -20,10 +20,18 @@ interface Outcome {
 }
 
 /**
- * Approve / Reject (pending) or Revert (applied). Shows the service result
+ * Approve / Reject (pending) or Revert (applied, unless `canRevert` is false). Shows the service result
  * code and error text on refusal, then refreshes the server-rendered page.
  */
-export default function ProposalActions({ id, status }: { id: string; status: string }) {
+export default function ProposalActions({
+  id,
+  status,
+  canRevert = true,
+}: {
+  id: string
+  status: string
+  canRevert?: boolean
+}) {
   const router = useRouter()
   const [busy, setBusy] = useState<Action | null>(null)
   const [outcome, setOutcome] = useState<Outcome | null>(null)
@@ -61,7 +69,7 @@ export default function ProposalActions({ id, status }: { id: string; status: st
             </Button>
           </>
         )}
-        {status === 'applied' && (
+        {status === 'applied' && canRevert && (
           <Button variant="outline" loading={busy === 'revert'} disabled={!!busy} onClick={() => run('revert')}>
             Revert
           </Button>
