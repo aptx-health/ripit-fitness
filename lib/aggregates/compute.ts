@@ -87,7 +87,7 @@ function ageDays(now: Date, when: Date): number {
 }
 
 /** RPE-equivalent effort for a set, or null when neither RPE nor RIR was logged. */
-function setEffort(set: AggregateSetInput): number | null {
+export function setEffort(set: Pick<AggregateSetInput, 'rpe' | 'rir'>): number | null {
   if (set.rpe != null) return set.rpe
   if (set.rir != null) return 10 - set.rir
   return null
