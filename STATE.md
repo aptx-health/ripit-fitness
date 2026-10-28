@@ -6,7 +6,7 @@ None
 Running quietly: None.
 
 ## Active
-- Agent tools slice 3: training insight tools and raw export, all items 016–023 accepted 2026-10-27. Worktree2, branch `feature/agent-insights`; PR into `dev` open. See [initiatives/agent-tools/status.md](initiatives/agent-tools/status.md).
+- Agent tools slice 3: training insight tools and raw export, all items 016–023 accepted 2026-10-27. Worktree2, branch `feature/agent-insights`; PR #999 into `dev` open. See [initiatives/agent-tools/status.md](initiatives/agent-tools/status.md).
 
 ## Blocked
 None

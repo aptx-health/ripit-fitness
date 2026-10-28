@@ -66,3 +66,5 @@ Append-only. Newest at the bottom.
 - 2026-10-27 20:49 MDT: 023 Part B done (full suite 1254 passed, tsc clean, re-run by the lead). Short re-review of 023 dispatched to reviewer.
 - 2026-10-27 20:50 MDT: 023 re-review: ship. Round-2 Hub review published: https://dustins-macbook-pro.tailc29f1d.ts.net:8443/Projects/ripit-fitness/slice3-export-review/index. Waiting on Dustin to accept 020–023, then the PR into dev.
 - 2026-10-27 20:57 MDT: Dustin accepted round 2 (020–023). Committing and opening the PR into dev.
+- 2026-10-27 20:57 MDT: committed ed6d71f5 and opened PR #999 into dev. Left uncommitted: .claude/skills/break-matrix/ (not part of any item; Dustin to decide). This line is uncommitted.
+- 2026-10-27 21:15 MDT: Dustin wants the break-matrix skill committed so agents use it for faster test pass-proofs. Added to PR #999, with a pointer in AGENTS.md Testing.
