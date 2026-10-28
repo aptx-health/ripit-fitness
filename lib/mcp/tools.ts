@@ -1,5 +1,8 @@
 import type { PrismaClient } from '@prisma/client'
 import { z } from 'zod'
+import { computeEffortSummary, EFFORT_SESSION_STATUSES, WEEK_MS } from '@/lib/insights/effort'
+import { decodeCursor, EXPORT_COLUMNS, encodeCursor, fetchExportRows, parseRange } from '@/lib/insights/export'
+import { computeStallSignals, STALL_SESSION_STATUSES } from '@/lib/insights/stall'
 import { logger } from '@/lib/logger'
 import type { Notify } from '@/lib/notify'
 import { visibleTo } from '@/lib/proposals/exercise-definition'
@@ -61,6 +64,20 @@ const schemas = {
     limit: z.number().int().min(1).max(50).optional(),
     since: z.iso.datetime({ offset: true }).or(z.iso.date()).optional().describe('ISO date; only workouts completed on or after it'),
   }),
+  get_stall_signals: z.object({
+    exerciseDefinitionId: z.string().min(1).optional().describe('Only this exercise'),
+    sessions: z.number().int().min(2).max(12).optional().describe('Most recent sessions per exercise; defaults to 6'),
+    sinceDays: z.number().int().min(1).max(365).optional().describe('Only sessions in the last N days; defaults to 120'),
+  }),
+  get_effort_summary: z.object({
+    weeks: z.number().int().min(1).max(12).optional().describe('Rolling 7-day weeks, newest first; defaults to 4'),
+  }),
+  export_training_data: z.object({
+    since: z.string().describe('Start date (YYYY-MM-DD, midnight UTC) or ISO timestamp, inclusive'),
+    until: z.string().optional().describe('End date or ISO timestamp, exclusive; defaults to now'),
+    cursor: z.string().optional().describe("The previous page's nextCursor"),
+    limit: z.number().int().min(1).max(2000).optional().describe('Rows per page; defaults to 1000'),
+  }),
   propose_exercise_create: z.object({
     definition: z.object(definitionFields).strict(),
     rationale,
@@ -94,6 +111,12 @@ const descriptions: Record<ToolName, string> = {
   list_programs: "List the user's training programs with active flag and week count.",
   get_program: "Get one of the user's programs in full: weeks, workouts, exercises and prescribed sets.",
   get_workout_history: 'List completed workouts, newest first, with exercises and logged sets.',
+  get_stall_signals:
+    'Per exercise, the best working-set e1RM (lbs) of each recent session, oldest first, with early/late means, change percent and sessions since the best. Raw numbers only; sorted biggest drop first.',
+  get_effort_summary:
+    'Per rolling 7-day week (index 0 = last 7 days): working and rated sets, average effort (RPE, or 10 - RIR), effort distribution, share at 9+ and 10, and session RPE. Raw numbers only.',
+  export_training_data:
+    'Raw logged sets (warmups included and flagged) from completed and abandoned workouts in a date range, as rows in the listed column order, paged with nextCursor. Nothing is converted. For large pulls in a script, GET /api/agent/export.csv?since=&until= with the same bearer token returns the whole range (up to 3 years) as one CSV.',
   propose_exercise_create:
     'Propose a new exercise definition. Nothing changes until the user approves it in the admin Workbench.',
   propose_exercise_update:
@@ -248,6 +271,100 @@ const handlers: { [N in ToolName]: Handler<N> } = {
       }
     })
     return { workouts }
+  },
+
+  async get_stall_signals(prisma, ctx, { exerciseDefinitionId, sessions, sinceDays }) {
+    const since = new Date(Date.now() - (sinceDays ?? 120) * 24 * 60 * 60 * 1000)
+    // Working sets only; reps > 0 because Epley is undefined at 0 reps.
+    const sets = await prisma.loggedSet.findMany({
+      where: {
+        isWarmup: false,
+        weight: { gt: 0 },
+        reps: { gt: 0 },
+        completion: {
+          userId: ctx.userId,
+          status: { in: STALL_SESSION_STATUSES },
+          isArchived: false,
+          completedAt: { gte: since },
+        },
+        ...(exerciseDefinitionId && { exercise: { exerciseDefinitionId } }),
+      },
+      select: {
+        completionId: true,
+        reps: true,
+        weight: true,
+        weightUnit: true,
+        completion: { select: { completedAt: true } },
+        exercise: { select: { exerciseDefinitionId: true, exerciseDefinition: { select: { name: true } } } },
+      },
+    })
+    const rows = sets.map(({ completion, exercise, ...set }) => ({
+      ...set,
+      completedAt: completion.completedAt,
+      exerciseDefinitionId: exercise.exerciseDefinitionId,
+      name: exercise.exerciseDefinition.name,
+    }))
+    return { exercises: computeStallSignals(rows, sessions ?? 6) }
+  },
+
+  async get_effort_summary(prisma, ctx, { weeks }) {
+    const count = weeks ?? 4
+    const now = new Date()
+    const completions = await prisma.workoutCompletion.findMany({
+      where: {
+        userId: ctx.userId,
+        status: { in: EFFORT_SESSION_STATUSES },
+        isArchived: false,
+        completedAt: { gt: new Date(now.getTime() - count * WEEK_MS), lte: now },
+      },
+      select: {
+        completedAt: true,
+        sessionRpe: true,
+        loggedSets: {
+          where: { isWarmup: false },
+          select: { rpe: true, rir: true, exercise: { select: { exerciseDefinitionId: true } } },
+        },
+      },
+    })
+    const sessions = completions.map((c) => ({
+      completedAt: c.completedAt,
+      sessionRpe: c.sessionRpe,
+      sets: c.loggedSets.map(({ exercise, ...set }) => ({ ...set, exerciseDefinitionId: exercise.exerciseDefinitionId })),
+    }))
+    return { weeks: computeEffortSummary(sessions, count, now) }
+  },
+
+  async export_training_data(prisma, ctx, { since, until, cursor, limit }) {
+    const range = parseRange(since, until, new Date())
+    if (!range.ok) throw new ToolError(range.error, { field: range.field })
+
+    // A cursor carries its range, so a page without `until` keeps the first page's "now".
+    let offset = 0
+    let rangeUntil = range.until
+    if (cursor !== undefined) {
+      const state = decodeCursor(cursor)
+      const sameRange =
+        state?.since === range.since.toISOString() &&
+        (!until || state.until === range.until.toISOString())
+      if (!state || !sameRange) throw new ToolError('invalid cursor for this range', { field: 'cursor' })
+      offset = state.offset
+      rangeUntil = new Date(state.until)
+    }
+
+    const pageSize = limit ?? 1000
+    // One extra row tells us whether another page exists.
+    const fetched = await fetchExportRows(
+      prisma,
+      ctx.userId,
+      { since: range.since, until: rangeUntil },
+      { skip: offset, take: pageSize + 1 }
+    )
+    const rows = fetched.slice(0, pageSize)
+    const nextCursor =
+      fetched.length > pageSize
+        ? encodeCursor({ offset: offset + pageSize, since: range.since.toISOString(), until: rangeUntil.toISOString() })
+        : null
+    return { columns: [...EXPORT_COLUMNS], rows, nextCursor, rowCount: rows.length }
   },
 
   async propose_exercise_create(prisma, ctx, { definition, rationale, feedbackId }) {
