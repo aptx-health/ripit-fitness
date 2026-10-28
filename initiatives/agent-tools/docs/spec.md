@@ -126,3 +126,68 @@ Agents can propose a **new** program. Editing an existing program is a later sli
 
 OAuth for claude.ai/mobile connectors, MCP Apps UI, program proposals,
 insights tools beyond raw history, multi-user anything.
+
+## Training insights (added 2026-10-27 for slice 3, items 016 onward; raw numbers only, per Dustin)
+
+Two read-only tools that return **raw numbers only**: no verdicts, labels, flags or thresholds. The agent calibrates its own judgement from the numbers and writes the coaching words. (Dustin, 2026-10-27: "the agent should receive raw numbers or averages rather than high/medium/low, so it can calibrate itself.") Discovery: `work/016-handback.md`. No schema change and no UI.
+
+Shared rules:
+- Sessions are the token user's `WorkoutCompletion`s with `isArchived: false`, ad-hoc and program alike. **Stall** uses status `completed` only. **Effort** uses `completed` and `abandoned`. (Changed 2026-10-27, Dustin: a cut-short workout shouldn't drag a stall average down.)
+- **Effort** counts every non-warmup set (`isWarmup: false`), whatever its weight or reps, so bodyweight work such as pull-ups and dips counts. **Stall** needs a load: a non-warmup set with `weight > 0` and `reps > 0`. (Changed 2026-10-27, Dustin.) In the effort fields below, "working set" means any non-warmup set.
+- Weights are converted to lbs with `normalizeWeightToLbs`.
+- e1RM (estimated one-rep max) uses `epleyE1RM` (`lib/learning/math.ts`). A session's value is its best working set (`bestSetE1RM`, `lib/stats/exercise-history-derivation.ts`).
+- Effort per set is `rpe ?? (10 − rir)`, via `setEffort` in `lib/aggregates/compute.ts`, exported for reuse. A set with neither is unrated.
+- Exercises are grouped by `Exercise.exerciseDefinitionId`.
+- A "week" is a rolling 7-day bucket ending now; index 0 is the last 7 days.
+- Each tool does one `findMany` and groups in memory, so there's no query per exercise. Pure logic lives in `lib/insights/stall.ts` and `lib/insights/effort.ts`.
+- Numbers are rounded to 1 decimal place. A value that can't be computed is `null`, never 0.
+
+### `get_stall_signals({ exerciseDefinitionId?, sessions?, sinceDays? })`
+- Defaults and limits: `sessions` 6 (2–12), `sinceDays` 120 (1–365). Out-of-range values give a tool error with `field`.
+- It looks at the most recent `sessions` sessions per exercise within `sinceDays` that have at least one working set. Exercises with no working sets in the window are left out.
+- Returns `{ exercises: [...] }`. Each exercise is `{ exerciseDefinitionId, name, sessionsAnalyzed, spanDays, firstDate, lastDate, earlyE1rmLbs, lateE1rmLbs, changePct, bestE1rmLbs, sessionsSinceBest, repRange: { min, max }, series: [{ date, e1rmLbs, weight, unit, reps }] }`.
+  - `series` runs oldest → newest, one entry per session, from its best working set.
+  - `earlyE1rmLbs` and `lateE1rmLbs` are the means of the first 2 and the last 2 sessions. With a single session both equal that session's value. `changePct` is `(late − early) / early × 100`, and it is `null` with fewer than 2 sessions.
+  - `sessionsSinceBest` counts sessions after the best one: 0 when the newest session is the best.
+  - `spanDays` is the whole days from `firstDate` to `lastDate`.
+  - A session's date is `WorkoutCompletion.completedAt`, as an ISO timestamp. `series[].weight` and `unit` are as logged; only `e1rmLbs` is converted.
+  - On a tie for best e1RM, the most recent session is the best.
+  - `repRange` is the min and max reps across the series' best sets.
+  - Compute from unrounded values and round only on output.
+- Sort order: `changePct` ascending (most negative first), with nulls last, then by name. With `exerciseDefinitionId`, only that exercise is returned. An id the user has never logged returns an empty list.
+
+### `get_effort_summary({ weeks? })`
+- Defaults and limits: `weeks` 4 (1–12).
+- Returns `{ weeks: [...] }`, with index 0 the last 7 days.
+  - Each week: `{ start, end, sessions, workingSets, ratedSets, coveragePct, avgEffort, distribution: { le6, rpe7, rpe8, rpe9, rpe10 }, pctAtOrAbove9, pctAt10, exercisesTrained, exercisesTopSetAt10, sessionRpe: { count, avg } }`.
+  - `start` and `end` are ISO timestamps: `weeks[0].end` is now, each week is exactly 7 days, and `weeks[i].start` equals `weeks[i+1].end`.
+  - `distribution` counts rated working sets by effort, rounded to the nearest whole number.
+  - `coveragePct` is `ratedSets / workingSets × 100`.
+  - With no rated sets, `avgEffort`, `pctAtOrAbove9` and `pctAt10` are `null`. With no working sets, `coveragePct` is `null`.
+  - `exercisesTopSetAt10` counts exercises whose hardest rated working set that week was effort 10.
+
+## Training data export (added 2026-10-27 for items 020 onward)
+
+Raw rows for agents that analyse data with their own scripts in a sandbox. The insight tools stay as the quick answer; this is the flexible primitive beside them. (Dustin, 2026-10-27: MCP tool plus CSV endpoint, warmups included and flagged.)
+
+Rows:
+- One row per `LoggedSet`, **including warmups**, from the token user's `WorkoutCompletion`s with status `completed` or `abandoned` and `isArchived: false`.
+- Columns, in this order: `date` (completion `completedAt`, ISO), `completionId`, `workoutName` (completion `name`, or the program workout's name, or null), `isAdHoc`, `status`, `sessionRpe`, `durationSeconds`, `exerciseDefinitionId`, `exerciseName` (definition name), `exerciseOrder`, `setNumber`, `reps`, `weight`, `unit`, `rpe`, `rir`, `isWarmup`.
+- Weights are as logged; nothing is converted, derived or filtered beyond the session rule. Missing values are null in JSON and empty in CSV.
+- Order: `date` ascending, then `completionId`, `exerciseOrder` and `setNumber`. The order is stable, so paging never skips or repeats a row while the data is unchanged.
+- An empty `since=` or `until=` counts as absent. (Added 2026-10-27 after review 022.)
+- The range is `since` (required, a date or ISO timestamp, inclusive) to `until` (optional, default now, exclusive). `until` must be after `since`. A bad value is an error naming the field.
+
+### MCP tool `export_training_data({ since, until?, cursor?, limit? })`
+- `limit` defaults to 1000 (1–2000). `cursor` is opaque, taken from the previous page's `nextCursor`; an invalid one is an error with `field: 'cursor'`.
+- Returns `{ columns: [...], rows: [[...], ...], nextCursor, rowCount }`. Rows are arrays in column order, which keeps them compact. `nextCursor` is null on the last page, including when the last page is exactly `limit` rows. Date-only `since` and `until` mean midnight UTC. MCP rows aren't formula-guarded; only the CSV is.
+- The tool description tells agents that the CSV endpoint exists for large pulls in a script.
+
+### CSV endpoint `GET /api/agent/export.csv?since=&until=`
+- Auth is the same agent bearer token as `/api/mcp` (`resolveAgentToken`). A missing, unknown or revoked token gets 401. Rate-limited with `agentMcpLimiter`.
+- Returns every row in the range with no paging. The range is at most 1096 days (3 years); longer gives 400. `text/csv; charset=utf-8`, `Content-Disposition: attachment; filename="ripit-training-<since>-<until>.csv"`, and a header line of the column names.
+- RFC 4180 quoting. Text fields that start with `=`, `+`, `-`, `@`, a tab or a carriage return, or with whitespace followed by one of `= + - @`, get a leading `'`, so a spreadsheet won't run them as formulas. (Widened 2026-10-27 after review 022.)
+- A bad `since` or `until` gives 400 with a JSON `{ error, field }`.
+
+### Getting a token into a sandbox
+Create a separate agent token per sandbox in Workbench → Agent tokens and pass it in as an environment variable (for example `RIPIT_TOKEN`). Never put it in a prompt, a script file or a repo. Tokens can only read and propose, and one can be revoked on its own. This is documentation only, with no code.
