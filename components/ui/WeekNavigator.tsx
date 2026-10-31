@@ -4,7 +4,7 @@ import Link from 'next/link'
 type Props = {
   currentWeek: number
   totalWeeks: number
-  baseUrl: string // '/training' or '/cardio'
+  baseUrl: string // e.g. '/library/programs/<id>'
   programName: string
   completionIndicator?: React.ReactNode
 }

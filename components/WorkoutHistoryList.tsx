@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { clientLogger } from '@/lib/client-logger'
 import { sessionEffortLabel } from '@/lib/effort-prompt'
+import { programDetailHref } from '@/lib/training/program-href'
 
 type Exercise = {
   name: string
@@ -44,7 +45,9 @@ type WorkoutCompletion = {
     id: string
     name: string
     week: {
+      weekNumber: number
       program: {
+        id: string
         name: string
       }
     }
@@ -303,7 +306,9 @@ export default function WorkoutHistoryList({ count, compact = false }: Props) {
             {completion.workout && (
               <div className="pt-2">
                 <Link
-                  href={`/programs/${completion.workout.id}`}
+                  href={programDetailHref(completion.workout.week.program.id, {
+                    week: String(completion.workout.week.weekNumber),
+                  })}
                   className="text-sm text-primary hover:text-primary-hover font-medium"
                 >
                   View Full Workout →

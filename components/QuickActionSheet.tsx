@@ -23,9 +23,11 @@ import { FetchError, fetchJsonWithRetry } from '@/lib/api/fetch'
 import { discardDraft } from '@/lib/api/workout-sets'
 import { clientLogger } from '@/lib/client-logger'
 import { useDraftWorkout } from '@/lib/contexts/DraftWorkoutContext'
+import { programDetailHref } from '@/lib/training/program-href'
 
 type NextWorkout = {
   workoutId: string
+  programId: string
   workoutName: string
   dayNumber: number
   weekNumber: number
@@ -140,14 +142,18 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
     if (activeDraft.isAdHoc) {
       router.push(`/training/adhoc/${activeDraft.completionId}`)
     } else {
-      router.push(`/training?resume=${activeDraft.workoutId}`)
+      router.push(
+        activeDraft.programId && activeDraft.workoutId
+          ? programDetailHref(activeDraft.programId, { resume: activeDraft.workoutId })
+          : '/training'
+      )
     }
   }, [activeDraft, onOpenChange, router])
 
   const handleContinueProgram = useCallback(() => {
     if (!nextWorkout) return
     onOpenChange(false)
-    router.push(`/training?resume=${nextWorkout.workoutId}`)
+    router.push(programDetailHref(nextWorkout.programId, { resume: nextWorkout.workoutId }))
   }, [nextWorkout, onOpenChange, router])
 
   const handleOpenSavedWorkouts = useCallback(() => {

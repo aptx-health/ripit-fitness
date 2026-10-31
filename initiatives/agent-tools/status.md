@@ -91,3 +91,7 @@ Append-only. Newest at the bottom.
 - 2026-10-31 01:30 MDT: 032 built; full suite green. One fix: RPE must be an integer (PrescribedSet.rpe is Int). Spec updated; test-builder updating the tests, then the implementer.
 - 2026-10-31 01:55 MDT: 032 done incl. integer RPE; lead re-ran agent-tools 766/766, tsc clean. 033 review dispatched without the implementer's handback.
 - 2026-10-31 02:15 MDT: 033 review: ship (4 low notes). Spec fixed: rationale is required, as for other propose tools. Low notes 1, 2, 4 and 5 go in the PR body. Items 031-033 accepted by the lead (pre-approved). Committing and opening the PR into dev.
+- 2026-10-31 02:40 MDT: PR #1004 opened into dev (commit 4109e840). CI green: tests, migrations, build and smoke tests pass; build-and-push skipped (runs after merge). Waiting on Dustin to merge.
+- 2026-10-31 MDT: Dustin previewed on phone ("looks great") and merged #1004. Release PR #1005 (dev → main) CI green, merged; images sha-dfa2bd27adc6fdb189e8b3859befd865890dddf1 built. Infra agent opened ripit-infra #132 (tag bump only, checked); Dustin merged. Slice 5 is in prod.
+- 2026-10-31 MDT: Correction to the line above: ripit-infra #132 is NOT merged (still open; I misread Dustin's message). Nothing merged it. Slice 5 is not in prod until Dustin merges #132.
+- 2026-10-31 08:23 MDT: Dustin merged ripit-infra #132. Slice 5 is in prod. Next roadmap item: one source of truth for FAU targets.

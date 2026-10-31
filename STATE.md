@@ -6,7 +6,7 @@ None
 Running quietly: None.
 
 ## Active
-- Agent tools slice 5: workout draft proposals (+ readOnlyHint). Worktree2, branch `feature/agent-workout-draft`. Stage: PR into dev, CI. Dustin pre-approved via /goal: no sign-off forms; done = PR into dev with CI green. See [initiatives/agent-tools/status.md](initiatives/agent-tools/status.md).
+- Training + Library redesign (high priority): Worktree2, branch `feature/training-library`. Stage: TL1 PR into dev (bottom of stack); TL2 next on a stacked branch. See [initiatives/training-library/status.md](initiatives/training-library/status.md).
 
 ## Blocked
 None
@@ -15,6 +15,7 @@ None
 See [ROADMAP.md](ROADMAP.md).
 
 ## Recently completed
+- Agent tools slice 5 released to prod (ripit-infra #132, 2026-10-31): agents propose saved workouts and edits; readOnlyHint on read tools. Items 030–033 accepted.
 - Agent tools slice 4 released to prod (ripit-infra #131, 2026-10-30): agents read anchors, targets and FAU volume and propose anchor and target changes. Items 024–029 accepted. The faster test harness (#1002) shipped in the same release.
 - Agent tools slice 3 released to prod (ripit-infra #130, 2026-10-27): stall and effort numbers, raw export (MCP + CSV), break-matrix skill. Items 016–023 accepted.
 - Agent tools slice 2 released to prod (ripit-infra #129 merged 2026-10-27).

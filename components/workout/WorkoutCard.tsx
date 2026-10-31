@@ -27,6 +27,8 @@ type Props = {
   onUnskip: (workoutId: string) => void
   onLog: (workoutId: string) => void
   hideSkip?: boolean
+  /** View only: no start, continue, skip or unskip. */
+  readOnly?: boolean
 }
 
 export default function WorkoutCard({
@@ -40,16 +42,17 @@ export default function WorkoutCard({
   onUnskip,
   onLog,
   hideSkip = false,
+  readOnly = false,
 }: Props) {
   const latestCompletion = workout.completions[0]
   const isCompleted = latestCompletion?.status === 'completed'
   const isDraft = latestCompletion?.status === 'draft'
   const isSkipped = latestCompletion?.status === 'skipped'
-  const hasActions = !isCompleted && !isSkipped
+  const hasActions = !readOnly && !isCompleted && !isSkipped
 
   // Tap row to expand/collapse for actionable workouts, or unskip
   const handleCardTap = () => {
-    if (isLoading || isSkipping || isUnskipping) return
+    if (readOnly || isLoading || isSkipping || isUnskipping) return
     if (isSkipped) {
       onUnskip(workout.id)
     } else if (hasActions) {
@@ -57,7 +60,7 @@ export default function WorkoutCard({
     }
   }
 
-  const isInteractive = hasActions || isSkipped
+  const isInteractive = !readOnly && (hasActions || isSkipped)
 
   // Status bar color (left border)
   const borderColor = isCompleted
@@ -80,6 +83,8 @@ export default function WorkoutCard({
   // Primary action label for screen readers
   const actionLabel = isCompleted
     ? 'Completed workout'
+    : readOnly
+      ? isSkipped ? 'Skipped workout' : isDraft ? 'Workout in progress' : 'Workout'
     : isDraft
       ? expanded ? 'Collapse actions' : 'Expand actions to continue workout'
       : isSkipped

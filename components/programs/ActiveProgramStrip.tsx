@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useToast } from '@/components/ToastProvider'
 import { clientLogger } from '@/lib/client-logger'
+import { programDetailHref } from '@/lib/training/program-href'
 
 type Props = {
   programId: string
@@ -102,7 +103,7 @@ export default function ActiveProgramStrip({
           )}
           <div className="flex flex-wrap gap-2 pt-2">
             <Link
-              href="/training"
+              href={programDetailHref(programId)}
               className="flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground text-sm font-semibold uppercase tracking-wider doom-focus-ring"
               style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)' }}
             >

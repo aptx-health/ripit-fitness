@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
 import { pluralize } from '@/lib/format/pluralize'
+import { programDetailHref } from '@/lib/training/program-href'
 
 type ActivationConfirmModalProps = {
   programId: string
@@ -77,7 +78,7 @@ export default function ActivationConfirmModal({
         throw new Error(data.error || 'Failed to activate program')
       }
 
-      router.push('/training')
+      router.push(programDetailHref(programId))
       router.refresh()
       onClose()
     } catch (err) {

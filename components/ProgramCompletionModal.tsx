@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
 import { pluralize } from '@/lib/format/pluralize'
+import { programDetailHref } from '@/lib/training/program-href'
 
 interface CompletionStats {
   programName: string
@@ -124,7 +125,7 @@ export function ProgramCompletionModal({
         onRestart()
       } else {
         // Fallback: navigate to week 1 and refresh
-        router.push('/training?week=1')
+        router.push(programDetailHref(programId, { week: '1' }))
         setTimeout(() => router.refresh(), 100)
       }
 
