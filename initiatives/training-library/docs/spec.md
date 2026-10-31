@@ -259,7 +259,38 @@ Responses return `{id, status, kind}`, never the whole row.
 
 ### TL5b User agent tokens and scoped notifications
 
-Specified when TL5a is done.
+Any user can connect their own agent (Claude, Hermes and so on) to the MCP server, so the suggestions they review in TL5a can come from it. Admins keep their existing token manager.
+
+**Settings → Agent access** (`/settings/agent-access`)
+- Linked from the Settings page as a row like "Muscle balance", labelled "Agent access".
+- The page uses the settings-subpage pattern, with a back link "← Settings".
+- It explains in one or two lines that an agent with a token can read your training data and make suggestions you review. It shows the MCP server address to connect to: `<app origin>/api/mcp`.
+- It lists the user's tokens, newest first. Each shows its name, created date, and "Revoked" or a Revoke button.
+- **Create:**
+  - A name field (1–50 characters, trimmed) and a Create button.
+  - After creating, the token is shown **once** in a copyable box, with "Copy it now; you won't see it again." Leaving or reloading the page hides it for good.
+- **Revoke:** confirm in place ("Revoke <name>?" with Revoke and Cancel). A revoked token stops working at once.
+- **Limit:** at most 5 active (unrevoked) tokens per user. At the limit, Create is disabled and explains why.
+
+**API** (signed-in user, own tokens only, rate limited like other user routes)
+- **`GET /api/agent-tokens`:** `{tokens:[{id, name, createdAt, revokedAt}]}`. Never the hash or the token.
+- **`POST /api/agent-tokens`:** `{name}`.
+  - Returns 201 `{token:{id, name, createdAt}, secret}`. `secret` is the plain token, returned only here.
+  - A bad name is a 400.
+  - At the limit, 409 `{code:'TOKEN_LIMIT'}`.
+- **`DELETE /api/agent-tokens/[id]`:** revokes the token and returns 200 `{token}`. Revoking an already revoked token is fine. Another user's or an unknown id is a 404.
+- Reuse `lib/agent-tokens.ts` (`createAgentToken`, `revokeAgentToken`). The admin routes stay as they are.
+
+**MCP for non-admin token owners**
+- `propose_exercise_create` and `propose_exercise_update` are refused for non-admin owners. They return an error with code `forbidden` and the message "Exercise library changes are admin-only." Nothing is created and nobody is notified.
+- `tools/list` hides those two tools from non-admins.
+- Every other tool works as before.
+
+**Notifications**
+- A new proposal posts to Discord and Bark only when its owner is an admin.
+- A proposal owned by a non-admin sends no notification at all, so other users' content never reaches Dustin's channels.
+
+**Out of scope:** token scopes or expiry, last-used tracking, an in-app agent, and notifying users themselves (for example by email).
 
 ## TL6 Training folder tabs (mockup A)
 

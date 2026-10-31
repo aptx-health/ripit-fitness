@@ -213,6 +213,10 @@ function proposalUrl(id: string): string {
 /**
  * Record an agent's proposal. Validates it now (and again on approve), then
  * notifies. A notification failure never blocks the proposal.
+ *
+ * `notify` posts to Dustin's channels as given: callers must gate it by the
+ * owner's role and pass a no-op for non-admins (the MCP tools do this through
+ * notifyFor in lib/mcp/tools.ts), so other users' content never reaches them.
  */
 export async function createProposal(
   prisma: PrismaClient,

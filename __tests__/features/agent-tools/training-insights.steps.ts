@@ -143,7 +143,7 @@ async function agentTokens() {
 }
 
 function ctx() {
-  return { userId: s.userId, tokenId: s.tokenId, notify: async () => {} }
+  return { userId: s.userId, tokenId: s.tokenId, role: 'admin', notify: async () => {} }
 }
 
 async function callAgentTool(name: string, args: Record<string, unknown> = {}, prisma?: PrismaClient): Promise<Outcome> {
@@ -767,7 +767,7 @@ describe('training insight tool arguments', () => {
 
   it('lists both tools, and neither writes anything', async () => {
     const { listTools } = await tools()
-    const raw = (await listTools()) as unknown
+    const raw = (await listTools('admin')) as unknown
     const list = Array.isArray(raw) ? raw : ((raw as { tools?: unknown[] })?.tools ?? [])
     const names = (list as Array<{ name: string }>).map((t) => t.name)
     expect(names).toContain('get_stall_signals')

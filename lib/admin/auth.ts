@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { type AuthUser, getCurrentUser, type UserRole } from '@/lib/auth/server'
+import { isAdminRole, isEditorRole } from '@/lib/auth/roles'
+import { type AuthUser, getCurrentUser } from '@/lib/auth/server'
 import { logger } from '@/lib/logger'
 import { adminLimiter, checkRateLimit } from '@/lib/rate-limit'
 
@@ -8,8 +9,7 @@ export interface RequireOptions {
   rateLimit?: boolean
 }
 
-const ADMIN_ROLES: UserRole[] = ['admin']
-const EDITOR_ROLES: UserRole[] = ['admin', 'editor']
+export { isAdminRole, isEditorRole } from '@/lib/auth/roles'
 
 export interface AdminAuthResult {
   user: AuthUser
@@ -35,7 +35,7 @@ export async function requireAdmin(opts: RequireOptions = {}): Promise<AdminAuth
     return { response: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
   }
 
-  if (!ADMIN_ROLES.includes(user.role)) {
+  if (!isAdminRole(user.role)) {
     logger.warn({ userId: user.id, role: user.role }, 'Admin auth: forbidden (admin required)')
     return { response: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) }
   }
@@ -60,7 +60,7 @@ export async function requireEditor(opts: RequireOptions = {}): Promise<AdminAut
     return { response: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
   }
 
-  if (!EDITOR_ROLES.includes(user.role)) {
+  if (!isEditorRole(user.role)) {
     logger.warn({ userId: user.id, role: user.role }, 'Editor auth: forbidden (editor required)')
     return { response: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) }
   }
@@ -73,16 +73,3 @@ export async function requireEditor(opts: RequireOptions = {}): Promise<AdminAut
   return { user }
 }
 
-/**
- * Check if a role has admin-level access (for use in server components).
- */
-export function isAdminRole(role: UserRole): boolean {
-  return ADMIN_ROLES.includes(role)
-}
-
-/**
- * Check if a role has editor-level access (for use in server components).
- */
-export function isEditorRole(role: UserRole): boolean {
-  return EDITOR_ROLES.includes(role)
-}
