@@ -1,12 +1,16 @@
 # Testing
 
-Vitest with Testcontainers. Each run starts its own Postgres and Redis, so Docker must be running. Doppler is not needed. Run the suite with `npm run test:run`, or one file with `npm run test:run -- <pattern>`. `npm test` starts watch mode.
+Vitest with Testcontainers. Each run starts one Postgres container (`lib/test/global-setup.ts`) and pushes the schema into a template database; each test file gets its own database cloned from it (`lib/test/database.ts`). Docker must be running. Doppler is not needed. Run the suite with `npm run test:run`, or one file with `npm run test:run -- <pattern>`. `npm test` starts watch mode.
 
 On Dustin's Mac, Docker runs under Colima. Export these before running tests, or Testcontainers reports "no working container runtime strategy":
 
 ```bash
-export DOCKER_HOST=unix://$HOME/.colima/default/docker.sock TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock TESTCONTAINERS_RYUK_DISABLED=true
+export DOCKER_HOST=unix://$HOME/.colima/default/docker.sock TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
 ```
+
+Leave Ryuk on. It works under Colima with the socket override and removes a run's containers when the run is killed. With `TESTCONTAINERS_RYUK_DISABLED=true`, killed runs leak Postgres containers.
+
+`testDb.reset()` deletes every row in every table in one statement (about 6 ms), including tables added later, so test files don't need their own `TRUNCATE` lists.
 
 vitest-cucumber runs each step as its own test. A scenario counts as passing only when all of its steps pass. While a scenario is red, a negative `Then` step can pass on its own.
 

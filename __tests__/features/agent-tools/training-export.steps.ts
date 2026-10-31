@@ -299,21 +299,11 @@ async function seedSession(o: SessionSpec) {
 /** The weights of rows for a def, in the order returned. */
 const weightsOf = (rows: unknown[][]) => asObjects(rows).map((r) => r.weight)
 
-async function wipeTables(prisma: PrismaClient) {
-  for (const t of ['AgentToken', 'LoggedSet', 'Exercise', 'WorkoutCompletion']) {
-    try {
-      await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${t}" CASCADE`)
-    } catch {
-      /* table missing */
-    }
-  }
-}
 
 async function freshState(): Promise<State> {
   const db = await getTestDatabase()
   await db.reset()
   const prisma = db.getPrismaClient()
-  await wipeTables(prisma)
   const user = await createTestUser()
   const other = await createTestUser()
   const { createAgentToken } = await agentTokens()
@@ -338,7 +328,6 @@ describeFeature(feature, ({ Background, Rule }) => {
       const db = await getTestDatabase()
       await db.reset()
       const prisma = db.getPrismaClient()
-      await wipeTables(prisma)
       const user = await createTestUser()
       const other = await createTestUser()
       s = { prisma, userId: user.id, otherUserId: other.id, tokenId: '', token: '' } as State
