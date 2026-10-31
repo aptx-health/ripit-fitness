@@ -43,3 +43,20 @@
 - 2026-10-31 MDT: Dustin's TL5a preview notes: everything works, but Training reads as a big list with tiny headers and unclear hierarchy; the suggestion card doesn't show it's a suggestion. He asked for 3 rough mockups (tab-like section headers, envelope tab or Library-tab style). 050 dispatched to implementer. TL5a PR is held until the direction is picked.
 - 2026-10-31 MDT: 050 mockups published to Handoff Hub; waiting on Dustin's pick.
 - 2026-10-31 MDT: Dustin picked mockup A (folder tabs). TL5a committed as its own stacked PR; the restyle becomes TL6, stacked on TL5a. TL5b follows.
+- 2026-10-31 MDT: TL5a PR #1010 (stacked on #1009). TL6 folder tabs on feature/training-folder-tabs: spec written; 051 test updates (test-builder) and 052 build (implementer, including the preview seed cleanup) dispatched in parallel, since this is mostly visual.
+- 2026-10-31 MDT: 052 build back (2269 passed; side-by-side matches mockup A). 053 review dispatched.
+- 2026-10-31 MDT: 051 accepted (45 tests; 6 locked files updated to the new text). The .feature files keep the old section names in their step text; the steps still match.
+- 2026-10-31 MDT: 053 review: ship with notes. Fixes sent (the shadow fallback that broke 12 themes, aria-labels, clamp-2, a short targets label). App-wide green contrast added to the roadmap.
+- 2026-10-31 MDT: 052 retry in. 4 locked assertions pin the old row label and the View link name; updates sent to the test-builder.
+- 2026-10-31 MDT: TL6 fixes and test updates in; lead re-run green. Preview up; suggestions re-seeded for Dustin.
+- 2026-10-31 MDT: TL6 preview seed: proposals cmvwwh9b70002vrxnbf4pc41n and cmvwwha5z0004vrxnld3vtn2w, plus token cmvwwh9b10000vrxnmkz5jm1x. Clean up after the preview.
+- 2026-10-31 MDT: Dustin on the TL6 preview: "looks great". Changes: See all becomes a dimmed-green paper tab next to the section tab (also on Pinned, for consistency); drop 'Your coach suggests' and the 'Waiting on you' stamp. Sent to the implementer and test-builder.
+- 2026-10-31 MDT: Dustin wants Training consolidated into 3 tabbed blocks (Coach; Workouts: Pinned Workouts | Recent; Program: Up Next | Active Program, with a no-program placeholder) and a mockup on the Hub before confirming. 054 queued for the implementer after the TL6 tweak.
+- 2026-10-31 MDT: 054 mockup published to the Hub; waiting on Dustin's confirmation and 4 questions.
+- 2026-10-31 MDT: Dustin confirmed the three-block layout (054). Tweaks: 'All suggestions' sits beside the coach tab; no See all on Workouts. Folded into TL6 (same PR). Spec updated; tests and build dispatched in parallel.
+- 2026-10-31 MDT: three-block build in, and the preview is restarted. 6 locked assertions conflict (both panels are in the DOM, plus a regex), and Node 26's localStorage breaks local test runs. Both sent to the test-builder.
+- 2026-10-31 MDT: 051 follow-up 3 in (tests rewritten for the blocks; vitest.config.ts runs workers with --no-experimental-webstorage on Node 22.4+). Lead re-run green. 055 review dispatched.
+- 2026-10-31 MDT: 055 review: ship with notes. Invisible keyboard focus on the clipped tabs goes to the implementer, with 2 nits.
+- 2026-10-31 MDT: Dustin: the center Workout button is enough; no start button for new users on Training.
+- 2026-10-31 MDT: 055 fixes in; lead re-run green. Waiting on Dustin's final look at TL6 before the PR.
+- 2026-10-31 MDT: Dustin OK'd TL6 ('Perfect!'). Committed; PR stacked on TL5a. Next: TL5b.

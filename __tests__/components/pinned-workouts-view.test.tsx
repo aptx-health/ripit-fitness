@@ -7,8 +7,8 @@
  *   components/training/TrainingHome.tsx   home.pinned:
  *     [{ id, name, exerciseCount, pinnedAt: Date }] (at most 5, newest first,
  *     as the loader gives them). When non-empty, a section headed "Pinned
- *     Workouts" sits between Up Next and Recent Workouts. A row: the name,
- *     "N exercises" ("1 exercise"), a "Start" button. A "See all" link to
+ *     Workouts" is the first tab of the Workouts block (TL6 final layout). A row: the name,
+ *     "N exercises" ("1 exercise"), a "Start" button. There is no "See all" link; it used to go to
  *     /library?type=workouts is always in the section. Start POSTs
  *     /api/workouts/saved/<id>/start; on { completionId } it goes to
  *     /training/adhoc/<completionId>; on 409 it shows the response's message
@@ -111,18 +111,22 @@ afterEach(() => {
 
 // ---------------------------------------------------------------------------
 describe('training home view: Pinned Workouts', () => {
-  it('sits between Up Next and Recent Workouts, before Current Program', async () => {
+  it('is the first tab of the Workouts block, which comes before the Program block', async () => {
     await renderHome(home({ upNext: UP_NEXT, recent: RECENT, currentProgram: CURRENT }))
-    const order = ['up next', 'pinned workouts', 'recent workouts', 'current program'].map((t) => screen.getByText(new RegExp(`^${t}$`, 'i')))
-    for (let i = 0; i < order.length - 1; i++) {
-      expect(order[i].compareDocumentPosition(order[i + 1]) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    }
+    const workouts = screen.getByRole('region', { name: 'Workouts' })
+    const tabs = within(workouts).getAllByRole('tab').map((t) => (t.textContent ?? '').trim())
+    expect(tabs[0]).toMatch(/^pinned workouts/i)
+    expect(tabs[1]).toMatch(/^recent/i)
+    const program = screen.getByRole('region', { name: 'Program' })
+    expect(workouts.compareDocumentPosition(program) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
-  it('is hidden when nothing is pinned, with no See all', async () => {
-    await renderHome(home({ pinned: [], upNext: UP_NEXT }))
-    expect(screen.queryByText(/pinned workouts/i)).toBeNull()
-    expect(screen.queryByRole('link', { name: /see all/i })).toBeNull()
+  it('with nothing pinned the Pinned Workouts tab is still there, empty, and Recent is open', async () => {
+    await renderHome(home({ pinned: [], recent: RECENT, upNext: UP_NEXT }))
+    const workouts = screen.getByRole('region', { name: 'Workouts' })
+    expect(within(workouts).getByRole('tab', { name: /^recent/i }).getAttribute('aria-selected')).toBe('true')
+    fireEvent.click(within(workouts).getByRole('tab', { name: /^pinned workouts/i }))
+    expect(within(workouts).queryAllByRole('button', { name: /^start /i })).toEqual([])
   })
 
   it('shows each pin in the order given, with its exercise count and a Start button', async () => {
@@ -140,21 +144,23 @@ describe('training home view: Pinned Workouts', () => {
     expect(within(rowOf('Mobility')).getByText('1 exercise')).toBeTruthy()
   })
 
-  it('always has See all, to My Workouts, even for a single pin', async () => {
+  it('has no See all link (the Workouts block has none)', async () => {
     await renderHome(home({ pinned: [PINS[0]] }))
-    const url = new URL(screen.getByRole('link', { name: /see all/i }).getAttribute('href') as string, 'http://x')
-    expect([url.pathname, url.searchParams.get('type')]).toEqual(['/library', 'workouts'])
+    expect(screen.queryAllByRole('link', { name: /see all/i })).toEqual([])
   })
 
-  it('a pinned workout alone is enough: no empty-home start screen', async () => {
+  it('a pinned workout alone shows the Workouts block and the Program placeholder, no start screen', async () => {
     await renderHome(home())
-    expect(screen.queryByText(/find a program/i)).toBeNull()
+    expect(screen.getByRole('region', { name: 'Workouts' })).toBeTruthy()
+    expect(within(screen.getByRole('region', { name: 'Program' })).getAllByText(/no active program/i).length).toBeGreaterThan(0)
     expect(screen.queryByText(/nothing planned yet/i)).toBeNull()
+    expect(screen.queryByText(/start a workout/i)).toBeNull()
   })
 
-  it('with nothing at all the empty home still shows', async () => {
+  it('with nothing at all only the Program placeholder shows', async () => {
     await renderHome(home({ pinned: [] }))
-    expect(screen.getByText(/find a program/i)).toBeTruthy()
+    expect(screen.getAllByRole('region')).toHaveLength(1)
+    expect(screen.getByRole('link', { name: /find a program/i })).toBeTruthy()
   })
 
   it('Start begins that workout and opens the logger', async () => {
@@ -180,6 +186,7 @@ describe('training home view: Pinned Workouts', () => {
     const fromStart = (await screen.findByText(/finish your current workout/i)).textContent
     cleanup()
     await renderHome(home({ recent: RECENT }))
+    fireEvent.click(screen.getByRole('tab', { name: /^recent/i }))
     fireEvent.click(screen.getByRole('button', { name: /repeat leg day/i }))
     expect((await screen.findByText(/finish your current workout/i)).textContent).toBe(fromStart)
   })

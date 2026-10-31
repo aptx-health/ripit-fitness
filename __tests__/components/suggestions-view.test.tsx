@@ -7,12 +7,13 @@
  *   components/training/TrainingHome.tsx   home.suggestions = { count, items }
  *     (items: newest first, at most 3, { id, kind, title, summary, rationale,
  *     createdAt }). Users see `title`, never `summary`.
- *     When count > 0 a section headed "Coach Suggestions · <count>" is the first
+ *     When count > 0 a block (region) named "From your coach" (TL6; the count is a
+ *     separate chip labelled "<count> suggestions") is the first
  *     section, above Up Next. The newest item is prominent: its kind label
  *     (Workout, Workout change, Program, Anchor lifts, Training targets), its
  *     summary, its rationale and a "Review" link to /suggestions/<id>. The other
  *     items (up to 2) are listed by title only, each a link to its review
- *     screen. A "View Suggestions" link goes to /suggestions. Suggestions alone
+ *     screen ("Review suggestion"). An "All suggestions" link tab beside it goes to /suggestions. Suggestions alone
  *     suppress the empty-home screen.
  *   components/suggestions/SuggestionsList.tsx   props { suggestions: items }
  *     every suggestion's title (not its summary) is a link to /suggestions/<id>, newest first;
@@ -88,32 +89,35 @@ beforeEach(() => {
 
 // ---------------------------------------------------------------------------
 describe('training home view: Coach Suggestions', () => {
-  it('is the first section, above Up Next', async () => {
+  it('is the first block, above the Program block', async () => {
     await renderHome(home([WORKOUT], { upNext: UP_NEXT, currentProgram: { programId: 'p1', programName: 'Machine Starter', weekNumber: 2, totalWeeks: 5, workoutsDone: 3, workoutsTotal: 10 } }))
-    const first = screen.getByText(/^coach suggestions/i)
-    const upNext = screen.getByText(/^up next$/i)
-    expect(first.compareDocumentPosition(upNext) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    expect(screen.getAllByRole('heading', { level: 2 })[0].textContent).toBe('Coach Suggestions · 1')
+    const first = screen.getByRole('region', { name: 'From your coach' })
+    const program = screen.getByRole('region', { name: 'Program' })
+    expect(first.compareDocumentPosition(program) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(screen.getAllByRole('region')[0]).toBe(first)
+    expect(screen.getByLabelText('1 suggestion').textContent).toBe('1')
   })
 
-  it('the heading counts every pending suggestion, not just the ones listed', async () => {
+  it('the count chip counts every pending suggestion, not just the ones listed', async () => {
     await renderHome(home([WORKOUT, PROGRAM, ANCHORS], {}, 5))
-    expect(screen.getAllByRole('heading', { level: 2 })[0].textContent).toBe('Coach Suggestions · 5')
+    expect(screen.getAllByRole('region')[0]).toBe(screen.getByRole('region', { name: 'From your coach' }))
+    expect(screen.getByLabelText('5 suggestions').textContent).toBe('5')
   })
 
-  it('is hidden with no suggestions, including its View Suggestions link', async () => {
+  it('is hidden with no suggestions, including its All suggestions link', async () => {
     await renderHome(home([], { upNext: UP_NEXT }))
-    expect(screen.queryByText(/coach suggestions/i)).toBeNull()
-    expect(screen.queryByText(/view suggestions/i)).toBeNull()
+    expect(screen.queryByRole('region', { name: 'From your coach' })).toBeNull()
+    expect(screen.queryByRole('link', { name: /all suggestions/i })).toBeNull()
   })
 
-  it('shows the newest prominently: kind label, summary, rationale and Review', async () => {
+  it('shows the newest prominently: kind label, title, rationale and Review suggestion', async () => {
     await renderHome(home([WORKOUT, PROGRAM]))
     expect(screen.getByText('Workout')).toBeTruthy()
     expect(screen.getByText(WORKOUT.title)).toBeTruthy()
     expect(screen.queryByText(WORKOUT.summary)).toBeNull()
     expect(screen.getByText(WORKOUT.rationale)).toBeTruthy()
-    expect(screen.getByText(/^review$/i).closest('a')?.getAttribute('href')).toBe('/suggestions/g1')
+    expect(screen.getByRole('link', { name: /^review suggestion$/i }).getAttribute('href')).toBe('/suggestions/g1')
+    expect(screen.queryByRole('link', { name: /^review$/i })).toBeNull()
   })
 
   it('lists the others by summary only, as links, below the newest', async () => {
@@ -125,18 +129,20 @@ describe('training home view: Coach Suggestions', () => {
     }
     const newest = screen.getByText(WORKOUT.title)
     expect(newest.compareDocumentPosition(screen.getByText(PROGRAM.title)) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    expect(screen.getAllByText(/^review$/i)).toHaveLength(1)
+    expect(screen.getAllByRole('link', { name: /^review suggestion$/i })).toHaveLength(1)
   })
 
   it('shows a single suggestion without a list below it', async () => {
     await renderHome(home([WORKOUT]))
-    expect(screen.getAllByRole('link', { name: /suggestions\/|review/i }).length).toBeGreaterThan(0)
+    expect(screen.getByRole('link', { name: /^review suggestion$/i })).toBeTruthy()
     expect(screen.queryByText(PROGRAM.title)).toBeNull()
   })
 
-  it('has View Suggestions, to the list', async () => {
+  it('has an All suggestions link beside the tab, to the list', async () => {
     await renderHome(home([WORKOUT, PROGRAM]))
-    expect(screen.getByText(/view suggestions/i).closest('a')?.getAttribute('href')).toBe('/suggestions')
+    expect(screen.getByRole('link', { name: 'All suggestions' }).getAttribute('href')).toBe('/suggestions')
+    expect(screen.queryAllByRole('link', { name: /see all/i })).toEqual([])
+    expect(screen.queryByText(/view suggestions/i)).toBeNull()
   })
 
   it.each([
@@ -150,15 +156,17 @@ describe('training home view: Coach Suggestions', () => {
     expect(screen.getByText(label)).toBeTruthy()
   })
 
-  it('suggestions alone are enough: no empty-home start screen', async () => {
+  it('suggestions alone show the coach block and the Program placeholder, with no start screen', async () => {
     await renderHome(home([WORKOUT]))
-    expect(screen.queryByText(/find a program/i)).toBeNull()
+    expect(screen.getByRole('region', { name: 'From your coach' })).toBeTruthy()
     expect(screen.queryByText(/nothing planned yet/i)).toBeNull()
+    expect(screen.queryByText(/start a workout/i)).toBeNull()
   })
 
-  it('the empty home still shows with nothing at all', async () => {
+  it('with nothing at all only the Program placeholder shows', async () => {
     await renderHome(home([]))
-    expect(screen.getByText(/find a program/i)).toBeTruthy()
+    expect(screen.getAllByRole('region')).toHaveLength(1)
+    expect(screen.getByRole('link', { name: /find a program/i })).toBeTruthy()
   })
 
   it('never says "proposal"', async () => {

@@ -1,86 +1,164 @@
 'use client'
 
-import { ChevronRight, Play, RotateCcw } from 'lucide-react'
+import { BookOpen, ChevronRight, Clock, Megaphone, Pin, Play, RotateCcw } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
 import { useMounted } from '@/hooks/useMounted'
-import { startFreestyleWorkout } from '@/lib/api/adhoc-workout'
-import { FetchError } from '@/lib/api/fetch'
 import { clientLogger } from '@/lib/client-logger'
 import { formatDuration } from '@/lib/format/duration'
 import { pluralize } from '@/lib/format/pluralize'
 import { libraryHref } from '@/lib/library/links'
-import { suggestionKindLabel } from '@/lib/suggestions/kinds'
+import { suggestionKindLabel, suggestionKindShortLabel } from '@/lib/suggestions/kinds'
 import type { SuggestionItem } from '@/lib/suggestions/types'
 import type { CurrentProgram, PinnedWorkout, RecentSession, TrainingHomeData, UpNext } from '@/lib/training/home'
 import { programDetailHref } from '@/lib/training/program-href'
+import SectionTab, { SECTION_BOX } from './SectionTab'
+import TabbedBlock from './TabbedBlock'
 
 /**
- * The Training home: "what should I do next?" Sections appear only when they
- * have something to show, in a fixed order: Coach Suggestions, Up Next, Pinned
- * Workouts, Recent Workouts, Current Program. Pinned Start and Recent Repeat share one session starter, so only one start
- * request runs at a time on the whole page.
+ * The Training home: "what should I do next?", as three folder blocks in a
+ * fixed order:
+ *   1. From your coach (only with pending suggestions)
+ *   2. Workouts: Pinned Workouts | Recent (hidden with neither)
+ *   3. Program: Up Next | Active Program (always; a placeholder without one)
+ * The two-tab blocks switch client-side and remember the choice per device
+ * (TabbedBlock). Pinned Start and Recent Repeat share one session starter, so
+ * only one start request runs at a time on the whole page.
  */
 export default function TrainingHome({ home }: { home: TrainingHomeData }) {
   const { suggestions, upNext, pinned, recent, currentProgram } = home
-  const isEmpty =
-    suggestions.count === 0 && !upNext && pinned.length === 0 && recent.length === 0 && !currentProgram
   const starter = useSessionStart()
 
   return (
     <div className="space-y-6">
       {suggestions.count > 0 && <SuggestionsSection count={suggestions.count} items={suggestions.items} />}
-      {upNext && <UpNextSection upNext={upNext} />}
-      {pinned.length > 0 && <PinnedSection pinned={pinned} starter={starter} />}
-      {recent.length > 0 && <RecentSection recent={recent} starter={starter} />}
-      {currentProgram && <CurrentProgramSection program={currentProgram} />}
-      {isEmpty && <EmptyHome />}
+      {(pinned.length > 0 || recent.length > 0) && (
+        <TabbedBlock
+          name="Workouts"
+          idPrefix="workouts"
+          storageKey="training.workoutsTab"
+          tone="mine"
+          defaultTab={pinned.length > 0 ? 'pinned' : 'recent'}
+          tabs={[
+            {
+              id: 'pinned',
+              label: 'Pinned Workouts',
+              icon: <Pin size={16} aria-hidden="true" />,
+              count: pinned.length,
+              countLabel: pluralize(pinned.length, 'pinned workout'),
+              hasContent: pinned.length > 0,
+              panel: <PinnedPanel pinned={pinned} starter={starter} />,
+            },
+            {
+              id: 'recent',
+              label: 'Recent',
+              icon: <Clock size={16} aria-hidden="true" />,
+              hasContent: recent.length > 0,
+              panel: <RecentPanel recent={recent} starter={starter} />,
+            },
+          ]}
+        />
+      )}
+      <TabbedBlock
+        name="Program"
+        idPrefix="program"
+        storageKey="training.programTab"
+        tone="next"
+        defaultTab={upNext ? 'up-next' : 'active'}
+        tabs={[
+          {
+            id: 'up-next',
+            label: 'Up Next',
+            icon: <Play size={16} aria-hidden="true" />,
+            hasContent: Boolean(currentProgram && upNext),
+            panel: !currentProgram ? <NoProgram /> : upNext ? <UpNextPanel upNext={upNext} /> : <AllDone />,
+          },
+          {
+            id: 'active',
+            label: 'Active Program',
+            icon: <BookOpen size={16} aria-hidden="true" />,
+            hasContent: Boolean(currentProgram),
+            panel: currentProgram ? <ActiveProgramPanel program={currentProgram} upNext={upNext} /> : <NoProgram />,
+          },
+        ]}
+      />
     </div>
   )
 }
 
-function SectionHeading({ children }: { children: React.ReactNode }) {
-  return (
-    <h2 className="mb-2 text-sm font-bold uppercase tracking-wider text-muted-foreground doom-label">{children}</h2>
-  )
+/**
+ * The day a suggestion was made, relative to the viewer's today ("today",
+ * "yesterday", "Oct 28"). Client-only, like SessionDate: the server's time zone
+ * would shift it.
+ */
+function SuggestedDay({ date }: { date: Date }) {
+  const mounted = useMounted()
+  if (!mounted) return null
+  const d = new Date(date)
+  const startOf = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime()
+  const days = Math.round((startOf(new Date()) - startOf(d)) / 86_400_000)
+  if (days === 0) return <>today</>
+  if (days === 1) return <>yesterday</>
+  return <>{d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</>
 }
 
-/** The newest suggestion in full, the next ones by summary, and a way to the list. */
+/** The newest suggestion in full, the next ones as rows, under the coach's tab. */
 function SuggestionsSection({ count, items }: { count: number; items: SuggestionItem[] }) {
-  const [newest, ...others] = items
+  const [newest, ...rest] = items
+  const others = rest.slice(0, 2)
   return (
     <section aria-labelledby="suggestions-heading">
-      <div className="flex items-baseline justify-between">
-        <SectionHeading>
-          <span id="suggestions-heading">Coach Suggestions · {count}</span>
-        </SectionHeading>
-        <Link
-          href="/suggestions"
-          className="text-sm font-semibold uppercase tracking-wider text-primary hover:text-primary-hover doom-link"
-        >
-          View Suggestions
-        </Link>
-      </div>
-      <div className="bg-card border border-border border-l-4 border-l-accent doom-noise">
+      <SectionTab
+        variant="coach"
+        id="suggestions-heading"
+        icon={<Megaphone size={16} />}
+        label="From your coach"
+        count={count}
+        countLabel={pluralize(count, 'suggestion')}
+        action={{ href: '/suggestions', label: 'All suggestions' }}
+      />
+      <div className={SECTION_BOX.coach}>
         {newest && (
-          <div className="p-4 space-y-2">
-            <p className="text-xs font-bold uppercase tracking-wider text-accent">{suggestionKindLabel(newest.kind)}</p>
-            <h3 className="font-bold text-foreground break-words">{newest.title}</h3>
-            <p className="text-sm text-muted-foreground line-clamp-2 break-words">{newest.rationale}</p>
-            <Link href={`/suggestions/${newest.id}`} className={`${primaryButton} w-full`}>
-              Review
+          <div className="p-4">
+            {/* The tab already says "From your coach": the card starts with the kind. */}
+            <span className="inline-block bg-foreground px-1.5 py-0.5 text-xs font-bold uppercase tracking-wider text-card">
+              {suggestionKindLabel(newest.kind)}
+            </span>
+            <h3 className="mt-1.5 text-xl font-bold leading-tight text-foreground break-words">{newest.title}</h3>
+            <p className="text-sm text-muted-foreground">
+              {newest.exerciseCount != null && `${pluralize(newest.exerciseCount, 'exercise')} · `}
+              suggested <SuggestedDay date={newest.createdAt} />
+            </p>
+            {/* Quote marks in CSS, so the text is the rationale exactly. */}
+            <blockquote className="my-3 border-l-[3px] border-accent pl-2.5 text-sm text-muted-foreground line-clamp-2 break-words before:content-['“'] after:content-['”']">
+              {newest.rationale}
+            </blockquote>
+            <Link
+              href={`/suggestions/${newest.id}`}
+              className="flex w-full items-center justify-center px-4 py-3 bg-accent text-accent-foreground hover:bg-accent-hover doom-focus-ring font-bold uppercase tracking-wider text-sm"
+              // Not every theme defines --accent-active; fall back to the hover shade.
+              style={{
+                boxShadow:
+                  '0 4px 0 var(--accent-active, var(--accent-hover)), 0 6px 8px rgba(0,0,0,.15), inset 0 1px 0 rgba(255,255,255,.3)',
+              }}
+            >
+              Review suggestion
             </Link>
           </div>
         )}
         {others.length > 0 && (
-          <ul className="border-t border-border divide-y divide-border">
+          <ul className="border-t border-dashed border-accent">
             {others.map((item) => (
-              <li key={item.id}>
+              <li key={item.id} className="border-b border-dashed border-accent/40 last:border-b-0">
                 <Link
                   href={`/suggestions/${item.id}`}
-                  className="flex items-center gap-2 px-4 py-3 text-sm text-foreground hover:bg-muted/50 doom-focus-ring"
+                  className="flex items-center gap-2.5 px-4 py-3 text-foreground hover:bg-accent/10 doom-focus-ring"
                 >
+                  <span aria-hidden="true" className="h-2 w-2 shrink-0 rounded-full bg-accent" />
+                  <span className="w-16 shrink-0 text-[10px] font-bold uppercase tracking-wider text-accent-text">
+                    {suggestionKindShortLabel(item.kind)}
+                  </span>
                   <span className="flex-1 min-w-0 truncate">{item.title}</span>
                   <ChevronRight size={16} className="shrink-0 text-muted-foreground" aria-hidden="true" />
                 </Link>
@@ -96,13 +174,9 @@ function SuggestionsSection({ count, items }: { count: number; items: Suggestion
 const primaryButton =
   'inline-flex items-center justify-center gap-2 px-4 py-3 bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d doom-focus-ring font-bold uppercase tracking-wider text-sm'
 
-function UpNextSection({ upNext }: { upNext: UpNext }) {
+function UpNextPanel({ upNext }: { upNext: UpNext }) {
   return (
-    <section aria-labelledby="up-next-heading">
-      <SectionHeading>
-        <span id="up-next-heading">Up Next</span>
-      </SectionHeading>
-      <div className="bg-card border border-border border-l-4 border-l-primary doom-noise p-4 space-y-3">
+    <div className="doom-noise p-4 space-y-3">
         <div>
           <p className="text-sm font-semibold uppercase tracking-wider text-primary">{upNext.programName}</p>
           <p className="text-sm text-muted-foreground">
@@ -115,9 +189,33 @@ function UpNextSection({ upNext }: { upNext: UpNext }) {
           <Play size={16} />
           {upNext.hasDraft ? 'Continue' : 'Start Workout'}
         </Link>
-      </div>
-    </section>
+    </div>
   )
+}
+
+/** A program with every workout done: Up Next has nothing to start. */
+function AllDone() {
+  return <p className="px-4 py-5 text-sm text-muted-foreground">Every workout in this program is done.</p>
+}
+
+/** Without an active program both Program tabs show this. */
+function NoProgram() {
+  return (
+    <div className="px-4 py-5 text-center space-y-3">
+      <h3 className="text-lg font-bold uppercase tracking-wider text-foreground">No active program</h3>
+      <p className="text-sm text-muted-foreground">Pick a program to follow and your next workout shows up here.</p>
+      <Link
+        href={libraryHref({ type: 'programs', tab: 'browse' })}
+        className="flex items-center justify-center w-full py-3 border-2 border-border bg-transparent text-muted-foreground transition-all text-sm font-semibold uppercase tracking-wider doom-focus-ring hover:bg-muted/40 hover:border-primary hover:text-foreground"
+      >
+        Find a program
+      </Link>
+    </div>
+  )
+}
+
+function EmptyLine({ children }: { children: React.ReactNode }) {
+  return <p className="px-4 py-5 text-sm text-muted-foreground">{children}</p>
 }
 
 /**
@@ -184,28 +282,17 @@ function RowFailure({ message }: { message: string }) {
   )
 }
 
-function PinnedSection({ pinned, starter }: { pinned: PinnedWorkout[]; starter: SessionStarter }) {
+function PinnedPanel({ pinned, starter }: { pinned: PinnedWorkout[]; starter: SessionStarter }) {
   const { start, startingId, failure } = starter
+  if (pinned.length === 0) return <EmptyLine>No pinned workouts yet. Pin one from My Workouts.</EmptyLine>
 
   return (
-    <section aria-labelledby="pinned-heading">
-      <div className="flex items-baseline justify-between">
-        <SectionHeading>
-          <span id="pinned-heading">Pinned Workouts</span>
-        </SectionHeading>
-        <Link
-          href={libraryHref({ type: 'workouts' })}
-          className="text-sm font-semibold uppercase tracking-wider text-primary hover:text-primary-hover doom-link"
-        >
-          See all
-        </Link>
-      </div>
-      <ul className="bg-card border border-border doom-corners divide-y divide-border">
+    <ul className="divide-y divide-border">
         {pinned.map((workout) => (
           <li key={workout.id} className="px-4 py-3">
             <div className="flex items-center gap-3">
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-foreground doom-heading truncate">{workout.name}</p>
+                <p className="font-bold text-foreground truncate">{workout.name}</p>
                 <p className="text-sm text-muted-foreground">{pluralize(workout.exerciseCount, 'exercise')}</p>
               </div>
               <button
@@ -222,26 +309,22 @@ function PinnedSection({ pinned, starter }: { pinned: PinnedWorkout[]; starter: 
             {failure?.id === workout.id && <RowFailure message={failure.message} />}
           </li>
         ))}
-      </ul>
-    </section>
+    </ul>
   )
 }
 
-function RecentSection({ recent, starter }: { recent: RecentSession[]; starter: SessionStarter }) {
+function RecentPanel({ recent, starter }: { recent: RecentSession[]; starter: SessionStarter }) {
   const { start, startingId: repeatingId, failure } = starter
   const repeat = (id: string) => start(id, `/api/workouts/completions/${id}/repeat`, 'repeat')
+  if (recent.length === 0) return <EmptyLine>No finished workouts yet.</EmptyLine>
 
   return (
-    <section aria-labelledby="recent-heading">
-      <SectionHeading>
-        <span id="recent-heading">Recent Workouts</span>
-      </SectionHeading>
-      <ul className="bg-card border border-border doom-corners divide-y divide-border">
+    <ul className="divide-y divide-border">
         {recent.map((session) => (
           <li key={session.id} className="px-4 py-3">
             <div className="flex items-center gap-3">
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-foreground doom-heading truncate">{session.name}</p>
+                <p className="font-bold text-foreground truncate">{session.name}</p>
                 <p className="flex gap-2 text-sm text-muted-foreground">
                   <SessionDate date={session.completedAt} />
                   {session.durationSeconds != null && (
@@ -268,93 +351,43 @@ function RecentSection({ recent, starter }: { recent: RecentSession[]; starter: 
             {failure?.id === session.id && <RowFailure message={failure.message} />}
           </li>
         ))}
-      </ul>
-    </section>
+    </ul>
   )
 }
 
-function CurrentProgramSection({ program }: { program: CurrentProgram }) {
+function ActiveProgramPanel({ program, upNext }: { program: CurrentProgram; upNext: UpNext | null }) {
   const percent = program.workoutsTotal > 0 ? Math.round((program.workoutsDone / program.workoutsTotal) * 100) : 0
   return (
-    <section aria-labelledby="current-program-heading">
-      <SectionHeading>
-        <span id="current-program-heading">Current Program</span>
-      </SectionHeading>
-      <div className="bg-card border border-border doom-noise p-4 space-y-3">
-        <div>
-          <h3 className="text-lg font-bold text-foreground doom-heading">{program.programName}</h3>
+    <div className="px-4 py-3.5">
+      <div className="flex items-center gap-3">
+        <div className="flex-1 min-w-0">
+          <h3 className="font-bold text-foreground truncate">{program.programName}</h3>
           <p className="text-sm text-muted-foreground">
-            Week {program.weekNumber} of {program.totalWeeks}
-          </p>
-        </div>
-        <div>
-          <div
-            role="progressbar"
-            aria-label="Program progress"
-            aria-valuemin={0}
-            aria-valuemax={program.workoutsTotal}
-            aria-valuenow={program.workoutsDone}
-            className="h-2 w-full bg-muted overflow-hidden"
-          >
-            <div className="h-full bg-primary" style={{ width: `${percent}%` }} />
-          </div>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {program.workoutsDone} of {program.workoutsTotal} workouts done
+            Week {program.weekNumber} of {program.totalWeeks} · {program.workoutsDone} of {program.workoutsTotal}{' '}
+            workouts done
           </p>
         </div>
         <Link
           href={programDetailHref(program.programId)}
-          className="inline-block text-sm font-semibold uppercase tracking-wider text-primary hover:text-primary-hover doom-link"
+          aria-label={`View ${program.programName}`}
+          className="shrink-0 text-sm font-bold uppercase tracking-wider text-primary hover:text-primary-hover doom-link"
         >
-          View Program →
+          View
         </Link>
       </div>
-    </section>
-  )
-}
-
-function EmptyHome() {
-  const router = useRouter()
-  const [starting, setStarting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  // Starts a freestyle workout the way the center Workout button's sheet does.
-  const start = async () => {
-    if (starting) return
-    setStarting(true)
-    setError(null)
-    try {
-      const completion = await startFreestyleWorkout()
-      router.push(`/training/adhoc/${completion.id}?new=1`)
-    } catch (err) {
-      clientLogger.error('Failed to start freestyle workout:', err)
-      setError(
-        err instanceof FetchError && err.status === 409
-          ? 'You already have a workout in progress.'
-          : "Couldn't start a workout. Check your connection and try again."
-      )
-      setStarting(false)
-    }
-  }
-
-  return (
-    <div className="bg-card border-y sm:border border-border doom-noise doom-card p-8 text-center space-y-4">
-      <p className="text-muted-foreground">Nothing planned yet. Start lifting now, or pick a program to follow.</p>
-      <div className="flex flex-col gap-3">
-        <button type="button" onClick={start} disabled={starting} className={`${primaryButton} disabled:opacity-50`}>
-          <Play size={16} />
-          {starting ? 'Starting…' : 'Start a workout'}
-        </button>
-        <Link
-          href={libraryHref({ type: 'programs', tab: 'browse' })}
-          className="flex items-center justify-center w-full py-3 border-2 border-border bg-transparent text-muted-foreground transition-all text-sm font-semibold uppercase tracking-wider doom-focus-ring hover:bg-muted/40 hover:border-primary hover:text-foreground"
-        >
-          Find a program
-        </Link>
+      <div
+        role="progressbar"
+        aria-label="Program progress"
+        aria-valuemin={0}
+        aria-valuemax={program.workoutsTotal}
+        aria-valuenow={program.workoutsDone}
+        className="mt-2.5 h-2 w-full bg-muted overflow-hidden"
+      >
+        <div className="h-full bg-primary" style={{ width: `${percent}%` }} />
       </div>
-      {error && (
-        <p role="alert" className="text-sm text-error">
-          {error}
+      {upNext && (
+        <p className="mt-2.5 text-sm text-muted-foreground">
+          Next: Week {upNext.weekNumber} · Day {upNext.dayNumber} · {upNext.workoutName}
         </p>
       )}
     </div>

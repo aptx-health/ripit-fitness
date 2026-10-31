@@ -260,3 +260,65 @@ Responses return `{id, status, kind}`, never the whole row.
 ### TL5b User agent tokens and scoped notifications
 
 Specified when TL5a is done.
+
+## TL6 Training folder tabs (mockup A)
+
+Dustin picked mockup A, `docs/mockups/050/mockup-a.html` and `.png`. It's a visual restyle of the Training home: behaviour, data and routes stay as they are. Build it to match the mockup closely, using the app's tokens and components.
+
+**Section tabs**
+- Every section gets a folder-style tab header (a new shared `SectionTab` component): an icon, an uppercase label, an optional count chip, and an optional right-aligned link.
+- The tab sits on the section's box, and the box border matches the tab.
+- Variants:
+  - **coach:** gold, filled. Label "From your coach", the pending count as a chip, and "See all" to `/suggestions`.
+  - **next:** green, filled. Label "Up Next".
+  - **quiet:** tan:
+    - "Pinned", with a count chip and "See all" to `/library?type=workouts`;
+    - "Recent", with a count chip;
+    - "Current Program".
+- Each tab label is the section's heading (`h2`), with the count in a separate chip whose accessible label is, e.g., "3 suggestions". Exact strings: "From your coach", "Up Next", "Pinned", "Recent", "Current Program".
+
+**The suggestion card**
+- At the top, "Your coach suggests" with the coach icon, and a "Waiting on you" stamp.
+- Then the kind label as a dark chip ("Workout", "Program", …), the title (`suggestionTitle`), a meta line, the rationale as a quote with a gold rule, and a full-width gold **Review suggestion** button to `/suggestions/<id>`.
+- The meta line:
+  - a workout: "N exercises · suggested <relative day>";
+  - anything else: "suggested <relative day>".
+  - The relative day ("today", "yesterday", "Oct 28") renders client-side only, as the TL2 dates do.
+- The other pending suggestions (up to 2) are rows below a dashed divider. Each row has a gold dot, the kind label in small caps, the title and a chevron, and links to its review screen.
+
+**Other sections**
+- Up Next is unchanged in content, inside a green box.
+- Pinned and Recent rows use mixed-case titles, with the bordered Start and Repeat buttons as today.
+- Current Program becomes one row:
+  - the name;
+  - "Week X of Y · N of M workouts done";
+  - a "View" link on the right;
+  - the progress bar underneath.
+
+**Unchanged:** the section order and rules, the empty home, and every link target and behaviour from TL2, TL4 and TL5a.
+
+**TL6 changes from Dustin's preview (2026-10-31)**
+- The "See all" action becomes its own paper tab, to the right of the section's tab: same folder shape, a dimmed primary green, the text "See all", and the accessible names kept. It applies wherever a section has "See all" (From your coach, and Pinned).
+- The suggestion card drops "Your coach suggests" and the "Waiting on you" stamp, since the tab already says "From your coach". The card starts with the kind chip.
+
+**TL6 final layout: three tabbed blocks (mockup 054, confirmed by Dustin 2026-10-31)**
+
+Training has three blocks in this order, each a folder box with paper tabs. When a block has more than one tab, the tabs switch what the block shows (a tablist, both panels server-rendered, switching hides one, no fetch).
+1. **Coach block** (only with pending suggestions):
+   - The "From your coach" tab, with its count chip.
+   - Directly beside it, like a second tab, a dimmed-green link tab "All suggestions" to `/suggestions`.
+   - Content as before: the kind chip, title, meta, quote, Review suggestion, and up to 2 rows.
+2. **Workouts block:** tabs "Pinned Workouts" and "Recent".
+   - Pinned Workouts shows the pinned rows with Start. Recent shows the recent rows with Repeat.
+   - There's no "See all" tab.
+   - A tab whose list is empty is still selectable and shows a short empty line. The whole block hides only when there are no pins and no recent sessions.
+3. **Program block:** tabs "Up Next" and "Active Program".
+   - Up Next is today's Up Next content.
+   - Active Program is today's Current Program row: name, "Week X of Y · N of M workouts done", the bar, and "View <name>". It adds a "Next: Week W · Day D · <workout>" line when there's a next workout. There's no Start button.
+   - With no active program, the block still shows. Both tabs show the same placeholder: "No active program", one line of text, and "Find a program" to `/library?type=programs&tab=browse`.
+- **Tab selection:**
+  - Remembered per device, in `localStorage`, read after mount.
+  - Defaults: Pinned Workouts if there are pins, else Recent; Up Next if there's a next workout, else Active Program.
+  - A stored choice never opens an empty panel when the other tab has content.
+- **Empty home:** the empty-home screen is gone. The Program block's placeholder and the Workouts block, when present, cover it. With no pins, no recent sessions and no program, the page shows only the Program block's placeholder.
+- **Headings:** each tab is a tab button, and each block is a region named after the block ("From your coach", "Workouts", "Program").
