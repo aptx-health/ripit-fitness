@@ -15,8 +15,8 @@
  *  - ctx.notify receives something whose JSON contains the new proposal id.
  */
 import { createHash } from 'node:crypto'
-import type { PrismaClient } from '@prisma/client'
 import { describeFeature, loadFeature } from '@amiceli/vitest-cucumber'
+import type { PrismaClient } from '@prisma/client'
 import { expect, vi } from 'vitest'
 import { getTestDatabase } from '@/lib/test/database'
 import {
@@ -227,16 +227,6 @@ async function seedWorkout(userId: string, workoutName: string, sets: number) {
   return completion.id
 }
 
-async function wipeAgentTables(prisma: PrismaClient) {
-  // The shared reset() does not know the new tables; clear them here.
-  for (const t of ['Proposal', 'AgentToken']) {
-    try {
-      await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${t}" CASCADE`)
-    } catch {
-      /* table does not exist until the schema change lands */
-    }
-  }
-}
 
 // ---------------------------------------------------------------------------
 // Feature
@@ -249,7 +239,6 @@ describeFeature(feature, ({ Background, Rule }) => {
       const db = await getTestDatabase()
       await db.reset()
       const prisma = db.getPrismaClient()
-      await wipeAgentTables(prisma)
       const user = await createTestUser()
       const other = await createTestUser()
       s = {

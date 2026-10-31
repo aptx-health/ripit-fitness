@@ -277,21 +277,11 @@ const repeat = (n: number, set: SetSpec): SetSpec[] => Array.from({ length: n },
 const working = (rpe: number | null, n: number, extra: Partial<SetSpec> = {}) =>
   repeat(n, { weight: 100, reps: 5, rpe, ...extra })
 
-async function wipeTables(prisma: PrismaClient) {
-  for (const t of ['AgentToken', 'LoggedSet', 'Exercise', 'WorkoutCompletion']) {
-    try {
-      await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${t}" CASCADE`)
-    } catch {
-      /* table missing */
-    }
-  }
-}
 
 async function freshState(): Promise<State> {
   const db = await getTestDatabase()
   await db.reset()
   const prisma = db.getPrismaClient()
-  await wipeTables(prisma)
   const user = await createTestUser()
   const other = await createTestUser()
   const next = { prisma, userId: user.id, otherUserId: other.id, tokenId: '' } as State
@@ -312,7 +302,6 @@ describeFeature(feature, ({ Background, Rule }) => {
       const db = await getTestDatabase()
       await db.reset()
       const prisma = db.getPrismaClient()
-      await wipeTables(prisma)
       const user = await createTestUser()
       const other = await createTestUser()
       s = { prisma, userId: user.id, otherUserId: other.id, tokenId: '' } as State

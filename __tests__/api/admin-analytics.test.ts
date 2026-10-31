@@ -40,12 +40,8 @@ describe('Admin analytics — role-based filtering', () => {
 
   beforeEach(async () => {
     const testDb = await getTestDatabase()
+    // Clears every table, including the bootstrapped "user" table.
     await testDb.reset()
-    // reset() doesn't touch the "user" table (it's not in Prisma schema),
-    // so clear it explicitly for test isolation.
-    await prisma.$executeRawUnsafe(`TRUNCATE TABLE "user" CASCADE`)
-    await prisma.$executeRawUnsafe(`TRUNCATE TABLE "AppEvent" CASCADE`)
-    await prisma.$executeRawUnsafe(`TRUNCATE TABLE "Feedback" CASCADE`)
   })
 
   it('excludes staff accounts from all usage and retention metrics', async () => {

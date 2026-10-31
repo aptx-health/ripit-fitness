@@ -354,15 +354,6 @@ async function seedProgram(userId: string, name: string, extra: Record<string, u
 
 let seeded: { program: { id: string }; expected: Record<string, unknown> } | undefined
 
-async function wipeTables(prisma: PrismaClient) {
-  for (const t of ['Proposal', 'AgentToken']) {
-    try {
-      await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${t}" CASCADE`)
-    } catch {
-      /* table missing */
-    }
-  }
-}
 
 async function proposeBlockAndApprove() {
   mustSucceed(await proposeProgram(agentBlock()), 'propose Agent Block')
@@ -382,7 +373,6 @@ describeFeature(feature, ({ Background, Rule }) => {
       const db = await getTestDatabase()
       await db.reset()
       const prisma = db.getPrismaClient()
-      await wipeTables(prisma)
       const user = await createTestUser()
       const other = await createTestUser()
       s = {

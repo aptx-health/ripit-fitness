@@ -64,13 +64,13 @@ export default function ProposalActions({
             <Button variant="success" doom loading={busy === 'approve'} disabled={!!busy} onClick={() => run('approve')}>
               Approve
             </Button>
-            <Button variant="secondary" loading={busy === 'reject'} disabled={!!busy} onClick={() => run('reject')}>
+            <Button variant="secondary" doom loading={busy === 'reject'} disabled={!!busy} onClick={() => run('reject')}>
               Reject
             </Button>
           </>
         )}
         {status === 'applied' && canRevert && (
-          <Button variant="outline" loading={busy === 'revert'} disabled={!!busy} onClick={() => run('revert')}>
+          <Button variant="outline" doom loading={busy === 'revert'} disabled={!!busy} onClick={() => run('revert')}>
             Revert
           </Button>
         )}
