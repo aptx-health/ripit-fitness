@@ -6,10 +6,10 @@ import { computeWorkoutRollup } from '@/lib/stats/workout-rollup'
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: Promise<{ completionId: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { completionId } = await params
+    const { id: completionId } = await params
 
     const { user, error } = await getCurrentUser()
     if (error || !user) {

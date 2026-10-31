@@ -6,7 +6,7 @@ import { logger } from '@/lib/logger'
 import { checkRateLimitWithHeaders, workoutActionLimiter } from '@/lib/rate-limit'
 
 /**
- * PATCH /api/workouts/completions/[completionId]/effort
+ * PATCH /api/workouts/completions/[id]/effort
  *
  * Persists a session-level effort rating (RPE-equivalent 6–10) captured via
  * the word-label chips on the rollup. Fire-and-forget from the client; never
@@ -15,10 +15,10 @@ import { checkRateLimitWithHeaders, workoutActionLimiter } from '@/lib/rate-limi
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ completionId: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { completionId } = await params
+    const { id: completionId } = await params
 
     const { user, error } = await getCurrentUser()
     if (error || !user) {

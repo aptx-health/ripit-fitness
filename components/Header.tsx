@@ -8,6 +8,7 @@ import { useState } from 'react'
 import QuickActionSheet from '@/components/QuickActionSheet'
 import { ThemeSelector } from '@/components/ThemeSelector'
 import { useDraftWorkout } from '@/lib/contexts/DraftWorkoutContext'
+import { isTabActive } from '@/lib/nav/active-tab'
 
 type Props = {
   userEmail: string
@@ -45,11 +46,12 @@ export default function Header({ userEmail }: Props) {
             <div className="h-6 w-px bg-border" />
             <div className="flex items-center gap-3 sm:gap-4">
               {NAV_LINKS.map(({ href, label }) => {
-                const isActive = pathname.startsWith(href)
+                const isActive = isTabActive(href, pathname)
                 return (
                   <Link
                     key={href}
                     href={href}
+                    aria-current={isActive ? 'page' : undefined}
                     className={`text-xs sm:text-sm font-semibold uppercase tracking-wider transition-colors ${
                       isActive
                         ? 'text-accent border-b-2 border-accent pb-0.5'

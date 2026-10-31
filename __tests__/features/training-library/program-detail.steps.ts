@@ -17,9 +17,11 @@
  *
  *   lib/training/program-links.ts
  *     programDetailHref(programId, query?) -> "/library/programs/<id>[?k=v]"
- *     trainingRedirectTarget(userId, query) -> Promise<string | null>
- *       the active program's detail URL with the query kept; null = no active
- *       program, so /training shows NoActiveProgram.
+ *     trainingResumeRedirectTarget(userId, query) -> Promise<string | null>
+ *       (TL2 replaced TL1's trainingRedirectTarget.) The active program's
+ *       detail URL with the query kept, only when `resume` is in the query;
+ *       null = show the Training home. More of its tests are in
+ *       training-home.steps.ts.
  *     legacyProgramRedirectTarget(programId, query) -> string
  *       where /programs/[id] sends you, query kept.
  *
@@ -118,7 +120,7 @@ async function weekLoader() {
 async function links() {
   return (await load('@/lib/training/program-links')) as {
     programDetailHref: (programId: string, query?: Record<string, string | undefined>) => string
-    trainingRedirectTarget: (userId: string, query: Query) => Promise<string | null>
+    trainingResumeRedirectTarget: (userId: string, query: Query) => Promise<string | null>
     legacyProgramRedirectTarget: (programId: string, query: Query) => string
   }
 }
@@ -405,8 +407,8 @@ describeFeature(feature, ({ Background, Rule }) => {
   Rule('Old addresses lead to the detail screen', ({ RuleScenario }) => {
     RuleScenario('Training opens the active program\'s detail for now', ({ When, Then }) => {
       When('the user opens Training with week 3 and a workout to resume', async () => {
-        const { trainingRedirectTarget } = await links()
-        s.target = await trainingRedirectTarget(s.userId, { week: '3', resume: workoutOf(s.starter, 3, 1) })
+        const { trainingResumeRedirectTarget } = await links()
+        s.target = await trainingResumeRedirectTarget(s.userId, { week: '3', resume: workoutOf(s.starter, 3, 1) })
       })
       Then('they land on the "Machine Starter" detail screen at week 3 with that workout resumed', () => {
         expect(s.target).toBeTruthy()
@@ -423,10 +425,11 @@ describeFeature(feature, ({ Background, Rule }) => {
         expect(await s.prisma.program.count({ where: { userId: s.userId, isActive: true } })).toBe(0)
       })
       When('the user opens Training', async () => {
-        const { trainingRedirectTarget } = await links()
-        s.target = await trainingRedirectTarget(s.userId, {})
+        const { trainingResumeRedirectTarget } = await links()
+        s.target = await trainingResumeRedirectTarget(s.userId, {})
       })
       Then('they see the no-active-program screen', () => {
+        // TL2: no redirect; the Training home shows instead (see training-home.steps.ts).
         expect(s.target).toBeNull()
       })
     })
@@ -646,75 +649,31 @@ describe('program detail: redirects', () => {
     s = await freshState()
   })
 
-  it('/training goes to the active program with no query when none was given', async () => {
-    const { trainingRedirectTarget } = await links()
-    const target = await trainingRedirectTarget(s.userId, {})
-    expect(target).toBe(`/library/programs/${s.starter.id}`)
-  })
-
-  it('/training keeps week, resume and every other query param', async () => {
-    const { trainingRedirectTarget } = await links()
-    const target = await trainingRedirectTarget(s.userId, {
-      week: '2',
-      resume: 'w-123',
-      expand: 'first',
-      debugHistoryCount: '0',
-    })
-    const { path, params } = parse(target as string)
-    expect(path).toBe(`/library/programs/${s.starter.id}`)
-    expect(params).toEqual({ week: ['2'], resume: ['w-123'], expand: ['first'], debugHistoryCount: ['0'] })
-  })
-
-  it('/training skips params that are undefined', async () => {
-    const { trainingRedirectTarget } = await links()
-    const target = await trainingRedirectTarget(s.userId, { week: undefined, resume: 'w-1' })
+  it('/training?resume= skips params that are undefined', async () => {
+    const { trainingResumeRedirectTarget } = await links()
+    const target = await trainingResumeRedirectTarget(s.userId, { week: undefined, resume: 'w-1' })
     expect(parse(target as string).params).toEqual({ resume: ['w-1'] })
   })
 
-  it('/training keeps a repeated param as repeated values', async () => {
-    const { trainingRedirectTarget } = await links()
-    const target = await trainingRedirectTarget(s.userId, { week: ['1', '2'] })
-    expect(parse(target as string).params).toEqual({ week: ['1', '2'] })
+  it('/training?resume= keeps a repeated param as repeated values', async () => {
+    const { trainingResumeRedirectTarget } = await links()
+    const target = await trainingResumeRedirectTarget(s.userId, { resume: 'w-1', week: ['1', '2'] })
+    expect(parse(target as string).params).toEqual({ resume: ['w-1'], week: ['1', '2'] })
   })
 
-  it('/training goes to an active program that has no weeks yet', async () => {
+  it('/training?resume= goes to an active program that has no weeks yet', async () => {
     await s.prisma.program.updateMany({ where: { userId: s.userId }, data: { isActive: false } })
     const empty = await seedProgram(s.prisma, s.userId, { name: 'Empty', weeks: 0, isActive: true })
-    const { trainingRedirectTarget } = await links()
-    expect(await trainingRedirectTarget(s.userId, { week: '2' })).toBe(`/library/programs/${empty.id}?week=2`)
+    const { trainingResumeRedirectTarget } = await links()
+    expect(await trainingResumeRedirectTarget(s.userId, { resume: 'w-1' })).toBe(`/library/programs/${empty.id}?resume=w-1`)
   })
 
-  it('/training goes to whichever program is active', async () => {
+  it('/training?resume= goes to whichever program is active', async () => {
     await s.prisma.program.update({ where: { id: s.starter.id }, data: { isActive: false } })
     await s.prisma.program.update({ where: { id: s.split.id }, data: { isActive: true } })
-    const { trainingRedirectTarget } = await links()
-    expect(parse((await trainingRedirectTarget(s.userId, {})) as string).path).toBe(`/library/programs/${s.split.id}`)
-  })
-
-  it("/training ignores another user's active program", async () => {
-    await s.prisma.program.updateMany({ where: { userId: s.userId }, data: { isActive: false } })
-    await seedProgram(s.prisma, s.otherUserId, { name: 'Theirs', weeks: 2, isActive: true })
-    const { trainingRedirectTarget } = await links()
-    expect(await trainingRedirectTarget(s.userId, { week: '2' })).toBeNull()
-  })
-
-  it('/training does not treat an archived program as active', async () => {
-    await s.prisma.program.updateMany({ where: { userId: s.userId }, data: { isActive: false } })
-    await s.prisma.program.update({ where: { id: s.split.id }, data: { isActive: true, isArchived: true } })
-    const { trainingRedirectTarget } = await links()
-    expect(await trainingRedirectTarget(s.userId, {})).toBeNull()
-  })
-
-  it('/training does not treat a deleted active program as active', async () => {
-    await s.prisma.program.update({ where: { id: s.starter.id }, data: { deletedAt: new Date() } })
-    const { trainingRedirectTarget } = await links()
-    expect(await trainingRedirectTarget(s.userId, {})).toBeNull()
-  })
-
-  it('/training with no active program redirects nowhere, whatever the query', async () => {
-    await s.prisma.program.updateMany({ where: { userId: s.userId }, data: { isActive: false } })
-    const { trainingRedirectTarget } = await links()
-    expect(await trainingRedirectTarget(s.userId, { week: '3', resume: 'w' })).toBeNull()
+    const { trainingResumeRedirectTarget } = await links()
+    const target = await trainingResumeRedirectTarget(s.userId, { resume: 'w-1' })
+    expect(parse(target as string).path).toBe(`/library/programs/${s.split.id}`)
   })
 
   it('/programs/[id] keeps the query string', async () => {

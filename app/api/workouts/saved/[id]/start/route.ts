@@ -1,12 +1,11 @@
-import { createId } from '@paralleldrive/cuid2'
-import { Prisma } from '@prisma/client'
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { recordEvent } from '@/lib/events'
 import { logger } from '@/lib/logger'
 import { checkRateLimit, workoutActionLimiter } from '@/lib/rate-limit'
-import type { SavedWorkoutData, SavedWorkoutExercise } from '@/types/saved-workout'
+import { draftExistsBody, startDraftFromPlan } from '@/lib/workouts/start-draft'
+import type { SavedWorkoutData } from '@/types/saved-workout'
 
 /**
  * POST /api/workouts/saved/[id]/start
@@ -17,7 +16,8 @@ import type { SavedWorkoutData, SavedWorkoutExercise } from '@/types/saved-worko
  *
  * Conflict semantics mirror /api/workouts/adhoc: only one open draft per user
  * — if one exists we return 409 with the existing draft so the client can
- * show the resume-vs-abandon prompt.
+ * show the resume-vs-abandon prompt. The draft itself is built by
+ * startDraftFromPlan, shared with "repeat a session".
  */
 export async function POST(
   _req: NextRequest,
@@ -50,136 +50,19 @@ export async function POST(
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
-    const now = new Date()
-    let completionId: string | null = null
-    let existingDraft:
-      | {
-          id: string
-          isAdHoc: boolean
-          name: string | null
-          workout: { name: string } | null
-        }
-      | null = null
-
-    try {
-      completionId = await prisma.$transaction(
-        async (tx) => {
-          const found = await tx.workoutCompletion.findFirst({
-            where: { userId: user.id, status: 'draft', isArchived: false },
-            select: {
-              id: true,
-              isAdHoc: true,
-              name: true,
-              workout: { select: { name: true } },
-            },
-          })
-          if (found) {
-            existingDraft = found
-            return null
-          }
-
-          const completion = await tx.workoutCompletion.create({
-            data: {
-              workoutId: null,
-              savedWorkoutId: saved.id,
-              userId: user.id,
-              status: 'draft',
-              isAdHoc: true,
-              name: saved.name,
-              startedAt: now,
-              completedAt: now,
-            },
-            select: { id: true },
-          })
-
-          // Pre-generate exercise ids so we can link prescribed sets in a
-          // single createMany without a per-exercise round-trip.
-          const exerciseRows = workoutData.map((ex: SavedWorkoutExercise) => ({
-            id: createId(),
-            name: ex.name,
-            exerciseDefinitionId: ex.exerciseDefinitionId,
-            order: ex.order,
-            notes: ex.notes ?? null,
-            exerciseGroup: ex.exerciseGroup ?? null,
-            workoutId: null,
-            workoutCompletionId: completion.id,
-            userId: user.id,
-            isOneOff: true,
-          }))
-
-          if (exerciseRows.length > 0) {
-            await tx.exercise.createMany({ data: exerciseRows })
-          }
-
-          const prescribedRows = workoutData.flatMap(
-            (ex: SavedWorkoutExercise, idx: number) =>
-              (ex.sets ?? []).map((s) => ({
-                exerciseId: exerciseRows[idx].id,
-                userId: user.id,
-                setNumber: s.setNumber,
-                reps: s.reps,
-                rir: s.rir ?? null,
-                rpe: s.rpe ?? null,
-                isWarmup: Boolean(s.isWarmup),
-              }))
-          )
-
-          if (prescribedRows.length > 0) {
-            await tx.prescribedSet.createMany({ data: prescribedRows })
-          }
-
-          await tx.savedWorkout.update({
-            where: { id: saved.id },
-            data: { lastUsedAt: now },
-          })
-
-          return completion.id
-        },
-        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
-      )
-    } catch (txErr) {
-      if (
-        txErr instanceof Prisma.PrismaClientKnownRequestError &&
-        (txErr.code === 'P2034' || txErr.code === 'P2002')
-      ) {
-        existingDraft = await prisma.workoutCompletion.findFirst({
-          where: { userId: user.id, status: 'draft', isArchived: false },
-          select: {
-            id: true,
-            isAdHoc: true,
-            name: true,
-            workout: { select: { name: true } },
-          },
-        })
-      } else {
-        throw txErr
-      }
+    const result = await startDraftFromPlan({
+      userId: user.id,
+      name: saved.name,
+      plan: workoutData,
+      savedWorkoutId: saved.id,
+      afterCreate: async (tx) => {
+        await tx.savedWorkout.update({ where: { id: saved.id }, data: { lastUsedAt: new Date() } })
+      },
+    })
+    if (!result.ok) {
+      return NextResponse.json(draftExistsBody(result.draft), { status: 409 })
     }
-
-    if (existingDraft) {
-      const draft = existingDraft as {
-        id: string
-        isAdHoc: boolean
-        name: string | null
-        workout: { name: string } | null
-      }
-      return NextResponse.json(
-        {
-          error: 'DRAFT_EXISTS',
-          message: 'Finish your current workout before starting a new one.',
-          draft: {
-            completionId: draft.id,
-            isAdHoc: draft.isAdHoc,
-            name: draft.name ?? draft.workout?.name ?? null,
-          },
-        },
-        { status: 409 }
-      )
-    }
-
-    if (!completionId) {
-      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-    }
+    const { completionId } = result
 
     recordEvent(user.id, 'workout_started_from_saved', {
       savedWorkoutId: saved.id,
