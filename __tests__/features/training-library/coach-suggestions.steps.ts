@@ -183,6 +183,8 @@ async function agent(name: string, args: Json, who: 'me' | 'other' = 'me') {
   const ctx = {
     userId: who === 'me' ? s.userId : s.otherUserId,
     tokenId: who === 'me' ? s.tokenId : s.otherTokenId,
+    // exercise-library proposals are admin-only, so only they are seeded by an admin's agent
+    role: name.startsWith('propose_exercise_') ? 'admin' : 'user',
     notify: vi.fn(async () => {}),
   }
   const raw = (await callTool(s.prisma, ctx as never, name, args as never)) as { isError?: boolean; content?: Array<{ text?: string }> }
@@ -329,7 +331,6 @@ async function renderReview(id: string) {
   render(createElement(mod.default, { suggestion }))
   return suggestion
 }
-const headings = () => screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)
 
 beforeEach(() => {
   rl.refuse = false
@@ -362,7 +363,8 @@ describeFeature(feature, ({ Background, Rule }) => {
       Then('the first section is "Coach Suggestions · 2"', async () => {
         const home = await renderHome()
         expect(home.suggestions.count).toBe(2)
-        expect(headings()[0]).toBe('Coach Suggestions · 2')
+        expect(screen.getAllByRole('region')[0]).toBe(screen.getByRole('region', { name: 'From your coach' }))
+        expect(screen.getByLabelText('2 suggestions').textContent).toBe('2')
       })
       And('"Short Full-Body Workout" is shown with its rationale and a Review button', async () => {
         const home = await renderHome()
@@ -370,7 +372,7 @@ describeFeature(feature, ({ Background, Rule }) => {
         expect(screen.getByText(/Short Full-Body Workout/)).toBeTruthy()
         expect(screen.getByText(RATIONALE)).toBeTruthy()
         expect(screen.queryByText(/New saved workout:|New program:/)).toBeNull()
-        expect(screen.getByText(/^review$/i).closest('a')?.getAttribute('href')).toBe(`/suggestions/${s.pending.workout}`)
+        expect(screen.getByRole('link', { name: /^review suggestion$/i }).getAttribute('href')).toBe(`/suggestions/${s.pending.workout}`)
       })
       And('"New 3-Day Strength Program" is listed below it', async () => {
         await shown()
@@ -381,7 +383,7 @@ describeFeature(feature, ({ Background, Rule }) => {
       })
       And('"View Suggestions" opens the list of suggestions', async () => {
         await shown()
-        expect(screen.getByText(/view suggestions/i).closest('a')?.getAttribute('href')).toBe('/suggestions')
+        expect(screen.getByRole('link', { name: 'All suggestions' }).getAttribute('href')).toBe('/suggestions')
       })
     })
 
@@ -399,8 +401,8 @@ describeFeature(feature, ({ Background, Rule }) => {
       Then('there is no Coach Suggestions section', async () => {
         const home = await renderHome()
         expect(home.suggestions).toEqual({ count: 0, items: [] })
-        expect(screen.queryByText(/coach suggestions/i)).toBeNull()
-        expect(screen.queryByText(/view suggestions/i)).toBeNull()
+        expect(screen.queryByRole('region', { name: 'From your coach' })).toBeNull()
+        expect(screen.queryByRole('link', { name: /all suggestions/i })).toBeNull()
       })
     })
 
@@ -1266,6 +1268,35 @@ describe('suggestions: rate limiting', () => {
     const id = await suggestWorkout('Push day')
     expect((await list()).status).toBe(200)
     expect((await detail(id)).status).toBe(200)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// TL6: the card's meta line needs the exercise count of a workout suggestion
+// ---------------------------------------------------------------------------
+describe('suggestions: exercise count on Training items (TL6)', () => {
+  beforeEach(async () => {
+    s = await freshState()
+  })
+
+  it('a workout suggestion carries its exercise count; every other kind carries null', async () => {
+    const saved = await savedWorkout('Push day')
+    const create = await suggestWorkout('Push A', 50)
+    const update = await aged(await agent('propose_workout_update', { savedWorkoutId: saved.id, name: 'Push B', rationale: RATIONALE }), 40)
+    const program = await suggestProgram('3-Day Strength', 30)
+    const targets = await suggestTarget({ quads: 1.3 }, 20)
+    const anchors = await suggestAnchor({ hinge: [s.squat.id] }, 10)
+    const { suggestions } = (await getHome()) as unknown as { suggestions: { items: Array<{ id: string; exerciseCount: number | null }> } }
+    const byId = Object.fromEntries((await getHome()).suggestions.items.map((i) => [i.id, (i as { exerciseCount?: number | null }).exerciseCount]))
+    expect(byId[anchors]).toBeNull()
+    expect(byId[targets]).toBeNull()
+    expect(byId[program]).toBeNull()
+    expect(suggestions.items).toHaveLength(3)
+    // the oldest two fall outside the newest three; ask the loader for them separately
+    for (const id of [create, update]) await s.prisma.proposal.update({ where: { id }, data: { createdAt: ago(1) } })
+    const again = Object.fromEntries((await getHome()).suggestions.items.map((i) => [i.id, (i as { exerciseCount?: number | null }).exerciseCount]))
+    expect(again[create]).toBe(2)
+    expect(again[update]).toBeNull()
   })
 })
 

@@ -23,6 +23,16 @@ const LABELS: Record<SuggestionKind, string> = {
 
 export const isSuggestionKind = (kind: string): kind is SuggestionKind => kind in LABELS
 
+const SHORT_LABELS: Partial<Record<SuggestionKind, string>> = {
+  'anchors.update': 'Anchors',
+  'balance_targets.update': 'Targets',
+}
+
+/** A one-word label for tight rows; the full label elsewhere. */
+export function suggestionKindShortLabel(kind: string): string | null {
+  return isSuggestionKind(kind) ? (SHORT_LABELS[kind] ?? LABELS[kind]) : null
+}
+
 /** The user-facing label, or null for a kind users never see. */
 export function suggestionKindLabel(kind: string): string | null {
   return isSuggestionKind(kind) ? LABELS[kind] : null

@@ -34,6 +34,11 @@ async function titlesFor(userId: string, rows: TitleSource[]): Promise<string[]>
   return rows.map((r) => suggestionTitle(r.kind, r.payload, r.before, r.targetId ? names.get(r.targetId) : null))
 }
 
+function exerciseCountOf(payload: unknown): number | null {
+  const exercises = (payload as { exercises?: unknown } | null)?.exercises
+  return Array.isArray(exercises) ? exercises.length : null
+}
+
 /** Pending suggestions, newest first; `take` limits the list. */
 export async function listPendingSuggestions(userId: string, take?: number): Promise<SuggestionItem[]> {
   const rows = await prisma.proposal.findMany({
@@ -43,7 +48,11 @@ export async function listPendingSuggestions(userId: string, take?: number): Pro
     ...(take !== undefined && { take }),
   })
   const titles = await titlesFor(userId, rows)
-  return rows.map(({ payload: _payload, before: _before, targetId: _targetId, ...item }, i) => ({ ...item, title: titles[i] }))
+  return rows.map(({ payload, before: _before, targetId: _targetId, ...item }, i) => ({
+    ...item,
+    title: titles[i],
+    exerciseCount: item.kind === 'saved_workout.create' ? exerciseCountOf(payload) : null,
+  }))
 }
 
 export function countPendingSuggestions(userId: string): Promise<number> {

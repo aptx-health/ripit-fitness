@@ -28,6 +28,8 @@ export interface SuggestionItem {
   title: string
   /** The service summary, kept for admin and the API; not shown to users. */
   summary: string
+  /** A suggested workout's exercise count, for its meta line; null for other kinds. */
+  exerciseCount?: number | null
   rationale: string
   createdAt: Date
 }
