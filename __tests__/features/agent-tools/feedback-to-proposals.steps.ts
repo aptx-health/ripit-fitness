@@ -12,8 +12,9 @@
  * vitest-cucumber runs every step as its own test, so mocks are created once
  * per scenario in the first Background step. Never reset them in afterEach.
  */
-import type { PrismaClient } from '@prisma/client'
+
 import { describeFeature, loadFeature } from '@amiceli/vitest-cucumber'
+import type { PrismaClient } from '@prisma/client'
 import { expect, vi } from 'vitest'
 import { getTestDatabase } from '@/lib/test/database'
 import { createTestExerciseDefinition, createTestUser } from '@/lib/test/factories'
@@ -168,15 +169,6 @@ function proposeBpAlias(feedbackId: string | undefined) {
   })
 }
 
-async function wipeTables(prisma: PrismaClient) {
-  for (const t of ['Proposal', 'AgentToken', 'Feedback']) {
-    try {
-      await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${t}" CASCADE`)
-    } catch {
-      /* table missing */
-    }
-  }
-}
 
 // ---------------------------------------------------------------------------
 // Feature
@@ -187,7 +179,6 @@ describeFeature(feature, ({ Background, Rule }) => {
       const db = await getTestDatabase()
       await db.reset()
       const prisma = db.getPrismaClient()
-      await wipeTables(prisma)
       const user = await createTestUser()
       const other = await createTestUser()
       s = {
