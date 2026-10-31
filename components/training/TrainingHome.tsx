@@ -11,22 +11,26 @@ import { clientLogger } from '@/lib/client-logger'
 import { formatDuration } from '@/lib/format/duration'
 import { pluralize } from '@/lib/format/pluralize'
 import { libraryHref } from '@/lib/library/links'
-import type { CurrentProgram, RecentSession, TrainingHomeData, UpNext } from '@/lib/training/home'
+import type { CurrentProgram, PinnedWorkout, RecentSession, TrainingHomeData, UpNext } from '@/lib/training/home'
 import { programDetailHref } from '@/lib/training/program-href'
 
 /**
  * The Training home: "what should I do next?" Sections appear only when they
- * have something to show, in a fixed order. Coach Suggestions (TL5) goes before
- * Up Next and Pinned Workouts (TL4) after it.
+ * have something to show, in a fixed order: Up Next, Pinned Workouts, Recent
+ * Workouts, Current Program. Coach Suggestions (TL5) will go before Up Next.
+ * Pinned Start and Recent Repeat share one session starter, so only one start
+ * request runs at a time on the whole page.
  */
 export default function TrainingHome({ home }: { home: TrainingHomeData }) {
-  const { upNext, recent, currentProgram } = home
-  const isEmpty = !upNext && recent.length === 0 && !currentProgram
+  const { upNext, pinned, recent, currentProgram } = home
+  const isEmpty = !upNext && pinned.length === 0 && recent.length === 0 && !currentProgram
+  const starter = useSessionStart()
 
   return (
     <div className="space-y-6">
       {upNext && <UpNextSection upNext={upNext} />}
-      {recent.length > 0 && <RecentSection recent={recent} />}
+      {pinned.length > 0 && <PinnedSection pinned={pinned} starter={starter} />}
+      {recent.length > 0 && <RecentSection recent={recent} starter={starter} />}
       {currentProgram && <CurrentProgramSection program={currentProgram} />}
       {isEmpty && <EmptyHome />}
     </div>
@@ -80,19 +84,25 @@ function SessionDate({ date }: { date: Date }) {
   )
 }
 
-function RecentSection({ recent }: { recent: RecentSession[] }) {
+/**
+ * POSTs a start route that answers { completionId } (or 409 DRAFT_EXISTS with
+ * a message) and opens the new session in the ad-hoc logger. One request at a
+ * time for everything that uses this starter; a failure is shown on the row
+ * that asked.
+ */
+function useSessionStart() {
   const router = useRouter()
   const busy = useRef(false)
-  const [repeatingId, setRepeatingId] = useState<string | null>(null)
+  const [startingId, setStartingId] = useState<string | null>(null)
   const [failure, setFailure] = useState<{ id: string; message: string } | null>(null)
 
-  const repeat = async (id: string) => {
+  const start = async (id: string, url: string, verb: 'start' | 'repeat') => {
     if (busy.current) return
     busy.current = true
-    setRepeatingId(id)
+    setStartingId(id)
     setFailure(null)
     try {
-      const res = await fetch(`/api/workouts/completions/${id}/repeat`, { method: 'POST' })
+      const res = await fetch(url, { method: 'POST' })
       const body = await res.json().catch(() => ({}))
       if (res.ok && body.completionId) {
         router.push(`/training/adhoc/${body.completionId}`)
@@ -100,16 +110,76 @@ function RecentSection({ recent }: { recent: RecentSession[] }) {
       }
       setFailure({
         id,
-        message: res.status === 409 && body.message ? body.message : "Couldn't repeat this workout. Please try again.",
+        message: res.status === 409 && body.message ? body.message : `Couldn't ${verb} this workout. Please try again.`,
       })
     } catch (err) {
-      clientLogger.error('Failed to repeat session', err)
-      setFailure({ id, message: "Couldn't repeat this workout. Check your connection and try again." })
+      clientLogger.error(`Failed to ${verb} workout`, err)
+      setFailure({ id, message: `Couldn't ${verb} this workout. Check your connection and try again.` })
     } finally {
       busy.current = false
-      setRepeatingId(null)
+      setStartingId(null)
     }
   }
+
+  return { start, startingId, failure }
+}
+
+type SessionStarter = ReturnType<typeof useSessionStart>
+
+function RowFailure({ message }: { message: string }) {
+  return (
+    <p role="alert" className="mt-2 text-sm text-error">
+      {message}
+    </p>
+  )
+}
+
+function PinnedSection({ pinned, starter }: { pinned: PinnedWorkout[]; starter: SessionStarter }) {
+  const { start, startingId, failure } = starter
+
+  return (
+    <section aria-labelledby="pinned-heading">
+      <div className="flex items-baseline justify-between">
+        <SectionHeading>
+          <span id="pinned-heading">Pinned Workouts</span>
+        </SectionHeading>
+        <Link
+          href={libraryHref({ type: 'workouts' })}
+          className="text-sm font-semibold uppercase tracking-wider text-primary hover:text-primary-hover doom-link"
+        >
+          See all
+        </Link>
+      </div>
+      <ul className="bg-card border border-border doom-corners divide-y divide-border">
+        {pinned.map((workout) => (
+          <li key={workout.id} className="px-4 py-3">
+            <div className="flex items-center gap-3">
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-foreground doom-heading truncate">{workout.name}</p>
+                <p className="text-sm text-muted-foreground">{pluralize(workout.exerciseCount, 'exercise')}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => start(workout.id, `/api/workouts/saved/${workout.id}/start`, 'start')}
+                disabled={startingId !== null}
+                aria-label={`Start ${workout.name}`}
+                className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 border border-border text-foreground hover:bg-muted doom-focus-ring text-sm font-semibold uppercase tracking-wider disabled:opacity-50"
+              >
+                <Play size={14} />
+                {startingId === workout.id ? 'Starting…' : 'Start'}
+              </button>
+            </div>
+            {failure?.id === workout.id && <RowFailure message={failure.message} />}
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+function RecentSection({ recent, starter }: { recent: RecentSession[]; starter: SessionStarter }) {
+  const { start, startingId: repeatingId, failure } = starter
+  const repeat = (id: string) => start(id, `/api/workouts/completions/${id}/repeat`, 'repeat')
 
   return (
     <section aria-labelledby="recent-heading">
@@ -145,11 +215,7 @@ function RecentSection({ recent }: { recent: RecentSession[] }) {
                 </button>
               )}
             </div>
-            {failure?.id === session.id && (
-              <p role="alert" className="mt-2 text-sm text-error">
-                {failure.message}
-              </p>
-            )}
+            {failure?.id === session.id && <RowFailure message={failure.message} />}
           </li>
         ))}
       </ul>

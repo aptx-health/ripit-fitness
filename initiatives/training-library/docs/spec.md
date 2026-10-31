@@ -142,3 +142,37 @@ The Programs tab becomes **Library**, at `/library`: the place to manage workout
 **Program detail back link:** "← LIBRARY" to `/library?type=programs`, in place of "← TRAINING".
 
 **Out of scope:** Browse Workouts, Create New Workout, pinning (TL4), suggestions (TL5), and moving `/programs/new` and `/programs/[id]/edit`.
+
+## TL4 Pinned workouts
+
+Users pin saved workouts to keep informal routines on Training without building a program.
+
+**Schema** (additive, no backfill)
+- Add `SavedWorkout.pinnedAt DateTime?` and `@@index([userId, pinnedAt(sort: Desc)])`.
+- Create the migration locally (the worktree DBs are built with `db push`, so use `db execute` + `migrate resolve --applied` rather than `migrate dev`). It is applied on deploy, never by hand to staging or prod.
+
+**API**
+- `PATCH /api/workouts/saved/[id]` accepts `pinned: boolean`, alone or alongside today's rename fields.
+  - `true` sets `pinnedAt` to now, but only if it isn't pinned already: pinning again keeps its place.
+  - `false` clears `pinnedAt`.
+  - Another user's or an unknown id is a 404, as today. A non-boolean `pinned` is a 400.
+  - The response includes `pinnedAt`.
+- `GET /api/workouts/saved` returns `pinnedAt` for each workout. The list order is unchanged.
+- Pinning doesn't change `updatedAt`-based or content checks: the proposal conflict and revert rules compare name, notes and plan only.
+
+**My Workouts (Library → Workouts)**
+- Each row has a pin toggle: an icon button labelled "Pin" or "Unpin" with `aria-pressed`. A pinned row shows a small pinned marker.
+- The saved-workout detail dialog has the same toggle.
+- Toggling updates the row in place, with no full reload. On failure it reverts and shows the list's usual error.
+
+**Training → Pinned Workouts**
+- Goes between Up Next and Recent Workouts, in the TL2 order.
+- Shown only when the user has at least one pinned workout.
+- Lists the 5 most recently pinned, newest first. Each shows the name, "N exercises" ("1 exercise" when singular) and a **Start** button.
+- Start uses the existing saved-workout start (`POST /api/workouts/saved/[id]/start`) and goes to the ad-hoc logger.
+  - On 409 `DRAFT_EXISTS`, it shows the same message the Repeat button shows.
+  - Only one request runs at a time.
+- A "See all" link goes to `/library?type=workouts`. It is always shown in the section.
+- `getTrainingHome` gains `pinned: [{id, name, exerciseCount, pinnedAt}]`, holding at most 5.
+
+**Out of scope:** pinning program days, a pin limit, reordering pins, and exposing `pinnedAt` through MCP.

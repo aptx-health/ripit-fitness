@@ -6,7 +6,7 @@ None
 Running quietly: None.
 
 ## Active
-- Training + Library redesign (high priority): Worktree2, branch `feature/training-library`. Stage: TL1 PR #1006 into dev; TL2 PR #1007 stacked on it; TL3 phone preview (Dustin) on `feature/library`. See [initiatives/training-library/status.md](initiatives/training-library/status.md).
+- Training + Library redesign (high priority): Worktree2. Stacked PRs: TL1 #1006 → dev, TL2 #1007, TL3 #1008 (TL1–TL3 = prod release set, all reviewed and OK'd by Dustin). Now: TL4 phone preview (Dustin) on `feature/pinned-workouts`. See [initiatives/training-library/status.md](initiatives/training-library/status.md).
 
 ## Blocked
 None

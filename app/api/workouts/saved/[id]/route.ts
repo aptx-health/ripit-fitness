@@ -43,12 +43,9 @@ export async function GET(
       },
     })
 
-    if (!saved) {
+    // Another user's workout is a 404 too, so ids can't be probed.
+    if (!saved || saved.userId !== user.id) {
       return NextResponse.json({ error: 'Saved workout not found' }, { status: 404 })
-    }
-
-    if (saved.userId !== user.id) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     const { userId: _userId, ...rest } = saved
@@ -67,7 +64,10 @@ export async function GET(
 
 /**
  * PATCH /api/workouts/saved/[id]
- * Updates metadata (name, notes) on a saved workout owned by the current user.
+ * Updates metadata (name, notes) and the pin on a saved workout owned by the
+ * current user. `pinned: true` keeps an existing pinnedAt, so pinning again
+ * doesn't move it; `false` clears it. A pin-only change leaves updatedAt as it
+ * was. Another user's workout is a 404, the same as an unknown id.
  */
 export async function PATCH(
   request: NextRequest,
@@ -84,7 +84,7 @@ export async function PATCH(
     const limited = await checkRateLimit(workoutActionLimiter, user.id)
     if (limited) return limited
 
-    let body: { name?: unknown; notes?: unknown }
+    let body: { name?: unknown; notes?: unknown; pinned?: unknown }
     try {
       body = await request.json()
     } catch {
@@ -127,7 +127,12 @@ export async function PATCH(
       }
     }
 
-    if (Object.keys(updates).length === 0) {
+    if (body.pinned !== undefined && typeof body.pinned !== 'boolean') {
+      return NextResponse.json({ error: 'pinned must be a boolean' }, { status: 400 })
+    }
+    const pinned = body.pinned as boolean | undefined
+
+    if (Object.keys(updates).length === 0 && pinned === undefined) {
       return NextResponse.json(
         { error: 'No updatable fields provided' },
         { status: 400 }
@@ -136,26 +141,31 @@ export async function PATCH(
 
     const existing = await prisma.savedWorkout.findUnique({
       where: { id },
-      select: { id: true, userId: true },
+      select: { id: true, userId: true, pinnedAt: true, updatedAt: true },
     })
 
-    if (!existing) {
+    if (!existing || existing.userId !== user.id) {
       return NextResponse.json({ error: 'Saved workout not found' }, { status: 404 })
     }
 
-    if (existing.userId !== user.id) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
+    const pinnedAt = pinned === undefined ? undefined : pinned ? (existing.pinnedAt ?? new Date()) : null
+    const pinOnly = Object.keys(updates).length === 0
 
     const updated = await prisma.savedWorkout.update({
       where: { id },
-      data: updates,
+      data: {
+        ...updates,
+        ...(pinnedAt !== undefined && { pinnedAt }),
+        // Pinning isn't an edit: keep updatedAt so nothing reads it as one.
+        ...(pinOnly && { updatedAt: existing.updatedAt }),
+      },
       select: {
         id: true,
         name: true,
         notes: true,
         exerciseCount: true,
         lastUsedAt: true,
+        pinnedAt: true,
         createdAt: true,
       },
     })
@@ -198,12 +208,9 @@ export async function DELETE(
       select: { id: true, userId: true },
     })
 
-    if (!existing) {
+    // Another user's workout is a 404 too, so ids can't be probed.
+    if (!existing || existing.userId !== user.id) {
       return NextResponse.json({ error: 'Saved workout not found' }, { status: 404 })
-    }
-
-    if (existing.userId !== user.id) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     await prisma.savedWorkout.delete({ where: { id } })

@@ -27,3 +27,9 @@
 - 2026-10-31 MDT: 041 follow-up: 8 tests that the view follows the address (6/6 breaks killed); 81/81 green on the tree. Waiting on the implementer's packet.
 - 2026-10-31 MDT: 042 retry in; lead re-run green. TL3 phone preview up for Dustin.
 - 2026-10-31 MDT: Dustin OK'd the TL3 preview. Committed; PR stacked on TL2. TL1–TL3 (the prod release set) are all in PRs. Next: TL4 Pinned workouts.
+- 2026-10-31 MDT: TL3 PR #1008 (stacked on #1007). TL4 on feature/pinned-workouts: spec + pinned-workouts.feature written; 044 tests dispatched to test-builder.
+- 2026-10-31 MDT: 044 accepted (84 tests, 38/38 breaks; PATCH another user's id becomes 404, not 403). 045 build dispatched (includes the pinnedAt migration, local only).
+- 2026-10-31 MDT: 045 build back (migration 20261031200017_saved_workout_pinned_at; lead re-run 2036 passed, tsc clean). 046 review dispatched.
+- 2026-10-31 MDT: 046 review: ship with notes (3 low, 1 nit). Fixes sent to implementer.
+- 2026-10-31 MDT: 045 retry in; lead re-run green. TL4 phone preview up for Dustin.
+- 2026-10-31 MDT: Dustin OK'd the TL4 preview. Committed; PR stacked on TL3. Next: TL5 Coach Suggestions.

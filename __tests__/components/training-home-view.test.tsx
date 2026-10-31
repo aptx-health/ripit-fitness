@@ -45,6 +45,7 @@ vi.mock('next/navigation', () => ({
 }))
 
 interface Home {
+  pinned: Array<{ id: string; name: string; exerciseCount: number; pinnedAt: Date }>
   upNext: null | {
     programId: string
     programName: string
@@ -91,8 +92,8 @@ const CURRENT = {
   workoutsDone: 3,
   workoutsTotal: 10,
 }
-const FULL: Home = { upNext: UP_NEXT, recent: RECENT, currentProgram: CURRENT }
-const EMPTY: Home = { upNext: null, recent: [], currentProgram: null }
+const FULL: Home = { upNext: UP_NEXT, pinned: [], recent: RECENT, currentProgram: CURRENT }
+const EMPTY: Home = { upNext: null, pinned: [], recent: [], currentProgram: null }
 
 async function renderHome(home: Home) {
   const mod = (await load('@/components/training/TrainingHome')) as { default: ComponentType<{ home: Home }> }
@@ -144,7 +145,7 @@ describe('training home view: sections', () => {
   })
 
   it('works with sessions only: no program sections and no empty state', async () => {
-    await renderHome({ upNext: null, recent: RECENT, currentProgram: null })
+    await renderHome({ upNext: null, pinned: [], recent: RECENT, currentProgram: null })
     expect(screen.getByText(/recent workouts/i)).toBeTruthy()
     expect(screen.queryByText(/up next/i)).toBeNull()
     expect(screen.queryByText(/current program/i)).toBeNull()
@@ -152,7 +153,7 @@ describe('training home view: sections', () => {
   })
 
   it('works with a program only: no Recent Workouts', async () => {
-    await renderHome({ upNext: UP_NEXT, recent: [], currentProgram: CURRENT })
+    await renderHome({ upNext: UP_NEXT, pinned: [], recent: [], currentProgram: CURRENT })
     expect(screen.queryByText(/recent workouts/i)).toBeNull()
     expect(screen.getByText(/up next/i)).toBeTruthy()
   })
@@ -207,7 +208,7 @@ describe('training home view: Recent Workouts', () => {
   })
 
   it('omits the duration when it is unknown', async () => {
-    await renderHome({ upNext: null, currentProgram: null, recent: [RECENT[2]] })
+    await renderHome({ upNext: null, pinned: [], currentProgram: null, recent: [RECENT[2]] })
     expect(screen.queryByText(/\bmin\b|\d+h \d+m/)).toBeNull()
   })
 
