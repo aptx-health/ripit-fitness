@@ -7,6 +7,19 @@ import type {
   UpdateExerciseDefinitionInput,
 } from '@/lib/validators/exercise-definition'
 import {
+  type AnchorChanges,
+  anchorSummary,
+  anchorsBefore,
+  BalanceConflict,
+  checkAnchorChanges,
+  checkTargetChanges,
+  swapAnchors,
+  swapTargets,
+  type TargetChanges,
+  targetSummary,
+  targetsBefore,
+} from './balance'
+import {
   checkCreate,
   checkUpdate,
   createData,
@@ -17,13 +30,21 @@ import {
 } from './exercise-definition'
 import { checkProgram, createProgram, programSummary } from './program'
 
-export const PROPOSAL_KINDS = ['exercise_definition.create', 'exercise_definition.update', 'program.create'] as const
+export const PROPOSAL_KINDS = [
+  'exercise_definition.create',
+  'exercise_definition.update',
+  'program.create',
+  'anchors.update',
+  'balance_targets.update',
+] as const
 export type ProposalKind = (typeof PROPOSAL_KINDS)[number]
 
 export const PROPOSAL_KIND_LABELS: Record<ProposalKind, string> = {
   'exercise_definition.create': 'New exercise',
   'exercise_definition.update': 'Exercise edit',
   'program.create': 'New program',
+  'anchors.update': 'Anchor change',
+  'balance_targets.update': 'Target change',
 }
 
 export const PROPOSAL_STATUSES = ['pending', 'applied', 'rejected', 'reverted', 'conflict'] as const
@@ -59,6 +80,24 @@ export type CreateProposalInput =
       kind: 'program.create'
       rationale: string
       program: unknown
+      feedbackId?: string
+    }
+  | {
+      userId: string
+      agentTokenId: string
+      kind: 'anchors.update'
+      rationale: string
+      /** Pattern -> exercise ids; only the named patterns change. */
+      changes: Record<string, unknown>
+      feedbackId?: string
+    }
+  | {
+      userId: string
+      agentTokenId: string
+      kind: 'balance_targets.update'
+      rationale: string
+      /** FAU -> target; only the named FAUs change. */
+      changes: Record<string, unknown>
       feedbackId?: string
     }
 
@@ -161,6 +200,32 @@ export async function createProposal(
       rationale: input.rationale,
       payload: check.program as unknown as Prisma.InputJsonObject,
     }
+  } else if (input.kind === 'anchors.update') {
+    const check = await checkAnchorChanges(prisma, input.changes, input.userId)
+    if (!check.ok) return check
+    const before = await anchorsBefore(prisma, input.userId, check.changes)
+    data = {
+      userId: input.userId,
+      agentTokenId: input.agentTokenId,
+      kind: input.kind,
+      summary: anchorSummary(check.changes),
+      rationale: input.rationale,
+      payload: { changes: check.changes } as Prisma.InputJsonObject,
+      before: before as Prisma.InputJsonObject,
+    }
+  } else if (input.kind === 'balance_targets.update') {
+    const check = checkTargetChanges(input.changes)
+    if (!check.ok) return check
+    const before = await targetsBefore(prisma, input.userId, check.changes)
+    data = {
+      userId: input.userId,
+      agentTokenId: input.agentTokenId,
+      kind: input.kind,
+      summary: targetSummary(check.changes, before),
+      rationale: input.rationale,
+      payload: { changes: check.changes } as Prisma.InputJsonObject,
+      before: before as Prisma.InputJsonObject,
+    }
   } else {
     const current = await prisma.exerciseDefinition.findFirst({
       where: { id: input.id, ...visibleTo(input.userId) },
@@ -253,6 +318,33 @@ export async function approveProposal(
         })
       }
 
+      if (existing.kind === 'anchors.update' || existing.kind === 'balance_targets.update') {
+        const { changes } = existing.payload as { changes: Record<string, unknown> }
+        const before = existing.before as Record<string, unknown>
+        try {
+          if (existing.kind === 'anchors.update') {
+            const check = await checkAnchorChanges(tx, changes, userId)
+            if (!check.ok) throw new Refusal('invalid', check.error)
+            await swapAnchors(tx, userId, before as AnchorChanges, check.changes)
+          } else {
+            const check = checkTargetChanges(changes)
+            if (!check.ok) throw new Refusal('invalid', check.error)
+            await swapTargets(tx, userId, before as TargetChanges, check.changes)
+          }
+        } catch (error) {
+          if (error instanceof BalanceConflict) {
+            throw new Refusal('conflict', `${error.message} changed after the proposal was made`)
+          }
+          throw error
+        }
+        // Revert restores the touched keys' values from before approve.
+        await resolveLinkedFeedback(tx, existing, userId)
+        return tx.proposal.update({
+          where: { id: proposalId },
+          data: { inverse: before as Prisma.InputJsonObject, error: null },
+        })
+      }
+
       const { id, changes } = existing.payload as unknown as UpdatePayload
       const before = existing.before as Record<string, unknown>
       const check = await checkUpdate(tx, id, changes, userId)
@@ -291,6 +383,14 @@ export async function approveProposal(
     return { ok: true, proposal }
   } catch (error) {
     if (error instanceof Refusal) return refuseApproval(prisma, proposalId, error.code, error.message)
+    // Settings or the profile row was created by someone else while approving.
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2002' &&
+      (existing.kind === 'anchors.update' || existing.kind === 'balance_targets.update')
+    ) {
+      return refuseApproval(prisma, proposalId, 'conflict', 'settings changed while approving')
+    }
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
       return refuseApproval(prisma, proposalId, 'invalid', 'an exercise with this name already exists')
     }
@@ -345,8 +445,10 @@ export async function rejectProposal(
 /**
  * Undo an applied proposal. An update restores the fields it changed, unless the
  * definition was edited since approve (conflict); a create
- * deletes the definition unless a workout already uses it. A program create
- * can't be reverted; the program is deleted from Programs like any other.
+ * deletes the definition unless a workout already uses it. An anchor or target
+ * change restores the touched keys unless one moved since approve (conflict).
+ * A program create can't be reverted; the program is deleted from Programs
+ * like any other.
  */
 export async function revertProposal(
   prisma: PrismaClient,
@@ -374,6 +476,24 @@ export async function revertProposal(
         data: { status: 'reverted', decidedAt: new Date() },
       })
       if (claimed.count === 0) throw new Refusal('not_applied', 'proposal is not applied')
+
+      if (existing.kind === 'anchors.update' || existing.kind === 'balance_targets.update') {
+        // Only restore if every touched key still holds what approve wrote.
+        const { changes } = existing.payload as { changes: Record<string, unknown> }
+        try {
+          if (existing.kind === 'anchors.update') {
+            await swapAnchors(tx, userId, changes as AnchorChanges, existing.inverse as AnchorChanges)
+          } else {
+            await swapTargets(tx, userId, changes as TargetChanges, existing.inverse as TargetChanges)
+          }
+        } catch (error) {
+          if (error instanceof BalanceConflict) {
+            throw new Refusal('conflict', `${error.message} changed after the proposal was applied`)
+          }
+          throw error
+        }
+        return tx.proposal.findUniqueOrThrow({ where: { id: proposalId } })
+      }
 
       const inverse = existing.inverse as unknown as CreateInverse | UpdateInverse
       if (inverse.op === 'delete') {

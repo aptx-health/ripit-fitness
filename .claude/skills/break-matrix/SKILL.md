@@ -1,7 +1,7 @@
 ---
 name: break-matrix
-description: Use when you must prove a new test file can fail (handoff-test-builder step 7) by running it against a scratch fake with one rule broken at a time; runs the variants in parallel and only the targeted tests, so a 50-variant matrix takes minutes, not tens of minutes.
-version: 0.1.0
+description: Use when you must prove a new test file can fail (handoff-test-builder step 7) by running it against a scratch fake with one rule broken at a time; each variant runs only the tests aimed at its break, in small parallel batches with visible progress.
+version: 0.2.0
 author: Dustin Mays, Claude
 license: MIT
 metadata:
@@ -12,49 +12,54 @@ metadata:
 
 # Break matrix
 
-Proves a test file catches each rule it claims to test. You run the tests against a **scratch fake** that implements the spec correctly (must pass), then against variants of the fake with **one rule broken each** (each must fail, and only the tests aimed at that rule).
+Proves a test file catches each rule it claims to test. You run the tests against a **scratch fake** that implements the spec correctly (must pass), then against variants of the fake with **one rule broken each** (each must fail the tests aimed at that rule).
 
-Used from `handoff-test-builder` step 7. This skill is only about how to run the matrix fast.
+Used from `handoff-test-builder` step 7. This skill is about how to run the matrix at a sensible cost.
 
-## Why it is slow, and what fixes it
+## Scale: what it costs
 
-Each run is its own vitest process. With a testcontainers database, each process starts a Postgres container and pushes the schema (about 10 to 15 seconds). Running 50 variants one after another costs about 10 minutes. The variants share no state, so:
+Measured on a 162-test Gherkin file with testcontainers Postgres (Colima, one laptop):
 
-1. **Run variants in parallel.** One process per variant, 4 at a time (`xargs -P 4`). Each gets its own container on a random port. Go to 6 if the machine copes; drop to 2 if tests start timing out (low CPU or RAM in Colima or Docker causes false failures).
-2. **Run only what the break should hit.** Keep the file under test, skip other files, and use `-t "<name>"` when you already know which tests a variant targets. Run the full file once for the baseline.
-3. **Share one container (optional).** Alias the repo's test-database module to a scratch one that connects to a single persistent Postgres, and reset data between tests. Saves the container start per variant. Only worth it above about 30 variants.
-4. **Don't start a database for pure logic.** If a break only touches pure functions, test it without the container.
+- One full-file run is about 25 s. Almost all of it is per-test database seeding, which is CPU-bound. Container start is only 3 to 5 s of it.
+- Running variants in parallel helps only until the CPUs are full: 6 at once took 180 s for 12 full-file variants (about 15 s each), barely better than serial.
+- So **60 full-file variants is about 15 minutes**. Don't run a matrix that way.
+- A variant that runs only the 1 to 5 tests aimed at its break takes about 8 to 12 s, mostly the one container start.
+
+Sharing one Postgres container across variants was tried and saved only the 3 to 5 s start. It added moving parts (a template database, a resolver plugin) for little gain, so it was removed. Don't re-add it.
+
+## Always run targeted tests
+
+Every variant runs `vitest -t "<regex>"` with only the tests aimed at that break. Run the **full file once**, for the baseline (all must pass). Never run the full file per variant.
+
+1. For each break, write the regex of the test names it should fail (describe and test names; use `a|b` for several). Put them in `breaks.tsv`, one per line: `break_name<TAB>regex`.
+2. A targeted run proves the break is **killed**. It does not prove the break fails *only* its targets. If you want that for a suspicious break, rerun that one variant on the full file.
+3. With Gherkin step files (vitest-cucumber), each step is its own test and `-t` would skip the Background steps that build the scenario's state, so the scripts add `|Background` to every regex. If you run `vitest -t` by hand, add it yourself. Failures such as `Cannot read properties of undefined` mean missing setup, not a caught break.
+4. A break that fails no targeted test **survived**: add a test, or say in the packet why it is unobservable. Check the regex matches something first (the output says how many tests ran).
 
 ## Procedure
 
 1. **Build the fake outside the repo** (the scratchpad dir). Alias it over the module under test with a scratch vitest config: `mergeConfig` of the repo config, `root` set to the repo, regex aliases like `/^@\/lib\/foo$/`. Import `mergeConfig` from the repo's `node_modules/vitest/dist/config.js` by absolute path, and symlink the repo's `node_modules` into the scratch dir so bare imports resolve.
 2. **Make breaks switchable by one env var**, e.g. `FAKE_BREAK=name`, read in the fake. One name = one broken rule.
-3. **Baseline:** run with no break. Everything must pass. If not, the tests or the fake are wrong; fix before going on.
-4. **Run the matrix in parallel** with a script like this, with the same env vars you use for normal runs (for testcontainers on Colima: `DOCKER_HOST`, `TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE`, `TESTCONTAINERS_RYUK_DISABLED`):
-
-   ```bash
-   BREAKS="warmup units sort ..."
-   run() {
-     FAKE_BREAK=$1 npx vitest run --config "$SP/vitest.fake.config.ts" "$FILE" 2>&1 \
-       | grep -E "^ FAIL|Tests  " | sed -E 's/ FAIL  .*> //' | cut -c1-110 | sort -u \
-       | sed "s/^/[$1] /"
-   }
-   export -f run; export SP FILE
-   printf '%s\n' $BREAKS | xargs -P 4 -I{} bash -c 'run {}'
-   ```
-   Output from parallel jobs interleaves by line; the `[name]` prefix keeps each line attributable. Sort the output if you want it grouped.
+3. **Baseline:** run the full file with no break. Everything must pass. If not, the tests or the fake are wrong; fix before going on.
+4. **Run the matrix in batches** with `scripts/run-batch.sh` (set `REPO`, `FILE`, `SCRATCH`, and `PAR` if you want to change the default of 4):
+   - One batch per call, about 12 variants, run in the background. Say "batch N of M done" between batches so progress is visible.
+   - It prints one line per variant as it finishes: `killed by N tests`, `SURVIVED` (with how many tests ran), `TIMEOUT`, or `ERROR` with the first error line, so a crashed run is never read as "failed as intended". Logs are per variant.
+   - Stopping a run means killing the xargs and vitest children too. Ryuk is disabled, so also check for leftover Postgres containers (`docker ps`) and remove only the ones you started.
 5. **Read the results:**
-   - A break that fails **no tests** survived: add a test, or say in the packet why it is unobservable.
-   - A break that fails **unrelated tests** is too broad, or a test is too coupled. Say so.
-   - A break that fails the expected tests only is proven.
+   - `SURVIVED` and the regex matched tests: the break is not caught.
+   - `ERROR`: the run did not execute; fix the setup, don't count it.
+   - `killed`: proven, for the tests you aimed at.
 6. **Delete the fake and the scratch config** when done.
 
 ## Report
 
-In the packet, list the breaks by group (not one line each), say how many failed only their targets, and name any survivors and why.
+In the packet, list the breaks by group (not one line each), say how many were killed, and name any survivors and why. Say the matrix was run targeted, with one full-file baseline.
 
 ## Pitfalls
 
-- Two rules that share a code path (for example, a tab and a leading-whitespace guard) can hide each other in a break. Check each variant fails the tests you meant; make the fake's rules independent if not.
-- Timeouts under parallel load look like failures. Re-run a surprising variant alone before believing it.
+- Two rules that share a code path (for example, a tab and a leading-whitespace guard) can hide each other in a break. Make the fake's rules independent.
+- A kill caused by missing setup (a skipped Background step) is a false kill. The runner flags these as `SETUP errors`; check the log before counting it.
+- A `-t` regex that matches no tests passes silently. Check the "ran" count.
+- Timeouts under parallel load look like failures. Rerun a surprising variant alone before believing it.
+- macOS has no `timeout`; `run-batch.sh` uses `gtimeout` if installed and otherwise runs without a time limit, and says so.
 - Don't run breaks against the real implementation. They are only for the scratch fake.
