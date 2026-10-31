@@ -29,6 +29,21 @@ import {
   visibleTo,
 } from './exercise-definition'
 import { checkProgram, createProgram, programSummary } from './program'
+import {
+  applySavedWorkoutUpdate,
+  checkWorkoutChanges,
+  checkWorkoutCreate,
+  createSavedWorkout,
+  createSummary,
+  deleteSavedWorkout,
+  fieldsBefore,
+  restoreSavedWorkout,
+  SavedWorkoutConflict,
+  updateSummary,
+  type WorkoutChanges,
+  type WorkoutCreateInput,
+  type WorkoutFields,
+} from './saved-workout'
 
 export const PROPOSAL_KINDS = [
   'exercise_definition.create',
@@ -36,6 +51,8 @@ export const PROPOSAL_KINDS = [
   'program.create',
   'anchors.update',
   'balance_targets.update',
+  'saved_workout.create',
+  'saved_workout.update',
 ] as const
 export type ProposalKind = (typeof PROPOSAL_KINDS)[number]
 
@@ -45,6 +62,8 @@ export const PROPOSAL_KIND_LABELS: Record<ProposalKind, string> = {
   'program.create': 'New program',
   'anchors.update': 'Anchor change',
   'balance_targets.update': 'Target change',
+  'saved_workout.create': 'New saved workout',
+  'saved_workout.update': 'Saved workout change',
 }
 
 export const PROPOSAL_STATUSES = ['pending', 'applied', 'rejected', 'reverted', 'conflict'] as const
@@ -100,6 +119,24 @@ export type CreateProposalInput =
       changes: Record<string, unknown>
       feedbackId?: string
     }
+  | {
+      userId: string
+      agentTokenId: string
+      kind: 'saved_workout.create'
+      rationale: string
+      workout: unknown
+      feedbackId?: string
+    }
+  | {
+      userId: string
+      agentTokenId: string
+      kind: 'saved_workout.update'
+      rationale: string
+      savedWorkoutId: string
+      /** name, notes and exercises; only the given fields change. */
+      changes: unknown
+      feedbackId?: string
+    }
 
 export type CreateProposalResult =
   | { ok: true; proposal: Proposal }
@@ -123,6 +160,11 @@ interface CreateInverse {
   id: string
 }
 
+interface SavedWorkoutUpdatePayload {
+  savedWorkoutId: string
+  changes: WorkoutChanges
+}
+
 // Thrown inside a transaction to roll it back; carries the result to return.
 class Refusal extends Error {
   constructor(
@@ -130,6 +172,16 @@ class Refusal extends Error {
     message: string
   ) {
     super(message)
+  }
+}
+
+/** Run a saved-workout write, turning its conflict into a refusal. */
+async function asConflict(write: () => Promise<void>): Promise<void> {
+  try {
+    await write()
+  } catch (error) {
+    if (error instanceof SavedWorkoutConflict) throw new Refusal('conflict', error.message)
+    throw error
   }
 }
 
@@ -225,6 +277,35 @@ export async function createProposal(
       rationale: input.rationale,
       payload: { changes: check.changes } as Prisma.InputJsonObject,
       before: before as Prisma.InputJsonObject,
+    }
+  } else if (input.kind === 'saved_workout.create') {
+    const check = await checkWorkoutCreate(prisma, input.workout, input.userId)
+    if (!check.ok) return check
+    data = {
+      userId: input.userId,
+      agentTokenId: input.agentTokenId,
+      kind: input.kind,
+      summary: createSummary(check.value),
+      rationale: input.rationale,
+      payload: check.value as unknown as Prisma.InputJsonObject,
+    }
+  } else if (input.kind === 'saved_workout.update') {
+    const current = await prisma.savedWorkout.findFirst({
+      where: { id: input.savedWorkoutId, userId: input.userId },
+      select: { id: true, name: true, notes: true, workoutData: true },
+    })
+    if (!current) return { ok: false, code: 'not_found', error: 'saved workout not found', field: 'savedWorkoutId' }
+    const check = await checkWorkoutChanges(prisma, input.changes, input.userId)
+    if (!check.ok) return check
+    data = {
+      userId: input.userId,
+      agentTokenId: input.agentTokenId,
+      kind: input.kind,
+      summary: updateSummary(current.name, check.value),
+      rationale: input.rationale,
+      payload: { savedWorkoutId: current.id, changes: check.value } as unknown as Prisma.InputJsonObject,
+      targetId: current.id,
+      before: fieldsBefore(current, check.value) as unknown as Prisma.InputJsonObject,
     }
   } else {
     const current = await prisma.exerciseDefinition.findFirst({
@@ -345,6 +426,34 @@ export async function approveProposal(
         })
       }
 
+      if (existing.kind === 'saved_workout.create') {
+        const check = await checkWorkoutCreate(tx, existing.payload, userId)
+        if (!check.ok) throw new Refusal('invalid', check.error)
+        const created = await createSavedWorkout(tx, userId, check.value, check.definitionNames)
+        const inverse: CreateInverse = { op: 'delete', id: created.id }
+        await resolveLinkedFeedback(tx, existing, userId)
+        return tx.proposal.update({
+          where: { id: proposalId },
+          data: { targetId: created.id, inverse: inverse as unknown as Prisma.InputJsonObject, error: null },
+        })
+      }
+
+      if (existing.kind === 'saved_workout.update') {
+        const { savedWorkoutId, changes } = existing.payload as unknown as SavedWorkoutUpdatePayload
+        const check = await checkWorkoutChanges(tx, changes, userId)
+        if (!check.ok) throw new Refusal('invalid', check.error)
+        const before = existing.before as WorkoutFields
+        await asConflict(() =>
+          applySavedWorkoutUpdate(tx, userId, savedWorkoutId, before, check.value, check.definitionNames)
+        )
+        // Revert restores the touched fields' values from before approve.
+        await resolveLinkedFeedback(tx, existing, userId)
+        return tx.proposal.update({
+          where: { id: proposalId },
+          data: { inverse: before as unknown as Prisma.InputJsonObject, error: null },
+        })
+      }
+
       const { id, changes } = existing.payload as unknown as UpdatePayload
       const before = existing.before as Record<string, unknown>
       const check = await checkUpdate(tx, id, changes, userId)
@@ -447,8 +556,10 @@ export async function rejectProposal(
  * definition was edited since approve (conflict); a create
  * deletes the definition unless a workout already uses it. An anchor or target
  * change restores the touched keys unless one moved since approve (conflict).
- * A program create can't be reverted; the program is deleted from Programs
- * like any other.
+ * A saved workout create deletes it unless Dustin started or edited it; a
+ * saved workout change restores the touched fields unless one moved since
+ * approve. A program create can't be reverted; the program is deleted from
+ * Programs like any other.
  */
 export async function revertProposal(
   prisma: PrismaClient,
@@ -492,6 +603,20 @@ export async function revertProposal(
           }
           throw error
         }
+        return tx.proposal.findUniqueOrThrow({ where: { id: proposalId } })
+      }
+
+      if (existing.kind === 'saved_workout.create') {
+        const { id } = existing.inverse as unknown as CreateInverse
+        await asConflict(() => deleteSavedWorkout(tx, userId, id, existing.payload as unknown as WorkoutCreateInput))
+        return tx.proposal.findUniqueOrThrow({ where: { id: proposalId } })
+      }
+
+      if (existing.kind === 'saved_workout.update') {
+        const { savedWorkoutId, changes } = existing.payload as unknown as SavedWorkoutUpdatePayload
+        await asConflict(() =>
+          restoreSavedWorkout(tx, userId, savedWorkoutId, changes, existing.inverse as unknown as WorkoutFields)
+        )
         return tx.proposal.findUniqueOrThrow({ where: { id: proposalId } })
       }
 

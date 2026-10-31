@@ -6,7 +6,7 @@ None
 Running quietly: None.
 
 ## Active
-- Agent tools slice 4: anchors and FAU targets for agents (read + propose). Worktree2, branch `feature/agent-balance`. Stage: PR into dev. See [initiatives/agent-tools/status.md](initiatives/agent-tools/status.md).
+- Agent tools slice 5: workout draft proposals (+ readOnlyHint). Worktree2, branch `feature/agent-workout-draft`. Stage: PR into dev, CI. Dustin pre-approved via /goal: no sign-off forms; done = PR into dev with CI green. See [initiatives/agent-tools/status.md](initiatives/agent-tools/status.md).
 
 ## Blocked
 None
@@ -15,6 +15,7 @@ None
 See [ROADMAP.md](ROADMAP.md).
 
 ## Recently completed
+- Agent tools slice 4 released to prod (ripit-infra #131, 2026-10-30): agents read anchors, targets and FAU volume and propose anchor and target changes. Items 024–029 accepted. The faster test harness (#1002) shipped in the same release.
 - Agent tools slice 3 released to prod (ripit-infra #130, 2026-10-27): stall and effort numbers, raw export (MCP + CSV), break-matrix skill. Items 016–023 accepted.
 - Agent tools slice 2 released to prod (ripit-infra #129 merged 2026-10-27).
 - Agent tools slice 2: items 009 to 015 accepted (2026-10-26). Agents read programs and propose new ones; no revert for programs; admin back arrow fix; phone-preview skill. First run under Project Structure V3.
