@@ -92,6 +92,7 @@ Connection pooling (`DATABASE_URL` vs `DIRECT_URL`, PgBouncer): `docs/DATABASE_C
 - Vitest plus Testcontainers: each run gets its own Postgres and Redis, so Docker must be running. Under Colima, export the env vars in `docs/TESTING.md` first.
 - Tests call lib functions directly with a `PrismaClient` (no HTTP) and assert database state.
 - Factories live in `lib/test/factories.ts` and the harness in `lib/test/database.ts`. Patterns: `docs/TESTING.md`.
+- One Postgres container serves the whole run; each test file gets its own database cloned from a template. `testDb.reset()` clears every table in about 6 ms, so don't add per-file `TRUNCATE` lists. Keep Ryuk on (don't set `TESTCONTAINERS_RYUK_DISABLED` locally).
 - **Proving new tests can fail:** use the `break-matrix` skill (`.claude/skills/break-matrix`). It runs the scratch-fake break variants in parallel and only the targeted tests, so a 50-variant matrix takes minutes, not tens of minutes.
 - Behaviour specs are Gherkin files in `features/`, run through `@amiceli/vitest-cucumber`. Write a spec only when its work item is about to be dispatched, never ahead of time.
 - **UI changes:** drive the real flow and take a screenshot before pushing. Use the `webapp-testing` skill and `docs/PLAYWRIGHT_RECIPES.md`, and add a recipe whenever discovering a flow took more than 5 minutes. When seeding agent proposals for screenshots, blank `DISCORD_PROPOSALS_WEBHOOK_URL`; `dev_personal` points at Dustin's real #proposals channel.

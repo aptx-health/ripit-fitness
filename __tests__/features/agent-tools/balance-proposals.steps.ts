@@ -336,30 +336,11 @@ async function extras(n: number, userId?: string): Promise<Def[]> {
   return out
 }
 
-async function wipeTables(prisma: PrismaClient) {
-  for (const t of [
-    'Proposal',
-    'Feedback',
-    'AgentToken',
-    'LoggedSet',
-    'Exercise',
-    'WorkoutCompletion',
-    'UserTrainingProfile',
-    'UserMuscleBalanceSettings',
-  ]) {
-    try {
-      await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${t}" CASCADE`)
-    } catch {
-      /* table missing */
-    }
-  }
-}
 
 async function freshState(): Promise<State> {
   const db = await getTestDatabase()
   await db.reset()
   const prisma = db.getPrismaClient()
-  await wipeTables(prisma)
   const user = await createTestUser()
   const other = await createTestUser()
   const next = {

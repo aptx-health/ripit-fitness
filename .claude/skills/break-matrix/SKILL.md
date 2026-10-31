@@ -18,14 +18,11 @@ Used from `handoff-test-builder` step 7. This skill is about how to run the matr
 
 ## Scale: what it costs
 
-Measured on a 162-test Gherkin file with testcontainers Postgres (Colima, one laptop):
+Measured 2026-10-30 after the harness change (one Postgres container per run, a database per file cloned from a template, and a single-statement `reset()`; see `docs/TESTING.md`):
 
-- One full-file run is about 25 s. Almost all of it is per-test database seeding, which is CPU-bound. Container start is only 3 to 5 s of it.
-- Running variants in parallel helps only until the CPUs are full: 6 at once took 180 s for 12 full-file variants (about 15 s each), barely better than serial.
-- So **60 full-file variants is about 15 minutes**. Don't run a matrix that way.
-- A variant that runs only the 1 to 5 tests aimed at its break takes about 8 to 12 s, mostly the one container start.
-
-Sharing one Postgres container across variants was tried and saved only the 3 to 5 s start. It added moving parts (a template database, a resolver plugin) for little gain, so it was removed. Don't re-add it.
+- The full suite (1,422 tests, 85 files) takes about 12 s. The 168-test balance file takes about 4 s on its own, most of it vitest startup and the one container start.
+- Before that change, the same file took about 25 s, because every test spent ~157 ms resetting the database. Older numbers in work items (15-minute matrices, 8 to 12 s per variant) predate the change.
+- Each variant still pays vitest startup plus one container start, so targeted `-t` runs (below) still save time. Parallel scaling has not been re-measured since Colima went to 6 CPUs.
 
 ## Always run targeted tests
 
@@ -44,7 +41,7 @@ Every variant runs `vitest -t "<regex>"` with only the tests aimed at that break
 4. **Run the matrix in batches** with `scripts/run-batch.sh` (set `REPO`, `FILE`, `SCRATCH`, and `PAR` if you want to change the default of 4):
    - One batch per call, about 12 variants, run in the background. Say "batch N of M done" between batches so progress is visible.
    - It prints one line per variant as it finishes: `killed by N tests`, `SURVIVED` (with how many tests ran), `TIMEOUT`, or `ERROR` with the first error line, so a crashed run is never read as "failed as intended". Logs are per variant.
-   - Stopping a run means killing the xargs and vitest children too. Ryuk is disabled, so also check for leftover Postgres containers (`docker ps`) and remove only the ones you started.
+   - Stopping a run means killing the xargs and vitest children too. Ryuk (testcontainers' reaper) removes a killed run's containers within about 10 s. Still check `docker ps`, and remove only the ones you started.
 5. **Read the results:**
    - `SURVIVED` and the regex matched tests: the break is not caught.
    - `ERROR`: the run did not execute; fix the setup, don't count it.

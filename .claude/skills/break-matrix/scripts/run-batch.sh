@@ -6,7 +6,7 @@
 # Gherkin (vitest-cucumber) runs each step as its own test, and -t would skip the Background steps that create the
 # scenario's state, so "|Background" is added to every regex. Failures that look like missing setup are flagged.
 # Runs one batch, prints one line per variant as it finishes, then a batch summary. Logs: $SCRATCH/logs/<break>.log
-export DOCKER_HOST=${DOCKER_HOST:-unix://$HOME/.colima/default/docker.sock} TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=${TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE:-/var/run/docker.sock} TESTCONTAINERS_RYUK_DISABLED=true
+export DOCKER_HOST=${DOCKER_HOST:-unix://$HOME/.colima/default/docker.sock} TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=${TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE:-/var/run/docker.sock}
 for v in REPO FILE SCRATCH; do [ -n "${!v}" ] || { echo "set $v"; exit 2; }; done
 N=${1:-1}; SIZE=${2:-12}; PAR=${PAR:-4}; LOGS=$SCRATCH/logs; mkdir -p "$LOGS"
 cd "$REPO" || { echo "cannot cd to $REPO"; exit 2; }
