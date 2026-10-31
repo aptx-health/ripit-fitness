@@ -191,3 +191,43 @@ Rows:
 
 ### Getting a token into a sandbox
 Create a separate agent token per sandbox in Workbench → Agent tokens and pass it in as an environment variable (for example `RIPIT_TOKEN`). Never put it in a prompt, a script file or a repo. Tokens can only read and propose, and one can be revoked on its own. This is documentation only, with no code.
+
+## Anchors and balance targets (added 2026-10-30 for slice 4, items 024 onward)
+
+Agents read Dustin's anchors, his FAU (functional anatomical unit) targets, and per-FAU volume, and propose changes to anchors and targets. Reads return raw numbers only. Discovery: `work/024-handback.md`.
+
+Stores:
+- Anchors are in `UserTrainingProfile.targetMovements`: `{ [pattern]: exerciseDefinitionId[] }`. The patterns are `ANCHOR_PATTERNS` (`lib/exercises/anchor-patterns.ts`), with at most 5 ids each.
+- Targets are in `UserMuscleBalanceSettings.targets`, the store Settings edits: 18 FAUs (`ALL_FAUS`, `lib/fau-volume.ts`), each 0–2 on a 0.05 step, default 1. `UserTrainingProfile.ratioTargets` isn't read or written in this slice.
+- Agents never change the calc settings (`lookbackDays`, `includeSecondary`, `secondaryWeight`, `excludeWarmups`).
+- Reads never write. There's no `getOrCreate`; when a row is missing, the defaults are used.
+
+### Read tools
+- `get_anchors()` returns `{ patterns: [{ pattern, displayName, exercises: [{ id, name, lastLoggedDaysAgo }] }], validPatterns, maxPerPattern: 5 }`.
+  - All 6 patterns are listed, with an empty `exercises` array where none is set.
+  - `lastLoggedDaysAgo` is whole days since that exercise was last logged in a completed, unarchived session, or null.
+- `get_balance_targets()` returns `{ targets: { [fau]: number }, isDefault, bounds: { min: 0, max: 2, step: 0.05 }, settings: { lookbackDays, includeSecondary, secondaryWeight, excludeWarmups } }`. All 18 FAUs are present, and `isDefault` is true when there's no settings row.
+- `get_fau_volume({ days? })`: `days` defaults to the user's `lookbackDays` (1–365). It returns `{ since, until, sessions, settings, faus: [...] }`, all 18 FAUs, each `{ fau, displayName, primarySets, secondarySets, target, lastTrainedDaysAgo }`.
+  - It counts completed, unarchived sessions within the last `days`.
+  - A set counts if it is non-warmup, or any set when `excludeWarmups` is false. A counted set adds 1 to `primarySets` for each of its definition's primary FAUs, and 1 to `secondarySets` for each secondary FAU.
+  - No weighting is applied: the agent applies `secondaryWeight` if it wants.
+  - `lastTrainedDaysAgo` is whole days since the last counted set touching that FAU as primary, within the window, or null.
+  - There are no status, share, deficit or neglected fields.
+
+### Proposal tools
+Kinds are `anchors.update` and `balance_targets.update`. Approve, reject and revert run through the existing service and admin pages. `feedbackId` works as before.
+- `propose_anchor_update({ changes: { [pattern]: exerciseDefinitionId[] }, rationale, feedbackId? })`.
+  - Each named pattern's list is replaced, and `[]` clears it. Unnamed patterns are untouched.
+  - Validation reports the first failure, with `field` set to the pattern name. A pattern must be valid, have at most 5 ids after removing duplicates, and every id must exist and be visible to the user (system or theirs).
+  - An exercise's own `movementPattern` isn't checked. Agents can see it with `get_exercise`.
+  - `changes` must name at least one pattern.
+- `propose_target_update({ changes: { [fau]: number }, rationale, feedbackId? })`.
+  - Only the named FAUs change.
+  - Each must be a valid FAU, with a value from 0 to 2 on the 0.05 step. An off-step value is refused, not rounded, with `field` set to the FAU.
+  - At least one FAU must be named.
+- `before` stores the touched keys' values at propose time: the current list or target, or the default when unset.
+- **Conflict:** at approve, if any touched key's live value differs from `before`, the proposal is marked `conflict` and nothing changes. Unrelated profile or settings edits don't conflict (don't use `updatedAt`).
+- **Approve:** merges the changes into the live value in one transaction. For targets with no settings row, it creates the row with the default calc settings. It stores `inverse` as the `before` values of the touched keys.
+- **Revert:** restores `inverse` for the touched keys. It's refused with `conflict` if any touched key's live value no longer equals what approve wrote; the proposal then stays `applied`.
+- Summaries look like `Update anchors: Hinge` or `Update targets: quads 1 → 1.3, hamstrings 1 → 1.2`.
+- **Admin detail page:** a FieldDiff with one row per touched key. The label is the pattern or FAU display name; anchors show exercise names, not ids. Revert is shown, as for exercise proposals.

@@ -1,5 +1,13 @@
-import type { PrismaClient } from '@prisma/client'
+import { Prisma, type PrismaClient } from '@prisma/client'
 import { z } from 'zod'
+import {
+  buildAnchors,
+  calcSettings,
+  computeFauVolume,
+  effectiveTargets,
+  TARGET_BOUNDS,
+  VOLUME_SESSION_STATUSES,
+} from '@/lib/insights/balance'
 import { computeEffortSummary, EFFORT_SESSION_STATUSES, WEEK_MS } from '@/lib/insights/effort'
 import { decodeCursor, EXPORT_COLUMNS, encodeCursor, fetchExportRows, parseRange } from '@/lib/insights/export'
 import { computeStallSignals, STALL_SESSION_STATUSES } from '@/lib/insights/stall'
@@ -8,6 +16,7 @@ import type { Notify } from '@/lib/notify'
 import { visibleTo } from '@/lib/proposals/exercise-definition'
 import { issueField, programInput, programTreeSelect } from '@/lib/proposals/program'
 import { createProposal, PROPOSAL_STATUSES } from '@/lib/proposals/service'
+import { normalizeTargetMovements } from '@/lib/user-training-profile'
 import { VALID_CATEGORIES, VALID_STATUSES } from '@/types/feedback'
 
 /**
@@ -52,6 +61,12 @@ const feedbackId = z.string().min(1).optional().describe('Id of the feedback (fr
 
 const rationale = z.string().trim().min(1).max(2000).describe('Why this change is worth making')
 
+// Domain rules (valid keys, limits, visibility) are the proposal service's, so
+// each failure is named by its pattern or FAU.
+const nonEmpty = (o: object) => Object.keys(o).length > 0
+
+const DAY_MS = 24 * 60 * 60 * 1000
+
 const schemas = {
   search_exercises: z.object({
     query: z.string().min(1).max(100),
@@ -78,6 +93,11 @@ const schemas = {
     cursor: z.string().optional().describe("The previous page's nextCursor"),
     limit: z.number().int().min(1).max(2000).optional().describe('Rows per page; defaults to 1000'),
   }),
+  get_anchors: z.object({}),
+  get_balance_targets: z.object({}),
+  get_fau_volume: z.object({
+    days: z.number().int().min(1).max(365).optional().describe("Window in days; defaults to the user's lookbackDays"),
+  }),
   propose_exercise_create: z.object({
     definition: z.object(definitionFields).strict(),
     rationale,
@@ -91,6 +111,22 @@ const schemas = {
   }),
   propose_program_create: z.object({
     program: programInput,
+    rationale,
+    feedbackId,
+  }),
+  propose_anchor_update: z.object({
+    changes: z
+      .record(z.string(), z.array(z.string()))
+      .refine(nonEmpty, 'changes must name at least one pattern')
+      .describe('Pattern -> up to 5 exercise ids, replacing that pattern; [] clears it. Unnamed patterns are untouched'),
+    rationale,
+    feedbackId,
+  }),
+  propose_target_update: z.object({
+    changes: z
+      .record(z.string(), z.number())
+      .refine(nonEmpty, 'changes must name at least one FAU')
+      .describe('FAU -> target, 0 to 2 in steps of 0.05. Unnamed FAUs are untouched'),
     rationale,
     feedbackId,
   }),
@@ -117,6 +153,16 @@ const descriptions: Record<ToolName, string> = {
     'Per rolling 7-day week (index 0 = last 7 days): working and rated sets, average effort (RPE, or 10 - RIR), effort distribution, share at 9+ and 10, and session RPE. Raw numbers only.',
   export_training_data:
     'Raw logged sets (warmups included and flagged) from completed and abandoned workouts in a date range, as rows in the listed column order, paged with nextCursor. Nothing is converted. For large pulls in a script, GET /api/agent/export.csv?since=&until= with the same bearer token returns the whole range (up to 3 years) as one CSV.',
+  get_anchors:
+    'The anchor exercises picked for each of the 6 movement patterns, in stored order, with whole days since each was last logged (null if never).',
+  get_balance_targets:
+    'Muscle-balance target per FAU (all 18; 1 when unset), whether they are all defaults, the allowed bounds, and the calc settings (read-only to agents).',
+  get_fau_volume:
+    "Per FAU (all 18), raw counts over the window: primarySets (counted sets of exercises with it as a primary FAU), secondarySets (as a secondary FAU, unweighted), its target and days since last trained as primary. Warmups count only when excludeWarmups is off. Apply secondaryWeight yourself if you want it.",
+  propose_anchor_update:
+    'Propose new anchor exercises for one or more patterns. Nothing changes until the user approves it.',
+  propose_target_update:
+    'Propose new muscle-balance targets for one or more FAUs. Calc settings cannot be changed. Nothing changes until the user approves it.',
   propose_exercise_create:
     'Propose a new exercise definition. Nothing changes until the user approves it in the admin Workbench.',
   propose_exercise_update:
@@ -334,6 +380,85 @@ const handlers: { [N in ToolName]: Handler<N> } = {
     return { weeks: computeEffortSummary(sessions, count, now) }
   },
 
+  async get_anchors(prisma, ctx) {
+    const now = new Date()
+    const profile = await prisma.userTrainingProfile.findUnique({
+      where: { userId: ctx.userId },
+      select: { targetMovements: true },
+    })
+    const anchors = normalizeTargetMovements(profile?.targetMovements)
+    const ids = [...new Set(Object.values(anchors).flat())]
+    if (ids.length === 0) return buildAnchors(anchors, new Map(), new Map(), now)
+
+    const definitions = await prisma.exerciseDefinition.findMany({
+      where: { id: { in: ids }, ...visibleTo(ctx.userId) },
+      select: { id: true, name: true },
+    })
+    // Latest completed, unarchived session per exercise, in one grouped query.
+    const logged = await prisma.$queryRaw<Array<{ id: string; last: Date }>>`
+      SELECT e."exerciseDefinitionId" AS id, MAX(c."completedAt") AS last
+      FROM "LoggedSet" ls
+      JOIN "Exercise" e ON e.id = ls."exerciseId"
+      JOIN "WorkoutCompletion" c ON c.id = ls."completionId"
+      WHERE ls."userId" = ${ctx.userId}
+        AND c."userId" = ${ctx.userId}
+        AND c.status = 'completed'
+        AND c."isArchived" = false
+        AND e."exerciseDefinitionId" IN (${Prisma.join(ids)})
+      GROUP BY e."exerciseDefinitionId"`
+    return buildAnchors(
+      anchors,
+      new Map(definitions.map((d) => [d.id, d.name])),
+      new Map(logged.map((r) => [r.id, r.last])),
+      now
+    )
+  },
+
+  async get_balance_targets(prisma, ctx) {
+    const row = await prisma.userMuscleBalanceSettings.findUnique({ where: { userId: ctx.userId } })
+    return {
+      targets: effectiveTargets(row?.targets),
+      isDefault: !row,
+      bounds: TARGET_BOUNDS,
+      settings: calcSettings(row),
+    }
+  },
+
+  async get_fau_volume(prisma, ctx, { days }) {
+    const row = await prisma.userMuscleBalanceSettings.findUnique({ where: { userId: ctx.userId } })
+    const settings = calcSettings(row)
+    const now = new Date()
+    const since = new Date(now.getTime() - (days ?? settings.lookbackDays) * DAY_MS)
+    const completions = await prisma.workoutCompletion.findMany({
+      where: {
+        userId: ctx.userId,
+        status: { in: VOLUME_SESSION_STATUSES },
+        isArchived: false,
+        completedAt: { gte: since, lte: now },
+      },
+      select: {
+        completedAt: true,
+        loggedSets: {
+          select: {
+            isWarmup: true,
+            exercise: { select: { exerciseDefinition: { select: { primaryFAUs: true, secondaryFAUs: true } } } },
+          },
+        },
+      },
+    })
+    const sessions = completions.map((c) => ({
+      completedAt: c.completedAt,
+      sets: c.loggedSets.map((set) => ({ isWarmup: set.isWarmup, ...set.exercise.exerciseDefinition })),
+    }))
+    return {
+      since: since.toISOString(),
+      until: now.toISOString(),
+      sessions: completions.length,
+      settings,
+      faus: computeFauVolume(sessions, effectiveTargets(row?.targets), settings.excludeWarmups, now),
+    }
+  },
+
   async export_training_data(prisma, ctx, { since, until, cursor, limit }) {
     const range = parseRange(since, until, new Date())
     if (!range.ok) throw new ToolError(range.error, { field: range.field })
@@ -411,6 +536,28 @@ const handlers: { [N in ToolName]: Handler<N> } = {
       ctx.notify
     )
     if (!result.ok) throw new ToolError(result.error, { field: result.field, existingId: result.existingId })
+    const { id, status, summary } = result.proposal
+    return { proposalId: id, status, summary }
+  },
+
+  async propose_anchor_update(prisma, ctx, { changes, rationale, feedbackId }) {
+    const result = await createProposal(
+      prisma,
+      { userId: ctx.userId, agentTokenId: ctx.tokenId, kind: 'anchors.update', changes, rationale, feedbackId },
+      ctx.notify
+    )
+    if (!result.ok) throw new ToolError(result.error, { field: result.field })
+    const { id, status, summary } = result.proposal
+    return { proposalId: id, status, summary }
+  },
+
+  async propose_target_update(prisma, ctx, { changes, rationale, feedbackId }) {
+    const result = await createProposal(
+      prisma,
+      { userId: ctx.userId, agentTokenId: ctx.tokenId, kind: 'balance_targets.update', changes, rationale, feedbackId },
+      ctx.notify
+    )
+    if (!result.ok) throw new ToolError(result.error, { field: result.field })
     const { id, status, summary } = result.proposal
     return { proposalId: id, status, summary }
   },
