@@ -95,3 +95,50 @@ TL2 builds Up Next, Recent Workouts and Current Program, and leaves space for th
 - The bottom nav and desktop header highlight the right tab, with its gold underline, on every page. `/library/programs/*` highlights Training until TL3 adds the Library tab; after that it highlights Library. Today nothing is highlighted there. (Dustin, TL1 preview.)
 
 **Out of scope:** Coach Suggestions (TL5), Pinned Workouts (TL4), the nav and Library (TL3), a program draft whose program is no longer active (still rare; it stays as in TL1), and any change to the logger.
+
+## TL3 Library
+
+The Programs tab becomes **Library**, at `/library`: the place to manage workouts and programs. Most of today's Programs page is reused.
+
+**Navigation**
+- The bottom nav and desktop header become Training · Library · Workout (center) · Learn · Settings. The Library tab takes the Programs tab's place and links to `/library`, and its icon may stay the same.
+- `isTabActive`:
+  - Library is active on `/library` and everything under it, including `/library/programs/*`.
+  - Remove TL2's rule that made Training active on `/library/programs/*`.
+  - Library is also active on `/programs/new` and `/programs/*/edit`, which stay at their current addresses.
+
+**`/library` page**
+- **Title:** "LIBRARY", in the same style as today's "PROGRAMS".
+- **Content switch:** WORKOUTS | PROGRAMS, controlled by `?type=workouts|programs`. With no `type`, it shows Programs.
+- **Programs:** MY PROGRAMS | BROWSE, as today, with `?tab=browse` and `?cloning=`. A first-time user with no programs still lands on Browse, as today.
+- **Workouts:** My Workouts only. There's no Browse sub-tab yet (deferred), so no secondary switch is shown.
+- **Create action:** "+ Create New Program" appears only on Programs → My Programs. There's no create action on Workouts (deferred).
+
+**My Workouts**
+- Today's saved-workouts list (`SavedWorkoutsList`), unchanged in behaviour (start, open details, rename, delete), under the heading "MY WORKOUTS". Keep its "Start a freestyle workout" button.
+- An empty list keeps today's empty message.
+
+**My Programs**
+- Remove the big active-program strip (`ActiveProgramStrip`) and the "no active program" note above the tabs.
+- The active program is a normal entry in the list, shown first, with an ACTIVE badge and "Week X of Y" (TL1's current-week rule).
+- Every entry's expanded actions gain **VIEW**, which opens `/library/programs/<id>`. The existing actions stay: activate, edit, duplicate, delete.
+
+**Browse Programs:** unchanged.
+
+**Redirects** (keeping the rest of the query)
+- `/programs` → `/library?type=programs`, keeping `tab` and `cloning`.
+- `/workouts/saved` → `/library?type=workouts`.
+- `/community`, which already redirects to `/programs`, goes straight to `/library?type=programs&tab=browse`.
+
+**Links:** every link to the old list pages goes to the new addresses:
+- onboarding;
+- `CommunityProgramCard` (`?cloning=`);
+- `ProgramCompletionModal`;
+- `StrengthActivationModal`'s no-`onSkip` path;
+- the back links on `/programs/new` and `/programs/[id]/edit`;
+- `WorkoutRollupModal` and `QuickActionSheet` for saved workouts;
+- Training's empty-state "Find a program", which goes to `/library?type=programs&tab=browse`.
+
+**Program detail back link:** "← LIBRARY" to `/library?type=programs`, in place of "← TRAINING".
+
+**Out of scope:** Browse Workouts, Create New Workout, pinning (TL4), suggestions (TL5), and moving `/programs/new` and `/programs/[id]/edit`.

@@ -3,13 +3,14 @@
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import CommunityProgramsView from '@/components/community/CommunityProgramsView'
+import SavedWorkoutsList from '@/components/features/saved-workouts/SavedWorkoutsList'
+import MyProgramsList from '@/components/programs/MyProgramsList'
+import StrengthActivationModal from '@/components/StrengthActivationModal'
 import { useToast } from '@/components/ToastProvider'
 import { SegmentedControl } from '@/components/ui/SegmentedControl'
 import { useProgramAccess } from '@/hooks/useCustomProgramAccess'
 import { clientLogger } from '@/lib/client-logger'
-import StrengthActivationModal from '../StrengthActivationModal'
-import ActiveProgramStrip from './ActiveProgramStrip'
-import MyProgramsList from './MyProgramsList'
+import { type LibraryType, libraryHref, parseLibraryType } from '@/lib/library/links'
 
 type StrengthProgram = {
   id: string
@@ -52,7 +53,12 @@ type Props = {
   customProgramLimitBypass: boolean
 }
 
-export default function ConsolidatedProgramsView({
+/**
+ * The Library: WORKOUTS | PROGRAMS (`?type=`), and under Programs the
+ * MY PROGRAMS | BROWSE switch (`?tab=browse`) with the `?cloning=` progress
+ * flow that used to live on /programs.
+ */
+export default function LibraryView({
   strengthPrograms,
   communityPrograms,
   currentUserId,
@@ -65,11 +71,35 @@ export default function ConsolidatedProgramsView({
   const router = useRouter()
   const toast = useToast()
   // Default to Browse tab for first-time users (no programs yet) or when URL param says so
-  const tabParam = searchParams.get('tab')
   const isNewUser = strengthPrograms.length === 0
-  const [activeTab, setActiveTab] = useState<'my' | 'browse'>(
-    tabParam === 'browse' || isNewUser ? 'browse' : 'my'
-  )
+  // The switches follow the address. A first-time user defaults to Browse; a
+  // program being added (?cloning=) always shows My Programs.
+  const tabFrom = (params: URLSearchParams): 'my' | 'browse' => {
+    if (params.get('cloning')) return 'my'
+    const tab = params.get('tab')
+    if (tab === 'browse' || tab === 'my') return tab
+    return isNewUser ? 'browse' : 'my'
+  }
+  const [libraryType, setLibraryType] = useState<LibraryType>(() => parseLibraryType(searchParams.get('type')))
+  const [activeTab, setActiveTab] = useState<'my' | 'browse'>(() => tabFrom(searchParams))
+
+  // Re-read the switches when the address changes from outside (the Library
+  // tab, a link from the Workout sheet), but not for this view's own
+  // replaceState writes, which already match the state.
+  const search = searchParams.toString()
+  const [seenSearch, setSeenSearch] = useState(search)
+  const ownWrite = useRef<string | null>(null)
+  if (search !== seenSearch) {
+    setSeenSearch(search)
+    if (search !== ownWrite.current) {
+      setLibraryType(parseLibraryType(searchParams.get('type')))
+      setActiveTab(tabFrom(searchParams))
+    }
+  }
+  const writeUrl = (url: string) => {
+    ownWrite.current = new URL(url, window.location.href).searchParams.toString()
+    window.history.replaceState(null, '', url)
+  }
 
   // Cloning state
   const [cloningProgramId, setCloningProgramId] = useState<string | null>(null)
@@ -99,7 +129,7 @@ export default function ConsolidatedProgramsView({
       pollingIntervalRef.current = null
     }
     setCloningProgramId(null)
-    window.history.replaceState(null, '', '/programs')
+    writeUrl(libraryHref({ type: 'programs' }))
   }
 
   const handleCloneFailed = (programId: string, message?: string) => {
@@ -146,6 +176,7 @@ export default function ConsolidatedProgramsView({
 
           setActivationProgramId(programId)
           setShowActivationModal(true)
+          setLibraryType('programs')
           setActiveTab('my')
           cleanupCloningState()
           router.refresh()
@@ -206,6 +237,7 @@ export default function ConsolidatedProgramsView({
 
     if (cloningId && cloningId !== cloningProgramId) {
       setCloningProgramId(cloningId)
+      setLibraryType('programs')
       setActiveTab('my')
       startPolling(cloningId)
     }
@@ -219,15 +251,27 @@ export default function ConsolidatedProgramsView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, cloningProgramId])
 
+  const handleTypeChange = (type: LibraryType) => {
+    setLibraryType(type)
+    const url = new URL(window.location.href)
+    url.searchParams.set('type', type)
+    if (type === 'workouts') url.searchParams.delete('tab')
+    else if (activeTab === 'browse' || isNewUser) url.searchParams.set('tab', activeTab)
+    writeUrl(url.toString())
+  }
+
   const handleTabChange = (tab: 'my' | 'browse') => {
     setActiveTab(tab)
     const url = new URL(window.location.href)
     if (tab === 'browse') {
       url.searchParams.set('tab', 'browse')
+    } else if (isNewUser) {
+      // Without it, a first-time user's default would be Browse again.
+      url.searchParams.set('tab', 'my')
     } else {
       url.searchParams.delete('tab')
     }
-    window.history.replaceState(null, '', url.toString())
+    writeUrl(url.toString())
   }
 
   return (
@@ -236,69 +280,71 @@ export default function ConsolidatedProgramsView({
         {/* Header */}
         <div className="px-4 sm:px-0 mb-4">
           <h1 className="text-4xl font-bold text-foreground doom-title uppercase tracking-wider">
-            PROGRAMS
+            LIBRARY
           </h1>
         </div>
 
-        {/* Active Program Strip */}
-        <div className="px-4 sm:px-0 mb-4">
-          {activeProgram ? (
-            <ActiveProgramStrip
-              programId={activeProgram.id}
-              programName={activeProgram.name}
-              description={activeProgram.description}
-              currentWeek={activeWeekInfo?.weekNumber ?? null}
-              totalWeeks={activeWeekInfo?.totalWeeks ?? null}
-              weekCount={activeProgram._count.weeks}
-              targetDaysPerWeek={activeProgram.targetDaysPerWeek}
-            />
-          ) : (
-            <div className="border border-border border-l-4 border-l-muted-foreground bg-card doom-noise p-3 sm:p-4">
-              <p className="text-sm text-muted-foreground">
-                No active program — activate or browse one below
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Tab Toggle */}
+        {/* Content switch */}
         <div className="px-4 sm:px-0 mb-4">
           <SegmentedControl
-            aria-label="Programs view"
+            aria-label="Library content"
             tone="bold"
             options={[
-              { value: 'my', label: 'My Programs' },
-              { value: 'browse', label: 'Browse' },
+              { value: 'workouts', label: 'Workouts' },
+              { value: 'programs', label: 'Programs' },
             ]}
-            value={activeTab}
-            onChange={(next) => handleTabChange(next)}
+            value={libraryType}
+            onChange={(next) => handleTypeChange(next)}
           />
         </div>
 
-        {/* Tab Content */}
-        <div className="px-4 sm:px-0">
-          {activeTab === 'my' ? (
-            <MyProgramsList
-              programs={strengthPrograms}
-              cloningProgress={cloningProgress}
-              localCopyStatuses={localCopyStatuses}
-              deletedPrograms={deletedPrograms}
-              hasActiveProgram={!!activeProgram}
-              activeProgram={activeProgram ? { id: activeProgram.id, name: activeProgram.name } : null}
-              programCount={programCount}
-              hasAccess={hasAccess}
-              bypassLimit={bypassLimit}
-              maxPrograms={maxPrograms}
-            />
-          ) : (
-            <CommunityProgramsView
-              communityPrograms={communityPrograms}
-              currentUserId={currentUserId}
-              hasAccess={hasAccess}
-              maxPrograms={maxPrograms}
-            />
-          )}
-        </div>
+        {libraryType === 'workouts' ? (
+          <div className="px-4 sm:px-0">
+            <h2 className="mb-3 text-sm font-bold uppercase tracking-wider text-muted-foreground doom-label">
+              MY WORKOUTS
+            </h2>
+            <SavedWorkoutsList />
+          </div>
+        ) : (
+          <>
+            {/* Programs: mine or community */}
+            <div className="px-4 sm:px-0 mb-4">
+              <SegmentedControl
+                aria-label="Programs view"
+                options={[
+                  { value: 'my', label: 'My Programs' },
+                  { value: 'browse', label: 'Browse' },
+                ]}
+                value={activeTab}
+                onChange={(next) => handleTabChange(next)}
+              />
+            </div>
+
+            <div className="px-4 sm:px-0">
+              {activeTab === 'my' ? (
+                <MyProgramsList
+                  programs={strengthPrograms}
+                  cloningProgress={cloningProgress}
+                  localCopyStatuses={localCopyStatuses}
+                  deletedPrograms={deletedPrograms}
+                  activeProgram={activeProgram ? { id: activeProgram.id, name: activeProgram.name } : null}
+                  activeWeekInfo={activeWeekInfo}
+                  programCount={programCount}
+                  hasAccess={hasAccess}
+                  bypassLimit={bypassLimit}
+                  maxPrograms={maxPrograms}
+                />
+              ) : (
+                <CommunityProgramsView
+                  communityPrograms={communityPrograms}
+                  currentUserId={currentUserId}
+                  hasAccess={hasAccess}
+                  maxPrograms={maxPrograms}
+                />
+              )}
+            </div>
+          </>
+        )}
       </div>
 
       {/* Activation Modal */}

@@ -316,11 +316,13 @@ describe('activation modal: No, keep inactive', () => {
     expect(writes()).toEqual([])
   })
 
-  it('without onSkip, closes and goes to the programs list', async () => {
+  it('without onSkip, closes and goes to the Library programs list', async () => {
     const { onClose } = await renderModal()
     fireEvent.click(screen.getByRole('button', { name: /no, keep inactive/i }))
     expect(onClose).toHaveBeenCalledTimes(1)
-    expect(h.push).toHaveBeenCalledWith('/programs')
+    expect(h.push).toHaveBeenCalledTimes(1)
+    const to = new URL(h.push.mock.calls[0][0], 'http://x')
+    expect([to.pathname, to.searchParams.get('type')]).toEqual(['/library', 'programs'])
     expect(writes()).toEqual([])
   })
 })

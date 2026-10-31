@@ -10,6 +10,7 @@ import { FetchError } from '@/lib/api/fetch'
 import { clientLogger } from '@/lib/client-logger'
 import { formatDuration } from '@/lib/format/duration'
 import { pluralize } from '@/lib/format/pluralize'
+import { libraryHref } from '@/lib/library/links'
 import type { CurrentProgram, RecentSession, TrainingHomeData, UpNext } from '@/lib/training/home'
 import { programDetailHref } from '@/lib/training/program-href'
 
@@ -229,7 +230,7 @@ function EmptyHome() {
           {starting ? 'Starting…' : 'Start a workout'}
         </button>
         <Link
-          href="/programs"
+          href={libraryHref({ type: 'programs', tab: 'browse' })}
           className="flex items-center justify-center w-full py-3 border-2 border-border bg-transparent text-muted-foreground transition-all text-sm font-semibold uppercase tracking-wider doom-focus-ring hover:bg-muted/40 hover:border-primary hover:text-foreground"
         >
           Find a program

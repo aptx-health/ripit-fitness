@@ -1,7 +1,7 @@
-import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { Suspense } from 'react'
+import ProgramBackLink from '@/components/programs/ProgramBackLink'
 import StrengthWeekView from '@/components/StrengthWeekView'
 import { RestoringWorkoutSpinner } from '@/components/ui/RestoringWorkoutSpinner'
 import { isEditorRole } from '@/lib/admin/auth'
@@ -114,14 +114,7 @@ function ProgramDetailShell({ children }: { children?: React.ReactNode }) {
       <div className="max-w-2xl mx-auto sm:px-6 py-4">
         {/* pt-4 on top of the shell's py-4 puts the link where the settings subpages' sits (32px). */}
         <div className="px-4 sm:px-0 pt-4 mb-4">
-          {/* Same back link as the settings subpages. TL3 points it at the Library. */}
-          <Link
-            href="/training"
-            className="relative inline-flex items-center gap-1.5 text-sm font-medium uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground doom-focus-ring before:content-[''] before:absolute before:-inset-3"
-          >
-            <ArrowLeft size={16} aria-hidden="true" />
-            Training
-          </Link>
+          <ProgramBackLink />
         </div>
         <div className="px-4 sm:px-0">{children}</div>
       </div>

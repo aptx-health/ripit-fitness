@@ -4,6 +4,7 @@ import { Bookmark, BookmarkCheck, ChevronLeft, MessageSquarePlus, TrendingDown, 
 import Link from 'next/link'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
+import { libraryHref } from '@/lib/library/links'
 import type { RollupExercise, WorkoutRollup } from '@/lib/stats/workout-rollup'
 import { POST_SESSION_REFINEMENTS } from '@/types/feedback'
 import { EffortChips } from './EffortChips'
@@ -637,7 +638,7 @@ export function WorkoutRollupModal({ open, rollup, onClose }: WorkoutRollupModal
             <div className="px-4 pt-3">
               {savedWorkoutId ? (
                 <Link
-                  href="/workouts/saved"
+                  href={libraryHref({ type: 'workouts' })}
                   className="flex w-full items-center justify-center gap-2 px-4 py-3 border-2 border-border bg-muted text-sm font-bold uppercase tracking-wider doom-focus-ring"
                 >
                   <BookmarkCheck className="w-4 h-4 text-primary" />

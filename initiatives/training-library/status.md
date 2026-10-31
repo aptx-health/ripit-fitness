@@ -19,3 +19,11 @@
 - 2026-10-31 MDT: 040 review: ship with notes (2 low, 2 visual nits). Fixes sent to implementer.
 - 2026-10-31 MDT: 039 retry in; lead re-run green. TL2 phone preview up for Dustin.
 - 2026-10-31 MDT: Dustin OK'd the TL2 preview. Committed; PR stacked on TL1. Next: TL3 Library.
+- 2026-10-31 MDT: TL2 PR #1007 (stacked on #1006). TL3 on feature/library (stacked on TL2): spec + library.feature written; 041 tests dispatched to test-builder. Lead: Library defaults to Programs; Workouts has no Browse or create yet; My Programs entries gain VIEW.
+- 2026-10-31 MDT: TL2 PR #1007 checks: only smoke-test runs on a stacked PR (base isn't dev), and it passed. Tests, migrations and build run once it targets dev. Lead's local full run: green.
+- 2026-10-31 MDT: 041 accepted (73 new tests + 4 locked files updated on purpose; 49/49 breaks). 042 build dispatched to implementer.
+- 2026-10-31 MDT: 042 build back (lead re-run 1944 passed, tsc clean). 043 review dispatched with a visual check.
+- 2026-10-31 MDT: 043 review: fix first. The Library switch doesn't follow URL changes (e.g. tapping the Library tab from Workouts). Fix to the implementer, test to the test-builder. Settings SSR 500 added to the roadmap.
+- 2026-10-31 MDT: 041 follow-up: 8 tests that the view follows the address (6/6 breaks killed); 81/81 green on the tree. Waiting on the implementer's packet.
+- 2026-10-31 MDT: 042 retry in; lead re-run green. TL3 phone preview up for Dustin.
+- 2026-10-31 MDT: Dustin OK'd the TL3 preview. Committed; PR stacked on TL2. TL1–TL3 (the prod release set) are all in PRs. Next: TL4 Pinned workouts.

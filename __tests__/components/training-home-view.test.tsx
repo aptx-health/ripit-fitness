@@ -160,7 +160,8 @@ describe('training home view: sections', () => {
   it('shows a simple start when there is nothing at all', async () => {
     await renderHome(EMPTY)
     expect(screen.getByText(/start a workout/i)).toBeTruthy()
-    expect(screen.getByText(/find a program/i).closest('a')?.getAttribute('href')).toBe('/programs')
+    const find = new URL(screen.getByText(/find a program/i).closest('a')?.getAttribute('href') ?? '', 'http://x')
+    expect([find.pathname, find.searchParams.get('type'), find.searchParams.get('tab')]).toEqual(['/library', 'programs', 'browse'])
     expect(screen.queryByText(/up next|recent workouts|current program/i)).toBeNull()
   })
 })

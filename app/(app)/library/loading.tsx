@@ -1,4 +1,4 @@
-export default function ProgramsLoading() {
+export default function LibraryLoading() {
   return (
     <div className="bg-background p-6">
       <div className="max-w-6xl mx-auto space-y-6">
