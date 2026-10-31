@@ -7,8 +7,12 @@ import ProposalStatusBadge from '@/components/admin/proposals/ProposalStatusBadg
 import { isAdminRole } from '@/lib/admin/auth'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { ANCHOR_PATTERN_DISPLAY_NAMES, type AnchorPattern } from '@/lib/exercises/anchor-patterns'
+import { FAU_DISPLAY_NAMES } from '@/lib/fau-volume'
+import { effectiveTargets, formatTarget } from '@/lib/insights/balance'
 import type { ProgramInput } from '@/lib/proposals/program'
 import { PROPOSAL_KIND_LABELS, type ProposalKind } from '@/lib/proposals/service'
+import { normalizeTargetMovements } from '@/lib/user-training-profile'
 
 export const revalidate = 0
 
@@ -33,6 +37,50 @@ async function programDetail(payload: unknown, targetId: string | null, userId: 
 }
 
 /**
+ * One row per touched pattern or FAU. Anchor ids are shown as exercise names,
+ * resolved in one query; a pending proposal whose key moved shows the live value.
+ */
+async function balanceRows(
+  kind: string,
+  payload: unknown,
+  beforeJson: unknown,
+  pending: boolean,
+  userId: string
+): Promise<DiffRow[]> {
+  const { changes } = payload as { changes: Record<string, unknown> }
+  const before = (beforeJson ?? {}) as Record<string, unknown>
+
+  if (kind === 'balance_targets.update') {
+    const row = pending
+      ? await prisma.userMuscleBalanceSettings.findUnique({ where: { userId }, select: { targets: true } })
+      : null
+    const live = pending ? (effectiveTargets(row?.targets) as Record<string, number>) : null
+    return Object.entries(changes).map(([fau, after]) => ({
+      field: FAU_DISPLAY_NAMES[fau] ?? fau,
+      before: formatTarget(before[fau] as number),
+      after: formatTarget(after as number),
+      ...(live && live[fau] !== before[fau] && { current: formatTarget(live[fau]) }),
+    }))
+  }
+
+  const profile = pending
+    ? await prisma.userTrainingProfile.findUnique({ where: { userId }, select: { targetMovements: true } })
+    : null
+  const live = pending ? (normalizeTargetMovements(profile?.targetMovements) as Record<string, string[]>) : null
+  const lists = Object.keys(changes).flatMap((p) => [changes[p], before[p], live?.[p]]) as Array<string[] | undefined>
+  const ids = [...new Set(lists.flatMap((list) => list ?? []))]
+  const definitions = await prisma.exerciseDefinition.findMany({ where: { id: { in: ids } }, select: { id: true, name: true } })
+  const names = new Map(definitions.map((d) => [d.id, d.name]))
+  const named = (list: unknown) => ((list as string[] | undefined) ?? []).map((id) => names.get(id) ?? id)
+  return Object.entries(changes).map(([pattern, after]) => ({
+    field: ANCHOR_PATTERN_DISPLAY_NAMES[pattern as AnchorPattern] ?? pattern,
+    before: named(before[pattern]),
+    after: named(after),
+    ...(live && !same(live[pattern] ?? [], before[pattern]) && { current: named(live[pattern]) }),
+  }))
+}
+
+/**
  * One proposal: rationale, before/after field diff (or a program outline) and the decision buttons.
  * Agent text (summary, rationale, values) is rendered as plain text only.
  */
@@ -53,9 +101,10 @@ export default async function ProposalDetailPage({ params }: { params: Promise<{
 
   const isProgram = proposal.kind === 'program.create'
   const isCreate = proposal.kind === 'exercise_definition.create'
+  const isBalance = proposal.kind === 'anchors.update' || proposal.kind === 'balance_targets.update'
   const program = isProgram ? await programDetail(proposal.payload, proposal.targetId, user.id) : null
   const current =
-    proposal.targetId && !isProgram
+    proposal.targetId && !isProgram && !isBalance
       ? await prisma.exerciseDefinition.findUnique({ where: { id: proposal.targetId } })
       : null
 
@@ -63,6 +112,8 @@ export default async function ProposalDetailPage({ params }: { params: Promise<{
   if (isCreate) {
     const definition = proposal.payload as Record<string, unknown>
     rows = Object.entries(definition).map(([field, after]) => ({ field, after }))
+  } else if (isBalance) {
+    rows = await balanceRows(proposal.kind, proposal.payload, proposal.before, proposal.status === 'pending', user.id)
   } else if (!isProgram) {
     const { changes } = proposal.payload as { changes: Record<string, unknown> }
     const before = (proposal.before ?? {}) as Record<string, unknown>
