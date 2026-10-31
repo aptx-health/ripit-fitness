@@ -1,0 +1,7 @@
+Report: complete (031 saved-workout tests, red)
+Built __tests__/features/agent-tools/saved-workout-proposals.steps.ts, 199 tests, locked. 15 scenarios + registration/annotations, reads (no-write counting), create/update args, approve/revert both kinds, bounds, before/inverse shapes, workoutData, revert refusals, approve re-check, summaries.
+Red: 139 failed / 60 passed; all failures missing tools/kinds/annotations. Other agent-tools files pass alone. Biome, tsc clean.
+Pass-proof: fake 199/199; 46 one-rule breaks, all killed (one first-pass survivor was a fake mistake, fixed). Fake deleted; Ryuk on, no leaks.
+Needs call: 1) field as full path (spec) vs leaf issueField; 2) singular summary.
+Assumptions: before/inverse keys name/notes/exercises (workoutData shape); get_active_draft newest by startedAt, loggedSetCount working sets; create revert refused on any completion with savedWorkoutId or edit of name/notes/exercises (lastUsedAt-only untested); invalid approve must not leave applied; update revert of deleted row = conflict (create revert of deleted row untested); unknown-field refusal on exercise/set objects; annotations tested on listTools() only (HTTP pass-through for 032 to check); names from definition at approve (rename while pending tested).
+Outside: removed forced TESTCONTAINERS_RYUK_DISABLED from break-matrix run-batch.sh (global skill + worktree copy) and updated SKILL.md; uncommitted. Full-file run ~5 s now.

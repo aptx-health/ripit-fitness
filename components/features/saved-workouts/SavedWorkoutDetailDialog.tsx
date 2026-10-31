@@ -8,7 +8,8 @@ import { useToast } from '@/components/ToastProvider'
 import { clientLogger } from '@/lib/client-logger'
 import { pluralize } from '@/lib/format/pluralize'
 import { formatSavedWorkoutDate } from '@/lib/format/savedWorkoutDate'
-import type { SavedWorkoutData } from '@/types/saved-workout'
+import { describeSavedSets } from '@/lib/format/savedWorkoutSets'
+import type { SavedWorkoutData, SavedWorkoutExercise } from '@/types/saved-workout'
 import type { SavedWorkoutListItem } from './SavedWorkoutRow'
 
 type SavedWorkoutDetail = SavedWorkoutListItem & {
@@ -20,11 +21,9 @@ type Props = {
   onOpenChange: (open: boolean) => void
 }
 
-function extractExerciseNames(workoutData: SavedWorkoutData): string[] {
+function extractExercises(workoutData: SavedWorkoutData): SavedWorkoutExercise[] {
   if (!Array.isArray(workoutData)) return []
-  return workoutData
-    .map((ex) => (typeof ex?.name === 'string' ? ex.name : null))
-    .filter((n): n is string => !!n && n.length > 0)
+  return workoutData.filter((ex) => typeof ex?.name === 'string' && ex.name.length > 0)
 }
 
 export default function SavedWorkoutDetailDialog({ item, onOpenChange }: Props) {
@@ -77,7 +76,7 @@ export default function SavedWorkoutDetailDialog({ item, onOpenChange }: Props) 
     }
   }
 
-  const exerciseNames = detail ? extractExerciseNames(detail.workoutData) : []
+  const exercises = detail ? extractExercises(detail.workoutData) : []
   const dateLabel = item.lastUsedAt
     ? `Last done ${formatSavedWorkoutDate(item.lastUsedAt)}`
     : `Created ${formatSavedWorkoutDate(item.createdAt)}`
@@ -138,17 +137,28 @@ export default function SavedWorkoutDetailDialog({ item, onOpenChange }: Props) 
                   </div>
                 )}
 
-                {exerciseNames.length > 0 ? (
+                {exercises.length > 0 ? (
                   <ol className="flex flex-col gap-1">
-                    {exerciseNames.map((name, idx) => (
-                      <li
-                        key={`${name}-${idx}`}
-                        className="flex items-center gap-3 border-b border-border py-2.5 text-base text-foreground last:border-b-0"
-                      >
-                        <span className="w-6 text-sm text-muted-foreground">{idx + 1}.</span>
-                        <span className="flex-1">{name}</span>
-                      </li>
-                    ))}
+                    {exercises.map((exercise, idx) => {
+                      const sets = Array.isArray(exercise.sets) ? describeSavedSets(exercise.sets) : ''
+                      return (
+                        <li
+                          key={`${exercise.name}-${idx}`}
+                          className="flex items-start gap-3 border-b border-border py-2.5 text-base text-foreground last:border-b-0"
+                        >
+                          <span className="w-6 pt-0.5 text-sm text-muted-foreground">{idx + 1}.</span>
+                          <div className="min-w-0 flex-1">
+                            <div className="break-words">{exercise.name}</div>
+                            {sets && <div className="text-sm text-muted-foreground">{sets}</div>}
+                            {exercise.notes && (
+                              <div className="whitespace-pre-wrap break-words text-xs text-muted-foreground">
+                                {exercise.notes}
+                              </div>
+                            )}
+                          </div>
+                        </li>
+                      )
+                    })}
                   </ol>
                 ) : (
                   <p className="text-sm text-muted-foreground">

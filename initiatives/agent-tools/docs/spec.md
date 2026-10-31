@@ -231,3 +231,52 @@ Kinds are `anchors.update` and `balance_targets.update`. Approve, reject and rev
 - **Revert:** restores `inverse` for the touched keys. It's refused with `conflict` if any touched key's live value no longer equals what approve wrote; the proposal then stays `applied`.
 - Summaries look like `Update anchors: Hinge` or `Update targets: quads 1 → 1.3, hamstrings 1 → 1.2`.
 - **Admin detail page:** a FieldDiff with one row per touched key. The label is the pattern or FAU display name; anchors show exercise names, not ids. Revert is shown, as for exercise proposals.
+
+## Saved workouts (added 2026-10-31 for slice 5, items 030 onward)
+
+Agents compose a workout for Dustin as a **saved workout**: a standalone template (`SavedWorkout`) with no program or week, which he starts from "My saved workouts". Agents never write a live session (`WorkoutCompletion` with status `draft`): that would start its clock, take the one-draft slot, and race the logger. Discovery: `work/030-handback.md`.
+
+Store: `SavedWorkout { id, userId, name, notes, workoutData, exerciseCount, lastUsedAt, createdAt, updatedAt }`. `workoutData` is `SavedWorkoutData` (`types/saved-workout.ts`): `[{ name, exerciseDefinitionId, order, notes, exerciseGroup, sets: [{ setNumber, reps, rir, rpe, isWarmup }] }]`. There's no weight, by design; an agent puts load guidance in the exercise `notes`.
+
+### Read tools (all `readOnlyHint: true`)
+- `list_saved_workouts()` returns `{ savedWorkouts: [{ id, name, notes, exerciseCount, lastUsedAt, createdAt }] }`, Dustin's only, newest `createdAt` first.
+- `get_saved_workout({ id })` returns that plus `exercises: [{ order, exerciseDefinitionId, name, notes, sets: [{ setNumber, reps, rir, rpe, isWarmup }] }]`. Another user's id or an unknown id gives `not found`.
+- `get_active_draft()` returns Dustin's newest live session with status `draft`, or `null`: `{ completionId, name, isAdHoc, startedAt, exercises: [{ name, exerciseDefinitionId, loggedSetCount }] }`. It is read only; nothing writes to it.
+
+### Proposal tools
+Kinds are `saved_workout.create` (label "New saved workout") and `saved_workout.update` (label "Saved workout change"). Approve, reject and revert run through the existing service and admin pages. `rationale` and `feedbackId` work as before.
+
+Exercise input, shared by both tools: `exercises` is 1–15 items, each `{ exerciseDefinitionId, notes?, sets }`, with `sets` 1–10 items, each `{ reps, rir?, rpe?, isWarmup? }`.
+- `reps` is a string of 1–20 characters ("8", "8-10", "AMRAP"). `rir` is an integer 0–10, `rpe` an integer 1–10 (`PrescribedSet.rpe` is `Int`, and starting a saved workout copies it there), `isWarmup` defaults to false. Unknown fields are refused.
+- `order` and `setNumber` come from array position, starting at 1. `name` and `exerciseGroup` aren't input: `name` is the definition's name at approve time, and `exerciseGroup` is null.
+- Every `exerciseDefinitionId` must exist and be visible to Dustin (system or his own). Validation reports the first failure, with `field` naming it (for example `exercises[2].exerciseDefinitionId`).
+
+- `propose_workout_create({ name, notes?, exercises, rationale, feedbackId? })` → `{ proposalId, status: 'pending', summary }`. `name` is 1–100 characters, `notes` at most 1000.
+- `propose_workout_update({ savedWorkoutId, name?, notes?, exercises?, rationale, feedbackId? })` → the same.
+  - At least one of `name`, `notes`, `exercises` must be given. `exercises` replaces the whole list. `notes: null` clears notes.
+  - The saved workout must be Dustin's, or the tool returns `not found`.
+  - `before` stores the touched fields' live values; `exercises` is stored in the `workoutData` shape.
+
+**Approve, in one transaction**
+- Create: check again (ids still visible), then create the `SavedWorkout` with `workoutData` built from the input, `exerciseCount` = number of exercises, `lastUsedAt` null. Store `targetId` = the new id and `inverse` = `{ op: 'delete', id }`.
+- Update: check again. If the row is gone, the proposal is marked `conflict` ("saved workout was deleted"). If any touched field's live value differs from `before`, it's marked `conflict` and nothing changes; edits to untouched fields don't conflict (don't use `updatedAt`). Otherwise write the touched fields (and `exerciseCount` when `exercises` changes), and store `inverse` = `before`.
+
+**Revert**
+- Create: delete the saved workout. It's refused with `conflict` once any `WorkoutCompletion` has that `savedWorkoutId` (Dustin started it), or if the row was edited after approve. The proposal then stays `applied`.
+- Update: restore `inverse` for the touched fields. It's refused with `conflict` if the row is gone or any touched field no longer equals what approve wrote.
+- Reverting never touches a session: starting a saved workout copies it.
+
+**Summaries:** `New saved workout: Push day (5 exercises)` (`1 exercise` when there's one) and `Update saved workout Push day: name, exercises`.
+
+`field` in a validation error is the full path from the tool's arguments (`exercises[2].sets[0].rir`), not just the leaf key. These tools don't use the leaf-only `issueField` helper.
+
+**Admin detail page**
+- Create: the workout name and notes, then one line per exercise: name, then its sets as `3 × 8, RIR 2` (sets with the same reps, RIR, RPE and warmup flag are grouped; warmups are labelled).
+- Update: a FieldDiff with one row per touched field (Name, Notes, Exercises), with exercises shown in the same per-exercise format, before vs after.
+- Revert is shown for applied proposals, as for other kinds.
+
+### App change
+The saved-workout detail dialog (`SavedWorkoutDetailDialog`) shows each exercise's sets in the same format, so Dustin sees the plan before starting. Showing planned sets inside the ad-hoc logger is a separate roadmap item.
+
+### MCP annotations
+Every read tool (`search_exercises`, `get_*`, `list_*`, `export_training_data`) declares `annotations: { readOnlyHint: true }` in `tools/list`. Propose tools declare `{ readOnlyHint: false, destructiveHint: false }`.

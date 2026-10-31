@@ -4,15 +4,19 @@ import FieldDiff, { type DiffRow } from '@/components/admin/proposals/FieldDiff'
 import ProgramOutline from '@/components/admin/proposals/ProgramOutline'
 import ProposalActions from '@/components/admin/proposals/ProposalActions'
 import ProposalStatusBadge from '@/components/admin/proposals/ProposalStatusBadge'
+import SavedWorkoutOutline from '@/components/admin/proposals/SavedWorkoutOutline'
 import { isAdminRole } from '@/lib/admin/auth'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { ANCHOR_PATTERN_DISPLAY_NAMES, type AnchorPattern } from '@/lib/exercises/anchor-patterns'
 import { FAU_DISPLAY_NAMES } from '@/lib/fau-volume'
+import { describeSavedExercises, type ExerciseLine } from '@/lib/format/savedWorkoutSets'
 import { effectiveTargets, formatTarget } from '@/lib/insights/balance'
 import type { ProgramInput } from '@/lib/proposals/program'
+import type { WorkoutChanges, WorkoutCreateInput, WorkoutFields } from '@/lib/proposals/saved-workout'
 import { PROPOSAL_KIND_LABELS, type ProposalKind } from '@/lib/proposals/service'
 import { normalizeTargetMovements } from '@/lib/user-training-profile'
+import type { SavedWorkoutData } from '@/types/saved-workout'
 
 export const revalidate = 0
 
@@ -80,8 +84,62 @@ async function balanceRows(
   }))
 }
 
+type ExerciseInput = WorkoutCreateInput['exercises'][number]
+
+/** Proposed exercises with names from their definitions (one query); a deleted one shows as missing. */
+async function namedExercises(exercises: ExerciseInput[]): Promise<ExerciseLine[]> {
+  const ids = [...new Set(exercises.map((e) => e.exerciseDefinitionId))]
+  const definitions = await prisma.exerciseDefinition.findMany({ where: { id: { in: ids } }, select: { id: true, name: true } })
+  const names = new Map(definitions.map((d) => [d.id, d.name]))
+  return exercises.map((e) => ({ name: names.get(e.exerciseDefinitionId) ?? 'Missing exercise', notes: e.notes, sets: e.sets }))
+}
+
+const storedLines = (data: SavedWorkoutData | undefined) => describeSavedExercises(Array.isArray(data) ? data : [])
+
 /**
- * One proposal: rationale, before/after field diff (or a program outline) and the decision buttons.
+ * One row per touched field (Name, Notes, Exercises), exercises as one line
+ * each. A pending proposal whose field moved shows the live value.
+ */
+async function savedWorkoutRows(
+  payload: unknown,
+  beforeJson: unknown,
+  pending: boolean,
+  targetId: string | null,
+  userId: string
+): Promise<DiffRow[]> {
+  const { changes } = payload as { changes: WorkoutChanges }
+  const before = (beforeJson ?? {}) as WorkoutFields
+  const live =
+    pending && targetId
+      ? await prisma.savedWorkout.findFirst({ where: { id: targetId, userId }, select: { name: true, notes: true, workoutData: true } })
+      : null
+  const rows: DiffRow[] = []
+  if (changes.name !== undefined) {
+    rows.push({ field: 'Name', before: before.name, after: changes.name, ...(live && live.name !== before.name && { current: live.name }) })
+  }
+  if (changes.notes !== undefined) {
+    rows.push({
+      field: 'Notes',
+      before: before.notes,
+      after: changes.notes,
+      ...(live && (live.notes ?? null) !== (before.notes ?? null) && { current: live.notes }),
+    })
+  }
+  if (changes.exercises !== undefined) {
+    const liveText = live ? storedLines(live.workoutData as unknown as SavedWorkoutData) : null
+    const beforeText = storedLines(before.exercises)
+    rows.push({
+      field: 'Exercises',
+      before: beforeText,
+      after: describeSavedExercises(await namedExercises(changes.exercises)),
+      ...(liveText !== null && liveText !== beforeText && { current: liveText }),
+    })
+  }
+  return rows
+}
+
+/**
+ * One proposal: rationale, before/after field diff (or a program or saved workout outline) and the decision buttons.
  * Agent text (summary, rationale, values) is rendered as plain text only.
  */
 export default async function ProposalDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -102,9 +160,13 @@ export default async function ProposalDetailPage({ params }: { params: Promise<{
   const isProgram = proposal.kind === 'program.create'
   const isCreate = proposal.kind === 'exercise_definition.create'
   const isBalance = proposal.kind === 'anchors.update' || proposal.kind === 'balance_targets.update'
+  const isSavedCreate = proposal.kind === 'saved_workout.create'
+  const isSavedUpdate = proposal.kind === 'saved_workout.update'
   const program = isProgram ? await programDetail(proposal.payload, proposal.targetId, user.id) : null
+  const savedWorkout = isSavedCreate ? (proposal.payload as unknown as WorkoutCreateInput) : null
+  const savedExercises = savedWorkout ? await namedExercises(savedWorkout.exercises) : []
   const current =
-    proposal.targetId && !isProgram && !isBalance
+    proposal.targetId && !isProgram && !isBalance && !isSavedCreate && !isSavedUpdate
       ? await prisma.exerciseDefinition.findUnique({ where: { id: proposal.targetId } })
       : null
 
@@ -114,7 +176,9 @@ export default async function ProposalDetailPage({ params }: { params: Promise<{
     rows = Object.entries(definition).map(([field, after]) => ({ field, after }))
   } else if (isBalance) {
     rows = await balanceRows(proposal.kind, proposal.payload, proposal.before, proposal.status === 'pending', user.id)
-  } else if (!isProgram) {
+  } else if (isSavedUpdate) {
+    rows = await savedWorkoutRows(proposal.payload, proposal.before, proposal.status === 'pending', proposal.targetId, user.id)
+  } else if (!isProgram && !isSavedCreate) {
     const { changes } = proposal.payload as { changes: Record<string, unknown> }
     const before = (proposal.before ?? {}) as Record<string, unknown>
     const live = current as Record<string, unknown> | null
@@ -196,6 +260,11 @@ export default async function ProposalDetailPage({ params }: { params: Promise<{
             </Link>
           )}
           <ProgramOutline program={program.program} definitionNames={program.definitionNames} />
+        </section>
+      ) : savedWorkout ? (
+        <section className="space-y-1.5">
+          <h2 className="doom-label text-secondary">Proposed saved workout</h2>
+          <SavedWorkoutOutline name={savedWorkout.name} notes={savedWorkout.notes} exercises={savedExercises} />
         </section>
       ) : (
         <section className="space-y-1.5">
