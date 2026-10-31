@@ -1,10 +1,6 @@
-export interface DiffRow {
-  field: string
-  before?: unknown
-  after: unknown
-  /** The live value, shown only when it differs from `before` (stale proposal). */
-  current?: unknown
-}
+import type { DiffRow } from '@/lib/suggestions/types'
+
+export type { DiffRow }
 
 function format(value: unknown): string {
   if (value === null || value === undefined || value === '') return '—'
@@ -13,10 +9,19 @@ function format(value: unknown): string {
 }
 
 /**
- * Before/after table for a proposal. Every value is agent-supplied or derived
- * from it, so it is rendered as plain text only.
+ * Before/after table for a proposal (admin) or suggestion (user review). Every
+ * value is agent-supplied or derived from it, so it is rendered as plain text only.
  */
-export default function FieldDiff({ rows, mode }: { rows: DiffRow[]; mode: 'create' | 'update' }) {
+export default function FieldDiff({
+  rows,
+  mode,
+  staleLabel = 'Changed since proposed.',
+}: {
+  rows: DiffRow[]
+  mode: 'create' | 'update'
+  /** Lead-in for a value that moved while pending. */
+  staleLabel?: string
+}) {
   return (
     <div className="border-2 border-border divide-y divide-border">
       {rows.map((row) => (
@@ -34,7 +39,7 @@ export default function FieldDiff({ rows, mode }: { rows: DiffRow[]; mode: 'crea
           </div>
           {row.current !== undefined && (
             <div className="text-xs text-warning-text">
-              Changed since proposed. Now: <span className="whitespace-pre-wrap break-words">{format(row.current)}</span>
+              {`${staleLabel} Now: `}<span className="whitespace-pre-wrap break-words">{format(row.current)}</span>
             </div>
           )}
         </div>

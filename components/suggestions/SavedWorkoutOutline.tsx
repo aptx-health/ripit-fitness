@@ -1,7 +1,7 @@
 import { describeSavedSets, type ExerciseLine } from '@/lib/format/savedWorkoutSets'
 
 /**
- * Read-only outline of a proposed saved workout: notes, then one line per
+ * Read-only outline of a suggested saved workout: notes, then one line per
  * exercise with its sets. Every value is agent-supplied, so it is plain text.
  */
 export default function SavedWorkoutOutline({
