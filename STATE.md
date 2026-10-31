@@ -6,7 +6,7 @@ None
 Running quietly: None.
 
 ## Active
-- Training + Library redesign (high priority): Worktree2, branch `feature/training-library`. Stage: TL1 PR into dev (bottom of stack); TL2 next on a stacked branch. See [initiatives/training-library/status.md](initiatives/training-library/status.md).
+- Training + Library redesign (high priority): Worktree2, branch `feature/training-library`. Stage: TL1 PR #1006 into dev; TL2 PR stacked on it; TL3 next. See [initiatives/training-library/status.md](initiatives/training-library/status.md).
 
 ## Blocked
 None

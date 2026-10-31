@@ -1,3 +1,4 @@
+import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { Suspense } from 'react'
@@ -111,13 +112,15 @@ function ProgramDetailShell({ children }: { children?: React.ReactNode }) {
   return (
     <div className="bg-background">
       <div className="max-w-2xl mx-auto sm:px-6 py-4">
-        <div className="px-4 sm:px-0 mb-4">
-          {/* TL3 points this at the Library. */}
+        {/* pt-4 on top of the shell's py-4 puts the link where the settings subpages' sits (32px). */}
+        <div className="px-4 sm:px-0 pt-4 mb-4">
+          {/* Same back link as the settings subpages. TL3 points it at the Library. */}
           <Link
             href="/training"
-            className="text-primary hover:text-primary-hover text-sm flex items-center gap-1 doom-link"
+            className="relative inline-flex items-center gap-1.5 text-sm font-medium uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground doom-focus-ring before:content-[''] before:absolute before:-inset-3"
           >
-            ← Back to Training
+            <ArrowLeft size={16} aria-hidden="true" />
+            Training
           </Link>
         </div>
         <div className="px-4 sm:px-0">{children}</div>

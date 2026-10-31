@@ -10,3 +10,12 @@
 - 2026-10-31 MDT: 036 retry in (fixes 1/2/4/5). Fix 4 contradicts 2 locked assertions; test updates + new tests for empty program and builder skip sent to test-builder (wF:p1).
 - 2026-10-31 MDT: TL1 green after fixes (lead re-run 1733 passed, tsc clean). Preview rebuilt. Waiting on Dustin's phone check before the PR into dev.
 - 2026-10-31 MDT: Dustin chose stacked PRs against dev. TL1 committed and opened as the bottom PR; TL2 branches from it.
+- 2026-10-31 MDT: TL1 PR #1006 into dev (bottom of stack). TL2 on feature/training-home (stacked). TL2 spec + training-home.feature written; 038 tests dispatched to test-builder (wF:p1).
+- 2026-10-31 MDT: Dustin's TL1 preview notes: the 'Back to Training' link doesn't match the app's styling; the nav has no Training highlight or gold underline on the program detail page. Both added to the TL2 spec. From now on, reviews take Playwright screenshots at phone width and check styling.
+- 2026-10-31 MDT: TL1 PR #1006 CI green (migrations, tests, build, smoke). Ready for Dustin to merge.
+- 2026-10-31 MDT: 038 accepted (132 tests incl. nav rule, 91/91 breaks killed). 039 build dispatched to implementer with self-check screenshots via Chrome. Lead: Repeat of archived = 404; TL1 trainingRedirectTarget removed.
+- 2026-10-31 MDT: 038 follow-up done: TL1 steps moved to trainingResumeRedirectTarget (8 red until TL2 lands). Note: program-detail.feature's 'Training … for now' scenarios now mean resume-redirect / home; wording left as is so it matches the steps.
+- 2026-10-31 MDT: 039 build back (lead re-run 1859 passed, tsc clean; screenshots in assets/039). 040 review dispatched with a visual check.
+- 2026-10-31 MDT: 040 review: ship with notes (2 low, 2 visual nits). Fixes sent to implementer.
+- 2026-10-31 MDT: 039 retry in; lead re-run green. TL2 phone preview up for Dustin.
+- 2026-10-31 MDT: Dustin OK'd the TL2 preview. Committed; PR stacked on TL1. Next: TL3 Library.

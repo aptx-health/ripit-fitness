@@ -5,6 +5,7 @@ import { CURRENT_WAIVER_VERSION } from '@/lib/constants/waiver'
 import { prisma } from '@/lib/db'
 import { logger } from '@/lib/logger'
 import { checkRateLimit, programManagementLimiter } from '@/lib/rate-limit'
+import { programDetailHref } from '@/lib/training/program-href'
 
 const PROGRAM_MAP: Record<string, string> = {
   machines: 'Machine Starter',
@@ -116,7 +117,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const intended = experienceLevel === 'beginner' ? '/training?expand=first' : '/welcome'
+    // Beginners land on their new program with day 1 expanded; without one, Training.
+    const beginnerHome = programId ? programDetailHref(programId, { expand: 'first' }) : '/training'
+    const intended = experienceLevel === 'beginner' ? beginnerHome : '/welcome'
 
     // Route through waiver if the user hasn't accepted the current version
     // yet. The waiver page reads ?next= and pushes there after acceptance,
