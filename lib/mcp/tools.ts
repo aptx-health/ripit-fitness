@@ -15,9 +15,17 @@ import { logger } from '@/lib/logger'
 import type { Notify } from '@/lib/notify'
 import { visibleTo } from '@/lib/proposals/exercise-definition'
 import { issueField, programInput, programTreeSelect } from '@/lib/proposals/program'
+import {
+  fieldPath,
+  WORKOUT_CHANGES_REQUIRED,
+  workoutExercises,
+  workoutName,
+  workoutNotes,
+} from '@/lib/proposals/saved-workout'
 import { createProposal, PROPOSAL_STATUSES } from '@/lib/proposals/service'
 import { normalizeTargetMovements } from '@/lib/user-training-profile'
 import { VALID_CATEGORIES, VALID_STATUSES } from '@/types/feedback'
+import type { SavedWorkoutData } from '@/types/saved-workout'
 
 /**
  * MCP tools for agents (slice 1). Read tools are scoped to the token's user;
@@ -41,6 +49,7 @@ export interface ToolDescriptor {
   name: string
   description: string
   inputSchema: { type: 'object'; [key: string]: unknown }
+  annotations: { readOnlyHint: boolean; destructiveHint?: boolean }
 }
 
 // Structural checks only; the exercise-definition validator owns the domain
@@ -130,6 +139,28 @@ const schemas = {
     rationale,
     feedbackId,
   }),
+  list_saved_workouts: z.object({}),
+  get_saved_workout: z.object({ id: z.string().min(1) }),
+  get_active_draft: z.object({}),
+  propose_workout_create: z.object({
+    name: workoutName,
+    notes: workoutNotes.optional(),
+    exercises: workoutExercises.describe(
+      'In order. Each { exerciseDefinitionId, notes?, sets: [{ reps, rir?, rpe?, isWarmup? }] }; no weight, put load guidance in notes'
+    ),
+    rationale,
+    feedbackId,
+  }),
+  propose_workout_update: z
+    .object({
+      savedWorkoutId: z.string().min(1),
+      name: workoutName.optional(),
+      notes: workoutNotes.nullable().optional().describe('null clears the notes'),
+      exercises: workoutExercises.optional().describe('Replaces the whole exercise list'),
+      rationale,
+      feedbackId,
+    })
+    .refine((a) => a.name !== undefined || a.notes !== undefined || a.exercises !== undefined, WORKOUT_CHANGES_REQUIRED),
   list_proposals: z.object({ status: z.enum(PROPOSAL_STATUSES).optional() }),
   list_feedback: z.object({
     status: z.enum(VALID_STATUSES).optional().describe('Defaults to new'),
@@ -169,10 +200,28 @@ const descriptions: Record<ToolName, string> = {
     'Propose changes to an existing exercise definition. Nothing changes until the user approves it.',
   propose_program_create:
     'Propose a new program (weeks > workouts > exercises > prescribed sets). Week, day, order and set numbers come from array position. Nothing is created until the user approves it; it is created inactive.',
+  list_saved_workouts:
+    "List the user's saved workouts (templates started from My saved workouts), newest created first.",
+  get_saved_workout: "Get one of the user's saved workouts with its exercises and planned sets.",
+  get_active_draft:
+    "The user's live workout session (status draft), newest first, with each exercise's logged set count; null if none. Read only: agents never change a live session.",
+  propose_workout_create:
+    'Propose a new saved workout: exercises with planned sets (reps, RIR, RPE, warm-up). Order and set numbers come from array position. Nothing is created until the user approves it; it is never started for them.',
+  propose_workout_update:
+    "Propose changes to one of the user's saved workouts: name, notes (null clears) and/or the whole exercise list. Nothing changes until the user approves it.",
   list_proposals: "List the user's proposals and their status.",
   list_feedback:
     "List the user's app feedback, newest first (status defaults to new). Pass a feedback id as feedbackId on a propose tool to link the proposal; approving it resolves the feedback.",
 }
+
+const savedWorkoutSummary = {
+  id: true,
+  name: true,
+  notes: true,
+  exerciseCount: true,
+  lastUsedAt: true,
+  createdAt: true,
+} satisfies Prisma.SavedWorkoutSelect
 
 class ToolError extends Error {
   constructor(
@@ -562,6 +611,107 @@ const handlers: { [N in ToolName]: Handler<N> } = {
     return { proposalId: id, status, summary }
   },
 
+  async list_saved_workouts(prisma, ctx) {
+    const savedWorkouts = await prisma.savedWorkout.findMany({
+      where: { userId: ctx.userId },
+      orderBy: { createdAt: 'desc' },
+      select: savedWorkoutSummary,
+    })
+    return { savedWorkouts }
+  },
+
+  async get_saved_workout(prisma, ctx, { id }) {
+    const saved = await prisma.savedWorkout.findFirst({
+      where: { id, userId: ctx.userId },
+      select: { ...savedWorkoutSummary, workoutData: true },
+    })
+    if (!saved) throw new ToolError('saved workout not found', { field: 'id' })
+    const { workoutData, ...rest } = saved
+    const list = (Array.isArray(workoutData) ? workoutData : []) as unknown as SavedWorkoutData
+    return {
+      ...rest,
+      exercises: list.map((e) => ({
+        order: e.order,
+        exerciseDefinitionId: e.exerciseDefinitionId,
+        name: e.name,
+        notes: e.notes ?? null,
+        sets: (e.sets ?? []).map((s) => ({
+          setNumber: s.setNumber,
+          reps: s.reps,
+          rir: s.rir ?? null,
+          rpe: s.rpe ?? null,
+          isWarmup: !!s.isWarmup,
+        })),
+      })),
+    }
+  },
+
+  async get_active_draft(prisma, ctx) {
+    const exerciseSelect = { id: true, name: true, exerciseDefinitionId: true } as const
+    const draft = await prisma.workoutCompletion.findFirst({
+      where: { userId: ctx.userId, status: 'draft', isArchived: false },
+      orderBy: [{ startedAt: { sort: 'desc', nulls: 'last' } }, { completedAt: 'desc' }],
+      select: {
+        id: true,
+        name: true,
+        isAdHoc: true,
+        startedAt: true,
+        // A programmed session logs against its workout's exercises; one-offs hang off the session.
+        workout: { select: { name: true, exercises: { orderBy: { order: 'asc' }, select: exerciseSelect } } },
+        exercises: { orderBy: { order: 'asc' }, select: exerciseSelect },
+        loggedSets: { select: { exerciseId: true } },
+      },
+    })
+    if (!draft) return null
+    const counts = new Map<string, number>()
+    for (const set of draft.loggedSets) counts.set(set.exerciseId, (counts.get(set.exerciseId) ?? 0) + 1)
+    return {
+      completionId: draft.id,
+      name: draft.name ?? draft.workout?.name ?? null,
+      isAdHoc: draft.isAdHoc,
+      startedAt: draft.startedAt,
+      exercises: [...(draft.workout?.exercises ?? []), ...draft.exercises].map((e) => ({
+        name: e.name,
+        exerciseDefinitionId: e.exerciseDefinitionId,
+        loggedSetCount: counts.get(e.id) ?? 0,
+      })),
+    }
+  },
+
+  async propose_workout_create(prisma, ctx, { name, notes, exercises, rationale, feedbackId }) {
+    const result = await createProposal(
+      prisma,
+      {
+        userId: ctx.userId,
+        agentTokenId: ctx.tokenId,
+        kind: 'saved_workout.create',
+        workout: { name, ...(notes !== undefined && { notes }), exercises },
+        rationale,
+        feedbackId,
+      },
+      ctx.notify
+    )
+    if (!result.ok) throw new ToolError(result.error, { field: result.field })
+    const { id, status, summary } = result.proposal
+    return { proposalId: id, status, summary }
+  },
+
+  async propose_workout_update(prisma, ctx, { savedWorkoutId, name, notes, exercises, rationale, feedbackId }) {
+    const changes = {
+      ...(name !== undefined && { name }),
+      ...(notes !== undefined && { notes }),
+      ...(exercises !== undefined && { exercises }),
+    }
+    const result = await createProposal(
+      prisma,
+      { userId: ctx.userId, agentTokenId: ctx.tokenId, kind: 'saved_workout.update', savedWorkoutId, changes, rationale, feedbackId },
+      ctx.notify
+    )
+    if (!result.ok) throw new ToolError(result.error, { field: result.field })
+    const { id, status, summary } = result.proposal
+    return { proposalId: id, status, summary }
+  },
+
   async list_proposals(prisma, ctx, { status }) {
     const proposals = await prisma.proposal.findMany({
       where: { userId: ctx.userId, ...(status && { status }) },
@@ -603,6 +753,15 @@ const handlers: { [N in ToolName]: Handler<N> } = {
   },
 }
 
+// Saved-workout tools name the full argument path (exercises[2].sets[0].rir);
+// the older tools report the leaf key.
+const FULL_PATH_TOOLS = new Set<ToolName>(['propose_workout_create', 'propose_workout_update'])
+
+// Every tool reads, except the propose tools, which only record a pending proposal.
+function annotationsFor(name: ToolName): ToolDescriptor['annotations'] {
+  return name.startsWith('propose_') ? { readOnlyHint: false, destructiveHint: false } : { readOnlyHint: true }
+}
+
 function isToolName(name: string): name is ToolName {
   return Object.hasOwn(schemas, name)
 }
@@ -616,6 +775,7 @@ export function listTools(): ToolDescriptor[] {
     name,
     description: descriptions[name],
     inputSchema: z.toJSONSchema(schemas[name]) as ToolDescriptor['inputSchema'],
+    annotations: annotationsFor(name),
   }))
 }
 
@@ -630,9 +790,9 @@ export async function callTool(
   const parsed = schemas[name].safeParse(args ?? {})
   if (!parsed.success) {
     const issue = parsed.error.issues[0]
-    // Report the field itself, not its container (definition.primaryFAUs -> primaryFAUs,
+    // Older tools report the field itself, not its container (definition.primaryFAUs -> primaryFAUs,
     // program.weeks.0.workouts -> workouts).
-    const field = issueField(issue.path)
+    const field = FULL_PATH_TOOLS.has(name) ? fieldPath(issue.path) : issueField(issue.path)
     return text({ error: issue.message, ...(field && { field }) }, true)
   }
 

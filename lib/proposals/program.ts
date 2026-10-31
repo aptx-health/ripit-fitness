@@ -8,7 +8,7 @@ import { visibleTo } from './exercise-definition'
  * exercise order and set numbers come from array position, starting at 1.
  */
 
-const prescribedSet = z
+export const prescribedSet = z
   .object({
     reps: z.string().trim().min(1).max(20),
     weight: z.string().trim().max(20).optional(),
