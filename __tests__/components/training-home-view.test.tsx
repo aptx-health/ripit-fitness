@@ -10,8 +10,10 @@
  *   recent         [{ id, name, completedAt: Date, durationSeconds | null, canRepeat }]
  *   currentProgram { programId, programName, weekNumber, totalWeeks,
  *                    workoutsDone, workoutsTotal } | null
- * Section headings read "Up Next", "Recent Workouts", "Current Program" (any
- * case). Order is fixed: Up Next, Recent Workouts, Current Program.
+ * Training is three tabbed blocks (TL6 final layout): regions "From your coach",
+ * "Workouts" (Pinned Workouts | Recent) and "Program" (Up Next | Active Program).
+ * The tests here assume the default tabs; the tabs themselves are in
+ * training-home-tabs.test.tsx.
  *
  *   Up Next        text "Week W · Day D", the workout name, "N exercises";
  *                  a link "Start Workout" (or "Continue" when hasDraft) to href.
@@ -21,7 +23,7 @@
  *                  /api/workouts/completions/<id>/repeat; on 200 { completionId }
  *                  it goes to /training/adhoc/<completionId>; on 409 it shows the
  *                  response's message and stays.
- *   Current        "Week X of Y", "N of M workouts done", a progressbar with
+ *   Current        "Week X of Y · N of M workouts done" in one line, a progressbar with
  *                  aria-valuenow=N and aria-valuemax=M, and a "View Program"
  *                  link to /library/programs/<programId>.
  *   Empty          with no section: "Start a workout" and a "Find a program"
@@ -45,6 +47,7 @@ vi.mock('next/navigation', () => ({
 }))
 
 interface Home {
+  suggestions: { count: number; items: unknown[] }
   pinned: Array<{ id: string; name: string; exerciseCount: number; pinnedAt: Date }>
   upNext: null | {
     programId: string
@@ -92,8 +95,8 @@ const CURRENT = {
   workoutsDone: 3,
   workoutsTotal: 10,
 }
-const FULL: Home = { upNext: UP_NEXT, pinned: [], recent: RECENT, currentProgram: CURRENT }
-const EMPTY: Home = { upNext: null, pinned: [], recent: [], currentProgram: null }
+const FULL: Home = { upNext: UP_NEXT, pinned: [], suggestions: { count: 0, items: [] }, recent: RECENT, currentProgram: CURRENT }
+const EMPTY: Home = { upNext: null, pinned: [], suggestions: { count: 0, items: [] }, recent: [], currentProgram: null }
 
 async function renderHome(home: Home) {
   const mod = (await load('@/components/training/TrainingHome')) as { default: ComponentType<{ home: Home }> }
@@ -126,44 +129,46 @@ const rowOf = (name: string) => {
   return el as HTMLElement
 }
 
-describe('training home view: sections', () => {
-  it('shows the three sections in a fixed order', async () => {
+describe('training home view: blocks', () => {
+  it('shows the Workouts and Program blocks in a fixed order', async () => {
     await renderHome(FULL)
-    const up = screen.getByText(/up next/i)
-    const recent = screen.getByText(/recent workouts/i)
-    const current = screen.getByText(/current program/i)
-    expect(up.compareDocumentPosition(recent) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    expect(recent.compareDocumentPosition(current) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    const regions = screen.getAllByRole('region')
+    expect(regions).toHaveLength(2)
+    expect(screen.getByRole('region', { name: 'Workouts' })).toBe(regions[0])
+    expect(screen.getByRole('region', { name: 'Program' })).toBe(regions[1])
     expect(screen.queryByText(/start a workout/i)).toBeNull()
   })
 
-  it('leaves out a section that has nothing to show', async () => {
+  it('without a next workout the Program block opens on Active Program', async () => {
     await renderHome({ ...FULL, upNext: null })
-    expect(screen.queryByText(/up next/i)).toBeNull()
-    expect(screen.getByText(/recent workouts/i)).toBeTruthy()
-    expect(screen.getByText(/current program/i)).toBeTruthy()
+    const program = screen.getByRole('region', { name: 'Program' })
+    expect(within(program).getByRole('tab', { name: /^active program/i }).getAttribute('aria-selected')).toBe('true')
+    expect(within(program).queryByRole('link', { name: /start workout/i })).toBeNull()
+    expect(screen.getByRole('region', { name: 'Workouts' })).toBeTruthy()
   })
 
-  it('works with sessions only: no program sections and no empty state', async () => {
-    await renderHome({ upNext: null, pinned: [], recent: RECENT, currentProgram: null })
-    expect(screen.getByText(/recent workouts/i)).toBeTruthy()
-    expect(screen.queryByText(/up next/i)).toBeNull()
-    expect(screen.queryByText(/current program/i)).toBeNull()
-    expect(screen.queryByText(/find a program/i)).toBeNull()
+  it('works with sessions only: the Program block is a placeholder, and no start screen', async () => {
+    await renderHome({ upNext: null, pinned: [], suggestions: { count: 0, items: [] }, recent: RECENT, currentProgram: null })
+    expect(screen.getByRole('region', { name: 'Workouts' })).toBeTruthy()
+    const program = screen.getByRole('region', { name: 'Program' })
+    expect(within(program).getAllByText(/no active program/i).length).toBeGreaterThan(0)
+    expect(within(program).queryByRole('progressbar')).toBeNull()
+    expect(screen.queryByText(/start a workout/i)).toBeNull()
   })
 
-  it('works with a program only: no Recent Workouts', async () => {
-    await renderHome({ upNext: UP_NEXT, pinned: [], recent: [], currentProgram: CURRENT })
-    expect(screen.queryByText(/recent workouts/i)).toBeNull()
-    expect(screen.getByText(/up next/i)).toBeTruthy()
+  it('works with a program only: no Workouts block', async () => {
+    await renderHome({ upNext: UP_NEXT, pinned: [], suggestions: { count: 0, items: [] }, recent: [], currentProgram: CURRENT })
+    expect(screen.queryByRole('region', { name: 'Workouts' })).toBeNull()
+    expect(within(screen.getByRole('region', { name: 'Program' })).getByRole('tab', { name: /^up next/i })).toBeTruthy()
   })
 
-  it('shows a simple start when there is nothing at all', async () => {
+  it('with nothing at all there is only the Program placeholder', async () => {
     await renderHome(EMPTY)
-    expect(screen.getByText(/start a workout/i)).toBeTruthy()
-    const find = new URL(screen.getByText(/find a program/i).closest('a')?.getAttribute('href') ?? '', 'http://x')
+    expect(screen.getAllByRole('region')).toHaveLength(1)
+    const find = new URL(screen.getByRole('link', { name: /find a program/i }).getAttribute('href') ?? '', 'http://x')
     expect([find.pathname, find.searchParams.get('type'), find.searchParams.get('tab')]).toEqual(['/library', 'programs', 'browse'])
-    expect(screen.queryByText(/up next|recent workouts|current program/i)).toBeNull()
+    expect(screen.queryByText(/start a workout/i)).toBeNull()
+    expect(screen.queryByText(/nothing planned yet/i)).toBeNull()
   })
 })
 
@@ -171,7 +176,7 @@ describe('training home view: Up Next', () => {
   it('names the program, week and day, workout and exercise count', async () => {
     await renderHome(FULL)
     expect(screen.getAllByText('Machine Starter').length).toBeGreaterThan(0)
-    expect(screen.getByText(/week 2\s*·\s*day 1/i)).toBeTruthy()
+    expect(screen.getByText('Week 2 · Day 1')).toBeTruthy()
     expect(screen.getByText('Full Body A')).toBeTruthy()
     expect(screen.getByText(/5 exercises/i)).toBeTruthy()
   })
@@ -208,7 +213,7 @@ describe('training home view: Recent Workouts', () => {
   })
 
   it('omits the duration when it is unknown', async () => {
-    await renderHome({ upNext: null, pinned: [], currentProgram: null, recent: [RECENT[2]] })
+    await renderHome({ upNext: null, pinned: [], suggestions: { count: 0, items: [] }, currentProgram: null, recent: [RECENT[2]] })
     expect(screen.queryByText(/\bmin\b|\d+h \d+m/)).toBeNull()
   })
 
@@ -265,24 +270,28 @@ describe('training home view: Recent Workouts', () => {
   })
 })
 
-describe('training home view: Current Program', () => {
+describe('training home view: Active Program', () => {
+  const openActive = () => fireEvent.click(screen.getByRole('tab', { name: /^active program/i }))
+
   it('shows the week, the count and a progress bar', async () => {
     await renderHome(FULL)
-    expect(screen.getByText(/week 2 of 5/i)).toBeTruthy()
-    expect(screen.getByText(/3 of 10 workouts done/i)).toBeTruthy()
+    openActive()
+    expect(screen.getByText('Week 2 of 5 · 3 of 10 workouts done')).toBeTruthy()
     const bar = screen.getByRole('progressbar')
     expect(bar.getAttribute('aria-valuenow')).toBe('3')
     expect(bar.getAttribute('aria-valuemax')).toBe('10')
   })
 
-  it('View Program opens the detail page', async () => {
+  it('View opens the detail page', async () => {
     await renderHome(FULL)
-    expect(screen.getByText(/view program/i).closest('a')?.getAttribute('href')).toBe('/library/programs/p1')
+    openActive()
+    expect(screen.getByRole('link', { name: 'View Machine Starter' }).getAttribute('href')).toBe('/library/programs/p1')
+    expect(screen.queryByText(/view program/i)).toBeNull()
   })
 
   it('shows a full bar when every workout is done', async () => {
     await renderHome({ ...FULL, upNext: null, currentProgram: { ...CURRENT, weekNumber: 5, workoutsDone: 10 } })
-    expect(screen.getByText(/10 of 10 workouts done/i)).toBeTruthy()
+    expect(screen.getByText('Week 5 of 5 · 10 of 10 workouts done')).toBeTruthy()
     expect(screen.getByRole('progressbar').getAttribute('aria-valuenow')).toBe('10')
   })
 })

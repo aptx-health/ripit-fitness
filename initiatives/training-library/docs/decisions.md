@@ -35,3 +35,4 @@ Source: design agent handoff, kept verbatim in [design-handoff.md](design-handof
 - Lead: Repeat carries exercises, sets, reps, RIR and RPE from the logged sets, not weight (PrescribedSet has no weight).
 - Lead: anchors and balance-target suggestions show FAU display names, never keys.
 - Dustin (TL1 preview): the final review of each UI item includes phone-width screenshots taken with Claude in Chrome (Playwright only if Chrome is unavailable), checked against the rest of the app's styling. Seen in TL1, fixed in TL2: the back link's styling doesn't match the app, and the nav doesn't highlight on the program detail page.
+- Dustin (2026-10-31): no 'Start a workout' on Training for new users; the center Workout button is enough.

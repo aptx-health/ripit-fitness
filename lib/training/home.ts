@@ -1,10 +1,12 @@
 import { prisma } from '@/lib/db'
+import { countPendingSuggestions, listPendingSuggestions } from '@/lib/suggestions/detail'
+import type { SuggestionItem } from '@/lib/suggestions/types'
 import { programDetailHref } from '@/lib/training/program-href'
 import { resolveDurationSeconds } from '@/lib/workout-history'
 
 /**
- * Data for the Training home: Up Next, Pinned Workouts, Recent Workouts and
- * Current Program.
+ * Data for the Training home: Coach Suggestions, Up Next, Pinned Workouts,
+ * Recent Workouts and Current Program.
  * Skipped counts as done, and only the user's own non-archived completions
  * count.
  */
@@ -46,6 +48,8 @@ export interface CurrentProgram {
 }
 
 export interface TrainingHomeData {
+  /** All pending suggestions counted; the newest few listed. */
+  suggestions: { count: number; items: SuggestionItem[] }
   upNext: UpNext | null
   pinned: PinnedWorkout[]
   recent: RecentSession[]
@@ -54,10 +58,11 @@ export interface TrainingHomeData {
 
 const RECENT_LIMIT = 3
 const PINNED_LIMIT = 5
+const SUGGESTION_LIMIT = 3
 const DONE_STATUSES = ['completed', 'skipped']
 
 export async function getTrainingHome(userId: string): Promise<TrainingHomeData> {
-  const [program, recent, pinned] = await Promise.all([
+  const [program, recent, pinned, suggestionCount, suggestionItems] = await Promise.all([
     prisma.program.findFirst({
       where: { userId, isActive: true, isArchived: false, deletedAt: null },
       select: {
@@ -105,9 +110,12 @@ export async function getTrainingHome(userId: string): Promise<TrainingHomeData>
       take: PINNED_LIMIT,
       select: { id: true, name: true, exerciseCount: true, pinnedAt: true },
     }),
+    countPendingSuggestions(userId),
+    listPendingSuggestions(userId, SUGGESTION_LIMIT),
   ])
 
   return {
+    suggestions: { count: suggestionCount, items: suggestionItems },
     ...(program ? await programSections(program, userId) : { upNext: null, currentProgram: null }),
     pinned: pinned.map((w) => ({ ...w, pinnedAt: w.pinnedAt as Date })),
     recent: recent.map((c) => ({

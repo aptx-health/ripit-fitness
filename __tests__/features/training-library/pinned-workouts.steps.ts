@@ -232,7 +232,6 @@ const rowOf = (name: string) => screen.getByRole('button', { name: `View ${name}
 const pinButton = (name: string) => within(rowOf(name)).getByRole('button', { name: /^pin\b/i })
 const unpinButton = (name: string) => within(rowOf(name)).getByRole('button', { name: /^unpin\b/i })
 const pinnedRowOf = (name: string) => screen.getByText(name).closest('li') as HTMLElement
-const headings = () => screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)
 
 beforeEach(() => {
   ui.push.mockClear()
@@ -271,8 +270,9 @@ describeFeature(feature, ({ Background, Rule }) => {
       And('it appears under Pinned Workouts on Training', async () => {
         const home = await renderHome()
         expect(home.pinned.map((p) => p.name)).toEqual(['Upper Body'])
-        expect(screen.getByText(/^pinned workouts$/i)).toBeTruthy()
-        expect(screen.getByText('Upper Body')).toBeTruthy()
+        const workouts = screen.getByRole('region', { name: 'Workouts' })
+        expect(within(workouts).getByRole('tab', { name: /^pinned workouts/i }).getAttribute('aria-selected')).toBe('true')
+        expect(within(workouts).getByText('Upper Body')).toBeTruthy()
       })
     })
 
@@ -295,7 +295,8 @@ describeFeature(feature, ({ Background, Rule }) => {
       And('Training has no Pinned Workouts section', async () => {
         const home = await renderHome()
         expect(home.pinned).toEqual([])
-        expect(screen.queryByText(/pinned workouts/i)).toBeNull()
+        // no pins and no recent sessions: the Workouts block hides
+        expect(screen.queryByRole('region', { name: 'Workouts' })).toBeNull()
       })
     })
 
@@ -353,10 +354,9 @@ describeFeature(feature, ({ Background, Rule }) => {
         expect(screen.queryByText('Upper Body')).toBeNull()
       })
       And('"See all" opens My Workouts', async () => {
+        // TL6 final layout: the Workouts block has no See all link
         await shown()
-        const link = screen.getByRole('link', { name: /see all/i })
-        const url = new URL(link.getAttribute('href') as string, 'http://x')
-        expect([url.pathname, url.searchParams.get('type')]).toEqual(['/library', 'workouts'])
+        expect(screen.queryAllByRole('link', { name: /see all/i })).toEqual([])
       })
     })
 
@@ -429,7 +429,9 @@ describeFeature(feature, ({ Background, Rule }) => {
       })
       Then('the sections are Up Next, Pinned Workouts, Recent Workouts and Current Program, in that order', async () => {
         await shown()
-        expect(headings()).toEqual(['Up Next', 'Pinned Workouts', 'Recent Workouts', 'Current Program'])
+        // blocks: Workouts (Pinned Workouts | Recent) then Program (Up Next | Active Program)
+        expect(screen.getAllByRole('region').map((r) => r.getAttribute('aria-label') ?? '')).toEqual(['Workouts', 'Program'])
+        expect(screen.getAllByRole('tab').map((t) => (t.textContent ?? '').trim().split(/\s/)[0])).toEqual(['Pinned', 'Recent', 'Up', 'Active'])
       })
     })
   })

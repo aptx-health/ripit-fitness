@@ -95,7 +95,7 @@ async function agentTokens() {
 }
 
 function ctx() {
-  return { userId: s.userId, tokenId: s.tokenId, notify: s.notify }
+  return { userId: s.userId, tokenId: s.tokenId, role: 'admin', notify: s.notify }
 }
 
 async function callAgentTool(name: string, args: Record<string, unknown>, prisma: PrismaClient = s.prisma): Promise<Outcome> {
@@ -500,7 +500,7 @@ describeFeature(feature, ({ Background, Rule }) => {
     RuleScenario('Read tools are marked read-only', ({ When, Then, And }) => {
       When('the agent lists the tools', async () => {
         const { listTools } = await tools()
-        const raw = (await listTools()) as unknown
+        const raw = (await listTools('admin')) as unknown
         const list = Array.isArray(raw) ? raw : ((raw as { tools?: unknown[] })?.tools ?? [])
         s.snapshot = JSON.stringify(list)
       })
@@ -789,7 +789,7 @@ describe('saved workout tools: registration', () => {
 
   async function listed() {
     const { listTools } = await tools()
-    const raw = (await listTools()) as unknown
+    const raw = (await listTools('admin')) as unknown
     const list = Array.isArray(raw) ? raw : ((raw as { tools?: unknown[] })?.tools ?? [])
     return list as Array<{ name: string; annotations?: Json; inputSchema?: Json }>
   }

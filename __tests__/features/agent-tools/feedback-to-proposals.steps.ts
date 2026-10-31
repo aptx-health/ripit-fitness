@@ -93,7 +93,7 @@ async function agentTokens() {
 }
 
 function ctx() {
-  return { userId: s.userId, tokenId: s.tokenId, notify: s.notify }
+  return { userId: s.userId, tokenId: s.tokenId, role: 'admin', notify: s.notify }
 }
 
 async function callAgentTool(name: string, args: Record<string, unknown>): Promise<Outcome> {
@@ -278,7 +278,7 @@ describeFeature(feature, ({ Background, Rule }) => {
     RuleScenario('Agents have no tool that changes feedback', ({ When, Then, And }) => {
       When('the agent lists its tools', async () => {
         const { listTools } = await tools()
-        const raw = (await listTools()) as unknown
+        const raw = (await listTools('admin')) as unknown
         const list = Array.isArray(raw) ? raw : ((raw as { tools?: unknown[] })?.tools ?? [])
         s.tools = (list as Array<{ name: string }>).map((t) => t.name)
       })

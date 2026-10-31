@@ -44,7 +44,7 @@
 
 import { describeFeature, loadFeature } from '@amiceli/vitest-cucumber'
 import type { PrismaClient } from '@prisma/client'
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { NextRequest } from 'next/server'
 import { createElement } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -108,6 +108,7 @@ interface CurrentProgram {
 }
 interface Home {
   upNext: UpNext | null
+  suggestions: { count: number; items: unknown[] }
   pinned: Array<{ id: string; name: string; exerciseCount: number; pinnedAt: Date }>
   recent: RecentRow[]
   currentProgram: CurrentProgram | null
@@ -444,7 +445,7 @@ describeFeature(feature, ({ Rule }) => {
         await renderHome(s.home as Home)
         expect(screen.getByText(/up next/i)).toBeTruthy()
         expect(screen.getAllByText('Machine Starter').length).toBeGreaterThan(0)
-        expect(screen.getByText(/week 2\s*·\s*day 1/i)).toBeTruthy()
+        expect(screen.getByText('Week 2 · Day 1')).toBeTruthy()
         expect(screen.getByText('Full Body A')).toBeTruthy()
         expect(screen.getByText(/5 exercises/i)).toBeTruthy()
         cleanup()
@@ -510,13 +511,16 @@ describeFeature(feature, ({ Rule }) => {
       Then('there is no Up Next section', async () => {
         expect(s.home?.upNext).toBeNull()
         await renderHome(s.home as Home)
-        expect(screen.queryByText(/up next/i)).toBeNull()
+        // the Program block stays, as a placeholder: nothing to start
+        expect(screen.queryByRole('link', { name: /start workout|continue/i })).toBeNull()
+        expect(within(screen.getByRole('region', { name: 'Program' })).getAllByText(/no active program/i).length).toBeGreaterThan(0)
         cleanup()
       })
       And('there is no Current Program section', async () => {
         expect(s.home?.currentProgram).toBeNull()
         await renderHome(s.home as Home)
-        expect(screen.queryByText(/current program/i)).toBeNull()
+        expect(screen.queryByRole('progressbar')).toBeNull()
+        expect(screen.queryByRole('link', { name: /^view /i })).toBeNull()
         cleanup()
       })
     })
@@ -548,7 +552,7 @@ describeFeature(feature, ({ Rule }) => {
         expect(r.map((x) => x.durationSeconds)).toEqual([null, 2700, 3900])
         expect(r.map((x) => x.completedAt.getTime())).toEqual([noon(3).getTime(), noon(5).getTime(), noon(8).getTime()])
         await renderHome(s.home as Home)
-        expect(screen.getByText(/recent workouts/i)).toBeTruthy()
+        expect(screen.getByRole('tab', { name: /^recent/i }).getAttribute('aria-selected')).toBe('true')
         for (const name of ['Session Four', 'Session Three', 'Machine Starter W1 D1']) {
           expect(screen.getByText(name)).toBeTruthy()
         }
@@ -698,10 +702,9 @@ describeFeature(feature, ({ Rule }) => {
             workoutsTotal: 10,
           })
           await renderHome(s.home as Home)
-          expect(screen.getByText(/current program/i)).toBeTruthy()
+          fireEvent.click(screen.getByRole('tab', { name: /^active program/i }))
           expect(screen.getAllByText('Machine Starter').length).toBeGreaterThan(0)
-          expect(screen.getByText(/week 2 of 5/i)).toBeTruthy()
-          expect(screen.getByText(/3 of 10 workouts done/i)).toBeTruthy()
+          expect(screen.getByText('Week 2 of 5 · 3 of 10 workouts done')).toBeTruthy()
           const bar = screen.getByRole('progressbar')
           expect(bar.getAttribute('aria-valuenow')).toBe('3')
           expect(bar.getAttribute('aria-valuemax')).toBe('10')
@@ -710,7 +713,8 @@ describeFeature(feature, ({ Rule }) => {
       )
       And('"View Program" opens its detail page', async () => {
         await renderHome(s.home as Home)
-        const link = screen.getByText(/view program/i).closest('a')
+        fireEvent.click(screen.getByRole('tab', { name: /^active program/i }))
+        const link = screen.getByRole('link', { name: 'View Machine Starter' })
         expect(link?.getAttribute('href')).toBe(`/library/programs/${starter().id}`)
         cleanup()
       })
@@ -728,14 +732,15 @@ describeFeature(feature, ({ Rule }) => {
         s.home = await getHome()
       })
       Then('they see "Start a workout" and "Find a program"', async () => {
-        expect(s.home).toEqual({ upNext: null, pinned: [], recent: [], currentProgram: null })
+        expect(s.home).toEqual({ upNext: null, pinned: [], suggestions: { count: 0, items: [] }, recent: [], currentProgram: null })
         await renderHome(s.home as Home)
-        expect(screen.getByText(/start a workout/i)).toBeTruthy()
-        const find = new URL(screen.getByText(/find a program/i).closest('a')?.getAttribute('href') ?? '', 'http://x')
+        // the empty-home screen is gone: only the Program block's placeholder remains
+        expect(screen.queryByText(/start a workout/i)).toBeNull()
+        expect(screen.getAllByRole('region')).toHaveLength(1)
+        const find = new URL(screen.getByRole('link', { name: /find a program/i }).getAttribute('href') ?? '', 'http://x')
         expect([find.pathname, find.searchParams.get('type'), find.searchParams.get('tab')]).toEqual(['/library', 'programs', 'browse'])
-        expect(screen.queryByText(/up next/i)).toBeNull()
-        expect(screen.queryByText(/recent workouts/i)).toBeNull()
-        expect(screen.queryByText(/current program/i)).toBeNull()
+        expect(screen.queryByRole('region', { name: 'Workouts' })).toBeNull()
+        expect(screen.queryByRole('region', { name: 'From your coach' })).toBeNull()
         cleanup()
       })
     })

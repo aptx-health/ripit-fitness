@@ -53,6 +53,8 @@ describe('isTabActive', () => {
   it.each([
     ['/training', '/training'],
     ['/training', '/training/adhoc/abc123'],
+    ['/training', '/suggestions'],
+    ['/training', '/suggestions/s1'],
     ['/library', '/library'],
     ['/library', '/library/programs/p1'],
     ['/library', '/library/programs/p1/anything'],
@@ -71,6 +73,10 @@ describe('isTabActive', () => {
     '/programs/p1/edit',
   ])('Library is the only active tab on %s', async (path) => {
     expect(await activeTabs(path)).toEqual(['/library'])
+  })
+
+  it.each(['/suggestions', '/suggestions/s1'])('Training is the only active tab on %s', async (path) => {
+    expect(await activeTabs(path)).toEqual(['/training'])
   })
 
   it('Training is not active on a program detail page', async () => {
@@ -151,6 +157,18 @@ describe('navs', () => {
     h.pathname = path
     await header()
     expect(labels(current())).toEqual(['Library'])
+  })
+
+  it.each(['/suggestions', '/suggestions/s1'])('the bottom nav marks Training current on %s, and only Training', async (path) => {
+    h.pathname = path
+    await bottomNav()
+    expect(labels(current())).toEqual(['Training'])
+  })
+
+  it.each(['/suggestions', '/suggestions/s1'])('the header marks Training current on %s, and only Training', async (path) => {
+    h.pathname = path
+    await header()
+    expect(labels(current())).toEqual(['Training'])
   })
 
   it('the bottom nav still marks Training on /training', async () => {

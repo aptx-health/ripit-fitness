@@ -33,3 +33,38 @@
 - 2026-10-31 MDT: 046 review: ship with notes (3 low, 1 nit). Fixes sent to implementer.
 - 2026-10-31 MDT: 045 retry in; lead re-run green. TL4 phone preview up for Dustin.
 - 2026-10-31 MDT: Dustin OK'd the TL4 preview. Committed; PR stacked on TL3. Next: TL5 Coach Suggestions.
+- 2026-10-31 MDT: TL4 PR #1009 (stacked on #1008). TL5 split into TL5a (user review of suggestions) and TL5b (user tokens + scoped notify), as stacked PRs. TL5a spec + coach-suggestions.feature written; 047 tests dispatched. Lead: exercise-library proposals are 404 on user routes; non-admin tokens will be refused exercise-library propose tools (TL5b).
+- 2026-10-31 MDT: 047 accepted (153 tests, 60/60 breaks). 048 build dispatched. Lead: a reverted suggestion shows 'Undone'; no cap check on accept; seeding with notification URLs blank.
+- 2026-10-31 MDT: 048 build back (lead re-run 2197 passed, tsc clean; the admin page is byte-identical after the lift). 049 review dispatched, asked to judge the key-based target summaries users would see.
+- 2026-10-31 MDT: 049 review: fix first. Users saw service summaries with keys, and 'proposal' leaked in error JSON. Spec now has title and error-wording rules; the implementer fixes, the test-builder adds tests; the no-op target proposals go to the roadmap.
+- 2026-10-31 MDT: 048 retry in (suggestionTitle, h1 size, error wording and trimmed data, GET rate limits using the write limiter). Waiting on the test-builder's 047 follow-up packet before the preview.
+- 2026-10-31 MDT: 047 follow-up in (26 tests for titles, wording and rate limits). Lead re-run green. TL5a phone preview up for Dustin.
+- 2026-10-31 MDT: Preview seed for Dustin: proposals cmvwvkcoy0002vr23g4e0vcrx (workout) and cmvwvkdjq0004vr236n93ktwz (program), plus temporary token cmvwvkcos0000vr23swamdmf0, on the wt2 DB. Clean up after the preview: the proposals, the token, and anything they created.
+- 2026-10-31 MDT: Dustin's TL5a preview notes: everything works, but Training reads as a big list with tiny headers and unclear hierarchy; the suggestion card doesn't show it's a suggestion. He asked for 3 rough mockups (tab-like section headers, envelope tab or Library-tab style). 050 dispatched to implementer. TL5a PR is held until the direction is picked.
+- 2026-10-31 MDT: 050 mockups published to Handoff Hub; waiting on Dustin's pick.
+- 2026-10-31 MDT: Dustin picked mockup A (folder tabs). TL5a committed as its own stacked PR; the restyle becomes TL6, stacked on TL5a. TL5b follows.
+- 2026-10-31 MDT: TL5a PR #1010 (stacked on #1009). TL6 folder tabs on feature/training-folder-tabs: spec written; 051 test updates (test-builder) and 052 build (implementer, including the preview seed cleanup) dispatched in parallel, since this is mostly visual.
+- 2026-10-31 MDT: 052 build back (2269 passed; side-by-side matches mockup A). 053 review dispatched.
+- 2026-10-31 MDT: 051 accepted (45 tests; 6 locked files updated to the new text). The .feature files keep the old section names in their step text; the steps still match.
+- 2026-10-31 MDT: 053 review: ship with notes. Fixes sent (the shadow fallback that broke 12 themes, aria-labels, clamp-2, a short targets label). App-wide green contrast added to the roadmap.
+- 2026-10-31 MDT: 052 retry in. 4 locked assertions pin the old row label and the View link name; updates sent to the test-builder.
+- 2026-10-31 MDT: TL6 fixes and test updates in; lead re-run green. Preview up; suggestions re-seeded for Dustin.
+- 2026-10-31 MDT: TL6 preview seed: proposals cmvwwh9b70002vrxnbf4pc41n and cmvwwha5z0004vrxnld3vtn2w, plus token cmvwwh9b10000vrxnmkz5jm1x. Clean up after the preview.
+- 2026-10-31 MDT: Dustin on the TL6 preview: "looks great". Changes: See all becomes a dimmed-green paper tab next to the section tab (also on Pinned, for consistency); drop 'Your coach suggests' and the 'Waiting on you' stamp. Sent to the implementer and test-builder.
+- 2026-10-31 MDT: Dustin wants Training consolidated into 3 tabbed blocks (Coach; Workouts: Pinned Workouts | Recent; Program: Up Next | Active Program, with a no-program placeholder) and a mockup on the Hub before confirming. 054 queued for the implementer after the TL6 tweak.
+- 2026-10-31 MDT: 054 mockup published to the Hub; waiting on Dustin's confirmation and 4 questions.
+- 2026-10-31 MDT: Dustin confirmed the three-block layout (054). Tweaks: 'All suggestions' sits beside the coach tab; no See all on Workouts. Folded into TL6 (same PR). Spec updated; tests and build dispatched in parallel.
+- 2026-10-31 MDT: three-block build in, and the preview is restarted. 6 locked assertions conflict (both panels are in the DOM, plus a regex), and Node 26's localStorage breaks local test runs. Both sent to the test-builder.
+- 2026-10-31 MDT: 051 follow-up 3 in (tests rewritten for the blocks; vitest.config.ts runs workers with --no-experimental-webstorage on Node 22.4+). Lead re-run green. 055 review dispatched.
+- 2026-10-31 MDT: 055 review: ship with notes. Invisible keyboard focus on the clipped tabs goes to the implementer, with 2 nits.
+- 2026-10-31 MDT: Dustin: the center Workout button is enough; no start button for new users on Training.
+- 2026-10-31 MDT: 055 fixes in; lead re-run green. Waiting on Dustin's final look at TL6 before the PR.
+- 2026-10-31 MDT: Dustin OK'd TL6 ('Perfect!'). Committed; PR stacked on TL5a. Next: TL5b.
+- 2026-10-31 MDT: TL6 PR #1011 (stacked on #1010). TL5b on feature/user-agent-tokens: spec and user-agent-tokens.feature written; 056 tests dispatched. Lead: /settings/agent-access, 5 active tokens max, non-admins don't see and can't call the exercise-library tools, only admin-owned proposals notify.
+- 2026-10-31 MDT: TL6 preview seed cleaned up; preview stopped.
+- 2026-10-31 MDT: 056 accepted (93 tests, 55/55 breaks; 7 agent-tools steps files now pass role 'admin'). 057 build dispatched. Lead: editors count as non-admin; the forbidden check runs before argument validation.
+- 2026-10-31 MDT: 057 build in (866/866 targeted; tsc clean). 12 locked TL5a tests seed exercise proposals without a role, which is now forbidden. Fix sent to the test-builder.
+- 2026-10-31 MDT: 057 build back; lead re-run 2369 passed, tsc clean. 058 security-focused review dispatched.
+- 2026-10-31 MDT: 058 review: ship with notes. Key: the MCP URL shown in prod would be staging's, because NEXT_PUBLIC_APP_URL is inlined at build. Fixes to the implementer, test gaps to the test-builder, proposal links to the roadmap.
+- 2026-10-31 MDT: 056 follow-up 2 in (18 tests for editor, role-lookup failure, export revoke, no-role, limit race; 8/8 breaks). Waiting on the implementer's 058 fixes.
+- 2026-10-31 MDT: 058 fixes in; lead re-run green. TL5b phone preview up for Dustin.

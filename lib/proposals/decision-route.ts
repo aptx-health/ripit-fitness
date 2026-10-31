@@ -10,7 +10,7 @@ import {
   revertProposal,
 } from './service'
 
-const STATUS_BY_CODE: Record<DecisionCode, number> = {
+export const STATUS_BY_CODE: Record<DecisionCode, number> = {
   not_found: 404,
   not_pending: 409,
   not_applied: 409,
