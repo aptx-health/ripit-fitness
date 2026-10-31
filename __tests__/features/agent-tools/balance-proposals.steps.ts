@@ -103,7 +103,7 @@ async function agentTokens() {
 }
 
 function ctx() {
-  return { userId: s.userId, tokenId: s.tokenId, notify: s.notify }
+  return { userId: s.userId, tokenId: s.tokenId, role: 'admin', notify: s.notify }
 }
 
 async function callAgentTool(name: string, args: Record<string, unknown>, prisma: PrismaClient = s.prisma): Promise<Outcome> {
@@ -723,7 +723,7 @@ describe('balance tools: registration', () => {
 
   it('lists the five tools', async () => {
     const { listTools } = await tools()
-    const raw = (await listTools()) as unknown
+    const raw = (await listTools('admin')) as unknown
     const list = Array.isArray(raw) ? raw : ((raw as { tools?: unknown[] })?.tools ?? [])
     const names = (list as Array<{ name: string }>).map((t) => t.name)
     for (const n of ['get_anchors', 'get_balance_targets', 'get_fau_volume', 'propose_anchor_update', 'propose_target_update']) {

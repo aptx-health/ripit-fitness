@@ -19,11 +19,26 @@ export const dynamic = 'force-dynamic'
 
 function buildServer(ctx: ToolContext): Server {
   const server = new Server({ name: 'ripit', version: '1.0.0' }, { capabilities: { tools: {} } })
-  server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: listTools() }))
+  server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: listTools(ctx.role) }))
   server.setRequestHandler(CallToolRequestSchema, async (req) =>
     callTool(prisma, ctx, req.params.name, req.params.arguments ?? {})
   )
   return server
+}
+
+/**
+ * The token owner's role, read from BetterAuth's "user" table as the session
+ * does (lib/auth/server.ts): no row or no role means 'user'. A failed lookup
+ * also falls back to 'user', the least privileged role.
+ */
+async function ownerRole(userId: string): Promise<string> {
+  try {
+    const rows = await prisma.$queryRaw<Array<{ role: string | null }>>`SELECT role FROM "user" WHERE id = ${userId}`
+    return rows[0]?.role || 'user'
+  } catch (error) {
+    logger.warn({ error, userId }, 'MCP: could not read the token owner role')
+    return 'user'
+  }
 }
 
 async function handle(request: Request): Promise<Response> {
@@ -41,7 +56,8 @@ async function handle(request: Request): Promise<Response> {
     const rl = await checkRateLimitWithHeaders(agentMcpLimiter, agent.tokenId, { endpoint: '/api/mcp' })
     if (rl.response) return rl.response
 
-    const server = buildServer({ ...agent, notify })
+    // Tools filter by role, and notify is skipped for non-admins (lib/mcp/tools.ts).
+    const server = buildServer({ ...agent, role: await ownerRole(agent.userId), notify })
     const transport = new WebStandardStreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
       enableJsonResponse: true,

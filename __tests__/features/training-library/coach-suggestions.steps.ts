@@ -183,6 +183,8 @@ async function agent(name: string, args: Json, who: 'me' | 'other' = 'me') {
   const ctx = {
     userId: who === 'me' ? s.userId : s.otherUserId,
     tokenId: who === 'me' ? s.tokenId : s.otherTokenId,
+    // exercise-library proposals are admin-only, so only they are seeded by an admin's agent
+    role: name.startsWith('propose_exercise_') ? 'admin' : 'user',
     notify: vi.fn(async () => {}),
   }
   const raw = (await callTool(s.prisma, ctx as never, name, args as never)) as { isError?: boolean; content?: Array<{ text?: string }> }

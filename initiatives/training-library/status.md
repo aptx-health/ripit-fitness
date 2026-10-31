@@ -60,3 +60,11 @@
 - 2026-10-31 MDT: Dustin: the center Workout button is enough; no start button for new users on Training.
 - 2026-10-31 MDT: 055 fixes in; lead re-run green. Waiting on Dustin's final look at TL6 before the PR.
 - 2026-10-31 MDT: Dustin OK'd TL6 ('Perfect!'). Committed; PR stacked on TL5a. Next: TL5b.
+- 2026-10-31 MDT: TL6 PR #1011 (stacked on #1010). TL5b on feature/user-agent-tokens: spec and user-agent-tokens.feature written; 056 tests dispatched. Lead: /settings/agent-access, 5 active tokens max, non-admins don't see and can't call the exercise-library tools, only admin-owned proposals notify.
+- 2026-10-31 MDT: TL6 preview seed cleaned up; preview stopped.
+- 2026-10-31 MDT: 056 accepted (93 tests, 55/55 breaks; 7 agent-tools steps files now pass role 'admin'). 057 build dispatched. Lead: editors count as non-admin; the forbidden check runs before argument validation.
+- 2026-10-31 MDT: 057 build in (866/866 targeted; tsc clean). 12 locked TL5a tests seed exercise proposals without a role, which is now forbidden. Fix sent to the test-builder.
+- 2026-10-31 MDT: 057 build back; lead re-run 2369 passed, tsc clean. 058 security-focused review dispatched.
+- 2026-10-31 MDT: 058 review: ship with notes. Key: the MCP URL shown in prod would be staging's, because NEXT_PUBLIC_APP_URL is inlined at build. Fixes to the implementer, test gaps to the test-builder, proposal links to the roadmap.
+- 2026-10-31 MDT: 056 follow-up 2 in (18 tests for editor, role-lookup failure, export revoke, no-role, limit race; 8/8 breaks). Waiting on the implementer's 058 fixes.
+- 2026-10-31 MDT: 058 fixes in; lead re-run green. TL5b phone preview up for Dustin.
