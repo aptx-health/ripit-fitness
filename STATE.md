@@ -6,7 +6,7 @@ None
 Running quietly: None.
 
 ## Active
-- Training + Library redesign (high priority): Worktree2. Stacked PRs: TL1 #1006 → dev, TL2 #1007, TL3 #1008 (TL1–TL3 = prod release set, all reviewed and OK'd by Dustin). Now: TL4 phone preview (Dustin) on `feature/pinned-workouts`. See [initiatives/training-library/status.md](initiatives/training-library/status.md).
+- Training + Library redesign (high priority): Worktree2. Stacked PRs: TL1 #1006 → dev, TL2 #1007, TL3 #1008 (TL1–TL3 = prod release set, all reviewed and OK'd by Dustin). TL4 #1009. Now: TL6 folder-tab restyle (mockup A), then TL5b on `feature/coach-suggestions`. See [initiatives/training-library/status.md](initiatives/training-library/status.md).
 
 ## Blocked
 None

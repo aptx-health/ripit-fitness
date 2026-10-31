@@ -176,3 +176,87 @@ Users pin saved workouts to keep informal routines on Training without building 
 - `getTrainingHome` gains `pinned: [{id, name, exerciseCount, pinnedAt}]`, holding at most 5.
 
 **Out of scope:** pinning program days, a pin limit, reordering pins, and exposing `pinnedAt` through MCP.
+
+## TL5 Coach Suggestions
+
+TL5 is split into two stacked PRs:
+- **TL5a:** users review suggestions in the app.
+- **TL5b:** users create their own agent tokens, and notifications are scoped to the owner.
+
+Until TL5b lands, only admins have tokens, so in practice only Dustin gets suggestions.
+
+### TL5a Suggestions for users
+
+"Suggestion" is the user-facing word for a pending agent proposal. The UI never says "proposal".
+
+**Kinds users see:** `saved_workout.create`, `saved_workout.update`, `program.create`, `anchors.update` and `balance_targets.update`. Exercise-library kinds (`exercise_definition.*`) never appear outside admin, and any user-facing route treats them as not found.
+
+**API** (signed-in user, own proposals only; another user's, an unknown or a hidden-kind id is a 404, with rate limiting as for other user routes)
+- **`GET /api/suggestions`:** the user's pending suggestions of the allowed kinds, newest first, as `{id, kind, summary, rationale, createdAt}`.
+- **`GET /api/suggestions/[id]`:** one suggestion of an allowed kind, whatever its status, with what the review screen needs.
+- **`POST /api/suggestions/[id]/accept`:** runs the existing approve in `lib/proposals/service.ts`, with the same result mapping as the admin decision route.
+  - A suggestion that isn't pending is a 409.
+  - A conflict result keeps the existing status `conflict` and responds so the UI can say "This suggestion no longer applies".
+  - For `program.create` the response includes the new program's id.
+- **`POST /api/suggestions/[id]/reject`:** runs the existing reject.
+- There's no user revert: undo stays in admin.
+- Accepted programs may take a user past the 3-program cap (decided). The service already allows this.
+
+**Training → Coach Suggestions**
+- The first section, above Up Next. Shown only when the user has at least one pending suggestion.
+- The heading is "Coach Suggestions · N".
+- The newest suggestion is prominent:
+  - its kind label: "Workout" for a saved workout create, "Workout change" for an update, "Program", "Anchor lifts" or "Training targets";
+  - its summary;
+  - its rationale, cut to 2 lines;
+  - a **Review** button that opens `/suggestions/[id]`.
+- Up to 2 more suggestions are listed compactly, by summary only, each linking to its review screen.
+- A **View Suggestions** link goes to `/suggestions`.
+- `getTrainingHome` gains `suggestions: {count, items}`, where `items` holds the newest 3. Pending suggestions also suppress the empty-home screen.
+
+**`/suggestions`**
+- The list of pending suggestions, with the same rows as above. If none are pending, it says "No suggestions right now" and links back to Training.
+
+**`/suggestions/[id]` review screen**
+- The title, kind label, rationale and created date.
+- A body per kind. Lift the renderers out of the admin proposal detail page into shared components and use them in both places, with no duplicated logic:
+  - **Saved workout create:** the outline (exercises with planned sets).
+  - **Saved workout update:** the changed fields, before and after.
+  - **Program:** the program outline (weeks, days, exercises).
+  - **Anchors and balance targets:** before and after per pattern or FAU, always using display names, never keys.
+- **Accept** and **Reject** buttons, shown only while the suggestion is pending. A suggestion that isn't pending shows its outcome ("Accepted", "Rejected", "No longer applies") and no buttons.
+- **After Accept:**
+  - A workout lands in My Workouts. The screen confirms with a link to `/library?type=workouts`.
+  - A program asks "Make it active?" with **Make active** and **Not now**.
+    - Make active uses the existing activation (`POST /api/programs/[id]/activate`), then goes to the program's detail page.
+    - Not now goes to the program's detail page, which stays inactive.
+  - Anchors and targets confirm with "Updated".
+- **After Reject:** it goes back to `/suggestions`, or to Training if none are left.
+- An action that fails shows the error and leaves the suggestion pending.
+
+**Titles** (added after review 049)
+- Users never see the service summary, which admin keeps. Every user-facing title comes from `suggestionTitle`:
+  - workout create: the workout's name;
+  - workout update: "<current name>: <changed fields>", e.g. "Push A: name, exercises";
+  - program: the program's name;
+  - targets: "<FAU display name> <before> → <after>", joined with ", ";
+  - anchors: the pattern display names, joined with ", ".
+- The review screen's title is a normal-size heading, not the all-caps display style.
+
+**Error wording:** route errors to users never contain "proposal". By code:
+- `not_pending`: "This suggestion was already decided."
+- `conflict`: "This suggestion no longer applies."
+- `not_found`: "Suggestion not found."
+- `invalid`: "This suggestion can't be applied."
+
+Responses return `{id, status, kind}`, never the whole row.
+
+**Navigation:** `/suggestions*` highlights the Training tab.
+
+**Admin:** unchanged. Admins still see every kind in `/admin/proposals`, with revert.
+
+**Out of scope for TL5a:** user tokens and the notification changes (TL5b), undo, and editing a suggestion before accepting it.
+
+### TL5b User agent tokens and scoped notifications
+
+Specified when TL5a is done.

@@ -47,6 +47,7 @@ vi.mock('@/components/ToastProvider', () => ({
 
 type Pinned = { id: string; name: string; exerciseCount: number; pinnedAt: Date }
 type Home = {
+  suggestions: { count: number; items: unknown[] }
   upNext: unknown
   pinned: Pinned[]
   recent: unknown[]
@@ -73,7 +74,7 @@ const RECENT = [
   { id: 'c1', name: 'Leg Day', completedAt: new Date('2026-10-28T12:00:00Z'), durationSeconds: 2700, canRepeat: true },
 ]
 const CURRENT = { programId: 'p1', programName: 'Machine Starter', weekNumber: 2, totalWeeks: 5, workoutsDone: 3, workoutsTotal: 10 }
-const home = (over: Partial<Home> = {}): Home => ({ upNext: null, pinned: PINS, recent: [], currentProgram: null, ...over })
+const home = (over: Partial<Home> = {}): Home => ({ upNext: null, pinned: PINS, suggestions: { count: 0, items: [] }, recent: [], currentProgram: null, ...over })
 
 type Reply = () => Promise<{ ok: boolean; status: number; json: () => Promise<unknown> }>
 let calls: Array<{ url: string; method: string; body?: string }>

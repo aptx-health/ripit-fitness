@@ -108,6 +108,7 @@ interface CurrentProgram {
 }
 interface Home {
   upNext: UpNext | null
+  suggestions: { count: number; items: unknown[] }
   pinned: Array<{ id: string; name: string; exerciseCount: number; pinnedAt: Date }>
   recent: RecentRow[]
   currentProgram: CurrentProgram | null
@@ -728,7 +729,7 @@ describeFeature(feature, ({ Rule }) => {
         s.home = await getHome()
       })
       Then('they see "Start a workout" and "Find a program"', async () => {
-        expect(s.home).toEqual({ upNext: null, pinned: [], recent: [], currentProgram: null })
+        expect(s.home).toEqual({ upNext: null, pinned: [], suggestions: { count: 0, items: [] }, recent: [], currentProgram: null })
         await renderHome(s.home as Home)
         expect(screen.getByText(/start a workout/i)).toBeTruthy()
         const find = new URL(screen.getByText(/find a program/i).closest('a')?.getAttribute('href') ?? '', 'http://x')

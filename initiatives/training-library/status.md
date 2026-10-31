@@ -33,3 +33,13 @@
 - 2026-10-31 MDT: 046 review: ship with notes (3 low, 1 nit). Fixes sent to implementer.
 - 2026-10-31 MDT: 045 retry in; lead re-run green. TL4 phone preview up for Dustin.
 - 2026-10-31 MDT: Dustin OK'd the TL4 preview. Committed; PR stacked on TL3. Next: TL5 Coach Suggestions.
+- 2026-10-31 MDT: TL4 PR #1009 (stacked on #1008). TL5 split into TL5a (user review of suggestions) and TL5b (user tokens + scoped notify), as stacked PRs. TL5a spec + coach-suggestions.feature written; 047 tests dispatched. Lead: exercise-library proposals are 404 on user routes; non-admin tokens will be refused exercise-library propose tools (TL5b).
+- 2026-10-31 MDT: 047 accepted (153 tests, 60/60 breaks). 048 build dispatched. Lead: a reverted suggestion shows 'Undone'; no cap check on accept; seeding with notification URLs blank.
+- 2026-10-31 MDT: 048 build back (lead re-run 2197 passed, tsc clean; the admin page is byte-identical after the lift). 049 review dispatched, asked to judge the key-based target summaries users would see.
+- 2026-10-31 MDT: 049 review: fix first. Users saw service summaries with keys, and 'proposal' leaked in error JSON. Spec now has title and error-wording rules; the implementer fixes, the test-builder adds tests; the no-op target proposals go to the roadmap.
+- 2026-10-31 MDT: 048 retry in (suggestionTitle, h1 size, error wording and trimmed data, GET rate limits using the write limiter). Waiting on the test-builder's 047 follow-up packet before the preview.
+- 2026-10-31 MDT: 047 follow-up in (26 tests for titles, wording and rate limits). Lead re-run green. TL5a phone preview up for Dustin.
+- 2026-10-31 MDT: Preview seed for Dustin: proposals cmvwvkcoy0002vr23g4e0vcrx (workout) and cmvwvkdjq0004vr236n93ktwz (program), plus temporary token cmvwvkcos0000vr23swamdmf0, on the wt2 DB. Clean up after the preview: the proposals, the token, and anything they created.
+- 2026-10-31 MDT: Dustin's TL5a preview notes: everything works, but Training reads as a big list with tiny headers and unclear hierarchy; the suggestion card doesn't show it's a suggestion. He asked for 3 rough mockups (tab-like section headers, envelope tab or Library-tab style). 050 dispatched to implementer. TL5a PR is held until the direction is picked.
+- 2026-10-31 MDT: 050 mockups published to Handoff Hub; waiting on Dustin's pick.
+- 2026-10-31 MDT: Dustin picked mockup A (folder tabs). TL5a committed as its own stacked PR; the restyle becomes TL6, stacked on TL5a. TL5b follows.

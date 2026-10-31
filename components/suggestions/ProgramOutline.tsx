@@ -24,7 +24,7 @@ export function setSummary(sets: SetInput[]): string {
 }
 
 /**
- * Read-only outline of a proposed program: weeks, workouts, exercises and a
+ * Read-only outline of a suggested program: weeks, workouts, exercises and a
  * set summary. Every value is agent-supplied, so it is rendered as plain text.
  */
 export default function ProgramOutline({

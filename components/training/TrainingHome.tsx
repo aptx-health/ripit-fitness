@@ -1,6 +1,6 @@
 'use client'
 
-import { Play, RotateCcw } from 'lucide-react'
+import { ChevronRight, Play, RotateCcw } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
@@ -11,23 +11,26 @@ import { clientLogger } from '@/lib/client-logger'
 import { formatDuration } from '@/lib/format/duration'
 import { pluralize } from '@/lib/format/pluralize'
 import { libraryHref } from '@/lib/library/links'
+import { suggestionKindLabel } from '@/lib/suggestions/kinds'
+import type { SuggestionItem } from '@/lib/suggestions/types'
 import type { CurrentProgram, PinnedWorkout, RecentSession, TrainingHomeData, UpNext } from '@/lib/training/home'
 import { programDetailHref } from '@/lib/training/program-href'
 
 /**
  * The Training home: "what should I do next?" Sections appear only when they
- * have something to show, in a fixed order: Up Next, Pinned Workouts, Recent
- * Workouts, Current Program. Coach Suggestions (TL5) will go before Up Next.
- * Pinned Start and Recent Repeat share one session starter, so only one start
+ * have something to show, in a fixed order: Coach Suggestions, Up Next, Pinned
+ * Workouts, Recent Workouts, Current Program. Pinned Start and Recent Repeat share one session starter, so only one start
  * request runs at a time on the whole page.
  */
 export default function TrainingHome({ home }: { home: TrainingHomeData }) {
-  const { upNext, pinned, recent, currentProgram } = home
-  const isEmpty = !upNext && pinned.length === 0 && recent.length === 0 && !currentProgram
+  const { suggestions, upNext, pinned, recent, currentProgram } = home
+  const isEmpty =
+    suggestions.count === 0 && !upNext && pinned.length === 0 && recent.length === 0 && !currentProgram
   const starter = useSessionStart()
 
   return (
     <div className="space-y-6">
+      {suggestions.count > 0 && <SuggestionsSection count={suggestions.count} items={suggestions.items} />}
       {upNext && <UpNextSection upNext={upNext} />}
       {pinned.length > 0 && <PinnedSection pinned={pinned} starter={starter} />}
       {recent.length > 0 && <RecentSection recent={recent} starter={starter} />}
@@ -40,6 +43,53 @@ export default function TrainingHome({ home }: { home: TrainingHomeData }) {
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
     <h2 className="mb-2 text-sm font-bold uppercase tracking-wider text-muted-foreground doom-label">{children}</h2>
+  )
+}
+
+/** The newest suggestion in full, the next ones by summary, and a way to the list. */
+function SuggestionsSection({ count, items }: { count: number; items: SuggestionItem[] }) {
+  const [newest, ...others] = items
+  return (
+    <section aria-labelledby="suggestions-heading">
+      <div className="flex items-baseline justify-between">
+        <SectionHeading>
+          <span id="suggestions-heading">Coach Suggestions · {count}</span>
+        </SectionHeading>
+        <Link
+          href="/suggestions"
+          className="text-sm font-semibold uppercase tracking-wider text-primary hover:text-primary-hover doom-link"
+        >
+          View Suggestions
+        </Link>
+      </div>
+      <div className="bg-card border border-border border-l-4 border-l-accent doom-noise">
+        {newest && (
+          <div className="p-4 space-y-2">
+            <p className="text-xs font-bold uppercase tracking-wider text-accent">{suggestionKindLabel(newest.kind)}</p>
+            <h3 className="font-bold text-foreground break-words">{newest.title}</h3>
+            <p className="text-sm text-muted-foreground line-clamp-2 break-words">{newest.rationale}</p>
+            <Link href={`/suggestions/${newest.id}`} className={`${primaryButton} w-full`}>
+              Review
+            </Link>
+          </div>
+        )}
+        {others.length > 0 && (
+          <ul className="border-t border-border divide-y divide-border">
+            {others.map((item) => (
+              <li key={item.id}>
+                <Link
+                  href={`/suggestions/${item.id}`}
+                  className="flex items-center gap-2 px-4 py-3 text-sm text-foreground hover:bg-muted/50 doom-focus-ring"
+                >
+                  <span className="flex-1 min-w-0 truncate">{item.title}</span>
+                  <ChevronRight size={16} className="shrink-0 text-muted-foreground" aria-hidden="true" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </section>
   )
 }
 
