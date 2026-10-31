@@ -1,12 +1,13 @@
 'use client'
 
-import { ChevronDown, ChevronRight, Copy, Lock, Pencil, Star, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronRight, Copy, Eye, Lock, Pencil, Star, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useToast } from '@/components/ToastProvider'
 import { CreateNewCard } from '@/components/ui/CreateNewCard'
 import { clientLogger } from '@/lib/client-logger'
+import { programDetailHref } from '@/lib/training/program-href'
 import ActivationConfirmModal from './ActivationConfirmModal'
 
 type Program = {
@@ -26,8 +27,9 @@ type Props = {
   cloningProgress: Record<string, { currentWeek: number; totalWeeks: number }>
   localCopyStatuses: Record<string, string>
   deletedPrograms: Set<string>
-  hasActiveProgram: boolean
   activeProgram?: { id: string; name: string } | null
+  /** The active program's current week, shown on its row. */
+  activeWeekInfo?: { weekNumber: number; totalWeeks: number } | null
   programCount: number
   hasAccess: boolean
   bypassLimit: boolean
@@ -41,8 +43,8 @@ export default function MyProgramsList({
   cloningProgress,
   localCopyStatuses,
   deletedPrograms,
-  hasActiveProgram,
   activeProgram,
+  activeWeekInfo = null,
   programCount,
   hasAccess,
   bypassLimit,
@@ -58,13 +60,17 @@ export default function MyProgramsList({
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null)
   const [showPremiumModal, setShowPremiumModal] = useState(false)
 
-  // Filter out active program (shown in strip) and deleted programs
-  const inactivePrograms = programs
-    .filter(p => !p.isActive && !deletedPrograms.has(p.id))
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  // The active program first, then the rest newest first; deleted ones drop out.
+  const listedPrograms = programs
+    .filter(p => !deletedPrograms.has(p.id))
+    .sort(
+      (a, b) =>
+        Number(b.isActive) - Number(a.isActive) ||
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
 
-  const displayedPrograms = showAll ? inactivePrograms : inactivePrograms.slice(0, INITIAL_SHOW)
-  const hasMore = inactivePrograms.length > INITIAL_SHOW
+  const displayedPrograms = showAll ? listedPrograms : listedPrograms.slice(0, INITIAL_SHOW)
+  const hasMore = listedPrograms.length > INITIAL_SHOW
 
   const handleActivate = (programId: string, programName: string) => {
     setActivationTarget({ id: programId, name: programName })
@@ -115,15 +121,11 @@ export default function MyProgramsList({
     }
   }
 
-  if (inactivePrograms.length === 0) {
+  if (listedPrograms.length === 0) {
     return (
       <div className="space-y-3">
         <div className="bg-card border border-border doom-noise p-8 text-center">
-          <p className="text-muted-foreground mb-2">
-            {hasActiveProgram
-              ? 'No other programs saved.'
-              : 'No programs yet.'}
-          </p>
+          <p className="text-muted-foreground mb-2">No programs yet.</p>
           <p className="text-sm text-muted-foreground">
             Browse community programs or create your own.
           </p>
@@ -165,6 +167,9 @@ export default function MyProgramsList({
                     <h3 className="text-base font-bold text-foreground uppercase truncate doom-heading">
                       {program.name}
                     </h3>
+                    {program.isActive && !isCloning && (
+                      <span className="text-xs font-bold text-primary uppercase tracking-wider shrink-0">ACTIVE</span>
+                    )}
                     {isCloning && (
                       <span className="text-xs font-semibold text-primary uppercase tracking-wider animate-pulse shrink-0">
                         CLONING{progress ? ` ${progress.currentWeek}/${progress.totalWeeks}` : '...'}
@@ -172,6 +177,14 @@ export default function MyProgramsList({
                     )}
                   </div>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    {program.isActive && activeWeekInfo && (
+                      <>
+                        <span>
+                          Week {activeWeekInfo.weekNumber} of {activeWeekInfo.totalWeeks}
+                        </span>
+                        <span aria-hidden="true">&middot;</span>
+                      </>
+                    )}
                     {program._count.weeks > 0 && (
                       <span>{program._count.weeks}wk</span>
                     )}
@@ -201,16 +214,26 @@ export default function MyProgramsList({
                     </p>
                   )}
                   <div className="flex flex-wrap gap-2 pt-2">
-                    <button
-                      type="button"
-                      onClick={() => handleActivate(program.id, program.name)}
-                      disabled={isLoading}
-                      className="flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground text-sm font-semibold uppercase tracking-wider doom-focus-ring disabled:opacity-50"
+                    <Link
+                      href={programDetailHref(program.id)}
+                      className="flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground text-sm font-semibold uppercase tracking-wider doom-focus-ring"
                       style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)' }}
                     >
-                      <Star size={14} />
-                      ACTIVATE
-                    </button>
+                      <Eye size={14} />
+                      VIEW
+                    </Link>
+                    {!program.isActive && (
+                      <button
+                        type="button"
+                        onClick={() => handleActivate(program.id, program.name)}
+                        disabled={isLoading}
+                        className="flex items-center gap-1.5 px-3 py-2 border border-border text-foreground text-sm font-semibold uppercase tracking-wider hover:bg-muted transition-colors doom-focus-ring disabled:opacity-50"
+                        style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.20), 0 1px 0 rgba(0,0,0,0.30)' }}
+                      >
+                        <Star size={14} />
+                        ACTIVATE
+                      </button>
+                    )}
                     <Link
                       href={`/programs/${program.id}/edit`}
                       className="flex items-center gap-1.5 px-3 py-2 border border-border text-foreground text-sm font-semibold uppercase tracking-wider hover:bg-muted transition-colors doom-focus-ring"
@@ -264,7 +287,7 @@ export default function MyProgramsList({
           onClick={() => setShowAll(true)}
           className="w-full py-2 text-sm text-muted-foreground hover:text-foreground font-semibold uppercase tracking-wider transition-colors doom-focus-ring"
         >
-          SHOW ALL ({inactivePrograms.length})
+          SHOW ALL ({listedPrograms.length})
         </button>
       )}
 

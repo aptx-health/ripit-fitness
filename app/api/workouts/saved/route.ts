@@ -41,6 +41,7 @@ export async function GET(_request: NextRequest) {
         notes: true,
         exerciseCount: true,
         lastUsedAt: true,
+        pinnedAt: true,
         createdAt: true,
       },
     })

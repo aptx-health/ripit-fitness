@@ -10,7 +10,7 @@ import { isTabActive } from '@/lib/nav/active-tab'
 
 const TABS = [
   { id: 'training', label: 'Training', icon: Activity, href: '/training' },
-  { id: 'programs', label: 'Programs', icon: LayoutGrid, href: '/programs' },
+  { id: 'library', label: 'Library', icon: LayoutGrid, href: '/library' },
 ] as const
 
 const TABS_AFTER = [

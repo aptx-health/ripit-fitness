@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
+import { libraryHref } from '@/lib/library/links'
 import { programDetailHref } from '@/lib/training/program-href'
 
 type StrengthActivationModalProps = {
@@ -54,7 +55,7 @@ export default function StrengthActivationModal({
       return
     }
     onClose()
-    router.push('/programs')
+    router.push(libraryHref({ type: 'programs' }))
     router.refresh()
   }
 

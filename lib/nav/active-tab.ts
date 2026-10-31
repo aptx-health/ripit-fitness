@@ -1,11 +1,12 @@
 /**
  * Which nav tab is current for a path. Both the bottom nav and the desktop
- * header use this. A program's detail page belongs to Training until TL3 adds
- * the Library tab.
+ * header use this. Suggestions belong to Training; the program builder pages
+ * (`/programs/new` and `/programs/<id>/edit`) belong to the Library.
  */
 
 const EXTRA_PATHS: Record<string, string[]> = {
-  '/training': ['/library/programs'],
+  '/training': ['/suggestions'],
+  '/library': ['/programs/'],
 }
 
 export function isTabActive(tabHref: string, pathname: string): boolean {

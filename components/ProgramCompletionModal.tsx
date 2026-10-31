@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
 import { pluralize } from '@/lib/format/pluralize'
+import { libraryHref } from '@/lib/library/links'
 import { programDetailHref } from '@/lib/training/program-href'
 
 interface CompletionStats {
@@ -146,7 +147,7 @@ export function ProgramCompletionModal({
     if (restarting) return
 
     onClose()
-    router.push('/programs')
+    router.push(libraryHref({ type: 'programs' }))
   }
 
   const formatVolume = (volume: number | undefined | null) => {

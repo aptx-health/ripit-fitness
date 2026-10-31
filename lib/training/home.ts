@@ -1,9 +1,12 @@
 import { prisma } from '@/lib/db'
+import { countPendingSuggestions, listPendingSuggestions } from '@/lib/suggestions/detail'
+import type { SuggestionItem } from '@/lib/suggestions/types'
 import { programDetailHref } from '@/lib/training/program-href'
 import { resolveDurationSeconds } from '@/lib/workout-history'
 
 /**
- * Data for the Training home: Up Next, Recent Workouts and Current Program.
+ * Data for the Training home: Coach Suggestions, Up Next, Pinned Workouts,
+ * Recent Workouts and Current Program.
  * Skipped counts as done, and only the user's own non-archived completions
  * count.
  */
@@ -18,6 +21,13 @@ export interface UpNext {
   exerciseCount: number
   hasDraft: boolean
   href: string
+}
+
+export interface PinnedWorkout {
+  id: string
+  name: string
+  exerciseCount: number
+  pinnedAt: Date
 }
 
 export interface RecentSession {
@@ -38,16 +48,21 @@ export interface CurrentProgram {
 }
 
 export interface TrainingHomeData {
+  /** All pending suggestions counted; the newest few listed. */
+  suggestions: { count: number; items: SuggestionItem[] }
   upNext: UpNext | null
+  pinned: PinnedWorkout[]
   recent: RecentSession[]
   currentProgram: CurrentProgram | null
 }
 
 const RECENT_LIMIT = 3
+const PINNED_LIMIT = 5
+const SUGGESTION_LIMIT = 3
 const DONE_STATUSES = ['completed', 'skipped']
 
 export async function getTrainingHome(userId: string): Promise<TrainingHomeData> {
-  const [program, recent] = await Promise.all([
+  const [program, recent, pinned, suggestionCount, suggestionItems] = await Promise.all([
     prisma.program.findFirst({
       where: { userId, isActive: true, isArchived: false, deletedAt: null },
       select: {
@@ -89,10 +104,20 @@ export async function getTrainingHome(userId: string): Promise<TrainingHomeData>
         _count: { select: { loggedSets: true } },
       },
     }),
+    prisma.savedWorkout.findMany({
+      where: { userId, pinnedAt: { not: null } },
+      orderBy: { pinnedAt: 'desc' },
+      take: PINNED_LIMIT,
+      select: { id: true, name: true, exerciseCount: true, pinnedAt: true },
+    }),
+    countPendingSuggestions(userId),
+    listPendingSuggestions(userId, SUGGESTION_LIMIT),
   ])
 
   return {
+    suggestions: { count: suggestionCount, items: suggestionItems },
     ...(program ? await programSections(program, userId) : { upNext: null, currentProgram: null }),
+    pinned: pinned.map((w) => ({ ...w, pinnedAt: w.pinnedAt as Date })),
     recent: recent.map((c) => ({
       id: c.id,
       name: c.workout?.name ?? c.name ?? 'Open Workout',

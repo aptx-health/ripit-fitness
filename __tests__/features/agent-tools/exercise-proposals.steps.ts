@@ -113,7 +113,7 @@ async function attempt(fn: () => Promise<unknown>): Promise<Outcome> {
 }
 
 function ctx() {
-  return { userId: s.userId, tokenId: s.tokenId, notify: s.notify }
+  return { userId: s.userId, tokenId: s.tokenId, role: 'admin', notify: s.notify }
 }
 
 // Variable specifiers stop Vite resolving these at transform time, so a missing
@@ -316,7 +316,7 @@ describeFeature(feature, ({ Background, Rule }) => {
     RuleScenario('The agent tool list has no way to approve its own proposals', ({ When, Then, And }) => {
       When('the agent lists its tools', async () => {
         const { listTools } = await tools()
-        const raw = (await listTools()) as unknown
+        const raw = (await listTools('admin')) as unknown
         const list = Array.isArray(raw) ? raw : ((raw as { tools?: unknown[] })?.tools ?? [])
         s.tools = (list as Array<{ name: string }>).map((t) => t.name)
       })

@@ -23,6 +23,7 @@ import { FetchError, fetchJsonWithRetry } from '@/lib/api/fetch'
 import { discardDraft } from '@/lib/api/workout-sets'
 import { clientLogger } from '@/lib/client-logger'
 import { useDraftWorkout } from '@/lib/contexts/DraftWorkoutContext'
+import { libraryHref } from '@/lib/library/links'
 import { programDetailHref } from '@/lib/training/program-href'
 
 type NextWorkout = {
@@ -158,7 +159,7 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
 
   const handleOpenSavedWorkouts = useCallback(() => {
     onOpenChange(false)
-    router.push('/workouts/saved')
+    router.push(libraryHref({ type: 'workouts' }))
   }, [onOpenChange, router])
 
   const startFreestyle = useCallback(async () => {

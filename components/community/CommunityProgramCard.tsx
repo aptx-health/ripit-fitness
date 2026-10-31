@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
 import { EQUIPMENT_LABELS, GOAL_LABELS, LEVEL_LABELS } from '@/lib/constants/program-metadata'
 import { formatRelativeTime } from '@/lib/format/relativeTime'
+import { libraryHref } from '@/lib/library/links'
 import UnpublishProgramDialog from './UnpublishProgramDialog'
 
 type CommunityProgram = {
@@ -71,7 +72,7 @@ export default function CommunityProgramCard({
       const data = await response.json()
 
       // Redirect to programs page with cloning parameter for status polling
-      router.push(`/programs?cloning=${data.programId}`)
+      router.push(libraryHref({ type: 'programs', cloning: data.programId }))
     } catch (err) {
       clientLogger.error('Error adding program:', err)
       setError(err instanceof Error ? err.message : 'Failed to add program')
