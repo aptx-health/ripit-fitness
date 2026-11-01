@@ -1,0 +1,1 @@
+Report: complete (085). lib/mcp/tools.ts only (+13/−1): schema, description, handler via normalizeUserTrainingProfile (set → stored list; not set → EQUIPMENT_CHECKLIST_VALUES), readOnlyHint via annotationsFor. 084 tests 28/28; suite 2415/4; tsc, eslint, biome clean. No tools docs besides initiatives/agent-tools/docs/spec.md (lead file).
