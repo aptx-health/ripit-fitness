@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import AppScrollContainer from '@/components/AppScrollContainer'
 import BottomNav from '@/components/BottomNav'
 import FeedbackButton from '@/components/features/FeedbackButton'
 import { PwaInstallButton } from '@/components/features/PwaInstallButton'
@@ -34,17 +35,18 @@ export default async function AppLayout({
 
   return (
     <DraftWorkoutProvider>
-      <div className="min-h-screen bg-background">
+      {/* Mobile: a fixed-height shell whose content scrolls inside
+          AppScrollContainer, so the document never scrolls under the iOS
+          status bar. Desktop: the window scrolls as before. */}
+      <div className="flex h-(--app-h) flex-col overflow-hidden bg-background md:block md:h-auto md:min-h-screen md:overflow-visible">
         <SignupCompletedTracker />
         <SessionContextTracker />
         <Header userEmail={user.email || ''} />
-        <div className="pb-20 md:pb-0">
-          <div
-            className="md:hidden"
-            style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
-          />
-          {children}
-        </div>
+        <div
+          className="shrink-0 bg-background md:hidden"
+          style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+        />
+        <AppScrollContainer>{children}</AppScrollContainer>
         <BottomNav />
         <PwaInstallButton />
         <FeedbackButton />

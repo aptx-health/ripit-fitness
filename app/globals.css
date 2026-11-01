@@ -1856,6 +1856,19 @@
   --accent-rgb: 204, 121, 167;
 }
 
+/* Height of the mobile (app) shell. In iOS standalone, 100dvh stops short of
+   the status bar, so add the top inset back (capped at the large viewport). */
+:root {
+  --app-h: 100dvh;
+}
+@media (display-mode: standalone) {
+  @supports (-webkit-touch-callout: none) {
+    :root {
+      --app-h: min(100lvh, calc(100dvh + env(safe-area-inset-top, 0px)));
+    }
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

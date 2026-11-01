@@ -14,6 +14,7 @@ import {
   LEVEL_LABELS,
 } from '@/lib/constants/program-metadata'
 import { pluralize } from '@/lib/format/pluralize'
+import { scrollAppToTop } from '@/lib/nav/app-scroll'
 import CommunityProgramCard from './CommunityProgramCard'
 
 type CommunityProgram = {
@@ -106,7 +107,7 @@ export default function CommunityProgramsView({
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
     // Scroll to top of list
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    scrollAppToTop('smooth')
   }
 
   // Handle level change
