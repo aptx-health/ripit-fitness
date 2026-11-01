@@ -120,3 +120,46 @@ Branch `feature/ui-settings-subpages`, stacked on UI5. Audit section "Settings �
 7. Every save/load/validation behaves exactly as before; existing tests keep passing.
 
 **Done when:** suite, tsc, eslint/biome on touched files pass; touch-emulated 390px light/dark screenshots of all four sub-pages (and Muscle balance / Target movements with unsaved changes); Training, Library and Settings main unchanged.
+
+---
+
+# Workout screen (logger) build: L1–L3
+
+Source: the logger audit `docs/logger-audit/README.md` (081) and its idea mockups `docs/logger-audit/ideas/`. Dustin (2026-11-01) picked **direction A** for all three areas: bottom bar (flat folder bar), tab bar (paper tabs over a folder box), plan drawer (folder bottom sheet). Stacked PRs with `gh stack`, base `dev`. Same shared rules as UI1–UI6 (no `doom-corners`, folder boxes, plain rows, 48px targets, light and dark).
+
+| Item | Branch | What |
+|---|---|---|
+| L1 | `feature/logger-shared` | `LoggerConfirm` for the six confirms, menu style, bevel/token clean-up, one surface |
+| L2 | `feature/logger-bottom-bar` | One `LoggerBottomBar` for all three logger modes (direction A) |
+| L3 | `feature/logger-plan` | Paper tabs + folder box (tab-bar A); plan drawer as a folder bottom sheet (plan-drawer A) |
+
+L4 (one exercise picker; saved-workout template sets in the freestyle logger) is on the ROADMAP, not in this round.
+
+## L1: shared logger pieces
+
+**Behaviour:** `features/ui-audit/logger-confirm.feature`.
+
+1. **`LoggerConfirm`** on Radix AlertDialog (`components/ui/radix/alert-dialog.tsx`): a `PaperTabTitle` title (tone `mine`, or `quiet` for destructive) on a folder box, a one-line body, outline Cancel and one filled action (`bg-error` only when destructive). Real dialog semantics: `role="alertdialog"`, focus trapped and returned, Escape closes (= Cancel), title and body labelled.
+2. **Replace all six confirms** with it, keeping each one's behaviour and callbacks: Complete (`CompleteWorkoutConfirm.tsx`; add a "N sets · M min" summary line), Exit (`ExitWorkoutConfirm.tsx`; "Save as draft" filled, "Discard" outline with error text, Cancel), Delete set (`DeleteSetConfirm.tsx`; retitle "Delete the only set?"), Delete exercise (`ExerciseQuickActionsMenu.tsx`; titled "Delete <exercise>?"), Switch to logging (`FollowAlongHeader.tsx`), ad-hoc Complete (`adhoc/AdHocLoggerView.tsx:902`).
+3. **Menus** (`ExerciseQuickActionsMenu`, the plan-row menu): `bg-card border-2 border-secondary folder-box`, plain muted heading row, `divide-y` items, 48px.
+4. **Bevels → tokens** (S2) in `ExerciseLoggingHeader.tsx`: no fixed `rgba()` shadows/colours; outline buttons `border-2 border-border`; filled buttons only get the `0 3px 0 var(--primary-active)` press edge. (The bottom bar and plan editor bevels go in L2/L3.)
+5. **One surface** (S5): both loggers on `bg-background`.
+6. Small ones: rest stopwatch dismiss is a 48px target; completion failure uses a toast, not `alert()`; "First time logging this" hides once a set is logged.
+
+**Done when:** L1 tests pass; suite, tsc, eslint/biome on touched files; touch-emulated 390px light/dark screenshots of each confirm, the menu, and the logger header; everything else unchanged.
+
+**Carried into L2/L3 from review 090:** 48px targets for "Delete set N" (22px), "Exercise options" (28px), the intensity-tip dismiss (16px), follow-along "Close workout" (26px), the Switch strip (28px) and Previous (40×44). L2 owns the bottom bar and follow-along controls; L3 owns the exercise area and tabs.
+
+## L2: one bottom bar (direction A)
+
+Branch `feature/logger-bottom-bar`, stacked on L1. **Behaviour:** `features/ui-audit/logger-bottom-bar.feature`. Look: `docs/logger-audit/ideas/bb-a-*.png` and `bb-a-done-*.png` (on the docs branch until #1022 merges).
+
+1. **One `LoggerBottomBar`** for the program logger, follow-along and freestyle, with slots for left, main and right buttons. It replaces `ExerciseActionsFooter`, `FollowAlongFooter` and the freestyle footer in `components/adhoc/AdHocLoggerView.tsx`.
+2. **Look:** flat `bg-card`, `border-t-2 border-secondary`, outline 48px prev/next squares (`border-2 border-border`; disabled = outline with muted text, not `opacity-50`), main button filled accent with the `0 3px 0` press edge. No fixed `rgba()`.
+3. **LOG SET** has a second line with what will be saved: "8 reps × 135 lbs" (whatever the form holds; sensible text for time- or bodyweight-based sets).
+4. **It never disappears.** After the last prescribed set it becomes `[‹] [+ Extra set] [Next exercise ›]` (on the last exercise: Finish instead of Next exercise). Drop `SetLoggingForm`'s in-content "All prescribed sets logged" box.
+5. **Banner:** when all sets are logged, `DrawerContextBanner` shows "7 of 7 done" instead of "SET 8".
+6. **Follow-along** uses the same bar (prev, NEXT EXERCISE / Finish); freestyle with no exercises shows Add exercise as the main button.
+7. Carry-overs from 090 that live here: follow-along "Close workout" and the Switch strip at 48px; Previous 48×48.
+
+**Done when:** L2 tests pass; suite, tsc, eslint/biome on touched files; touch-emulated 390px light/dark screenshots of the bar in each mode, mid-exercise and after the last set; logging behaviour unchanged.

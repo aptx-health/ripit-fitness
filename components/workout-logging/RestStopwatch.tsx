@@ -30,7 +30,7 @@ export default function RestStopwatch({
 
   return (
     <div
-      className="px-2.5 py-3"
+      className="px-2.5"
       style={{
         backgroundColor: 'color-mix(in srgb, var(--success) 8%, transparent)',
         boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04), inset 0 -1px 0 rgba(0,0,0,0.30)',
@@ -53,7 +53,7 @@ export default function RestStopwatch({
           <button
             type="button"
             onClick={onDismiss}
-            className="p-1 text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+            className="inline-flex h-12 w-12 items-center justify-center text-muted-foreground/70 hover:text-muted-foreground transition-colors doom-focus-ring"
             aria-label="Dismiss rest timer"
           >
             <X size={14} />

@@ -1,7 +1,6 @@
 'use client'
 
 import { Menu, X } from 'lucide-react'
-import { useMemo } from 'react'
 import { useWorkoutTimer } from '@/hooks/useWorkoutTimer'
 
 interface ExerciseLoggingHeaderProps {
@@ -29,16 +28,8 @@ function ProgressIndicator({ current, total }: { current: number; total: number 
         return (
           <div
             key={exerciseIndex}
-            className="flex-1 transition-colors"
-            style={{
-              height: barHeight,
-              backgroundColor: lit
-                ? 'var(--primary)'
-                : 'rgba(16, 185, 129, 0.14)',
-              boxShadow: lit
-                ? 'inset 0 1px 0 rgba(255,255,255,0.28), 0 0 4px rgba(16,185,129,0.45)'
-                : 'inset 0 1px 1px rgba(0,0,0,0.40)',
-            }}
+            className={`flex-1 transition-colors ${lit ? 'bg-primary' : 'bg-primary/20'}`}
+            style={{ height: barHeight }}
           />
         )
       })}
@@ -63,19 +54,17 @@ export default function ExerciseLoggingHeader({
   onOpenPlanEditor,
   modeToggle,
 }: ExerciseLoggingHeaderProps) {
-  const initialElapsed = useMemo(() => {
-    if (!startedAt) return 0
-    return Math.max(0, Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000))
-  }, [startedAt])
+  const { formatted: elapsedTime } = useWorkoutTimer(startedAt)
 
-  const { formatted: elapsedTime } = useWorkoutTimer(initialElapsed)
-
+  // Header buttons are outlined in the header's own darker shade (--secondary-active),
+  // not --border: that is a page token and reads as a light stroke on the coloured bar.
   return (
     <div
-      className="bg-secondary text-secondary-foreground flex-shrink-0"
-      style={{ paddingTop: 'env(safe-area-inset-top)', boxShadow: 'inset 0 -1px 0 rgba(0,0,0,0.25)' }}
+      className="bg-secondary text-secondary-foreground flex-shrink-0 border-b-2 border-secondary-active"
+      style={{ paddingTop: 'env(safe-area-inset-top)' }}
     >
-      <div className="px-3 py-2.5 grid items-center gap-3" style={{ gridTemplateColumns: '1fr auto 1fr' }}>
+      {/* 48px buttons with 4px above and below: the bar stays 56px, as with the old 36px buttons and 10px padding. */}
+      <div className="px-3 py-1 grid items-center gap-3" style={{ gridTemplateColumns: '1fr auto 1fr' }}>
         {/* Left: progress indicator (button when editor wired) */}
         <div className="flex items-center">
           {onOpenPlanEditor ? (
@@ -83,12 +72,7 @@ export default function ExerciseLoggingHeader({
               type="button"
               onClick={onOpenPlanEditor}
               aria-label="Edit workout plan"
-              className="group inline-flex items-center gap-2 p-1.5 doom-focus-ring transition-transform active:translate-y-[2px]"
-              style={{
-                backgroundColor: 'rgba(254, 243, 199, 0.06)',
-                boxShadow:
-                  'inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(0,0,0,0.35), 0 2px 0 rgba(0,0,0,0.40)',
-              }}
+              className="group inline-flex min-h-12 items-center gap-2 px-1.5 border-2 border-secondary-active hover:bg-secondary-hover doom-focus-ring"
             >
               <Menu
                 size={18}
@@ -97,11 +81,7 @@ export default function ExerciseLoggingHeader({
                 aria-hidden="true"
               />
               <span
-                className="inline-flex items-center px-1.5 py-1 max-[359px]:hidden"
-                style={{
-                  backgroundColor: 'rgba(0,0,0,0.45)',
-                  boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(0,0,0,0.25)',
-                }}
+                className="inline-flex items-center px-1.5 py-1 bg-secondary-active max-[359px]:hidden"
               >
                 <ProgressIndicator current={currentExerciseIndex} total={totalExercises} />
               </span>
@@ -130,21 +110,14 @@ export default function ExerciseLoggingHeader({
           <button
             type="button"
             onClick={onCompleteWorkout}
-            className="h-9 px-3 bg-primary text-primary-foreground text-sm font-bold uppercase tracking-widest hover:bg-primary-hover transition-colors doom-focus-ring"
-            style={{
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.30)',
-            }}
+            className="h-12 px-3 bg-primary text-primary-foreground text-sm font-bold uppercase tracking-widest hover:bg-primary-hover shadow-[0_3px_0_var(--primary-active)] transition-colors doom-focus-ring"
           >
             FINISH
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="h-9 w-9 flex items-center justify-center text-secondary-foreground/80 hover:text-secondary-foreground transition-colors doom-focus-ring"
-            style={{
-              backgroundColor: 'rgba(0,0,0,0.30)',
-              boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.05)',
-            }}
+            className="h-12 w-12 flex items-center justify-center border-2 border-secondary-active text-secondary-foreground/80 hover:text-secondary-foreground hover:bg-secondary-hover transition-colors doom-focus-ring"
             aria-label="Exit workout"
           >
             <X size={18} strokeWidth={2.5} />

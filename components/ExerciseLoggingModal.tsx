@@ -3,6 +3,7 @@
 import { AlertTriangle, Info, Pencil, Plus, RefreshCw, Trash2, Wrench, X } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useToast } from '@/components/ToastProvider'
 import { Button } from '@/components/ui/Button'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import type { MessageData } from '@/components/ui/MessageCard'
@@ -92,6 +93,8 @@ export default function ExerciseLoggingModal({
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isConfirming, setIsConfirming] = useState(false)
+  // Whole minutes since the start, taken when Complete is tapped (for its summary line).
+  const [completeMinutes, setCompleteMinutes] = useState(0)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<{
     show: boolean
     exerciseId?: string
@@ -195,6 +198,12 @@ export default function ExerciseLoggingModal({
     flushFailedSets,
     clearCache,
   } = useWorkoutDraft(workoutId)
+  const toast = useToast()
+
+  const openComplete = useCallback(() => {
+    setCompleteMinutes(startedAt ? Math.max(0, Math.floor((Date.now() - Date.parse(startedAt)) / 60_000)) : 0)
+    setIsConfirming(true)
+  }, [startedAt])
 
   const currentPrescribedSets = useMemo(
     () => currentExercise?.prescribedSets || [],
@@ -572,10 +581,14 @@ export default function ExerciseLoggingModal({
       clientLogger.error('Error completing workout:', error)
       setIsSubmitting(false)
       setIsConfirming(false)
-      const message = !navigator.onLine
-        ? 'You\'re offline. Your sets are saved locally. Reopen this workout when you have a connection to complete it.'
-        : 'Failed to save workout. Please try again.'
-      alert(message)
+      if (!navigator.onLine) {
+        toast.error(
+          "You're offline: workout not completed",
+          'Your sets are saved on this device. Reopen this workout when you have a connection to complete it.'
+        )
+      } else {
+        toast.error("Couldn't complete the workout", 'Please try again.')
+      }
       return
     } finally {
       setIsSubmitting(false)
@@ -592,10 +605,11 @@ export default function ExerciseLoggingModal({
       clientLogger.error('Error completing guided workout:', error)
       setIsSubmitting(false)
       setIsConfirming(false)
-      const message = !navigator.onLine
-        ? 'You\'re offline. Please try again when you have a connection.'
-        : 'Failed to save workout. Please try again.'
-      alert(message)
+      if (!navigator.onLine) {
+        toast.error("You're offline: workout not completed", 'Please try again when you have a connection.')
+      } else {
+        toast.error("Couldn't complete the workout", 'Please try again.')
+      }
       return
     } finally {
       setIsSubmitting(false)
@@ -675,7 +689,7 @@ export default function ExerciseLoggingModal({
     <>
       <div className="fixed inset-0 z-50 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center">
         {/* Modal - Full screen on mobile, centered on desktop */}
-        <div className="bg-card w-full h-[100dvh] sm:h-[85vh] sm:max-h-[85vh] sm:max-w-2xl sm:border-2 sm:border-border sm:rounded-lg flex flex-col shadow-xl">
+        <div className="bg-background w-full h-[100dvh] sm:h-[85vh] sm:max-h-[85vh] sm:max-w-2xl sm:border-2 sm:border-border sm:rounded-lg flex flex-col shadow-xl">
           {/* Header */}
           {isFollowAlong ? (
             <FollowAlongHeader
@@ -690,7 +704,7 @@ export default function ExerciseLoggingModal({
               totalExercises={totalExercises}
               failedSetCount={failedSetCount}
               startedAt={startedAt}
-              onCompleteWorkout={() => setIsConfirming(true)}
+              onCompleteWorkout={openComplete}
               onClose={handleExitWorkout}
               onOpenPlanEditor={handleOpenPlanEditor}
             />
@@ -787,7 +801,8 @@ export default function ExerciseLoggingModal({
                       onClick: handleDeleteExercise,
                       variant: 'danger',
                       requiresConfirmation: true,
-                      confirmationMessage: `Are you sure you want to delete "${currentExercise?.name || 'this exercise'}"?`,
+                      confirmationTitle: `Delete ${currentExercise?.name || 'this exercise'}?`,
+                      confirmationMessage: 'It will be removed from this workout.',
                     },
                   ] satisfies QuickAction[]}
                   loggingForm={
@@ -803,7 +818,7 @@ export default function ExerciseLoggingModal({
                       onExpandedInputChange={setExpandedInput}
                       onExtraSets={() => setExtraSetsMode(true)}
                       onNextExercise={handleNextExercise}
-                      onCompleteWorkout={() => setIsConfirming(true)}
+                      onCompleteWorkout={openComplete}
                       isLastExercise={currentIndex >= totalExercises - 1}
                     />
                   }
@@ -820,7 +835,7 @@ export default function ExerciseLoggingModal({
               isSubmitting={isSubmitting}
               onPrevious={handlePreviousExercise}
               onNext={handleNextExercise}
-              onFinish={() => setIsConfirming(true)}
+              onFinish={openComplete}
             />
           ) : (
             expandedInput === null && <ExerciseActionsFooter
@@ -841,6 +856,8 @@ export default function ExerciseLoggingModal({
             <CompleteWorkoutConfirm
               isFollowAlong={isFollowAlong}
               isSubmitting={isSubmitting}
+              setCount={loggedSets.length}
+              durationMinutes={completeMinutes}
               onCancel={() => setIsConfirming(false)}
               onConfirm={isFollowAlong ? handleGuidedComplete : handleCompleteWorkout}
             />

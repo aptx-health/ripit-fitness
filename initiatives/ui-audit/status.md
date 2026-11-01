@@ -54,3 +54,11 @@
 - 2026-11-01 MDT: Dustin merged stack #1017 (UI1–UI6, #1014–#1021) into dev; deploying to staging. Prod release (dev → main + infra bump) waits for Dustin.
 - 2026-11-01 MDT: 081 logger audit back (A recommended for all three areas; build items L1–L4). Published to Handoff Hub logger-ideas-081; waiting on Dustin.
 - 2026-11-01 MDT: Dustin picked direction A for the bottom bar, tab bar and plan drawer. Logger build L1–L3 as a new gh stack on dev in worktree2; L4 (one exercise picker, saved-workout sets in freestyle) to ROADMAP.
+- 2026-11-01 MDT: Logger build started as a new gh stack on dev in worktree2 (feature/logger-shared first). L1 spec + logger-confirm.feature written; 088 (L1 tests) dispatched. L4 + Copenhagen Plank check on ROADMAP. Docs PR #1022 and equipment PR #1023 open into dev.
+- 2026-11-01 MDT: 088 accepted (111 red, break matrix clean). 089 (L1 build) dispatched to implementer.
+- 2026-11-01 MDT: 089 back (116/116, suite green). 090 review dispatched.
+- 2026-11-01 MDT: 090 approve. 091 (Discard busy, 'under 1 min', 48px header buttons) dispatched; other small targets carried into L2/L3.
+- 2026-11-01 MDT: 091 back. L1 phone preview.
+- 2026-11-01 MDT: Dustin on the L1 preview: strange cream stroke around the header's plan and X buttons (border-border on the brown header). 092 dispatched.
+- 2026-11-01 MDT: 092 back (header outline uses each theme's darker header shade). L1 preview restarted.
+- 2026-11-01 MDT: Dustin: L1 header "better". L1 committed and submitted (gh stack on dev).
