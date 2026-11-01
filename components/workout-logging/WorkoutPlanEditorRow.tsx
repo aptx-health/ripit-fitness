@@ -47,7 +47,8 @@ export function WorkoutPlanEditorRow({
       onClick: onDelete,
       variant: 'danger',
       requiresConfirmation: true,
-      confirmationMessage: `Are you sure you want to delete "${exercise.name}"?`,
+      confirmationTitle: `Delete ${exercise.name}?`,
+      confirmationMessage: 'It will be removed from this workout.',
     },
   ]
 

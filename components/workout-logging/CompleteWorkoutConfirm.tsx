@@ -1,54 +1,45 @@
 'use client'
 
-import { Button } from '@/components/ui/Button'
-import { LoadingFrog } from '@/components/ui/loading-frog'
+import { pluralize } from '@/lib/format/pluralize'
+import LoggerConfirm from './LoggerConfirm'
 
 type Props = {
   isFollowAlong: boolean
   isSubmitting: boolean
+  /** Sets logged so far, across every exercise. */
+  setCount: number
+  /** Whole minutes since the workout started. */
+  durationMinutes: number
   onCancel: () => void
   onConfirm: () => void
 }
 
-export default function CompleteWorkoutConfirm({ isFollowAlong, isSubmitting, onCancel, onConfirm }: Props) {
+/** "Complete this workout?", with what will be saved: "18 sets · 42 min". */
+export default function CompleteWorkoutConfirm({
+  isFollowAlong,
+  isSubmitting,
+  setCount,
+  durationMinutes,
+  onCancel,
+  onConfirm,
+}: Props) {
+  const body = isSubmitting
+    ? 'Completing workout…'
+    : isFollowAlong
+      ? 'This saves the workout as done.'
+      : `${pluralize(setCount, 'set')} · ${durationMinutes < 1 ? 'under 1 min' : `${durationMinutes} min`}`
+
   return (
-    <div className="fixed inset-0 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center z-60">
-      <div className="bg-card border-2 border-border p-6 sm:p-8 text-center min-w-[300px] shadow-xl doom-corners">
-        {!isSubmitting ? (
-          <>
-            <p className="text-lg sm:text-xl mb-6 text-foreground font-bold uppercase tracking-wider">
-              {isFollowAlong ? 'Nice work! Mark this workout as done?' : 'Complete this workout?'}
-            </p>
-            <div className="flex justify-center gap-3">
-              <Button
-                type="button"
-                variant="secondary"
-                doom
-                onClick={onCancel}
-                className="px-4 sm:px-6 py-2.5 sm:py-3 text-base font-bold uppercase tracking-wider border-2 border-border hover:border-primary"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                variant="success"
-                doom
-                onClick={onConfirm}
-                className="px-4 sm:px-6 py-2.5 sm:py-3 text-base font-bold uppercase tracking-wider"
-              >
-                {isFollowAlong ? 'Finish' : 'Confirm'}
-              </Button>
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="mb-3 flex justify-center">
-              <LoadingFrog size={64} speed={0.8} />
-            </div>
-            <p className="text-foreground uppercase tracking-wider font-bold">Completing workout...</p>
-          </>
-        )}
-      </div>
-    </div>
+    <LoggerConfirm
+      open
+      onOpenChange={(open) => {
+        if (!open) onCancel()
+      }}
+      title={isFollowAlong ? 'Nice work! Mark this workout as done?' : 'Complete this workout?'}
+      body={body}
+      confirmLabel={isFollowAlong ? 'Finish' : 'Confirm'}
+      onConfirm={onConfirm}
+      busy={isSubmitting}
+    />
   )
 }

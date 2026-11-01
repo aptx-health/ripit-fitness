@@ -50,3 +50,11 @@
 - 2026-11-01 MDT: 082 approve. 083 (sticky unsaved bar, 48px leftovers, presets one row, 0/5 chip) dispatched.
 - 2026-11-01 MDT: 083 back (sticky unsaved bar, 48px leftovers, presets scroll in one row, 0/5). UI6 phone preview.
 - 2026-11-01 MDT: Dustin: UI6 "Everything looks great". Committed; PR opened and linked. UI1–UI6 all up as stack #1017.
+- 2026-11-01 MDT: Logger build started as a new gh stack on dev in worktree2 (feature/logger-shared first). L1 spec + logger-confirm.feature written; 088 (L1 tests) dispatched. L4 + Copenhagen Plank check on ROADMAP. Docs PR #1022 and equipment PR #1023 open into dev.
+- 2026-11-01 MDT: 088 accepted (111 red, break matrix clean). 089 (L1 build) dispatched to implementer.
+- 2026-11-01 MDT: 089 back (116/116, suite green). 090 review dispatched.
+- 2026-11-01 MDT: 090 approve. 091 (Discard busy, 'under 1 min', 48px header buttons) dispatched; other small targets carried into L2/L3.
+- 2026-11-01 MDT: 091 back. L1 phone preview.
+- 2026-11-01 MDT: Dustin on the L1 preview: strange cream stroke around the header's plan and X buttons (border-border on the brown header). 092 dispatched.
+- 2026-11-01 MDT: 092 back (header outline uses each theme's darker header shade). L1 preview restarted.
+- 2026-11-01 MDT: Dustin: L1 header "better". L1 committed and submitted (gh stack on dev).
