@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from 'node:crypto'
-import type { AgentToken, PrismaClient } from '@prisma/client'
+import type { AgentToken, Prisma, PrismaClient } from '@prisma/client'
+import { MAX_ACTIVE_AGENT_TOKENS } from './agent-token-view'
 
 const TOKEN_PREFIX = 'ripit_at_'
 
@@ -12,7 +13,7 @@ export function hashAgentToken(token: string): string {
  * returned once; only its SHA-256 hash is stored.
  */
 export async function createAgentToken(
-  prisma: PrismaClient,
+  prisma: PrismaClient | Prisma.TransactionClient,
   userId: string,
   name: string
 ): Promise<{ token: string; record: AgentToken }> {
@@ -21,6 +22,24 @@ export async function createAgentToken(
     data: { userId, name, tokenHash: hashAgentToken(token) },
   })
   return { token, record }
+}
+
+/**
+ * Create a token unless the user already has the maximum active ones. The count
+ * and the insert run in one transaction under a per-user advisory lock, so
+ * parallel requests can't both pass the count and go over the limit.
+ */
+export async function createAgentTokenWithinLimit(
+  prisma: PrismaClient,
+  userId: string,
+  name: string
+): Promise<{ ok: true; token: string; record: AgentToken } | { ok: false; code: 'TOKEN_LIMIT' }> {
+  return prisma.$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`agent-tokens:${userId}`}))`
+    const active = await tx.agentToken.count({ where: { userId, revokedAt: null } })
+    if (active >= MAX_ACTIVE_AGENT_TOKENS) return { ok: false, code: 'TOKEN_LIMIT' }
+    return { ok: true, ...(await createAgentToken(tx, userId, name)) }
+  })
 }
 
 /**

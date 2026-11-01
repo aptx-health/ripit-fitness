@@ -1,26 +1,13 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth/server'
-import { prisma } from '@/lib/db'
+import { homeRedirectTarget } from '@/lib/training/home-redirect'
 
 export default async function Home() {
   const { user } = await getCurrentUser()
 
   if (user) {
-    // Check if onboarding is completed
-    const settings = await prisma.userSettings.findUnique({
-      where: { userId: user.id },
-      select: { onboardingCompleted: true },
-    })
-    if (settings && !settings.onboardingCompleted) {
-      redirect('/onboarding')
-    }
-
-    // If user has an active program, go straight to Training
-    const hasActiveProgram = await prisma.program.count({
-      where: { userId: user.id, isActive: true, isArchived: false },
-    })
-    redirect(hasActiveProgram > 0 ? '/training' : '/programs')
+    redirect(await homeRedirectTarget(user.id))
   }
 
   // Landing page for non-authenticated users

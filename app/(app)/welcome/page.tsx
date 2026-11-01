@@ -9,6 +9,7 @@ import { LoadingFrog } from '@/components/ui/loading-frog'
 import { trackEvent } from '@/lib/analytics'
 import { startFreestyleWorkout } from '@/lib/api/adhoc-workout'
 import { clientLogger } from '@/lib/client-logger'
+import { libraryHref } from '@/lib/library/links'
 
 const INTENT_OPTIONS = [
   { value: 'new_to_apps', label: 'New to strength training apps' },
@@ -69,7 +70,7 @@ export default function WelcomePage() {
 
   function browsePrograms() {
     trackEvent('welcome_path_program', { ms_to_choice: elapsedMs() })
-    router.push('/programs')
+    router.push(libraryHref({ type: 'programs', tab: 'browse' }))
   }
 
   function skipToTraining() {

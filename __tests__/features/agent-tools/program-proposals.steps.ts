@@ -169,7 +169,7 @@ async function agentTokens() {
 }
 
 function ctx() {
-  return { userId: s.userId, tokenId: s.tokenId, notify: s.notify }
+  return { userId: s.userId, tokenId: s.tokenId, role: 'admin', notify: s.notify }
 }
 
 async function callAgentTool(name: string, args: Record<string, unknown>): Promise<Outcome> {

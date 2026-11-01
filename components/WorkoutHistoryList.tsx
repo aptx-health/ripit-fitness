@@ -6,6 +6,8 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { clientLogger } from '@/lib/client-logger'
 import { sessionEffortLabel } from '@/lib/effort-prompt'
+import { formatDuration } from '@/lib/format/duration'
+import { programDetailHref } from '@/lib/training/program-href'
 
 type Exercise = {
   name: string
@@ -44,7 +46,9 @@ type WorkoutCompletion = {
     id: string
     name: string
     week: {
+      weekNumber: number
       program: {
+        id: string
         name: string
       }
     }
@@ -53,15 +57,6 @@ type WorkoutCompletion = {
   _count: {
     loggedSets: number
   }
-}
-
-/** Format a duration in seconds as a compact "45 min" / "1h 05m" label. */
-function formatDuration(totalSeconds: number): string {
-  const totalMinutes = Math.max(1, Math.round(totalSeconds / 60))
-  if (totalMinutes < 60) return `${totalMinutes} min`
-  const hours = Math.floor(totalMinutes / 60)
-  const minutes = totalMinutes % 60
-  return `${hours}h ${minutes.toString().padStart(2, '0')}m`
 }
 
 type Props = {
@@ -303,7 +298,9 @@ export default function WorkoutHistoryList({ count, compact = false }: Props) {
             {completion.workout && (
               <div className="pt-2">
                 <Link
-                  href={`/programs/${completion.workout.id}`}
+                  href={programDetailHref(completion.workout.week.program.id, {
+                    week: String(completion.workout.week.weekNumber),
+                  })}
                   className="text-sm text-primary hover:text-primary-hover font-medium"
                 >
                   View Full Workout →

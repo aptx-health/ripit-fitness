@@ -3,17 +3,22 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
+import { libraryHref } from '@/lib/library/links'
+import { programDetailHref } from '@/lib/training/program-href'
 
 type StrengthActivationModalProps = {
   programId: string
   existingActiveProgram?: { id: string; name: string } | null
   onClose: () => void
+  /** "No, keep inactive". Defaults to closing and going to /programs. */
+  onSkip?: () => void
 }
 
 export default function StrengthActivationModal({
   programId,
   existingActiveProgram,
-  onClose
+  onClose,
+  onSkip,
 }: StrengthActivationModalProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
@@ -33,8 +38,8 @@ export default function StrengthActivationModal({
         throw new Error(data.error || 'Failed to activate program')
       }
 
-      // Redirect to training page to see the active program
-      router.push('/training')
+      // Open the program, now trainable
+      router.push(programDetailHref(programId))
       router.refresh()
     } catch (err) {
       clientLogger.error('Error activating program:', err)
@@ -45,8 +50,12 @@ export default function StrengthActivationModal({
   }
 
   const handleSkipActivation = () => {
+    if (onSkip) {
+      onSkip()
+      return
+    }
     onClose()
-    router.push('/programs?tab=strength')
+    router.push(libraryHref({ type: 'programs' }))
     router.refresh()
   }
 

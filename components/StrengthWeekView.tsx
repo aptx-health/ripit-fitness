@@ -7,6 +7,7 @@ import ExerciseLoggingModal from '@/components/ExerciseLoggingModal'
 import { PwaInstallPrompt } from '@/components/features/training/PwaInstallPrompt'
 import { WorkoutRollupModal } from '@/components/features/training/WorkoutRollupModal'
 import { ProgramCompletionModal } from '@/components/ProgramCompletionModal'
+import StrengthActivationModal from '@/components/StrengthActivationModal'
 import type { MessageData } from '@/components/ui/MessageCard'
 import { MessageCard } from '@/components/ui/MessageCard'
 import WeekNavigator from '@/components/ui/WeekNavigator'
@@ -18,6 +19,7 @@ import { useUserSettings } from '@/hooks/useUserSettings'
 import { clientLogger } from '@/lib/client-logger'
 import { useDraftWorkout } from '@/lib/contexts/DraftWorkoutContext'
 import type { WorkoutRollup } from '@/lib/stats/workout-rollup'
+import { programDetailHref } from '@/lib/training/program-href'
 
 type Workout = {
   id: string
@@ -47,6 +49,10 @@ type Props = {
   totalWeeks: number
   historyCount: number
   isEditorRole?: boolean
+  /** View only (a program that isn't active): no logging, skipping, Complete Week or restart. */
+  readOnly?: boolean
+  /** With readOnly, offer "Make active to train". */
+  canActivate?: boolean
 }
 
 type ModalMode = 'logging' | null
@@ -112,6 +118,8 @@ export default function StrengthWeekView({
   totalWeeks,
   historyCount,
   isEditorRole = false,
+  readOnly = false,
+  canActivate = false,
 }: Props) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -148,6 +156,7 @@ export default function StrengthWeekView({
   const [wasFirstWorkout, setWasFirstWorkout] = useState(false)
   const [rollup, setRollup] = useState<WorkoutRollup | null>(null)
   const [showRollup, setShowRollup] = useState(false)
+  const [showActivation, setShowActivation] = useState(false)
 
   // PWA install prompt — capture beforeinstallprompt early for Android
   const { deferredPrompt } = useBeforeInstallPrompt()
@@ -165,7 +174,7 @@ export default function StrengthWeekView({
     triggerOnPageLoad(historyCount)
   }, [settingsLoading]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const resumeWorkoutId = searchParams.get('resume')
+  const resumeWorkoutId = readOnly ? null : searchParams.get('resume')
 
   // Contextual content
   const loggingMode = (settings?.loggingMode as 'full' | 'follow_along' | undefined) || 'full'
@@ -217,13 +226,13 @@ export default function StrengthWeekView({
       const { data } = await response.json()
       setIsProgramComplete(data.isComplete)
 
-      if (data.isComplete && openModal && !isRestarting) {
+      if (data.isComplete && openModal && !isRestarting && !readOnly) {
         setShowCompletionModal(true)
       }
     } catch (error) {
       clientLogger.error('Error checking program completion:', error)
     }
-  }, [programId, isRestarting])
+  }, [programId, isRestarting, readOnly])
 
   // Check program completion status on mount
   useEffect(() => {
@@ -253,7 +262,7 @@ export default function StrengthWeekView({
     setIsProgramComplete(false)
 
     // Navigate to week 1 and force a full page refresh
-    router.push('/training?week=1')
+    router.push(programDetailHref(programId, { week: '1' }))
 
     // Refresh after navigation completes
     setTimeout(() => {
@@ -261,7 +270,7 @@ export default function StrengthWeekView({
       // Reset restarting flag after refresh
       setIsRestarting(false)
     }, 200)
-  }, [router])
+  }, [router, programId])
 
   // Fetch just metadata for logging modal (fast initial load)
   const fetchWorkoutMetadata = useCallback(async (workoutId: string) => {
@@ -472,10 +481,10 @@ export default function StrengthWeekView({
         <WeekNavigator
           currentWeek={week.weekNumber}
           totalWeeks={totalWeeks}
-          baseUrl="/training"
+          baseUrl={programDetailHref(programId)}
           programName={programName}
           completionIndicator={
-            isProgramComplete ? (
+            isProgramComplete && !readOnly ? (
               <button type="button"
                 onClick={() => setShowCompletionModal(true)}
                 className="flex items-center gap-2 px-4 py-2 bg-success text-success-foreground border-2 border-success hover:bg-success-hover font-bold text-sm uppercase tracking-wider transition-all"
@@ -495,6 +504,16 @@ export default function StrengthWeekView({
           </div>
         )}
       </div>
+
+      {readOnly && canActivate && (
+        <button
+          type="button"
+          onClick={() => setShowActivation(true)}
+          className="w-full py-3 bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d doom-focus-ring font-bold uppercase tracking-wider text-sm"
+        >
+          Make active to train
+        </button>
+      )}
 
       {trainingMessage && (
         <div className="mb-4">
@@ -536,10 +555,11 @@ export default function StrengthWeekView({
             onUnskip={handleUnskipWorkout}
             onLog={handleOpenLogging}
             hideSkip={isBeginnerFirstVisit && workout.id === firstWorkoutId}
+            readOnly={readOnly}
           />
         ))}
 
-        {hasIncompleteWorkouts && (
+        {hasIncompleteWorkouts && !readOnly && (
           <button
             type="button"
             data-training-widget
@@ -638,6 +658,14 @@ export default function StrengthWeekView({
         onInstalled={handlePwaInstalled}
         deferredPrompt={deferredPrompt}
       />
+
+      {showActivation && (
+        <StrengthActivationModal
+          programId={programId}
+          onClose={() => setShowActivation(false)}
+          onSkip={() => setShowActivation(false)}
+        />
+      )}
 
       {/* Program Completion Modal */}
       <ProgramCompletionModal

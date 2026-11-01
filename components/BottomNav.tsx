@@ -6,10 +6,11 @@ import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import QuickActionSheet from '@/components/QuickActionSheet'
 import { useDraftWorkout } from '@/lib/contexts/DraftWorkoutContext'
+import { isTabActive } from '@/lib/nav/active-tab'
 
 const TABS = [
   { id: 'training', label: 'Training', icon: Activity, href: '/training' },
-  { id: 'programs', label: 'Programs', icon: LayoutGrid, href: '/programs' },
+  { id: 'library', label: 'Library', icon: LayoutGrid, href: '/library' },
 ] as const
 
 const TABS_AFTER = [
@@ -91,7 +92,7 @@ type Tab = { id: string; label: string; icon: typeof Activity; href: string }
 
 function NavLink({ tab, pathname }: { tab: Tab; pathname: string }) {
   const { id, label, icon: Icon, href } = tab
-  const isActive = pathname.startsWith(href)
+  const isActive = isTabActive(href, pathname)
   return (
     <Link
       key={id}

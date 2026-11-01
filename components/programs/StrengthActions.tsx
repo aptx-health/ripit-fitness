@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
+import { programDetailHref } from '@/lib/training/program-href'
 import ActivationConfirmModal from './ActivationConfirmModal'
 
 type StrengthActionsProps = {
@@ -29,7 +30,7 @@ export function StrengthPrimaryActions({
     <>
       {isActive && (
         <Link
-          href="/training"
+          href={programDetailHref(programId)}
           className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d doom-focus-ring font-semibold uppercase tracking-wider md:inline-block w-full md:w-auto text-center"
         >
           OPEN PROGRAM

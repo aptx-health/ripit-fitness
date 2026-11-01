@@ -1,6 +1,12 @@
 import path from 'node:path'
 import { configDefaults, defineConfig } from 'vitest/config'
 
+// Node 22.4+ has a global `localStorage` getter that shadows jsdom's (Node 26
+// enables it by default), which leaves `window.localStorage` undefined in
+// tests. Turn Node's off for the test workers. Older Node rejects the flag.
+const [nodeMajor, nodeMinor] = process.versions.node.split('.').map(Number)
+const hasWebStorageFlag = nodeMajor > 22 || (nodeMajor === 22 && nodeMinor >= 4)
+
 export default defineConfig({
   test: {
     globals: true,
@@ -9,6 +15,7 @@ export default defineConfig({
     environment: 'jsdom',
     globalSetup: [path.resolve(__dirname, './lib/test/global-setup.ts')],
     setupFiles: [path.resolve(__dirname, './lib/test/setup.ts')],
+    ...(hasWebStorageFlag && { poolOptions: { forks: { execArgv: ['--no-experimental-webstorage'] } } }),
     testTimeout: 60000, // Longer timeout for container startup
     hookTimeout: 60000, // Longer timeout for setup hooks
     // Exclude nested worktrees from test discovery

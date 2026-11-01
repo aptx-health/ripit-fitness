@@ -10,6 +10,7 @@ import { pluralize } from '@/lib/format/pluralize'
 import { formatSavedWorkoutDate } from '@/lib/format/savedWorkoutDate'
 import { describeSavedSets } from '@/lib/format/savedWorkoutSets'
 import type { SavedWorkoutData, SavedWorkoutExercise } from '@/types/saved-workout'
+import PinToggle from './PinToggle'
 import type { SavedWorkoutListItem } from './SavedWorkoutRow'
 
 type SavedWorkoutDetail = SavedWorkoutListItem & {
@@ -18,6 +19,7 @@ type SavedWorkoutDetail = SavedWorkoutListItem & {
 
 type Props = {
   item: SavedWorkoutListItem
+  onTogglePin: () => void
   onOpenChange: (open: boolean) => void
 }
 
@@ -26,7 +28,7 @@ function extractExercises(workoutData: SavedWorkoutData): SavedWorkoutExercise[]
   return workoutData.filter((ex) => typeof ex?.name === 'string' && ex.name.length > 0)
 }
 
-export default function SavedWorkoutDetailDialog({ item, onOpenChange }: Props) {
+export default function SavedWorkoutDetailDialog({ item, onTogglePin, onOpenChange }: Props) {
   const router = useRouter()
   const toast = useToast()
   const [detail, setDetail] = useState<SavedWorkoutDetail | null>(null)
@@ -108,6 +110,7 @@ export default function SavedWorkoutDetailDialog({ item, onOpenChange }: Props) 
                 {pluralize(item.exerciseCount, 'exercise')} &middot; {dateLabel}
               </Dialog.Description>
             </div>
+            <PinToggle name={item.name} pinned={Boolean(item.pinnedAt)} onToggle={onTogglePin} className="-mt-2" />
             <Dialog.Close asChild>
               <button
                 type="button"

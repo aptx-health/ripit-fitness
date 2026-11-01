@@ -45,8 +45,9 @@ export async function GET(request: NextRequest) {
             name: true,
             week: {
               select: {
+                weekNumber: true,
                 program: {
-                  select: { name: true }
+                  select: { id: true, name: true }
                 }
               }
             }

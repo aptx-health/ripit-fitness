@@ -1,6 +1,7 @@
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
+import { programDetailHref } from '@/lib/training/program-href'
 import type { Week } from '@/types/program-builder'
 
 type UseProgramActionsParams = {
@@ -142,7 +143,7 @@ export function useProgramActions({
         onComplete()
         return
       }
-      router.push('/training')
+      router.push(programId ? programDetailHref(programId) : '/training')
       return
     }
 

@@ -126,7 +126,7 @@ async function route() {
 }
 
 function ctx() {
-  return { userId: s.userId, tokenId: s.tokenId, notify: async () => {} }
+  return { userId: s.userId, tokenId: s.tokenId, role: 'admin', notify: async () => {} }
 }
 
 async function callAgentTool(name: string, args: Record<string, unknown> = {}): Promise<Outcome> {
@@ -770,7 +770,7 @@ describe('training export edges', () => {
 
   it('lists export_training_data and points agents at the CSV endpoint', async () => {
     const { listTools } = await tools()
-    const raw = (await listTools()) as unknown
+    const raw = (await listTools('admin')) as unknown
     const list = Array.isArray(raw) ? raw : ((raw as { tools?: unknown[] })?.tools ?? [])
     const tool = (list as Array<{ name: string; description: string }>).find((t) => t.name === 'export_training_data')
     expect(tool, 'export_training_data should be listed').toBeDefined()

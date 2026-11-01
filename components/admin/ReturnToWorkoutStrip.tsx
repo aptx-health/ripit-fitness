@@ -4,10 +4,12 @@ import { Dumbbell } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
+import { programDetailHref } from '@/lib/training/program-href'
 
 type ActiveDraft = {
   completionId: string
   workoutId: string | null
+  programId: string | null
   workoutName: string
   isAdHoc: boolean
   weekNumber: number | null
@@ -44,8 +46,8 @@ export default function ReturnToWorkoutStrip() {
 
   const href = draft.isAdHoc
     ? `/training/adhoc/${draft.completionId}`
-    : draft.workoutId
-      ? `/training?resume=${draft.workoutId}`
+    : draft.workoutId && draft.programId
+      ? programDetailHref(draft.programId, { resume: draft.workoutId })
       : '/training'
 
   return (
