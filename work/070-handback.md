@@ -1,0 +1,1 @@
+Report: complete (070). welcome ref starts at 0 (eslint clean); lockAppScroll nests with a counter, #app-scroll by id; new overlap test (fails without the counter). Suite 2496/4. Lead re-ran app-scroll-shell tests 7/7.

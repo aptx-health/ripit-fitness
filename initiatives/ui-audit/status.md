@@ -1,0 +1,52 @@
+# UI audit: status (append-only)
+
+- 2026-11-01 MDT: Dustin asked for a UI audit across the tabs, to bring Library, the Workout center (Quick Actions) and Settings up to the Training page's folder-tab style; Learning is out of scope (it will be replaced). Separately, research the iOS PWA blur at the top of the screen near the notch. Size: standard, starting with two read-only items: 059 audit (reviewer, wF:p3) and 060 iOS blur research (implementer, wF:p2). Lead: lead-ripit-mcp. Branch feature/ui-audit in worktree2, from origin/dev. The build items come after Dustin picks from the audit.
+- 2026-11-01 MDT: 060 back: likely cause is black-translucent status bar + iOS 27 scroll-edge blur; recommend statusBarStyle default + theme-color (medium confidence). Note: docs/2026-11-01-ios-pwa-top-blur.md. 059 audit still running.
+- 2026-11-01 MDT: 060 back: likely cause is black-translucent status bar + iOS 27 scroll-edge blur; recommend statusBarStyle default + theme-color (medium confidence). Note: docs/2026-11-01-ios-pwa-top-blur.md. 059 audit still running.
+- 2026-11-01 MDT: correction: the line above was appended twice by a lead shell mistake; it is one event.
+- 2026-11-01 MDT: 059 back: 6 proposed build items (shared folder primitives, Quick Actions, Library tabs+Workouts, Browse+program detail, Settings main incl. SSR 500 fix, Settings sub-pages) plus sw.js redirect bug. Publishing 059+060 to Handoff Hub for Dustin.
+- 2026-11-01 MDT: published Handoff Hub ripit-fitness/ui-audit-059-060. Waiting on Dustin to pick build items and the blur fix.
+- 2026-11-01 MDT: Dustin: "do all of them", as stacked PRs with `gh stack` (v0.1.0 installed). Items UI1–UI6 in spec.md; branch renamed feature/ui-audit → feature/ui-shared (UI1, bottom of the stack). Tests first only where there's behaviour (UI1: PaperTabs, matcher, status bar; UI5: SSR fix, Equipment row); style-only items skip the test-builder and rely on reviewer screenshots plus Dustin's phone preview. 059/060 accepted. 061 (UI1 tests) dispatched to test-builder.
+- 2026-11-01 MDT: 061 accepted (53 red, break matrix 83/83). 062 (UI1 build) dispatched to implementer.
+- 2026-11-01 MDT: 062 back (all green; 14 pre-existing eslint errors treated as baseline, CI runs no eslint; later items clean their files). 063 review dispatched.
+- 2026-11-01 MDT: 063 approve. Findings 1–3 (runtime theme-color, PaperTabs bad value fallback, 48px back link) sent as 064 before Dustin's preview.
+- 2026-11-01 MDT: 064 done (theme-color follows app theme, PaperTabs fallback, 48px back link). Starting phone preview for Dustin.
+- 2026-11-01 MDT: phone preview up at :10000 for UI1; waiting on Dustin.
+- 2026-11-01 MDT: Dustin on the installed preview: still sees the blur. Served head is correct (status-bar-style default, theme-color). Lead read Collie 1.23.4's bundle: same meta, but its content scrolls in an inner container (`flex min-h-0 flex-1 overflow-y-auto`) under a fixed header, so the document never scrolls. Ripit scrolls the document. INFERENCE: the iOS 27 edge blur follows the root scroller, so the status-bar change alone isn't enough.
+- 2026-11-01 MDT: Dustin agreed: keep UI1 as is and try an inner-scroll app shell as its own item (065, branch feature/ui-scroll-shell) before Quick Actions. UI1 committed and submitted as the bottom of the gh stack.
+- 2026-11-01 MDT: UI1 = PR #1014 (base dev). 065 (scroll shell) dispatched to implementer on feature/ui-scroll-shell.
+- 2026-11-01 MDT: Dustin: scroll fix in its own worktree, style stack independent; lead owns both. 065 moved to worktree1 (branch feature/ui-scroll-shell off feature/ui-shared, its own PR) with a new agent `scroll-shell` (wF:p5); dropped from worktree2's gh-stack file. Implementer (wF:p2) back on the style stack, starting UI2.
+- 2026-11-01 MDT: 066 (UI2 Quick Actions) dispatched to implementer on feature/ui-quick-actions.
+- 2026-11-01 MDT: 066 back (green; found ripit's gold .bg-card:hover border, folded into UI3 as a shared fix). 067 review dispatched.
+- 2026-11-01 MDT: 065 back (inner-scroll shell, green). Phone preview from worktree1 for Dustin's re-add check; code review after (reviewer busy with 067).
+- 2026-11-01 MDT: 067: changes needed (hover pin dead on phones; header strip; 44px discard). 068 fixes dispatched; gold hover now fixed at the source in UI2.
+- 2026-11-01 MDT: Dustin on the installed worktree1 preview: "looks good" (scroll shell). Preview stopped. 069 code review of 065 dispatched before its PR.
+- 2026-11-01 MDT: 069 approve. 070 (lint + nested scroll locks) to scroll-shell; then commit and PR.
+- 2026-11-01 MDT: 068 back (gold hover fixed at the source with a folder-box class, strip gone, 48px discard). Skipped re-review on purpose: three narrow, measured fixes. Phone preview of UI2 from worktree2.
+- 2026-11-01 MDT: scroll shell committed (1aa44d33) and opened as PR #1015 on feature/ui-shared, outside the gh stack. Retarget to dev once #1014 merges. UI2 on phone preview.
+- 2026-11-01 MDT: Dustin: UI2 preview "looks great". Committed and submitted on the gh stack.
+- 2026-11-01 MDT: UI2 = PR #1016 (gh stack #1017 with #1014). 071 (UI3 Library tabs + Workouts) dispatched to implementer on feature/ui-library-tabs.
+- 2026-11-01 MDT: Dustin merged #1015, which went into feature/ui-shared (its base), so #1014 now carries the scroll fix too; #1014 body updated. Local stack (UI2, UI3) to be rebased onto the new feature/ui-shared with gh stack sync after UI3 is committed (the implementer is mid-change in worktree2).
+- 2026-11-01 MDT: 071 back (green, 19 new tests). 072 review dispatched.
+- 2026-11-01 MDT: 072 approve; 4 low findings carried into UI4. UI3 committed; stack synced onto feature/ui-shared (now incl. #1015); phone preview of UI3 next.
+- 2026-11-01 MDT: UI3 committed (stack synced onto ui-shared incl. #1015; force-pushed). UI3 phone preview up. 073 (UI4) dispatched; implementer holds off on servers while the preview runs.
+- 2026-11-01 MDT: Dustin: UI3 "Looks awesome". Preview stopped; UI3 PR opened; implementer cleared to run servers.
+- 2026-11-01 MDT: UI3 = PR #1018 (base feature/ui-quick-actions), linked into gh stack #1017 (#1014 → #1016 → #1018).
+- 2026-11-01 MDT: 073 back (green, 5 new tests). 074 review dispatched.
+- 2026-11-01 MDT: 074 approve with follow-ups (48px targets, density, author + more cue back, Level menu closes, quiet PaperTabTitle). 075 dispatched; then Dustin's preview.
+- 2026-11-01 MDT: 075 back (all listed targets ≥48px, author + more cue back, density still ~4/screen). Re-review skipped (measured). UI4 phone preview.
+- 2026-11-01 MDT: Dustin: UI4 "Looks excellent". Committed; PR opened and linked.
+- 2026-11-01 MDT: UI4 = PR #1019 (stack #1017 now #1014 → #1016 → #1018 → #1019). UI5 spec + settings-page.feature written; 076 (UI5 tests) dispatched to test-builder on feature/ui-settings.
+- 2026-11-01 MDT: 076 back (58 red, break matrix clean). Lead correction: no lbs/kg control (hidden on purpose, fba784df); spec + .feature fixed. Test-builder to drop that and delete the superseded TL5b agent-access-link test.
+- 2026-11-01 MDT: 076 accepted (59 red). 077 (UI5 build) dispatched to implementer.
+- 2026-11-01 MDT: 077 back (server page, blocks, prod /settings 200; connected sign-in badge was a real bug, fixed). 078 review dispatched.
+- 2026-11-01 MDT: 078 approve. 079 (sign-in load error, intensity row hit area, hasPassword hides Change password, clear fields) dispatched. Turbopack build vs health route added to ROADMAP.
+- 2026-11-01 MDT: 079 back (green). UI5 phone preview.
+- 2026-11-01 MDT: Dustin asked whether the MCP agent sees equipment: it doesn't (no tool reads equipmentAvailable). Added get_equipment to the top of ROADMAP Next, right after the UI audit. Removed the /settings SSR 500 roadmap item (fixed in UI5).
+- 2026-11-01 MDT: Dustin: UI5 looks good. Committed; PR opened and linked.
+- 2026-11-01 MDT: UI5 = PR #1020 (stack #1017: #1014 → #1016 → #1018 → #1019 → #1020). 080 (UI6 sub-pages) dispatched to implementer on feature/ui-settings-subpages.
+- 2026-11-01 MDT: Dustin asked for the workout logger screen and its modals next. 081 (read-only audit + 2–3 idea mockups each for the plan drawer, tab bar and bottom bar) dispatched to a new agent `logger-audit` (wF:p6) in worktree1, detached at origin/feature/ui-settings.
+- 2026-11-01 MDT: 080 back (green, 14 new tests). 082 review dispatched.
+- 2026-11-01 MDT: 082 approve. 083 (sticky unsaved bar, 48px leftovers, presets one row, 0/5 chip) dispatched.
+- 2026-11-01 MDT: 083 back (sticky unsaved bar, 48px leftovers, presets scroll in one row, 0/5). UI6 phone preview.
+- 2026-11-01 MDT: Dustin: UI6 "Everything looks great". Committed; PR opened and linked. UI1–UI6 all up as stack #1017.

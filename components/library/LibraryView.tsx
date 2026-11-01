@@ -1,5 +1,6 @@
 'use client'
 
+import { Bookmark, BookOpen, Compass, ListChecks } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import CommunityProgramsView from '@/components/community/CommunityProgramsView'
@@ -7,7 +8,8 @@ import SavedWorkoutsList from '@/components/features/saved-workouts/SavedWorkout
 import MyProgramsList from '@/components/programs/MyProgramsList'
 import StrengthActivationModal from '@/components/StrengthActivationModal'
 import { useToast } from '@/components/ToastProvider'
-import { SegmentedControl } from '@/components/ui/SegmentedControl'
+import PageTitle from '@/components/ui/PageTitle'
+import PaperTabs from '@/components/ui/PaperTabs'
 import { useProgramAccess } from '@/hooks/useCustomProgramAccess'
 import { clientLogger } from '@/lib/client-logger'
 import { type LibraryType, libraryHref, parseLibraryType } from '@/lib/library/links'
@@ -51,12 +53,19 @@ type Props = {
   programCount: number
   isAdmin: boolean
   customProgramLimitBypass: boolean
+  /** Saved workouts, for the Workouts tab's chip; kept current by the list once it loads. */
+  savedWorkoutCount?: number
 }
 
+/** The tab ids PaperTabs reports, checked before they reach the state. */
+const isLibraryType = (id: string): id is LibraryType => id === 'workouts' || id === 'programs'
+const isProgramsTab = (id: string): id is 'my' | 'browse' => id === 'my' || id === 'browse'
+
 /**
- * The Library: WORKOUTS | PROGRAMS (`?type=`), and under Programs the
- * MY PROGRAMS | BROWSE switch (`?tab=browse`) with the `?cloning=` progress
- * flow that used to live on /programs.
+ * The Library: WORKOUTS | PROGRAMS paper tabs (`?type=`), each over its folder
+ * box, and inside the Programs box its own MY PROGRAMS | BROWSE tabs
+ * (`?tab=browse`), with the `?cloning=` progress flow that used to live on
+ * /programs. Unknown `?type=`/`?tab=` values fall back to the defaults.
  */
 export default function LibraryView({
   strengthPrograms,
@@ -66,7 +75,15 @@ export default function LibraryView({
   programCount,
   isAdmin,
   customProgramLimitBypass,
+  savedWorkoutCount,
 }: Props) {
+  const [savedCount, setSavedCount] = useState(savedWorkoutCount)
+  // A new server count (after router.refresh()) replaces whatever the list last reported.
+  const [seenServerCount, setSeenServerCount] = useState(savedWorkoutCount)
+  if (savedWorkoutCount !== seenServerCount) {
+    setSeenServerCount(savedWorkoutCount)
+    setSavedCount(savedWorkoutCount)
+  }
   const searchParams = useSearchParams()
   const router = useRouter()
   const toast = useToast()
@@ -279,72 +296,108 @@ export default function LibraryView({
       <div className="max-w-2xl mx-auto sm:px-6 py-4">
         {/* Header */}
         <div className="px-4 sm:px-0 mb-4">
-          <h1 className="text-4xl font-bold text-foreground doom-title uppercase tracking-wider">
-            LIBRARY
-          </h1>
+          <PageTitle>LIBRARY</PageTitle>
         </div>
 
-        {/* Content switch */}
-        <div className="px-4 sm:px-0 mb-4">
-          <SegmentedControl
-            aria-label="Library content"
-            tone="bold"
-            options={[
-              { value: 'workouts', label: 'Workouts' },
-              { value: 'programs', label: 'Programs' },
+        <div className="px-4 sm:px-0">
+          <PaperTabs
+            name="Library content"
+            idPrefix="library"
+            tone={libraryType === 'workouts' ? 'mine' : 'next'}
+            tabs={[
+              {
+                id: 'workouts',
+                label: 'Workouts',
+                icon: <Bookmark size={16} aria-hidden="true" />,
+                // Decoration only (no countLabel): the rows in the box say how many.
+                count: savedCount ? savedCount : undefined,
+              },
+              { id: 'programs', label: 'Programs', icon: <BookOpen size={16} aria-hidden="true" /> },
             ]}
             value={libraryType}
-            onChange={(next) => handleTypeChange(next)}
+            onChange={(id) => {
+              if (isLibraryType(id)) handleTypeChange(id)
+            }}
           />
-        </div>
 
-        {libraryType === 'workouts' ? (
-          <div className="px-4 sm:px-0">
-            <h2 className="mb-3 text-sm font-bold uppercase tracking-wider text-muted-foreground doom-label">
-              MY WORKOUTS
-            </h2>
-            <SavedWorkoutsList />
+          <div
+            role="tabpanel"
+            id="library-panel-workouts"
+            aria-labelledby="library-tab-workouts"
+            hidden={libraryType !== 'workouts'}
+            className="folder-box border-2 border-secondary bg-card"
+          >
+            {libraryType === 'workouts' && (
+              <>
+                {/* The tab names the box; the heading stays for screen-reader navigation. */}
+                <h2 className="sr-only">My workouts</h2>
+                <SavedWorkoutsList onCountChange={setSavedCount} />
+              </>
+            )}
           </div>
-        ) : (
-          <>
-            {/* Programs: mine or community */}
-            <div className="px-4 sm:px-0 mb-4">
-              <SegmentedControl
-                aria-label="Programs view"
-                options={[
-                  { value: 'my', label: 'My Programs' },
-                  { value: 'browse', label: 'Browse' },
-                ]}
-                value={activeTab}
-                onChange={(next) => handleTabChange(next)}
-              />
-            </div>
 
-            <div className="px-4 sm:px-0">
-              {activeTab === 'my' ? (
-                <MyProgramsList
-                  programs={strengthPrograms}
-                  cloningProgress={cloningProgress}
-                  localCopyStatuses={localCopyStatuses}
-                  deletedPrograms={deletedPrograms}
-                  activeProgram={activeProgram ? { id: activeProgram.id, name: activeProgram.name } : null}
-                  activeWeekInfo={activeWeekInfo}
-                  programCount={programCount}
-                  hasAccess={hasAccess}
-                  bypassLimit={bypassLimit}
-                  maxPrograms={maxPrograms}
-                />
-              ) : (
-                <CommunityProgramsView
-                  communityPrograms={communityPrograms}
-                  currentUserId={currentUserId}
-                  hasAccess={hasAccess}
-                  maxPrograms={maxPrograms}
-                />
-              )}
-            </div>
-          </>
-        )}
+          <div
+            role="tabpanel"
+            id="library-panel-programs"
+            aria-labelledby="library-tab-programs"
+            hidden={libraryType !== 'programs'}
+            className="folder-box border-2 border-primary bg-card"
+          >
+            {libraryType === 'programs' && (
+              <>
+                {/* The Programs folder's own tabs, on a green line across the box. */}
+                <div className="px-3 pt-3">
+                  <PaperTabs
+                    name="Programs view"
+                    idPrefix="programs"
+                    tone="next"
+                    tabs={[
+                      { id: 'my', label: 'My Programs', icon: <ListChecks size={16} aria-hidden="true" /> },
+                      { id: 'browse', label: 'Browse', icon: <Compass size={16} aria-hidden="true" /> },
+                    ]}
+                    value={activeTab}
+                    onChange={(id) => {
+                      if (isProgramsTab(id)) handleTabChange(id)
+                    }}
+                  />
+                </div>
+                {(['my', 'browse'] as const).map((id) => (
+                  <div
+                    key={id}
+                    role="tabpanel"
+                    id={`programs-panel-${id}`}
+                    aria-labelledby={`programs-tab-${id}`}
+                    hidden={activeTab !== id}
+                    className="border-t-2 border-primary"
+                  >
+                    {activeTab === id &&
+                      (id === 'my' ? (
+                        <MyProgramsList
+                          programs={strengthPrograms}
+                          cloningProgress={cloningProgress}
+                          localCopyStatuses={localCopyStatuses}
+                          deletedPrograms={deletedPrograms}
+                          activeProgram={activeProgram ? { id: activeProgram.id, name: activeProgram.name } : null}
+                          activeWeekInfo={activeWeekInfo}
+                          programCount={programCount}
+                          hasAccess={hasAccess}
+                          bypassLimit={bypassLimit}
+                          maxPrograms={maxPrograms}
+                        />
+                      ) : (
+                        <CommunityProgramsView
+                          communityPrograms={communityPrograms}
+                          currentUserId={currentUserId}
+                          hasAccess={hasAccess}
+                          maxPrograms={maxPrograms}
+                        />
+                      ))}
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Activation Modal */}

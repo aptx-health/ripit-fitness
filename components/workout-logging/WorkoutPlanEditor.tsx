@@ -19,6 +19,7 @@ import {
 import { Plus, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { lockAppScroll } from '@/lib/nav/app-scroll'
 import { WorkoutPlanEditorRow } from './WorkoutPlanEditorRow'
 
 export type WorkoutPlanEditorExercise = {
@@ -73,11 +74,7 @@ export default function WorkoutPlanEditor({
   // Lock body scroll while open
   useEffect(() => {
     if (!open) return
-    const previous = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.body.style.overflow = previous
-    }
+    return lockAppScroll()
   }, [open])
 
   const sensors = useSensors(

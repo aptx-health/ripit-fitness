@@ -14,7 +14,7 @@ export default async function LibraryPage() {
     redirect('/login')
   }
 
-  const [strengthPrograms, communityPrograms, activeWeekInfo, programCount, userSettings] = await Promise.all([
+  const [strengthPrograms, communityPrograms, activeWeekInfo, programCount, userSettings, savedWorkoutCount] = await Promise.all([
     prisma.program.findMany({
       where: {
         userId: user.id,
@@ -118,6 +118,8 @@ export default async function LibraryPage() {
       where: { userId: user.id },
       select: { customProgramLimitBypass: true },
     }),
+    // For the Workouts tab's count chip
+    prisma.savedWorkout.count({ where: { userId: user.id } }),
   ])
 
   const currentWeek = activeWeekInfo.length > 0
@@ -133,6 +135,7 @@ export default async function LibraryPage() {
       programCount={programCount}
       isAdmin={user.role === 'admin'}
       customProgramLimitBypass={userSettings?.customProgramLimitBypass ?? false}
+      savedWorkoutCount={savedWorkoutCount}
     />
   )
 }

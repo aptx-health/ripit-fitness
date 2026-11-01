@@ -22,7 +22,7 @@ export default function PinToggle({ name, pinned, onToggle, className = '' }: Pr
       aria-label={`${pinned ? 'Unpin' : 'Pin'} ${name}`}
       title={pinned ? 'Unpin from Training' : 'Pin to Training'}
       className={`doom-focus-ring flex min-h-12 min-w-12 items-center justify-center ${
-        pinned ? 'text-primary' : 'text-muted-foreground'
+        pinned ? 'text-foreground' : 'text-muted-foreground'
       } hover:bg-muted hover:text-foreground ${className}`}
     >
       {/* Filled when pinned: the icon shows the state, the label names the action. */}

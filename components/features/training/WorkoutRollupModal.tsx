@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
 import { libraryHref } from '@/lib/library/links'
+import { lockAppScroll } from '@/lib/nav/app-scroll'
 import type { RollupExercise, WorkoutRollup } from '@/lib/stats/workout-rollup'
 import { POST_SESSION_REFINEMENTS } from '@/types/feedback'
 import { EffortChips } from './EffortChips'
@@ -174,11 +175,7 @@ export function WorkoutRollupModal({ open, rollup, onClose }: WorkoutRollupModal
 
   useEffect(() => {
     if (!open) return
-    const original = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.body.style.overflow = original
-    }
+    return lockAppScroll()
   }, [open])
 
   // Show a bottom fade when there's more scrollable content below the fold.

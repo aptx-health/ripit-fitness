@@ -1,0 +1,1 @@
+Report: complete (079). AccountBlock 'Couldn't load' on failure; whole intensity row is the switch (min-h-12); connected-accounts returns hasPassword, Change password hidden when false; fields cleared after success; HelpBlock tidied. Tests settings-fixes.test.tsx (12). Suite 2600/4/0; tsc, eslint, biome clean. Lead re-ran Settings tests.

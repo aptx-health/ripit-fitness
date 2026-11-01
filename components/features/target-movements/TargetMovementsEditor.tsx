@@ -1,21 +1,15 @@
 'use client'
 
-import {
-  ArrowLeft,
-  CheckCircle2,
-  ChevronDown,
-  Plus,
-  Save,
-  X,
-  XCircle,
-} from 'lucide-react'
-import Link from 'next/link'
+import { Anchor, CheckCircle2, ChevronDown, Plus, X, XCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useMemo, useState } from 'react'
 import {
   type ExerciseDefinition,
   ExerciseSearchInterface,
 } from '@/components/exercise-selection/ExerciseSearchInterface'
+import SaveButton from '@/components/settings/SaveButton'
+import { OUTLINE_BUTTON, ROW_LABEL, SettingsBlock } from '@/components/settings/SettingsBlock'
+import UnsavedChangesBar from '@/components/settings/UnsavedChangesBar'
 import { Button } from '@/components/ui/Button'
 import {
   Dialog,
@@ -26,6 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/radix/dialog'
+import SubpageHeader from '@/components/ui/SubpageHeader'
 import { clientLogger } from '@/lib/client-logger'
 import {
   ANCHOR_PATTERN_DISPLAY_NAMES,
@@ -60,6 +55,11 @@ export default function TargetMovementsEditor({
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
+  // What was last loaded or saved, to tell when there are unsaved changes.
+  const [savedSelections, setSavedSelections] = useState(selections)
+  const dirty = ANCHOR_PATTERNS.some(
+    (p) => (selections[p] ?? []).join(',') !== (savedSelections[p] ?? []).join(',')
+  )
 
   const totalSelected = useMemo(
     () => ANCHOR_PATTERNS.reduce((sum, p) => sum + (selections[p]?.length ?? 0), 0),
@@ -118,6 +118,7 @@ export default function TargetMovementsEditor({
         throw new Error(data.error || 'Failed to save target movements')
       }
       setSaved(true)
+      setSavedSelections(selections)
       window.setTimeout(() => {
         router.push('/settings')
       }, 650)
@@ -138,138 +139,97 @@ export default function TargetMovementsEditor({
   return (
     <main className="bg-background px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto max-w-3xl">
-        <div className="mb-6 flex items-center justify-between gap-3">
-          <div>
-            <Link
-              href="/settings"
-              className="mb-3 inline-flex min-h-11 items-center gap-2 text-sm font-bold uppercase tracking-wider text-muted-foreground doom-focus-ring hover:text-foreground"
-            >
-              <ArrowLeft size={16} aria-hidden="true" />
-              Settings
-            </Link>
-            <h1 className="text-2xl font-bold uppercase tracking-wider text-foreground">
-              Target Movements
-            </h1>
-          </div>
-          <Button type="button" variant="primary" doom loading={isSaving} onClick={save}>
-            <Save size={16} aria-hidden="true" className="mr-1.5" />
-            Save
-          </Button>
-        </div>
+        <SubpageHeader
+          title="Target movements"
+          intro="Pin the big compound movements you want to keep hitting."
+          action={<SaveButton dirty={dirty} saving={isSaving} onClick={save} />}
+        />
 
         <p className="mb-5 max-w-2xl text-sm text-muted-foreground">
-          Pin the big compound movements you want to keep hitting. Each pattern is
-          optional — add up to {MAX_ANCHOR_EXERCISES} preferred exercises. The
-          workout picker's{' '}
-          <span className="font-bold text-foreground">Anchors</span> view then
-          lists them by how long it's been since you last logged one.
+          {`Each pattern is optional: add up to ${MAX_ANCHOR_EXERCISES} preferred exercises. The workout picker's `}
+          <span className="font-bold text-foreground">Anchors</span>
+          {" view then lists them by how long it's been since you last logged one."}
         </p>
 
         {(error || saved) && (
-          <div
+          <p
             role={error ? 'alert' : 'status'}
-            className={`mb-5 flex items-start gap-3 border-2 p-3 text-sm font-semibold ${
-              error
-                ? 'border-error bg-error/10 text-error'
-                : 'border-success bg-success/10 text-foreground'
-            }`}
+            className={`mb-5 flex items-start gap-2 text-sm font-semibold ${error ? 'text-error' : 'text-foreground'}`}
           >
             {error ? (
               <XCircle size={18} aria-hidden="true" className="mt-0.5 flex-shrink-0" />
             ) : (
-              <CheckCircle2
-                size={18}
-                aria-hidden="true"
-                className="mt-0.5 flex-shrink-0 text-success"
-              />
+              <CheckCircle2 size={18} aria-hidden="true" className="mt-0.5 flex-shrink-0 text-success" />
             )}
             <span>{error || 'Target movements saved. Returning to settings.'}</span>
-          </div>
+          </p>
         )}
 
-        <div className="space-y-3">
+        <SettingsBlock title="Movements" icon={<Anchor size={16} />}>
           {ANCHOR_PATTERNS.map((pattern) => {
             const ids = selections[pattern] ?? []
             const isOpen = expanded.has(pattern)
+            const name = ANCHOR_PATTERN_DISPLAY_NAMES[pattern]
             return (
-              <section
-                key={pattern}
-                className="border-2 border-border bg-card doom-corners"
-              >
+              <div key={pattern}>
                 <button
                   type="button"
                   onClick={() => toggleExpanded(pattern)}
                   aria-expanded={isOpen}
-                  className="flex min-h-14 w-full items-center justify-between gap-3 px-4 py-3 text-left doom-focus-ring"
+                  aria-controls={`movement-${pattern}`}
+                  className="flex min-h-12 w-full items-center gap-3 px-4 py-3 text-left hover:bg-muted/50 doom-focus-ring"
                 >
-                  <span className="flex items-center gap-3">
-                    <ChevronDown
-                      size={18}
-                      aria-hidden="true"
-                      className={`flex-shrink-0 transition-transform ${
-                        isOpen ? 'rotate-180' : ''
-                      }`}
-                    />
-                    <span className="text-sm font-bold uppercase tracking-wider text-foreground">
-                      {ANCHOR_PATTERN_DISPLAY_NAMES[pattern]}
-                    </span>
-                  </span>
+                  <ChevronDown
+                    size={18}
+                    aria-hidden="true"
+                    className={`flex-shrink-0 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                  />
+                  <span className={`${ROW_LABEL} flex-1`}>{name}</span>
                   <span
-                    className={`border-2 px-2.5 py-1 text-xs font-bold tabular-nums uppercase tracking-wider ${
-                      ids.length > 0
-                        ? 'border-primary bg-primary/10 text-primary'
-                        : 'border-border bg-muted text-muted-foreground'
+                    className={`shrink-0 px-1.5 text-xs font-bold uppercase leading-5 tabular-nums tracking-wider ${
+                      ids.length > 0 ? 'bg-primary text-primary-foreground' : 'bg-border text-foreground'
                     }`}
                   >
-                    {ids.length > 0 ? `${ids.length} / ${MAX_ANCHOR_EXERCISES}` : 'Off'}
+                    {`${ids.length} / ${MAX_ANCHOR_EXERCISES}`}
                   </span>
                 </button>
 
                 {isOpen && (
-                  <div className="border-t border-border px-4 py-3">
+                  <div id={`movement-${pattern}`} className="pb-3 pl-12 pr-4">
                     {ids.length > 0 ? (
-                      <ul className="mb-3 flex flex-wrap gap-2">
+                      <ul className="mb-3 divide-y divide-border border-y border-border">
                         {ids.map((id) => {
                           const def = exerciseById.get(id)
                           return (
-                            <li
-                              key={id}
-                              className="inline-flex items-center gap-1.5 border-2 border-border bg-muted/40 py-1 pl-3 pr-1.5 text-sm font-bold text-foreground"
-                            >
-                              <span className="uppercase tracking-wide">
+                            <li key={id} className="flex min-h-12 items-center justify-between gap-2">
+                              <span className="min-w-0 truncate text-sm font-bold uppercase tracking-wide text-foreground">
                                 {def?.name ?? 'Unknown exercise'}
                               </span>
                               <button
                                 type="button"
                                 onClick={() => removeExercise(pattern, id)}
                                 aria-label={`Remove ${def?.name ?? 'exercise'}`}
-                                className="inline-flex h-6 w-6 items-center justify-center border border-border bg-card text-muted-foreground doom-focus-ring hover:border-error hover:text-error"
+                                className="inline-flex h-12 w-12 shrink-0 items-center justify-center text-muted-foreground doom-focus-ring hover:text-error"
                               >
-                                <X size={14} strokeWidth={2.5} />
+                                <X size={16} strokeWidth={2.5} aria-hidden="true" />
                               </button>
                             </li>
                           )
                         })}
                       </ul>
                     ) : (
-                      <p className="mb-3 text-sm text-muted-foreground">
-                        No exercises pinned yet.
-                      </p>
+                      <p className="mb-3 text-sm text-muted-foreground">No exercises pinned yet.</p>
                     )}
-                    <button
-                      type="button"
-                      onClick={() => setOpenPattern(pattern)}
-                      className="inline-flex min-h-11 items-center gap-2 border-2 border-border bg-muted px-3 py-2 text-sm font-bold uppercase tracking-wider text-foreground doom-focus-ring hover:border-primary"
-                    >
-                      <Plus size={16} aria-hidden="true" />
+                    <button type="button" onClick={() => setOpenPattern(pattern)} className={OUTLINE_BUTTON}>
+                      <Plus size={14} aria-hidden="true" />
                       {ids.length > 0 ? 'Edit exercises' : 'Add exercises'}
                     </button>
                   </div>
                 )}
-              </section>
+              </div>
             )
           })}
-        </div>
+        </SettingsBlock>
 
         <p className="mt-5 text-sm text-muted-foreground">
           {totalSelected > 0
@@ -283,6 +243,8 @@ export default function TargetMovementsEditor({
               }.`
             : 'No movements configured yet — the Anchors view stays hidden until you pin at least one.'}
         </p>
+
+        <UnsavedChangesBar dirty={dirty} saving={isSaving} onSave={save} />
       </div>
 
       {openPattern && (

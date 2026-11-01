@@ -28,6 +28,11 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   viewportFit: "cover",
+  // The ripit theme's --background, so the solid status bar matches the page.
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#FBF8F3" },
+    { media: "(prefers-color-scheme: dark)", color: "#1A1108" },
+  ],
 };
 
 export const metadata: Metadata = {
@@ -36,7 +41,10 @@ export const metadata: Metadata = {
   manifest: "/site.webmanifest",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
+    // Not black-translucent: iOS 27 blurs content scrolling under a translucent
+    // bar (initiatives/ui-audit/docs/2026-11-01-ios-pwa-top-blur.md). iOS reads
+    // this at Add to Home Screen, so a change shows only after a re-add.
+    statusBarStyle: "default",
     title: "Ripit",
   },
   icons: {

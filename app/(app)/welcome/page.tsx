@@ -10,6 +10,7 @@ import { trackEvent } from '@/lib/analytics'
 import { startFreestyleWorkout } from '@/lib/api/adhoc-workout'
 import { clientLogger } from '@/lib/client-logger'
 import { libraryHref } from '@/lib/library/links'
+import { getAppScrollRoot } from '@/lib/nav/app-scroll'
 
 const INTENT_OPTIONS = [
   { value: 'new_to_apps', label: 'New to strength training apps' },
@@ -24,7 +25,8 @@ type Step = 'intent' | 'path'
 export default function WelcomePage() {
   const router = useRouter()
   const toast = useToast()
-  const mountedAtRef = useRef<number>(Date.now())
+  // Set on mount below; Date.now() can't run during render
+  const mountedAtRef = useRef<number>(0)
   const [step, setStep] = useState<Step>('intent')
   const [intent, setIntent] = useState<IntentValue | null>(null)
   const [startingFreestyle, setStartingFreestyle] = useState(false)
@@ -109,17 +111,22 @@ function ScrollHintFade() {
   const [show, setShow] = useState(false)
 
   useEffect(() => {
+    // Mobile scrolls the app's inner container; desktop scrolls the window
+    const root = getAppScrollRoot()
+    const target: HTMLElement | Window = root ?? window
     function update() {
-      const docHeight = document.documentElement.scrollHeight
-      const scrollBottom = window.innerHeight + window.scrollY
+      const docHeight = root ? root.scrollHeight : document.documentElement.scrollHeight
+      const scrollBottom = root
+        ? root.clientHeight + root.scrollTop
+        : window.innerHeight + window.scrollY
       // Show when there's >40px of content below the current viewport bottom
       setShow(docHeight - scrollBottom > 40)
     }
     update()
-    window.addEventListener('scroll', update, { passive: true })
+    target.addEventListener('scroll', update, { passive: true })
     window.addEventListener('resize', update)
     return () => {
-      window.removeEventListener('scroll', update)
+      target.removeEventListener('scroll', update)
       window.removeEventListener('resize', update)
     }
   }, [])

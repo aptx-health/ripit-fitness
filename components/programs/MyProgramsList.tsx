@@ -1,11 +1,10 @@
 'use client'
 
-import { ChevronDown, ChevronRight, Copy, Eye, Lock, Pencil, Star, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronRight, Copy, Eye, Lock, Pencil, Plus, Star, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useToast } from '@/components/ToastProvider'
-import { CreateNewCard } from '@/components/ui/CreateNewCard'
 import { clientLogger } from '@/lib/client-logger'
 import { programDetailHref } from '@/lib/training/program-href'
 import ActivationConfirmModal from './ActivationConfirmModal'
@@ -123,13 +122,11 @@ export default function MyProgramsList({
 
   if (listedPrograms.length === 0) {
     return (
-      <div className="space-y-3">
-        <div className="bg-card border border-border doom-noise p-8 text-center">
-          <p className="text-muted-foreground mb-2">No programs yet.</p>
-          <p className="text-sm text-muted-foreground">
-            Browse community programs or create your own.
-          </p>
-        </div>
+      <div>
+        {/* Training's EmptyLine */}
+        <p className="px-4 py-5 text-sm text-muted-foreground">
+          No programs yet. Browse community programs or create your own.
+        </p>
         <CreateProgramRow
           hasAccess={hasAccess}
           bypassLimit={bypassLimit}
@@ -145,8 +142,9 @@ export default function MyProgramsList({
   }
 
   return (
-    <div className="space-y-3">
-      <div className="border border-border divide-y divide-border bg-card doom-noise">
+    <div>
+      {/* Rows in the Programs folder box, like Training's: no box of their own. */}
+      <div className="divide-y divide-border">
         {displayedPrograms.map(program => {
           const copyStatus = localCopyStatuses[program.id] ?? program.copyStatus
           const isCloning = copyStatus === 'cloning' || copyStatus?.startsWith('cloning_week_')
@@ -164,11 +162,13 @@ export default function MyProgramsList({
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-base font-bold text-foreground uppercase truncate doom-heading">
+                    <h3 className="text-base font-bold text-foreground uppercase tracking-wider truncate">
                       {program.name}
                     </h3>
                     {program.isActive && !isCloning && (
-                      <span className="text-xs font-bold text-primary uppercase tracking-wider shrink-0">ACTIVE</span>
+                      <span className="shrink-0 bg-primary px-1.5 text-xs font-bold uppercase leading-5 tracking-wider text-primary-foreground">
+                        Active
+                      </span>
                     )}
                     {isCloning && (
                       <span className="text-xs font-semibold text-primary uppercase tracking-wider animate-pulse shrink-0">
@@ -216,7 +216,7 @@ export default function MyProgramsList({
                   <div className="flex flex-wrap gap-2 pt-2">
                     <Link
                       href={programDetailHref(program.id)}
-                      className="flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground text-sm font-semibold uppercase tracking-wider doom-focus-ring"
+                      className="flex min-h-12 items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground text-sm font-semibold uppercase tracking-wider doom-focus-ring"
                       style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)' }}
                     >
                       <Eye size={14} />
@@ -227,7 +227,7 @@ export default function MyProgramsList({
                         type="button"
                         onClick={() => handleActivate(program.id, program.name)}
                         disabled={isLoading}
-                        className="flex items-center gap-1.5 px-3 py-2 border border-border text-foreground text-sm font-semibold uppercase tracking-wider hover:bg-muted transition-colors doom-focus-ring disabled:opacity-50"
+                        className="flex min-h-12 items-center gap-1.5 px-3 py-2 border border-border text-foreground text-sm font-semibold uppercase tracking-wider hover:bg-muted transition-colors doom-focus-ring disabled:opacity-50"
                         style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.20), 0 1px 0 rgba(0,0,0,0.30)' }}
                       >
                         <Star size={14} />
@@ -236,7 +236,7 @@ export default function MyProgramsList({
                     )}
                     <Link
                       href={`/programs/${program.id}/edit`}
-                      className="flex items-center gap-1.5 px-3 py-2 border border-border text-foreground text-sm font-semibold uppercase tracking-wider hover:bg-muted transition-colors doom-focus-ring"
+                      className="flex min-h-12 items-center gap-1.5 px-3 py-2 border border-border text-foreground text-sm font-semibold uppercase tracking-wider hover:bg-muted transition-colors doom-focus-ring"
                       style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.20), 0 1px 0 rgba(0,0,0,0.30)' }}
                     >
                       <Pencil size={14} />
@@ -246,7 +246,7 @@ export default function MyProgramsList({
                       type="button"
                       onClick={() => handleDuplicate(program.id)}
                       disabled={isLoading}
-                      className="flex items-center gap-1.5 px-3 py-2 border border-border text-foreground text-sm font-semibold uppercase tracking-wider hover:bg-muted transition-colors doom-focus-ring disabled:opacity-50"
+                      className="flex min-h-12 items-center gap-1.5 px-3 py-2 border border-border text-foreground text-sm font-semibold uppercase tracking-wider hover:bg-muted transition-colors doom-focus-ring disabled:opacity-50"
                       style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.20), 0 1px 0 rgba(0,0,0,0.30)' }}
                     >
                       {duplicating === program.id ? (
@@ -261,7 +261,7 @@ export default function MyProgramsList({
                         type="button"
                         onClick={() => setDeleteTarget({ id: program.id, name: program.name })}
                         disabled={isLoading}
-                        className="flex items-center gap-1.5 px-3 py-2 border border-error/50 text-error text-sm font-semibold uppercase tracking-wider hover:bg-error/10 transition-colors doom-focus-ring disabled:opacity-50"
+                        className="flex min-h-12 items-center gap-1.5 px-3 py-2 border border-error/50 text-error text-sm font-semibold uppercase tracking-wider hover:bg-error/10 transition-colors doom-focus-ring disabled:opacity-50"
                         style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.20), 0 1px 0 rgba(0,0,0,0.30)' }}
                       >
                         {deleting === program.id ? (
@@ -285,7 +285,7 @@ export default function MyProgramsList({
         <button
           type="button"
           onClick={() => setShowAll(true)}
-          className="w-full py-2 text-sm text-muted-foreground hover:text-foreground font-semibold uppercase tracking-wider transition-colors doom-focus-ring"
+          className="w-full min-h-12 border-t border-border py-2 text-sm text-muted-foreground hover:text-foreground font-semibold uppercase tracking-wider transition-colors doom-focus-ring"
         >
           SHOW ALL ({listedPrograms.length})
         </button>
@@ -339,29 +339,29 @@ function CreateProgramRow({
   maxPrograms: number
   onPremiumGate: () => void
 }) {
-  if (hasAccess) {
-    return (
-      <div className="space-y-1">
-        <CreateNewCard href="/programs/new" label="CREATE NEW PROGRAM" />
-        {!bypassLimit && (
-          <p className="text-sm text-muted-foreground text-center">
-            {programCount} of {maxPrograms} program slots used
-          </p>
-        )}
-      </div>
-    )
-  }
+  // A quiet last row: the slots used, and Training's outline button.
+  const slots = (
+    <p className="text-sm text-muted-foreground">
+      {programCount} of {maxPrograms} program slots used
+    </p>
+  )
+  const button =
+    'shrink-0 inline-flex min-h-12 items-center gap-1.5 px-3 border border-border text-foreground hover:bg-muted doom-focus-ring text-sm font-semibold uppercase tracking-wider'
 
   return (
-    <div className="space-y-1">
-      <CreateNewCard
-        label="CREATE NEW PROGRAM"
-        locked
-        onClick={onPremiumGate}
-      />
-      <p className="text-sm text-muted-foreground text-center">
-        {programCount} of {maxPrograms} program slots used
-      </p>
+    <div className="flex items-center justify-between gap-3 border-t border-border px-4 py-3">
+      {hasAccess && bypassLimit ? <span /> : slots}
+      {hasAccess ? (
+        <Link href="/programs/new" className={button}>
+          <Plus size={14} aria-hidden="true" />
+          Create new program
+        </Link>
+      ) : (
+        <button type="button" onClick={onPremiumGate} className={`${button} text-muted-foreground opacity-70`}>
+          <Lock size={14} aria-hidden="true" />
+          Create new program
+        </button>
+      )}
     </div>
   )
 }
@@ -382,7 +382,7 @@ function DeleteConfirmModal({
       className="fixed inset-0 backdrop-blur-md bg-background/80 flex items-center justify-center z-[60] p-4"
       style={{ position: 'fixed', inset: 0, zIndex: 60 }}
     >
-      <div className="bg-card border-2 border-error p-6 sm:p-8 text-center max-w-sm w-full shadow-xl doom-corners">
+      <div className="folder-box bg-card border-2 border-error p-6 sm:p-8 text-center max-w-sm w-full shadow-xl">
         <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2 uppercase tracking-wider">
           Delete Program?
         </h3>
@@ -426,7 +426,7 @@ function PremiumGateModal({ maxPrograms, onClose }: { maxPrograms: number; onClo
       className="fixed inset-0 backdrop-blur-md bg-background/80 flex items-center justify-center z-[60] p-4"
       style={{ position: 'fixed', inset: 0, zIndex: 60 }}
     >
-      <div className="bg-card border-2 border-warning p-6 sm:p-8 text-center max-w-sm w-full shadow-xl doom-corners">
+      <div className="folder-box bg-card border-2 border-warning p-6 sm:p-8 text-center max-w-sm w-full shadow-xl">
         <div className="flex justify-center mb-4">
           <div className="w-12 h-12 rounded-full bg-warning/20 flex items-center justify-center">
             <Lock size={24} className="text-warning" />

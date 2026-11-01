@@ -1,19 +1,16 @@
 'use client'
 
+import * as Popover from '@radix-ui/react-popover'
 import { Check, ChevronDown, MessageSquarePlus, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import ProgramRequestModal from '@/components/features/ProgramRequestModal'
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/radix/popover'
-import {
   FITNESS_LEVELS,
   LEVEL_LABELS,
 } from '@/lib/constants/program-metadata'
 import { pluralize } from '@/lib/format/pluralize'
+import { scrollAppToTop } from '@/lib/nav/app-scroll'
 import CommunityProgramCard from './CommunityProgramCard'
 
 type CommunityProgram = {
@@ -73,6 +70,7 @@ export default function CommunityProgramsView({
   const selectedLevel = userSelectedLevel === undefined ? (defaultLevel ?? null) : userSelectedLevel
   const [currentPage, setCurrentPage] = useState(1)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
+  const [levelMenuOpen, setLevelMenuOpen] = useState(false)
 
   // Filter programs by type, level, and goals
   const filteredPrograms = useMemo(() => {
@@ -106,13 +104,14 @@ export default function CommunityProgramsView({
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
     // Scroll to top of list
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    scrollAppToTop('smooth')
   }
 
   // Handle level change
   const handleLevelChange = (level: string | null) => {
     setUserSelectedLevel(level)
     setCurrentPage(1)
+    setLevelMenuOpen(false)
   }
 
   // Clear all filters
@@ -124,98 +123,103 @@ export default function CommunityProgramsView({
   // Check if any filters are active
   const hasActiveFilters = selectedLevel !== null
 
+  // The type chip only says something when the programs shown differ in type.
+  const showType = new Set(filteredPrograms.map((p) => p.programType)).size > 1
+
   return (
     <div>
-        {/* Filter Buttons */}
-        <div className="sticky top-0 bg-background z-10 pb-4">
-          <div className="flex flex-wrap gap-2 items-center">
-            {/* Level Filter Popover */}
-            <Popover>
-              <PopoverTrigger asChild>
-                <button type="button" className="px-4 py-2 border-2 border-border text-foreground hover:border-primary transition-colors uppercase tracking-wider font-semibold doom-focus-ring flex items-center gap-2 text-sm">
+        {/* Filter strip: sticks to the top of the Programs box while the list scrolls. */}
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-border bg-card px-4 py-1.5">
+          <div className="flex items-center gap-1">
+            {/* Level: a small dimmed tab, like "All suggestions" on Training */}
+            <Popover.Root open={levelMenuOpen} onOpenChange={setLevelMenuOpen}>
+              <Popover.Trigger asChild>
+                <button
+                  type="button"
+                  className="inline-flex min-h-12 items-center gap-1.5 bg-primary/15 px-3 text-[13px] font-bold uppercase tracking-wider text-foreground hover:bg-primary/25 doom-focus-ring"
+                >
                   Level: {selectedLevel ? LEVEL_LABELS[selectedLevel] : 'All'}
-                  <ChevronDown size={16} />
+                  <ChevronDown size={14} aria-hidden="true" />
                 </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-56 p-2" align="start">
-                <div className="space-y-1">
-                  <button type="button"
-                    onClick={() => handleLevelChange(null)}
-                    className="w-full px-3 py-2 text-left text-sm hover:bg-primary/10 transition-colors doom-focus-ring flex items-center justify-between uppercase tracking-wider font-medium"
-                  >
-                    All Levels
-                    {selectedLevel === null && <Check size={16} className="text-primary" />}
-                  </button>
-                  {Object.values(FITNESS_LEVELS).map((level) => (
+              </Popover.Trigger>
+              <Popover.Portal>
+                {/* A plain menu like the saved-workout row menu (no corner brackets). */}
+                <Popover.Content
+                  align="start"
+                  sideOffset={4}
+                  className="folder-box z-[100] w-56 border-2 border-border bg-card p-2 shadow-xl"
+                >
+                  <div className="space-y-1">
                     <button type="button"
-                      key={level}
-                      onClick={() => handleLevelChange(level)}
-                      className="w-full px-3 py-2 text-left text-sm hover:bg-primary/10 transition-colors doom-focus-ring flex items-center justify-between uppercase tracking-wider font-medium"
+                      onClick={() => handleLevelChange(null)}
+                      className="w-full min-h-12 px-3 py-2 text-left text-sm hover:bg-primary/10 transition-colors doom-focus-ring flex items-center justify-between uppercase tracking-wider font-medium"
                     >
-                      {LEVEL_LABELS[level]}
-                      {selectedLevel === level && <Check size={16} className="text-primary" />}
+                      All Levels
+                      {selectedLevel === null && <Check size={16} className="text-primary" />}
                     </button>
-                  ))}
-                </div>
-              </PopoverContent>
-            </Popover>
+                    {Object.values(FITNESS_LEVELS).map((level) => (
+                      <button type="button"
+                        key={level}
+                        onClick={() => handleLevelChange(level)}
+                        className="w-full min-h-12 px-3 py-2 text-left text-sm hover:bg-primary/10 transition-colors doom-focus-ring flex items-center justify-between uppercase tracking-wider font-medium"
+                      >
+                        {LEVEL_LABELS[level]}
+                        {selectedLevel === level && <Check size={16} className="text-primary" />}
+                      </button>
+                    ))}
+                  </div>
+                </Popover.Content>
+              </Popover.Portal>
+            </Popover.Root>
 
             {/* TODO: Re-enable goals filter when program library grows */}
 
-            {/* Clear Filters Button */}
             {hasActiveFilters && (
               <button type="button"
                 onClick={clearFilters}
-                className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors uppercase tracking-wider flex items-center gap-1 doom-focus-ring"
+                className="inline-flex min-h-12 items-center gap-1 px-3 text-sm font-medium uppercase tracking-wider text-muted-foreground hover:text-foreground doom-focus-ring"
               >
-                <X size={14} />
+                <X size={14} aria-hidden="true" />
                 Clear
               </button>
             )}
           </div>
 
-          {/* Results count */}
           {filteredPrograms.length > 0 && (
-            <p className="text-sm text-muted-foreground mt-3">
-              Showing {pluralize(filteredPrograms.length, 'program')}
-            </p>
+            <p className="text-sm text-muted-foreground">{pluralize(filteredPrograms.length, 'program')}</p>
           )}
         </div>
 
-        {/* Empty State */}
         {filteredPrograms.length === 0 ? (
-          <div className="bg-card border border-border p-12 text-center doom-noise doom-corners">
-            <h2 className="text-xl font-semibold text-foreground mb-2 doom-heading uppercase tracking-wider">
-              NO MATCHING PROGRAMS
-            </h2>
-            <p className="text-muted-foreground mb-6">
-              {hasActiveFilters
-                ? 'Try changing your filters. '
-                : ''}
-              We&apos;re adding new programs regularly and would love your suggestions &mdash;{' '}
+          // Training's EmptyLine, with a way to ask for a program
+          <div className="px-4 py-5">
+            <p className="text-sm text-muted-foreground">
+              No matching programs. {hasActiveFilters ? 'Try another level. ' : ''}
+              We&apos;re adding new programs regularly; tell us what you want to see.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="inline-flex min-h-12 items-center px-4 border border-border text-foreground hover:bg-muted doom-focus-ring text-sm font-semibold uppercase tracking-wider"
+                >
+                  Clear filters
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => setFeedbackOpen(true)}
-                className="text-primary hover:text-primary-hover underline underline-offset-2 transition-colors font-semibold"
-                aria-label="Suggest a program"
+                className="inline-flex min-h-12 items-center gap-1.5 px-4 border border-border text-foreground hover:bg-muted doom-focus-ring text-sm font-semibold uppercase tracking-wider"
               >
-                tell us what you want to see
-              </button>.
-            </p>
-            {hasActiveFilters && (
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="px-4 py-2 bg-primary text-primary-foreground border-2 border-primary hover:bg-primary-hover transition-colors font-semibold uppercase tracking-wider text-sm doom-focus-ring"
-              >
-                Clear Filters
+                <MessageSquarePlus size={14} aria-hidden="true" />
+                Suggest a program
               </button>
-            )}
+            </div>
           </div>
         ) : (
           <>
-            {/* Program Cards */}
-            <div className="grid grid-cols-1 gap-4 mb-8">
+            <ul className="divide-y divide-border">
               {paginatedPrograms.map((program) => (
                 <CommunityProgramCard
                   key={program.id}
@@ -223,36 +227,28 @@ export default function CommunityProgramsView({
                   currentUserId={currentUserId}
                   hasAccess={hasAccess}
                   maxPrograms={maxPrograms}
+                  showType={showType}
                 />
               ))}
-            </div>
+            </ul>
 
-            {/*
-              "Request a program" prompt. This is an *empty-state placeholder*
-              — not a create-new affordance and not a tip annotation. The
-              dashed border is doing a third job here: signalling "this
-              region is a placeholder, not a real card." Kept as raw markup
-              with this comment so future cleanup doesn't mis-classify it.
-              See DESIGN.md §5 Components — Dashed vs Solid.
-            */}
-            <div className="border-2 border-dashed border-border bg-card/50 p-6 sm:p-8 text-center mb-8">
-              <p className="text-sm sm:text-base text-muted-foreground mb-4">
-                Looking for something specific?
-              </p>
+            {/* Request a program: a quiet last row */}
+            <div className="flex items-center justify-between gap-3 border-t border-border px-4 py-3">
+              <p className="text-sm text-muted-foreground">Looking for something specific?</p>
               <button
                 type="button"
                 onClick={() => setFeedbackOpen(true)}
-                className="px-4 py-3 min-h-12 bg-muted text-foreground border-2 border-border hover:border-primary hover:text-primary transition-colors font-semibold uppercase tracking-wider text-sm doom-focus-ring inline-flex items-center gap-2"
+                className="shrink-0 inline-flex min-h-12 items-center gap-1.5 px-3 border border-border text-foreground hover:bg-muted doom-focus-ring text-sm font-semibold uppercase tracking-wider"
                 aria-label="Request a program"
               >
-                <MessageSquarePlus size={18} />
-                Request a Program
+                <MessageSquarePlus size={14} aria-hidden="true" />
+                Request
               </button>
             </div>
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 flex-wrap">
+              <div className="flex items-center justify-center gap-2 flex-wrap border-t border-border px-4 pt-4">
                 <button type="button"
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
@@ -315,7 +311,7 @@ export default function CommunityProgramsView({
 
             {/* Page info */}
             {totalPages > 1 && (
-              <p className="text-center text-xs sm:text-sm text-muted-foreground mt-4">
+              <p className="text-center text-xs sm:text-sm text-muted-foreground px-4 pt-3 pb-4">
                 Page {currentPage} of {totalPages} • Showing{' '}
                 {(currentPage - 1) * ITEMS_PER_PAGE + 1} to{' '}
                 {Math.min(currentPage * ITEMS_PER_PAGE, filteredPrograms.length)} of{' '}
