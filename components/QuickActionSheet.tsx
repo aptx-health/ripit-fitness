@@ -14,7 +14,7 @@ import {
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useToast } from '@/components/ToastProvider'
-import { PAPER_TAB_CLIP } from '@/components/ui/PaperTabs'
+import PaperTabTitle from '@/components/ui/PaperTabTitle'
 import { useUserSettings } from '@/hooks/useUserSettings'
 import {
   discardAdHocWorkout,
@@ -289,15 +289,9 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
         >
           {/* A folder like Training's: a green paper tab on a bordered box. */}
           <div className="flex items-end">
-            <div
-              className="relative z-10 inline-flex items-center gap-2 pl-3.5 pr-6 pt-2 pb-1.5 rounded-tl bg-primary text-primary-foreground"
-              style={PAPER_TAB_CLIP}
-            >
-              <DialogPrimitive.Title className="inline-flex items-center gap-2 font-bold uppercase tracking-wider">
-                <Zap size={16} aria-hidden="true" />
-                Quick actions
-              </DialogPrimitive.Title>
-            </div>
+            <PaperTabTitle tone="next" icon={<Zap size={16} />} asChild>
+              <DialogPrimitive.Title>Quick actions</DialogPrimitive.Title>
+            </PaperTabTitle>
             {/* Close sits on the tab row, at the right edge of the box below. */}
             <DialogPrimitive.Close
               aria-label="Close"

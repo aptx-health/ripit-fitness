@@ -11,7 +11,12 @@ import RenameSavedWorkoutDialog from './RenameSavedWorkoutDialog'
 import SavedWorkoutDetailDialog from './SavedWorkoutDetailDialog'
 import SavedWorkoutRow, { type SavedWorkoutListItem } from './SavedWorkoutRow'
 
-export default function SavedWorkoutsList() {
+/**
+ * The saved workouts, as rows for the Library's Workouts folder box (the box
+ * itself is the caller's). `onCountChange` reports the number after each load,
+ * rename or delete, for the tab's count chip.
+ */
+export default function SavedWorkoutsList({ onCountChange }: { onCountChange?: (count: number) => void } = {}) {
   const toast = useToast()
   const router = useRouter()
 
@@ -41,6 +46,11 @@ export default function SavedWorkoutsList() {
   useEffect(() => {
     fetchList()
   }, [fetchList])
+
+  const count = items?.length
+  useEffect(() => {
+    if (count !== undefined && !loadError) onCountChange?.(count)
+  }, [count, loadError, onCountChange])
 
   const handleRenameSuccess = useCallback((updated: SavedWorkoutListItem) => {
     setItems((prev) =>
@@ -105,7 +115,7 @@ export default function SavedWorkoutsList() {
 
   if (items === null) {
     return (
-      <div className="flex items-center justify-center py-16 text-muted-foreground">
+      <div className="flex items-center justify-center py-12 text-muted-foreground">
         <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
         <span className="ml-2 text-sm">Loading...</span>
       </div>
@@ -114,26 +124,24 @@ export default function SavedWorkoutsList() {
 
   if (loadError && items.length === 0) {
     return (
-      <div className="border-2 border-error bg-error/10 p-4 text-sm text-error">
+      <p role="alert" className="px-4 py-5 text-sm text-error">
         {loadError}
-      </div>
+      </p>
     )
   }
 
   if (items.length === 0) {
     return (
-      <div className="doom-corners border-2 border-border bg-card p-6 text-center">
-        <p className="text-base text-foreground">
-          You haven&apos;t saved any workouts yet.
-        </p>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Finish a freestyle workout and tap Save.
+      // Training's EmptyLine, plus the way to make a first one.
+      <div className="px-4 py-5">
+        <p className="text-sm text-muted-foreground">
+          You haven&apos;t saved any workouts yet. Finish a freestyle workout and tap Save.
         </p>
         <button
           type="button"
           onClick={handleStartFreestyle}
           disabled={startingFreestyle}
-          className="doom-focus-ring mt-6 inline-flex min-h-12 items-center justify-center bg-primary px-4 py-2 text-sm font-semibold uppercase tracking-wider text-primary-foreground transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+          className="doom-focus-ring mt-4 inline-flex min-h-12 items-center justify-center gap-1.5 border border-border px-4 py-2 text-sm font-semibold uppercase tracking-wider text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
         >
           {startingFreestyle ? 'Starting...' : 'Start a freestyle workout'}
         </button>
@@ -146,7 +154,7 @@ export default function SavedWorkoutsList() {
 
   return (
     <>
-      <ul className="flex flex-col gap-2">
+      <ul className="divide-y divide-border">
         {items.map((item) => (
           <li key={item.id}>
             <SavedWorkoutRow

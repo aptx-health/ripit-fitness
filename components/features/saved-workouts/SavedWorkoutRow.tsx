@@ -33,38 +33,37 @@ export default function SavedWorkoutRow({ item, onOpen, onTogglePin, onRename, o
     : `Created ${formatSavedWorkoutDate(item.createdAt)}`
 
   return (
-    <div className="doom-corners group relative flex items-stretch border-2 border-border bg-card transition-colors hover:border-primary">
+    // A row in the Workouts folder box, like Pinned on Training: the list draws the dividers.
+    <div className="flex items-center pr-1">
       <button
         type="button"
         onClick={onOpen}
-        className="doom-focus-ring flex min-h-12 flex-1 items-center gap-3 px-4 py-3 text-left"
+        className="doom-focus-ring flex min-h-12 min-w-0 flex-1 items-center gap-3 px-4 py-3 text-left hover:bg-muted/50"
         aria-label={`View ${item.name}`}
       >
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="truncate text-base font-semibold text-foreground">{item.name}</span>
+            <span className="truncate font-bold text-foreground">{item.name}</span>
             {item.pinnedAt && (
-              <span className="shrink-0 text-xs font-bold uppercase tracking-wider text-primary">Pinned</span>
+              // Brown, the colour of the Pinned Workouts tab on Training.
+              <span className="shrink-0 bg-secondary px-1.5 text-xs font-bold uppercase leading-5 tracking-wider text-secondary-foreground">
+                Pinned
+              </span>
             )}
           </div>
-          <div className="mt-0.5 truncate text-xs text-muted-foreground sm:text-sm">
+          <div className="mt-0.5 truncate text-sm text-muted-foreground">
             {pluralize(item.exerciseCount, 'exercise')} &middot; {dateLabel}
           </div>
         </div>
       </button>
 
-      <PinToggle
-        name={item.name}
-        pinned={Boolean(item.pinnedAt)}
-        onToggle={onTogglePin}
-        className="border-l-2 border-border"
-      />
+      <PinToggle name={item.name} pinned={Boolean(item.pinnedAt)} onToggle={onTogglePin} />
 
       <Popover.Root open={menuOpen} onOpenChange={setMenuOpen}>
         <Popover.Trigger asChild>
           <button
             type="button"
-            className="doom-focus-ring flex min-h-12 min-w-12 items-center justify-center border-l-2 border-border text-muted-foreground hover:bg-muted hover:text-foreground"
+            className="doom-focus-ring flex min-h-12 min-w-12 items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground"
             aria-label={`Actions for ${item.name}`}
           >
             <MoreVertical className="h-5 w-5" aria-hidden="true" />
@@ -74,7 +73,7 @@ export default function SavedWorkoutRow({ item, onOpen, onTogglePin, onRename, o
           <Popover.Content
             align="end"
             sideOffset={4}
-            className="doom-corners z-[100] min-w-[160px] border-2 border-border bg-card shadow-xl"
+            className="z-[100] min-w-[160px] border-2 border-border bg-card shadow-xl"
           >
             <div className="flex flex-col py-1">
               <button

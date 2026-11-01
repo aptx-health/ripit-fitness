@@ -59,3 +59,21 @@ Branch `feature/ui-quick-actions`, stacked on UI1. Audit section "Workout centre
 **Done when:** suite, tsc and eslint on the file pass; 390px screenshots of the sheet in each state (normal, draft in progress, freestyle) in light and dark.
 
 **Shared fix found in UI2:** the ripit theme's unlayered `[data-theme="ripit"] .bg-card:hover { border-color: gold }` (`app/globals.css:2348`) turns folder box borders gold under the pointer, and the hover sticks after a tap on phones. Fixed at the source in UI2 (068), since a `hover:` override never applies on touch phones. UI3 adds a reusable paper-tab title primitive (`asChild`) so dialog titles stop copying `SectionTab` classes.
+
+## UI3: Library tabs and Workouts
+
+Branch `feature/ui-library-tabs`, stacked on UI2. Audit sections "Library → Tabs", "Workouts", "Workout detail dialog".
+
+1. **Paper tabs, not SegmentedControls.** Top level: "Workouts" (Bookmark icon, brown `mine` tone, count chip) and "Programs" (BookOpen, green `next` tone), driving the existing `?type=` URL. Inside Programs: "My Programs" and "Browse" as that folder's own green paper tabs, driving `?tab=`. Content sits in the folder box under its tabs. Use `PaperTabs` from UI1, controlled from the URL; check the URL value before passing it (an unknown value falls back to the default). Render each panel with the `${idPrefix}-panel-${id}` ids, or set `aria-controls` to what exists.
+2. **Remove the "MY WORKOUTS" label** that repeats the selected tab.
+3. **Saved workouts as rows in one box** (`divide-y`, like Pinned on Training): no per-row cards, no `doom-corners`; pin and ⋮ as borderless 48px icon buttons; "PINNED" becomes the Pin icon in brown (or a small brown chip).
+4. **Empty state:** a quiet box with Training's `EmptyLine` style.
+5. **Row menu (⋮):** plain `border-2 border-border bg-card`, no brackets.
+6. **Workout detail dialog:** a brown "Workout" paper tab on a `border-2 border-secondary folder-box` box, no brackets. Add a reusable paper-tab title piece (e.g. `PaperTabTitle` with `asChild`) so dialog titles stop copying `SectionTab` classes, and switch the Quick Actions sheet to it. Start button matches Training's Start Workout (Play icon + label).
+7. `SegmentedControl` stays only for in-form switches.
+
+**Tests:** keep existing Library tests passing; add tests for URL-driven tabs (clicking a tab updates `?type=`/`?tab=`; an unknown value falls back; back/forward follows the URL).
+
+**Done when:** suite, tsc, eslint/biome on touched files pass; 390px screenshots (light, dark) of Library Workouts, Programs → My Programs, Programs → Browse (tabs only; Browse cards are UI4), the row menu, and the detail dialog; Training and Quick Actions unchanged.
+
+**Carried into UI4 from review 072:** Browse's sticky filter strip uses `bg-card` (not `bg-background`) inside the green box; no boxes in boxes (My Programs drops its own list border; Browse cards are not separate bordered frames inside the Programs box); the Workouts count chip follows a new server count after `router.refresh()`; `PaperTabTitle` can render a non-heading (`span`) so the detail dialog has one h2; the close square and row menu get `folder-box` so mouse hover doesn't turn them gold.

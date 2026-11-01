@@ -37,7 +37,10 @@ export interface PaperTab {
   label: string
   icon?: ReactNode
   count?: number
-  /** Accessible label for the count chip, e.g. "2 pinned workouts". */
+  /**
+   * Accessible label for the count chip, e.g. "2 pinned workouts". Without
+   * one the chip is decoration only, so the tab's name stays its label.
+   */
   countLabel?: string
 }
 
@@ -126,8 +129,7 @@ export default function PaperTabs({
             {tab.label}{' '}
             {tab.count !== undefined && (
               <span
-                role="img"
-                aria-label={tab.countLabel}
+                {...(tab.countLabel ? { role: 'img', 'aria-label': tab.countLabel } : { 'aria-hidden': true })}
                 className={`px-1.5 text-xs leading-5 ${isSelected ? SELECTED_CHIP[tone] : 'bg-border text-foreground'}`}
               >
                 {tab.count}

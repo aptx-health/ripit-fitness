@@ -25,3 +25,7 @@
 - 2026-11-01 MDT: 068 back (gold hover fixed at the source with a folder-box class, strip gone, 48px discard). Skipped re-review on purpose: three narrow, measured fixes. Phone preview of UI2 from worktree2.
 - 2026-11-01 MDT: scroll shell committed (1aa44d33) and opened as PR #1015 on feature/ui-shared, outside the gh stack. Retarget to dev once #1014 merges. UI2 on phone preview.
 - 2026-11-01 MDT: Dustin: UI2 preview "looks great". Committed and submitted on the gh stack.
+- 2026-11-01 MDT: UI2 = PR #1016 (gh stack #1017 with #1014). 071 (UI3 Library tabs + Workouts) dispatched to implementer on feature/ui-library-tabs.
+- 2026-11-01 MDT: Dustin merged #1015, which went into feature/ui-shared (its base), so #1014 now carries the scroll fix too; #1014 body updated. Local stack (UI2, UI3) to be rebased onto the new feature/ui-shared with gh stack sync after UI3 is committed (the implementer is mid-change in worktree2).
+- 2026-11-01 MDT: 071 back (green, 19 new tests). 072 review dispatched.
+- 2026-11-01 MDT: 072 approve; 4 low findings carried into UI4. UI3 committed; stack synced onto feature/ui-shared (now incl. #1015); phone preview of UI3 next.

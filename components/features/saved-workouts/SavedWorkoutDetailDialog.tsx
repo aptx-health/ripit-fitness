@@ -1,10 +1,11 @@
 'use client'
 
 import * as Dialog from '@radix-ui/react-dialog'
-import { Loader2, X } from 'lucide-react'
+import { Bookmark, Loader2, Play, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useToast } from '@/components/ToastProvider'
+import PaperTabTitle from '@/components/ui/PaperTabTitle'
 import { clientLogger } from '@/lib/client-logger'
 import { pluralize } from '@/lib/format/pluralize'
 import { formatSavedWorkoutDate } from '@/lib/format/savedWorkoutDate'
@@ -90,8 +91,9 @@ export default function SavedWorkoutDetailDialog({ item, onTogglePin, onOpenChan
           className="backdrop-blur-md bg-black/40 dark:bg-black/60"
           style={{ position: 'fixed', inset: 0, zIndex: 50 }}
         />
+        {/* A brown "Workout" folder: the tab sits on the box, and the close button on the tab row. */}
         <Dialog.Content
-          className="doom-corners flex w-[calc(100vw-2rem)] max-w-md flex-col border-2 border-border bg-card shadow-xl"
+          className="flex w-[calc(100vw-2rem)] max-w-md flex-col"
           style={{
             position: 'fixed',
             left: '50%',
@@ -101,90 +103,95 @@ export default function SavedWorkoutDetailDialog({ item, onTogglePin, onOpenChan
             maxHeight: 'calc(100dvh - 4rem)',
           }}
         >
-          <div className="flex items-start justify-between border-b-2 border-border p-6 pb-4">
-            <div className="min-w-0 flex-1">
-              <Dialog.Title className="truncate text-xl font-bold uppercase tracking-wider text-foreground">
-                {item.name}
-              </Dialog.Title>
-              <Dialog.Description className="mt-1 text-sm text-muted-foreground">
-                {pluralize(item.exerciseCount, 'exercise')} &middot; {dateLabel}
-              </Dialog.Description>
-            </div>
-            <PinToggle name={item.name} pinned={Boolean(item.pinnedAt)} onToggle={onTogglePin} className="-mt-2" />
+          <div className="flex shrink-0 items-end">
+            <PaperTabTitle tone="mine" icon={<Bookmark size={16} />}>
+              Workout
+            </PaperTabTitle>
             <Dialog.Close asChild>
               <button
                 type="button"
                 aria-label="Close"
-                className="doom-focus-ring -mr-2 -mt-2 flex min-h-12 min-w-12 items-center justify-center text-muted-foreground hover:text-foreground"
+                className="doom-focus-ring ml-auto flex h-12 w-12 items-center justify-center border-2 border-b-0 border-secondary bg-card text-foreground hover:bg-muted"
               >
                 <X className="h-5 w-5" aria-hidden="true" />
               </button>
             </Dialog.Close>
           </div>
-
-          <div className="flex-1 overflow-y-auto p-6">
-            {loadError ? (
-              <div className="border-2 border-error bg-error/10 p-3 text-sm text-error">
-                {loadError}
+          <div className="folder-box flex min-h-0 flex-1 flex-col border-2 border-secondary bg-card shadow-xl">
+            <div className="flex items-start gap-2 border-b border-border py-3 pl-4 pr-1">
+              <div className="min-w-0 flex-1 pt-1">
+                <Dialog.Title className="truncate text-xl font-bold uppercase tracking-wider text-foreground">
+                  {item.name}
+                </Dialog.Title>
+                <Dialog.Description className="mt-1 text-sm text-muted-foreground">
+                  {pluralize(item.exerciseCount, 'exercise')} &middot; {dateLabel}
+                </Dialog.Description>
               </div>
-            ) : detail === null ? (
-              <div className="flex items-center justify-center py-8 text-muted-foreground">
-                <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
-                <span className="ml-2 text-sm">Loading...</span>
-              </div>
-            ) : (
-              <>
-                {detail.notes && (
-                  <div className="mb-4 whitespace-pre-wrap rounded-none border-2 border-border bg-muted p-3 text-sm text-foreground">
-                    {detail.notes}
-                  </div>
-                )}
+              <PinToggle name={item.name} pinned={Boolean(item.pinnedAt)} onToggle={onTogglePin} />
+            </div>
 
-                {exercises.length > 0 ? (
-                  <ol className="flex flex-col gap-1">
-                    {exercises.map((exercise, idx) => {
-                      const sets = Array.isArray(exercise.sets) ? describeSavedSets(exercise.sets) : ''
-                      return (
-                        <li
-                          key={`${exercise.name}-${idx}`}
-                          className="flex items-start gap-3 border-b border-border py-2.5 text-base text-foreground last:border-b-0"
-                        >
-                          <span className="w-6 pt-0.5 text-sm text-muted-foreground">{idx + 1}.</span>
-                          <div className="min-w-0 flex-1">
-                            <div className="break-words">{exercise.name}</div>
-                            {sets && <div className="text-sm text-muted-foreground">{sets}</div>}
-                            {exercise.notes && (
-                              <div className="whitespace-pre-wrap break-words text-xs text-muted-foreground">
-                                {exercise.notes}
-                              </div>
-                            )}
-                          </div>
-                        </li>
-                      )
-                    })}
-                  </ol>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    {pluralize(item.exerciseCount, 'exercise')} saved.
-                  </p>
-                )}
-              </>
-            )}
-          </div>
+            <div className="flex-1 overflow-y-auto p-4">
+              {loadError ? (
+                <div className="border-2 border-error bg-error/10 p-3 text-sm text-error">
+                  {loadError}
+                </div>
+              ) : detail === null ? (
+                <div className="flex items-center justify-center py-8 text-muted-foreground">
+                  <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+                  <span className="ml-2 text-sm">Loading...</span>
+                </div>
+              ) : (
+                <>
+                  {detail.notes && (
+                    <div className="mb-4 whitespace-pre-wrap rounded-none border-2 border-border bg-muted p-3 text-sm text-foreground">
+                      {detail.notes}
+                    </div>
+                  )}
 
-          <div className="border-t-2 border-border p-4">
-            <button
-              type="button"
-              onClick={handleStart}
-              disabled={starting || detail === null}
-              className="doom-focus-ring flex min-h-12 w-full items-center justify-center bg-primary px-4 py-2 text-sm font-semibold uppercase tracking-wider text-primary-foreground transition-all hover:bg-primary-hover active:translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-50"
-              style={{
-                boxShadow:
-                  'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)',
-              }}
-            >
-              {starting ? 'Starting...' : 'Start this workout'}
-            </button>
+                  {exercises.length > 0 ? (
+                    <ol className="flex flex-col gap-1">
+                      {exercises.map((exercise, idx) => {
+                        const sets = Array.isArray(exercise.sets) ? describeSavedSets(exercise.sets) : ''
+                        return (
+                          <li
+                            key={`${exercise.name}-${idx}`}
+                            className="flex items-start gap-3 border-b border-border py-2.5 text-base text-foreground last:border-b-0"
+                          >
+                            <span className="w-6 pt-0.5 text-sm text-muted-foreground">{idx + 1}.</span>
+                            <div className="min-w-0 flex-1">
+                              <div className="break-words">{exercise.name}</div>
+                              {sets && <div className="text-sm text-muted-foreground">{sets}</div>}
+                              {exercise.notes && (
+                                <div className="whitespace-pre-wrap break-words text-xs text-muted-foreground">
+                                  {exercise.notes}
+                                </div>
+                              )}
+                            </div>
+                          </li>
+                        )
+                      })}
+                    </ol>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      {pluralize(item.exerciseCount, 'exercise')} saved.
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+
+            <div className="border-t border-border p-4">
+              {/* Training's Start Workout: Play icon and label on the primary button. */}
+              <button
+                type="button"
+                onClick={handleStart}
+                disabled={starting || detail === null}
+                className="flex min-h-12 w-full items-center justify-center gap-2 px-4 py-3 bg-primary text-primary-foreground hover:bg-primary-hover doom-button-3d doom-focus-ring font-bold uppercase tracking-wider text-sm disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Play size={16} aria-hidden="true" />
+                {starting ? 'Starting...' : 'Start this workout'}
+              </button>
+            </div>
           </div>
         </Dialog.Content>
       </Dialog.Portal>
