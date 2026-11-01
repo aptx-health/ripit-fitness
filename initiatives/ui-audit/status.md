@@ -29,3 +29,10 @@
 - 2026-11-01 MDT: Dustin merged #1015, which went into feature/ui-shared (its base), so #1014 now carries the scroll fix too; #1014 body updated. Local stack (UI2, UI3) to be rebased onto the new feature/ui-shared with gh stack sync after UI3 is committed (the implementer is mid-change in worktree2).
 - 2026-11-01 MDT: 071 back (green, 19 new tests). 072 review dispatched.
 - 2026-11-01 MDT: 072 approve; 4 low findings carried into UI4. UI3 committed; stack synced onto feature/ui-shared (now incl. #1015); phone preview of UI3 next.
+- 2026-11-01 MDT: UI3 committed (stack synced onto ui-shared incl. #1015; force-pushed). UI3 phone preview up. 073 (UI4) dispatched; implementer holds off on servers while the preview runs.
+- 2026-11-01 MDT: Dustin: UI3 "Looks awesome". Preview stopped; UI3 PR opened; implementer cleared to run servers.
+- 2026-11-01 MDT: UI3 = PR #1018 (base feature/ui-quick-actions), linked into gh stack #1017 (#1014 → #1016 → #1018).
+- 2026-11-01 MDT: 073 back (green, 5 new tests). 074 review dispatched.
+- 2026-11-01 MDT: 074 approve with follow-ups (48px targets, density, author + more cue back, Level menu closes, quiet PaperTabTitle). 075 dispatched; then Dustin's preview.
+- 2026-11-01 MDT: 075 back (all listed targets ≥48px, author + more cue back, density still ~4/screen). Re-review skipped (measured). UI4 phone preview.
+- 2026-11-01 MDT: Dustin: UI4 "Looks excellent". Committed; PR opened and linked.

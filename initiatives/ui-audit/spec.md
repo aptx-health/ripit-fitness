@@ -77,3 +77,32 @@ Branch `feature/ui-library-tabs`, stacked on UI2. Audit sections "Library → Ta
 **Done when:** suite, tsc, eslint/biome on touched files pass; 390px screenshots (light, dark) of Library Workouts, Programs → My Programs, Programs → Browse (tabs only; Browse cards are UI4), the row menu, and the detail dialog; Training and Quick Actions unchanged.
 
 **Carried into UI4 from review 072:** Browse's sticky filter strip uses `bg-card` (not `bg-background`) inside the green box; no boxes in boxes (My Programs drops its own list border; Browse cards are not separate bordered frames inside the Programs box); the Workouts count chip follows a new server count after `router.refresh()`; `PaperTabTitle` can render a non-heading (`span`) so the detail dialog has one h2; the close square and row menu get `folder-box` so mouse hover doesn't turn them gold.
+
+## UI4: Browse and program detail
+
+Branch `feature/ui-browse`, stacked on UI3. Audit sections "Browse", "My Programs", "Program detail", plus the 072 carry-overs above.
+
+1. **Browse cards are compact rows/folders inside the green Programs box** (no separate bordered frames, no `doom-corners`, no noise): name (bold uppercase) with the STRENGTH/level chip in Training's filled chip style; a 2-line description; one meta line ("Beginner · machines · 5 wk · 3×/wk"); "Add" as an outline button on the right like Training's Start. Drop or fold in "Published …". Aim for ~5 programs per screen at 390px. Keep every existing action (add, view details, cloning progress).
+2. **Filter and footer:** the sticky filter strip uses `bg-card`; "Level" becomes a small dimmed tab or chips; "Request a program" is a quiet row with an outline button (no dashed box). Empty and filtered-empty states use `EmptyLine`.
+3. **My Programs:** drop its own outer list border (it's inside the box now); row titles lose `doom-heading`; ACTIVE as a green chip; Create new program as Training's quiet outline button.
+4. **Program detail:** the program name is the title; the week is a green folder with a "Week 1 of 2" tab carrying the arrows, day rows inside; Recent History a quiet folder with a count chip; no `doom-corners`; day titles plain.
+5. **From 072:** Workouts count follows a new server count after `router.refresh()`; `PaperTabTitle` can render a `span` (dialog gets one h2); close square and row menu get `folder-box`.
+
+**Done when:** suite, tsc, eslint/biome on touched files pass; 390px touch-emulated screenshots (light, dark) of Browse (top and scrolled), filtered-empty, My Programs, program detail (week + history); Training, Quick Actions and Library Workouts unchanged.
+
+**Carried into UI5/UI6 from 075:** the shared `components/ui/radix/popover` adds `doom-corners` and `doom-noise` for every caller (drop them there once its callers are checked); `ProgramBackLink` "← Library" is a 20px target (give it 48px, like `SubpageHeader`'s back link).
+
+## UI5: Settings main page (and the SSR 500)
+
+Branch `feature/ui-settings`, stacked on UI4. Audit section "Settings → Main page" and bug 1. **Behaviour:** `features/ui-audit/settings-page.feature`.
+
+1. **Fix the SSR 500.** `app/(app)/settings/page.tsx` is a client page calling `useSession()` during server render. Make the page a server component that reads the user with `getCurrentUser()` (as the sub-pages do) and passes what the client parts need (role for the Admin block, email); client interactivity moves into child components. `GET /settings` must return 200 in a production build.
+2. **Split the 546-line file** into a server page plus small client blocks (e.g. `components/settings/*`), each under the repo's file-length limit.
+3. **`PageTitle`**: SETTINGS.
+4. **Folder blocks** with tabs and rows, one box each, in this order: **Look** (Theme, Mode), **Workouts** (Workout mode, weight unit, Intensity, Rating type), **Training targets** (Muscle balance, Target movements, **Equipment** (new row → `/settings/equipment`), Agent access), **Account** (email, connected sign-in methods, Change password, Sign out), **Help** (Feedback, Support), **Admin** (admins/editors only).
+5. **Rows, not heavy buttons:** navigation rows have a fixed-width icon column and a chevron; Theme and Mode show their value on the right ("Theme · Ripit ›"); Sign out is one quiet outline button at the end of Account. The in-form `SegmentedControl`s (Workout mode, RPE/RIR) stay.
+6. Every existing setting still saves and loads exactly as before; Change password still works; Admin rows only for admin/editor.
+7. Fix the existing eslint error in the file (around line 308). Look into the "Connected sign-in methods: GOOGLE" for a password user; fix it if it's a real bug, or say it's seed data.
+8. Carry-over from 075: drop `doom-corners`/`doom-noise` from the shared `components/ui/radix/popover` if no other caller relies on them (check them all).
+
+**Done when:** the 076 tests pass; suite, tsc, eslint/biome on touched files pass; prod build serves `/settings` 200 with no server error in the log; touch-emulated 390px light/dark screenshots of the whole page, as admin and as a plain user.

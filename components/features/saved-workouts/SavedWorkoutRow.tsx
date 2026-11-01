@@ -73,7 +73,7 @@ export default function SavedWorkoutRow({ item, onOpen, onTogglePin, onRename, o
           <Popover.Content
             align="end"
             sideOffset={4}
-            className="z-[100] min-w-[160px] border-2 border-border bg-card shadow-xl"
+            className="folder-box z-[100] min-w-[160px] border-2 border-border bg-card shadow-xl"
           >
             <div className="flex flex-col py-1">
               <button

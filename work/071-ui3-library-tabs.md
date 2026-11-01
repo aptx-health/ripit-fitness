@@ -1,6 +1,6 @@
 ---
 id: 071
-state: review
+state: accepted
 waiting_on:
 executor: implementer
 from: lead (lead-ripit-mcp)
@@ -26,3 +26,4 @@ Packet per `handoff-implementer`, first line `Report: ...`. SendMessage `lead-ri
 ## Log
 - 2026-11-01 MDT: created; dispatched to implementer (wF:p2). Test-builder skipped on purpose: mostly styling; the implementer adds URL-tab tests.
 - 2026-11-01 MDT: handback: done, green. Lead accepts both choices (sr-only heading; unannounced chip). 072 review dispatched.
+- 2026-11-01 MDT: Dustin on phone preview: "Looks awesome". Accepted.

@@ -1,6 +1,7 @@
 'use client'
 
 import { Check, ChevronDown, ChevronRight, Play, SkipForward } from 'lucide-react'
+import { pluralize } from '@/lib/format/pluralize'
 
 type Workout = {
   id: string
@@ -105,12 +106,12 @@ export default function WorkoutCard({
           {/* Content */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-0.5">
-              <h3 className={`text-lg font-bold text-foreground doom-heading break-words ${isSkipped ? 'line-through opacity-60' : ''}`}>
+              <h3 className={`text-lg font-bold uppercase tracking-wider text-foreground break-words ${isSkipped ? 'line-through opacity-60' : ''}`}>
                 DAY {workout.dayNumber}: {workout.name}
               </h3>
             </div>
             <div className="flex items-center gap-3 text-sm text-muted-foreground">
-              <span>{workout._count.exercises} exercises</span>
+              <span>{pluralize(workout._count.exercises, 'exercise')}</span>
               {latestCompletion && !isSkipped && (
                 <span className="text-xs">
                   {new Date(latestCompletion.completedAt).toLocaleDateString('en-US', {
@@ -158,7 +159,7 @@ export default function WorkoutCard({
           <button
             type="button"
             onClick={() => onLog(workout.id)}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary text-primary-foreground hover:bg-primary-hover font-bold uppercase tracking-wider text-sm transition-colors doom-focus-ring"
+            className="w-full min-h-12 flex items-center justify-center gap-2 px-4 py-3 bg-primary text-primary-foreground hover:bg-primary-hover font-bold uppercase tracking-wider text-sm transition-colors doom-focus-ring"
             style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)' }}
           >
             <Play size={16} />
@@ -169,7 +170,7 @@ export default function WorkoutCard({
               type="button"
               onClick={() => onSkip(workout.id)}
               disabled={isSkipping}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-secondary text-secondary-foreground hover:bg-secondary-hover font-semibold uppercase tracking-wider text-sm transition-colors doom-focus-ring disabled:opacity-50"
+              className="w-full min-h-12 flex items-center justify-center gap-2 px-4 py-3 bg-secondary text-secondary-foreground hover:bg-secondary-hover font-semibold uppercase tracking-wider text-sm transition-colors doom-focus-ring disabled:opacity-50"
               style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)' }}
             >
               <SkipForward size={14} />

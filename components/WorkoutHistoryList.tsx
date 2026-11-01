@@ -1,12 +1,14 @@
 'use client'
 
-import { ChevronDown, ChevronRight, Clock, Dumbbell, Flame } from 'lucide-react'
+import { ChevronDown, ChevronRight, Clock, Dumbbell, Flame, History } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 
+import PaperTabTitle from '@/components/ui/PaperTabTitle'
 import { clientLogger } from '@/lib/client-logger'
 import { sessionEffortLabel } from '@/lib/effort-prompt'
 import { formatDuration } from '@/lib/format/duration'
+import { pluralize } from '@/lib/format/pluralize'
 import { programDetailHref } from '@/lib/training/program-href'
 
 type Exercise = {
@@ -316,38 +318,46 @@ export default function WorkoutHistoryList({ count, compact = false }: Props) {
   // Compact mode uses a collapsible section (like Archived Programs)
   if (compact) {
     return (
-      <div data-training-widget className="bg-card border border-border doom-corners">
-        <button
-          type="button"
-          onClick={() => setSectionExpanded(!sectionExpanded)}
-          className="w-full px-6 py-4 flex items-center justify-between hover:bg-muted transition-colors"
-        >
-          <div className="flex items-center gap-2">
+      // A quiet folder: a tan "Recent history" tab with the count, the sessions in the box.
+      <section data-training-widget aria-labelledby="recent-history-title">
+        <div className="flex items-end">
+          <PaperTabTitle
+            tone="quiet"
+            icon={<History size={16} />}
+            count={count}
+            countLabel={pluralize(count, 'session')}
+            asChild
+          >
+            <h2 id="recent-history-title">Recent history</h2>
+          </PaperTabTitle>
+        </div>
+        <div className="folder-box border border-border bg-card">
+          <button
+            type="button"
+            onClick={() => setSectionExpanded(!sectionExpanded)}
+            aria-expanded={sectionExpanded}
+            className="w-full min-h-12 px-4 py-3 flex items-center justify-between gap-2 text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground doom-focus-ring"
+          >
+            {sectionExpanded ? 'Hide recent sessions' : 'Show recent sessions'}
             {sectionExpanded ? (
-              <ChevronDown className="w-5 h-5 text-muted-foreground" />
+              <ChevronDown className="w-5 h-5 shrink-0" aria-hidden="true" />
             ) : (
-              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+              <ChevronRight className="w-5 h-5 shrink-0" aria-hidden="true" />
             )}
-            <h3 className="text-lg font-semibold text-foreground uppercase tracking-wide">
-              Recent History
-            </h3>
-            <span className="px-2 py-0.5 bg-muted text-muted-foreground text-xs font-semibold">
-              {count}
-            </span>
-          </div>
-        </button>
-        {sectionExpanded && (
-          <div className="border-t border-border">
-            {isLoading ? (
-              <div className="p-4">{renderSkeleton()}</div>
-            ) : (
-              <div className="divide-y divide-border">
-                {completions.map((completion) => renderHistoryItem(completion))}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+          </button>
+          {sectionExpanded && (
+            <div className="border-t border-border">
+              {isLoading ? (
+                <div className="p-4">{renderSkeleton()}</div>
+              ) : (
+                <div className="divide-y divide-border">
+                  {completions.map((completion) => renderHistoryItem(completion))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </section>
     )
   }
 

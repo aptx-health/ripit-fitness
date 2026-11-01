@@ -1,11 +1,10 @@
 'use client'
 
-import { Dumbbell, Lock } from 'lucide-react'
+import { ChevronDown, ChevronUp, Dumbbell, Lock, Plus } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
-import { EQUIPMENT_LABELS, GOAL_LABELS, LEVEL_LABELS } from '@/lib/constants/program-metadata'
-import { formatRelativeTime } from '@/lib/format/relativeTime'
+import { EQUIPMENT_LABELS, LEVEL_LABELS } from '@/lib/constants/program-metadata'
 import { libraryHref } from '@/lib/library/links'
 import UnpublishProgramDialog from './UnpublishProgramDialog'
 
@@ -33,6 +32,8 @@ type CommunityProgramCardProps = {
   currentUserId: string
   hasAccess: boolean
   maxPrograms: number
+  /** Show the type chip; the list hides it when every program it shows is the same type. */
+  showType?: boolean
 }
 
 export default function CommunityProgramCard({
@@ -40,6 +41,7 @@ export default function CommunityProgramCard({
   currentUserId,
   hasAccess,
   maxPrograms,
+  showType = true,
 }: CommunityProgramCardProps) {
   const router = useRouter()
   const [isAdding, setIsAdding] = useState(false)
@@ -47,6 +49,19 @@ export default function CommunityProgramCard({
   const [showLimitModal, setShowLimitModal] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [descExpanded, setDescExpanded] = useState(false)
+  // Whether the two-line clamp hides part of the description: only then is there "more".
+  const descRef = useRef<HTMLSpanElement>(null)
+  const [descClamped, setDescClamped] = useState(false)
+  useEffect(() => {
+    const el = descRef.current
+    if (!el || descExpanded) return
+    const measure = () => setDescClamped(el.scrollHeight > el.clientHeight + 1)
+    measure()
+    if (typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(measure)
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [descExpanded])
 
   const isAuthor = program.authorUserId === currentUserId
 
@@ -80,156 +95,112 @@ export default function CommunityProgramCard({
     }
   }
 
+  // One meta line: "by Ripit Fitness · Beginner · machines · 5 wk · 3×/wk". Each item stays whole when it wraps.
+  const equipment = program.equipmentNeeded.slice(0, 2).map((eq) => (EQUIPMENT_LABELS[eq] || eq).toLowerCase())
+  const meta = [
+    `by ${program.displayName}`,
+    program.level ? LEVEL_LABELS[program.level] : null,
+    equipment.length > 0
+      ? `${equipment.join(', ')}${program.equipmentNeeded.length > 2 ? ` +${program.equipmentNeeded.length - 2}` : ''}`
+      : null,
+    `${program.weekCount} wk`,
+    program.targetDaysPerWeek ? `${program.targetDaysPerWeek}×/wk` : null,
+  ].filter((item): item is string => Boolean(item))
+
   return (
     <>
-      <div className="p-4 sm:p-6 bg-card border-2 border-border hover:border-primary transition-colors doom-corners doom-noise">
-        {/* Header */}
-        <div className="flex justify-between items-start gap-3 mb-3">
-          <div className="flex-1 min-w-0">
-            <h3 className="text-lg sm:text-xl font-bold text-foreground break-words uppercase tracking-wide">
-              {program.name}
-            </h3>
-            <p className="text-sm sm:text-base text-muted-foreground mt-1">
-              by {program.displayName}
-            </p>
-          </div>
+      {/* A row in the Programs folder box, like Training's rows: the list draws the dividers. */}
+      <li className="px-4 py-3">
+        <div className="flex items-start gap-3">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <h3 className="font-bold uppercase tracking-wider text-foreground break-words">{program.name}</h3>
+              {showType && (
+                <span className="inline-flex items-center gap-1 bg-primary px-1.5 text-xs font-bold uppercase leading-5 tracking-wider text-primary-foreground">
+                  <Dumbbell size={12} aria-hidden="true" />
+                  {program.programType}
+                </span>
+              )}
+              {isAuthor && (
+                <span className="bg-accent px-1.5 text-xs font-bold uppercase leading-5 tracking-wider text-accent-foreground">
+                  Your program
+                </span>
+              )}
+            </div>
 
-          {/* Badges */}
-          <div className="flex flex-col gap-2 flex-shrink-0">
-            {/* Author badge */}
-            {isAuthor && (
-              <span className="px-2 py-1 bg-accent/20 text-accent text-xs font-bold uppercase tracking-wider whitespace-nowrap border border-accent">
-                YOUR PROGRAM
-              </span>
-            )}
-
-            {/* Type badge */}
-            <span
-              className="px-2 py-1 bg-primary text-primary-foreground text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1 whitespace-nowrap"
-              title="strength program"
+            {/* Description: two lines, tap to expand */}
+            <button
+              type="button"
+              onClick={() => setDescExpanded((v) => !v)}
+              aria-expanded={descExpanded}
+              className="mt-1 block w-full text-left text-sm text-foreground/80 break-words doom-focus-ring"
             >
-              <Dumbbell size={12} />
-              <span>strength</span>
-            </span>
-          </div>
-        </div>
-
-        {/* Description — tap to expand */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation()
-            setDescExpanded((v) => !v)
-          }}
-          className="text-sm text-foreground/80 mb-4 break-words text-left w-full"
-        >
-          <span className={descExpanded ? '' : 'line-clamp-3'}>
-            {program.description}
-          </span>
-          {!descExpanded && program.description.length > 120 && (
-            <span className="text-primary text-xs font-semibold uppercase tracking-wider ml-1">more</span>
-          )}
-        </button>
-
-        {/* Metadata Badges */}
-        {(program.level || program.goals.length > 0) && (
-          <div className="flex flex-wrap gap-2 mb-4">
-            {/* Level Badge */}
-            {program.level && (
-              <span className="px-2 py-1 bg-accent/20 text-accent text-xs font-bold uppercase tracking-wider border border-accent">
-                {LEVEL_LABELS[program.level]}
+              <span ref={descRef} className={descExpanded ? 'block' : 'line-clamp-2'}>
+                {program.description}
               </span>
-            )}
+              {(descClamped || descExpanded) && (
+                <span className="mt-0.5 inline-flex items-center gap-0.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {descExpanded ? 'Less' : 'More'}
+                  {descExpanded ? (
+                    <ChevronUp size={12} aria-hidden="true" />
+                  ) : (
+                    <ChevronDown size={12} aria-hidden="true" />
+                  )}
+                </span>
+              )}
+            </button>
 
-            {/* Goal Badges (show first 3 that have labels) */}
-            {program.goals.filter((g) => GOAL_LABELS[g]).slice(0, 3).map((goal) => (
-              <span
-                key={goal}
-                className="px-2 py-1 bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider border border-primary/30"
-              >
-                {GOAL_LABELS[goal]}
-              </span>
-            ))}
+            <p className="mt-1 text-sm text-muted-foreground">
+              {meta.map((item, i) => (
+                <span key={item}>
+                  {i > 0 && ' · '}
+                  <span className="whitespace-nowrap">{item}</span>
+                </span>
+              ))}
+            </p>
 
-            {program.goals.filter((g) => GOAL_LABELS[g]).length > 3 && (
-              <span className="px-2 py-1 bg-muted text-muted-foreground text-xs font-bold uppercase tracking-wider">
-                +{program.goals.filter((g) => GOAL_LABELS[g]).length - 3} more
-              </span>
+            {error && (
+              <p role="alert" className="mt-2 text-sm font-medium text-error">
+                {error}
+              </p>
             )}
           </div>
-        )}
 
-        {/* Equipment */}
-        {program.equipmentNeeded.length > 0 && (
-          <div className="text-xs text-muted-foreground mb-3">
-            <span className="font-semibold uppercase tracking-wider">Equipment: </span>
-            {program.equipmentNeeded.slice(0, 4).map((eq, idx) => (
-              <span key={eq}>
-                {EQUIPMENT_LABELS[eq] || eq}
-                {idx < Math.min(program.equipmentNeeded.length - 1, 3) && ', '}
-              </span>
-            ))}
-            {program.equipmentNeeded.length > 4 && (
-              <span> +{program.equipmentNeeded.length - 4} more</span>
-            )}
-          </div>
-        )}
-
-        {/* Metadata */}
-        <div className="flex flex-wrap gap-x-3 sm:gap-x-4 gap-y-1 text-sm sm:text-base text-muted-foreground mb-3">
-          <span>{program.durationDisplay || `${program.weekCount} weeks`}</span>
-          <span className="hidden sm:inline">•</span>
-          <span>{program.workoutCount} workouts</span>
-          {program.targetDaysPerWeek && (
-            <>
-              <span className="hidden sm:inline">•</span>
-              <span>{program.targetDaysPerWeek}x/week</span>
-            </>
-          )}
-        </div>
-
-        {/* Published date */}
-        <div className="text-sm text-muted-foreground mb-4">
-          Published {formatRelativeTime(program.publishedAt)}
-        </div>
-
-        {/* Error message */}
-        {error && (
-          <div className="mb-4 p-3 bg-error/10 border-2 border-error">
-            <p className="text-sm text-error font-medium">{error}</p>
-          </div>
-        )}
-
-        {/* Actions */}
-        <div className="flex gap-2">
+          {/* Add, as Training's Start: a quiet outline button on the right */}
           {!isAuthor ? (
             hasAccess ? (
-              <button type="button"
+              <button
+                type="button"
                 onClick={handleAddProgram}
                 disabled={isAdding}
-                className="flex-1 px-4 py-2.5 sm:py-3 bg-primary text-primary-foreground hover:bg-primary-hover transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base uppercase tracking-wider doom-button-3d doom-focus-ring"
+                aria-label={`Add to my programs: ${program.name}`}
+                className="shrink-0 inline-flex min-h-12 items-center gap-1.5 px-3 border border-border text-foreground hover:bg-muted doom-focus-ring text-sm font-semibold uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isAdding ? 'ADDING...' : 'ADD TO MY PROGRAMS'}
+                <Plus size={14} aria-hidden="true" />
+                {isAdding ? 'Adding…' : 'Add'}
               </button>
             ) : (
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => setShowLimitModal(true)}
-                className="flex-1 px-4 py-2.5 sm:py-3 border-2 border-border text-muted-foreground transition-colors font-semibold text-sm sm:text-base uppercase tracking-wider doom-focus-ring cursor-not-allowed opacity-70 flex items-center justify-center gap-2"
+                aria-label={`Add to my programs: ${program.name} (no free program slots)`}
+                className="shrink-0 inline-flex min-h-12 items-center gap-1.5 px-3 border border-border text-muted-foreground opacity-70 doom-focus-ring text-sm font-semibold uppercase tracking-wider"
               >
-                <Lock size={16} />
-                ADD TO MY PROGRAMS
+                <Lock size={14} aria-hidden="true" />
+                Add
               </button>
             )
           ) : (
-            <button type="button"
+            <button
+              type="button"
               onClick={() => setShowUnpublishDialog(true)}
-              className="flex-1 px-4 py-2.5 sm:py-3 border-2 border-error text-error hover:bg-error/10 transition-colors font-semibold text-sm sm:text-base uppercase tracking-wider doom-focus-ring"
+              className="shrink-0 inline-flex min-h-12 items-center px-3 border border-error/60 text-error hover:bg-error/10 doom-focus-ring text-sm font-semibold uppercase tracking-wider"
             >
-              UNPUBLISH
+              Unpublish
             </button>
           )}
         </div>
-      </div>
+      </li>
 
       {/* Program Limit Modal */}
       {showLimitModal && (
@@ -237,7 +208,7 @@ export default function CommunityProgramCard({
           className="fixed inset-0 backdrop-blur-md bg-background/80 flex items-center justify-center z-[60] p-4"
           style={{ position: 'fixed', inset: 0, zIndex: 60 }}
         >
-          <div className="bg-card border-2 border-warning p-6 sm:p-8 text-center max-w-sm w-full shadow-xl doom-corners">
+          <div className="folder-box bg-card border-2 border-warning p-6 sm:p-8 text-center max-w-sm w-full shadow-xl">
             <div className="flex justify-center mb-4">
               <div className="w-12 h-12 rounded-full bg-warning/20 flex items-center justify-center">
                 <Lock size={24} className="text-warning" />

@@ -78,6 +78,12 @@ export default function LibraryView({
   savedWorkoutCount,
 }: Props) {
   const [savedCount, setSavedCount] = useState(savedWorkoutCount)
+  // A new server count (after router.refresh()) replaces whatever the list last reported.
+  const [seenServerCount, setSeenServerCount] = useState(savedWorkoutCount)
+  if (savedWorkoutCount !== seenServerCount) {
+    setSeenServerCount(savedWorkoutCount)
+    setSavedCount(savedWorkoutCount)
+  }
   const searchParams = useSearchParams()
   const router = useRouter()
   const toast = useToast()
@@ -362,7 +368,7 @@ export default function LibraryView({
                     id={`programs-panel-${id}`}
                     aria-labelledby={`programs-tab-${id}`}
                     hidden={activeTab !== id}
-                    className="border-t-2 border-primary p-3"
+                    className="border-t-2 border-primary"
                   >
                     {activeTab === id &&
                       (id === 'my' ? (

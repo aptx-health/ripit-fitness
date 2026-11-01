@@ -295,7 +295,7 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
             {/* Close sits on the tab row, at the right edge of the box below. */}
             <DialogPrimitive.Close
               aria-label="Close"
-              className="ml-auto inline-flex shrink-0 items-center justify-center w-12 h-12 bg-card border-2 border-b-0 border-primary text-foreground hover:bg-muted transition-colors doom-focus-ring"
+              className="folder-box ml-auto inline-flex shrink-0 items-center justify-center w-12 h-12 bg-card border-2 border-b-0 border-primary text-foreground hover:bg-muted transition-colors doom-focus-ring"
             >
               <X size={20} strokeWidth={2.5} aria-hidden="true" />
             </DialogPrimitive.Close>

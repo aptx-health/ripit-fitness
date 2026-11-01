@@ -104,14 +104,15 @@ export default function SavedWorkoutDetailDialog({ item, onTogglePin, onOpenChan
           }}
         >
           <div className="flex shrink-0 items-end">
-            <PaperTabTitle tone="mine" icon={<Bookmark size={16} />}>
+            {/* A span: the workout's name below is the dialog's one heading. */}
+            <PaperTabTitle tone="mine" icon={<Bookmark size={16} />} as="span">
               Workout
             </PaperTabTitle>
             <Dialog.Close asChild>
               <button
                 type="button"
                 aria-label="Close"
-                className="doom-focus-ring ml-auto flex h-12 w-12 items-center justify-center border-2 border-b-0 border-secondary bg-card text-foreground hover:bg-muted"
+                className="folder-box doom-focus-ring ml-auto flex h-12 w-12 items-center justify-center border-2 border-b-0 border-secondary bg-card text-foreground hover:bg-muted"
               >
                 <X className="h-5 w-5" aria-hidden="true" />
               </button>
