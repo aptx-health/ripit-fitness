@@ -7,6 +7,7 @@ import SavedWorkoutsList from '@/components/features/saved-workouts/SavedWorkout
 import MyProgramsList from '@/components/programs/MyProgramsList'
 import StrengthActivationModal from '@/components/StrengthActivationModal'
 import { useToast } from '@/components/ToastProvider'
+import PageTitle from '@/components/ui/PageTitle'
 import { SegmentedControl } from '@/components/ui/SegmentedControl'
 import { useProgramAccess } from '@/hooks/useCustomProgramAccess'
 import { clientLogger } from '@/lib/client-logger'
@@ -279,9 +280,7 @@ export default function LibraryView({
       <div className="max-w-2xl mx-auto sm:px-6 py-4">
         {/* Header */}
         <div className="px-4 sm:px-0 mb-4">
-          <h1 className="text-4xl font-bold text-foreground doom-title uppercase tracking-wider">
-            LIBRARY
-          </h1>
+          <PageTitle>LIBRARY</PageTitle>
         </div>
 
         {/* Content switch */}

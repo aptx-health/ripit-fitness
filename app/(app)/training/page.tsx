@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import TrainingHome from '@/components/training/TrainingHome'
+import PageTitle from '@/components/ui/PageTitle'
 import { getCurrentUser } from '@/lib/auth/server'
 import { getTrainingHome } from '@/lib/training/home'
 import { trainingResumeRedirectTarget } from '@/lib/training/program-links'
@@ -28,9 +29,7 @@ export default async function TrainingPage({ searchParams }: Props) {
     <div className="bg-background">
       <div className="max-w-2xl mx-auto sm:px-6 py-4">
         <div className="px-4 sm:px-0 mb-4">
-          <h1 className="text-4xl font-bold text-foreground doom-title uppercase tracking-wider">
-            TRAINING
-          </h1>
+          <PageTitle>TRAINING</PageTitle>
         </div>
         <div className="px-4 sm:px-0">
           <TrainingHome home={home} />

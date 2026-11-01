@@ -1,0 +1,16 @@
+# UI audit: status (append-only)
+
+- 2026-11-01 MDT: Dustin asked for a UI audit across the tabs, to bring Library, the Workout center (Quick Actions) and Settings up to the Training page's folder-tab style; Learning is out of scope (it will be replaced). Separately, research the iOS PWA blur at the top of the screen near the notch. Size: standard, starting with two read-only items: 059 audit (reviewer, wF:p3) and 060 iOS blur research (implementer, wF:p2). Lead: lead-ripit-mcp. Branch feature/ui-audit in worktree2, from origin/dev. The build items come after Dustin picks from the audit.
+- 2026-11-01 MDT: 060 back: likely cause is black-translucent status bar + iOS 27 scroll-edge blur; recommend statusBarStyle default + theme-color (medium confidence). Note: docs/2026-11-01-ios-pwa-top-blur.md. 059 audit still running.
+- 2026-11-01 MDT: 060 back: likely cause is black-translucent status bar + iOS 27 scroll-edge blur; recommend statusBarStyle default + theme-color (medium confidence). Note: docs/2026-11-01-ios-pwa-top-blur.md. 059 audit still running.
+- 2026-11-01 MDT: correction: the line above was appended twice by a lead shell mistake; it is one event.
+- 2026-11-01 MDT: 059 back: 6 proposed build items (shared folder primitives, Quick Actions, Library tabs+Workouts, Browse+program detail, Settings main incl. SSR 500 fix, Settings sub-pages) plus sw.js redirect bug. Publishing 059+060 to Handoff Hub for Dustin.
+- 2026-11-01 MDT: published Handoff Hub ripit-fitness/ui-audit-059-060. Waiting on Dustin to pick build items and the blur fix.
+- 2026-11-01 MDT: Dustin: "do all of them", as stacked PRs with `gh stack` (v0.1.0 installed). Items UI1–UI6 in spec.md; branch renamed feature/ui-audit → feature/ui-shared (UI1, bottom of the stack). Tests first only where there's behaviour (UI1: PaperTabs, matcher, status bar; UI5: SSR fix, Equipment row); style-only items skip the test-builder and rely on reviewer screenshots plus Dustin's phone preview. 059/060 accepted. 061 (UI1 tests) dispatched to test-builder.
+- 2026-11-01 MDT: 061 accepted (53 red, break matrix 83/83). 062 (UI1 build) dispatched to implementer.
+- 2026-11-01 MDT: 062 back (all green; 14 pre-existing eslint errors treated as baseline, CI runs no eslint; later items clean their files). 063 review dispatched.
+- 2026-11-01 MDT: 063 approve. Findings 1–3 (runtime theme-color, PaperTabs bad value fallback, 48px back link) sent as 064 before Dustin's preview.
+- 2026-11-01 MDT: 064 done (theme-color follows app theme, PaperTabs fallback, 48px back link). Starting phone preview for Dustin.
+- 2026-11-01 MDT: phone preview up at :10000 for UI1; waiting on Dustin.
+- 2026-11-01 MDT: Dustin on the installed preview: still sees the blur. Served head is correct (status-bar-style default, theme-color). Lead read Collie 1.23.4's bundle: same meta, but its content scrolls in an inner container (`flex min-h-0 flex-1 overflow-y-auto`) under a fixed header, so the document never scrolls. Ripit scrolls the document. INFERENCE: the iOS 27 edge blur follows the root scroller, so the status-bar change alone isn't enough.
+- 2026-11-01 MDT: Dustin agreed: keep UI1 as is and try an inner-scroll app shell as its own item (065, branch feature/ui-scroll-shell) before Quick Actions. UI1 committed and submitted as the bottom of the gh stack.

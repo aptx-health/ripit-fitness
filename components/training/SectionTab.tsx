@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { ReactNode } from 'react'
+import { PAPER_LINK_TAB, PAPER_TAB_CLIP } from '@/components/ui/PaperTabs'
 
 /**
  * Folder-style section header for the Training home: a tab with an icon, the
@@ -21,16 +22,6 @@ const CHIP: Record<SectionTabVariant, string> = {
   next: 'bg-primary-foreground text-primary',
   quiet: 'bg-border text-foreground',
 }
-
-/**
- * Keyboard focus for a paper tab. The clip-path cuts off any ring drawn outside
- * the tab (doom-focus-ring, the themes' *:focus-visible outline), so the ring is
- * drawn inside: a background line, then a foreground line, which shows on every
- * tab fill (gold, green, brown, tan). Important (!) so it beats the unlayered
- * theme rule `[data-theme="ripit"] *:focus-visible`.
- */
-export const PAPER_TAB_FOCUS =
-  'focus-visible:outline-none! focus-visible:shadow-[inset_0_0_0_2px_var(--background),inset_0_0_0_4px_var(--foreground)]!'
 
 /** The box under each tab: its border matches the tab. */
 export const SECTION_BOX: Record<SectionTabVariant, string> = {
@@ -63,7 +54,7 @@ export default function SectionTab({
     <div className="flex items-end">
       <div
         className={`relative z-10 inline-flex items-center gap-2 pl-3.5 pr-6 pt-2 pb-1.5 rounded-tl ${TAB[variant]}`}
-        style={{ clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 100%, 0 100%)' }}
+        style={PAPER_TAB_CLIP}
       >
         <h2 id={id} className="inline-flex items-center gap-2 font-bold uppercase tracking-wider">
           <span aria-hidden="true" className="inline-flex">
@@ -79,13 +70,12 @@ export default function SectionTab({
         )}
       </div>
       {action && (
-        // A second paper tab tucked beside the first: dimmed primary, foreground
-        // text so it reads in every theme.
+        // A second paper tab tucked beside the first.
         <Link
           href={action.href}
           aria-label={action.ariaLabel}
-          className={`-ml-2.5 inline-flex items-center pl-4 pr-5 pt-1.5 pb-1.5 rounded-tl bg-primary/25 text-foreground hover:bg-primary/35 ${PAPER_TAB_FOCUS} text-[13px] font-bold uppercase tracking-wider whitespace-nowrap`}
-          style={{ clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 100%, 0 100%)' }}
+          className={PAPER_LINK_TAB}
+          style={PAPER_TAB_CLIP}
         >
           {action.label}
         </Link>
