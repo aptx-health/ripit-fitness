@@ -112,8 +112,8 @@ function ProgramDetailShell({ children }: { children?: React.ReactNode }) {
   return (
     <div className="bg-background">
       <div className="max-w-2xl mx-auto sm:px-6 py-4">
-        {/* pt-4 on top of the shell's py-4 puts the link where the settings subpages' sits (32px). */}
-        <div className="px-4 sm:px-0 pt-4 mb-4">
+        {/* pt-2 on top of the shell's py-4 puts the 48px link where SubpageHeader's sits (24px). */}
+        <div className="px-4 sm:px-0 pt-2 mb-3">
           <ProgramBackLink />
         </div>
         <div className="px-4 sm:px-0">{children}</div>

@@ -44,3 +44,9 @@
 - 2026-11-01 MDT: 079 back (green). UI5 phone preview.
 - 2026-11-01 MDT: Dustin asked whether the MCP agent sees equipment: it doesn't (no tool reads equipmentAvailable). Added get_equipment to the top of ROADMAP Next, right after the UI audit. Removed the /settings SSR 500 roadmap item (fixed in UI5).
 - 2026-11-01 MDT: Dustin: UI5 looks good. Committed; PR opened and linked.
+- 2026-11-01 MDT: UI5 = PR #1020 (stack #1017: #1014 → #1016 → #1018 → #1019 → #1020). 080 (UI6 sub-pages) dispatched to implementer on feature/ui-settings-subpages.
+- 2026-11-01 MDT: Dustin asked for the workout logger screen and its modals next. 081 (read-only audit + 2–3 idea mockups each for the plan drawer, tab bar and bottom bar) dispatched to a new agent `logger-audit` (wF:p6) in worktree1, detached at origin/feature/ui-settings.
+- 2026-11-01 MDT: 080 back (green, 14 new tests). 082 review dispatched.
+- 2026-11-01 MDT: 082 approve. 083 (sticky unsaved bar, 48px leftovers, presets one row, 0/5 chip) dispatched.
+- 2026-11-01 MDT: 083 back (sticky unsaved bar, 48px leftovers, presets scroll in one row, 0/5). UI6 phone preview.
+- 2026-11-01 MDT: Dustin: UI6 "Everything looks great". Committed; PR opened and linked. UI1–UI6 all up as stack #1017.

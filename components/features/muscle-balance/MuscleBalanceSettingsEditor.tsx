@@ -1,10 +1,12 @@
 'use client'
 
-import { ArrowLeft, CheckCircle2, RotateCcw, Save, XCircle } from 'lucide-react'
-import Link from 'next/link'
+import { CalendarRange, CheckCircle2, RotateCcw, Target, XCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState } from 'react'
-import { Button } from '@/components/ui/Button'
+import SaveButton from '@/components/settings/SaveButton'
+import { OUTLINE_BUTTON, ROW_LABEL, SettingsBlock } from '@/components/settings/SettingsBlock'
+import UnsavedChangesBar from '@/components/settings/UnsavedChangesBar'
+import SubpageHeader from '@/components/ui/SubpageHeader'
 import { clientLogger } from '@/lib/client-logger'
 import { ALL_FAUS, FAU_DISPLAY_NAMES, type FAUKey } from '@/lib/fau-volume'
 import {
@@ -134,157 +136,126 @@ export default function MuscleBalanceSettingsEditor({ initialSnapshot }: Props) 
     }
   }
 
+  // Unsaved changes: anything differing from the last saved (or loaded) settings.
+  const savedSettings = snapshot.settings
+  const dirty =
+    ALL_FAUS.some((fau) => targets[fau] !== savedSettings.targets[fau]) ||
+    lookbackWorkoutsInput !== String(savedSettings.lookbackWorkouts) ||
+    includeSecondary !== savedSettings.includeSecondary ||
+    secondaryWeight !== savedSettings.secondaryWeight ||
+    excludeWarmups !== savedSettings.excludeWarmups
+
   return (
     <main className="bg-background px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto max-w-5xl">
-        <div className="mb-6 flex items-center justify-between gap-3">
-          <div>
-            <Link
-              href="/settings"
-              className="mb-3 inline-flex min-h-11 items-center gap-2 text-sm font-bold uppercase tracking-wider text-muted-foreground doom-focus-ring hover:text-foreground"
-            >
-              <ArrowLeft size={16} aria-hidden="true" />
-              Settings
-            </Link>
-            <h1 className="text-2xl font-bold uppercase tracking-wider text-foreground">
-              Muscle Balance
-            </h1>
-          </div>
-          <Button type="button" variant="primary" doom loading={isSaving} onClick={save}>
-            <Save size={16} aria-hidden="true" className="mr-1.5" />
-            Save
-          </Button>
-        </div>
+        <SubpageHeader
+          title="Muscle balance"
+          intro="Set the ideal training share for each muscle. Equal values mean balanced training."
+          action={<SaveButton dirty={dirty} saving={isSaving} onClick={save} />}
+        />
 
         {(error || saved) && (
-          <div
+          <p
             role={error ? 'alert' : 'status'}
-            className={`mb-5 flex items-start gap-3 border-2 p-3 text-sm font-semibold ${
-              error
-                ? 'border-error bg-error/10 text-error'
-                : 'border-success bg-success/10 text-foreground'
-            }`}
+            className={`mb-5 flex items-start gap-2 text-sm font-semibold ${error ? 'text-error' : 'text-foreground'}`}
           >
             {error ? (
               <XCircle size={18} aria-hidden="true" className="mt-0.5 flex-shrink-0" />
             ) : (
               <CheckCircle2 size={18} aria-hidden="true" className="mt-0.5 flex-shrink-0 text-success" />
             )}
-            <span>
-              {error || 'Muscle balance saved. Returning to settings.'}
-            </span>
-          </div>
+            <span>{error || 'Muscle balance saved. Returning to settings.'}</span>
+          </p>
         )}
 
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
-          <section className="border-2 border-border bg-card p-4 sm:p-5 doom-corners">
-            <div className="mb-5 flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <h2 className="text-base font-bold uppercase tracking-wider text-foreground">
-                  Target Ratios
-                </h2>
-                <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-                  Set the ideal training share for each muscle. Equal values mean balanced training.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={resetTargets}
-                className="inline-flex min-h-11 items-center gap-2 self-start border-2 border-border bg-muted px-3 py-2 text-sm font-bold uppercase tracking-wider text-foreground doom-focus-ring hover:border-primary"
-              >
-                <RotateCcw size={16} aria-hidden="true" />
-                Reset
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
+          <SettingsBlock title="Target ratios" icon={<Target size={16} />}>
+            {ALL_FAUS.map((fau) => {
+              const value = targets[fau]
+              const share = targetTotal > 0 ? (value / targetTotal) * 100 : 0
+              return (
+                <MuscleTargetRow
+                  key={fau}
+                  fau={fau}
+                  value={value}
+                  share={share}
+                  onChange={(next) => updateTarget(fau, next)}
+                />
+              )
+            })}
+            <div className="px-4 py-3">
+              <button type="button" onClick={resetTargets} className={OUTLINE_BUTTON}>
+                <RotateCcw size={14} aria-hidden="true" />
+                Reset to defaults
               </button>
             </div>
+          </SettingsBlock>
 
-            <div className="space-y-2 sm:space-y-5">
-              {ALL_FAUS.map((fau) => {
-                const value = targets[fau]
-                const share = targetTotal > 0 ? (value / targetTotal) * 100 : 0
-                return (
-                  <MuscleTargetRow
-                    key={fau}
-                    fau={fau}
-                    value={value}
-                    share={share}
-                    onChange={(next) => updateTarget(fau, next)}
-                  />
-                )
-              })}
-            </div>
-          </section>
-
-          <aside className="space-y-5 lg:sticky lg:top-6">
-            <section className="border-2 border-border bg-card p-4 doom-corners">
-              <h2 className="text-base font-bold uppercase tracking-wider text-foreground">
-                Window
-              </h2>
-              <label htmlFor="lookback-workouts" className="mt-4 block text-sm font-bold uppercase tracking-wider text-foreground">
-                Completed workouts
-              </label>
-              <input
-                id="lookback-workouts"
-                type="number"
-                min="1"
-                max="52"
-                value={lookbackWorkoutsInput}
-                onChange={(event) => {
-                  setSaved(false)
-                  setError(null)
-                  setLookbackWorkoutsInput(event.target.value)
-                }}
-                onBlur={() => {
-                  if (lookbackWorkouts === null) {
-                    setLookbackWorkoutsInput(String(snapshot.settings.lookbackWorkouts))
-                    return
-                  }
-                  setLookbackWorkoutsInput(String(lookbackWorkouts))
-                }}
-                className="mt-2 w-full border-2 border-input bg-input px-3 py-2 font-bold tabular-nums text-foreground focus:border-primary focus:outline-none"
-              />
-
-              <div className="mt-5 space-y-4">
-                <ToggleRow
-                  label="Include secondary muscles"
-                  checked={includeSecondary}
-                  onChange={setIncludeSecondary}
-                />
-                {includeSecondary && (
-                  <div>
-                    <label htmlFor="secondary-weight" className="block text-sm font-bold uppercase tracking-wider text-foreground">
-                      Secondary set credit: {secondaryWeight.toFixed(2)}
-                    </label>
-                    <input
-                      id="secondary-weight"
-                      type="range"
-                      min="0"
-                      max="1"
-                      step="0.05"
-                      value={secondaryWeight}
-                      onChange={(event) => {
-                        setSaved(false)
-                        setSecondaryWeight(Number(event.target.value))
-                      }}
-                      className="mt-2 h-11 w-full accent-primary"
-                    />
-                  </div>
-                )}
-                <ToggleRow
-                  label="Ignore warmup sets"
-                  checked={excludeWarmups}
-                  onChange={setExcludeWarmups}
+          <div className="space-y-6 lg:sticky lg:top-6">
+            <SettingsBlock title="Window" icon={<CalendarRange size={16} />}>
+              <div className="flex min-h-12 items-center justify-between gap-3 px-4 py-2">
+                <label htmlFor="lookback-workouts" className={ROW_LABEL}>
+                  Completed workouts
+                </label>
+                <input
+                  id="lookback-workouts"
+                  type="number"
+                  min="1"
+                  max="52"
+                  value={lookbackWorkoutsInput}
+                  onChange={(event) => {
+                    setSaved(false)
+                    setError(null)
+                    setLookbackWorkoutsInput(event.target.value)
+                  }}
+                  onBlur={() => {
+                    if (lookbackWorkouts === null) {
+                      setLookbackWorkoutsInput(String(snapshot.settings.lookbackWorkouts))
+                      return
+                    }
+                    setLookbackWorkoutsInput(String(lookbackWorkouts))
+                  }}
+                  className={NUMBER_INPUT}
                 />
               </div>
-            </section>
+              <ToggleRow label="Include secondary muscles" checked={includeSecondary} onChange={setIncludeSecondary} />
+              {includeSecondary && (
+                <div className="px-4 py-3">
+                  <label htmlFor="secondary-weight" className={ROW_LABEL}>
+                    Secondary set credit: {secondaryWeight.toFixed(2)}
+                  </label>
+                  <input
+                    id="secondary-weight"
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={secondaryWeight}
+                    onChange={(event) => {
+                      setSaved(false)
+                      setSecondaryWeight(Number(event.target.value))
+                    }}
+                    className="mt-2 h-12 w-full accent-primary"
+                  />
+                </div>
+              )}
+              <ToggleRow label="Ignore warmup sets" checked={excludeWarmups} onChange={setExcludeWarmups} />
+            </SettingsBlock>
 
             <MuscleBalancePanel snapshot={previewSnapshot} compact />
-          </aside>
+          </div>
         </div>
+
+        <UnsavedChangesBar dirty={dirty} saving={isSaving} onSave={save} />
       </div>
     </main>
   )
 }
 
+const NUMBER_INPUT =
+  'min-h-12 w-20 shrink-0 border-2 border-input bg-input px-2 text-right font-bold tabular-nums text-foreground focus:border-primary focus:outline-none'
+
+/** One muscle: name and share on the left, the ratio on the right (slider too on wider screens). */
 function MuscleTargetRow({
   fau,
   value,
@@ -296,72 +267,45 @@ function MuscleTargetRow({
   share: number
   onChange: (value: number) => void
 }) {
-  const [open, setOpen] = useState(false)
   const label = FAU_DISPLAY_NAMES[fau]
-  const formattedValue = formatRatio(value)
 
   return (
-    <div className="border border-border/70 bg-muted/20 sm:border-0 sm:bg-transparent">
-      <button
-        type="button"
-        onClick={() => setOpen((current) => !current)}
-        className="flex min-h-14 w-full items-center justify-between gap-3 px-3 py-2 text-left doom-focus-ring sm:hidden"
-        aria-expanded={open}
-        aria-controls={`target-controls-${fau}`}
-      >
-        <span>
-          <span className="block text-sm font-bold uppercase tracking-wider text-foreground">
-            {label}
-          </span>
-          <span className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            {share.toFixed(1)}% share
-          </span>
-        </span>
-        <span className="border-2 border-border bg-input px-3 py-1 text-base font-bold tabular-nums text-foreground">
-          {formattedValue}
-        </span>
-      </button>
-
-      <div
-        id={`target-controls-${fau}`}
-        className={`${open ? 'grid' : 'hidden'} gap-3 px-3 pb-3 sm:grid sm:grid-cols-[150px_minmax(0,1fr)_74px] sm:items-center sm:px-0 sm:pb-0`}
-      >
-        <label
-          htmlFor={`target-${fau}`}
-          className="hidden text-sm font-bold uppercase tracking-wider text-foreground sm:block"
-        >
+    <div className="flex min-h-12 items-center gap-3 px-4 py-2">
+      <div className="min-w-0 flex-1 sm:w-40 sm:flex-none">
+        <label htmlFor={`target-${fau}-number`} className={ROW_LABEL}>
           {label}
         </label>
-        <input
-          id={`target-${fau}`}
-          type="range"
-          min="0"
-          max="2"
-          step="0.05"
-          value={value}
-          onChange={(event) => onChange(Number(event.target.value))}
-          className="h-11 w-full accent-primary"
-        />
-        <div className="flex items-center justify-between gap-2 sm:block sm:text-right">
-          <input
-            type="number"
-            min="0"
-            max="2"
-            step="0.05"
-            value={formattedValue}
-            onChange={(event) => onChange(Number(event.target.value))}
-            aria-label={`${label} target ratio`}
-            className="w-24 border-2 border-input bg-input px-2 py-1 text-right font-bold tabular-nums text-foreground focus:border-primary focus:outline-none sm:w-20"
-          />
-          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            {share.toFixed(1)}%
-          </div>
-        </div>
+        <span className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          {share.toFixed(1)}% share
+        </span>
       </div>
+      <input
+        id={`target-${fau}`}
+        type="range"
+        min="0"
+        max="2"
+        step="0.05"
+        value={value}
+        onChange={(event) => onChange(Number(event.target.value))}
+        aria-label={`${label} target ratio slider`}
+        className="hidden h-12 min-w-0 flex-1 accent-primary sm:block"
+      />
+      <input
+        id={`target-${fau}-number`}
+        type="number"
+        min="0"
+        max="2"
+        step="0.05"
+        value={formatRatio(value)}
+        onChange={(event) => onChange(Number(event.target.value))}
+        aria-label={`${label} target ratio`}
+        className={NUMBER_INPUT}
+      />
     </div>
   )
 }
 
+/** A row that is the switch, so the label toggles it too. */
 function ToggleRow({
   label,
   checked,
@@ -372,28 +316,28 @@ function ToggleRow({
   onChange: (checked: boolean) => void
 }) {
   return (
-    <div className="flex items-center justify-between gap-4">
-      <span className="text-sm font-bold uppercase tracking-wider text-foreground">
-        {label}
-      </span>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={checked}
-        onClick={() => onChange(!checked)}
-        className={`relative inline-flex h-8 w-14 min-w-14 items-center rounded-full border-2 transition-colors doom-focus-ring ${
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={label}
+      onClick={() => onChange(!checked)}
+      className="group flex min-h-12 w-full items-center justify-between gap-4 px-4 py-2 text-left doom-focus-ring"
+    >
+      <span className={ROW_LABEL}>{label}</span>
+      <span
+        aria-hidden="true"
+        className={`relative inline-flex h-8 w-14 min-w-14 items-center rounded-full border-2 transition-colors ${
           checked ? 'border-primary bg-primary' : 'border-border bg-muted'
         }`}
       >
         <span
           className={`inline-block h-5 w-5 rounded-full transition-transform ${
-            checked
-              ? 'translate-x-[26px] bg-primary-foreground'
-              : 'translate-x-[3px] bg-muted-foreground'
+            checked ? 'translate-x-[26px] bg-primary-foreground' : 'translate-x-[3px] bg-muted-foreground'
           }`}
         />
-      </button>
-    </div>
+      </span>
+    </button>
   )
 }
 

@@ -106,3 +106,17 @@ Branch `feature/ui-settings`, stacked on UI4. Audit section "Settings → Main p
 8. Carry-over from 075: drop `doom-corners`/`doom-noise` from the shared `components/ui/radix/popover` if no other caller relies on them (check them all).
 
 **Done when:** the 076 tests pass; suite, tsc, eslint/biome on touched files pass; prod build serves `/settings` 200 with no server error in the log; touch-emulated 390px light/dark screenshots of the whole page, as admin and as a plain user.
+
+## UI6: Settings sub-pages
+
+Branch `feature/ui-settings-subpages`, stacked on UI5. Audit section "Settings → Sub-pages" and S4.
+
+1. **`SubpageHeader`** (from UI1, 48px back link) on Muscle balance, Target movements, Equipment and Agent access: "← Settings", `text-2xl` uppercase title, one-line intro, Save in the action slot as an outline button that turns primary when there are unsaved changes (or a sticky footer Save if the header gets crowded; say which).
+2. **Muscle balance:** one folder box ("Target ratios" tab) of plain rows with the number input on the right; no `doom-corners`, no nested boxes.
+3. **Target movements:** movements as rows in one quiet box; open a row to show its exercises; no per-movement cards or brackets. Fix the existing eslint errors in `TargetMovementsEditor.tsx` (around 163, 165).
+4. **Equipment:** one quiet box per category (quiet tab, e.g. "Barbells & bars") with checkbox rows instead of full-width green tiles; Presets as chips in one row.
+5. **Agent access:** folder boxes "MCP address" and "Your tokens" (count chip on the tab), with the create form inside the tokens box.
+6. Carry-over from 075: `ProgramBackLink` "← Library" gets a 48px target.
+7. Every save/load/validation behaves exactly as before; existing tests keep passing.
+
+**Done when:** suite, tsc, eslint/biome on touched files pass; touch-emulated 390px light/dark screenshots of all four sub-pages (and Muscle balance / Target movements with unsaved changes); Training, Library and Settings main unchanged.
