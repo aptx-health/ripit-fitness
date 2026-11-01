@@ -1,29 +1,11 @@
 import { redirect } from 'next/navigation'
-import SavedWorkoutsList from '@/components/features/saved-workouts/SavedWorkoutsList'
-import { getCurrentUser } from '@/lib/auth/server'
+import { legacySavedWorkoutsRedirectTarget } from '@/lib/library/links'
 
-export const metadata = {
-  title: 'Saved Workouts',
+type Props = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
 }
 
-export default async function SavedWorkoutsPage() {
-  const { user } = await getCurrentUser()
-  if (!user) {
-    redirect('/login')
-  }
-
-  return (
-    <main className="mx-auto max-w-2xl px-4 pb-24 pt-6">
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold uppercase tracking-wider text-foreground">
-          Saved Workouts
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Workouts you have saved to repeat.
-        </p>
-      </header>
-
-      <SavedWorkoutsList />
-    </main>
-  )
+/** Old saved-workouts page: now Library → Workouts. */
+export default async function SavedWorkoutsPage({ searchParams }: Props) {
+  redirect(legacySavedWorkoutsRedirectTarget(await searchParams))
 }

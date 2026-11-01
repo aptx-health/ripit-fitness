@@ -2,7 +2,7 @@
 
 import { Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useToast } from '@/components/ToastProvider'
 import { startFreestyleWorkout } from '@/lib/api/adhoc-workout'
 import { clientLogger } from '@/lib/client-logger'
@@ -19,7 +19,7 @@ export default function SavedWorkoutsList() {
   const [loadError, setLoadError] = useState<string | null>(null)
   const [renameTarget, setRenameTarget] = useState<SavedWorkoutListItem | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<SavedWorkoutListItem | null>(null)
-  const [detailTarget, setDetailTarget] = useState<SavedWorkoutListItem | null>(null)
+  const [detailId, setDetailId] = useState<string | null>(null)
   const [startingFreestyle, setStartingFreestyle] = useState(false)
 
   const fetchList = useCallback(async () => {
@@ -55,6 +55,40 @@ export default function SavedWorkoutsList() {
     setDeleteTarget(null)
     toast.success('Deleted')
   }, [toast])
+
+  // Optimistic: flip the row now, take pinnedAt from the response, and put
+  // the old value back if the request fails.
+  // Rows with a pin PATCH in flight; taps on them are ignored until it settles.
+  const pinPending = useRef(new Set<string>())
+
+  const handleTogglePin = useCallback(
+    async (item: SavedWorkoutListItem) => {
+      if (pinPending.current.has(item.id)) return
+      pinPending.current.add(item.id)
+      const setPinnedAt = (pinnedAt: string | null) =>
+        setItems((prev) => (prev ? prev.map((x) => (x.id === item.id ? { ...x, pinnedAt } : x)) : prev))
+      const before = item.pinnedAt ?? null
+      const pinned = !before
+      setPinnedAt(pinned ? new Date().toISOString() : null)
+      try {
+        const res = await fetch(`/api/workouts/saved/${item.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pinned }),
+        })
+        if (!res.ok) throw new Error(`Request failed (${res.status})`)
+        const data = (await res.json()) as { saved: { pinnedAt: string | null } }
+        setPinnedAt(data.saved.pinnedAt)
+      } catch (err) {
+        clientLogger.error('Failed to update pin', err)
+        setPinnedAt(before)
+        toast.error(pinned ? 'Could not pin workout' : 'Could not unpin workout', 'Please try again.')
+      } finally {
+        pinPending.current.delete(item.id)
+      }
+    },
+    [toast]
+  )
 
   const handleStartFreestyle = useCallback(async () => {
     if (startingFreestyle) return
@@ -107,6 +141,9 @@ export default function SavedWorkoutsList() {
     )
   }
 
+  // The live row, so a pin toggled in the dialog shows in both places.
+  const detailItem = items.find((item) => item.id === detailId) ?? null
+
   return (
     <>
       <ul className="flex flex-col gap-2">
@@ -114,7 +151,8 @@ export default function SavedWorkoutsList() {
           <li key={item.id}>
             <SavedWorkoutRow
               item={item}
-              onOpen={() => setDetailTarget(item)}
+              onOpen={() => setDetailId(item.id)}
+              onTogglePin={() => handleTogglePin(item)}
               onRename={() => setRenameTarget(item)}
               onDelete={() => setDeleteTarget(item)}
             />
@@ -142,11 +180,12 @@ export default function SavedWorkoutsList() {
         />
       )}
 
-      {detailTarget && (
+      {detailItem && (
         <SavedWorkoutDetailDialog
-          item={detailTarget}
+          item={detailItem}
+          onTogglePin={() => handleTogglePin(detailItem)}
           onOpenChange={(open) => {
-            if (!open) setDetailTarget(null)
+            if (!open) setDetailId(null)
           }}
         />
       )}

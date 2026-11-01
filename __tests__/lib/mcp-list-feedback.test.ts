@@ -10,7 +10,7 @@ function stubPrisma() {
   return { prisma: { feedback: { findMany } } as unknown as PrismaClient, findMany }
 }
 
-const ctx = { userId: 'user-1', tokenId: 'token-1', notify: vi.fn(async () => {}) }
+const ctx = { userId: 'user-1', tokenId: 'token-1', role: 'user', notify: vi.fn(async () => {}) }
 
 function payload(result: { content: Array<{ text: string }> }) {
   return JSON.parse(result.content[0].text)

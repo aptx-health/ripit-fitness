@@ -33,6 +33,7 @@ export async function GET() {
     return NextResponse.json({
       next: {
         workoutId: next.id,
+        programId: data.program.id,
         workoutName: next.name,
         dayNumber: next.dayNumber,
         weekNumber: data.week.weekNumber,

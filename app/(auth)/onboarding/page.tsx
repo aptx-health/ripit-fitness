@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
+import { libraryHref } from '@/lib/library/links'
 import { clearAttribution, getAttribution } from '@/lib/signup-attribution'
 
 type Step = 'loading' | 'experience' | 'equipment' | 'info' | 'completing'
@@ -246,14 +247,14 @@ export default function OnboardingPage() {
                 Failed to load the program
               </p>
               <p className="mb-6 text-[15px] leading-relaxed text-muted-foreground">
-                Go to the Programs tab and browse available programs.
+                Go to the Library and browse available programs.
               </p>
               <button
                 type="button"
-                onClick={() => { window.location.href = '/programs' }}
+                onClick={() => { window.location.href = libraryHref({ type: 'programs', tab: 'browse' }) }}
                 className="w-full min-h-12 bg-success text-sm font-medium uppercase tracking-widest text-success-foreground doom-focus-ring"
               >
-                Go to Programs
+                Go to Library
               </button>
             </FadeIn>
           ) : (

@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import ProgramBuilder from '@/components/ProgramBuilder'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { libraryHref } from '@/lib/library/links'
 
 type Props = {
   params: Promise<{ id: string }>
@@ -41,7 +42,7 @@ export default async function EditProgramPage({ params, searchParams }: Props) {
   })
 
   if (!program) {
-    redirect('/programs')
+    redirect(libraryHref({ type: 'programs' }))
   }
 
   // Fetch only the current week's full data
@@ -84,10 +85,10 @@ export default async function EditProgramPage({ params, searchParams }: Props) {
         <div className="mb-6">
           <div className="flex items-center gap-4 mb-4">
             <Link
-              href="/programs"
+              href={libraryHref({ type: 'programs' })}
               className="text-primary hover:text-primary-hover text-sm flex items-center gap-1 doom-link"
             >
-              ← Back to Programs
+              ← Back to Library
             </Link>
             <span className="text-muted-foreground">|</span>
             <h1 className="text-2xl font-semibold text-foreground doom-heading">EDIT PROGRAM</h1>

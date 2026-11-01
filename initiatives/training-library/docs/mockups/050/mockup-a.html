@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=390">
+<title>Training: Folder tabs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --background:#FBF8F3; --foreground:#3A2817; --card:#FFFCF7; --muted:#F5EFE6;
+  --muted-foreground:#78573B; --border:#D4C4B0;
+  --primary:#10B981; --primary-hover:#059669; --primary-active:#047857; --primary-foreground:#fff;
+  --secondary:#92400E; --secondary-foreground:#FEF3C7;
+  --accent:#D4930A; --accent-muted:#FBEFD5; --warning:#F59E0B;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--background)}
+body{width:390px;color:var(--foreground);font-family:'Rajdhani',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:.02em;font-weight:500}
+a{color:inherit;text-decoration:none}
+.page{padding:16px 16px 24px}
+.doom-title{font-size:36px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;text-shadow:2px 2px 0 rgba(0,0,0,.25)}
+.doom-heading{font-weight:600;text-transform:uppercase;letter-spacing:.08em;text-shadow:1px 1px 2px rgba(0,0,0,.25)}
+.doom-label{font-weight:600;text-transform:uppercase;letter-spacing:.05em;font-size:12px}
+.muted{color:var(--muted-foreground)}
+.card{background:var(--card);border:1px solid var(--border);position:relative}
+.corners{position:relative}
+.corners::before,.corners::after{content:'';position:absolute;width:16px;height:16px;z-index:3}
+.corners::before{top:-1px;left:-1px;border-top:3px solid var(--primary);border-left:3px solid var(--primary)}
+.corners::after{bottom:-1px;right:-1px;border-bottom:3px solid var(--primary);border-right:3px solid var(--primary)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:14px;padding:12px 16px;border:0;cursor:pointer}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 4px 0 var(--primary-active),0 6px 8px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.2)}
+.btn-gold{background:var(--accent);color:var(--foreground);box-shadow:0 4px 0 #A87207,0 6px 8px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.3)}
+.btn-outline{background:transparent;color:var(--foreground);border:1px solid var(--border);font-weight:600;padding:9px 12px}
+.btn-block{display:flex;width:100%}
+.ico{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.chev{width:16px;height:16px;color:var(--muted-foreground)}
+.row{display:flex;align-items:center;gap:12px}
+.grow{flex:1;min-width:0}
+.trunc{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar{height:8px;background:var(--muted)}
+.bar>i{display:block;height:100%;background:var(--primary)}
+/* bottom nav: static at the end so a full-page shot shows it once, as the app's fixed nav would */
+.nav{margin-top:8px;border-top:2px solid var(--border);background:rgba(245,239,230,.95);display:flex;align-items:stretch;height:58px}
+.nav a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11px;color:var(--muted-foreground)}
+.nav a.on{color:var(--accent);box-shadow:inset 0 -3px 0 var(--accent)}
+.nav .ico{width:20px;height:20px}
+.nav .wo{flex:1;display:flex;align-items:center;justify-content:center}
+.nav .chip{width:64px;height:52px;transform:translateY(-6px);border-radius:6px;background:var(--accent);color:var(--foreground);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 5px 0 #A87207,0 7px 10px rgba(0,0,0,.25),inset 0 2px 0 rgba(255,255,255,.45)}
+.nav .chip span{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+
+.stack{display:flex;flex-direction:column;gap:22px;margin-top:14px}
+/* A folder: a tab sticking up from the top-left of its body */
+.folder .tabs{display:flex;align-items:flex-end;justify-content:space-between}
+.tab{display:inline-flex;align-items:center;gap:8px;padding:8px 22px 7px 14px;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  clip-path:polygon(0 0,calc(100% - 14px) 0,100% 100%,0 100%);border-radius:4px 0 0 0}
+.tab .n{font-size:12px;padding:1px 6px;border-radius:2px}
+.tab-coach{background:var(--accent);color:var(--foreground)}
+.tab-coach .n{background:var(--foreground);color:var(--accent)}
+.tab-primary{background:var(--primary);color:#fff}
+.tab-quiet{background:var(--muted);color:var(--muted-foreground);border:1px solid var(--border);border-bottom:0;font-size:14px}
+.tab-quiet .n{background:var(--border);color:var(--foreground)}
+.tabs .more{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--primary-hover);padding-bottom:6px}
+.body{border:1px solid var(--border);background:var(--card)}
+.body-coach{border:2px solid var(--accent);background:#FFF9EC}
+.body-primary{border:2px solid var(--primary)}
+.body-quiet{background:var(--card)}
+.pad{padding:14px 16px}
+/* coach suggestion */
+.from{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--secondary);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.from .ico{width:18px;height:18px}
+.stamp{margin-left:auto;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--secondary);border:2px solid var(--secondary);padding:2px 6px;transform:rotate(-3deg)}
+.kind{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--foreground);color:var(--card);padding:2px 6px}
+.s-title{font-size:20px;font-weight:700;line-height:1.15;margin:6px 0 2px}
+.why{font-size:14px;color:var(--muted-foreground);border-left:3px solid var(--accent);padding-left:10px;margin:10px 0 14px}
+.others{border-top:1px dashed var(--accent)}
+.others a{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px dashed #E8D3A6;font-size:15px}
+.others a:last-child{border-bottom:0}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex:none}
+.kind-sm{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--secondary);width:62px;flex:none}
+/* up next */
+.prog{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--primary-hover)}
+.big{font-size:26px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;line-height:1.1;margin:2px 0}
+/* quiet rows */
+.list a,.list div.r{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border)}
+.list > :last-child{border-bottom:0}
+.r-title{font-size:16px;font-weight:700;letter-spacing:.04em}
+.r-meta{font-size:13px;color:var(--muted-foreground)}
+</style></head>
+<body>
+<div class="page">
+  <h1 class="doom-title">Training</h1>
+  <div class="stack">
+
+    <section class="folder">
+      <div class="tabs"><span class="tab tab-coach"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="14" r="5"/><path d="M12 10.5 21 6v5l-8 2"/><path d="M8 9V5"/></svg>From your coach <span class="n">3</span></span><a class="more" href="#">See all</a></div>
+      <div class="body body-coach">
+        <div class="pad">
+          <div class="from"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="14" r="5"/><path d="M12 10.5 21 6v5l-8 2"/><path d="M8 9V5"/></svg>Your coach suggests<span class="stamp">Waiting on you</span></div>
+          <div style="margin-top:12px"><span class="kind">Workout</span></div>
+          <div class="s-title">Short Full-Body Workout</div>
+          <div class="r-meta">3 exercises · ~30 min · suggested today</div>
+          <p class="why">“A quick session that still hits press, pull and hinge when you are short on time.”</p>
+          <span class="btn btn-gold btn-block">Review suggestion</span>
+        </div>
+        <div class="others"><a href="#"><span class="dot"></span><span class="kind-sm">Program</span><span class="grow trunc">3-Day Strength</span><svg class="chev ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a><a href="#"><span class="dot"></span><span class="kind-sm">Targets</span><span class="grow trunc">Calves 1 → 0.75, Glutes 1 → 1.25</span><svg class="chev ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a></div>
+      </div>
+    </section>
+
+    <section class="folder">
+      <div class="tabs"><span class="tab tab-primary"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><polygon points="6 3 20 12 6 21 6 3"/></svg>Up next</span></div>
+      <div class="body body-primary pad">
+        <div class="prog">Agent Strength Block</div>
+        <div class="r-meta">Week 1 · Day 1</div>
+        <div class="big">Upper</div>
+        <div class="r-meta" style="margin-bottom:14px">2 exercises</div>
+        <span class="btn btn-primary btn-block"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><polygon points="6 3 20 12 6 21 6 3"/></svg>Start workout</span>
+      </div>
+    </section>
+
+    <section class="folder">
+      <div class="tabs"><span class="tab tab-quiet"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>Pinned <span class="n">2</span></span><a class="more" href="#">See all</a></div>
+      <div class="body body-quiet list"><div class="r"><div class="grow"><div class="r-title">Push A</div><div class="r-meta">3 exercises</div></div><span class="btn btn-outline"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><polygon points="6 3 20 12 6 21 6 3"/></svg>Start</span></div><div class="r"><div class="grow"><div class="r-title">Mobility</div><div class="r-meta">4 exercises</div></div><span class="btn btn-outline"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><polygon points="6 3 20 12 6 21 6 3"/></svg>Start</span></div></div>
+    </section>
+
+    <section class="folder">
+      <div class="tabs"><span class="tab tab-quiet"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Recent <span class="n">3</span></span></div>
+      <div class="body body-quiet list"><div class="r"><div class="grow"><div class="r-title">Full Body</div><div class="r-meta">Oct 24 · 47 min</div></div><span class="btn btn-outline"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>Repeat</span></div><div class="r"><div class="grow"><div class="r-title">Lower Body</div><div class="r-meta">Oct 22 · 52 min</div></div><span class="btn btn-outline"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>Repeat</span></div><div class="r"><div class="grow"><div class="r-title">Upper Body</div><div class="r-meta">Oct 20 · 44 min</div></div><span class="btn btn-outline"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>Repeat</span></div></div>
+    </section>
+
+    <section class="folder">
+      <div class="tabs"><span class="tab tab-quiet"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>Current program</span></div>
+      <div class="body body-quiet pad">
+        <div class="row"><div class="grow"><div class="r-title">Agent Strength Block</div><div class="r-meta">Week 1 of 2 · 1 of 4 workouts done</div></div><a class="more" href="#" style="color:var(--primary-hover);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase">View</a></div>
+        <div class="bar" style="margin-top:10px"><i style="width:25%"></i></div>
+      </div>
+    </section>
+
+  </div>
+</div>
+<nav class="nav" aria-label="Main navigation">
+  <a class="on" href="#"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Training</a>
+  <a href="#"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect width="7" height="7" x="3" y="3"/><rect width="7" height="7" x="14" y="3"/><rect width="7" height="7" x="14" y="14"/><rect width="7" height="7" x="3" y="14"/></svg>Library</a>
+  <div class="wo"><span class="chip"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.4 14.4 9.6 9.6"/><path d="M18.66 21.51a2 2 0 1 1-2.83-2.82l-1.77 1.76a2 2 0 1 1-2.83-2.82l6.37-6.37a2 2 0 1 1 2.82 2.83l-1.76 1.77a2 2 0 1 1 2.82 2.83z"/><path d="m21.5 21.5-1.4-1.4"/><path d="M3.9 3.9 2.5 2.5"/><path d="M6.4 12.77a2 2 0 1 1-2.83-2.83l1.77-1.76a2 2 0 1 1-2.83-2.83l2.83-2.83a2 2 0 1 1 2.83 2.83l1.76-1.77a2 2 0 1 1 2.83 2.83z"/></svg><span>Workout</span></span></div>
+  <a href="#"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>Learn</a>
+  <a href="#"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</a>
+</nav>
+</body></html>

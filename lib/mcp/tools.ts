@@ -1,5 +1,6 @@
 import { Prisma, type PrismaClient } from '@prisma/client'
 import { z } from 'zod'
+import { isAdminRole } from '@/lib/auth/roles'
 import {
   buildAnchors,
   calcSettings,
@@ -36,8 +37,22 @@ import type { SavedWorkoutData } from '@/types/saved-workout'
 export interface ToolContext {
   userId: string
   tokenId: string
+  /** The token owner's role. Only admins see the exercise-library tools and trigger notifications. */
+  role: string
   notify: Notify
 }
+
+/** Exercise-library proposals are reviewed in admin only, so only admins may make them. */
+const ADMIN_ONLY_TOOLS: ReadonlySet<string> = new Set(['propose_exercise_create', 'propose_exercise_update'])
+
+const FORBIDDEN = { error: 'Exercise library changes are admin-only.', code: 'forbidden' } as const
+
+/**
+ * The notify a tool may use: the real one for an admin owner, a no-op for
+ * anyone else, so other users' content never reaches Dustin's channels.
+ */
+const isAdminCtx = (ctx: ToolContext) => isAdminRole(ctx.role)
+const notifyFor = (ctx: ToolContext): Notify => (isAdminCtx(ctx) ? ctx.notify : async () => {})
 
 export interface CallToolResult {
   [key: string]: unknown
@@ -552,7 +567,7 @@ const handlers: { [N in ToolName]: Handler<N> } = {
         rationale,
         feedbackId,
       },
-      ctx.notify
+      notifyFor(ctx)
     )
     if (!result.ok) throw new ToolError(result.error, { field: result.field, existingId: result.existingId })
     const { id, status, summary } = result.proposal
@@ -571,7 +586,7 @@ const handlers: { [N in ToolName]: Handler<N> } = {
         rationale,
         feedbackId,
       },
-      ctx.notify
+      notifyFor(ctx)
     )
     if (!result.ok) throw new ToolError(result.error, { field: result.field, existingId: result.existingId })
     const { id: proposalId, status, summary } = result.proposal
@@ -582,7 +597,7 @@ const handlers: { [N in ToolName]: Handler<N> } = {
     const result = await createProposal(
       prisma,
       { userId: ctx.userId, agentTokenId: ctx.tokenId, kind: 'program.create', program, rationale, feedbackId },
-      ctx.notify
+      notifyFor(ctx)
     )
     if (!result.ok) throw new ToolError(result.error, { field: result.field, existingId: result.existingId })
     const { id, status, summary } = result.proposal
@@ -593,7 +608,7 @@ const handlers: { [N in ToolName]: Handler<N> } = {
     const result = await createProposal(
       prisma,
       { userId: ctx.userId, agentTokenId: ctx.tokenId, kind: 'anchors.update', changes, rationale, feedbackId },
-      ctx.notify
+      notifyFor(ctx)
     )
     if (!result.ok) throw new ToolError(result.error, { field: result.field })
     const { id, status, summary } = result.proposal
@@ -604,7 +619,7 @@ const handlers: { [N in ToolName]: Handler<N> } = {
     const result = await createProposal(
       prisma,
       { userId: ctx.userId, agentTokenId: ctx.tokenId, kind: 'balance_targets.update', changes, rationale, feedbackId },
-      ctx.notify
+      notifyFor(ctx)
     )
     if (!result.ok) throw new ToolError(result.error, { field: result.field })
     const { id, status, summary } = result.proposal
@@ -689,7 +704,7 @@ const handlers: { [N in ToolName]: Handler<N> } = {
         rationale,
         feedbackId,
       },
-      ctx.notify
+      notifyFor(ctx)
     )
     if (!result.ok) throw new ToolError(result.error, { field: result.field })
     const { id, status, summary } = result.proposal
@@ -705,7 +720,7 @@ const handlers: { [N in ToolName]: Handler<N> } = {
     const result = await createProposal(
       prisma,
       { userId: ctx.userId, agentTokenId: ctx.tokenId, kind: 'saved_workout.update', savedWorkoutId, changes, rationale, feedbackId },
-      ctx.notify
+      notifyFor(ctx)
     )
     if (!result.ok) throw new ToolError(result.error, { field: result.field })
     const { id, status, summary } = result.proposal
@@ -770,8 +785,10 @@ function text(data: unknown, isError = false): CallToolResult {
   return { content: [{ type: 'text', text: JSON.stringify(data) }], ...(isError && { isError: true }) }
 }
 
-export function listTools(): ToolDescriptor[] {
-  return (Object.keys(schemas) as ToolName[]).map((name) => ({
+/** The tools the token owner may use: non-admins don't see the exercise-library ones. */
+export function listTools(role: string): ToolDescriptor[] {
+  const names = (Object.keys(schemas) as ToolName[]).filter((name) => isAdminRole(role) || !ADMIN_ONLY_TOOLS.has(name))
+  return names.map((name) => ({
     name,
     description: descriptions[name],
     inputSchema: z.toJSONSchema(schemas[name]) as ToolDescriptor['inputSchema'],
@@ -786,6 +803,8 @@ export async function callTool(
   args: unknown
 ): Promise<CallToolResult> {
   if (!isToolName(name)) return text({ error: `unknown tool: ${name}` }, true)
+  // Before argument checks, so a non-admin learns nothing about the tool.
+  if (ADMIN_ONLY_TOOLS.has(name) && !isAdminCtx(ctx)) return text(FORBIDDEN, true)
 
   const parsed = schemas[name].safeParse(args ?? {})
   if (!parsed.success) {

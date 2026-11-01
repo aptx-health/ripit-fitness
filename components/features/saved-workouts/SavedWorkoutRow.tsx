@@ -5,6 +5,7 @@ import { MoreVertical } from 'lucide-react'
 import { useState } from 'react'
 import { pluralize } from '@/lib/format/pluralize'
 import { formatSavedWorkoutDate } from '@/lib/format/savedWorkoutDate'
+import PinToggle from './PinToggle'
 
 export type SavedWorkoutListItem = {
   id: string
@@ -13,16 +14,18 @@ export type SavedWorkoutListItem = {
   exerciseCount: number
   lastUsedAt: string | null
   createdAt: string
+  pinnedAt?: string | null
 }
 
 type Props = {
   item: SavedWorkoutListItem
   onOpen: () => void
+  onTogglePin: () => void
   onRename: () => void
   onDelete: () => void
 }
 
-export default function SavedWorkoutRow({ item, onOpen, onRename, onDelete }: Props) {
+export default function SavedWorkoutRow({ item, onOpen, onTogglePin, onRename, onDelete }: Props) {
   const [menuOpen, setMenuOpen] = useState(false)
 
   const dateLabel = item.lastUsedAt
@@ -38,14 +41,24 @@ export default function SavedWorkoutRow({ item, onOpen, onRename, onDelete }: Pr
         aria-label={`View ${item.name}`}
       >
         <div className="min-w-0 flex-1">
-          <div className="truncate text-base font-semibold text-foreground">
-            {item.name}
+          <div className="flex items-center gap-2">
+            <span className="truncate text-base font-semibold text-foreground">{item.name}</span>
+            {item.pinnedAt && (
+              <span className="shrink-0 text-xs font-bold uppercase tracking-wider text-primary">Pinned</span>
+            )}
           </div>
           <div className="mt-0.5 truncate text-xs text-muted-foreground sm:text-sm">
             {pluralize(item.exerciseCount, 'exercise')} &middot; {dateLabel}
           </div>
         </div>
       </button>
+
+      <PinToggle
+        name={item.name}
+        pinned={Boolean(item.pinnedAt)}
+        onToggle={onTogglePin}
+        className="border-l-2 border-border"
+      />
 
       <Popover.Root open={menuOpen} onOpenChange={setMenuOpen}>
         <Popover.Trigger asChild>

@@ -215,9 +215,11 @@ model SavedWorkout {
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
   lastUsedAt         DateTime?
+  pinnedAt           DateTime?
 
   @@index([userId, lastUsedAt(sort: Desc)])
   @@index([userId, createdAt(sort: Desc)])
+  @@index([userId, pinnedAt(sort: Desc)])
 }
 
 model LoggedSet {
