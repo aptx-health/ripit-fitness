@@ -4,16 +4,17 @@ import * as DialogPrimitive from '@radix-ui/react-dialog'
 import {
   Bookmark,
   Dumbbell,
-  LayoutGrid,
   Loader2,
   type LucideIcon,
   Play,
   Trash2,
   X,
+  Zap,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useToast } from '@/components/ToastProvider'
+import { PAPER_TAB_CLIP } from '@/components/ui/PaperTabs'
 import { useUserSettings } from '@/hooks/useUserSettings'
 import {
   discardAdHocWorkout,
@@ -286,38 +287,45 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
           aria-describedby={undefined}
           className={`fixed left-1/2 -translate-x-1/2 z-[51] w-[min(96vw,28rem)] ${MOBILE_BOTTOM} ${DESKTOP_CENTER} data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom md:data-[state=closed]:slide-out-to-bottom-0 md:data-[state=open]:slide-in-from-bottom-0 md:data-[state=open]:fade-in-0 md:data-[state=closed]:fade-out-0 data-[state=open]:duration-200 data-[state=closed]:duration-150`}
         >
-          <div
-            className="bg-card border border-border doom-corners"
-            style={{ boxShadow: '0 -8px 24px rgba(0,0,0,0.35)' }}
-          >
-            {/* Header — same cream surface as rows; close as a chunky bordered chip */}
-            <div className="flex items-center justify-between px-4 pt-3 pb-2.5 border-b border-border">
-              <DialogPrimitive.Title className="doom-label text-foreground/80">
+          {/* A folder like Training's: a green paper tab on a bordered box. */}
+          <div className="flex items-end">
+            <div
+              className="relative z-10 inline-flex items-center gap-2 pl-3.5 pr-6 pt-2 pb-1.5 rounded-tl bg-primary text-primary-foreground"
+              style={PAPER_TAB_CLIP}
+            >
+              <DialogPrimitive.Title className="inline-flex items-center gap-2 font-bold uppercase tracking-wider">
+                <Zap size={16} aria-hidden="true" />
                 Quick actions
               </DialogPrimitive.Title>
-              <DialogPrimitive.Close
-                aria-label="Close"
-                className="inline-flex items-center justify-center w-8 h-8 border border-border bg-muted/30 hover:bg-muted/60 active:bg-muted text-foreground/70 hover:text-foreground transition-colors doom-focus-ring"
-              >
-                <X size={16} strokeWidth={2.5} />
-              </DialogPrimitive.Close>
             </div>
+            {/* Close sits on the tab row, at the right edge of the box below. */}
+            <DialogPrimitive.Close
+              aria-label="Close"
+              className="ml-auto inline-flex shrink-0 items-center justify-center w-12 h-12 bg-card border-2 border-b-0 border-primary text-foreground hover:bg-muted transition-colors doom-focus-ring"
+            >
+              <X size={20} strokeWidth={2.5} aria-hidden="true" />
+            </DialogPrimitive.Close>
+          </div>
+          <div
+            className="folder-box bg-card border-2 border-primary"
+            style={{ boxShadow: '0 -8px 24px rgba(0,0,0,0.35)' }}
+          >
 
             {activeDraft ? (
               <>
                 {/* Draft row: tap the body to resume, tap the trailing trash
                     chip to arm + confirm discard inline. */}
-                <div className="flex items-stretch bg-accent/10">
+                <div className="flex items-stretch">
                   <button
                     type="button"
                     onClick={handleResumeDraft}
-                    className="group flex-1 flex items-center gap-3 px-4 py-3.5 text-left hover:bg-accent/15 active:bg-accent/25 transition-colors doom-focus-ring min-w-0"
+                    className="group flex-1 flex items-center gap-3 px-4 py-3.5 text-left hover:bg-muted/50 active:bg-muted/70 transition-colors doom-focus-ring min-w-0"
                   >
-                    <span className="inline-flex items-center justify-center w-10 h-10 border border-accent bg-accent text-accent-foreground shrink-0">
-                      <Play size={20} strokeWidth={2.25} />
+                    <span className="inline-flex items-center justify-center w-10 h-10 text-foreground shrink-0">
+                      <Play size={20} strokeWidth={2.25} aria-hidden="true" />
                     </span>
                     <div className="flex-1 min-w-0">
-                      <div className="font-bold text-base text-foreground doom-heading truncate">
+                      <div className={ROW_TITLE}>
                         {activeDraft.isAdHoc
                           ? 'Freestyle workout'
                           : activeDraft.workoutName}
@@ -334,7 +342,7 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
                     aria-label={
                       confirmDiscard ? 'Confirm discard draft' : 'Discard draft'
                     }
-                    className={`shrink-0 inline-flex items-center justify-center gap-1.5 px-3 my-2 mr-3 border transition-colors doom-focus-ring disabled:opacity-50 ${
+                    className={`shrink-0 inline-flex min-w-12 items-center justify-center gap-1.5 px-3 my-2 mr-3 border transition-colors doom-focus-ring disabled:opacity-50 ${
                       confirmDiscard
                         ? 'bg-error text-error-foreground border-error'
                         : 'bg-card hover:bg-error/15 hover:border-error/60 hover:text-error text-foreground/70 border-border'
@@ -355,18 +363,19 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
 
                 {/* Single explanatory line replacing three rows of identical
                     "finish current workout first" denial. */}
-                <div className="px-4 py-3 text-center text-xs text-muted-foreground italic border-t border-border">
+                <div className="px-4 py-3 text-sm text-muted-foreground border-t border-border">
                   Continue or discard your draft to unlock other actions
                 </div>
               </>
             ) : showFreestyleHeadsUp ? (
               <div className="px-5 pt-4 pb-5">
-                <h2 className="doom-heading text-foreground text-xl leading-tight">
+                <h2 className="text-lg font-bold uppercase tracking-wider text-foreground leading-tight">
                   Freestyle is for logging
                 </h2>
                 <p className="text-base text-muted-foreground mt-2.5 leading-relaxed">
-                  It's a blank canvas where you pick exercises and log every
-                  set as you go. Worth a try if you're curious.
+                  {
+                    "It's a blank canvas where you pick exercises and log every set as you go. Worth a try if you're curious."
+                  }
                 </p>
                 <p className="text-sm text-muted-foreground mt-3">
                   Prefer logging?{' '}
@@ -427,12 +436,6 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
                     onClick={handleOpenSavedWorkouts}
                   />
                 )}
-                <ActionRow
-                  icon={LayoutGrid}
-                  label="Pick a workout"
-                  subtitle="Coming soon"
-                  disabled
-                />
               </div>
             )}
           </div>
@@ -453,6 +456,9 @@ type ActionRowProps = {
   tone?: 'success' | 'accent'
 }
 
+/** Row titles as on Training: plain bold uppercase. */
+const ROW_TITLE = 'font-bold text-base uppercase tracking-wider text-foreground truncate'
+
 const TONE_CHIP_STYLES = {
   success: 'bg-success text-success-foreground border-success',
   accent: 'bg-accent text-accent-foreground border-accent',
@@ -472,11 +478,13 @@ function ActionRow({
   const enabledStyles = 'hover:bg-muted/50 active:bg-muted/70 cursor-pointer'
   const disabledStyles = 'opacity-50 cursor-not-allowed'
 
+  // Only a toned row ("Continue your program") gets a filled chip; the others
+  // keep the icon in the same column, unboxed.
   const chipStyles = activeTone
-    ? TONE_CHIP_STYLES[activeTone]
+    ? `border ${TONE_CHIP_STYLES[activeTone]}`
     : disabled
-      ? 'bg-muted/40 text-muted-foreground border-border'
-      : 'bg-muted/30 text-foreground/80 border-border'
+      ? 'text-muted-foreground'
+      : 'text-foreground'
 
   return (
     <button
@@ -486,12 +494,12 @@ function ActionRow({
       className={`${baseStyles} ${disabled ? disabledStyles : enabledStyles}`}
     >
       <span
-        className={`inline-flex items-center justify-center w-10 h-10 border ${chipStyles} shrink-0`}
+        className={`inline-flex items-center justify-center w-10 h-10 ${chipStyles} shrink-0`}
       >
-        <Icon size={20} strokeWidth={2.25} />
+        <Icon size={20} strokeWidth={2.25} aria-hidden="true" />
       </span>
       <div className="flex-1 min-w-0">
-        <div className="font-bold text-base text-foreground doom-heading truncate">
+        <div className={ROW_TITLE}>
           {label}
         </div>
         {subtitle && (

@@ -23,8 +23,8 @@ export interface BlockTab extends PaperTab {
 export type BlockTone = 'mine' | 'next'
 
 const BOX: Record<BlockTone, string> = {
-  mine: 'border-2 border-secondary bg-card',
-  next: 'border-2 border-primary bg-card',
+  mine: 'folder-box border-2 border-secondary bg-card',
+  next: 'folder-box border-2 border-primary bg-card',
 }
 
 function readStored(key: string): string | null {

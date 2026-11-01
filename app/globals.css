@@ -2334,15 +2334,25 @@ body > [data-training-widget] {
    RIPIT THEME ENHANCEMENTS (Donkey Kong)
    ============================================ */
 
-/* Primary buttons get golden glow */
-[data-theme="ripit"] .bg-primary:hover {
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); /* emerald green glow */
-}
+/* Hover effects only where a pointer can hover: on touch screens a tap leaves
+   :hover stuck on the element until the next tap elsewhere. */
+@media (hover: hover) {
+  /* Primary buttons get golden glow */
+  [data-theme="ripit"] .bg-primary:hover {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); /* emerald green glow */
+  }
 
-/* Accent elements get golden shimmer */
-[data-theme="ripit"] .border-accent:hover,
-[data-theme="ripit"] .text-accent:hover {
-  box-shadow: 0 0 15px rgba(251, 191, 36, 0.3); /* golden glow */
+  /* Accent elements get golden shimmer */
+  [data-theme="ripit"] .border-accent:hover,
+  [data-theme="ripit"] .text-accent:hover {
+    box-shadow: 0 0 15px rgba(251, 191, 36, 0.3); /* golden glow */
+  }
+
+  /* Cards get subtle golden borders on hover; folder boxes (Training's blocks,
+     the Quick Actions sheet) keep the colour that matches their paper tab. */
+  [data-theme="ripit"] .bg-card:not(.folder-box):hover {
+    border-color: rgba(251, 191, 36, 0.3); /* golden tint */
+  }
 }
 
 /* Active nav items get gold accent */
@@ -2355,11 +2365,6 @@ body > [data-training-widget] {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
   box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.2); /* golden outer ring */
-}
-
-/* Cards get subtle golden borders on hover */
-[data-theme="ripit"] .bg-card:hover {
-  border-color: rgba(251, 191, 36, 0.3); /* golden tint */
 }
 
 /* Disable hover effect for BragStrip stats - preserve original border colors */

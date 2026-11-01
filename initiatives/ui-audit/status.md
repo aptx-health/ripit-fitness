@@ -14,3 +14,14 @@
 - 2026-11-01 MDT: phone preview up at :10000 for UI1; waiting on Dustin.
 - 2026-11-01 MDT: Dustin on the installed preview: still sees the blur. Served head is correct (status-bar-style default, theme-color). Lead read Collie 1.23.4's bundle: same meta, but its content scrolls in an inner container (`flex min-h-0 flex-1 overflow-y-auto`) under a fixed header, so the document never scrolls. Ripit scrolls the document. INFERENCE: the iOS 27 edge blur follows the root scroller, so the status-bar change alone isn't enough.
 - 2026-11-01 MDT: Dustin agreed: keep UI1 as is and try an inner-scroll app shell as its own item (065, branch feature/ui-scroll-shell) before Quick Actions. UI1 committed and submitted as the bottom of the gh stack.
+- 2026-11-01 MDT: UI1 = PR #1014 (base dev). 065 (scroll shell) dispatched to implementer on feature/ui-scroll-shell.
+- 2026-11-01 MDT: Dustin: scroll fix in its own worktree, style stack independent; lead owns both. 065 moved to worktree1 (branch feature/ui-scroll-shell off feature/ui-shared, its own PR) with a new agent `scroll-shell` (wF:p5); dropped from worktree2's gh-stack file. Implementer (wF:p2) back on the style stack, starting UI2.
+- 2026-11-01 MDT: 066 (UI2 Quick Actions) dispatched to implementer on feature/ui-quick-actions.
+- 2026-11-01 MDT: 066 back (green; found ripit's gold .bg-card:hover border, folded into UI3 as a shared fix). 067 review dispatched.
+- 2026-11-01 MDT: 065 back (inner-scroll shell, green). Phone preview from worktree1 for Dustin's re-add check; code review after (reviewer busy with 067).
+- 2026-11-01 MDT: 067: changes needed (hover pin dead on phones; header strip; 44px discard). 068 fixes dispatched; gold hover now fixed at the source in UI2.
+- 2026-11-01 MDT: Dustin on the installed worktree1 preview: "looks good" (scroll shell). Preview stopped. 069 code review of 065 dispatched before its PR.
+- 2026-11-01 MDT: 069 approve. 070 (lint + nested scroll locks) to scroll-shell; then commit and PR.
+- 2026-11-01 MDT: 068 back (gold hover fixed at the source with a folder-box class, strip gone, 48px discard). Skipped re-review on purpose: three narrow, measured fixes. Phone preview of UI2 from worktree2.
+- 2026-11-01 MDT: scroll shell committed (1aa44d33) and opened as PR #1015 on feature/ui-shared, outside the gh stack. Retarget to dev once #1014 merges. UI2 on phone preview.
+- 2026-11-01 MDT: Dustin: UI2 preview "looks great". Committed and submitted on the gh stack.

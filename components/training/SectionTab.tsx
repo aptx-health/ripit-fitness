@@ -23,11 +23,11 @@ const CHIP: Record<SectionTabVariant, string> = {
   quiet: 'bg-border text-foreground',
 }
 
-/** The box under each tab: its border matches the tab. */
+/** The box under each tab: its border matches the tab. `folder-box` keeps the theme's card hover off it (globals.css). */
 export const SECTION_BOX: Record<SectionTabVariant, string> = {
-  coach: 'border-2 border-accent bg-accent-muted',
-  next: 'border-2 border-primary bg-card',
-  quiet: 'border border-border bg-card',
+  coach: 'folder-box border-2 border-accent bg-accent-muted',
+  next: 'folder-box border-2 border-primary bg-card',
+  quiet: 'folder-box border border-border bg-card',
 }
 
 export default function SectionTab({

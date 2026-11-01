@@ -6,7 +6,7 @@ None
 Running quietly: None.
 
 ## Active
-- UI audit (initiatives/ui-audit): bring Library, the Workout center and Settings up to the Training style, plus research the iOS PWA top blur. Building UI1–UI6 as a gh stack; UI1 on phone preview, waiting on Dustin.
+- UI audit (initiatives/ui-audit): bring Library, the Workout center and Settings up to the Training style, plus research the iOS PWA top blur. Building UI1–UI6 as a gh stack; UI1 is PR #1014 (stack bottom); style stack in worktree2 (UI2 next); scroll fix is PR #1015 (on #1014, outside the stack); UI2 on phone preview.
 
 ## Blocked
 None
