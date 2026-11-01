@@ -18,13 +18,14 @@ export async function GET(_request: NextRequest) {
       [user.id]
     )
 
-    const providers = result.rows
-      .map((row) => row.providerId)
-      .filter((id) => id !== 'credential')
+    const ids: string[] = result.rows.map((row) => row.providerId)
+    // `providers` leaves out the password account; `hasPassword` says whether there is one.
+    const providers = ids.filter((id) => id !== 'credential')
 
     return NextResponse.json({
       email: user.email,
       providers,
+      hasPassword: ids.includes('credential'),
     })
   } catch (err) {
     logger.error({ error: err, context: 'connected-accounts' }, 'Failed to fetch connected accounts')

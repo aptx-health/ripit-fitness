@@ -36,3 +36,11 @@
 - 2026-11-01 MDT: 074 approve with follow-ups (48px targets, density, author + more cue back, Level menu closes, quiet PaperTabTitle). 075 dispatched; then Dustin's preview.
 - 2026-11-01 MDT: 075 back (all listed targets ≥48px, author + more cue back, density still ~4/screen). Re-review skipped (measured). UI4 phone preview.
 - 2026-11-01 MDT: Dustin: UI4 "Looks excellent". Committed; PR opened and linked.
+- 2026-11-01 MDT: UI4 = PR #1019 (stack #1017 now #1014 → #1016 → #1018 → #1019). UI5 spec + settings-page.feature written; 076 (UI5 tests) dispatched to test-builder on feature/ui-settings.
+- 2026-11-01 MDT: 076 back (58 red, break matrix clean). Lead correction: no lbs/kg control (hidden on purpose, fba784df); spec + .feature fixed. Test-builder to drop that and delete the superseded TL5b agent-access-link test.
+- 2026-11-01 MDT: 076 accepted (59 red). 077 (UI5 build) dispatched to implementer.
+- 2026-11-01 MDT: 077 back (server page, blocks, prod /settings 200; connected sign-in badge was a real bug, fixed). 078 review dispatched.
+- 2026-11-01 MDT: 078 approve. 079 (sign-in load error, intensity row hit area, hasPassword hides Change password, clear fields) dispatched. Turbopack build vs health route added to ROADMAP.
+- 2026-11-01 MDT: 079 back (green). UI5 phone preview.
+- 2026-11-01 MDT: Dustin asked whether the MCP agent sees equipment: it doesn't (no tool reads equipmentAvailable). Added get_equipment to the top of ROADMAP Next, right after the UI audit. Removed the /settings SSR 500 roadmap item (fixed in UI5).
+- 2026-11-01 MDT: Dustin: UI5 looks good. Committed; PR opened and linked.
