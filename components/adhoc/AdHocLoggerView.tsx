@@ -3,13 +3,11 @@
 import { Plus, RefreshCw, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
 import type { ExerciseDefinition } from '@/components/exercise-selection/ExerciseSearchInterface'
 import type { MuscleBalanceSnapshot } from '@/components/features/muscle-balance/types'
 import { WorkoutRollupModal } from '@/components/features/training/WorkoutRollupModal'
 import { useToast } from '@/components/ToastProvider'
-import { Button } from '@/components/ui/Button'
-import { LoadingFrog } from '@/components/ui/loading-frog'
+import CompleteWorkoutConfirm from '@/components/workout-logging/CompleteWorkoutConfirm'
 import ExerciseActionsFooter from '@/components/workout-logging/ExerciseActionsFooter'
 import ExerciseDisplayTabs from '@/components/workout-logging/ExerciseDisplayTabs'
 import ExerciseLoggingHeader from '@/components/workout-logging/ExerciseLoggingHeader'
@@ -141,6 +139,8 @@ export default function AdHocLoggerView({
   const [isLoggingSet, setIsLoggingSet] = useState(false)
   const [isCompleting, setIsCompleting] = useState(false)
   const [isConfirmingComplete, setIsConfirmingComplete] = useState(false)
+  // Whole minutes since the start, taken when Complete is tapped (for its summary line).
+  const [completeMinutes, setCompleteMinutes] = useState(0)
   const [isDiscarding, setIsDiscarding] = useState(false)
   const [historyByExerciseId, setHistoryByExerciseId] = useState<
     Map<string, ExerciseHistory | null>
@@ -594,8 +594,9 @@ export default function AdHocLoggerView({
       )
       return
     }
+    setCompleteMinutes(startedAt ? Math.max(0, Math.floor((Date.now() - Date.parse(startedAt)) / 60_000)) : 0)
     setIsConfirmingComplete(true)
-  }, [loggedSets.length, toast])
+  }, [loggedSets.length, startedAt, toast])
 
   const handleCompleteWorkout = useCallback(async () => {
     if (isCompleting || loggedSets.length === 0) return
@@ -813,7 +814,8 @@ export default function AdHocLoggerView({
                   onClick: handleDeleteExercise,
                   variant: 'danger',
                   requiresConfirmation: true,
-                  confirmationMessage: `Are you sure you want to delete "${currentExercise.name}"? Any sets you've logged for it will be removed.`,
+                  confirmationTitle: `Delete ${currentExercise.name}?`,
+                  confirmationMessage: "Any sets you've logged for it will be removed too.",
                 },
               ] satisfies QuickAction[]}
             />
@@ -896,50 +898,16 @@ export default function AdHocLoggerView({
           isDiscarding={isDiscarding}
         />
       )}
-      {isConfirmingComplete &&
-        createPortal(
-          <div className="fixed inset-0 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center z-[60] p-4">
-            <div className="bg-card border-2 border-border p-6 sm:p-8 text-center min-w-[300px] max-w-sm w-full shadow-xl doom-corners">
-              {!isCompleting ? (
-                <>
-                  <p className="text-lg sm:text-xl mb-6 text-foreground font-bold uppercase tracking-wider">
-                    Complete this workout?
-                  </p>
-                  <div className="flex justify-center gap-3">
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      doom
-                      onClick={() => setIsConfirmingComplete(false)}
-                      className="px-4 sm:px-6 py-2.5 sm:py-3 text-base font-bold uppercase tracking-wider border-2 border-border hover:border-primary"
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="success"
-                      doom
-                      onClick={handleCompleteWorkout}
-                      className="px-4 sm:px-6 py-2.5 sm:py-3 text-base font-bold uppercase tracking-wider"
-                    >
-                      Confirm
-                    </Button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="mb-3 flex justify-center">
-                    <LoadingFrog size={64} speed={0.8} />
-                  </div>
-                  <p className="text-foreground uppercase tracking-wider font-bold">
-                    Completing workout…
-                  </p>
-                </>
-              )}
-            </div>
-          </div>,
-          document.body
-        )}
+      {isConfirmingComplete && (
+        <CompleteWorkoutConfirm
+          isFollowAlong={false}
+          isSubmitting={isCompleting}
+          setCount={loggedSets.length}
+          durationMinutes={completeMinutes}
+          onCancel={() => setIsConfirmingComplete(false)}
+          onConfirm={handleCompleteWorkout}
+        />
+      )}
       <WorkoutRollupModal
         open={showRollup}
         rollup={rollup}

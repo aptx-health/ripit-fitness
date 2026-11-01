@@ -15,6 +15,8 @@ interface LastSessionReferenceProps {
   isLoading?: boolean
   /** Tap the row to prefill the form with the previous workout's last set. */
   onApply?: (set: ApplicableSet) => void
+  /** Sets already logged for this exercise in this workout: then it isn't the first time any more. */
+  hasLoggedSets?: boolean
 }
 
 /**
@@ -30,6 +32,7 @@ export default function LastSessionReference({
   history,
   isLoading = false,
   onApply,
+  hasLoggedSets = false,
 }: LastSessionReferenceProps) {
   if (isLoading) return null
 
@@ -83,6 +86,7 @@ export default function LastSessionReference({
   }
 
   if (emptyReason === 'never-logged') {
+    if (hasLoggedSets) return null
     return (
       <div
         className="flex items-center gap-2 px-3 py-2 border-l-4 border-border bg-muted/30 text-sm text-muted-foreground"

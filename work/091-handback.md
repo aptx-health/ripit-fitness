@@ -1,0 +1,1 @@
+Report: complete (091). Locked 088 test pins busy leaving the secondary enabled, so added secondaryDisabled (Exit passes isDiscarding); 'under 1 min'; header Finish/Exit/Edit plan 48px with py-1 (bar height unchanged). Tests logger-confirm-fixes.test.tsx (7). Suite 2744/4/0; tsc, eslint, biome clean.
