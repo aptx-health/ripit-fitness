@@ -70,6 +70,7 @@ import {
   suggestWorkoutPayloadSchema,
 } from '@/lib/llm/prompts/suggest-workout/schemas'
 import type { WeeklyIntent } from '@/lib/llm/prompts/suggest-workout/types'
+import { getMuscleBalanceTargets } from '@/lib/muscle-balance'
 import { normalizeWeightToLbs } from '@/lib/stats/exercise-performance'
 import {
   type TuningConfig,
@@ -292,9 +293,11 @@ export async function buildTrainingStatePayload(
   tuning?: TuningConfig,
 ): Promise<TrainingStateBuildResult> {
   const config = tuning ?? (await loadTuningConfig(prisma))
-  const [profileRow, settings, aggregates, sessionRows, catalogRows, prefRows] =
+  const [profileRow, ratioTargets, settings, aggregates, sessionRows, catalogRows, prefRows] =
     await Promise.all([
       prisma.userTrainingProfile.findUnique({ where: { userId } }),
+      // Targets come from Settings (the one source), not the profile's old copy.
+      getMuscleBalanceTargets(prisma, userId),
       prisma.userSettings.findUnique({
         where: { userId },
         select: { signupIntent: true },
@@ -358,7 +361,7 @@ export async function buildTrainingStatePayload(
       }),
     ])
 
-  const profile: UserTrainingProfileDTO = normalizeUserTrainingProfile(profileRow)
+  const profile: UserTrainingProfileDTO = normalizeUserTrainingProfile(profileRow, ratioTargets)
   const signupIntent = settings?.signupIntent ?? null
 
   // --- session-derived blocks (recent_sessions + weekly-intent evaluation) ---

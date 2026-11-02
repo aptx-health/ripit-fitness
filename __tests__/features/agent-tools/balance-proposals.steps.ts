@@ -1203,14 +1203,12 @@ describe('target proposals: approve and revert', () => {
 })
 
 // ---------------------------------------------------------------------------
-// Review defect 1 (work/027-handback.md): approving an anchor change creates a
-// missing UserTrainingProfile. Its ratioTargets must be seeded the way
-// getOrCreateUserTrainingProfile seeds it: from the muscle-balance settings
-// targets, or the defaults when there is no settings row. That function is the
-// oracle: a second user with the same settings gets a profile from it, and the
-// approved user's stored ratioTargets must be identical.
+// Review defect 1 (work/027-handback.md), changed by work/103: approving an
+// anchor change still creates a missing UserTrainingProfile, but the profile's
+// old ratioTargets copy is no longer seeded from Settings (the targets live
+// only in UserMuscleBalanceSettings; see balance-targets-source.steps.ts).
 // ---------------------------------------------------------------------------
-describe('anchor approve seeds a new profile from Settings', () => {
+describe('anchor approve creating a new profile leaves the targets in Settings', () => {
   beforeEach(async () => {
     s = await freshState()
     await seedLibrary()
@@ -1219,57 +1217,38 @@ describe('anchor approve seeds a new profile from Settings', () => {
   const ratioOf = async (userId: string) =>
     (await s.prisma.userTrainingProfile.findUniqueOrThrow({ where: { userId } })).ratioTargets as Record<string, number>
 
-  /** What getOrCreateUserTrainingProfile stores for `userId` (same settings, no profile yet). */
-  async function reference(userId: string, rawTargets: Record<string, number> | null) {
-    if (rawTargets) {
-      await s.prisma.userMuscleBalanceSettings.create({ data: { userId, targets: rawTargets } })
-    }
-    const mod = (await load('@/lib/user-training-profile')) as typeof import('@/lib/user-training-profile')
-    await mod.getOrCreateUserTrainingProfile(s.prisma, userId)
-    return await ratioOf(userId)
-  }
-
   async function approveAnchorChangeWithNoProfile() {
     expect(await s.prisma.userTrainingProfile.count({ where: { userId: s.userId } })).toBe(0)
     const id = await pendingAnchors({ hinge: [s.rdl.id] })
     expectOk(await decide('approveProposal', id), 'approve')
     expect(await anchorsFor('hinge')).toEqual([s.rdl.id])
+    return id
   }
 
-  it('settings with quads 1.5 and no profile: ratioTargets match the Settings targets', async () => {
+  it('settings with quads 1.5 and no profile: the new profile does not take the Settings targets', async () => {
     await setSettings({ targets: { quads: 1.5, lats: 0.8 } })
-    const expected = await reference(s.otherUserId, { ...defaultTargets(), quads: 1.5, lats: 0.8 })
-    expect(expected.quads).toBe(1.5)
     await approveAnchorChangeWithNoProfile()
     const got = await ratioOf(s.userId)
-    expect(got.quads).toBe(1.5)
-    expect(got.lats).toBe(0.8)
-    expect(got).toEqual(expected)
+    expect(got.quads).not.toBe(1.5)
+    expect(got.lats).not.toBe(0.8)
   })
 
-  it('no settings and no profile: ratioTargets are the default seed', async () => {
-    const expected = await reference(s.otherUserId, null)
-    expect(Object.keys(expected).sort()).toEqual([...ALL_FAUS].sort())
+  it('settings with quads 1.5 and no profile: the Settings targets are left as they were', async () => {
+    await setSettings({ targets: { quads: 1.5, lats: 0.8 } })
+    const before = await liveTargets()
     await approveAnchorChangeWithNoProfile()
-    expect(await ratioOf(s.userId)).toEqual(expected)
+    expect(await liveTargets()).toEqual(before)
   })
 
-  it('settings whose targets lack some FAUs: the seed is filled out like the oracle fills it', async () => {
-    await setSettings({ targets: { quads: 1.5 } })
-    // Replace the full row with a sparse one, as an older row may be.
-    await s.prisma.userMuscleBalanceSettings.update({ where: { userId: s.userId }, data: { targets: { quads: 1.5 } } })
-    const expected = await reference(s.otherUserId, { quads: 1.5 })
-    expect(Object.keys(expected).sort()).toEqual([...ALL_FAUS].sort())
+  it('no settings and no profile: the profile is created and no settings row is made (control: passes today)', async () => {
     await approveAnchorChangeWithNoProfile()
-    expect(await ratioOf(s.userId)).toEqual(expected)
+    expect(await s.prisma.userMuscleBalanceSettings.count({ where: { userId: s.userId } })).toBe(0)
   })
 
-  it('the seed is not the calc settings or anything else from the settings row', async () => {
+  it('the calc settings are not touched either (control: passes today)', async () => {
     await setSettings({ targets: { quads: 1.5 }, lookbackDays: 30, secondaryWeight: 0.2 })
     await approveAnchorChangeWithNoProfile()
-    const got = await ratioOf(s.userId)
-    expect(Object.keys(got).sort()).toEqual([...ALL_FAUS].sort())
-    expect(got.quads).toBe(1.5)
+    expect(await liveCalc()).toEqual({ lookbackDays: 30, includeSecondary: true, secondaryWeight: 0.2, excludeWarmups: true })
   })
 
   it('an existing profile keeps its ratioTargets (control: passes today)', async () => {
@@ -1282,13 +1261,13 @@ describe('anchor approve seeds a new profile from Settings', () => {
     expect(await anchorsFor('hinge')).toEqual([s.rdl.id])
   })
 
-  it('revert of an approve that created the profile leaves the seeded ratioTargets alone', async () => {
+  it('revert of an approve that created the profile leaves its ratioTargets as the approve left them', async () => {
     await setSettings({ targets: { quads: 1.5 } })
-    const expected = await reference(s.otherUserId, { ...defaultTargets(), quads: 1.5 })
-    const id = await pendingAnchors({ hinge: [s.rdl.id] })
-    expectOk(await decide('approveProposal', id), 'approve')
+    const id = await approveAnchorChangeWithNoProfile()
+    const afterApprove = await ratioOf(s.userId)
+    expect(afterApprove.quads).not.toBe(1.5)
     expectOk(await decide('revertProposal', id), 'revert')
     expect(await anchorsFor('hinge')).toEqual([])
-    expect(await ratioOf(s.userId)).toEqual(expected)
+    expect(await ratioOf(s.userId)).toEqual(afterApprove)
   })
 })
