@@ -24,7 +24,8 @@ export async function POST(
 
     // Parse request body
     const body = await request.json()
-    const { exercises } = body as { exercises: ReorderItem[] }
+    // completionId: the session whose one-offs (added during logging) may be reordered too
+    const { exercises, completionId } = body as { exercises: ReorderItem[]; completionId?: string }
 
     // Validate required fields
     if (!exercises || !Array.isArray(exercises) || exercises.length === 0) {
@@ -70,8 +71,22 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
-    // Verify all exercises belong to this workout
-    const workoutExerciseIds = new Set(workout.exercises.map(e => e.id))
+    // Verify all exercises belong to this workout: its own, or one-offs added
+    // to the given session, which must be this user's session of this workout.
+    const sessionOneOffs = completionId
+      ? {
+          userId: user.id,
+          isOneOff: true,
+          workoutCompletion: { id: completionId, workoutId, userId: user.id },
+        }
+      : null
+    const oneOffs = sessionOneOffs
+      ? await prisma.exercise.findMany({
+          where: { ...sessionOneOffs, id: { in: exercises.map(e => e.exerciseId) } },
+          select: { id: true },
+        })
+      : []
+    const workoutExerciseIds = new Set([...workout.exercises.map(e => e.id), ...oneOffs.map(e => e.id)])
     const providedExerciseIds = exercises.map(e => e.exerciseId)
 
     for (const exerciseId of providedExerciseIds) {
@@ -93,9 +108,9 @@ export async function POST(
       )
     )
 
-    // Fetch the updated exercises
+    // Fetch the updated exercises (with the session's one-offs, as the plan lists them)
     const updatedExercises = await prisma.exercise.findMany({
-      where: { workoutId },
+      where: sessionOneOffs ? { OR: [{ workoutId }, sessionOneOffs] } : { workoutId },
       include: {
         prescribedSets: {
           orderBy: { setNumber: 'asc' }
@@ -111,7 +126,7 @@ export async function POST(
           }
         }
       },
-      orderBy: { order: 'asc' }
+      orderBy: [{ order: 'asc' }, { id: 'asc' }]
     })
 
     return NextResponse.json({

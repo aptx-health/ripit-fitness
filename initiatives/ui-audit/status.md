@@ -71,3 +71,17 @@
 - 2026-11-01 MDT: 095 approve. 096 (done state matches bb-a-done; clearer disabled states) dispatched. Header Finish duplication → L3; catppuccin accent contrast → ROADMAP.
 - 2026-11-01 MDT: 096 back (done state matches bb-a-done; off states clear). L2 phone preview.
 - 2026-11-01 MDT: Dustin: L2 "looks great". Committed; PR opened.
+- 2026-11-01 MDT: L2 = PR #1025 (base dev; L1 #1024 merged; log conflicts with #1022 merged by hand). L3 spec + logger-plan.feature written; 097 (L3 tests) dispatched on feature/logger-plan.
+- 2026-11-01 MDT: Dustin merged L2 (#1025). Release PR dev → main #1026 opened (UI1–UI6, blur fix, L1, L2, get_equipment, docs; no migrations). L3 continues for the next release.
+- 2026-11-01 MDT: 097 accepted (101 red, break matrix 76/76). 098 (L3 build) dispatched. Release PR #1026 green, waiting on Dustin's merge.
+- 2026-11-01 MDT: Dustin merged release #1026 into main. Waiting for images, then infra bump.
+- 2026-11-01 MDT: main images built and confirmed (app sha-c48c74a8…, clone-program c48c74a8…). Infra agent asked for the ripit-infra bump PR.
+- 2026-11-01 MDT: ripit-infra #134 opened (prod bump to c48c74a8). Waiting on Dustin's merge.
+- 2026-11-01 MDT: 098 back (tabs + plan sheet, 355 logger tests, suite 3000 green; real drag checked). 099 review dispatched.
+- 2026-11-01 MDT: 099 approve. 100 (added exercises in the plan, reorder keeps the current exercise, 48px grips, ticking clock) dispatched; double delete prompt → ROADMAP.
+- 2026-11-01 MDT: 100 back (one-offs in the plan via ?completionId=, reorder accepts own one-offs, stays on current exercise, 48px grips, ticking clock). 101 focused API review + L3 phone preview in parallel.
+- 2026-11-01 MDT: 101 approve (no cross-user access). 102 hardening (completionId tied to workout, stable order, reorder scoped to session, tests, '1 set') dispatched; no server while the preview runs.
+- 2026-11-01 MDT: 102 back (API hardened, 19 API tests). L3 waits on Dustin's preview.
+- 2026-11-01 20:15 CDT: Release #1026 is in prod (Dustin merged infra #134). Dustin's L3 preview: looks good except the plan sheet's tab had a rounded corner inside a square box; lead added PaperTabTitle `square` and used it on the sheet (91 tests pass, lint/tsc clean). Preview rebuilding.
+- 2026-11-01 20:35 CDT: Dustin: the plan sheet's tab didn't sit on top of anything. Restructured like Quick actions: tab + close on a clear row, plan in a bordered folder box below (dropped the earlier square/rounded-corner attempts). Lead amended locked test 'the dialog is a bg-card folder box' to check the box inside the dialog. 144 logger-plan tests pass.
+- 2026-11-01 20:45 CDT: Dustin accepted L3 on the preview. 098/100/102 accepted; committing feature/logger-plan and opening its PR into dev.

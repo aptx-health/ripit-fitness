@@ -1,3 +1,4 @@
+import type { Prisma } from '@prisma/client'
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
@@ -49,14 +50,14 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
-    // Build where conditions for both program exercises and one-offs
-    const whereConditions: Array<{
-      workoutId?: string
-      workoutCompletionId?: string
-      isOneOff?: boolean
-    }> = [{ workoutId }]
+    // Build where conditions for both program exercises and one-offs. One-offs
+    // count only when the session is this user's session of this workout.
+    const whereConditions: Prisma.ExerciseWhereInput[] = [{ workoutId }]
     if (completionId) {
-      whereConditions.push({ workoutCompletionId: completionId, isOneOff: true })
+      whereConditions.push({
+        isOneOff: true,
+        workoutCompletion: { id: completionId, workoutId, userId: user.id },
+      })
     }
 
     // Get total count for navigation info
@@ -67,7 +68,8 @@ export async function GET(
     // Get all exercise IDs in order to find the one at the target position
     const allExercises = await prisma.exercise.findMany({
       where: { OR: whereConditions, userId: user.id },
-      orderBy: { order: 'asc' },
+      // id breaks ties so positions never shuffle between requests
+      orderBy: [{ order: 'asc' }, { id: 'asc' }],
       select: { id: true, order: true },
     })
 
