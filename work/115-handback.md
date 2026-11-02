@@ -1,0 +1,3 @@
+# 115 handback (implementer, 2026-11-02)
+Report: complete. (1) e1RM PRs only from 1–12 rep sets, shared `MAX_PR_REPS = 12`; Lifts unchanged. (2) History is one `$queryRaw` (`earlierBestSets`): per session best-e1RM set, heaviest set per rep count 1–12, most-reps bodyweight set; ≤ sessions + 13 rows per exercise; query count unchanged. (3) TrendNote gains `lightWeeksSearched`; "No light week since you started." under 8 weeks. Tests: `progress-records-fixes.test.ts` (14), `progress-records-fixes-view.test.tsx` (4); break checks all caught. Suite 3455 pass. Lead re-ran: tsc clean, 15 progress files / 372 tests pass.
+Left: ProgressView `?? []` fallback (S1 progress-view.test.tsx fixtures still lack S2 fields, so it stays).

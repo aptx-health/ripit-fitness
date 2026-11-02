@@ -6,7 +6,7 @@ None
 Running quietly: None.
 
 ## Active
-- Progress tab replacing Learn (initiatives/analytics): S1 weekly report accepted 2026-11-02; PR into dev open. Next: S2 (Records/Lifts tab, trend note).
+- Progress tab replacing Learn (initiatives/analytics): S1 merged to dev (#1030); S2 (records, lifts, trend note) accepted 2026-11-02, PR into dev open. Neither in prod. Next: pinned lifts (scoping).
 - Balance targets, one source of truth (initiatives/agent-tools): in prod (#1028, release #1029, infra #135, 2026-11-01).
 - UI audit (initiatives/ui-audit): UI1–UI6, L1 (#1024) and L2 (#1025) are in prod (release #1026, infra #134, 2026-11-01). L3 (#1027) in prod via release #1029 / infra #135 (2026-11-01). Workout screen L1–L3 complete. Next: logger L4 and FAU targets (ROADMAP).
 

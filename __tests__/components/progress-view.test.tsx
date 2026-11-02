@@ -417,10 +417,10 @@ describe('Report card', () => {
     expect(flat(row('streak'))).toContain('0 weeks')
   })
 
-  it('does not show records, lifts or a trend note (those are S2)', async () => {
+  // Amended for S2 (work item 111): the Records / Lifts folder now belongs to the page
+  // (progress-records-view.test.tsx). Without a trend in the report there is still no note.
+  it('shows no trend note when the report has none', async () => {
     await open()
-    expect(screen.queryByText(/records/i)).toBeNull()
-    expect(screen.queryByText(/^lifts$/i)).toBeNull()
     expect(screen.queryByText(/light week/i)).toBeNull()
   })
 })

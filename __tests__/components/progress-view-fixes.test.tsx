@@ -42,6 +42,11 @@ function report(weekStart: string, o: Partial<WeeklyReport> = {}): WeeklyReport 
     normalWeeks: 4,
     streak: 0,
     weeks: [...Array.from({ length: 7 }, (_, i) => stats(addDays(weekStart, (i - 7) * 7))), current],
+    // S2 fields (lead amendment 2026-11-02, work 112): required on WeeklyReport since S2.
+    weightUnit: 'lbs',
+    records: [],
+    lifts: [],
+    trend: null,
     ...o,
   }
 }
