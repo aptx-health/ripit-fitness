@@ -163,3 +163,5 @@ Branch `feature/logger-bottom-bar`, stacked on L1. **Behaviour:** `features/ui-a
 7. Carry-overs from 090 that live here: follow-along "Close workout" and the Switch strip at 48px; Previous 48×48.
 
 **Done when:** L2 tests pass; suite, tsc, eslint/biome on touched files; touch-emulated 390px light/dark screenshots of the bar in each mode, mid-exercise and after the last set; logging behaviour unchanged.
+
+**Carried into L3 from review 095:** on the last exercise the header's Finish and the bar's Finish both show; L3 decides whether the header keeps it.

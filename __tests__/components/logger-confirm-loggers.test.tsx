@@ -40,6 +40,7 @@ const api = vi.hoisted(() => ({
   discardAdHocWorkout: vi.fn(),
   fetchExerciseHistory: vi.fn(),
 }))
+const prog = vi.hoisted(() => ({ total: 2 }))
 const nav = vi.hoisted(() => ({ push: vi.fn(), refresh: vi.fn(), replace: vi.fn(), back: vi.fn(), prefetch: vi.fn() }))
 
 vi.mock('@/components/ToastProvider', () => ({ useToast: () => toast, ToastProvider: ({ children }: { children: unknown }) => children }))
@@ -62,7 +63,7 @@ vi.mock('@/hooks/useProgressiveExercises', () => {
       currentExercise: exercise,
       currentExerciseState: 'loaded',
       currentIndex: 0,
-      totalExercises: 2,
+      totalExercises: prog.total,
       goToExercise: vi.fn(),
       goToNext: vi.fn(),
       goToPrevious: vi.fn(),
@@ -156,6 +157,7 @@ const alertSpy = vi.fn()
 beforeEach(() => {
   vi.clearAllMocks()
   window.alert = alertSpy
+  prog.total = 2
   draft.loggedSets = []
   draft.startedAt = null
   api.completeDraft.mockResolvedValue({ completionId: 'c1', rollup: null })
@@ -203,6 +205,9 @@ function programmed(over: Partial<Parameters<typeof ExerciseLoggingModal>[0]> = 
   render(<ExerciseLoggingModal {...props} />)
   return props
 }
+// Follow-along's Finish: the footer stub today, the bottom bar's "Finish" (last exercise) after L2.
+const guidedFinish = () =>
+  fireEvent.click(screen.queryByRole('button', { name: 'stub finish guided' }) ?? screen.getByRole('button', { name: /^finish$/i }))
 const finish = () => fireEvent.click(screen.getByRole('button', { name: /^finish$/i }))
 
 describe('Scenario: Completing a workout shows what will be saved (programmed logger)', () => {
@@ -326,8 +331,9 @@ describe('Scenario: A failed completion is shown in the app (programmed logger)'
 
 describe('Scenario: Switching from follow-along to logging, and completing a freestyle workout (follow-along)', () => {
   it('follow-along: Finish asks with the same kind of confirmation, and confirming completes it guided, as before', async () => {
+    prog.total = 1
     const p = programmed({ loggingMode: 'follow_along' })
-    fireEvent.click(screen.getByRole('button', { name: 'stub finish guided' }))
+    guidedFinish()
     expect(screen.getByRole('alertdialog', { name: /mark this workout as done/i })).toBeTruthy()
     fireEvent.click(btn('Finish'))
     await waitFor(() => expect(p.onComplete).toHaveBeenCalledTimes(1))
@@ -335,8 +341,9 @@ describe('Scenario: Switching from follow-along to logging, and completing a fre
   })
 
   it('follow-along: Escape leaves the workout open and uncompleted', () => {
+    prog.total = 1
     const p = programmed({ loggingMode: 'follow_along' })
-    fireEvent.click(screen.getByRole('button', { name: 'stub finish guided' }))
+    guidedFinish()
     pressEscape()
     noDialog()
     expect(api.completeDraft).not.toHaveBeenCalled()
@@ -345,8 +352,9 @@ describe('Scenario: Switching from follow-along to logging, and completing a fre
 
   it('follow-along: a failed completion is a toast too, not an alert', async () => {
     api.completeDraft.mockRejectedValue(new Error('boom'))
+    prog.total = 1
     programmed({ loggingMode: 'follow_along' })
-    fireEvent.click(screen.getByRole('button', { name: 'stub finish guided' }))
+    guidedFinish()
     fireEvent.click(btn('Finish'))
     await waitFor(() => expect(toast.error).toHaveBeenCalledTimes(1))
     expect(alertSpy).not.toHaveBeenCalled()

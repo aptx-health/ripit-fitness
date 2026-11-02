@@ -95,3 +95,4 @@ Append-only. Newest at the bottom.
 - 2026-10-31 MDT: Dustin previewed on phone ("looks great") and merged #1004. Release PR #1005 (dev → main) CI green, merged; images sha-dfa2bd27adc6fdb189e8b3859befd865890dddf1 built. Infra agent opened ripit-infra #132 (tag bump only, checked); Dustin merged. Slice 5 is in prod.
 - 2026-10-31 MDT: Correction to the line above: ripit-infra #132 is NOT merged (still open; I misread Dustin's message). Nothing merged it. Slice 5 is not in prod until Dustin merges #132.
 - 2026-10-31 08:23 MDT: Dustin merged ripit-infra #132. Slice 5 is in prod. Next roadmap item: one source of truth for FAU targets.
+- 2026-11-01 MDT: get_equipment merged to dev (#1023).

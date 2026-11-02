@@ -87,7 +87,7 @@ export default function FollowAlongHeader({
           <button
             type="button"
             onClick={onClose}
-            className="p-1 text-secondary-foreground/80 hover:text-secondary-foreground transition-colors doom-focus-ring"
+            className="-my-2 -mr-2 inline-flex h-12 w-12 items-center justify-center text-secondary-foreground/80 hover:text-secondary-foreground transition-colors doom-focus-ring"
             aria-label="Close workout"
           >
             <X size={18} strokeWidth={2.5} />
@@ -98,7 +98,7 @@ export default function FollowAlongHeader({
           <button
             type="button"
             onClick={handleBannerTap}
-            className={`w-full pb-2 px-4 text-sm text-secondary-foreground/90 hover:text-secondary-foreground hover:bg-black/5 active:bg-black/10 cursor-pointer transition-all duration-500 doom-focus-ring flex items-center justify-center gap-1.5 ${
+            className={`w-full min-h-12 pb-2 px-4 text-sm text-secondary-foreground/90 hover:text-secondary-foreground hover:bg-black/5 active:bg-black/10 cursor-pointer transition-all duration-500 doom-focus-ring flex items-center justify-center gap-1.5 ${
               bannerFading ? 'opacity-0' : 'opacity-100'
             }`}
           >
