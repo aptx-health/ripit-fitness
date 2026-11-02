@@ -50,6 +50,10 @@
 - 2026-11-01 MDT: 082 approve. 083 (sticky unsaved bar, 48px leftovers, presets one row, 0/5 chip) dispatched.
 - 2026-11-01 MDT: 083 back (sticky unsaved bar, 48px leftovers, presets scroll in one row, 0/5). UI6 phone preview.
 - 2026-11-01 MDT: Dustin: UI6 "Everything looks great". Committed; PR opened and linked. UI1–UI6 all up as stack #1017.
+- 2026-11-01 MDT: UI6 = PR #1021; stack #1017 is complete (#1014 → #1016 → #1018 → #1019 → #1020 → #1021). Lead's UI6 commit swept in 081's in-progress screenshots; removed in a follow-up commit (a0e2fb84; amend + force-push was blocked). Files stay on disk. Stage by path while 081 writes into worktree2.
+- 2026-11-01 MDT: Dustin merged stack #1017 (UI1–UI6, #1014–#1021) into dev; deploying to staging. Prod release (dev → main + infra bump) waits for Dustin.
+- 2026-11-01 MDT: 081 logger audit back (A recommended for all three areas; build items L1–L4). Published to Handoff Hub logger-ideas-081; waiting on Dustin.
+- 2026-11-01 MDT: Dustin picked direction A for the bottom bar, tab bar and plan drawer. Logger build L1–L3 as a new gh stack on dev in worktree2; L4 (one exercise picker, saved-workout sets in freestyle) to ROADMAP.
 - 2026-11-01 MDT: Logger build started as a new gh stack on dev in worktree2 (feature/logger-shared first). L1 spec + logger-confirm.feature written; 088 (L1 tests) dispatched. L4 + Copenhagen Plank check on ROADMAP. Docs PR #1022 and equipment PR #1023 open into dev.
 - 2026-11-01 MDT: 088 accepted (111 red, break matrix clean). 089 (L1 build) dispatched to implementer.
 - 2026-11-01 MDT: 089 back (116/116, suite green). 090 review dispatched.
