@@ -100,3 +100,7 @@ Append-only. Newest at the bottom.
 - 2026-11-01 MDT: 085 back (tools.ts +13/−1, 28/28). 086 review dispatched.
 - 2026-11-01 MDT: 086 approve. 087: description says never-set means the app doesn't restrict equipment and the list is the Settings checklist.
 - 2026-11-01 MDT: get_equipment merged to dev (#1023).
+- 2026-11-01 21:30 CDT: Started one source of truth for balance targets (ROADMAP Next; discovery 024). Size small. Dustin confirmed: Settings' copy (UserMuscleBalanceSettings.targets) is the source, no migration, staleness fix in the same PR, tests (103) → build (104) → review (105). Worktree2, feature/balance-targets. Feature: features/agent-tools/balance-targets-source.feature.
+- 2026-11-01 21:52 CDT: 103 back (11 red on dev, break matrix 20/20). Dispatched build 104 to implementer.
+- 2026-11-01 22:20 CDT: 104 done incl. lead follow-ups (aggregates normalized, seed script → Settings); 917 related tests pass. Review 105 dispatched.
+- 2026-11-01 22:45 CDT: Review 105 checks out (low findings only; staleness test gaps and query dedupe to ROADMAP). Committing and opening the PR.

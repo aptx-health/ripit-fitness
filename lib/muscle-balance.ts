@@ -140,6 +140,22 @@ export function normalizeMuscleBalanceSettings(
   }
 }
 
+/**
+ * The user's muscle-balance targets: the one source every reader uses
+ * (Settings, the planner, the aggregates, the profile view). Defaults when the
+ * user has no settings row; reading never creates one.
+ */
+export async function getMuscleBalanceTargets(
+  db: Pick<Prisma.TransactionClient, 'userMuscleBalanceSettings'>,
+  userId: string
+): Promise<MuscleBalanceTargets> {
+  const row = await db.userMuscleBalanceSettings.findUnique({
+    where: { userId },
+    select: { targets: true },
+  })
+  return row ? normalizeMuscleBalanceTargets(row.targets) : getDefaultMuscleBalanceTargets()
+}
+
 export async function getOrCreateMuscleBalanceSettings(
   prisma: PrismaClient,
   userId: string
