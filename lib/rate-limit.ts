@@ -117,6 +117,12 @@ export const communityCloneLimiter = lazyLimiter({ keyPrefix: 'clone', points: 3
 export const progressReadLimiter = lazyLimiter({ keyPrefix: 'progress-read', points: 60, duration: 60 })
 
 /**
+ * Saving pinned lifts (one PUT per pin, unpin or editor save)
+ * Tapping through pins quickly: 30 req / 60s per user
+ */
+export const progressPinsLimiter = lazyLimiter({ keyPrefix: 'progress-pins', points: 30, duration: 60 })
+
+/**
  * Admin endpoints: 30 req / 60s per user
  */
 export const adminLimiter = lazyLimiter({ keyPrefix: 'admin', points: 60, duration: 60 })

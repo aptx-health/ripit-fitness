@@ -80,6 +80,7 @@ async function deleteArchetypeData(userId: string): Promise<void> {
   await prisma.exercise.deleteMany({ where: { userId } }) // strays
   await prisma.userTrainingProfile.deleteMany({ where: { userId } })
   await prisma.userMuscleBalanceSettings.deleteMany({ where: { userId } })
+  await prisma.pinnedExercise.deleteMany({ where: { userId } })
   await prisma.userSettings.deleteMany({ where: { userId } })
 }
 

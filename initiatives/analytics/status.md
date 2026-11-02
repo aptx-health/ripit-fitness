@@ -20,3 +20,10 @@
 - 2026-11-02 CST: Dustin: cap e1RM PRs at 12 reps; fix the history query and light-week wording now. Fixes 115 to implementer (test-builder skipped on purpose, small). PaperTabs 48px raised for UI audit; findings 4 and 6 left as is.
 - 2026-11-02 CST: Fixes 115 back (3455 suite); lead re-ran 372 progress tests. Starting phone preview for Dustin.
 - 2026-11-02 CST: Dustin checked the S2 preview: "Looks great". 111–115 accepted. Committing and opening the PR into dev; pinned lifts next.
+- 2026-11-02 CST: S2 PR #1031 opened. S3 pinned lifts started (branch feature/pinned-lifts off S2). Dustin: pin from Lifts rows + editor; default = anchor lifts; chart page next slice; spec features/analytics/pinned-lifts.feature 'Yes, go'. Tests 116 dispatched.
+- 2026-11-02 CST: 116 back (135 tests, 129 red, breaks 93/94 + 1 unobservable). Build 117 dispatched. #1031 CI green, awaiting Dustin's merge.
+- 2026-11-02 CST: 117 back (3590 suite; migration 20261102180000_pinned_lifts, additive). Lead re-ran 507 progress tests. Review 118 dispatched.
+- 2026-11-02 CST: Dustin merged #1031 (S2) into dev.
+- 2026-11-02 CST: Review 118 checks out with one fix: exercise search leaks other users' custom exercises (pre-existing). Fixes 119 (search scoping, save race, editor 48px/tone, limit message, seed cleanup) to implementer.
+- 2026-11-02 CST: Fixes 119 back (3607 suite); lead re-ran 524 tests. Starting phone preview.
+- 2026-11-02 CST: Dustin checked the S3 preview: "Looks great". 116–119 accepted. Committing and opening the PR into dev.
