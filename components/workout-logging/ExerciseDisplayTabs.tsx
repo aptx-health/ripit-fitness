@@ -1,7 +1,7 @@
 'use client'
 
 import { Sparkles } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import type { MessageData } from '@/components/ui/MessageCard'
 import { MessageCard } from '@/components/ui/MessageCard'
@@ -144,12 +144,10 @@ export default function ExerciseDisplayTabs({
 
   // When the exercise changes, reset to "log-sets" if the current tab is
   // unavailable on the new exercise (e.g. "notes" tab when there are no notes).
-  // biome-ignore lint/correctness/useExhaustiveDependencies: exercise.id is intentional — re-evaluate tab availability on exercise switch
-  useEffect(() => {
-    if (activeTab === 'notes' && !hasNotes) {
-      setActiveTab('log-sets')
-    }
-  }, [exercise.id, hasNotes, activeTab])
+  // Adjusted during render, so there is no extra effect pass.
+  if (activeTab === 'notes' && !hasNotes) {
+    setActiveTab('log-sets')
+  }
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full flex flex-col">
@@ -189,6 +187,7 @@ export default function ExerciseDisplayTabs({
               history={exerciseHistory}
               isLoading={historyState === 'loading' || historyState === 'pending'}
               onApply={onApplySet}
+              hasLoggedSets={loggedSets.length > 0}
             />
           )}
           {loggingForm}

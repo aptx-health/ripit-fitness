@@ -1,6 +1,7 @@
 import { Prisma, type PrismaClient } from '@prisma/client'
 import { z } from 'zod'
 import { isAdminRole } from '@/lib/auth/roles'
+import { EQUIPMENT_CHECKLIST_VALUES } from '@/lib/equipment-availability'
 import {
   buildAnchors,
   calcSettings,
@@ -24,7 +25,7 @@ import {
   workoutNotes,
 } from '@/lib/proposals/saved-workout'
 import { createProposal, PROPOSAL_STATUSES } from '@/lib/proposals/service'
-import { normalizeTargetMovements } from '@/lib/user-training-profile'
+import { normalizeTargetMovements, normalizeUserTrainingProfile } from '@/lib/user-training-profile'
 import { VALID_CATEGORIES, VALID_STATUSES } from '@/types/feedback'
 import type { SavedWorkoutData } from '@/types/saved-workout'
 
@@ -119,6 +120,7 @@ const schemas = {
   }),
   get_anchors: z.object({}),
   get_balance_targets: z.object({}),
+  get_equipment: z.object({}),
   get_fau_volume: z.object({
     days: z.number().int().min(1).max(365).optional().describe("Window in days; defaults to the user's lookbackDays"),
   }),
@@ -203,6 +205,8 @@ const descriptions: Record<ToolName, string> = {
     'The anchor exercises picked for each of the 6 movement patterns, in stored order, with whole days since each was last logged (null if never).',
   get_balance_targets:
     'Muscle-balance target per FAU (all 18; 1 when unset), whether they are all defaults, the allowed bounds, and the calc settings (read-only to agents).',
+  get_equipment:
+    'The equipment the user has, as the names exercise definitions use. isSet true: their own selection (it can be empty, meaning they own nothing). isSet false: they have never set it, and the app does not restrict exercises by equipment at all; equipment is then just the Settings full-gym checklist, not a limit.',
   get_fau_volume:
     "Per FAU (all 18), raw counts over the window: primarySets (counted sets of exercises with it as a primary FAU), secondarySets (as a secondary FAU, unweighted), its target and days since last trained as primary. Warmups count only when excludeWarmups is off. Apply secondaryWeight yourself if you want it.",
   propose_anchor_update:
@@ -486,6 +490,14 @@ const handlers: { [N in ToolName]: Handler<N> } = {
       bounds: TARGET_BOUNDS,
       settings: calcSettings(row),
     }
+  },
+
+  async get_equipment(prisma, ctx) {
+    const row = await prisma.userTrainingProfile.findUnique({ where: { userId: ctx.userId } })
+    const profile = normalizeUserTrainingProfile(row)
+    return profile.equipmentAvailableSet
+      ? { equipment: profile.equipmentAvailable, isSet: true }
+      : { equipment: [...EQUIPMENT_CHECKLIST_VALUES], isSet: false }
   },
 
   async get_fau_volume(prisma, ctx, { days }) {

@@ -2,6 +2,7 @@
 
 import { ChevronRight, X } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
+import LoggerConfirm from './LoggerConfirm'
 
 interface FollowAlongHeaderProps {
   currentExerciseIndex: number
@@ -86,7 +87,7 @@ export default function FollowAlongHeader({
           <button
             type="button"
             onClick={onClose}
-            className="p-1 text-secondary-foreground/80 hover:text-secondary-foreground transition-colors doom-focus-ring"
+            className="-my-2 -mr-2 inline-flex h-12 w-12 items-center justify-center text-secondary-foreground/80 hover:text-secondary-foreground transition-colors doom-focus-ring"
             aria-label="Close workout"
           >
             <X size={18} strokeWidth={2.5} />
@@ -97,7 +98,7 @@ export default function FollowAlongHeader({
           <button
             type="button"
             onClick={handleBannerTap}
-            className={`w-full pb-2 px-4 text-sm text-secondary-foreground/90 hover:text-secondary-foreground hover:bg-black/5 active:bg-black/10 cursor-pointer transition-all duration-500 doom-focus-ring flex items-center justify-center gap-1.5 ${
+            className={`w-full min-h-12 pb-2 px-4 text-sm text-secondary-foreground/90 hover:text-secondary-foreground hover:bg-black/5 active:bg-black/10 cursor-pointer transition-all duration-500 doom-focus-ring flex items-center justify-center gap-1.5 ${
               bannerFading ? 'opacity-0' : 'opacity-100'
             }`}
           >
@@ -110,34 +111,14 @@ export default function FollowAlongHeader({
         )}
       </div>
 
-      {showConfirm && (
-        <div className="fixed inset-0 backdrop-blur-md bg-black/40 dark:bg-black/60 flex items-center justify-center z-[60] p-4">
-          <div className="bg-card border-2 border-border p-6 sm:p-8 text-center max-w-sm w-full shadow-xl doom-corners">
-            <h3 className="text-lg font-bold text-foreground mb-3 uppercase tracking-wider">
-              Switch to Logging Mode?
-            </h3>
-            <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-              This will let you track your weights and reps for each set. You can always switch back to Follow Along mode in Settings.
-            </p>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setShowConfirm(false)}
-                className="flex-1 px-4 py-3 text-base bg-muted text-foreground hover:bg-secondary transition-colors font-bold uppercase tracking-wider border-2 border-border hover:border-primary doom-focus-ring"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmSwitch}
-                className="flex-1 px-4 py-3 text-base bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-bold uppercase tracking-wider doom-button-3d doom-focus-ring"
-              >
-                Switch
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <LoggerConfirm
+        open={showConfirm}
+        onOpenChange={setShowConfirm}
+        title="Switch to logging mode?"
+        body="This lets you track weights and reps for each set. You can switch back to Follow Along in Settings."
+        confirmLabel="Switch"
+        onConfirm={handleConfirmSwitch}
+      />
     </>
   )
 }

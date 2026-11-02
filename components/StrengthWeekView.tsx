@@ -477,33 +477,7 @@ export default function StrengthWeekView({
 
   return (
     <div className="space-y-4">
-      <div>
-        <WeekNavigator
-          currentWeek={week.weekNumber}
-          totalWeeks={totalWeeks}
-          baseUrl={programDetailHref(programId)}
-          programName={programName}
-          completionIndicator={
-            isProgramComplete && !readOnly ? (
-              <button type="button"
-                onClick={() => setShowCompletionModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-success text-success-foreground border-2 border-success hover:bg-success-hover font-bold text-sm uppercase tracking-wider transition-all"
-                title="View completion stats and restart program"
-              >
-                <CheckCircle size={20} />
-                <span className="hidden sm:inline">Complete</span>
-              </button>
-            ) : undefined
-          }
-        />
-        {week.description && !trainingMessage && (
-          <div className="mt-3 px-1">
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              <span className="font-bold">Week Overview:</span> {week.description}
-            </p>
-          </div>
-        )}
-      </div>
+      <h1 className="text-2xl font-bold uppercase tracking-wider text-foreground break-words">{programName}</h1>
 
       {readOnly && canActivate && (
         <button
@@ -541,43 +515,68 @@ export default function StrengthWeekView({
         </div>
       )}
 
-      <div className="bg-card border border-border doom-corners divide-y divide-border">
-        {week.workouts.map(workout => (
-          <WorkoutCard
-            key={workout.id}
-            workout={workout}
-            expanded={expandedWorkoutId === workout.id}
-            isSkipping={skippingWorkout === workout.id}
-            isUnskipping={unskippingWorkout === workout.id}
-            isLoading={(isLoadingWorkout && selectedWorkoutId === workout.id) || (isPending && updatingWorkoutId === workout.id)}
-            onToggle={handleToggleWorkout}
-            onSkip={handleSkipWorkout}
-            onUnskip={handleUnskipWorkout}
-            onLog={handleOpenLogging}
-            hideSkip={isBeginnerFirstVisit && workout.id === firstWorkoutId}
-            readOnly={readOnly}
-          />
-        ))}
+      {/* The week: a green folder, "Week N of M" and its arrows on the tab, the days in the box. */}
+      <section>
+        <WeekNavigator
+          currentWeek={week.weekNumber}
+          totalWeeks={totalWeeks}
+          baseUrl={programDetailHref(programId)}
+          completionIndicator={
+            isProgramComplete && !readOnly ? (
+              <button type="button"
+                onClick={() => setShowCompletionModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-success text-success-foreground border-2 border-success hover:bg-success-hover font-bold text-sm uppercase tracking-wider transition-all"
+                title="View completion stats and restart program"
+              >
+                <CheckCircle size={20} />
+                <span className="hidden sm:inline">Complete</span>
+              </button>
+            ) : undefined
+          }
+        />
+        <div className="folder-box border-2 border-primary bg-card divide-y divide-border">
+          {week.description && !trainingMessage && (
+            <p className="px-4 py-3 text-sm text-muted-foreground leading-relaxed">
+              <span className="font-bold text-foreground">Week overview:</span> {week.description}
+            </p>
+          )}
+          {week.workouts.map(workout => (
+            <WorkoutCard
+              key={workout.id}
+              workout={workout}
+              expanded={expandedWorkoutId === workout.id}
+              isSkipping={skippingWorkout === workout.id}
+              isUnskipping={unskippingWorkout === workout.id}
+              isLoading={(isLoadingWorkout && selectedWorkoutId === workout.id) || (isPending && updatingWorkoutId === workout.id)}
+              onToggle={handleToggleWorkout}
+              onSkip={handleSkipWorkout}
+              onUnskip={handleUnskipWorkout}
+              onLog={handleOpenLogging}
+              hideSkip={isBeginnerFirstVisit && workout.id === firstWorkoutId}
+              readOnly={readOnly}
+            />
+          ))}
 
-        {hasIncompleteWorkouts && !readOnly && (
-          <button
-            type="button"
-            data-training-widget
-            onClick={() => {
-              if (confirm('This will mark all remaining workouts as skipped. Are you sure?')) {
-                handleCompleteWeek()
-              }
-            }}
-            disabled={completingWeek}
-            className="w-full py-3.5 text-muted-foreground hover:text-foreground bg-muted/20 hover:bg-muted/40 active:bg-muted/60 transition-all text-sm font-semibold uppercase tracking-wider doom-focus-ring disabled:opacity-50"
-          >
-            <div className="flex items-center justify-center gap-2">
-              <CheckCircle size={16} />
-              {completingWeek ? 'COMPLETING...' : 'COMPLETE WEEK'}
-            </div>
-          </button>
-        )}
-      </div>
+          {hasIncompleteWorkouts && !readOnly && (
+            <button
+              type="button"
+              data-training-widget
+              onClick={() => {
+                if (confirm('This will mark all remaining workouts as skipped. Are you sure?')) {
+                  handleCompleteWeek()
+                }
+              }}
+              disabled={completingWeek}
+              className="w-full py-3.5 text-muted-foreground hover:text-foreground bg-muted/20 hover:bg-muted/40 active:bg-muted/60 transition-all text-sm font-semibold uppercase tracking-wider doom-focus-ring disabled:opacity-50"
+            >
+              <div className="flex items-center justify-center gap-2">
+                <CheckCircle size={16} />
+                {completingWeek ? 'COMPLETING...' : 'COMPLETE WEEK'}
+              </div>
+            </button>
+          )}
+        </div>
+      </section>
 
       {/* Recent History */}
       {historyCount > 0 && (

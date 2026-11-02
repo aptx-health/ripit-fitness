@@ -68,3 +68,10 @@
 - 2026-10-31 MDT: 058 review: ship with notes. Key: the MCP URL shown in prod would be staging's, because NEXT_PUBLIC_APP_URL is inlined at build. Fixes to the implementer, test gaps to the test-builder, proposal links to the roadmap.
 - 2026-10-31 MDT: 056 follow-up 2 in (18 tests for editor, role-lookup failure, export revoke, no-role, limit race; 8/8 breaks). Waiting on the implementer's 058 fixes.
 - 2026-10-31 MDT: 058 fixes in; lead re-run green. TL5b phone preview up for Dustin.
+- 2026-10-31 MDT: Dustin OK'd TL5b. Committed; PR stacked on TL6. Every Training + Library item is built and OK'd. The stack waits on Dustin to merge bottom-up.
+- 2026-10-31 MDT: Dustin merged #1012 and #1011; the lead merged #1010, #1009, #1007 and #1008 (retargeted after a merge race) into feature/training-library (authorised by Dustin). #1006 now carries the whole redesign into dev; full CI is running.
+- 2026-10-31 MDT: #1006 full CI green (migrations, tests, build, smoke ×2). Waiting on Dustin to merge into dev.
+- 2026-10-31 MDT: Dustin merged #1006 into dev. Release PR dev → main opened; CI check in 10 min.
+- 2026-10-31 MDT: Dustin merged #1013 to main. Images sha-9afbb6f7… built. Infra agent asked for the prod bump PR.
+- 2026-10-31 MDT: ripit-infra #133 opened (tag bump only, checked). Prod BETTER_AUTH_URL unverified (no Doppler prd access); flagged to Dustin.
+- 2026-10-31 MDT: Dustin merged ripit-infra #133. The Training + Library redesign is in prod, and Dustin confirms "all working fine in prod". The initiative is complete. Next roadmap item: one source of truth for FAU targets. Wrapped for the night.

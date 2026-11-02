@@ -21,7 +21,7 @@ export default function MuscleBalancePanel({
   const hasHistory = snapshot.lookback.completedWorkouts > 0
 
   return (
-    <section className="border-2 border-border bg-card p-4 doom-corners">
+    <section className="folder-box border border-border bg-card p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 text-foreground">
@@ -89,7 +89,7 @@ export default function MuscleBalancePanel({
         <button
           type="button"
           onClick={() => setExpanded((value) => !value)}
-          className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-bold uppercase tracking-wider text-foreground doom-focus-ring hover:text-primary"
+          className="mt-3 inline-flex min-h-12 items-center gap-2 text-sm font-bold uppercase tracking-wider text-foreground doom-focus-ring hover:text-primary"
         >
           {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           {expanded ? 'Show less' : 'Show all muscles'}

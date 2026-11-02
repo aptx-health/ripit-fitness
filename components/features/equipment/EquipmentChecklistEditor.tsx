@@ -1,8 +1,9 @@
 'use client'
 
-import { ArrowLeft, Check } from 'lucide-react'
-import Link from 'next/link'
+import { Check, Dumbbell } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { ROW_LABEL, SettingsBlock } from '@/components/settings/SettingsBlock'
+import SubpageHeader from '@/components/ui/SubpageHeader'
 import { clientLogger } from '@/lib/client-logger'
 import { EQUIPMENT_LABELS } from '@/lib/constants/program-metadata'
 import {
@@ -92,109 +93,81 @@ export default function EquipmentChecklistEditor({
     }
   }, [selected])
 
+  // Saves on its own (debounced), so the header shows the save state, not a Save button.
+  const status = (
+    <span className="text-sm text-muted-foreground" role="status" aria-live="polite">
+      {saveState === 'saving' && 'Saving...'}
+      {saveState === 'saved' && 'Saved'}
+      {saveState === 'error' && <span className="text-error">Save failed, retry a change</span>}
+    </span>
+  )
+
   return (
-    <div className="bg-background px-4 sm:px-6 py-8">
-      <div className="max-w-md md:max-w-2xl mx-auto space-y-6">
-        <div>
-          <Link
-            href="/settings"
-            className="relative mb-4 inline-flex items-center gap-1.5 text-sm font-medium uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground doom-focus-ring before:content-[''] before:absolute before:-inset-3"
-          >
-            <ArrowLeft size={16} aria-hidden="true" />
-            Settings
-          </Link>
-          <h1 className="text-xl font-bold">Equipment</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Workout suggestions only use exercises you have equipment for.
-          </p>
-        </div>
+    <main className="bg-background px-4 py-6 sm:px-6 sm:py-8">
+      <div className="mx-auto max-w-2xl">
+        <SubpageHeader
+          title="Equipment"
+          intro="Workout suggestions only use exercises you have equipment for."
+          action={status}
+        />
 
         {isUnset && (
-          <div className="border-2 border-primary/40 bg-primary/10 px-4 py-3 text-sm text-foreground">
-            Assuming a full gym. Toggle off anything you&apos;re missing, or
-            start from a preset.
-          </div>
+          <p className="mb-5 text-sm text-foreground">
+            Assuming a full gym. Toggle off anything you&apos;re missing, or start from a preset.
+          </p>
         )}
 
-        {/* Presets */}
-        <div>
-          <span className="block text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
-            Presets
-          </span>
-          <div className="flex flex-wrap gap-2">
-            {EQUIPMENT_PRESETS.map((preset) => (
-              <button
-                key={preset.id}
-                type="button"
-                onClick={() => applyPreset(preset.values)}
-                className="min-h-11 px-4 py-2 border-2 border-border bg-muted text-foreground font-semibold uppercase tracking-wider text-sm transition-colors hover:border-primary hover:bg-secondary doom-focus-ring"
-              >
-                {preset.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Checklist */}
-        <div className="space-y-5">
-          <div className="flex items-center justify-between">
-            <span className="block text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-              Available Equipment
-            </span>
-            <span
-              className="text-sm text-muted-foreground"
-              role="status"
-              aria-live="polite"
-            >
-              {saveState === 'saving' && 'Saving...'}
-              {saveState === 'saved' && 'Saved'}
-              {saveState === 'error' && (
-                <span className="text-error">Save failed, retry a change</span>
-              )}
-            </span>
+        <div className="space-y-6">
+          {/* Presets: one row of chips */}
+          <div>
+            <span className={`${ROW_LABEL} mb-2 text-muted-foreground`}>Presets</span>
+            {/* One row that scrolls sideways at phone width, so the presets never wrap. */}
+            <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
+              {EQUIPMENT_PRESETS.map((preset) => (
+                <button
+                  key={preset.id}
+                  type="button"
+                  onClick={() => applyPreset(preset.values)}
+                  className="inline-flex min-h-12 shrink-0 items-center whitespace-nowrap bg-primary/15 px-3 text-[13px] font-bold uppercase tracking-wider text-foreground hover:bg-primary/25 doom-focus-ring"
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {EQUIPMENT_CHECKLIST_GROUPS.map((group) => (
-            <div key={group.id}>
-              <span className="block text-xs font-semibold text-muted-foreground/80 mb-2 uppercase tracking-wider">
-                {group.label}
-              </span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {group.values.map((value) => {
-                  const checked = effective.includes(value)
-                  return (
-                    <button
-                      key={value}
-                      type="button"
-                      role="checkbox"
-                      aria-checked={checked}
-                      aria-label={`${EQUIPMENT_LABELS[value]} available`}
-                      onClick={() => toggle(value)}
-                      className={`flex min-h-11 items-center gap-3 border-2 px-3 py-2 text-left text-sm font-semibold uppercase tracking-wider transition-colors doom-focus-ring ${
-                        checked
-                          ? 'border-primary bg-primary/10 text-foreground'
-                          : 'border-border bg-muted text-muted-foreground hover:border-primary'
+            <SettingsBlock key={group.id} title={group.label} icon={<Dumbbell size={16} />}>
+              {group.values.map((value) => {
+                const checked = effective.includes(value)
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    role="checkbox"
+                    aria-checked={checked}
+                    aria-label={`${EQUIPMENT_LABELS[value]} available`}
+                    onClick={() => toggle(value)}
+                    className="flex min-h-12 w-full items-center gap-3 px-4 py-2 text-left hover:bg-muted/50 doom-focus-ring"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={`flex h-5 w-5 shrink-0 items-center justify-center border-2 ${
+                        checked ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-background'
                       }`}
                     >
-                      <span
-                        aria-hidden="true"
-                        className={`flex h-5 w-5 shrink-0 items-center justify-center border-2 ${
-                          checked
-                            ? 'border-primary bg-primary text-primary-foreground'
-                            : 'border-border bg-background'
-                        }`}
-                      >
-                        {checked && <Check size={14} strokeWidth={3} />}
-                      </span>
+                      {checked && <Check size={14} strokeWidth={3} />}
+                    </span>
+                    <span className={`${ROW_LABEL} ${checked ? 'text-foreground' : 'text-muted-foreground'}`}>
                       {EQUIPMENT_LABELS[value]}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
+                    </span>
+                  </button>
+                )
+              })}
+            </SettingsBlock>
           ))}
         </div>
       </div>
-    </div>
+    </main>
   )
 }

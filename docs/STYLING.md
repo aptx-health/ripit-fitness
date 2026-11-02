@@ -1,4 +1,25 @@
-## DOOM Theme Color Tables
+## Folder blocks (start here)
+
+New screens use the folder style of the Training home. Build from these pieces rather than styling by hand:
+
+- **`components/ui/PaperTabs.tsx`**: the paper-tab strip. Controlled (`value` + `onChange`), so a page can keep the tab in the URL; tones `mine` (brown), `next` (green) and `coach` (gold); count chips; an optional trailing link tab (`linkTab`). Exports `PAPER_TAB_FOCUS`, the inset focus ring paper tabs need because their clip-path cuts off an outside ring.
+- **`components/training/TabbedBlock.tsx`**: paper tabs over a folder box, remembering the chosen tab on the device.
+- **`components/training/SectionTab.tsx`**: a single folder tab as a section heading, with `SECTION_BOX` for the box under it.
+- **`components/ui/PageTitle.tsx`**: the `text-4xl` `doom-title` hero title of a top-level screen.
+- **`components/ui/SubpageHeader.tsx`**: a sub-page's back link, `text-2xl` uppercase title, one-line intro and optional action (Save).
+
+Rules:
+
+- No `doom-corners` on folder surfaces.
+- Rows inside a box are plain `divide-y` rows.
+- `doom-title` only on the one hero title per screen.
+- Keep 48px touch targets.
+- Use theme tokens (`bg-card`, `text-muted-foreground`, `border-border`…), never fixed colours, and check light and dark.
+- Page-level switches are paper tabs; `SegmentedControl` stays for small in-form options (Workout mode, RPE/RIR).
+
+## Legacy: DOOM theme colour tables
+
+The tables below describe the original zinc/orange DOOM palette. They are kept for reference only; current screens use the theme tokens and the folder pieces above.
 
 ### LIGHT MODE (Brutal Gray)
 

@@ -1,7 +1,6 @@
 'use client'
 
-import { AlertTriangle } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
+import LoggerConfirm from './LoggerConfirm'
 
 type Props = {
   /**
@@ -14,14 +13,14 @@ type Props = {
   onSaveAsDraft: () => void
   onDiscard: () => void
   onCancel: () => void
-  /** When true, disables Save/Cancel and shows a spinner on the Discard button. */
+  /** When true, every button is disabled and the Discard button says "Discarding…". */
   isDiscarding?: boolean
 }
 
 /**
- * Shared exit-confirmation modal used by both the programmed
- * `<ExerciseLoggingModal>` and the ad-hoc logger surface.
- *  - With unsaved work: Save as Draft / Discard All / Cancel
+ * Shared exit confirmation for the programmed `<ExerciseLoggingModal>` and the
+ * ad-hoc logger.
+ *  - With unsaved work: Save as draft (filled) / Discard (outline, error text) / Cancel
  *  - Otherwise: Cancel / Exit
  */
 export default function ExitWorkoutConfirm({
@@ -31,78 +30,36 @@ export default function ExitWorkoutConfirm({
   onCancel,
   isDiscarding = false,
 }: Props) {
+  const close = (open: boolean) => {
+    if (!open) onCancel()
+  }
+
+  if (!hasUnsavedWork) {
+    return (
+      <LoggerConfirm
+        open
+        onOpenChange={close}
+        title="Exit workout?"
+        body="Nothing is logged yet, so there is nothing to save."
+        confirmLabel={isDiscarding ? 'Exiting…' : 'Exit'}
+        onConfirm={onDiscard}
+        busy={isDiscarding}
+      />
+    )
+  }
+
   return (
-    <div className="fixed inset-0 backdrop-blur-md bg-background/80 flex items-center justify-center z-[60] p-4">
-      <div className="bg-card border-2 border-warning p-6 sm:p-8 text-center max-w-sm w-full shadow-xl doom-corners">
-        <div className="text-warning mb-4 flex justify-center">
-          <AlertTriangle size={56} strokeWidth={2} />
-        </div>
-        <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2 uppercase tracking-wider">
-          {hasUnsavedWork ? 'Exit Workout?' : 'Confirm Exit'}
-        </h3>
-        <p className="text-base sm:text-lg text-muted-foreground mb-6">
-          {hasUnsavedWork
-            ? 'Save as draft to pick up where you left off, or discard.'
-            : 'Are you sure you want to exit?'}
-        </p>
-        {hasUnsavedWork ? (
-          <div className="flex flex-col gap-3">
-            <Button
-              type="button"
-              variant="primary"
-              doom
-              onClick={onSaveAsDraft}
-              disabled={isDiscarding}
-              className="w-full px-4 py-3 text-base sm:text-lg font-bold uppercase tracking-wider"
-            >
-              Save as Draft
-            </Button>
-            <Button
-              type="button"
-              variant="danger"
-              doom
-              onClick={onDiscard}
-              loading={isDiscarding}
-              className="w-full px-4 py-3 text-base sm:text-lg font-bold uppercase tracking-wider"
-            >
-              {isDiscarding ? 'Discarding…' : 'Discard All'}
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              doom
-              onClick={onCancel}
-              disabled={isDiscarding}
-              className="w-full px-4 py-3 text-base sm:text-lg font-bold uppercase tracking-wider border-2 border-border hover:border-primary"
-            >
-              Cancel
-            </Button>
-          </div>
-        ) : (
-          <div className="flex gap-3">
-            <Button
-              type="button"
-              variant="secondary"
-              doom
-              onClick={onCancel}
-              disabled={isDiscarding}
-              className="flex-1 px-4 py-3 text-base sm:text-lg font-bold uppercase tracking-wider border-2 border-border hover:border-primary"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              variant="danger"
-              doom
-              onClick={onDiscard}
-              loading={isDiscarding}
-              className="flex-1 px-4 py-3 text-base sm:text-lg font-bold uppercase tracking-wider"
-            >
-              {isDiscarding ? 'Exiting…' : 'Exit'}
-            </Button>
-          </div>
-        )}
-      </div>
-    </div>
+    <LoggerConfirm
+      open
+      onOpenChange={close}
+      title="Exit workout?"
+      body="Save as a draft to pick up where you left off, or discard it."
+      confirmLabel="Save as draft"
+      onConfirm={onSaveAsDraft}
+      secondaryLabel={isDiscarding ? 'Discarding…' : 'Discard'}
+      onSecondary={onDiscard}
+      busy={isDiscarding}
+      secondaryDisabled={isDiscarding}
+    />
   )
 }

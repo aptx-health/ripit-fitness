@@ -42,8 +42,13 @@ export default function DrawerContextBanner({
   isInputExpanded = false,
   menuActions,
 }: DrawerContextBannerProps) {
+  // Past the last planned set (all logged): count what is done, not the next set.
   const setLabel =
-    typeof totalSets === 'number' ? `Set ${currentSet} of ${totalSets}` : `Set ${currentSet}`
+    typeof totalSets === 'number'
+      ? currentSet > totalSets
+        ? `${totalSets} of ${totalSets} done`
+        : `Set ${currentSet} of ${totalSets}`
+      : `Set ${currentSet}`
 
   return (
     <div className="px-4 pt-2 pb-2 border-b border-border/60">

@@ -198,8 +198,32 @@ export function saveThemePreference(preference: ThemePreference): void {
 }
 
 /**
+ * Points the browser's theme colour (the iOS status bar, Android chrome) at the
+ * page background of the theme now applied. The server renders a light and a
+ * dark tag from the OS setting for first paint; every tag gets the same colour
+ * here, so the app's own theme and mode win whatever the OS prefers.
+ */
+export function syncThemeColor(): void {
+  if (typeof document === 'undefined') return;
+
+  const background = getComputedStyle(document.documentElement).getPropertyValue('--background').trim();
+  if (!background) return;
+
+  const tags = document.head.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]');
+  if (tags.length === 0) {
+    const tag = document.createElement('meta');
+    tag.name = 'theme-color';
+    tag.content = background;
+    document.head.appendChild(tag);
+    return;
+  }
+  for (const tag of tags) tag.content = background;
+}
+
+/**
  * Applies theme to the document root
- * Sets data-theme and data-mode attributes, plus legacy .dark class
+ * Sets data-theme and data-mode attributes, plus legacy .dark class, and the
+ * theme colour to match
  */
 export function applyTheme(preference: ThemePreference): void {
   if (typeof document === 'undefined') return;
@@ -215,5 +239,12 @@ export function applyTheme(preference: ThemePreference): void {
     root.classList.add('dark');
   } else {
     root.classList.remove('dark');
+  }
+
+  // Cosmetic: a failure here must never stop the theme applying.
+  try {
+    syncThemeColor();
+  } catch (error) {
+    clientLogger.warn('Failed to sync theme-color:', error);
   }
 }
