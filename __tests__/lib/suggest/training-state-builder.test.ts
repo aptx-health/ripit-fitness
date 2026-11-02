@@ -157,6 +157,8 @@ async function seedProfile(
   }
 
   const spec = ARCHETYPES[archetype]
+  // The targets live in Settings now; the profile's copy is not read.
+  await prisma.userMuscleBalanceSettings.create({ data: { userId, targets: spec.ratioTargets } })
   await prisma.userTrainingProfile.create({
     data: {
       userId,

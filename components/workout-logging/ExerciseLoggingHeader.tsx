@@ -1,6 +1,6 @@
 'use client'
 
-import { Menu, X } from 'lucide-react'
+import { ListChecks, X } from 'lucide-react'
 import { useWorkoutTimer } from '@/hooks/useWorkoutTimer'
 
 interface ExerciseLoggingHeaderProps {
@@ -12,6 +12,8 @@ interface ExerciseLoggingHeaderProps {
   onClose: () => void
   onOpenPlanEditor?: () => void
   modeToggle?: React.ReactNode
+  /** Off while the bottom bar offers Finish, so only one Finish is on screen. */
+  showFinish?: boolean
 }
 
 function ProgressIndicator({ current, total }: { current: number; total: number }) {
@@ -53,6 +55,7 @@ export default function ExerciseLoggingHeader({
   onClose,
   onOpenPlanEditor,
   modeToggle,
+  showFinish = true,
 }: ExerciseLoggingHeaderProps) {
   const { formatted: elapsedTime } = useWorkoutTimer(startedAt)
 
@@ -68,28 +71,15 @@ export default function ExerciseLoggingHeader({
         {/* Left: progress indicator (button when editor wired) */}
         <div className="flex items-center">
           {onOpenPlanEditor ? (
+            // Says what it opens and where you are, at every width: "PLAN 2/6".
             <button
               type="button"
               onClick={onOpenPlanEditor}
-              aria-label="Edit workout plan"
-              className="group inline-flex min-h-12 items-center gap-2 px-1.5 border-2 border-secondary-active hover:bg-secondary-hover doom-focus-ring"
+              className="inline-flex min-h-12 items-center gap-1.5 px-2.5 border-2 border-secondary-active hover:bg-secondary-hover text-sm font-bold uppercase tracking-wider text-secondary-foreground doom-focus-ring"
             >
-              <Menu
-                size={18}
-                strokeWidth={2.5}
-                className="text-secondary-foreground/85 ml-0.5 sm:hidden"
-                aria-hidden="true"
-              />
-              <span
-                className="inline-flex items-center px-1.5 py-1 bg-secondary-active max-[359px]:hidden"
-              >
-                <ProgressIndicator current={currentExerciseIndex} total={totalExercises} />
-              </span>
-              <span
-                className="hidden sm:inline text-[10px] font-bold uppercase tracking-[0.15em] text-secondary-foreground/85 pr-1"
-                aria-hidden="true"
-              >
-                Plan
+              <ListChecks size={16} strokeWidth={2.5} aria-hidden="true" />
+              <span className="tabular-nums">
+                Plan {currentExerciseIndex + 1}/{totalExercises}
               </span>
             </button>
           ) : (
@@ -107,6 +97,7 @@ export default function ExerciseLoggingHeader({
 
         {/* Right: FINISH pill (primary CTA) + boxed X escape hatch */}
         <div className="flex items-center justify-end gap-2">
+          {showFinish && (
           <button
             type="button"
             onClick={onCompleteWorkout}
@@ -114,6 +105,7 @@ export default function ExerciseLoggingHeader({
           >
             FINISH
           </button>
+          )}
           <button
             type="button"
             onClick={onClose}

@@ -9,16 +9,17 @@
  *
  * The scoring core ({@link computeAnchorStaleness}) is pure and unit-tested; the
  * async {@link getAnchorStaleness} wrapper is the thin DB seam that feeds it the
- * last-logged dates via {@link getBatchExercisePerformance}.
+ * last-logged dates ({@link getLastLoggedByExercise}).
  */
 
+import { Prisma } from '@prisma/client'
+import { prisma } from '@/lib/db'
 import {
   ANCHOR_PATTERN_DISPLAY_NAMES,
   ANCHOR_PATTERNS,
   type AnchorPattern,
   type TargetMovements,
 } from '@/lib/exercises/anchor-patterns'
-import { getBatchExercisePerformance } from '@/lib/queries/exercise-history'
 
 export type AnchorStalenessRow = {
   pattern: AnchorPattern
@@ -109,11 +110,31 @@ export async function getAnchorStaleness(
 
   if (allIds.length === 0) return []
 
-  const history = await getBatchExercisePerformance(allIds, userId)
-  const lastLoggedByExerciseId = new Map<string, Date>()
-  for (const [id, entry] of history) {
-    lastLoggedByExerciseId.set(id, entry.completedAt)
-  }
-
+  const lastLoggedByExerciseId = await getLastLoggedByExercise(userId, allIds)
   return computeAnchorStaleness(targetMovements, lastLoggedByExerciseId, new Date())
+}
+
+/**
+ * When each exercise definition was last logged: the newest completed,
+ * non-archived workout with a logged set of it. One grouped query over all of
+ * the user's history (no "last N workouts" cap), so an anchor last trained
+ * long ago still reads its real date rather than "never logged".
+ */
+export async function getLastLoggedByExercise(
+  userId: string,
+  exerciseDefinitionIds: string[],
+): Promise<Map<string, Date>> {
+  if (exerciseDefinitionIds.length === 0) return new Map()
+  const rows = await prisma.$queryRaw<Array<{ id: string; lastLogged: Date }>>`
+    SELECT e."exerciseDefinitionId" AS id, MAX(c."completedAt") AS "lastLogged"
+    FROM "LoggedSet" s
+    JOIN "Exercise" e ON e.id = s."exerciseId"
+    JOIN "WorkoutCompletion" c ON c.id = s."completionId"
+    WHERE c."userId" = ${userId}
+      AND c.status = 'completed'
+      AND c."isArchived" = false
+      AND e."exerciseDefinitionId" IN (${Prisma.join(exerciseDefinitionIds)})
+    GROUP BY e."exerciseDefinitionId"
+  `
+  return new Map(rows.map((r) => [r.id, new Date(r.lastLogged)]))
 }

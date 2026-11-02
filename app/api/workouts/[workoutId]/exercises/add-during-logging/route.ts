@@ -149,12 +149,19 @@ export async function POST(
         }
       }
 
+      // After the workout's exercises and this session's earlier one-offs, so two adds don't tie.
+      const oneOffMax = await prisma.exercise.aggregate({
+        where: { workoutCompletionId: actualCompletionId, isOneOff: true, userId: user.id },
+        _max: { order: true },
+      })
+      const oneOffOrder = Math.max(nextOrder, (oneOffMax._max.order ?? 0) + 1)
+
       addedExercise = await prisma.$transaction(async (tx) => {
         const exercise = await tx.exercise.create({
           data: {
             name: exerciseDefinition.name,
             exerciseDefinitionId,
-            order: nextOrder,
+            order: oneOffOrder,
             workoutId: null, // Not part of program structure
             isOneOff: true,
             workoutCompletionId: actualCompletionId,

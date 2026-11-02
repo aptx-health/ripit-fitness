@@ -202,7 +202,7 @@ export default function SetList({
             <button
               type="button"
               onClick={() => onDeleteSet(logged.setNumber)}
-              className="p-1 text-muted-foreground/60 hover:text-error doom-focus-ring"
+              className="-my-3 -mr-2 inline-flex h-12 w-12 shrink-0 items-center justify-center text-muted-foreground/60 hover:text-error doom-focus-ring"
               aria-label={`Delete set ${logged.setNumber}`}
             >
               <Trash2 size={14} strokeWidth={2} />

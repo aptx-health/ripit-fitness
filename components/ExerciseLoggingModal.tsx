@@ -14,6 +14,7 @@ import { type Exercise, type ExerciseHistory, useProgressiveExercises } from '@/
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
 import { useUserSettings } from '@/hooks/useUserSettings'
 import { useWorkoutDraft } from '@/hooks/useWorkoutDraft'
+import { useWorkoutPlanSheet } from '@/hooks/useWorkoutPlanSheet'
 import { completeDraft, discardDraft } from '@/lib/api/workout-sets'
 import { clientLogger } from '@/lib/client-logger'
 import { parseRepsFromPrescribed } from '@/lib/constants/intensity-presets'
@@ -32,7 +33,7 @@ import FollowAlongHeader from './workout-logging/FollowAlongHeader'
 import FollowAlongTabs from './workout-logging/FollowAlongTabs'
 import LoggerBottomBar, { pendingSetDetail } from './workout-logging/LoggerBottomBar'
 import SetLoggingForm, { type ExpandedInput } from './workout-logging/SetLoggingForm'
-import WorkoutPlanEditor, { type WorkoutPlanEditorExercise } from './workout-logging/WorkoutPlanEditor'
+import WorkoutPlanEditor from './workout-logging/WorkoutPlanEditor'
 import { AddExerciseWizard } from './workout-logging/wizards/AddExerciseWizard'
 import { DeleteExerciseWizard } from './workout-logging/wizards/DeleteExerciseWizard'
 import { EditExerciseWizard } from './workout-logging/wizards/EditExerciseWizard'
@@ -157,11 +158,6 @@ export default function ExerciseLoggingModal({
   const [editingExerciseDefinitionId, setEditingExerciseDefinitionId] = useState<string | null>(null)
   const [quickEditExerciseId, setQuickEditExerciseId] = useState<string | null>(null)
 
-  // Workout plan editor state
-  const [planEditorOpen, setPlanEditorOpen] = useState(false)
-  const [planExercises, setPlanExercises] = useState<WorkoutPlanEditorExercise[]>([])
-  const [isReorderingPlan, setIsReorderingPlan] = useState(false)
-
   // Progressive loading of exercises
   const {
     currentExercise,
@@ -203,6 +199,7 @@ export default function ExerciseLoggingModal({
     setCompleteMinutes(startedAt ? Math.max(0, Math.floor((Date.now() - Date.parse(startedAt)) / 60_000)) : 0)
     setIsConfirming(true)
   }, [startedAt])
+
 
   const currentPrescribedSets = useMemo(
     () => currentExercise?.prescribedSets || [],
@@ -431,46 +428,24 @@ export default function ExerciseLoggingModal({
   }
   const handleEditExercise = () => setActiveWizard('edit')
 
-  // Plan editor: fetch full exercise list when opening
-  const handleOpenPlanEditor = useCallback(async () => {
-    setPlanEditorOpen(true)
-    try {
-      const res = await fetch(`/api/workouts/${workoutId}/exercises`)
-      if (!res.ok) throw new Error('Failed to load')
-      const data = (await res.json()) as { exercises: { id: string; name: string }[] }
-      setPlanExercises(data.exercises.map((e) => ({ id: e.id, name: e.name })))
-    } catch (err) {
-      clientLogger.error('Failed to load workout exercises for plan editor', err)
-    }
-  }, [workoutId])
-
-  const handleReorderPlan = useCallback(
-    async (orderedIds: string[]) => {
-      setIsReorderingPlan(true)
-      // Optimistic; editor already updated its own local order.
-      setPlanExercises((prev) => {
-        const byId = new Map(prev.map((e) => [e.id, e] as const))
-        return orderedIds.map((id) => byId.get(id)).filter(Boolean) as WorkoutPlanEditorExercise[]
-      })
-      try {
-        const res = await fetch(`/api/workouts/${workoutId}/exercises/reorder`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            exercises: orderedIds.map((exerciseId, idx) => ({ exerciseId, order: idx + 1 })),
-          }),
-        })
-        if (!res.ok) throw new Error('Reorder failed')
-        refreshExercises()
-        if (onRefresh) await onRefresh()
-      } catch (err) {
-        clientLogger.error('Reorder failed', err)
-      } finally {
-        setIsReorderingPlan(false)
+  // Workout plan sheet. After a reorder, stay on the exercise you are on (by id).
+  const plan = useWorkoutPlanSheet({
+    workoutId,
+    workoutCompletionId,
+    startedAt,
+    loggedSets,
+    onReordered: async (orderedIds) => {
+      const newIndex = currentExercise ? orderedIds.indexOf(currentExercise.id) : -1
+      if (newIndex >= 0 && newIndex !== currentIndex) {
+        lastPrefillKey.current = ''
+        goToExercise(newIndex)
       }
+      refreshExercises()
+      if (onRefresh) await onRefresh()
     },
-    [workoutId, refreshExercises, onRefresh],
-  )
+  })
+  const planExercises = plan.exercises
+  const setPlanEditorOpen = plan.setOpen
 
   const handleJumpToExercise = useCallback(
     (exerciseId: string) => {
@@ -492,7 +467,7 @@ export default function ExerciseLoggingModal({
       setPlanEditorOpen(false)
       setActiveWizard('swap')
     },
-    [planExercises],
+    [planExercises, setPlanEditorOpen],
   )
 
   const handlePlanDelete = useCallback(
@@ -503,14 +478,14 @@ export default function ExerciseLoggingModal({
       setPlanEditorOpen(false)
       setActiveWizard('delete')
     },
-    [planExercises],
+    [planExercises, setPlanEditorOpen],
   )
 
   const handlePlanAdd = useCallback(() => {
     setWizardTarget(null)
     setPlanEditorOpen(false)
     setActiveWizard('add')
-  }, [])
+  }, [setPlanEditorOpen])
 
   const handleEditExerciseDefinition = () => {
     if (currentExercise?.exerciseDefinition && !currentExercise.exerciseDefinition.isSystem) {
@@ -680,6 +655,10 @@ export default function ExerciseLoggingModal({
   const totalLoggedSets = loggedSets.length
   const isFirstExercise = currentIndex === 0
   const isLastExercise = currentIndex >= totalExercises - 1
+  // One Finish on screen: the header's goes while the bottom bar shows its own
+  // (last exercise with every planned set logged, or extra sets there).
+  const barOffersFinish =
+    !isFollowAlong && expandedInput === null && isLastExercise && (hasLoggedAllPrescribed || extraSetsMode)
 
   if (!isOpen) return null
   if (typeof document === 'undefined') return null
@@ -705,7 +684,8 @@ export default function ExerciseLoggingModal({
               startedAt={startedAt}
               onCompleteWorkout={openComplete}
               onClose={handleExitWorkout}
-              onOpenPlanEditor={handleOpenPlanEditor}
+              onOpenPlanEditor={plan.openSheet}
+              showFinish={!barOffersFinish}
             />
           )}
 
@@ -719,7 +699,7 @@ export default function ExerciseLoggingModal({
               <button
                 type="button"
                 onClick={dismissIntensityIntro}
-                className="text-muted-foreground hover:text-foreground flex-shrink-0 mt-0.5"
+                className="-my-2 -mr-2 inline-flex h-12 w-12 flex-shrink-0 items-center justify-center text-muted-foreground hover:text-foreground doom-focus-ring"
                 aria-label="Dismiss intensity tip"
               >
                 <X size={16} />
@@ -919,12 +899,13 @@ export default function ExerciseLoggingModal({
 
       {/* Workout plan editor */}
       <WorkoutPlanEditor
-        open={planEditorOpen}
+        open={plan.open}
         onClose={() => setPlanEditorOpen(false)}
-        exercises={planExercises}
+        exercises={plan.rows}
+        elapsed={plan.elapsed}
         currentExerciseId={currentExercise?.id}
-        isReordering={isReorderingPlan}
-        onReorder={handleReorderPlan}
+        isReordering={plan.isReordering}
+        onReorder={plan.reorder}
         onJump={handleJumpToExercise}
         onAdd={handlePlanAdd}
         onSwap={handlePlanSwap}

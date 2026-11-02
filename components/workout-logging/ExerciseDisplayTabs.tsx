@@ -1,13 +1,14 @@
 'use client'
 
-import { Sparkles } from 'lucide-react'
+import { History, Info, ListChecks, Sparkles, StickyNote } from 'lucide-react'
 import { useState } from 'react'
 import { LoadingFrog } from '@/components/ui/loading-frog'
 import type { MessageData } from '@/components/ui/MessageCard'
 import { MessageCard } from '@/components/ui/MessageCard'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/radix/tabs'
+import PaperTabs, { type PaperTab } from '@/components/ui/PaperTabs'
 import { TipAnnotation } from '@/components/ui/TipAnnotation'
 import type { LoadState } from '@/hooks/useProgressiveExercises'
+import { pluralize } from '@/lib/format/pluralize'
 import type { ApplicableSet } from '@/lib/workout/prefill'
 import type { LoggedSet } from '@/types/workout'
 import DrawerContextBanner from './DrawerContextBanner'
@@ -64,7 +65,8 @@ interface ExerciseDisplayTabsProps {
       Falls back to `[exerciseHistory]` when omitted. */
   sessions?: ExerciseHistory[]
   historyState?: LoadState
-  hasHistoryIndicator?: boolean // Pre-computed indicator for dot (updates reactively)
+  /** No longer drawn (the History tab counts sessions); kept so callers need not change. */
+  hasHistoryIndicator?: boolean
   onDeleteSet: (setNumber: number) => void
   /** Copy a set's numbers into the logging form (tap-to-prefill). */
   onApplySet?: (set: ApplicableSet) => void
@@ -85,6 +87,8 @@ interface ExerciseDisplayTabsProps {
   menuActions?: import('./ExerciseQuickActionsMenu').QuickAction[]
 }
 
+type TabId = 'log' | 'info' | 'notes' | 'history'
+
 function ExerciseTabTitle({ exercise }: { exercise: Exercise }) {
   const supersetLabel = exercise.exerciseGroup ?? null
   return (
@@ -94,9 +98,7 @@ function ExerciseTabTitle({ exercise }: { exercise: Exercise }) {
           Superset {supersetLabel}
         </span>
       )}
-      <h2 className="text-xl font-bold text-foreground doom-heading truncate">
-        {exercise.name.toUpperCase()}
-      </h2>
+      <h2 className="text-xl font-bold uppercase tracking-wider text-foreground break-words">{exercise.name}</h2>
     </div>
   )
 }
@@ -120,7 +122,6 @@ export default function ExerciseDisplayTabs({
   exerciseHistory,
   sessions,
   historyState = 'loaded',
-  hasHistoryIndicator = false,
   onDeleteSet,
   onApplySet,
   loggingForm,
@@ -135,7 +136,7 @@ export default function ExerciseDisplayTabs({
   menuActions,
 }: ExerciseDisplayTabsProps) {
   const hasNotes = !!exercise.notes
-  const [activeTab, setActiveTab] = useState('log-sets')
+  const [activeTab, setActiveTab] = useState<TabId>('log')
 
   // Prefer the full sessions list; fall back to the single last session so
   // callers that only wire `exerciseHistory` still render a one-session panel.
@@ -146,119 +147,143 @@ export default function ExerciseDisplayTabs({
   // unavailable on the new exercise (e.g. "notes" tab when there are no notes).
   // Adjusted during render, so there is no extra effect pass.
   if (activeTab === 'notes' && !hasNotes) {
-    setActiveTab('log-sets')
+    setActiveTab('log')
   }
 
-  return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full flex flex-col">
-      <TabsList className="flex-shrink-0 sticky top-0 z-10 overflow-hidden">
-        <TabsTrigger value="log-sets" className="flex-1">
-          <span>Log Sets</span>
-        </TabsTrigger>
-        <TabsTrigger value="info" className="flex-1">
-          <span>Info</span>
-        </TabsTrigger>
-        {hasNotes && (
-          <TabsTrigger value="notes" className="relative flex-1">
-            <span>Notes</span>
-            <span className="absolute top-1 right-1 w-2 h-2 bg-primary"></span>
-          </TabsTrigger>
-        )}
-        <TabsTrigger value="history" className="relative flex-1">
-          <span>History</span>
-          {hasHistoryIndicator && (
-            <span className="absolute top-1 right-1 w-2 h-2 bg-primary"></span>
-          )}
-        </TabsTrigger>
-      </TabsList>
+  // Count chips, spoken: "1 note", "3 sessions" (none while history loads or when there is none).
+  const historyCount = historyState === 'loaded' && historySessions.length > 0 ? historySessions.length : undefined
+  const tabs: PaperTab[] = [
+    { id: 'log', label: 'Log', icon: <ListChecks size={16} aria-hidden="true" /> },
+    { id: 'info', label: 'Info', icon: <Info size={16} aria-hidden="true" /> },
+    ...(hasNotes
+      ? [{ id: 'notes', label: 'Notes', icon: <StickyNote size={16} aria-hidden="true" />, count: 1, countLabel: '1 note' }]
+      : []),
+    {
+      id: 'history',
+      label: 'History',
+      icon: <History size={16} aria-hidden="true" />,
+      count: historyCount,
+      countLabel: historyCount ? pluralize(historyCount, 'session') : undefined,
+    },
+  ]
+  const panel = (id: TabId) => ({
+    role: 'tabpanel' as const,
+    id: `exercise-panel-${id}`,
+    'aria-labelledby': `exercise-tab-${id}`,
+    hidden: activeTab !== id,
+  })
 
-      <TabsContent value="log-sets" className="flex-1 overflow-y-auto flex flex-col">
-        <DrawerContextBanner
-          exerciseName={exercise.name}
-          currentSet={currentSetNumber}
-          totalSets={totalSets}
-          prescribed={prescribedSummary}
-          isInputExpanded={isInputExpanded}
-          menuActions={menuActions}
+  const historyBody =
+    historyState === 'loading' || historyState === 'pending' ? (
+      <HistoryLoadingSkeleton />
+    ) : historyState === 'error' ? (
+      <div className="flex flex-col items-center justify-center h-full py-12">
+        <p className="text-base sm:text-lg text-error">Failed to load history</p>
+      </div>
+    ) : historySessions.length === 0 ? (
+      <div className="flex items-center justify-center h-full py-12">
+        <TipAnnotation icon={<Sparkles aria-hidden="true" size={16} strokeWidth={1.8} />}>
+          <span className="text-lg leading-relaxed text-muted-foreground">
+            First time doing this one. Log a set and your history starts here.
+          </span>
+        </TipAnnotation>
+      </div>
+    ) : (
+      <ExerciseHistoryPanel sessions={historySessions} />
+    )
+
+  return (
+    // Paper tabs (tone mine) over the exercise's folder box, as on Training. Only the
+    // selected panel renders its content; the others stay as empty, hidden panels.
+    <div className="w-full h-full flex flex-col">
+      <div className="flex-shrink-0 px-3 pt-2">
+        <PaperTabs
+          name="Exercise"
+          idPrefix="exercise"
+          tone="mine"
+          tabs={tabs}
+          value={activeTab}
+          onChange={(id) => setActiveTab(id as TabId)}
         />
-        <div className="px-4 pt-4 flex-1 flex flex-col gap-2">
-          {!isInputExpanded && (
-            <LastSessionReference
-              history={exerciseHistory}
-              isLoading={historyState === 'loading' || historyState === 'pending'}
-              onApply={onApplySet}
-              hasLoggedSets={loggedSets.length > 0}
-            />
-          )}
-          {loggingForm}
-          {!isInputExpanded && (
+      </div>
+      <div className="folder-box mx-3 mb-2 flex min-h-0 flex-1 flex-col border-2 border-secondary bg-card">
+        <div {...panel('log')} className="flex-1 overflow-y-auto flex flex-col">
+          {activeTab === 'log' && (
             <>
-              <SetList
-                prescribedSets={prescribedSets}
-                loggedSets={loggedSets}
-                exerciseHistory={exerciseHistory}
-                onDeleteSet={onDeleteSet}
-                onApplySet={onApplySet}
-                exerciseId={exercise.id}
-                showIntensity={showIntensity}
+              <DrawerContextBanner
+                exerciseName={exercise.name}
+                currentSet={currentSetNumber}
+                totalSets={totalSets}
+                prescribed={prescribedSummary}
+                isInputExpanded={isInputExpanded}
+                menuActions={menuActions}
               />
-              {message && (
-                <MessageCard
-                  message={message}
-                  variant="exercise_logger"
-                  onSeen={onMessageSeen}
-                  onDismiss={onMessageDismissed}
-                />
-              )}
+              <div className="px-4 pt-4 flex-1 flex flex-col gap-2">
+                {!isInputExpanded && (
+                  <LastSessionReference
+                    history={exerciseHistory}
+                    isLoading={historyState === 'loading' || historyState === 'pending'}
+                    onApply={onApplySet}
+                    hasLoggedSets={loggedSets.length > 0}
+                  />
+                )}
+                {loggingForm}
+                {!isInputExpanded && (
+                  <>
+                    <SetList
+                      prescribedSets={prescribedSets}
+                      loggedSets={loggedSets}
+                      exerciseHistory={exerciseHistory}
+                      onDeleteSet={onDeleteSet}
+                      onApplySet={onApplySet}
+                      exerciseId={exercise.id}
+                      showIntensity={showIntensity}
+                    />
+                    {message && (
+                      <MessageCard
+                        message={message}
+                        variant="exercise_logger"
+                        onSeen={onMessageSeen}
+                        onDismiss={onMessageDismissed}
+                      />
+                    )}
+                  </>
+                )}
+              </div>
             </>
           )}
         </div>
-      </TabsContent>
 
-      <TabsContent value="info" className="flex-1 overflow-y-auto px-4">
-        <ExerciseTabTitle exercise={exercise} />
-        <ExerciseInfoContent
-          exerciseName={exercise.name}
-          exerciseDefinition={exercise.exerciseDefinition}
-        />
-      </TabsContent>
+        <div {...panel('info')} className="flex-1 overflow-y-auto px-4">
+          {activeTab === 'info' && (
+            <>
+              <ExerciseTabTitle exercise={exercise} />
+              <ExerciseInfoContent exerciseName={exercise.name} exerciseDefinition={exercise.exerciseDefinition} />
+            </>
+          )}
+        </div>
 
-      {hasNotes && (
-        <TabsContent value="notes" className="flex-1 overflow-y-auto px-4">
-          <ExerciseTabTitle exercise={exercise} />
-          <div className="space-y-6">
-            <div>
-              <h4 className="text-lg sm:text-xl font-semibold text-foreground mb-3">Notes</h4>
-              <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed">
-                {exercise.notes}
-              </p>
-            </div>
+        {hasNotes && (
+          <div {...panel('notes')} className="flex-1 overflow-y-auto px-4">
+            {activeTab === 'notes' && (
+              <>
+                <ExerciseTabTitle exercise={exercise} />
+                <h4 className="text-lg sm:text-xl font-semibold text-foreground mb-3">Notes</h4>
+                <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed">{exercise.notes}</p>
+              </>
+            )}
           </div>
-        </TabsContent>
-      )}
-
-      <TabsContent value="history" className="flex-1 overflow-y-auto px-4">
-        <ExerciseTabTitle exercise={exercise} />
-        {historyState === 'loading' || historyState === 'pending' ? (
-          <HistoryLoadingSkeleton />
-        ) : historyState === 'error' ? (
-          <div className="flex flex-col items-center justify-center h-full py-12">
-            <p className="text-base sm:text-lg text-error">Failed to load history</p>
-          </div>
-        ) : historySessions.length === 0 ? (
-          <div className="flex items-center justify-center h-full py-12">
-            <TipAnnotation
-              icon={<Sparkles aria-hidden="true" size={16} strokeWidth={1.8} />}
-            >
-              <span className="text-lg leading-relaxed text-muted-foreground">
-                First time doing this one. Log a set and your history starts here.
-              </span>
-            </TipAnnotation>
-          </div>
-        ) : (
-          <ExerciseHistoryPanel sessions={historySessions} />
         )}
-      </TabsContent>
-    </Tabs>
+
+        <div {...panel('history')} className="flex-1 overflow-y-auto px-4">
+          {activeTab === 'history' && (
+            <>
+              <ExerciseTabTitle exercise={exercise} />
+              {historyBody}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
   )
 }

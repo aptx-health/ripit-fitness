@@ -82,7 +82,7 @@ export default function DrawerContextBanner({
               triggerIcon={Settings}
               triggerLabel="Edit"
               triggerAriaLabel="Exercise options"
-              triggerClassName="text-muted-foreground hover:text-foreground"
+              triggerClassName="min-h-12 min-w-12 -my-2 -mr-2 text-muted-foreground hover:text-foreground"
             />
           )}
         </div>

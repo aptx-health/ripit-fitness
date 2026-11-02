@@ -53,6 +53,7 @@ import {
   normalizeName,
 } from '../lib/eval/synthetic-history'
 import type { ArchetypeKey } from '../lib/eval/types'
+import { getDefaultMuscleBalanceTargets, normalizeMuscleBalanceTargets } from '../lib/muscle-balance'
 
 const prisma = new PrismaClient()
 
@@ -78,6 +79,7 @@ async function deleteArchetypeData(userId: string): Promise<void> {
   await prisma.program.deleteMany({ where: { userId } })
   await prisma.exercise.deleteMany({ where: { userId } }) // strays
   await prisma.userTrainingProfile.deleteMany({ where: { userId } })
+  await prisma.userMuscleBalanceSettings.deleteMany({ where: { userId } })
   await prisma.userSettings.deleteMany({ where: { userId } })
 }
 
@@ -142,9 +144,15 @@ async function seedArchetype(
       weeklyIntent: spec.weeklyIntents,
       equipmentAvailable: spec.equipment,
       bannedExerciseIds: [],
-      ratioTargets: spec.ratioTargets,
+      // Required but no longer read; the targets live in Settings (below).
+      ratioTargets: getDefaultMuscleBalanceTargets(),
       defaultIntensityPreference: spec.intensityPreference,
     },
+  })
+
+  // The archetype's targets, where every reader looks (unlisted FAUs at 1.0).
+  await prisma.userMuscleBalanceSettings.create({
+    data: { userId, targets: normalizeMuscleBalanceTargets(spec.ratioTargets) },
   })
 
   let sessionCount = 0

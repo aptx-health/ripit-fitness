@@ -9,8 +9,10 @@ import { ALL_FAUS, type FAUKey } from '@/lib/fau-volume'
 import { isRatioPresetId, type RatioPresetId } from '@/lib/learning/ratio-presets'
 import {
   getDefaultMuscleBalanceTargets,
+  getMuscleBalanceTargets,
   type MuscleBalanceTargets,
   normalizeMuscleBalanceTargets,
+  updateMuscleBalanceSettings,
 } from '@/lib/muscle-balance'
 
 export const INTENSITY_PREFERENCES = [
@@ -152,6 +154,11 @@ export type UserTrainingProfileDTO = {
    */
   equipmentAvailableSet: boolean
   bannedExerciseIds: string[]
+  /**
+   * The user's muscle-balance targets, read from UserMuscleBalanceSettings
+   * (the one source). The profile's own `ratioTargets` column is no longer
+   * read or written.
+   */
   ratioTargets: MuscleBalanceTargets
   defaultIntensityPreference: IntensityPreference | null
   // Demographics
@@ -381,7 +388,8 @@ type ProfileLike = {
   equipmentAvailable: string[]
   equipmentAvailableSet?: boolean
   bannedExerciseIds: string[]
-  ratioTargets: Prisma.JsonValue
+  /** The old column; ignored (targets come from Settings, see below). */
+  ratioTargets?: Prisma.JsonValue
   defaultIntensityPreference: string | null
   birthYear?: number | null
   biologicalSex?: string | null
@@ -399,8 +407,14 @@ type ProfileLike = {
   preferredDays?: string[]
 }
 
+/**
+ * Normalize a profile row into the DTO. `ratioTargets` is the user's
+ * UserMuscleBalanceSettings.targets (see getMuscleBalanceTargets), passed in
+ * because it lives on another row; omitted, it reads as the default targets.
+ */
 export function normalizeUserTrainingProfile(
-  profile: ProfileLike | null | undefined
+  profile: ProfileLike | null | undefined,
+  ratioTargets?: unknown
 ): UserTrainingProfileDTO {
   return {
     goalSentences: normalizeStringList(
@@ -426,7 +440,7 @@ export function normalizeUserTrainingProfile(
       MAX_BANNED_EXERCISE_IDS,
       64
     ),
-    ratioTargets: normalizeMuscleBalanceTargets(profile?.ratioTargets),
+    ratioTargets: normalizeMuscleBalanceTargets(ratioTargets),
     defaultIntensityPreference: normalizeIntensityPreference(
       profile?.defaultIntensityPreference ?? null
     ),
@@ -470,27 +484,21 @@ export function normalizeUserTrainingProfile(
 /**
  * Get the user's training profile, creating defaults if it doesn't exist.
  *
- * On first creation, seeds `ratioTargets` from `UserMuscleBalanceSettings.targets`
- * if the user already has muscle balance settings; otherwise uses defaults.
+ * `ratioTargets` is read from UserMuscleBalanceSettings (defaults when there is
+ * no row; never creates one). A new row's own `ratioTargets` column, required
+ * by the schema but no longer read, gets the default targets, not Settings'.
  */
 export async function getOrCreateUserTrainingProfile(
   prisma: PrismaClient,
   userId: string
 ): Promise<UserTrainingProfileDTO> {
-  const existing = await prisma.userTrainingProfile.findUnique({
-    where: { userId },
-  })
+  const [existing, ratioTargets] = await Promise.all([
+    prisma.userTrainingProfile.findUnique({ where: { userId } }),
+    getMuscleBalanceTargets(prisma, userId),
+  ])
   if (existing) {
-    return normalizeUserTrainingProfile(existing)
+    return normalizeUserTrainingProfile(existing, ratioTargets)
   }
-
-  const muscleBalance = await prisma.userMuscleBalanceSettings.findUnique({
-    where: { userId },
-    select: { targets: true },
-  })
-  const ratioTargets = muscleBalance
-    ? normalizeMuscleBalanceTargets(muscleBalance.targets)
-    : getDefaultMuscleBalanceTargets()
 
   const created = await prisma.userTrainingProfile.upsert({
     where: { userId },
@@ -501,12 +509,12 @@ export async function getOrCreateUserTrainingProfile(
       weeklyIntent: [],
       equipmentAvailable: [],
       bannedExerciseIds: [],
-      ratioTargets,
+      ratioTargets: getDefaultMuscleBalanceTargets(),
       defaultIntensityPreference: null,
     },
   })
 
-  return normalizeUserTrainingProfile(created)
+  return normalizeUserTrainingProfile(created, ratioTargets)
 }
 
 /**
@@ -531,8 +539,16 @@ export async function updateUserTrainingProfile(
   userId: string,
   update: UserTrainingProfileUpdate
 ): Promise<UserTrainingProfileDTO> {
-  // Ensure the row exists (also seeds ratioTargets on first touch).
+  // Ensure the row exists.
   await getOrCreateUserTrainingProfile(prisma, userId)
+
+  // Targets live in Settings: a ratioTargets update replaces the Settings
+  // targets (normalized as before; missing FAUs read as the default).
+  if ('ratioTargets' in update) {
+    await updateMuscleBalanceSettings(prisma, userId, {
+      targets: normalizeMuscleBalanceTargets(update.ratioTargets),
+    })
+  }
 
   const data: Prisma.UserTrainingProfileUpdateInput = {}
 
@@ -565,9 +581,6 @@ export async function updateUserTrainingProfile(
       MAX_BANNED_EXERCISE_IDS,
       64
     )
-  }
-  if ('ratioTargets' in update) {
-    data.ratioTargets = normalizeMuscleBalanceTargets(update.ratioTargets)
   }
   if ('defaultIntensityPreference' in update) {
     data.defaultIntensityPreference = normalizeIntensityPreference(
@@ -629,10 +642,10 @@ export async function updateUserTrainingProfile(
     data.preferredDays = normalizePreferredDays(update.preferredDays)
   }
 
-  const updated = await prisma.userTrainingProfile.update({
-    where: { userId },
-    data,
-  })
+  const [updated, ratioTargets] = await Promise.all([
+    prisma.userTrainingProfile.update({ where: { userId }, data }),
+    getMuscleBalanceTargets(prisma, userId),
+  ])
 
-  return normalizeUserTrainingProfile(updated)
+  return normalizeUserTrainingProfile(updated, ratioTargets)
 }
