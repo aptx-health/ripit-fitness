@@ -99,3 +99,4 @@ Append-only. Newest at the bottom.
 - 2026-11-01 MDT: 084 accepted (28 red, break matrix 34/34). 085 build dispatched to scroll-shell in worktree4.
 - 2026-11-01 MDT: 085 back (tools.ts +13/−1, 28/28). 086 review dispatched.
 - 2026-11-01 MDT: 086 approve. 087: description says never-set means the app doesn't restrict equipment and the list is the Settings checklist.
+- 2026-11-01 MDT: get_equipment merged to dev (#1023).

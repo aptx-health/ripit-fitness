@@ -62,3 +62,12 @@
 - 2026-11-01 MDT: Dustin on the L1 preview: strange cream stroke around the header's plan and X buttons (border-border on the brown header). 092 dispatched.
 - 2026-11-01 MDT: 092 back (header outline uses each theme's darker header shade). L1 preview restarted.
 - 2026-11-01 MDT: Dustin: L1 header "better". L1 committed and submitted (gh stack on dev).
+- 2026-11-01 MDT: L1 = PR #1024 (logger stack bottom, base dev). 093 (L2 tests) dispatched on feature/logger-bottom-bar.
+- 2026-11-01 MDT: 093 accepted (75 red, break matrix 80/80). 094 (L2 build) dispatched.
+- 2026-11-01 MDT: implementer hit a usage limit during 094 (no code changed), then resumed automatically at 17:10 and is building L2. Screenshot blocker: Dustin's freestyle 'Push A' draft in the wt2 DB blocks starting a program workout for dmays.
+- 2026-11-01 MDT: Dustin OK'd discarding his 'Push A' draft; implementer told to discard it through the app.
+- 2026-11-01 MDT: Dustin merged #1022 (docs) and #1023 (get_equipment) into dev.
+- 2026-11-01 MDT: 094 back (one bottom bar, old footers deleted, 210/210, suite green). 095 review dispatched.
+- 2026-11-01 MDT: 095 approve. 096 (done state matches bb-a-done; clearer disabled states) dispatched. Header Finish duplication → L3; catppuccin accent contrast → ROADMAP.
+- 2026-11-01 MDT: 096 back (done state matches bb-a-done; off states clear). L2 phone preview.
+- 2026-11-01 MDT: Dustin: L2 "looks great". Committed; PR opened.

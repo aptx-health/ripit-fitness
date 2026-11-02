@@ -8,11 +8,11 @@ import type { MuscleBalanceSnapshot } from '@/components/features/muscle-balance
 import { WorkoutRollupModal } from '@/components/features/training/WorkoutRollupModal'
 import { useToast } from '@/components/ToastProvider'
 import CompleteWorkoutConfirm from '@/components/workout-logging/CompleteWorkoutConfirm'
-import ExerciseActionsFooter from '@/components/workout-logging/ExerciseActionsFooter'
 import ExerciseDisplayTabs from '@/components/workout-logging/ExerciseDisplayTabs'
 import ExerciseLoggingHeader from '@/components/workout-logging/ExerciseLoggingHeader'
 import type { QuickAction } from '@/components/workout-logging/ExerciseQuickActionsMenu'
 import ExitWorkoutConfirm from '@/components/workout-logging/ExitWorkoutConfirm'
+import LoggerBottomBar, { pendingSetDetail } from '@/components/workout-logging/LoggerBottomBar'
 import SetLoggingForm, {
   type ExpandedInput,
 } from '@/components/workout-logging/SetLoggingForm'
@@ -779,18 +779,12 @@ export default function AdHocLoggerView({
               loggingForm={
                 <SetLoggingForm
                   prescribedSet={undefined}
-                  hasLoggedAllPrescribed={false}
-                  extraSetsMode={true}
                   hasRpe={false}
                   hasRir={hasIntensityAccess}
                   currentSet={currentSet}
                   onSetChange={setCurrentSet}
                   expandedInput={expandedInput}
                   onExpandedInputChange={setExpandedInput}
-                  onExtraSets={() => {}}
-                  onNextExercise={() => {}}
-                  onCompleteWorkout={handleCompleteWorkout}
-                  isLastExercise={currentIndex === exercises.length - 1}
                 />
               }
               isInputExpanded={isInputExpanded}
@@ -825,40 +819,21 @@ export default function AdHocLoggerView({
         </div>
 
         {!isInputExpanded && hasExercises && currentExercise && (
-          <ExerciseActionsFooter
-            currentExerciseIndex={currentIndex}
-            totalExercises={exercises.length}
-            nextSetNumber={nextSetNumber}
-            canLogSet={currentSet.reps !== '' && !isLoggingSet}
-            hasLoggedAllPrescribed={false}
-            extraSetsMode={true}
-            onLogSet={handleLogSet}
-            onPrevious={() => goToExercise(currentIndex - 1)}
-            onNext={() => goToExercise(currentIndex + 1)}
+          // Every freestyle set is "extra", so the bar is always Log set (never "+ Extra set").
+          <LoggerBottomBar
+            previous={{ onClick: () => goToExercise(currentIndex - 1), disabled: currentIndex === 0 }}
+            main={{
+              label: 'Log set',
+              detail: pendingSetDetail(currentSet),
+              onClick: handleLogSet,
+              disabled: currentSet.reps === '' || isLoggingSet,
+            }}
+            next={{ onClick: () => goToExercise(currentIndex + 1), disabled: currentIndex >= exercises.length - 1 }}
           />
         )}
 
         {!hasExercises && (
-          <div
-            className="bg-secondary px-4 py-3 flex-shrink-0"
-            style={{
-              boxShadow: 'inset 0 1px 0 rgba(0,0,0,0.25)',
-              paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))',
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => setPickerMode({ kind: 'add' })}
-              className="w-full h-12 bg-primary text-primary-foreground text-base font-bold uppercase tracking-widest transition-all doom-focus-ring inline-flex items-center justify-center gap-2"
-              style={{
-                boxShadow:
-                  'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)',
-              }}
-            >
-              <Plus size={18} strokeWidth={2.5} />
-              Add Exercise
-            </button>
-          </div>
+          <LoggerBottomBar main={{ label: 'Add exercise', onClick: () => setPickerMode({ kind: 'add' }) }} />
         )}
         </div>
       </div>

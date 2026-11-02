@@ -19,8 +19,6 @@ export type ExpandedInput = 'weight' | 'rpe' | 'rir' | 'reps' | null
 
 interface SetLoggingFormProps {
   prescribedSet: PrescribedSet | undefined
-  hasLoggedAllPrescribed: boolean
-  extraSetsMode: boolean
   hasRpe: boolean
   hasRir: boolean
   currentSet: {
@@ -39,26 +37,16 @@ interface SetLoggingFormProps {
   }) => void
   expandedInput: ExpandedInput
   onExpandedInputChange: (input: ExpandedInput) => void
-  onExtraSets: () => void
-  onNextExercise: () => void
-  onCompleteWorkout?: () => void
-  isLastExercise: boolean
 }
 
 export default function SetLoggingForm({
   prescribedSet,
-  hasLoggedAllPrescribed,
-  extraSetsMode,
   hasRpe,
   hasRir,
   currentSet,
   onSetChange,
   expandedInput,
   onExpandedInputChange,
-  onExtraSets,
-  onNextExercise,
-  onCompleteWorkout,
-  isLastExercise,
 }: SetLoggingFormProps) {
   const { settings } = useUserSettings()
 
@@ -96,42 +84,6 @@ export default function SetLoggingForm({
     else if (input === 'reps') onSetChange({ ...currentSet, reps: restored })
     onExpandedInputChange(null)
   }, [currentSet, onSetChange, onExpandedInputChange])
-
-  if (hasLoggedAllPrescribed && !extraSetsMode) {
-    return (
-      <div className="bg-success-muted border-2 border-success-border p-4 flex-shrink-0">
-        <div className="text-success-text font-bold mb-3 uppercase tracking-wider text-center">
-          All prescribed sets logged!
-        </div>
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={onExtraSets}
-            className="flex-1 py-2.5 bg-accent text-accent-foreground text-sm font-bold uppercase tracking-wider transition-all hover:bg-accent/90 doom-button-3d doom-focus-ring"
-          >
-            Extra Sets
-          </button>
-          {isLastExercise ? (
-            <button
-              type="button"
-              onClick={onCompleteWorkout}
-              className="flex-1 py-2.5 bg-primary text-primary-foreground text-sm font-bold uppercase tracking-wider transition-all hover:bg-primary/90 doom-button-3d doom-focus-ring"
-            >
-              Complete Workout
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={onNextExercise}
-              className="flex-1 py-2.5 bg-primary text-primary-foreground text-sm font-bold uppercase tracking-wider transition-all hover:bg-primary/90 doom-button-3d doom-focus-ring"
-            >
-              Next Exercise
-            </button>
-          )}
-        </div>
-      </div>
-    )
-  }
 
   const showReps = expandedInput === null || expandedInput === 'reps'
   const showWeight = expandedInput === null || expandedInput === 'weight'

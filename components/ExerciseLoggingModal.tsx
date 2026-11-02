@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle, Info, Pencil, Plus, RefreshCw, Trash2, Wrench, X } from 'lucide-react'
+import { AlertTriangle, Check, Info, Pencil, Plus, RefreshCw, Trash2, Wrench, X } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useToast } from '@/components/ToastProvider'
@@ -24,14 +24,13 @@ import ExerciseDefinitionEditorModal from './features/exercise-definition/Exerci
 import QuickEditExerciseSheet from './features/exercise-definition/QuickEditExerciseSheet'
 import CompleteWorkoutConfirm from './workout-logging/CompleteWorkoutConfirm'
 import DeleteSetConfirm from './workout-logging/DeleteSetConfirm'
-import ExerciseActionsFooter from './workout-logging/ExerciseActionsFooter'
 import ExerciseDisplayTabs from './workout-logging/ExerciseDisplayTabs'
 import ExerciseLoggingHeader from './workout-logging/ExerciseLoggingHeader'
 import type { QuickAction } from './workout-logging/ExerciseQuickActionsMenu'
 import ExitWorkoutConfirm from './workout-logging/ExitWorkoutConfirm'
-import FollowAlongFooter from './workout-logging/FollowAlongFooter'
 import FollowAlongHeader from './workout-logging/FollowAlongHeader'
 import FollowAlongTabs from './workout-logging/FollowAlongTabs'
+import LoggerBottomBar, { pendingSetDetail } from './workout-logging/LoggerBottomBar'
 import SetLoggingForm, { type ExpandedInput } from './workout-logging/SetLoggingForm'
 import WorkoutPlanEditor, { type WorkoutPlanEditorExercise } from './workout-logging/WorkoutPlanEditor'
 import { AddExerciseWizard } from './workout-logging/wizards/AddExerciseWizard'
@@ -233,10 +232,8 @@ export default function ExerciseLoggingModal({
         : undefined,
     [prescribedSet, hasIntensityAccess]
   )
-  const totalPrescribedSets =
-    currentPrescribedSets.length > 0 && nextSetNumber <= currentPrescribedSets.length
-      ? currentPrescribedSets.length
-      : undefined
+  // The planned count, also once every planned set is logged (the banner then reads "N of N done").
+  const totalPrescribedSets = currentPrescribedSets.length > 0 ? currentPrescribedSets.length : undefined
   const { settings, updateSettings } = useUserSettings()
 
   // One-time intensity intro tip
@@ -681,6 +678,8 @@ export default function ExerciseLoggingModal({
   const hasLoggedAllPrescribed =
     currentExerciseLoggedSets.length >= currentPrescribedSets.length
   const totalLoggedSets = loggedSets.length
+  const isFirstExercise = currentIndex === 0
+  const isLastExercise = currentIndex >= totalExercises - 1
 
   if (!isOpen) return null
   if (typeof document === 'undefined') return null
@@ -786,7 +785,8 @@ export default function ExerciseLoggingModal({
                   onMessageSeen={onMessageSeen}
                   onMessageDismissed={onMessageDismissed}
                   currentSetNumber={nextSetNumber}
-                  totalSets={totalPrescribedSets}
+                  // Extra sets are past the plan: the banner then just counts ("Set 4").
+                  totalSets={extraSetsMode ? undefined : totalPrescribedSets}
                   prescribedSummary={prescribedSummary}
                   menuActions={[
                     { label: 'Edit this exercise', icon: Pencil, onClick: handleEditExercise },
@@ -806,49 +806,70 @@ export default function ExerciseLoggingModal({
                     },
                   ] satisfies QuickAction[]}
                   loggingForm={
+                    hasLoggedAllPrescribed && !extraSetsMode ? (
+                      // The inputs wait behind this until "+ Extra set" asks for one more.
+                      <div className="flex items-center gap-2 border-l-4 border-success bg-success/10 px-3 py-2.5 text-sm font-bold uppercase tracking-wider text-success-text">
+                        <Check size={16} strokeWidth={2.5} aria-hidden="true" />
+                        All planned sets logged
+                      </div>
+                    ) : (
                     <SetLoggingForm
                       prescribedSet={prescribedSet}
-                      hasLoggedAllPrescribed={hasLoggedAllPrescribed}
-                      extraSetsMode={extraSetsMode}
                       hasRpe={hasRpe}
                       hasRir={hasRir}
                       currentSet={currentSet}
                       onSetChange={setCurrentSet}
                       expandedInput={expandedInput}
                       onExpandedInputChange={setExpandedInput}
-                      onExtraSets={() => setExtraSetsMode(true)}
-                      onNextExercise={handleNextExercise}
-                      onCompleteWorkout={openComplete}
-                      isLastExercise={currentIndex >= totalExercises - 1}
                     />
+                    )
                   }
                 />
               )
             ) : null}
           </div>
 
-          {/* Actions Footer */}
+          {/* The one bottom bar. Hidden only while an input is expanded (the keypad has its own Done). */}
           {isFollowAlong ? (
-            <FollowAlongFooter
-              currentIndex={currentIndex}
-              totalExercises={totalExercises}
-              isSubmitting={isSubmitting}
-              onPrevious={handlePreviousExercise}
-              onNext={handleNextExercise}
-              onFinish={openComplete}
+            <LoggerBottomBar
+              previous={{ onClick: handlePreviousExercise, disabled: isFirstExercise }}
+              main={
+                isLastExercise
+                  ? { label: 'Finish', onClick: openComplete, disabled: isSubmitting }
+                  : { label: 'Next exercise', onClick: handleNextExercise }
+              }
             />
           ) : (
-            expandedInput === null && <ExerciseActionsFooter
-              currentExerciseIndex={currentIndex}
-              totalExercises={totalExercises}
-              nextSetNumber={nextSetNumber}
-              canLogSet={!!canLogSet}
-              hasLoggedAllPrescribed={hasLoggedAllPrescribed}
-              extraSetsMode={extraSetsMode}
-              onLogSet={handleLogSet}
-              onPrevious={handlePreviousExercise}
-              onNext={handleNextExercise}
-            />
+            expandedInput === null &&
+            (hasLoggedAllPrescribed && !extraSetsMode ? (
+              // Done (bb-a-done): moving on is the filled action, "+ Extra set" the outline one.
+              <LoggerBottomBar
+                previous={{ onClick: handlePreviousExercise, disabled: isFirstExercise }}
+                secondary={{ label: '+ Extra set', onClick: () => setExtraSetsMode(true) }}
+                main={
+                  isLastExercise
+                    ? { label: 'Finish', onClick: openComplete, tone: 'primary' }
+                    : { label: 'Next exercise', onClick: handleNextExercise, tone: 'primary' }
+                }
+              />
+            ) : (
+              <LoggerBottomBar
+                previous={{ onClick: handlePreviousExercise, disabled: isFirstExercise }}
+                main={{
+                  label: 'Log set',
+                  detail: pendingSetDetail(currentSet),
+                  onClick: handleLogSet,
+                  disabled: !canLogSet,
+                }}
+                next={
+                  extraSetsMode
+                    ? isLastExercise
+                      ? { label: 'Finish', onClick: openComplete }
+                      : { label: 'Next exercise', onClick: handleNextExercise }
+                    : { onClick: handleNextExercise, disabled: isLastExercise }
+                }
+              />
+            ))
           )}
 
           {/* Workout completion confirmation */}
