@@ -1,0 +1,1 @@
+Report: complete (102). completionId must match workout and user in GET and [order]; id tiebreak in GET, [order], reorder response; add-during-logging orders after earlier one-offs; reorder scoped to the body's completionId (one-offs refused without it); '0 of 1 set'. API tests 19 (6 fail with hardening reverted). Suite 3029/4/0; tsc, eslint, biome clean. Lead re-ran API tests.

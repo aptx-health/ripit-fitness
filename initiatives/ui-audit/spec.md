@@ -165,3 +165,21 @@ Branch `feature/logger-bottom-bar`, stacked on L1. **Behaviour:** `features/ui-a
 **Done when:** L2 tests pass; suite, tsc, eslint/biome on touched files; touch-emulated 390px light/dark screenshots of the bar in each mode, mid-exercise and after the last set; logging behaviour unchanged.
 
 **Carried into L3 from review 095:** on the last exercise the header's Finish and the bar's Finish both show; L3 decides whether the header keeps it.
+
+## L3: paper tabs and the plan sheet (directions A)
+
+Branch `feature/logger-plan`, stacked on L2. **Behaviour:** `features/ui-audit/logger-plan.feature`. Look: `docs/logger-audit/ideas/tb-a-*.png` and `pd-a-*.png`; findings in the audit README's "Plan drawer" and "Tab bar" sections.
+
+**Tabs (tab-bar A)**
+1. `ExerciseDisplayTabs` uses `PaperTabs` (tone `mine`) over a `border-2 border-secondary folder-box` that holds the exercise: **Log · Info · Notes · History** (shortened from "Log Sets"); Notes and History carry count chips with `countLabel` (e.g. "1 note", "3 sessions") instead of the unlabelled 8px squares. Tabs about 36px tall, like Training.
+2. The exercise name appears once, in the box under the tabs (not repeated with `doom-heading` on Info, Notes and History).
+3. 090 carry-overs here: "Exercise options" and the intensity-tip dismiss at 48px; "Delete set N" at 48px.
+
+**Plan sheet (plan-drawer A)**
+4. The plan opens as a **folder bottom sheet** like Quick actions: a "Workout plan" `PaperTabTitle` with a count chip ("2/6") and a 48px close box on the tab row, a one-line summary ("9 of 23 sets · 24:10"), then plain `divide-y` rows in one box.
+5. **Rows:** a status square (✓ done, number for upcoming, filled number for now), the exercise name in normal case wrapping to two lines (no chevron), a sub-line with set squares and "2 of 4 sets · 50 lbs", and one current cue: an inset primary left bar plus a filled `NOW` chip. Tapping a row jumps to that exercise (as today). The row's ⋯ menu (L1 style) stays.
+6. **Reorder mode:** a `Reorder` button in the sheet's footer turns drag grips on (off by default); reordering works exactly as today. `+ Add exercise` sits next to it.
+7. **Opener:** the header button reads `PLAN 2/6` at every width (no unlabelled hamburger); remove its leftover bevels.
+8. From 095: on the last exercise, drop the header's Finish if the bar's Finish is showing (one Finish on screen); keep the header's Finish otherwise only if the bar doesn't offer one. Say what you chose.
+
+**Done when:** L3 tests pass; suite, tsc, eslint/biome on touched files; touch-emulated 390px light/dark screenshots of each tab, the plan sheet (mid-workout, reorder mode, a long name), and the header; logging, jumping, reordering, swapping, deleting and adding exercises all behave as before.

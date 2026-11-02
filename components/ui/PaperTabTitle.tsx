@@ -43,7 +43,7 @@ export default function PaperTabTitle({
   /** The element without `asChild`. */
   as?: 'h2' | 'span'
   /** A count chip after the title, named by `countLabel` (e.g. "6 sessions"). */
-  count?: number
+  count?: number | string
   countLabel?: string
   children: ReactNode
 }) {

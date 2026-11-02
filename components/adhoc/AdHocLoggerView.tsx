@@ -2,7 +2,7 @@
 
 import { Plus, RefreshCw, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ExerciseDefinition } from '@/components/exercise-selection/ExerciseSearchInterface'
 import type { MuscleBalanceSnapshot } from '@/components/features/muscle-balance/types'
 import { WorkoutRollupModal } from '@/components/features/training/WorkoutRollupModal'
@@ -16,7 +16,7 @@ import LoggerBottomBar, { pendingSetDetail } from '@/components/workout-logging/
 import SetLoggingForm, {
   type ExpandedInput,
 } from '@/components/workout-logging/SetLoggingForm'
-import WorkoutPlanEditor from '@/components/workout-logging/WorkoutPlanEditor'
+import WorkoutPlanEditor, { elapsedSince } from '@/components/workout-logging/WorkoutPlanEditor'
 import { useIntensityAccess } from '@/hooks/useIntensityAccess'
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
 import {
@@ -133,6 +133,19 @@ export default function AdHocLoggerView({
   const [expandedInput, setExpandedInput] = useState<ExpandedInput>(null)
   const [pickerMode, setPickerMode] = useState<PickerMode | null>(null)
   const [planEditorOpen, setPlanEditorOpen] = useState(false)
+  const [planElapsed, setPlanElapsed] = useState<string | undefined>(undefined)
+  // When the logger opened: the clock's start until the workout has its own (as the header's timer does).
+  const openedAt = useRef<string | null>(null)
+  useEffect(() => {
+    openedAt.current = new Date().toISOString()
+  }, [])
+
+  // The plan's clock ticks while the sheet is open, like the header's.
+  useEffect(() => {
+    if (!planEditorOpen) return
+    const id = setInterval(() => setPlanElapsed(elapsedSince(startedAt ?? openedAt.current, Date.now())), 1000)
+    return () => clearInterval(id)
+  }, [planEditorOpen, startedAt])
   const [isAdding, setIsAdding] = useState(false)
   const [isSwapping, setIsSwapping] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -586,6 +599,17 @@ export default function AdHocLoggerView({
   // Header check icon → confirmation modal (matches programmed logger).
   // If no sets have been logged, nudge the user to log something first
   // instead of silently doing nothing.
+  // Plan sheet rows: every exercise added so far with its logged sets ("2 sets"; freestyle has no plan).
+  const planRows = useMemo(
+    () =>
+      exercises.map((e) => ({
+        id: e.id,
+        name: e.name,
+        setsDone: loggedSets.filter((s) => s.exerciseId === e.id).length,
+      })),
+    [exercises, loggedSets]
+  )
+
   const handleRequestComplete = useCallback(() => {
     if (loggedSets.length === 0) {
       toast.warning(
@@ -747,7 +771,14 @@ export default function AdHocLoggerView({
           startedAt={startedAt}
           onCompleteWorkout={handleRequestComplete}
           onClose={handleClose}
-          onOpenPlanEditor={hasExercises ? () => setPlanEditorOpen(true) : undefined}
+          onOpenPlanEditor={
+            hasExercises
+              ? () => {
+                  setPlanElapsed(elapsedSince(startedAt ?? openedAt.current, Date.now()))
+                  setPlanEditorOpen(true)
+                }
+              : undefined
+          }
         />
 
         <div
@@ -856,7 +887,8 @@ export default function AdHocLoggerView({
       <WorkoutPlanEditor
         open={planEditorOpen}
         onClose={() => setPlanEditorOpen(false)}
-        exercises={exercises.map((e) => ({ id: e.id, name: e.name }))}
+        exercises={planRows}
+        elapsed={planElapsed}
         currentExerciseId={exercises[currentIndex]?.id}
         onReorder={handleReorderExercises}
         onJump={handleJumpToExercise}

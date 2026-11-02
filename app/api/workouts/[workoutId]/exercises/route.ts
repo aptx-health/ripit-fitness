@@ -152,11 +152,14 @@ export async function POST(
 }
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ workoutId: string }> }
 ) {
   try {
     const { workoutId } = await params
+    // Optional: also list this session's one-off exercises (added during logging),
+    // in the same order the logger walks them (see ./[order]/route.ts).
+    const completionId = request.nextUrl.searchParams.get('completionId')
 
     // Get authenticated user
     const { user, error } = await getCurrentUser()
@@ -185,9 +188,18 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
-    // Get workout exercises with all relations
+    // Get workout exercises (and this session's one-offs) with all relations
     const exercises = await prisma.exercise.findMany({
-      where: { workoutId },
+      where: completionId
+        ? {
+            OR: [
+              { workoutId },
+              // Only this user's session of this workout
+              { isOneOff: true, workoutCompletion: { id: completionId, workoutId, userId: user.id } },
+            ],
+            userId: user.id,
+          }
+        : { workoutId },
       include: {
         prescribedSets: {
           orderBy: { setNumber: 'asc' }
@@ -203,7 +215,8 @@ export async function GET(
           }
         }
       },
-      orderBy: { order: 'asc' }
+      // id breaks ties so one-offs added in one session keep a stable order
+      orderBy: [{ order: 'asc' }, { id: 'asc' }]
     })
 
     return NextResponse.json({
