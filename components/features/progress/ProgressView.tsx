@@ -13,8 +13,9 @@ import WeeklySetsChart from './WeeklySetsChart'
 
 /**
  * The Progress tab: one week at a time. A week navigator, the report card
- * (this week against the 8 weeks before it), the Records / Lifts folder and
- * the last 8 weeks of working sets with a trend note. Weeks are local Mondays:
+ * (this week against the 8 weeks before it), the Records / Lifts folder with
+ * the pinned lifts, and the last 8 weeks of working sets with a trend note.
+ * Weeks are local Mondays:
  * the browser's zone goes with every request, and the server picks the current
  * week when no start is sent.
  */
@@ -58,6 +59,26 @@ export default function ProgressView() {
   useEffect(() => {
     load()
   }, [load])
+
+  /** Saves the whole pin list, then reloads the week to show it; false when the save failed. */
+  const savePins = useCallback(
+    async (ids: string[], weekStart: string) => {
+      try {
+        const res = await fetch('/api/progress/pins', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ exerciseDefinitionIds: ids }),
+        })
+        if (!res.ok) throw new Error(`Saving pins failed (${res.status})`)
+      } catch (err) {
+        clientLogger.error('Error saving pinned lifts:', err)
+        return false
+      }
+      await load(weekStart)
+      return true
+    },
+    [load],
+  )
 
   if (!report) {
     return error ? (
@@ -117,8 +138,14 @@ export default function ProgressView() {
 
       <ReportCard report={report} />
 
-      {/* A report without the S2 fields (an older payload) shows an empty folder. */}
-      <RecordsLifts records={report.records ?? []} lifts={report.lifts ?? []} weightUnit={report.weightUnit ?? 'lbs'} />
+      {/* A report without the S2 or S3 fields (an older payload) shows an empty folder, and no pins. */}
+      <RecordsLifts
+        records={report.records ?? []}
+        lifts={report.lifts ?? []}
+        pinned={report.pinned ?? []}
+        weightUnit={report.weightUnit ?? 'lbs'}
+        onSavePins={(ids) => savePins(ids, report.weekStart)}
+      />
 
       <section aria-labelledby="progress-last-8">
         <div className="flex items-end">

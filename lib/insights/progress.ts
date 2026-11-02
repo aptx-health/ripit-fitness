@@ -1,5 +1,6 @@
 import { Prisma, type PrismaClient } from '@prisma/client'
 import { setEffort } from '@/lib/aggregates/compute'
+import { loadPinned, type PinnedLift, resolvePins } from '@/lib/insights/pinned-lifts'
 import {
   computeTrendNote,
   computeWeekLifts,
@@ -83,6 +84,8 @@ export interface WeeklyReport {
   lifts: WeekLift[]
   /** The note under the chart; null with fewer than 3 weeks of history (S2). */
   trend: TrendNote | null
+  /** The pinned lifts, in pin order (S3). Optional: reports from before S3 have none. */
+  pinned?: PinnedLift[]
 }
 
 export const DEFAULT_WEEKLY_WORKOUT_TARGET = 3
@@ -257,7 +260,10 @@ export function computeStreak(weeklyWorkouts: number[], target: number, openWeek
 
 // --- the loader -----------------------------------------------------------------
 
-type ReportDb = Pick<PrismaClient, 'workoutCompletion' | 'loggedCardioSession' | 'userSettings' | '$queryRaw'>
+type ReportDb = Pick<
+  PrismaClient,
+  'workoutCompletion' | 'loggedCardioSession' | 'userSettings' | 'pinnedExercise' | 'userTrainingProfile' | 'exerciseDefinition' | '$queryRaw'
+>
 
 const COUNTED = { status: 'completed', isArchived: false } as const
 
@@ -274,7 +280,8 @@ const HISTORY_SET = {
  * The report for one week: four queries for the week, the 8 before it and the
  * date of the first workout, one for the earlier best sets of the exercises
  * done that week (records and lifts), plus one grouped count when the streak runs
- * back past those 8 weeks. The normal averages only the prior weeks that start on
+ * back past those 8 weeks. Pins add three queries, and two more for their names
+ * and last sessions, however many there are. The normal averages only the prior weeks that start on
  * or after the week of the first workout; gaps after it count as 0.
  */
 export async function getWeeklyReport(
@@ -286,7 +293,7 @@ export async function getWeeklyReport(
   const rangeStart = weekBounds(weekStarts[0], timeZone).start
   const rangeEnd = weekBounds(weekStart, timeZone).end
 
-  const [settings, first, completions, cardio] = await Promise.all([
+  const [settings, first, completions, cardio, pins] = await Promise.all([
     db.userSettings.findUnique({ where: { userId }, select: { weeklyWorkoutTarget: true, defaultWeightUnit: true } }),
     db.workoutCompletion.findFirst({
       where: { userId, ...COUNTED },
@@ -311,6 +318,7 @@ export async function getWeeklyReport(
       where: { userId, status: 'completed', completedAt: { gte: rangeStart, lt: rangeEnd } },
       select: { completedAt: true, duration: true },
     }),
+    resolvePins(db, userId),
   ])
   const target = settings?.weeklyWorkoutTarget ?? DEFAULT_WEEKLY_WORKOUT_TARGET
   const weightUnit: WeightUnit = settings?.defaultWeightUnit === 'kg' ? 'kg' : 'lbs'
@@ -319,7 +327,13 @@ export async function getWeeklyReport(
   // Records and lifts: the sets in range, plus the earlier sets of this week's exercises that can matter.
   const inRange = completions.flatMap((c) => c.loggedSets.map((s) => historySet(s, c)))
   const shownIds = [...new Set(inRange.filter((s) => s.completedAt >= shownStart).map((s) => s.exerciseDefinitionId))]
-  const history = [...inRange, ...(await earlierBestSets(db, userId, shownIds, rangeStart))]
+  const doneIds = new Set(inRange.filter((s) => s.completedAt >= shownStart && !s.isWarmup).map((s) => s.exerciseDefinitionId))
+  const [earlier, pinnedRows] = await Promise.all([
+    earlierBestSets(db, userId, shownIds, rangeStart),
+    loadPinned(db, userId, { pins, doneIds, weekEnd: rangeEnd, unit: weightUnit }),
+  ])
+  const history = [...inRange, ...earlier]
+  const lifts = computeWeekLifts(history, shownStart, rangeEnd, weightUnit)
 
   const summary = summarizeWeeks({
     workouts: completions.map((c) => ({ ...c, sets: c.loggedSets })),
@@ -359,8 +373,12 @@ export async function getWeeklyReport(
     weeks,
     weightUnit,
     records: computeWeekRecords(history, shownStart, rangeEnd, weightUnit),
-    lifts: computeWeekLifts(history, shownStart, rangeEnd, weightUnit),
+    lifts,
     trend: computeTrendNote(weeks, sinceFirst, { openWeek: now < rangeEnd }),
+    pinned: pinnedRows.map(({ last, ...pin }) => {
+      const lift = lifts.find((l) => l.exerciseDefinitionId === pin.exerciseDefinitionId) ?? null
+      return { ...pin, lift, last: lift ? null : last }
+    }),
   }
 }
 

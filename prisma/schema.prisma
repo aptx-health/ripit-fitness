@@ -103,6 +103,7 @@ model ExerciseDefinition {
   taggedBy        String?
   exercises       Exercise[]
   userPreferences UserExercisePreference[]
+  pinnedBy        PinnedExercise[]
 
   @@index([normalizedName])
   @@index([isSystem])
@@ -375,10 +376,25 @@ model UserSettings {
   pwaPromptDismissedAt     DateTime?
   signupIntent             String?
   weeklyWorkoutTarget      Int       @default(3)
+  // true once the user has saved their pinned lifts; until then the pins are their anchors
+  pinnedLiftsCustomized    Boolean   @default(false)
   createdAt                DateTime  @default(now())
   updatedAt                DateTime  @updatedAt
 
   @@index([userId])
+}
+
+// A lift the user tracks on the Progress tab, in their order (position 0 first)
+model PinnedExercise {
+  id                   String             @id @default(cuid())
+  userId               String
+  exerciseDefinitionId String
+  position             Int
+  createdAt            DateTime           @default(now())
+  exerciseDefinition   ExerciseDefinition @relation(fields: [exerciseDefinitionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, exerciseDefinitionId])
+  @@index([userId, position])
 }
 
 model UserMuscleBalanceSettings {
