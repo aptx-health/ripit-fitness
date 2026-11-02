@@ -15,6 +15,7 @@
 
 import type { Prisma, PrismaClient } from '@prisma/client'
 import { logger } from '@/lib/logger'
+import { getMuscleBalanceTargets } from '@/lib/muscle-balance'
 import { computeAggregates, resolveAggregatesOptions } from './compute'
 import type { AggregateSessionInput, AggregatesOptions, TrainingAggregates } from './types'
 
@@ -125,13 +126,15 @@ export async function computeUserAggregates(
   const firstSessionAt = qualifyingTimes.length ? new Date(Math.min(...qualifyingTimes)) : null
   const lastSessionAt = qualifyingTimes.length ? new Date(Math.max(...qualifyingTimes)) : null
 
-  // Profile inputs for shares (ratioTargets) and goal_progress (goalSentences).
-  // Absent profile => default preset shares and no goal_progress.
-  const profile = await prisma.userTrainingProfile.findUnique({
-    where: { userId },
-    select: { ratioTargets: true, goalSentences: true },
-  })
-  const ratioTargets = normalizeRatioTargets(profile?.ratioTargets)
+  // Shares weigh the Settings targets (UserMuscleBalanceSettings, the one
+  // source, normalized as every reader sees them; defaults with no row, and no
+  // row is created). goal_progress reads the profile's goalSentences; absent
+  // profile => none.
+  const [targets, profile] = await Promise.all([
+    getMuscleBalanceTargets(prisma, userId),
+    prisma.userTrainingProfile.findUnique({ where: { userId }, select: { goalSentences: true } }),
+  ])
+  const ratioTargets = normalizeRatioTargets(targets)
 
   return computeAggregates(
     {
@@ -149,7 +152,7 @@ export async function computeUserAggregates(
   )
 }
 
-/** Coerce a stored ratioTargets JSON blob into a numeric FAU->weight record. */
+/** Keep the positive FAU weights (a 0 target drops out of the shares). */
 function normalizeRatioTargets(value: unknown): Record<string, number> | null {
   if (value == null || typeof value !== 'object' || Array.isArray(value)) return null
   const out: Record<string, number> = {}

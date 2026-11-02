@@ -407,8 +407,10 @@ describe('UserTrainingAggregates recompute', () => {
   it('honors ratioTargets weights when deriving target_share', async () => {
     const chest = await createDef(prisma, { primaryFAUs: ['chest'] })
     const lats = await createDef(prisma, { primaryFAUs: ['lats'] })
-    // Weight lats 3x chest -> target shares 0.25 / 0.75 over the two present FAUs.
-    await seedProfile(prisma, userId, { ratioTargets: { chest: 1, lats: 3 } })
+    // Weight lats 2x chest -> target shares 1/3 / 2/3 over the two present FAUs.
+    await seedProfile(prisma, userId, { ratioTargets: { chest: 1, lats: 2 } })
+    // The targets live in Settings now; the profile's copy is not read.
+    await prisma.userMuscleBalanceSettings.create({ data: { userId, targets: { chest: 1, lats: 2 } } })
     await seedSession(prisma, userId, chest, { daysAgo: 2, sets: chestSets(7) })
     await seedSession(prisma, userId, chest, { daysAgo: 5, sets: chestSets(7) })
     await seedSession(prisma, userId, lats, { daysAgo: 9, sets: chestSets(6) })
@@ -416,8 +418,8 @@ describe('UserTrainingAggregates recompute', () => {
     const agg = await recomputeUserAggregates(prisma, userId, NOW)
     const chestFau = agg.perFau.find((f) => f.fau === 'chest')!
     const latsFau = agg.perFau.find((f) => f.fau === 'lats')!
-    expect(chestFau.target_share).toBeCloseTo(0.25, 4)
-    expect(latsFau.target_share).toBeCloseTo(0.75, 4)
+    expect(chestFau.target_share).toBeCloseTo(1 / 3, 4)
+    expect(latsFau.target_share).toBeCloseTo(2 / 3, 4)
   })
 
   it('handles a zero-14d-volume present FAU (share 0, deficit = full target)', async () => {

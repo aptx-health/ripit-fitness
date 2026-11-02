@@ -31,16 +31,25 @@ describe('UserTrainingProfile normalization', () => {
       weeklyIntent: ['1 heavy leg day'],
       equipmentAvailable: ['barbell', 'barbell', '  dumbbell ', 'flux_capacitor'],
       bannedExerciseIds: ['ex_1', 'ex_2'],
-      ratioTargets: { chest: 1.5 },
       defaultIntensityPreference: 'hypertrophy',
-    })
+    }, { chest: 1.5 })
 
     expect(result.goalSentences).toEqual(['improve bench', 'spare legs'])
     expect(result.weeklyIntent).toEqual(['1 heavy leg day'])
     expect(result.equipmentAvailable).toEqual(['barbell', 'dumbbell'])
     expect(result.bannedExerciseIds).toEqual(['ex_1', 'ex_2'])
     expect(result.defaultIntensityPreference).toBe('hypertrophy')
+    // Targets come from the Settings row (the second argument), not the profile's column.
     expect(result.ratioTargets.chest).toBeCloseTo(1.5)
+    const columnOnly = normalizeUserTrainingProfile({
+      goalSentences: [],
+      weeklyIntent: [],
+      equipmentAvailable: [],
+      bannedExerciseIds: [],
+      ratioTargets: { chest: 1.5 },
+      defaultIntensityPreference: null,
+    })
+    expect(columnOnly.ratioTargets.chest).toBe(1)
   })
 
   it('rejects invalid intensity preference and non-array list inputs', () => {
@@ -355,7 +364,7 @@ describe('UserTrainingProfile persistence', () => {
     expect(rows).toHaveLength(1)
   })
 
-  it('seeds ratioTargets from existing UserMuscleBalanceSettings if present', async () => {
+  it('reads ratioTargets from UserMuscleBalanceSettings', async () => {
     const customTargets = {
       ...getDefaultMuscleBalanceTargets(),
       chest: 1.5,

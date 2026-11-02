@@ -86,3 +86,5 @@
 - 2026-11-01 20:35 CDT: Dustin: the plan sheet's tab didn't sit on top of anything. Restructured like Quick actions: tab + close on a clear row, plan in a bordered folder box below (dropped the earlier square/rounded-corner attempts). Lead amended locked test 'the dialog is a bg-card folder box' to check the box inside the dialog. 144 logger-plan tests pass.
 - 2026-11-01 20:45 CDT: Dustin accepted L3 on the preview. 098/100/102 accepted; committing feature/logger-plan and opening its PR into dev.
 - 2026-11-01 20:55 CDT: Commit hook flagged ExerciseLoggingModal.tsx at 1051 lines (max 1000); the L3 commit landed anyway. Lead moved the plan sheet's state into hooks/useWorkoutPlanSheet.ts (979 lines now); 684 component tests pass, tsc and lint clean.
+- 2026-11-01 21:00 CDT: L3 PR #1027 (feature/logger-plan → dev) opened.
+- 2026-11-01 21:15 CDT: Dustin merged L3 (#1027) into dev. Workout screen L1–L3 complete; L3 waits for the next prod release.

@@ -7,7 +7,7 @@ import {
 } from '@/lib/exercises/anchor-patterns'
 import type { FAUKey } from '@/lib/fau-volume'
 import { DEFAULT_CALC_SETTINGS, effectiveTargets, formatTarget, isValidTarget } from '@/lib/insights/balance'
-import { getDefaultMuscleBalanceTargets, isFAUKey, normalizeMuscleBalanceTargets } from '@/lib/muscle-balance'
+import { getDefaultMuscleBalanceTargets, isFAUKey } from '@/lib/muscle-balance'
 import { normalizeTargetMovements } from '@/lib/user-training-profile'
 import { visibleTo } from './exercise-definition'
 
@@ -95,8 +95,8 @@ export function anchorSummary(changes: AnchorChanges): string {
 
 /**
  * Write `next` over the touched patterns if each still holds `expected`;
- * otherwise throw BalanceConflict. Creates the profile when there is none,
- * with ratioTargets seeded from Settings.
+ * otherwise throw BalanceConflict. Creates the profile when there is none (its
+ * unused ratioTargets column gets the default targets, not Settings').
  */
 export async function swapAnchors(
   tx: Prisma.TransactionClient,
@@ -115,11 +115,9 @@ export async function swapAnchors(
   const targetMovements = normalizeTargetMovements({ ...live, ...next })
 
   if (!profile) {
-    // Seed ratioTargets from Settings as getOrCreateUserTrainingProfile does;
-    // nothing seeds it once the row exists.
-    const settings = await tx.userMuscleBalanceSettings.findUnique({ where: { userId }, select: { targets: true } })
-    const ratioTargets = settings ? normalizeMuscleBalanceTargets(settings.targets) : getDefaultMuscleBalanceTargets()
-    await tx.userTrainingProfile.create({ data: { userId, ratioTargets, targetMovements } })
+    await tx.userTrainingProfile.create({
+      data: { userId, ratioTargets: getDefaultMuscleBalanceTargets(), targetMovements },
+    })
     return
   }
   // Guards the read above against a concurrent write in this window.

@@ -6,7 +6,8 @@ None
 Running quietly: None.
 
 ## Active
-- UI audit (initiatives/ui-audit): UI1–UI6, L1 (#1024) and L2 (#1025) are in prod (release #1026, infra #134, 2026-11-01). L3 tabs + plan sheet: accepted by Dustin; PR from feature/logger-plan into dev. Next: logger L4 and FAU targets (ROADMAP).
+- Balance targets, one source of truth (initiatives/agent-tools): review 105 checks out; PR into dev (waiting on CI and Dustin's merge).
+- UI audit (initiatives/ui-audit): UI1–UI6, L1 (#1024) and L2 (#1025) are in prod (release #1026, infra #134, 2026-11-01). L3 tabs + plan sheet merged to dev (#1027, 2026-11-01); not yet in prod. Next: logger L4 and FAU targets (ROADMAP).
 
 ## Blocked
 None
