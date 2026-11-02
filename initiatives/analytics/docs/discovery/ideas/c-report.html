@@ -1,0 +1,55 @@
+<!doctype html><html lang="en" data-theme="ripit" data-mode="light"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Analytics C: Weekly report card</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_base.css"><script src="_charts.js"></script>
+</head><body><div class="phone" id="shot">
+<h1 class="title">Progress</h1>
+
+<!-- Week navigator -->
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+  <span class="btn" style="width:48px;padding:0">‹</span>
+  <div style="flex:1;text-align:center"><div class="rt" style="font-size:18px;text-transform:uppercase;letter-spacing:.06em">Week of Oct 26</div><div class="rm">Week 3 of Strength Block</div></div>
+  <span class="btn" style="width:48px;padding:0;color:var(--muted-foreground)">›</span>
+</div>
+
+<!-- Report card: each line is this week vs your 8-week normal -->
+<div class="folder">
+  <div class="tabs"><span class="tab next on"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Report card</span></div>
+  <div class="box next rows">
+    <div class="row"><div class="grow"><div class="label">Workouts</div><div class="big num">4 <span class="rm" style="font-size:15px;font-weight:600">of 4 planned</span></div></div><div style="text-align:right"><div class="chip up">Done</div><div class="rm num">normal 3.4</div></div></div>
+    <div class="row"><div class="grow"><div class="label">Working sets</div><div class="big num">66</div></div><div style="text-align:right"><div class="ok rt num">+14%</div><div class="rm num">normal 58</div></div></div>
+    <div class="row"><div class="grow"><div class="label">Time trained</div><div class="big num">3h 22m</div></div><div style="text-align:right"><div class="ok rt num">+21m</div><div class="rm num">+ 35m cardio</div></div></div>
+    <div class="row"><div class="grow"><div class="label">Effort</div><div class="big num">RPE 8.7</div><div class="rm num">31% of sets at 9+ · 2 sets at 10</div></div><div style="text-align:right"><div class="bad rt num">+0.6</div><div class="rm num">normal 8.1</div></div></div>
+    <div class="row"><div class="grow"><div class="label">Streak</div><div class="big num">6 weeks</div></div><div style="text-align:right;width:120px"><div class="weeks"><i class="h"></i><i class="h"></i><i class="h"></i><i class="h"></i><i class="h"></i><i class="h"></i></div></div></div>
+  </div>
+</div>
+
+<!-- Records this week -->
+<div class="folder">
+  <div class="tabs"><span class="tab coach on"><svg viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>Records <span class="n">2</span></span><span class="tab">Lifts</span></div>
+  <div class="box coach rows">
+    <div class="row"><div class="grow"><div class="rt">Back Squat</div><div class="rm num">275×4 · e1RM 287 lb (was 278)</div></div><span class="chip pr">PR</span></div>
+    <div class="row"><div class="grow"><div class="rt">Bench Press</div><div class="rm num">185×8 · best 8-rep set (was 180)</div></div><span class="chip pr">Rep PR</span></div>
+    <div class="row"><div class="grow"><div class="rt">Overhead Press</div><div class="rm num">115×5 · e1RM 128, 3rd session below 133</div></div><span class="chip q">Flat</span></div>
+  </div>
+</div>
+
+<!-- Effort over weeks: deload context -->
+<div class="folder">
+  <div class="tabs"><span class="tab mine on"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16v-4M12 16V8M17 16v-7"/></svg>Last 8 weeks</span></div>
+  <div class="box mine pad">
+    <div id="vol"></div>
+    <div class="note" style="margin:8px -12px -12px">Effort has risen 4 weeks running (8.0 → 8.7). Your last light week was 5 weeks ago.</div>
+  </div>
+</div>
+
+<nav class="nav"><a><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Training</a><a><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Library</a><div class="wo"><span>WORKOUT</span></div><a class="on"><svg viewBox="0 0 24 24"><path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/></svg>Progress</a><a><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>Settings</a></nav>
+</div>
+<script>
+bars(document.getElementById('vol'), [57, 63, 31, 55, 60, 62, 64, 66], {
+  labels: [[0, 'Sep 7'], [3, 'Sep 28'], [7, 'This wk']], cur: 7, dl: [2],
+  effort: [8.2, 8.4, 6.9, 7.7, 8.0, 8.2, 8.5, 8.7],
+})
+</script>
+</body></html>

@@ -1,0 +1,70 @@
+<!doctype html><html lang="en" data-theme="ripit" data-mode="light"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Analytics B: Exercise drill-down</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_base.css"><script src="_charts.js"></script>
+</head><body><div class="phone" id="shot">
+<h1 class="title">Progress</h1>
+
+<!-- Exercise picker: the page is about one lift at a time -->
+<div class="box" style="display:flex;align-items:center;gap:10px;padding:0 12px;height:52px;margin-bottom:10px">
+  <div class="grow" style="flex:1"><div class="label">Exercise</div><div class="rt">Back Squat</div></div><span class="chev" style="font-size:18px">▾</span>
+</div>
+<div style="display:flex;gap:6px;margin-bottom:18px;overflow:hidden">
+  <span class="chip" style="background:var(--secondary);color:var(--secondary-foreground);line-height:28px;padding:0 10px">Squat</span>
+  <span class="chip q" style="line-height:28px;padding:0 10px">Bench</span>
+  <span class="chip q" style="line-height:28px;padding:0 10px">Deadlift</span>
+  <span class="chip q" style="line-height:28px;padding:0 10px">OHP</span>
+  <span class="chip q" style="line-height:28px;padding:0 10px">Row</span>
+</div>
+
+<!-- Trend -->
+<div class="folder">
+  <div class="tabs"><span class="tab mine on"><svg viewBox="0 0 24 24"><path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/></svg>e1RM</span><span class="tab">Top set</span><span class="tab">Volume</span></div>
+  <div class="box mine">
+    <div class="tiles" style="border-bottom:1px solid var(--border)">
+      <div><div class="label">Best e1RM</div><div class="big num">287</div><div class="rm">lb · Oct 30</div></div>
+      <div><div class="label">8 weeks</div><div class="big num ok">+8.3%</div><div class="rm num">265 → 287</div></div>
+      <div><div class="label">Sessions</div><div class="big num">19</div><div class="rm">since Jun</div></div>
+    </div>
+    <div class="pad">
+      <div id="trend"></div>
+      <div class="rm" style="margin-top:4px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--accent);border:1.5px solid var(--foreground)"></span> all-time PR &nbsp; <span style="display:inline-block;width:14px;border-top:2px dashed var(--accent);vertical-align:middle"></span> top-set weight</div>
+    </div>
+    <div style="display:flex;border-top:1px solid var(--border)">
+      <span class="chip" style="flex:1;text-align:center;line-height:40px">3M</span><span class="chip" style="flex:1;text-align:center;line-height:40px;background:var(--muted)">6M</span><span class="chip" style="flex:1;text-align:center;line-height:40px">1Y</span><span class="chip" style="flex:1;text-align:center;line-height:40px">All</span>
+    </div>
+  </div>
+</div>
+
+<!-- Rep records -->
+<div class="folder">
+  <div class="tabs"><span class="tab coach on"><svg viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>Records</span></div>
+  <div class="box coach rows">
+    <div class="row" style="min-height:48px"><span class="label" style="width:56px">1 rep</span><div class="grow num rt">270 lb</div><span class="rm">Aug 14</span></div>
+    <div class="row" style="min-height:48px"><span class="label" style="width:56px">3 reps</span><div class="grow num rt">275 lb</div><span class="rm">Oct 9</span></div>
+    <div class="row" style="min-height:48px"><span class="label" style="width:56px">4 reps</span><div class="grow num rt">275 lb <span class="chip pr">New</span></div><span class="rm">Oct 30</span></div>
+    <div class="row" style="min-height:48px"><span class="label" style="width:56px">5 reps</span><div class="grow num rt">265 lb</div><span class="rm">Oct 23</span></div>
+    <div class="row" style="min-height:48px"><span class="label" style="width:56px">8 reps</span><div class="grow num rt">235 lb</div><span class="rm">Sep 18</span></div>
+  </div>
+</div>
+
+<!-- Sessions -->
+<div class="folder">
+  <div class="tabs"><span class="tab mine on"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Sessions <span class="n">19</span></span></div>
+  <div class="box mine rows">
+    <div class="row"><div class="grow"><div class="rt">Thu Oct 30</div><div class="rm num">275×4 · 255×6 · 255×6 · RPE 8.5</div></div><div style="text-align:right"><div class="rt num">287</div><div class="rm">e1RM</div></div></div>
+    <div class="row"><div class="grow"><div class="rt">Thu Oct 23</div><div class="rm num">265×5 · 245×6 · 245×6 · RPE 8</div></div><div style="text-align:right"><div class="rt num">276</div><div class="rm">e1RM</div></div></div>
+    <div class="row"><div class="grow"><div class="rt">Mon Oct 20</div><div class="rm num">225×8 · 225×8 · 225×7 · RPE 7.5</div></div><div style="text-align:right"><div class="rt num">278</div><div class="rm">e1RM</div></div></div>
+  </div>
+</div>
+
+<nav class="nav"><a><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Training</a><a><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Library</a><div class="wo"><span>WORKOUT</span></div><a class="on"><svg viewBox="0 0 24 24"><path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/></svg>Progress</a><a><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>Settings</a></nav>
+</div>
+<script>
+line(document.getElementById('trend'),
+  [262, 258, 266, 270, 268, 274, 265, 271, 276, 272, 278, 276, 287],
+  { labels: [[0, 'Aug'], [4, 'Sep'], [8, 'Oct'], [12, 'Now']], prs: [12],
+    overlay: [245, 245, 250, 255, 250, 255, 245, 255, 260, 255, 265, 265, 275] })
+</script>
+</body></html>

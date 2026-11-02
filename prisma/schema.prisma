@@ -374,6 +374,7 @@ model UserSettings {
   pwaPromptShownCount      Int       @default(0)
   pwaPromptDismissedAt     DateTime?
   signupIntent             String?
+  weeklyWorkoutTarget      Int       @default(3)
   createdAt                DateTime  @default(now())
   updatedAt                DateTime  @updatedAt
 

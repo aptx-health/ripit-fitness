@@ -6,7 +6,7 @@ Feature: Library
 
     Scenario: The nav shows Library instead of Programs
       When the user opens any page
-      Then the nav shows Training, Library, Workout, Learn and Settings
+      Then the nav shows Training, Library, Workout, Progress and Settings
       And Library is highlighted on the Library and on a program's detail page
 
     Scenario: Library opens on programs

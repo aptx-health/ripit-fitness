@@ -5,15 +5,15 @@
  *
  * Seams:
  *   lib/nav/active-tab.ts   isTabActive(tabHref, pathname) -> boolean
- *     the one rule both navs use. Tab hrefs: /training, /library, /learn,
+ *     the one rule both navs use. Tab hrefs: /training, /library, /progress,
  *     /settings. Library is active on /library, everything under it, and on
  *     /programs/new and /programs/<id>/edit (which stay where they are).
  *   components/BottomNav.tsx   active tab link has aria-current="page"
  *     (already does), others have none.
  *   components/Header.tsx   same: the active nav link gets aria-current="page"
  *     (set in TL2).
- *   Both navs list Training, Library, Learn, Settings, with the Workout
- *   (Quick actions) button between Library and Learn in the bottom nav, and
+ *   Both navs list Training, Library, Progress, Settings, with the Workout
+ *   (Quick actions) button between Library and Progress in the bottom nav, and
  *   no Programs tab.
  */
 
@@ -42,7 +42,7 @@ async function isTabActive(href: string, pathname: string) {
   return mod.isTabActive(href, pathname)
 }
 
-const TABS = ['/training', '/library', '/learn', '/settings']
+const TABS = ['/training', '/library', '/progress', '/settings']
 async function activeTabs(pathname: string) {
   const out: string[] = []
   for (const t of TABS) if (await isTabActive(t, pathname)) out.push(t)
@@ -60,7 +60,8 @@ describe('isTabActive', () => {
     ['/library', '/library/programs/p1/anything'],
     ['/library', '/programs/new'],
     ['/library', '/programs/p1/edit'],
-    ['/learn', '/learn/topic'],
+    ['/progress', '/progress'],
+    ['/progress', '/progress/anything'],
     ['/settings', '/settings'],
   ])('%s is active on %s', async (tab, path) => {
     expect(await isTabActive(tab, path)).toBe(true)
@@ -87,7 +88,7 @@ describe('isTabActive', () => {
     for (const [path, tab] of [
       ['/training', '/training'],
       ['/library', '/library'],
-      ['/learn', '/learn'],
+      ['/progress', '/progress'],
       ['/settings', '/settings'],
     ]) {
       expect(await activeTabs(path)).toEqual([tab])
@@ -115,27 +116,47 @@ async function header() {
   return render(createElement(Header, { userEmail: 'a@b.c' }))
 }
 
+describe('Progress replaces Learn in the nav', () => {
+  afterEach(cleanup)
+
+  it.each(['/progress', '/progress/anything'])('the bottom nav and the header mark Progress current on %s, and only Progress', async (path) => {
+    h.pathname = path
+    await bottomNav()
+    expect(labels(current())).toEqual(['Progress'])
+    cleanup()
+    await header()
+    expect(labels(current())).toEqual(['Progress'])
+  })
+
+  it('/learn marks no tab current any more (it redirects to /progress)', async () => {
+    expect(await activeTabs('/learn')).toEqual([])
+    expect(await activeTabs('/learn/some-article')).toEqual([])
+  })
+})
+
 describe('navs', () => {
   beforeEach(() => {
     h.pathname = '/library/programs/p1'
   })
   afterEach(cleanup)
 
-  it('the bottom nav shows Training, Library, Workout, Learn and Settings, with no Programs', async () => {
+  it('the bottom nav shows Training, Library, Workout, Progress and Settings, with no Programs or Learn', async () => {
     await bottomNav()
     const links = screen.getAllByRole('link')
-    expect(labels(links)).toEqual(['Training', 'Library', 'Learn', 'Settings'])
-    expect(links.map((a) => a.getAttribute('href'))).toEqual(['/training', '/library', '/learn', '/settings'])
+    expect(labels(links)).toEqual(['Training', 'Library', 'Progress', 'Settings'])
+    expect(links.map((a) => a.getAttribute('href'))).toEqual(['/training', '/library', '/progress', '/settings'])
+    expect(links.some((a) => (a.getAttribute('href') ?? '').startsWith('/learn'))).toBe(false)
     const workout = screen.getByRole('button', { name: /quick actions/i })
     expect(links[1].compareDocumentPosition(workout) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     expect(workout.compareDocumentPosition(links[2]) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
-  it('the header shows Training, Library and Learn, with no Programs', async () => {
+  it('the header shows Training, Library and Progress, with no Programs or Learn', async () => {
     await header()
-    const links = screen.getAllByRole('link').filter((a) => ['Training', 'Library', 'Programs', 'Learn'].includes(a.textContent ?? ''))
-    expect(labels(links)).toEqual(['Training', 'Library', 'Learn'])
-    expect(links.map((a) => a.getAttribute('href'))).toEqual(['/training', '/library', '/learn'])
+    const links = screen.getAllByRole('link').filter((a) => ['Training', 'Library', 'Programs', 'Progress', 'Learn'].includes(a.textContent ?? ''))
+    expect(labels(links)).toEqual(['Training', 'Library', 'Progress'])
+    expect(links.map((a) => a.getAttribute('href'))).toEqual(['/training', '/library', '/progress'])
+    expect(screen.getAllByRole('link').some((a) => (a.getAttribute('href') ?? '').startsWith('/learn'))).toBe(false)
   })
 
   it.each([

@@ -18,6 +18,8 @@ export type UserSettings = {
   seenMessageIds: string
   pwaPromptShownCount: number
   pwaPromptDismissedAt: string | null
+  /** Workouts a week that count toward the Progress streak, 1 to 14. */
+  weeklyWorkoutTarget?: number
 }
 
 type UseUserSettingsReturn = {

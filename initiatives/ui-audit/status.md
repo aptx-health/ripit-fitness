@@ -88,3 +88,4 @@
 - 2026-11-01 20:55 CDT: Commit hook flagged ExerciseLoggingModal.tsx at 1051 lines (max 1000); the L3 commit landed anyway. Lead moved the plan sheet's state into hooks/useWorkoutPlanSheet.ts (979 lines now); 684 component tests pass, tsc and lint clean.
 - 2026-11-01 21:00 CDT: L3 PR #1027 (feature/logger-plan → dev) opened.
 - 2026-11-01 21:15 CDT: Dustin merged L3 (#1027) into dev. Workout screen L1–L3 complete; L3 waits for the next prod release.
+- 2026-11-01 23:40 CDT: L3 in prod (release #1029, infra #135).

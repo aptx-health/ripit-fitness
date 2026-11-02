@@ -22,6 +22,7 @@ type UpdateSettingsRequest = {
   seenMessageIds?: string
   pwaPromptShownCount?: number
   pwaPromptDismissedAt?: string | null
+  weeklyWorkoutTarget?: number
 }
 
 export async function GET(_request: NextRequest) {
@@ -77,7 +78,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json() as UpdateSettingsRequest
-    const { displayName, defaultWeightUnit, defaultIntensityRating, dismissedPrimer, dismissedWarmup, dismissedStickNudge, completedTours, postSessionPromptCount, lastPostSessionPromptAt, experienceLevel, equipmentPreference, onboardingCompleted, intensityEnabled, loggingMode, dismissedMessageIds, seenMessageIds, pwaPromptShownCount, pwaPromptDismissedAt } = body
+    const { displayName, defaultWeightUnit, defaultIntensityRating, dismissedPrimer, dismissedWarmup, dismissedStickNudge, completedTours, postSessionPromptCount, lastPostSessionPromptAt, experienceLevel, equipmentPreference, onboardingCompleted, intensityEnabled, loggingMode, dismissedMessageIds, seenMessageIds, pwaPromptShownCount, pwaPromptDismissedAt, weeklyWorkoutTarget } = body
 
     // Validate weight unit
     if (defaultWeightUnit && !['lbs', 'kg'].includes(defaultWeightUnit)) {
@@ -119,6 +120,14 @@ export async function PUT(request: NextRequest) {
       )
     }
 
+    // Validate the weekly workout target: a whole number from 1 to 14
+    if (weeklyWorkoutTarget !== undefined && (typeof weeklyWorkoutTarget !== 'number' || !Number.isInteger(weeklyWorkoutTarget) || weeklyWorkoutTarget < 1 || weeklyWorkoutTarget > 14)) {
+      return NextResponse.json(
+        { error: 'Invalid weeklyWorkoutTarget. Must be a whole number from 1 to 14' },
+        { status: 400 }
+      )
+    }
+
     // Validate equipment preference
     if (equipmentPreference && !['machines', 'free_weights_cables'].includes(equipmentPreference)) {
       return NextResponse.json(
@@ -149,13 +158,15 @@ export async function PUT(request: NextRequest) {
         ...(seenMessageIds !== undefined && { seenMessageIds }),
         ...(pwaPromptShownCount !== undefined && { pwaPromptShownCount }),
         ...(pwaPromptDismissedAt !== undefined && { pwaPromptDismissedAt: pwaPromptDismissedAt ? new Date(pwaPromptDismissedAt) : null }),
+        ...(weeklyWorkoutTarget !== undefined && { weeklyWorkoutTarget }),
         updatedAt: new Date()
       },
       create: {
         userId: user.id,
         displayName: displayName?.trim() || null,
         defaultWeightUnit: defaultWeightUnit || 'lbs',
-        defaultIntensityRating: defaultIntensityRating || 'rir'
+        defaultIntensityRating: defaultIntensityRating || 'rir',
+        ...(weeklyWorkoutTarget !== undefined && { weeklyWorkoutTarget })
       }
     })
 
