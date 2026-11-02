@@ -1,6 +1,6 @@
 ---
 id: 081
-state: running
+state: accepted
 waiting_on:
 executor: logger-audit (new agent)
 from: lead (lead-ripit-mcp)
@@ -33,3 +33,5 @@ A short packet: folder path, top 5 findings, your recommended direction per area
 
 ## Log
 - 2026-11-01 MDT: created at Dustin's request; read-only. A new agent with little context, per Dustin. Runs in worktree1 so it doesn't collide with UI6 in worktree2.
+- 2026-11-01 MDT: back; published Handoff Hub ripit-fitness/logger-ideas-081. Waiting on Dustin's picks.
+- 2026-11-01 MDT: Dustin picked A for all three (bottom bar, tab bar, plan drawer): "the recommended (heavy alterations) setup". Accepted.
