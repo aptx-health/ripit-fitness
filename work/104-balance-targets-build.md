@@ -1,6 +1,6 @@
 ---
 id: 104
-state: review
+state: accepted
 waiting_on:
 executor: implementer
 from: lead (lead-ripit-mcp)
@@ -35,3 +35,4 @@ Use `handoff-implementer`. First line `Report: complete | needs decision | furth
 - 2026-11-01 21:52 CDT: created from 103; dispatched to implementer (wF:p2).
 - 2026-11-01 22:05 CDT: back; lead re-ran 5 files (266 pass). Lead decision: aggregates use getMuscleBalanceTargets (normalized), so planner and stats agree; adjust the lats-3 test to an in-range value. Also fix seed-synthetic-users to write Settings. Sent back to implementer.
 - 2026-11-01 22:20 CDT: follow-ups back; lead re-ran 17 files (917 pass), tsc ok. Review 105 dispatched.
+- 2026-11-01 23:40 CDT: accepted (Dustin merged #1028 and shipped to prod).

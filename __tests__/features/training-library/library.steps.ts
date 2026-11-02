@@ -87,19 +87,20 @@ describeFeature(feature, ({ Rule }) => {
         pending = () => renderNav('bottom', '/library/programs/p-os')
         await shown()
       })
-      Then('the nav shows Training, Library, Workout, Learn and Settings', async () => {
+      // The step text must match features/training-library/library.feature line 9, which still says Learn.
+      Then('the nav shows Training, Library, Workout, Progress and Settings', async () => {
         await shown()
         const links = screen.getAllByRole('link')
-        expect(links.map((a) => a.textContent)).toEqual(['Training', 'Library', 'Learn', 'Settings'])
-        expect(links.map((a) => a.getAttribute('href'))).toEqual(['/training', '/library', '/learn', '/settings'])
+        expect(links.map((a) => a.textContent)).toEqual(['Training', 'Library', 'Progress', 'Settings'])
+        expect(links.map((a) => a.getAttribute('href'))).toEqual(['/training', '/library', '/progress', '/settings'])
         const workout = screen.getByRole('button', { name: /quick actions/i })
         expect(links[1].compareDocumentPosition(workout) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
         expect(workout.compareDocumentPosition(links[2]) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
         expect(screen.queryByRole('link', { name: /programs/i })).toBeNull()
         cleanup()
         await renderNav('header', '/library')
-        const top = screen.getAllByRole('link').filter((a) => ['Training', 'Library', 'Programs', 'Learn'].includes(a.textContent ?? ''))
-        expect(top.map((a) => a.textContent)).toEqual(['Training', 'Library', 'Learn'])
+        const top = screen.getAllByRole('link').filter((a) => ['Training', 'Library', 'Programs', 'Progress', 'Learn'].includes(a.textContent ?? ''))
+        expect(top.map((a) => a.textContent)).toEqual(['Training', 'Library', 'Progress'])
       })
       And('Library is highlighted on the Library and on a program\'s detail page', async () => {
         for (const path of ['/library', '/library?type=programs', '/library/programs/p-os']) {

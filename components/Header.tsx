@@ -22,7 +22,7 @@ export default function Header({ userEmail }: Props) {
   const NAV_LINKS = [
     { href: '/training', label: 'Training' },
     { href: '/library', label: 'Library' },
-    { href: '/learn', label: 'Learn' },
+    { href: '/progress', label: 'Progress' },
   ] as const
 
   return (

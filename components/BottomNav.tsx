@@ -1,6 +1,6 @@
 'use client'
 
-import { Activity, BookOpen, Dumbbell, LayoutGrid, Settings } from 'lucide-react'
+import { Activity, Dumbbell, LayoutGrid, Settings, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
@@ -14,7 +14,7 @@ const TABS = [
 ] as const
 
 const TABS_AFTER = [
-  { id: 'learn', label: 'Learn', icon: BookOpen, href: '/learn' },
+  { id: 'progress', label: 'Progress', icon: TrendingUp, href: '/progress' },
   { id: 'settings', label: 'Settings', icon: Settings, href: '/settings' },
 ] as const
 

@@ -104,3 +104,5 @@ Append-only. Newest at the bottom.
 - 2026-11-01 21:52 CDT: 103 back (11 red on dev, break matrix 20/20). Dispatched build 104 to implementer.
 - 2026-11-01 22:20 CDT: 104 done incl. lead follow-ups (aggregates normalized, seed script → Settings); 917 related tests pass. Review 105 dispatched.
 - 2026-11-01 22:45 CDT: Review 105 checks out (low findings only; staleness test gaps and query dedupe to ROADMAP). Committing and opening the PR.
+- 2026-11-01 23:05 CDT: Dustin merged #1028. Release PR #1029 (dev→main) opened with #1027 and #1028.
+- 2026-11-01 23:40 CDT: In prod: release #1029 via infra #135 (app sha-654b60b9, clone-program 654b60b9). 103–105 accepted.

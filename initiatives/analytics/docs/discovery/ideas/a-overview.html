@@ -1,0 +1,60 @@
+<!doctype html><html lang="en" data-theme="ripit" data-mode="light"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Analytics A: Overview</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_base.css"><script src="_charts.js"></script>
+</head><body><div class="phone" id="shot">
+<h1 class="title">Progress</h1>
+
+<!-- 1. Consistency: this week -->
+<div class="folder">
+  <div class="tabs"><span class="tab next on"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>This week</span><span class="tab">Last week</span></div>
+  <div class="box next">
+    <div class="pad">
+      <div class="days"><div>M<i class="d"></i></div><div>T<i></i></div><div>W<i class="d"></i></div><div>T<i class="c"></i></div><div>F<i class="d"></i></div><div>S<i class="t"></i></div><div>S<i></i></div></div>
+      <div class="rm" style="margin-top:6px"><span style="display:inline-block;width:10px;height:10px;background:var(--primary)"></span> strength &nbsp; <span style="display:inline-block;width:10px;height:10px;background:var(--accent)"></span> cardio</div>
+    </div>
+    <div class="tiles" style="border-top:1px solid var(--border)">
+      <div><div class="label">Workouts</div><div class="big num">3</div><div class="rm num">avg 3.4/wk</div></div>
+      <div><div class="label">Sets</div><div class="big num">52</div><div class="rm num">avg 58</div></div>
+      <div><div class="label">Time</div><div class="big num">2h 41</div><div class="rm num">+ 35m cardio</div></div>
+    </div>
+    <div class="row" style="border-top:1px solid var(--border)">
+      <div class="grow"><div class="rt">6-week streak</div><div class="rm">Weeks with 2+ workouts · best 11</div></div>
+      <div style="width:150px"><div class="weeks"><i class="h"></i><i class="h"></i><i></i><i class="h"></i><i class="h"></i><i class="h"></i><i class="h"></i><i class="h"></i><i class="h"></i><i class="p"></i></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. Am I progressing: key lifts -->
+<div class="folder">
+  <div class="tabs"><span class="tab mine on"><svg viewBox="0 0 24 24"><path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/></svg>Lifts</span><span class="tab">Records <span class="n">2</span></span></div>
+  <div class="box mine rows">
+    <div class="row"><div class="grow"><div class="rt">Back Squat</div><div class="rm num">e1RM 287 lb · 275×4 Thu</div></div><div data-spark="250,255,254,262,266,265,271,278,276,287" data-pr="9"></div><div style="width:54px;text-align:right"><span class="chip pr">PR</span></div><span class="chev">›</span></div>
+    <div class="row"><div class="grow"><div class="rt">Bench Press</div><div class="rm num">e1RM 214 lb · 185×8 Mon</div></div><div data-spark="200,203,204,206,209,208,211,212,213,214" data-pr="9"></div><div style="width:54px;text-align:right" class="ok num"><b>+4.9%</b></div><span class="chev">›</span></div>
+    <div class="row"><div class="grow"><div class="rt">Deadlift</div><div class="rm num">e1RM 341 lb · 315×3 Fri</div></div><div data-spark="335,340,338,342,341,344,339,343,340,341" data-pr="7"></div><div style="width:54px;text-align:right" class="muted num"><b>+0.3%</b></div><span class="chev">›</span></div>
+    <div class="row"><div class="grow"><div class="rt">Overhead Press</div><div class="rm num">e1RM 128 lb · 115×5 Wed</div></div><div data-spark="133,134,132,131,130,131,129,128,129,128" data-pr="1"></div><div style="width:54px;text-align:right" class="bad num"><b>−3.8%</b></div><span class="chev">›</span></div>
+    <div class="note">Change = last 2 sessions vs first 2 in 8 weeks. Lifts = your target movements; tap for the full history.</div>
+  </div>
+</div>
+
+<!-- 3. Volume + effort over time -->
+<div class="folder">
+  <div class="tabs"><span class="tab mine on"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16v-4M12 16V8M17 16v-7"/></svg>Volume</span><span class="tab">Time</span><span class="tab">Muscles</span></div>
+  <div class="box mine pad">
+    <div class="rm" style="margin-bottom:6px">Working sets per week, with average effort</div>
+    <div id="vol"></div>
+    <div class="rm num" style="margin-top:6px">Wk of Sep 21 looks light: 31 sets, RPE 6.9.</div>
+  </div>
+</div>
+
+<nav class="nav"><a><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Training</a><a><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Library</a><div class="wo"><span>WORKOUT</span></div><a class="on"><svg viewBox="0 0 24 24"><path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/></svg>Progress</a><a><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>Settings</a></nav>
+</div>
+<script>
+document.querySelectorAll('[data-spark]').forEach((el) => spark(el, el.dataset.spark.split(',').map(Number), { pr: +el.dataset.pr }))
+bars(document.getElementById('vol'), [54, 58, 61, 57, 63, 31, 55, 60, 62, 66, 64, 52], {
+  labels: [[0, 'Aug 17'], [4, 'Sep 14'], [8, 'Oct 12'], [11, 'Now']], cur: 11, dl: [5],
+  effort: [7.8, 8.0, 8.1, 8.2, 8.4, 6.9, 7.7, 8.0, 8.2, 8.5, 8.7, 8.1],
+})
+</script>
+</body></html>
