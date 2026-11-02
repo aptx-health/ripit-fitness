@@ -25,3 +25,20 @@ export function signed(value: number, text: (abs: number) => string): string {
   if (body === text(0)) return body
   return `${value > 0 ? '+' : MINUS}${body}`
 }
+
+/** A weight to at most one decimal, with no trailing ".0": 275, 102.5. */
+export function formatWeight(weight: number): string {
+  return String(Math.round(weight * 10) / 10)
+}
+
+/** "lb" or "kg". */
+export function unitLabel(unit: 'lbs' | 'kg'): string {
+  return unit === 'kg' ? 'kg' : 'lb'
+}
+
+/** 1st, 2nd, 3rd, 4th ... 11th, 12th, 13th ... 21st. */
+export function ordinal(n: number): string {
+  const teen = n % 100 >= 11 && n % 100 <= 13
+  const suffix = teen ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' } as Record<number, string>)[n % 10] ?? 'th'
+  return `${n}${suffix}`
+}

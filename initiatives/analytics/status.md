@@ -10,3 +10,13 @@
 - 2026-11-02 02:40 CDT: Review 109 checks out. Dustin: normal = only weeks since first workout. Fixes 110 (normal, streak>8 tests, bounded streak query, no future weeks, 'This wk') to implementer; test-builder skipped on purpose (small fixes).
 - 2026-11-02 03:20 CDT: Fixes 110 back (24 new tests; 3267 suite). Starting phone preview for Dustin.
 - 2026-11-02 CST: Dustin checked the phone preview: "Looks good". 107–110 accepted. Preview stopped; committing and opening the PR into dev.
+- 2026-11-02 CST: #1030 merged into dev (CI green). Next: prod release when Dustin asks, or S2.
+- 2026-11-02 CST: S2 started on feature/progress-records. Spec features/analytics/weekly-records.feature. Dustin: Yes go; light week ≤60% of normal sets; Flat = 3rd session below best; exercise page B later. Tests 111 dispatched to test-builder.
+- 2026-11-02 CST: 111 back (147 tests, 144 red, break matrix 96/96). Lead answered 5 points + unpinned gaps (111-handback.md). Build 112 dispatched.
+- 2026-11-02 CST: 112 back (3414 suite). Lead amended S1 fixture for the new required fields; tsc clean, 331 progress tests pass. Review 113 (reviewer) and gap tests 114 (test-builder) dispatched in parallel.
+- 2026-11-02 CST: 114 back (23 decision tests pass, 17/17 breaks). Waiting on review 113.
+- 2026-11-02 CST: Dustin idea: pinned lifts instead of the full Lifts list. Added to ROADMAP Next as the follow-up after S2.
+- 2026-11-02 CST: Review 113 checks out (3437 suite). Findings: unbounded history query (medium), light-week wording, e1RM PR rep cap question. Asking Dustin.
+- 2026-11-02 CST: Dustin: cap e1RM PRs at 12 reps; fix the history query and light-week wording now. Fixes 115 to implementer (test-builder skipped on purpose, small). PaperTabs 48px raised for UI audit; findings 4 and 6 left as is.
+- 2026-11-02 CST: Fixes 115 back (3455 suite); lead re-ran 372 progress tests. Starting phone preview for Dustin.
+- 2026-11-02 CST: Dustin checked the S2 preview: "Looks great". 111–115 accepted. Committing and opening the PR into dev; pinned lifts next.

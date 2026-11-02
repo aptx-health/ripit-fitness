@@ -6,14 +6,17 @@ import PaperTabTitle from '@/components/ui/PaperTabTitle'
 import { clientLogger } from '@/lib/client-logger'
 import { pluralize } from '@/lib/format/pluralize'
 import { addWeeks, percentChange, type WeeklyReport } from '@/lib/insights/progress'
+import type { TrendNote } from '@/lib/insights/progress-records'
 import { DASH, formatMinutes, formatRpe, signed, weekOfLabel } from './format'
+import RecordsLifts from './RecordsLifts'
 import WeeklySetsChart from './WeeklySetsChart'
 
 /**
- * The Progress tab (S1): one week at a time. A week navigator, the report
- * card (this week against the 8 weeks before it) and the last 8 weeks of
- * working sets. Weeks are local Mondays: the browser's zone goes with every
- * request, and the server picks the current week when no start is sent.
+ * The Progress tab: one week at a time. A week navigator, the report card
+ * (this week against the 8 weeks before it), the Records / Lifts folder and
+ * the last 8 weeks of working sets with a trend note. Weeks are local Mondays:
+ * the browser's zone goes with every request, and the server picks the current
+ * week when no start is sent.
  */
 
 const NAV_BUTTON =
@@ -114,6 +117,9 @@ export default function ProgressView() {
 
       <ReportCard report={report} />
 
+      {/* A report without the S2 fields (an older payload) shows an empty folder. */}
+      <RecordsLifts records={report.records ?? []} lifts={report.lifts ?? []} weightUnit={report.weightUnit ?? 'lbs'} />
+
       <section aria-labelledby="progress-last-8">
         <div className="flex items-end">
           <PaperTabTitle tone="mine" icon={<BarChart3 size={16} />} asChild>
@@ -122,10 +128,34 @@ export default function ProgressView() {
         </div>
         <div className="folder-box border-2 border-secondary bg-card p-3">
           <WeeklySetsChart weeks={report.weeks} selected={report.weekStart} isCurrentWeek={report.isCurrentWeek} />
+          {report.trend && (
+            <p className="-mx-3 -mb-3 mt-2 border-t border-dashed border-border px-3 py-2 text-sm text-muted-foreground">
+              {trendText(report.trend)}
+            </p>
+          )}
         </div>
       </section>
     </div>
   )
+}
+
+/** The note's sentences: rising effort (3+ weeks), then the last light week. */
+function trendText(trend: TrendNote): string {
+  const effort =
+    trend.effortRisingWeeks > 0
+      ? `Effort has risen ${trend.effortRisingWeeks} weeks running (${formatRpe(trend.effortFrom)} → ${formatRpe(trend.effortTo)}). `
+      : ''
+  const ago = trend.lastLightWeeksAgo
+  const light =
+    ago == null
+      ? // Fewer than 8 weeks searched: the first workout is inside the chart.
+        (trend.lightWeeksSearched ?? 8) < 8
+        ? 'No light week since you started.'
+        : 'No light week in the last 8 weeks.'
+      : ago === 0
+        ? 'This was a light week.'
+        : `Your last light week was ${pluralize(ago, 'week')} ago.`
+  return effort + light
 }
 
 // --- the report card --------------------------------------------------------------

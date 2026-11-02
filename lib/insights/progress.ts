@@ -1,5 +1,17 @@
 import { Prisma, type PrismaClient } from '@prisma/client'
 import { setEffort } from '@/lib/aggregates/compute'
+import {
+  computeTrendNote,
+  computeWeekLifts,
+  computeWeekRecords,
+  type HistorySet,
+  LBS_PER_KG,
+  MAX_PR_REPS,
+  type TrendNote,
+  type WeekLift,
+  type WeekRecord,
+  type WeightUnit,
+} from '@/lib/insights/progress-records'
 
 /**
  * The Progress tab's weekly report (S1): one week compared with the user's
@@ -63,6 +75,14 @@ export interface WeeklyReport {
   streak: number
   /** The 8 weeks ending with the selected one, oldest first. */
   weeks: WeekStats[]
+  /** The user's unit; every weight in records and lifts is in it. */
+  weightUnit: WeightUnit
+  /** Personal records set in the selected week (S2). */
+  records: WeekRecord[]
+  /** Every exercise done in the selected week (S2). */
+  lifts: WeekLift[]
+  /** The note under the chart; null with fewer than 3 weeks of history (S2). */
+  trend: TrendNote | null
 }
 
 export const DEFAULT_WEEKLY_WORKOUT_TARGET = 3
@@ -241,10 +261,20 @@ type ReportDb = Pick<PrismaClient, 'workoutCompletion' | 'loggedCardioSession' |
 
 const COUNTED = { status: 'completed', isArchived: false } as const
 
+/** The set fields records and lifts need. */
+const HISTORY_SET = {
+  reps: true,
+  weight: true,
+  weightUnit: true,
+  isWarmup: true,
+  exercise: { select: { exerciseDefinitionId: true, exerciseDefinition: { select: { name: true } } } },
+} as const
+
 /**
  * The report for one week: four queries for the week, the 8 before it and the
- * date of the first workout, plus one grouped count when the streak runs back
- * past those 8 weeks. The normal averages only the prior weeks that start on
+ * date of the first workout, one for the earlier best sets of the exercises
+ * done that week (records and lifts), plus one grouped count when the streak runs
+ * back past those 8 weeks. The normal averages only the prior weeks that start on
  * or after the week of the first workout; gaps after it count as 0.
  */
 export async function getWeeklyReport(
@@ -257,7 +287,7 @@ export async function getWeeklyReport(
   const rangeEnd = weekBounds(weekStart, timeZone).end
 
   const [settings, first, completions, cardio] = await Promise.all([
-    db.userSettings.findUnique({ where: { userId }, select: { weeklyWorkoutTarget: true } }),
+    db.userSettings.findUnique({ where: { userId }, select: { weeklyWorkoutTarget: true, defaultWeightUnit: true } }),
     db.workoutCompletion.findFirst({
       where: { userId, ...COUNTED },
       select: { completedAt: true },
@@ -266,10 +296,11 @@ export async function getWeeklyReport(
     db.workoutCompletion.findMany({
       where: { userId, ...COUNTED, completedAt: { gte: rangeStart, lt: rangeEnd } },
       select: {
+        id: true,
         completedAt: true,
         startedAt: true,
         durationSeconds: true,
-        loggedSets: { select: { isWarmup: true, rpe: true, rir: true } },
+        loggedSets: { select: { rpe: true, rir: true, ...HISTORY_SET } },
         workout: {
           select: { week: { select: { weekNumber: true, program: { select: { name: true, isActive: true, userId: true } } } } },
         },
@@ -282,6 +313,13 @@ export async function getWeeklyReport(
     }),
   ])
   const target = settings?.weeklyWorkoutTarget ?? DEFAULT_WEEKLY_WORKOUT_TARGET
+  const weightUnit: WeightUnit = settings?.defaultWeightUnit === 'kg' ? 'kg' : 'lbs'
+  const { start: shownStart } = weekBounds(weekStart, timeZone)
+
+  // Records and lifts: the sets in range, plus the earlier sets of this week's exercises that can matter.
+  const inRange = completions.flatMap((c) => c.loggedSets.map((s) => historySet(s, c)))
+  const shownIds = [...new Set(inRange.filter((s) => s.completedAt >= shownStart).map((s) => s.exerciseDefinitionId))]
+  const history = [...inRange, ...(await earlierBestSets(db, userId, shownIds, rangeStart))]
 
   const summary = summarizeWeeks({
     workouts: completions.map((c) => ({ ...c, sets: c.loggedSets })),
@@ -308,6 +346,7 @@ export async function getWeeklyReport(
       c.workout.week.program.userId === userId,
   )?.workout?.week
 
+  const weeks = summary.slice(1)
   return {
     weekStart,
     isCurrentWeek: weekStartFor(now, timeZone) === weekStart,
@@ -317,8 +356,71 @@ export async function getWeeklyReport(
     normal: computeNormal(sinceFirst),
     normalWeeks: sinceFirst.length,
     streak: computeStreak(counts, target, now < rangeEnd),
-    weeks: summary.slice(1),
+    weeks,
+    weightUnit,
+    records: computeWeekRecords(history, shownStart, rangeEnd, weightUnit),
+    lifts: computeWeekLifts(history, shownStart, rangeEnd, weightUnit),
+    trend: computeTrendNote(weeks, sinceFirst, { openWeek: now < rangeEnd }),
   }
+}
+
+function historySet(
+  s: { reps: number; weight: number; weightUnit: string; isWarmup: boolean; exercise: { exerciseDefinitionId: string; exerciseDefinition: { name: string } } },
+  completion: { id: string; completedAt: Date },
+): HistorySet {
+  return {
+    completionId: completion.id,
+    completedAt: completion.completedAt,
+    exerciseDefinitionId: s.exercise.exerciseDefinitionId,
+    name: s.exercise.exerciseDefinition.name,
+    reps: s.reps,
+    weight: s.weight,
+    weightUnit: s.weightUnit,
+    isWarmup: s.isWarmup,
+  }
+}
+
+/**
+ * The earlier working sets (before `before`) of the given exercises that can
+ * change a record or a lift, so the rows grow with sessions, not with sets:
+ * each session's best-e1RM set (Lifts), each exercise's heaviest set at each
+ * of 1 to 12 reps (Records: the best e1RM at 12 reps or fewer is one of them),
+ * and its most-reps bodyweight set. The pure functions give the same answers on these
+ * as on every set. One query; e1RM is compared in pounds, as there.
+ */
+async function earlierBestSets(db: ReportDb, userId: string, exerciseDefinitionIds: string[], before: Date): Promise<HistorySet[]> {
+  if (exerciseDefinitionIds.length === 0) return []
+  const rows = await db.$queryRaw<Array<Omit<HistorySet, 'isWarmup'>>>(Prisma.sql`
+    WITH s AS (
+      SELECT ls.id, ls.reps, ls.weight, ls."weightUnit", c.id AS "completionId", c."completedAt",
+             e."exerciseDefinitionId", d.name,
+             ls.weight * CASE WHEN ls."weightUnit" = 'kg' THEN ${LBS_PER_KG} ELSE 1 END AS lbs
+      FROM "LoggedSet" ls
+      JOIN "WorkoutCompletion" c ON c.id = ls."completionId"
+      JOIN "Exercise" e ON e.id = ls."exerciseId"
+      JOIN "ExerciseDefinition" d ON d.id = e."exerciseDefinitionId"
+      WHERE c."userId" = ${userId}
+        AND c.status = 'completed'
+        AND c."isArchived" = false
+        AND ls."isWarmup" = false
+        AND c."completedAt" < (${before.toISOString()}::timestamptz AT TIME ZONE 'UTC')
+        AND e."exerciseDefinitionId" = ANY(${exerciseDefinitionIds}::text[])
+    ),
+    w AS (
+      SELECT *, CASE WHEN reps = 1 THEN lbs ELSE lbs * (1 + reps / 30.0) END AS e1rm FROM s WHERE lbs > 0
+    )
+    SELECT id, reps, weight, "weightUnit", "completionId", "completedAt", "exerciseDefinitionId", name FROM (
+      (SELECT DISTINCT ON ("exerciseDefinitionId", "completionId") * FROM w
+        ORDER BY "exerciseDefinitionId", "completionId", e1rm DESC)
+      UNION
+      (SELECT DISTINCT ON ("exerciseDefinitionId", reps) * FROM w WHERE reps <= ${MAX_PR_REPS}
+        ORDER BY "exerciseDefinitionId", reps, lbs DESC)
+      UNION
+      (SELECT DISTINCT ON ("exerciseDefinitionId") *, NULL::double precision AS e1rm FROM s WHERE lbs <= 0
+        ORDER BY "exerciseDefinitionId", reps DESC)
+    ) best
+  `)
+  return rows.map((r) => ({ ...r, reps: Number(r.reps), weight: Number(r.weight), isWarmup: false }))
 }
 
 /**
