@@ -1,0 +1,4 @@
+# 122 handback (reviewer, 2026-11-02)
+Report: complete. Verdict: needs fixes. All scenarios held live (390px light/dark, Playwright, a saved workout started via the real route). Suite 3698 pass. Data restored. Screenshots `initiatives/agent-tools/docs/assets/122/`.
+Findings: (1) medium bug: after the plan is done, the form keeps rpe "8" hidden and the next set logs it (hasRpe keyed on the next set; the field disappears, layout shifts). (2) density: empty RIR picker stacked above RPE; expanded list repeats logged sets; SET 2 / "set 2 next" / NEXT chip triple. (3) naming: header "PLAN 1/3" vs new "Plan" line. (4) low: deleting a set or a failed optimistic log doesn't refill the form. (5) info: AdHocLoggerView at 960 lines. (6) info, pre-existing: reopened exercise with logged sets shows an empty form.
+Dustin (2026-11-02): one effort picker per planned exercise (yes); rename the line to "Target" (yes); lean expanded list and dropping the next chip: no (keep).

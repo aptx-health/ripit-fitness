@@ -36,17 +36,21 @@ import type { AnchorStalenessRow } from '@/lib/recommendations/anchor-staleness'
 import type { FauNeed } from '@/lib/recommendations/fau-score'
 import type { WorkoutRollup } from '@/lib/stats/workout-rollup'
 import { type ApplicableSet, appliedSetToForm } from '@/lib/workout/prefill'
+import { nextPlannedSet, type PlannedSet, planFormValues, workingSets } from '@/lib/workout-logging/plan-summary'
 import type { LoggedSet } from '@/types/workout'
 import {
   AdHocEmptyState,
   AdHocExercisePickerModal,
   type PickerMode,
 } from './AdHocExercisePickerModal'
+import PlanLine, { usePlanExpanded } from './PlanLine'
 
 export type AdHocExercise = {
   id: string
   name: string
   notes: string | null
+  /** The plan copied from a saved or generated workout; missing or [] for none. */
+  prescribedSets?: PlannedSet[]
   exerciseDefinition: {
     primaryFAUs: string[]
     secondaryFAUs: string[]
@@ -101,6 +105,14 @@ const EMPTY_SET = {
   rir: '',
 }
 
+/** The form with the next planned set's reps and effort, while the exercise has a plan left. */
+function withPlan(form: typeof EMPTY_SET, exercise: AdHocExercise | undefined, loggedSets: LoggedSet[]) {
+  if (!exercise) return form
+  const done = loggedSets.filter((s) => s.exerciseId === exercise.id && !s.isWarmup).length
+  const values = planFormValues(exercise.prescribedSets ?? [], done)
+  return values ? { ...form, ...values } : form
+}
+
 export default function AdHocLoggerView({
   completionId,
   startedAt,
@@ -129,7 +141,8 @@ export default function AdHocLoggerView({
     }))
   )
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [currentSet, setCurrentSet] = useState(EMPTY_SET)
+  const [currentSet, setCurrentSet] = useState(() => withPlan(EMPTY_SET, initialExercises[0], loggedSets))
+  const [planExpanded, togglePlan] = usePlanExpanded()
   const [expandedInput, setExpandedInput] = useState<ExpandedInput>(null)
   const [pickerMode, setPickerMode] = useState<PickerMode | null>(null)
   const [planEditorOpen, setPlanEditorOpen] = useState(false)
@@ -174,6 +187,11 @@ export default function AdHocLoggerView({
     ? loggedSets.filter((s) => s.exerciseId === currentExercise.id)
     : []
   const nextSetNumber = currentExerciseSets.length + 1
+  // One effort picker: RPE for an exercise whose plan uses RPE targets (also once the plan is done),
+  // else RIR as today. Only the picker shown is saved, so no hidden effort is logged.
+  const planUsesRpe = workingSets(currentExercise?.prescribedSets ?? []).some((s) => s.rpe != null)
+  const showRpe = hasIntensityAccess && planUsesRpe
+  const showRir = hasIntensityAccess && !planUsesRpe
   const totalLoggedSets = loggedSets.length
 
   // Lazy-load history when the current exercise changes
@@ -222,22 +240,28 @@ export default function AdHocLoggerView({
 
   // Pre-fill the input from history once history arrives, but only when the
   // user hasn't started typing and there are no logged sets in this session
-  // for the current exercise (in-session inheritance handles the rest).
+  // for the current exercise (in-session inheritance handles the rest). A
+  // planned exercise takes only the weight: the plan has filled reps and effort.
   useEffect(() => {
     if (!currentExercise) return
     if (prefilledFromHistoryIds.current.has(currentExercise.id)) return
     if (currentExerciseSets.length > 0) return
-    if (currentSet.reps !== '' || currentSet.weight !== '') return
+    const planned = nextPlannedSet(currentExercise.prescribedSets ?? [], 0) != null
+    if (currentSet.weight !== '' || (!planned && currentSet.reps !== '')) return
     const history = historyByExerciseId.get(currentExercise.id)
     if (!history?.sets.length) return
     const lastSet = history.sets[history.sets.length - 1]
-    setCurrentSet({
-      reps: String(lastSet.reps),
-      weight: String(lastSet.weight),
-      weightUnit: (lastSet.weightUnit as 'lbs' | 'kg') ?? 'lbs',
-      rpe: lastSet.rpe !== null ? String(lastSet.rpe) : '',
-      rir: lastSet.rir !== null ? String(lastSet.rir) : '',
-    })
+    const weight = { weight: String(lastSet.weight), weightUnit: (lastSet.weightUnit as 'lbs' | 'kg') ?? 'lbs' }
+    setCurrentSet((prev) =>
+      planned
+        ? { ...prev, ...weight }
+        : {
+            reps: String(lastSet.reps),
+            ...weight,
+            rpe: lastSet.rpe !== null ? String(lastSet.rpe) : '',
+            rir: lastSet.rir !== null ? String(lastSet.rir) : '',
+          }
+    )
     prefilledFromHistoryIds.current.add(currentExercise.id)
   }, [
     currentExercise,
@@ -433,11 +457,11 @@ export default function AdHocLoggerView({
       const idx = exercises.findIndex((e) => e.id === exerciseId)
       if (idx >= 0) {
         setCurrentIndex(idx)
-        setCurrentSet(EMPTY_SET)
+        setCurrentSet(withPlan(EMPTY_SET, exercises[idx], loggedSets))
         setExpandedInput(null)
       }
     },
-    [exercises]
+    [exercises, loggedSets]
   )
 
   const handlePlanSwap = useCallback(
@@ -468,8 +492,9 @@ export default function AdHocLoggerView({
     const reps = parseInt(currentSet.reps, 10)
     if (!currentSet.reps || Number.isNaN(reps)) return
     const weight = parseFloat(currentSet.weight) || 0
-    const rpe = currentSet.rpe ? parseInt(currentSet.rpe, 10) : null
-    const rir = currentSet.rir ? parseInt(currentSet.rir, 10) : null
+    // Only the effort the form shows is logged (a plan may have filled one that isn't shown).
+    const rpe = showRpe && currentSet.rpe ? parseInt(currentSet.rpe, 10) : null
+    const rir = showRir && currentSet.rir ? parseInt(currentSet.rir, 10) : null
 
     // Optimistic append: render the set immediately with a temp id and
     // _syncStatus='pending'. On success we swap in the server id; on terminal
@@ -488,6 +513,8 @@ export default function AdHocLoggerView({
       _syncStatus: 'pending',
     }
     setLoggedSets((prev) => [...prev, optimisticSet])
+    // The set is done: the next planned set's reps and effort replace what was typed (the weight stays).
+    setCurrentSet((prev) => withPlan(prev, currentExercise, [...loggedSets, optimisticSet]))
     setExpandedInput(null)
     setIsLoggingSet(true)
 
@@ -532,9 +559,23 @@ export default function AdHocLoggerView({
     nextSetNumber,
     completionId,
     isLoggingSet,
+    loggedSets,
+    showRir,
+    showRpe,
     onRetryToast,
     toast,
   ])
+
+  // Sets removed (or a removal undone): when the form still holds what the plan filled in,
+  // it moves to the plan's new next set. A form the user changed is left alone.
+  const refillForm = useCallback((exercise: AdHocExercise, before: LoggedSet[], after: LoggedSet[]) => {
+    setCurrentSet((prev) => {
+      const done = before.filter((s) => s.exerciseId === exercise.id && !s.isWarmup).length
+      const filled = planFormValues(exercise.prescribedSets ?? [], done)
+      const untouched = filled != null && filled.reps === prev.reps && (filled.rpe ?? prev.rpe) === prev.rpe && (filled.rir ?? prev.rir) === prev.rir
+      return untouched ? withPlan(prev, exercise, after) : prev
+    })
+  }, [])
 
   const handleDeleteSet = useCallback(
     async (setNumber: number) => {
@@ -546,28 +587,21 @@ export default function AdHocLoggerView({
 
       // Failed-to-sync sets never reached the server; just drop them locally
       // and renumber on the client so the user can re-log.
+      const removed = loggedSets
+        .filter((s) => s.id !== target.id)
+        .map((s) =>
+          s.exerciseId === currentExercise.id && s.setNumber > setNumber ? { ...s, setNumber: s.setNumber - 1 } : s
+        )
       if (target._syncStatus === 'error' || target.id.startsWith('tmp-')) {
-        setLoggedSets((prev) => {
-          const filtered = prev.filter((s) => s.id !== target.id)
-          return filtered.map((s) =>
-            s.exerciseId === currentExercise.id && s.setNumber > setNumber
-              ? { ...s, setNumber: s.setNumber - 1 }
-              : s
-          )
-        })
+        setLoggedSets(removed)
+        refillForm(currentExercise, loggedSets, removed)
         return
       }
 
       // Optimistic remove with rollback on failure.
       const snapshot = loggedSets
-      setLoggedSets((prev) => {
-        const filtered = prev.filter((s) => s.id !== target.id)
-        return filtered.map((s) =>
-          s.exerciseId === currentExercise.id && s.setNumber > setNumber
-            ? { ...s, setNumber: s.setNumber - 1 }
-            : s
-        )
-      })
+      setLoggedSets(removed)
+      refillForm(currentExercise, snapshot, removed)
 
       try {
         const data = await deleteAdHocSet(completionId, target.id, {
@@ -587,13 +621,14 @@ export default function AdHocLoggerView({
       } catch (err) {
         clientLogger.error('Failed to delete set:', err)
         setLoggedSets(snapshot)
+        refillForm(currentExercise, removed, snapshot)
         toast.error(
           "Couldn't remove set",
           err instanceof FetchError && err.message ? err.message : 'Check your connection and try again.'
         )
       }
     },
-    [currentExercise, loggedSets, completionId, onRetryToast, toast]
+    [currentExercise, loggedSets, completionId, onRetryToast, refillForm, toast]
   )
 
   // Header check icon → confirmation modal (matches programmed logger).
@@ -708,10 +743,10 @@ export default function AdHocLoggerView({
     (index: number) => {
       if (index < 0 || index >= exercises.length) return
       setCurrentIndex(index)
-      setCurrentSet(EMPTY_SET)
+      setCurrentSet(withPlan(EMPTY_SET, exercises[index], loggedSets))
       setExpandedInput(null)
     },
-    [exercises.length]
+    [exercises, loggedSets]
   )
 
   const isInputExpanded = expandedInput !== null
@@ -807,11 +842,20 @@ export default function AdHocLoggerView({
               }
               onDeleteSet={handleDeleteSet}
               onApplySet={applySetToForm}
+              planLine={
+                <PlanLine
+                  exerciseId={currentExercise.id}
+                  prescribedSets={currentExercise.prescribedSets ?? []}
+                  loggedSets={currentExerciseSets}
+                  expanded={planExpanded}
+                  onToggle={togglePlan}
+                />
+              }
               loggingForm={
                 <SetLoggingForm
                   prescribedSet={undefined}
-                  hasRpe={false}
-                  hasRir={hasIntensityAccess}
+                  hasRpe={showRpe}
+                  hasRir={showRir}
                   currentSet={currentSet}
                   onSetChange={setCurrentSet}
                   expandedInput={expandedInput}

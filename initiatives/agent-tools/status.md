@@ -106,3 +106,12 @@ Append-only. Newest at the bottom.
 - 2026-11-01 22:45 CDT: Review 105 checks out (low findings only; staleness test gaps and query dedupe to ROADMAP). Committing and opening the PR.
 - 2026-11-01 23:05 CDT: Dustin merged #1028. Release PR #1029 (dev→main) opened with #1027 and #1028.
 - 2026-11-01 23:40 CDT: In prod: release #1029 via infra #135 (app sha-654b60b9, clone-program 654b60b9). 103–105 accepted.
+- 2026-11-02 CST: Planned sets in the workout logger started (Dustin noticed prod generated workouts' plans don't show). Shape: one-line Plan summary, tap to expand, remembered; pre-fill reps + RPE/RIR. Spec features/workout-logging/adhoc-planned-sets.feature. Tests 120 dispatched (branch feature/adhoc-planned-sets).
+- 2026-11-02 CST: 120 back (91 tests, 80 red, 47/47 breaks). Lead answered: RPE selector when planned, intensity off = no effort, no clearing. Build 121 dispatched.
+- 2026-11-02 CST: 121 back (3698 suite); lead re-ran 91 tests. Review 122 dispatched.
+- 2026-11-02 CST: Review 122: needs fixes (hidden RPE logged after the plan is done). Dustin: one effort picker per planned exercise; rename the line 'Target'; keep the expanded list and next chip. Lead amended locked view test strings for the rename. Fixes 123 dispatched.
+- 2026-11-02 CST: Fixes 123 back (3712 suite); lead re-ran 105 tests. Starting phone preview with a temp saved workout on the bodybuilder seed user.
+- 2026-11-02 CST: preview data: added SavedWorkout 'preview-plan-123' (Preview: Planned Push) for synthetic-bodybuilder in the wt2 DB; delete it and any draft/session started from it after Dustin's check.
+- 2026-11-02 CST: Dustin on the preview: 'works pretty well'; wants a flash/check when the last planned set is logged, replaying after delete + re-log. 5 scenarios added; item 124 to implementer. Preview left running.
+- 2026-11-02 CST: 124 back (3725 suite); lead re-ran 118 tests. Restarting preview with the flash.
+- 2026-11-02 CST: Dustin: 'really nice. Perfect.' 120–124 accepted. Preview stopped; temp saved workout and its draft deleted from the wt2 DB. Committing and opening the PR into dev.

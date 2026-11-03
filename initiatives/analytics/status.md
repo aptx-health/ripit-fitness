@@ -27,3 +27,5 @@
 - 2026-11-02 CST: Review 118 checks out with one fix: exercise search leaks other users' custom exercises (pre-existing). Fixes 119 (search scoping, save race, editor 48px/tone, limit message, seed cleanup) to implementer.
 - 2026-11-02 CST: Fixes 119 back (3607 suite); lead re-ran 524 tests. Starting phone preview.
 - 2026-11-02 CST: Dustin checked the S3 preview: "Looks great". 116–119 accepted. Committing and opening the PR into dev.
+- 2026-11-02 CST: Dustin merged #1032 (S3 pinned lifts) into dev.
+- 2026-11-02 CST: Dustin: prod release after the planned-sets work (bundles Progress S1–S3 + planned sets).

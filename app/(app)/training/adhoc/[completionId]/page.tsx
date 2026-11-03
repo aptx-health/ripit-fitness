@@ -61,6 +61,11 @@ async function AdHocLoggerLoader({ completionId }: { completionId: string }) {
             name: true,
             notes: true,
             order: true,
+            // The plan copied from a saved or generated workout; empty when added ad hoc.
+            prescribedSets: {
+              orderBy: { setNumber: 'asc' },
+              select: { setNumber: true, reps: true, rpe: true, rir: true, isWarmup: true },
+            },
             exerciseDefinition: {
               select: {
                 primaryFAUs: true,
@@ -124,6 +129,7 @@ async function AdHocLoggerLoader({ completionId }: { completionId: string }) {
     id: e.id,
     name: e.name,
     notes: e.notes,
+    prescribedSets: e.prescribedSets,
     exerciseDefinition: {
       primaryFAUs: e.exerciseDefinition.primaryFAUs,
       secondaryFAUs: e.exerciseDefinition.secondaryFAUs,
