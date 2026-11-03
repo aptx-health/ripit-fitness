@@ -60,6 +60,13 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  // Learn was replaced by Progress; its tables and admin CMS stay for now.
+  async redirects() {
+    return [
+      { source: '/learn', destination: '/progress', permanent: false },
+      { source: '/learn/:path*', destination: '/progress', permanent: false },
+    ];
+  },
   async headers() {
     return [
       {

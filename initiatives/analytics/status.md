@@ -1,0 +1,31 @@
+# Analytics tab — status (append-only)
+
+- 2026-11-01 23:55 CDT: Started. Dustin: an analytics/data tab replaces Learning. Answers "Am I progressing?" (strength trends, e1RM, PRs, volume) and "Consistency & effort" (workouts per week, streaks, time, RPE/RIR trends, deload signals). Learning's content is removed (/learn goes away or redirects). Size: standard. Lead: lead-ripit-mcp. First step: discovery + mockups (106), new agent `analytics-disco`, worktree1 detached at origin/dev.
+- 2026-11-01 23:58 CDT: 106 dispatched to analytics-disco (wF:p7).
+- 2026-11-02 00:20 CDT: Discovery 106 back; mockups A/B/C on Hub (analytics-106). Waiting on Dustin: page shape, streak rule, Learn content.
+- 2026-11-02 00:35 CDT: Dustin picked C (weekly report card) as the page; streak = weeks hitting a user-set weekly target; Learn unlinked now, tables deleted later. S1 feature written: features/analytics/weekly-report.feature (report card, 8-week chart, week navigator, target setting, Learn unlink). S2 later: Records/Lifts and trend notes.
+- 2026-11-02 00:40 CDT: Dustin OK'd S1 plan. Tests 107 dispatched to test-builder; branch feature/progress-report.
+- 2026-11-02 01:05 CDT: 107 back (185 red, break matrix 100/100). library.feature:9 Learn→Progress (lead). Build 108 dispatched.
+- 2026-11-02 01:50 CDT: 108 back (304 S1 tests pass; migration 20261102050748_weekly_workout_target, additive). Review 109 dispatched.
+- 2026-11-02 02:40 CDT: Review 109 checks out. Dustin: normal = only weeks since first workout. Fixes 110 (normal, streak>8 tests, bounded streak query, no future weeks, 'This wk') to implementer; test-builder skipped on purpose (small fixes).
+- 2026-11-02 03:20 CDT: Fixes 110 back (24 new tests; 3267 suite). Starting phone preview for Dustin.
+- 2026-11-02 CST: Dustin checked the phone preview: "Looks good". 107–110 accepted. Preview stopped; committing and opening the PR into dev.
+- 2026-11-02 CST: #1030 merged into dev (CI green). Next: prod release when Dustin asks, or S2.
+- 2026-11-02 CST: S2 started on feature/progress-records. Spec features/analytics/weekly-records.feature. Dustin: Yes go; light week ≤60% of normal sets; Flat = 3rd session below best; exercise page B later. Tests 111 dispatched to test-builder.
+- 2026-11-02 CST: 111 back (147 tests, 144 red, break matrix 96/96). Lead answered 5 points + unpinned gaps (111-handback.md). Build 112 dispatched.
+- 2026-11-02 CST: 112 back (3414 suite). Lead amended S1 fixture for the new required fields; tsc clean, 331 progress tests pass. Review 113 (reviewer) and gap tests 114 (test-builder) dispatched in parallel.
+- 2026-11-02 CST: 114 back (23 decision tests pass, 17/17 breaks). Waiting on review 113.
+- 2026-11-02 CST: Dustin idea: pinned lifts instead of the full Lifts list. Added to ROADMAP Next as the follow-up after S2.
+- 2026-11-02 CST: Review 113 checks out (3437 suite). Findings: unbounded history query (medium), light-week wording, e1RM PR rep cap question. Asking Dustin.
+- 2026-11-02 CST: Dustin: cap e1RM PRs at 12 reps; fix the history query and light-week wording now. Fixes 115 to implementer (test-builder skipped on purpose, small). PaperTabs 48px raised for UI audit; findings 4 and 6 left as is.
+- 2026-11-02 CST: Fixes 115 back (3455 suite); lead re-ran 372 progress tests. Starting phone preview for Dustin.
+- 2026-11-02 CST: Dustin checked the S2 preview: "Looks great". 111–115 accepted. Committing and opening the PR into dev; pinned lifts next.
+- 2026-11-02 CST: S2 PR #1031 opened. S3 pinned lifts started (branch feature/pinned-lifts off S2). Dustin: pin from Lifts rows + editor; default = anchor lifts; chart page next slice; spec features/analytics/pinned-lifts.feature 'Yes, go'. Tests 116 dispatched.
+- 2026-11-02 CST: 116 back (135 tests, 129 red, breaks 93/94 + 1 unobservable). Build 117 dispatched. #1031 CI green, awaiting Dustin's merge.
+- 2026-11-02 CST: 117 back (3590 suite; migration 20261102180000_pinned_lifts, additive). Lead re-ran 507 progress tests. Review 118 dispatched.
+- 2026-11-02 CST: Dustin merged #1031 (S2) into dev.
+- 2026-11-02 CST: Review 118 checks out with one fix: exercise search leaks other users' custom exercises (pre-existing). Fixes 119 (search scoping, save race, editor 48px/tone, limit message, seed cleanup) to implementer.
+- 2026-11-02 CST: Fixes 119 back (3607 suite); lead re-ran 524 tests. Starting phone preview.
+- 2026-11-02 CST: Dustin checked the S3 preview: "Looks great". 116–119 accepted. Committing and opening the PR into dev.
+- 2026-11-02 CST: Dustin merged #1032 (S3 pinned lifts) into dev.
+- 2026-11-02 CST: Dustin: prod release after the planned-sets work (bundles Progress S1–S3 + planned sets).

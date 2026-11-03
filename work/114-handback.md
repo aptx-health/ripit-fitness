@@ -1,0 +1,2 @@
+# 114 handback (test-builder, 2026-11-02)
+Report: complete. `__tests__/lib/insights/progress-records-decisions.test.ts`, 23 tests, locked; pass on the 112 build; break matrix 17/17 killed. Pins: open week never light (pure + loader), largest % gain rep PR, records order, first-time rep count not a PR. Unpinned: tie in % gain; view strings "This was a light week." and "No lifts this week" (lead: left to the review and the phone check). The fixture issue from 111 was already fixed by the lead.

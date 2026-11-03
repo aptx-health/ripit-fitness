@@ -1,6 +1,6 @@
 ---
 id: 103
-state: review
+state: accepted
 waiting_on:
 executor: test-builder
 from: lead (lead-ripit-mcp)
@@ -36,3 +36,4 @@ Use `handoff-test-builder`. First line `Report: complete | needs decision | furt
 - 2026-11-01 21:30 CDT: created; confirmed by Dustin.
 - 2026-11-01 21:32 CDT: dispatched to test-builder (wF:p1).
 - 2026-11-01 21:50 CDT: back; lead re-ran (11 red as stated). Handback saved.
+- 2026-11-01 23:40 CDT: accepted (Dustin merged #1028 and shipped to prod).

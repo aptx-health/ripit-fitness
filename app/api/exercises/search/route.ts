@@ -23,8 +23,9 @@ export async function GET(request: NextRequest) {
     const idFilters = (searchParams.get('ids')?.split(',').filter(Boolean) || []).slice(0, 50)
     const limit = Math.min(parseInt(searchParams.get('limit') || '50', 10), 100) // Max 100 results
 
-    // Build where conditions
-    const whereConditions: Record<string, unknown>[] = []
+    // Build where conditions. Only system exercises and the user's own custom
+    // ones: other users' custom exercises are private.
+    const whereConditions: Record<string, unknown>[] = [{ OR: [{ isSystem: true }, { userId: user.id }] }]
 
     // Filter to an explicit id set (curated anchor exercises)
     if (idFilters.length > 0) {
@@ -94,7 +95,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Combine all conditions
-    const whereClause = whereConditions.length > 0 ? { AND: whereConditions } : {}
+    const whereClause = { AND: whereConditions }
 
     // Execute search
     const exercises = await prisma.exerciseDefinition.findMany({

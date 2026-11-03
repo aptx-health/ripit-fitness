@@ -1,6 +1,6 @@
 ---
 id: 105
-state: review
+state: accepted
 waiting_on:
 executor: reviewer
 from: lead (lead-ripit-mcp)
@@ -27,3 +27,4 @@ First line `Report: complete | needs decision | further handoff`. Don't edit cod
 ## Log
 - 2026-11-01 22:20 CDT: created; dispatched to reviewer (wF:p3).
 - 2026-11-01 22:45 CDT: checks out; low findings 1-2 to ROADMAP, 3-6 noted.
+- 2026-11-01 23:40 CDT: accepted (Dustin merged #1028 and shipped to prod).

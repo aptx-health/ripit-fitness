@@ -7,11 +7,21 @@ import { useUserSettings } from '@/hooks/useUserSettings'
 import { SettingsBlock } from './SettingsBlock'
 
 const LABEL = 'block text-sm font-bold uppercase tracking-wider text-foreground'
+const DEFAULT_TARGET = 3
+
+/** A whole number from 1 to 14 typed into the target field, else null. */
+function parseTarget(text: string): number | null {
+  if (!/^\d{1,2}$/.test(text)) return null
+  const n = Number(text)
+  return n >= 1 && n <= 14 ? n : null
+}
 
 /**
  * Workouts: workout mode, intensity tracking and its rating type, saved as
  * before (debounced PUT through useUserSettings). There is no weight unit
  * control (hidden on purpose, fba784df): the loaded unit is sent back as is.
+ * The weekly workout target (Progress streak) saves on its own, only when it
+ * is a whole number from 1 to 14.
  */
 export default function WorkoutsBlock() {
   const { settings, isLoading, updateSettings } = useUserSettings()
@@ -19,6 +29,8 @@ export default function WorkoutsBlock() {
   const [intensityEnabled, setIntensityEnabled] = useState(settings?.intensityEnabled ?? false)
   const [intensityRating, setIntensityRating] = useState<'rpe' | 'rir'>(settings?.defaultIntensityRating ?? 'rir')
   const [loggingMode, setLoggingMode] = useState<'full' | 'follow_along'>(settings?.loggingMode || 'full')
+  const [targetText, setTargetText] = useState(String(settings?.weeklyWorkoutTarget ?? DEFAULT_TARGET))
+  const [targetEdited, setTargetEdited] = useState(false)
   const [error, setError] = useState<string | null>(null)
   // Only the user's own changes are saved; values that arrive from a load are not.
   const [edited, setEdited] = useState(false)
@@ -31,6 +43,7 @@ export default function WorkoutsBlock() {
     setIntensityEnabled(settings.intensityEnabled)
     setIntensityRating(settings.defaultIntensityRating)
     setLoggingMode(settings.loggingMode || 'full')
+    setTargetText(String(settings.weeklyWorkoutTarget ?? DEFAULT_TARGET))
   }
 
   // Auto-save after the user changes something (debounced to avoid rapid-fire requests)
@@ -51,6 +64,21 @@ export default function WorkoutsBlock() {
 
     return () => clearTimeout(timeout)
   }, [edited, weightUnit, intensityEnabled, intensityRating, loggingMode, updateSettings])
+
+  // The target saves by itself, debounced the same way, and never with an invalid value.
+  useEffect(() => {
+    const weeklyWorkoutTarget = parseTarget(targetText)
+    if (!targetEdited || weeklyWorkoutTarget == null) return
+
+    const timeout = setTimeout(() => {
+      setError(null)
+      updateSettings({ weeklyWorkoutTarget }).catch((err) => {
+        setError(err instanceof Error ? err.message : 'Failed to save settings')
+      })
+    }, 300)
+
+    return () => clearTimeout(timeout)
+  }, [targetEdited, targetText, updateSettings])
 
   return (
     <SettingsBlock title="Workouts" icon={<Dumbbell size={16} />}>
@@ -150,6 +178,37 @@ export default function WorkoutsBlock() {
                 </div>
               </div>
             </div>
+          </div>
+
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <label htmlFor="weekly-workout-target" className={LABEL}>
+                Weekly workout target
+              </label>
+              <p id="weekly-workout-target-help" className="mt-1 text-sm text-muted-foreground">
+                Workouts a week that keep your Progress streak going (1 to 14).
+              </p>
+            </div>
+            <input
+              id="weekly-workout-target"
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={14}
+              step={1}
+              value={targetText}
+              aria-describedby="weekly-workout-target-help"
+              aria-invalid={parseTarget(targetText) == null}
+              onChange={(event) => {
+                setTargetEdited(true)
+                setTargetText(event.target.value)
+              }}
+              onBlur={() => {
+                // Leaving an invalid value puts back the saved one.
+                if (parseTarget(targetText) == null) setTargetText(String(settings.weeklyWorkoutTarget ?? DEFAULT_TARGET))
+              }}
+              className="h-12 w-20 shrink-0 border-2 border-border bg-card px-3 text-center text-lg font-bold text-foreground tabular-nums doom-focus-ring aria-[invalid=true]:border-error"
+            />
           </div>
 
           {error && (
