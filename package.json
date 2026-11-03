@@ -15,6 +15,8 @@
     "test:run": "vitest run",
     "eval-suggest": "tsx scripts/eval-suggest.ts",
     "rate-suggestions": "tsx scripts/rate-suggestions.ts",
+    "perf:scan": "node .claude/skills/perf-check/scripts/static-scan.mjs",
+    "perf:tap": "npx -y -p playwright@1.63.0 node .claude/skills/perf-check/scripts/tap-test.mjs",
     "prepare": "husky"
   },
   "dependencies": {
