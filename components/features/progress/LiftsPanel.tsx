@@ -26,11 +26,14 @@ export default function LiftsPanel({
   lifts,
   pinned,
   weightUnit,
+  weekStart,
   onSavePins,
 }: {
   lifts: WeekLift[]
   pinned: PinnedLift[]
   weightUnit: 'lbs' | 'kg'
+  /** The shown week: each row links to its lift's page with it, so Back returns here. */
+  weekStart: string
   onSavePins: (ids: string[]) => Promise<boolean>
 }) {
   const [alsoOpen, setAlsoOpen] = useState(false)
@@ -40,6 +43,7 @@ export default function LiftsPanel({
   const [message, setMessage] = useState<{ id: string; text: string; alert: boolean } | null>(null)
 
   const pinnedIds = pinned.map((p) => p.exerciseDefinitionId)
+  const liftHref = (id: string) => `/progress/lift/${encodeURIComponent(id)}?week=${weekStart}`
   const others = lifts.filter((l) => !pinnedIds.includes(l.exerciseDefinitionId))
 
   const save = async (id: string, ids: string[]) => {
@@ -74,7 +78,12 @@ export default function LiftsPanel({
   )
   const liftRow = (l: WeekLift) => (
     <Fragment key={l.exerciseDefinitionId}>
-      <LiftRow lift={l} data={{ 'data-lift': l.exerciseDefinitionId }} pin={pinButton(l.name, l.exerciseDefinitionId, false)} />
+      <LiftRow
+        lift={l}
+        data={{ 'data-lift': l.exerciseDefinitionId }}
+        pin={pinButton(l.name, l.exerciseDefinitionId, false)}
+        href={liftHref(l.exerciseDefinitionId)}
+      />
       {rowMessage(l.exerciseDefinitionId)}
     </Fragment>
   )
@@ -86,7 +95,12 @@ export default function LiftsPanel({
           <h3 className="px-3 pb-1 pt-2.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">Pinned</h3>
           {pinned.map((p) => (
             <Fragment key={p.exerciseDefinitionId}>
-              <PinnedRow pinned={p} unit={weightUnit} pin={pinButton(p.name, p.exerciseDefinitionId, true)} />
+              <PinnedRow
+                pinned={p}
+                unit={weightUnit}
+                pin={pinButton(p.name, p.exerciseDefinitionId, true)}
+                href={liftHref(p.exerciseDefinitionId)}
+              />
               {rowMessage(p.exerciseDefinitionId)}
             </Fragment>
           ))}
@@ -133,9 +147,9 @@ export default function LiftsPanel({
 }
 
 /** A pinned lift: as in S2 when done this week, else its last session or "No sessions yet". */
-function PinnedRow({ pinned, unit, pin }: { pinned: PinnedLift; unit: 'lbs' | 'kg'; pin: ReactNode }) {
+function PinnedRow({ pinned, unit, pin, href }: { pinned: PinnedLift; unit: 'lbs' | 'kg'; pin: ReactNode; href: string }) {
   const data = { 'data-pinned': pinned.exerciseDefinitionId }
-  if (pinned.lift) return <LiftRow lift={pinned.lift} data={data} pin={pin} />
+  if (pinned.lift) return <LiftRow lift={pinned.lift} data={data} pin={pin} href={href} />
 
   const { last } = pinned
   const detail = !last
@@ -147,6 +161,7 @@ function PinnedRow({ pinned, unit, pin }: { pinned: PinnedLift; unit: 'lbs' | 'k
       name={pinned.name}
       detail={detail}
       pin={pin}
+      href={href}
       aside={last && <span className={MUTED_CHIP}>Not this week</span>}
     />
   )

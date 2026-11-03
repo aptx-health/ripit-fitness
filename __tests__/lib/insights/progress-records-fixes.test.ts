@@ -3,7 +3,7 @@
  * Spec: features/analytics/weekly-records.feature, "e1RM PRs only count sets of 12 reps or fewer".
  *
  *   1. Only sets of 1 to 12 reps can be an e1RM PR, and only they count toward the earlier best
- *      e1RM a record is judged against. Lifts still shows high-rep sets with their e1RM.
+ *      e1RM a record is judged against. Lifts still shows high-rep sets, without an e1RM (work 128).
  *   2. The loader reads a bounded set of earlier rows: for this week's exercises, each session's
  *      best set plus each exercise's bests (heaviest at each of 1 to 12 reps, most bodyweight
  *      reps). The rows grow with sessions, not sets, and the records and lifts are the same as
@@ -48,8 +48,9 @@ describe('e1RM PRs only count sets of 12 reps or fewer', () => {
     expect(records(h)).toEqual([])
     const [lift] = lifts(h)
     expect(lift).toMatchObject({ exerciseDefinitionId: 'calf', bestSet: { weight: 155, reps: 16 } })
-    expect(lift.e1rm).toBeCloseTo(epley(155, 16), 5)
-    expect(lift.previousE1rm).toBeCloseTo(epley(135, 15), 5)
+    // Work 128 (Dustin: cap the Lifts row's e1RM at 12 reps): no e1RM, no earlier e1RM to compare with.
+    expect(lift.e1rm).toBeNull()
+    expect(lift.previousE1rm).toBeNull()
   })
 
   it('12 reps can be an e1RM PR; 13 cannot', () => {

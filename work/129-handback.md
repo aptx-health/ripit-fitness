@@ -1,0 +1,4 @@
+# 129 handback (implementer, 2026-11-02)
+Report: complete. `LiftSkeleton.tsx` (same frame and heights as LiftView at 390px; motion-safe pulse; role=status, aria-hidden placeholders) used by new `progress/lift/[id]/loading.tsx`, the Suspense fallback and LiftView's loading state (incl. chip switches). Test `lift-skeleton-view.test.tsx` (5), break matrix 5/5; suite 3906 pass; tsc/Biome/eslint clean. Screenshots `assets/129/`.
+Cause of the 1–2 s: not the server (API 5–7 ms, RSC 5 ms). A client waterfall with nothing on screen: RSC payload → route JS → client API fetch; no loading.tsx meant no prefetch. loading.tsx now paints the skeleton at once. Further cut (not done): server-render the lift data in page.tsx to drop the client fetch.
+Data restored (incl. 2 leftover sessions from 126/128). Lead: re-ran lift tests + tsc; restarting the preview.

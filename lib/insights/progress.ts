@@ -135,6 +135,13 @@ export function isValidTimeZone(timeZone: string): boolean {
   }
 }
 
+/** A real calendar date in YYYY-MM-DD form that is a Monday. */
+export function isMonday(day: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return false
+  const date = new Date(`${day}T00:00:00Z`)
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === day && date.getUTCDay() === 1
+}
+
 /** The local Monday of the instant's week, as 'YYYY-MM-DD'. */
 export function weekStartFor(instant: Date, timeZone: string): string {
   const local = new Date(wallClockMs(instant.getTime(), timeZone))
@@ -401,7 +408,7 @@ function historySet(
 /**
  * The earlier working sets (before `before`) of the given exercises that can
  * change a record or a lift, so the rows grow with sessions, not with sets:
- * each session's best-e1RM set (Lifts), each exercise's heaviest set at each
+ * each session's best-e1RM set of 12 reps or fewer (Lifts), each exercise's heaviest set at each
  * of 1 to 12 reps (Records: the best e1RM at 12 reps or fewer is one of them),
  * and its most-reps bodyweight set. The pure functions give the same answers on these
  * as on every set. One query; e1RM is compared in pounds, as there.
@@ -428,7 +435,7 @@ async function earlierBestSets(db: ReportDb, userId: string, exerciseDefinitionI
       SELECT *, CASE WHEN reps = 1 THEN lbs ELSE lbs * (1 + reps / 30.0) END AS e1rm FROM s WHERE lbs > 0
     )
     SELECT id, reps, weight, "weightUnit", "completionId", "completedAt", "exerciseDefinitionId", name FROM (
-      (SELECT DISTINCT ON ("exerciseDefinitionId", "completionId") * FROM w
+      (SELECT DISTINCT ON ("exerciseDefinitionId", "completionId") * FROM w WHERE reps <= ${MAX_PR_REPS}
         ORDER BY "exerciseDefinitionId", "completionId", e1rm DESC)
       UNION
       (SELECT DISTINCT ON ("exerciseDefinitionId", reps) * FROM w WHERE reps <= ${MAX_PR_REPS}

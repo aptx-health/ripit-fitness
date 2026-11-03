@@ -6,8 +6,8 @@ None
 Running quietly: None.
 
 ## Active
-- Progress tab replacing Learn (initiatives/analytics): S1 (#1030), S2 (#1031), S3 pinned lifts (#1032) merged to dev; none in prod (S1 and S3 carry additive migrations). Next: per-lift chart page (ROADMAP).
-- Planned sets in the workout logger (initiatives/agent-tools): accepted 2026-11-02, PR into dev open. Then prod release (Progress S1–S3 + planned sets).
+- Progress tab replacing Learn (initiatives/analytics): S1–S3 in prod 2026-11-02 (release #1034, infra #136). Per-lift page (/progress/lift/[id]) accepted 2026-11-03; PR into dev open.
+- Planned sets in the workout logger (initiatives/agent-tools): in prod 2026-11-02 (release #1034, infra #136).
 - Balance targets, one source of truth (initiatives/agent-tools): in prod (#1028, release #1029, infra #135, 2026-11-01).
 - UI audit (initiatives/ui-audit): UI1–UI6, L1 (#1024) and L2 (#1025) are in prod (release #1026, infra #134, 2026-11-01). L3 (#1027) in prod via release #1029 / infra #135 (2026-11-01). Workout screen L1–L3 complete. Next: logger L4 and FAU targets (ROADMAP).
 
