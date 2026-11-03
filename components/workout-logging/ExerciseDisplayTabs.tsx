@@ -71,6 +71,8 @@ interface ExerciseDisplayTabsProps {
   /** Copy a set's numbers into the logging form (tap-to-prefill). */
   onApplySet?: (set: ApplicableSet) => void
   loggingForm: React.ReactNode
+  /** The ad-hoc logger's Plan line, shown above the form while no input is expanded. */
+  planLine?: React.ReactNode
   isInputExpanded?: boolean
   showIntensity?: boolean
   message?: MessageData | null
@@ -125,6 +127,7 @@ export default function ExerciseDisplayTabs({
   onDeleteSet,
   onApplySet,
   loggingForm,
+  planLine,
   isInputExpanded = false,
   showIntensity = true,
   message,
@@ -219,6 +222,7 @@ export default function ExerciseDisplayTabs({
                 menuActions={menuActions}
               />
               <div className="px-4 pt-4 flex-1 flex flex-col gap-2">
+                {!isInputExpanded && planLine}
                 {!isInputExpanded && (
                   <LastSessionReference
                     history={exerciseHistory}
