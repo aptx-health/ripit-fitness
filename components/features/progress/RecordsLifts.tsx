@@ -25,12 +25,15 @@ export default function RecordsLifts({
   lifts,
   pinned,
   weightUnit,
+  weekStart,
   onSavePins,
 }: {
   records: WeekRecord[]
   lifts: WeekLift[]
   pinned: PinnedLift[]
   weightUnit: 'lbs' | 'kg'
+  /** The shown week, for the lift rows' links. */
+  weekStart: string
   /** Saves the whole pin list in order and reloads the week; false when it failed. */
   onSavePins: (ids: string[]) => Promise<boolean>
 }) {
@@ -67,7 +70,7 @@ export default function RecordsLifts({
             records.map((r) => <RecordRow key={r.exerciseDefinitionId} record={r} unit={weightUnit} />)
           )
         ) : (
-          <LiftsPanel lifts={lifts} pinned={pinned} weightUnit={weightUnit} onSavePins={onSavePins} />
+          <LiftsPanel lifts={lifts} pinned={pinned} weightUnit={weightUnit} weekStart={weekStart} onSavePins={onSavePins} />
         )}
       </div>
     </section>

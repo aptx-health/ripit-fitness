@@ -29,3 +29,16 @@
 - 2026-11-02 CST: Dustin checked the S3 preview: "Looks great". 116–119 accepted. Committing and opening the PR into dev.
 - 2026-11-02 CST: Dustin merged #1032 (S3 pinned lifts) into dev.
 - 2026-11-02 CST: Dustin: prod release after the planned-sets work (bundles Progress S1–S3 + planned sets).
+- 2026-11-02 CST: Release PR dev→main opened (S1–S3 + planned sets).
+- 2026-11-02 CST: #1034 merged to main (1dadb94e); images built. Infra agent asked for the prod tag-bump PR.
+- 2026-11-02 CST: infra PR ripit-infra #136 (tag bumps to 1dadb94e) open; waiting on Dustin's merge.
+- 2026-11-02 CST: Dustin merged ripit-infra #136; in prod at 1dadb94e (release #1034).
+- 2026-11-02 CST: Per-lift page (mockup B) started on branch feature/lift-page. Dustin: tap any lift row, all 3 chart tabs, records + sessions. Spec features/analytics/lift-page.feature. Tests 125 dispatched to test-builder.
+- 2026-11-02 CST: Tests 125 back (152 tests, 150 red, break matrix 106/109 killed, 3 equivalent). Lead accepted the test-builder's five shape/rule choices. Build 126 dispatched to implementer.
+- 2026-11-02 CST: Build 126 back (suite 3877 pass, build ok). Lead re-ran 652 tests + tsc. Review 127 dispatched to reviewer.
+- 2026-11-02 CST: Review 127: fix first. Dustin: >12-rep lifts open on Top set, S2 row capped at 12, uncapped records; rust chart with light fill. Fixes 128 dispatched to implementer (skipping test-builder: small fixes; implementer adds tests, lead amends locked ones).
+- 2026-11-02 CST: Fixes 128 back; lead amended 3 locked assertions per Dustin's rules; full suite 3898 pass. Follow-up to implementer: cap the pinned 'Not this week' e1RM at 12.
+- 2026-11-02 CST: 128 follow-up back (pinned lastSets capped; suite 3901 pass). Lead re-ran insights/Progress tests. Starting phone preview for Dustin.
+- 2026-11-02 CST: Dustin on the preview: 1–2 s with no feedback when opening a lift; wants a skeleton at once. Small fix 129 to implementer (test-builder skipped: small UI change).
+- 2026-11-02 CST: 129 back: skeleton at once via loading.tsx. Slowness was a client waterfall (server 5–13 ms), not queries. Preview restarted.
+- 2026-11-03 CST: Dustin approved the lift page on the preview. 125–129 accepted. Preview stopped. Committing and opening the PR into dev.

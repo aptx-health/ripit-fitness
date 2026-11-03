@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import ProgressView from '@/components/features/progress/ProgressView'
 import PageTitle from '@/components/ui/PageTitle'
 
@@ -10,7 +11,10 @@ export default function ProgressPage() {
           <PageTitle>Progress</PageTitle>
         </div>
         <div className="px-4 sm:px-0">
-          <ProgressView />
+          {/* ProgressView reads ?week=, so it renders on the client. */}
+          <Suspense fallback={<p className="py-5 text-sm text-muted-foreground">Loading…</p>}>
+            <ProgressView />
+          </Suspense>
         </div>
       </div>
     </div>

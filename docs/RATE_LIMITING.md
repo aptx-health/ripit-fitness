@@ -16,6 +16,7 @@ Rate limiting is enforced at the API-route layer using [`rate-limiter-flexible`]
 | T6 — feedback | `feedbackSubmissionLimiter` | 5 / 3600s | userId | Replaces a prior DB-count check — submissions per hour |
 | T7 — heavy reads | `progressReadLimiter` | 60 / 60s | userId | `GET /api/progress/week` (nine weeks of sets per request), an exception to the read-endpoint policy below |
 | T8 — pinned lifts | `progressPinsLimiter` | 30 / 60s | userId | `PUT /api/progress/pins` (replaces the user's pinned lifts; one call per pin, unpin or editor save) |
+| T9 — lift history | `progressLiftLimiter` | 30 / 60s | userId | `GET /api/progress/lift/[id]` (every working set of one lift per request; the per-lift page and its pinned-lift chips), an exception to the read-endpoint policy below |
 
 BetterAuth handles its own rate limiting on everything under `/api/auth/[...all]` (sign-in, sign-up, password reset, etc.). The `RELAXED_RATE_LIMITS` env var should be unset (or `false`) in production — it's only enabled in staging for load testing. This is **not** a place to add `lib/rate-limit.ts` limiters; don't double-wrap.
 
