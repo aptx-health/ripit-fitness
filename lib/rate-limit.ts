@@ -123,6 +123,12 @@ export const progressReadLimiter = lazyLimiter({ keyPrefix: 'progress-read', poi
 export const progressPinsLimiter = lazyLimiter({ keyPrefix: 'progress-pins', points: 30, duration: 60 })
 
 /**
+ * One lift's history (the per-lift page: every working set of one exercise)
+ * Tapping between lifts and pinned chips: 30 req / 60s per user
+ */
+export const progressLiftLimiter = lazyLimiter({ keyPrefix: 'progress-lift', points: 30, duration: 60 })
+
+/**
  * Admin endpoints: 30 req / 60s per user
  */
 export const adminLimiter = lazyLimiter({ keyPrefix: 'admin', points: 60, duration: 60 })

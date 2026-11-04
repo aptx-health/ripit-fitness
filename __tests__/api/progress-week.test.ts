@@ -24,6 +24,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getTestDatabase } from '@/lib/test/database'
 import { createTestExerciseDefinition, createTestUser } from '@/lib/test/factories'
+import { countQueries } from '@/lib/test/query-count'
 
 const h = vi.hoisted(() => ({
   userId: '' as string,
@@ -245,5 +246,18 @@ describe('errors', () => {
     expect(text).toContain('Internal server error')
     expect(text).not.toContain('secret_table')
     expect(text).not.toMatch(/stack|at .*\.ts/i)
+  })
+})
+
+describe('query count', () => {
+  it('reads with the same queries for one workout as for ten (at most 11)', async () => {
+    await workoutAt(userId, new Date('2026-10-27T15:00:00Z'))
+    const one = await countQueries(prisma, () => call('?start=2026-10-26&tz=America%2FDenver'))
+    for (let i = 0; i < 9; i++) await workoutAt(userId, new Date(Date.UTC(2026, 9, 27 + (i % 5), 15)), 6)
+    const ten = await countQueries(prisma, () => call('?start=2026-10-26&tz=America%2FDenver'))
+    expect(one.result.status).toBe(200)
+    expect(ten.result.status).toBe(200)
+    expect(ten.count).toBe(one.count)
+    expect(ten.count).toBeLessThanOrEqual(11)
   })
 })

@@ -126,6 +126,10 @@ function best<T>(items: T[], score: (item: T) => number | null): T | undefined {
 const weighted = (sets: Lb[]) => sets.filter((s) => s.e1rm != null)
 const bodyweight = (sets: Lb[]) => sets.filter((s) => s.e1rm == null)
 
+/** The heaviest set, more reps on a tie; undefined when there are none. */
+const heaviestSet = (sets: Lb[]) =>
+  sets.reduce<Lb | undefined>((top, s) => (!top || s.lbs > top.lbs || (s.lbs === top.lbs && s.reps > top.reps) ? s : top), undefined)
+
 /** A set's e1RM when it can count toward an e1RM record: 12 reps or fewer. */
 const prE1rm = (s: Lb) => (s.reps <= MAX_PR_REPS ? s.e1rm : null)
 
@@ -187,24 +191,33 @@ export function computeWeekRecords(history: HistorySet[], weekStart: Date, weekE
   return records.sort((a, b) => (a.kind === b.kind ? a.name.localeCompare(b.name) : a.kind === 'e1rm' ? -1 : 1))
 }
 
-/** Each session's best e1RM, oldest first; sessions with no weighted set are left out. */
+/** Each session's best e1RM from sets of 12 reps or fewer, oldest first; sessions with none are left out. */
 function sessionE1rms(sets: Lb[]): Array<{ completedAt: number; e1rm: number }> {
   const sessions = new Map<string, { completedAt: number; e1rm: number }>()
   for (const s of sets) {
-    if (s.e1rm == null) continue
+    const e1rm = prE1rm(s)
+    if (e1rm == null) continue
     const session = sessions.get(s.completionId)
-    if (!session) sessions.set(s.completionId, { completedAt: s.completedAt, e1rm: s.e1rm })
-    else session.e1rm = Math.max(session.e1rm, s.e1rm)
+    if (!session) sessions.set(s.completionId, { completedAt: s.completedAt, e1rm })
+    else session.e1rm = Math.max(session.e1rm, e1rm)
   }
   return [...sessions.values()].sort((a, b) => a.completedAt - b.completedAt)
 }
 
-/** Every exercise with working sets in [weekStart, weekEnd), most working sets first. */
+/**
+ * Every exercise with working sets in [weekStart, weekEnd), most working sets
+ * first. e1RMs come from sets of 12 reps or fewer: a week of only higher-rep
+ * sets has no e1RM, change or Flat, and its best set is the heaviest (more
+ * reps on a tie), or the most reps for bodyweight.
+ */
 export function computeWeekLifts(history: HistorySet[], weekStart: Date, weekEnd: Date, unit: WeightUnit = 'lbs'): WeekLift[] {
   const lifts: WeekLift[] = []
   for (const [id, ex] of byExercise(history, weekStart, weekEnd)) {
     if (ex.week.length === 0) continue
-    const top = best(ex.week, (s) => s.e1rm) ?? (best(ex.week, (s) => s.reps) as Lb)
+    const top =
+      best(ex.week, prE1rm) ??
+      heaviestSet(weighted(ex.week)) ??
+      (best(ex.week, (s) => s.reps) as Lb)
     const sessions = sessionE1rms([...ex.before, ...ex.week])
     const start = weekStart.getTime()
     const previous = sessions.filter((s) => s.completedAt < start).at(-1)
@@ -215,7 +228,7 @@ export function computeWeekLifts(history: HistorySet[], weekStart: Date, weekEnd
       name: ex.name,
       workingSets: ex.week.length,
       bestSet: { weight: fromLbs(top.lbs, unit), reps: top.reps },
-      e1rm: top.e1rm == null ? null : fromLbs(top.e1rm, unit),
+      e1rm: prE1rm(top) == null ? null : fromLbs(top.e1rm as number, unit),
       previousE1rm: previous ? fromLbs(previous.e1rm, unit) : null,
       bestE1rm: bestE1rm == null ? null : fromLbs(bestE1rm, unit),
       sessionsBelowBest: lastBest < 0 ? 0 : sessions.length - 1 - lastBest,

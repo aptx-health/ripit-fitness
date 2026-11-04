@@ -97,6 +97,8 @@ Connection pooling (`DATABASE_URL` vs `DIRECT_URL`, PgBouncer): `docs/DATABASE_C
 - Behaviour specs are Gherkin files in `features/`, run through `@amiceli/vitest-cucumber`. Write a spec only when its work item is about to be dispatched, never ahead of time.
 - **UI changes:** drive the real flow and take a screenshot before pushing. Use the `webapp-testing` skill and `docs/PLAYWRIGHT_RECIPES.md`, and add a recipe whenever discovering a flow took more than 5 minutes. When seeding agent proposals for screenshots, blank `DISCORD_PROPOSALS_WEBHOOK_URL`; `dev_personal` points at Dustin's real #proposals channel.
 
+- **Performance (UI and API changes):** use the `perf-check` skill (`.claude/skills/perf-check`). `npm run perf:scan -- --changed origin/dev` must be clean or allowlisted with a reason. Each new or changed page or tap passes `npm run perf:tap` on a production build (`serve-build.sh start`; feedback ≤ 100 ms, content ≤ 2 s at phone speed). DB/list routes add a `countQueries` assertion: the same count for 1 row and for 10. Localhost hides latency; screenshots alone don't catch it.
+
 ## Git, CI, deploy
 
 - Branch from `dev` as `feature/<name>` and open PRs to `dev`.

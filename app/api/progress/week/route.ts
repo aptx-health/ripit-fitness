@@ -1,16 +1,9 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
-import { getWeeklyReport, isValidTimeZone, weekStartFor } from '@/lib/insights/progress'
+import { getWeeklyReport, isMonday, isValidTimeZone, weekStartFor } from '@/lib/insights/progress'
 import { logger } from '@/lib/logger'
 import { checkRateLimitWithHeaders, progressReadLimiter } from '@/lib/rate-limit'
-
-/** A real calendar date in YYYY-MM-DD form that is a Monday. */
-function isMonday(day: string): boolean {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return false
-  const date = new Date(`${day}T00:00:00Z`)
-  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === day && date.getUTCDay() === 1
-}
 
 /**
  * GET /api/progress/week?start=YYYY-MM-DD&tz=<IANA zone>

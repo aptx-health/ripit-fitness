@@ -1,13 +1,14 @@
 'use client'
 
 import { BarChart3, ChevronLeft, ChevronRight, ClipboardCheck } from 'lucide-react'
+import { useSearchParams } from 'next/navigation'
 import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import PaperTabTitle from '@/components/ui/PaperTabTitle'
 import { clientLogger } from '@/lib/client-logger'
 import { pluralize } from '@/lib/format/pluralize'
-import { addWeeks, percentChange, type WeeklyReport } from '@/lib/insights/progress'
+import { addWeeks, isMonday, percentChange, type WeeklyReport, weekStartFor } from '@/lib/insights/progress'
 import type { TrendNote } from '@/lib/insights/progress-records'
-import { DASH, formatMinutes, formatRpe, signed, weekOfLabel } from './format'
+import { browserTimeZone, DASH, formatMinutes, formatRpe, signed, weekOfLabel } from './format'
 import RecordsLifts from './RecordsLifts'
 import WeeklySetsChart from './WeeklySetsChart'
 
@@ -17,21 +18,25 @@ import WeeklySetsChart from './WeeklySetsChart'
  * the pinned lifts, and the last 8 weeks of working sets with a trend note.
  * Weeks are local Mondays:
  * the browser's zone goes with every request, and the server picks the current
- * week when no start is sent.
+ * week when no start is sent. `?week=YYYY-MM-DD` (a Monday, not after this
+ * week) opens on that week, and the shown week is written back to the URL
+ * (bare for this week), so the lift page's Back link and browser Back return to it.
  */
 
 const NAV_BUTTON =
   'flex h-12 w-12 shrink-0 items-center justify-center border-2 bg-card doom-focus-ring disabled:cursor-not-allowed disabled:border-border/50 disabled:text-muted-foreground border-border text-foreground hover:bg-muted'
 
-function browserTimeZone(): string {
-  try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
-  } catch {
-    return 'UTC'
-  }
+/** The `?week=` to open on: a real Monday no later than this week, else none. */
+function openingWeek(week: string | null): string | undefined {
+  if (!week || !isMonday(week)) return undefined
+  return week <= weekStartFor(new Date(), browserTimeZone()) ? week : undefined
 }
 
 export default function ProgressView() {
+  // Null outside the App Router (e.g. a bare render): no week, the current one shows.
+  const week = openingWeek(useSearchParams()?.get('week') ?? null)
+  // Only the first request uses ?week=; writing the URL below must not reload.
+  const opening = useRef(week)
   const [report, setReport] = useState<WeeklyReport | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -57,8 +62,17 @@ export default function ProgressView() {
   }, [])
 
   useEffect(() => {
-    load()
+    load(opening.current)
   }, [load])
+
+  // The shown week goes in the URL without a navigation (Next keeps its router
+  // in step with history.replaceState), so Back from a lift lands on it.
+  const shownWeek = report ? (report.isCurrentWeek ? null : report.weekStart) : undefined
+  useEffect(() => {
+    if (shownWeek === undefined) return
+    const url = shownWeek ? `${window.location.pathname}?week=${shownWeek}` : window.location.pathname
+    if (url !== `${window.location.pathname}${window.location.search}`) window.history.replaceState(null, '', url)
+  }, [shownWeek])
 
   /** Saves the whole pin list, then reloads the week to show it; false when the save failed. */
   const savePins = useCallback(
@@ -86,7 +100,7 @@ export default function ProgressView() {
         <p>{error}</p>
         <button
           type="button"
-          onClick={() => load()}
+          onClick={() => load(opening.current)}
           className="mt-3 inline-flex min-h-12 items-center border-2 border-border bg-card px-4 font-bold uppercase tracking-wider text-foreground hover:bg-muted doom-focus-ring"
         >
           Try again
@@ -144,6 +158,7 @@ export default function ProgressView() {
         lifts={report.lifts ?? []}
         pinned={report.pinned ?? []}
         weightUnit={report.weightUnit ?? 'lbs'}
+        weekStart={report.weekStart}
         onSavePins={(ids) => savePins(ids, report.weekStart)}
       />
 

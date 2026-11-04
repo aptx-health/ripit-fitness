@@ -115,3 +115,5 @@ Append-only. Newest at the bottom.
 - 2026-11-02 CST: Dustin on the preview: 'works pretty well'; wants a flash/check when the last planned set is logged, replaying after delete + re-log. 5 scenarios added; item 124 to implementer. Preview left running.
 - 2026-11-02 CST: 124 back (3725 suite); lead re-ran 118 tests. Restarting preview with the flash.
 - 2026-11-02 CST: Dustin: 'really nice. Perfect.' 120–124 accepted. Preview stopped; temp saved workout and its draft deleted from the wt2 DB. Committing and opening the PR into dev.
+- 2026-11-02 CST: Dustin merged #1033. Release PR dev→main opened.
+- 2026-11-02 CST: Dustin merged ripit-infra #136; in prod at 1dadb94e (release #1034).

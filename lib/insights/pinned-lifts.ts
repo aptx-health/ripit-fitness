@@ -1,6 +1,6 @@
 import { Prisma, type PrismaClient } from '@prisma/client'
 import { ANCHOR_PATTERNS } from '@/lib/exercises/anchor-patterns'
-import { LBS_PER_KG, type WeekLift, type WeightUnit } from '@/lib/insights/progress-records'
+import { LBS_PER_KG, MAX_PR_REPS, type WeekLift, type WeightUnit } from '@/lib/insights/progress-records'
 
 /**
  * The Progress tab's pinned lifts (S3): the exercise definitions a user tracks
@@ -107,6 +107,8 @@ export async function loadPinned(
 /**
  * Per exercise, the best working set (highest e1RM, then the heavier, then the
  * most reps) of its latest completed session before `before`. Weights in pounds.
+ * e1RM only from sets of 12 reps or fewer, as on the Lifts row: a session of
+ * higher-rep sets gives its heaviest set with no e1RM.
  */
 async function lastSets(
   db: PinnedDb,
@@ -130,7 +132,7 @@ async function lastSets(
         AND e."exerciseDefinitionId" = ANY(${exerciseDefinitionIds}::text[])
     )
     SELECT DISTINCT ON ("exerciseDefinitionId") "exerciseDefinitionId", "completedAt", reps, lbs,
-           CASE WHEN lbs <= 0 THEN NULL WHEN reps = 1 THEN lbs ELSE lbs * (1 + reps / 30.0) END AS e1rm
+           CASE WHEN lbs <= 0 OR reps > ${MAX_PR_REPS} THEN NULL WHEN reps = 1 THEN lbs ELSE lbs * (1 + reps / 30.0) END AS e1rm
     FROM s
     ORDER BY "exerciseDefinitionId", "completedAt" DESC, "completionId", e1rm DESC NULLS LAST, lbs DESC, reps DESC
   `)

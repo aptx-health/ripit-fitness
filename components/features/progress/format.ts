@@ -3,6 +3,15 @@
 export const DASH = '–'
 const MINUS = '−'
 
+/** The browser's IANA zone, sent with every Progress request; UTC when it can't tell. */
+export function browserTimeZone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
+  } catch {
+    return 'UTC'
+  }
+}
+
 /** 'YYYY-MM-DD' as "Oct 26". */
 export function weekOfLabel(weekStart: string): string {
   return new Date(`${weekStart}T00:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })

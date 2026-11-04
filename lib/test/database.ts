@@ -48,7 +48,11 @@ export class TestDatabase {
     process.env.DATABASE_URL = connectionString
     process.env.DIRECT_URL = connectionString
 
-    this.prisma = new PrismaClient({ datasources: { db: { url: connectionString } }, log: ['error'] })
+    // Query events let countQueries (lib/test/query-count.ts) count a call's SQL.
+    this.prisma = new PrismaClient({
+      datasources: { db: { url: connectionString } },
+      log: [{ emit: 'event', level: 'query' }, { emit: 'stdout', level: 'error' }],
+    }) as PrismaClient
     await this.prisma.$connect()
     return { prisma: this.prisma, connectionString }
   }

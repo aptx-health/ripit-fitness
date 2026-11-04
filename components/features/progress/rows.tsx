@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import type { ReactNode } from 'react'
 import type { WeekLift } from '@/lib/insights/progress-records'
 import { formatWeight, ordinal, signed } from './format'
@@ -16,7 +17,17 @@ export function setText(weight: number, reps: number): string {
 }
 
 /** A lift done in the week: its best set and e1RM, the change since the last session, and "Flat". */
-export function LiftRow({ lift, data, pin }: { lift: WeekLift; data: Record<string, string>; pin?: ReactNode }) {
+export function LiftRow({
+  lift,
+  data,
+  pin,
+  href,
+}: {
+  lift: WeekLift
+  data: Record<string, string>
+  pin?: ReactNode
+  href?: string
+}) {
   const { bestSet, e1rm, previousE1rm, bestE1rm, sessionsBelowBest } = lift
   const isFlat = sessionsBelowBest >= FLAT_SESSIONS && bestE1rm != null
   const set = setText(bestSet.weight, bestSet.reps)
@@ -34,6 +45,7 @@ export function LiftRow({ lift, data, pin }: { lift: WeekLift; data: Record<stri
       name={lift.name}
       detail={detail}
       pin={pin}
+      href={href}
       aside={
         (isFlat || change != null) && (
           <div className="flex items-center gap-2">
@@ -53,26 +65,45 @@ export function LiftRow({ lift, data, pin }: { lift: WeekLift; data: Record<stri
   )
 }
 
+/** A row; with `href`, its name, detail and aside are one link, and the pin button stays outside it. */
 export function Row({
   data,
   name,
   detail,
   aside,
   pin,
+  href,
 }: {
   data: Record<string, string>
   name: string
   detail: string
   aside?: ReactNode
   pin?: ReactNode
+  href?: string
 }) {
-  return (
-    <div {...data} className={`flex min-h-14 items-center gap-3 py-2.5 pl-3 ${pin ? 'pr-0' : 'pr-3'}`}>
+  const body = (
+    <>
       <div className="min-w-0 flex-1">
         <div className="font-bold leading-tight text-foreground">{name}</div>{' '}
         <div className="text-sm text-muted-foreground tabular-nums">{detail}</div>
       </div>
       {aside && <div className="shrink-0 text-right tabular-nums">{aside}</div>}
+    </>
+  )
+  const inner = `flex min-h-14 items-center gap-3 py-2.5 pl-3 ${pin ? 'pr-0' : 'pr-3'}`
+  if (!href) {
+    return (
+      <div {...data} className={inner}>
+        {body}
+        {pin}
+      </div>
+    )
+  }
+  return (
+    <div {...data} className="flex items-center">
+      <Link href={href} className={`${inner} min-w-0 flex-1 hover:bg-muted doom-focus-ring`}>
+        {body}
+      </Link>
       {pin}
     </div>
   )
