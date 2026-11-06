@@ -2,6 +2,7 @@
 
 import { Dumbbell, Flame, Plus, Star, Trophy, Zap } from 'lucide-react'
 import type { CSSProperties } from 'react'
+import { useReducedMotion } from '@/lib/display'
 
 interface DriftConfig {
   Icon: typeof Dumbbell
@@ -27,6 +28,10 @@ const DRIFT_ICONS: DriftConfig[] = [
 ]
 
 export function PixelDriftBackground() {
+  // Nothing to draw without motion (reduced motion or E-ink display)
+  const reducedMotion = useReducedMotion()
+  if (reducedMotion) return null
+
   return (
     <div
       aria-hidden="true"

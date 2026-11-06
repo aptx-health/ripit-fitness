@@ -1856,6 +1856,82 @@
   --accent-rgb: 204, 121, 167;
 }
 
+/* E-INK Theme - light only, for colour e-ink (designed on a BOOX with Kaleido 3).
+ * Paper: white page and cards, black text, icons and 2px borders. Colour is only
+ * for fills (buttons, active tabs, chips, chart marks), from five saturated
+ * hues that stay apart when Kaleido mutes them: blue, green, yellow, orange
+ * and rose. Each is light enough for black text at 7:1, so text is always
+ * black, and in greyscale every fill is still a mid grey inside a black border.
+ * No hover or pressed shades (touch e-ink has neither). There is no dark block:
+ * the inline scripts and lib/theme.ts read eink:dark as light. */
+[data-theme="eink"] {
+  /* Base colors */
+  --background: #FFFFFF;
+  --foreground: #000000;
+
+  /* Surface colors */
+  --card: #FFFFFF;
+  --card-foreground: #000000;
+  --muted: #E6E6E6;       /* light grey, solid */
+  --muted-foreground: #333333;  /* 12.6:1 on white, 10:1 on muted */
+
+  /* Border colors */
+  --border: #000000;
+  --input: #FFFFFF;
+
+  /* Primary (blue) */
+  --primary: #1EA0FF;
+  --primary-foreground: #000000;
+  --primary-hover: #1EA0FF;
+  --primary-active: #1EA0FF;
+  --primary-muted: #CCE8FF;
+  --primary-muted-dark: #1EA0FF;
+  --primary-rgb: 30, 160, 255;
+
+  /* Secondary (green) */
+  --secondary: #22CC44;
+  --secondary-foreground: #000000;
+  --secondary-hover: #22CC44;
+  --secondary-active: #22CC44;
+  --secondary-muted: #C8F2D0;
+
+  /* Success (green, with its words or check icon) */
+  --success: #22CC44;
+  --success-foreground: #000000;
+  --success-hover: #22CC44;
+  --success-muted: #C8F2D0;
+  --success-text: #000000;
+  --success-border: #000000;
+  --success-rgb: 34, 204, 68;
+
+  /* Warning (yellow) */
+  --warning: #FFE600;
+  --warning-foreground: #000000;
+  --warning-hover: #FFE600;
+  --warning-muted: #FFF6B0;
+  --warning-text: #000000;
+  --warning-border: #000000;
+  --warning-rgb: 255, 230, 0;
+
+  /* Error (rose red) */
+  --error: #FF5C8A;
+  --error-foreground: #000000;
+  --error-hover: #FF5C8A;
+  --error-muted: #FFD6E2;
+  --error-text: #000000;
+  --error-border: #000000;
+  --error-rgb: 255, 92, 138;
+
+  /* Accent (orange) */
+  --accent: #FF8800;
+  --accent-foreground: #000000;
+  --accent-hover: #FF8800;
+  --accent-active: #FF8800;
+  --accent-muted: #FFE0BF;
+  --accent-text: #000000;
+  --accent-rgb: 255, 136, 0;
+}
+
 /* Height of the mobile (app) shell. In iOS standalone, 100dvh stops short of
    the status bar, so add the top inset back (capped at the large viewport). */
 :root {
@@ -2624,4 +2700,240 @@ body > [data-training-widget] {
   filter: blur(0.5px);
   animation: chip-gold-shine 7s ease-in-out infinite;
   pointer-events: none;
+}
+
+/* ============================================
+   E-INK THEME (look) and E-INK DISPLAY (behaviour)
+   ============================================ */
+
+/* Paper: no shadows, glows, gradients, textures or blur. Background images go
+ * too (gradient fades, noise); sprites opt back in with --sprite. */
+[data-theme="eink"] *,
+[data-theme="eink"] *::before,
+[data-theme="eink"] *::after {
+  box-shadow: none !important;
+  text-shadow: none !important;
+  background-image: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+[data-theme="eink"] [data-sprite] {
+  background-image: var(--sprite) !important;
+}
+
+/* Borders and dividers: solid black, never hairline. */
+[data-theme="eink"] .border {
+  border-width: 2px;
+}
+[data-theme="eink"] .border-t {
+  border-top-width: 2px;
+}
+[data-theme="eink"] .border-b {
+  border-bottom-width: 2px;
+}
+[data-theme="eink"] .border-l {
+  border-left-width: 2px;
+}
+[data-theme="eink"] .border-r {
+  border-right-width: 2px;
+}
+[data-theme="eink"] .border-x {
+  border-inline-width: 2px;
+}
+[data-theme="eink"] .border-y {
+  border-block-width: 2px;
+}
+[data-theme="eink"] .divide-y > :not(:last-child) {
+  border-bottom-width: 2px;
+}
+[data-theme="eink"] .divide-x > :not(:last-child) {
+  border-inline-end-width: 2px;
+}
+
+/* Colour is for fills only: the colour text and border utilities are black. */
+[data-theme="eink"] .text-primary,
+[data-theme="eink"] .text-secondary,
+[data-theme="eink"] .text-accent,
+[data-theme="eink"] .text-success,
+[data-theme="eink"] .text-warning,
+[data-theme="eink"] .text-error,
+[data-theme="eink"] .text-destructive,
+[data-theme="eink"] .text-white {
+  color: var(--foreground);
+}
+[data-theme="eink"] .border-primary,
+[data-theme="eink"] .border-secondary,
+[data-theme="eink"] .border-accent,
+[data-theme="eink"] .border-success,
+[data-theme="eink"] .border-warning,
+[data-theme="eink"] .border-error,
+[data-theme="eink"] .border-destructive {
+  border-color: var(--border);
+}
+
+/* Inverted chips (a count on a tab, a badge): on a black fill the text is white. */
+[data-theme="eink"] :is(.bg-border, .bg-foreground, .bg-primary-foreground, .bg-secondary-foreground, .bg-accent-foreground) {
+  color: var(--background);
+}
+
+/* No translucent tints: an opacity-modified colour (bg-primary/10,
+ * text-muted-foreground/60, border-border/50 ...) is drawn solid. Matched only
+ * as a whole class, so hover:/focus: variants keep their state. */
+[data-theme="eink"] :is([class^="text-"], [class*=" text-"])[class*="/"]:not([class*="-foreground/"]) {
+  color: var(--foreground);
+}
+[data-theme="eink"] :is([class^="text-muted-foreground/"], [class*=" text-muted-foreground/"]) {
+  color: var(--muted-foreground);
+}
+[data-theme="eink"] :is([class^="text-foreground/"], [class*=" text-foreground/"], [class^="text-primary-foreground/"], [class*=" text-primary-foreground/"], [class^="text-secondary-foreground/"], [class*=" text-secondary-foreground/"]) {
+  color: var(--foreground);
+}
+[data-theme="eink"] :is([class^="border-"], [class*=" border-"])[class*="/"] {
+  border-color: var(--border);
+}
+[data-theme="eink"] :is([class^="bg-muted/"], [class*=" bg-muted/"]) {
+  background-color: var(--muted);
+}
+[data-theme="eink"] :is([class^="bg-primary/"], [class*=" bg-primary/"]) {
+  background-color: var(--primary-muted);
+}
+[data-theme="eink"] :is([class^="bg-secondary/"], [class*=" bg-secondary/"]) {
+  background-color: var(--secondary-muted);
+}
+[data-theme="eink"] :is([class^="bg-success/"], [class*=" bg-success/"]) {
+  background-color: var(--success-muted);
+}
+[data-theme="eink"] :is([class^="bg-warning/"], [class*=" bg-warning/"]) {
+  background-color: var(--warning-muted);
+}
+[data-theme="eink"] :is([class^="bg-error/"], [class*=" bg-error/"]) {
+  background-color: var(--error-muted);
+}
+[data-theme="eink"] :is([class^="bg-accent/"], [class*=" bg-accent/"]) {
+  background-color: var(--accent-muted);
+}
+[data-theme="eink"] :is([class^="bg-background/"], [class*=" bg-background/"], [class^="bg-card/"], [class*=" bg-card/"]) {
+  background-color: var(--background);
+}
+/* Dialog backdrops (bg-black/40): plain paper behind the dialog, not a scrim. */
+[data-theme="eink"] :is([class^="bg-black/"], [class*=" bg-black/"]) {
+  background-color: var(--background);
+}
+
+/* Chart area fills (LiftChart) are a translucent wash, and a solid one would
+ * hide the gridlines: no fill, just the line. */
+[data-theme="eink"] [data-fill] {
+  fill: none;
+}
+
+/* Fields read as fields: input borders and hard-coded grey borders are black,
+ * grey text and placeholders are dark enough (auth pages use raw greys). */
+[data-theme="eink"] .border-input,
+[data-theme="eink"] :is([class^="border-gray-"], [class*=" border-gray-"]) {
+  border-color: var(--border);
+}
+[data-theme="eink"] :is([class^="text-gray-"], [class*=" text-gray-"]) {
+  color: var(--foreground);
+}
+[data-theme="eink"] ::placeholder {
+  color: var(--muted-foreground);
+  opacity: 1;
+}
+
+/* No fades: an opacity-* utility (pending rows, dimmed hints) is drawn at full
+ * strength so its text keeps 7:1. opacity-0 still hides; hover:/group-hover:
+ * variants are untouched. Disabled controls get a cue that isn't a fade: a
+ * grey fill, a dashed border and the not-allowed cursor. */
+[data-theme="eink"] :is([class^="opacity-"], [class*=" opacity-"]):not(.opacity-0) {
+  opacity: 1;
+}
+[data-theme="eink"] :is(:disabled, [aria-disabled="true"]) {
+  opacity: 1;
+  cursor: not-allowed;
+  border-style: dashed;
+  background-color: var(--muted);
+}
+
+/* Follow-along progress: done segments filled, the rest outlined. */
+.fa-segment {
+  background-color: rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.2);
+}
+.fa-segment[data-done] {
+  background-color: var(--primary);
+  box-shadow: none;
+}
+[data-theme="eink"] .fa-segment {
+  height: 8px;
+  background-color: var(--background);
+  border: 1px solid var(--border);
+}
+[data-theme="eink"] .fa-segment[data-done] {
+  background-color: var(--foreground);
+}
+
+/* Inline-styled tints (FollowAlongTabs, RestStopwatch) as solid fills. */
+.wtd-card {
+  background-color: color-mix(in srgb, var(--primary) 8%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--primary) 30%, transparent),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+    inset 0 0 0 1px color-mix(in srgb, var(--primary) 25%, transparent);
+}
+.rest-stopwatch {
+  background-color: color-mix(in srgb, var(--success) 8%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+}
+[data-theme="eink"] .wtd-card {
+  background-color: var(--primary-muted);
+  border: 2px solid var(--border);
+}
+[data-theme="eink"] .rest-stopwatch {
+  background-color: var(--success-muted);
+  border-block: 2px solid var(--border);
+}
+
+/* Focus and the current page: thick black marks instead of colour. */
+[data-theme="eink"] *:focus-visible {
+  outline: 3px solid var(--foreground);
+  outline-offset: 2px;
+}
+[data-theme="eink"] nav a[aria-current="page"] span {
+  font-weight: 700;
+  text-decoration: underline 3px;
+  text-underline-offset: 4px;
+}
+
+/* E-ink display (any theme): no motion at all. */
+[data-display="eink"] *,
+[data-display="eink"] *::before,
+[data-display="eink"] *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+
+/* Skeletons stand still as outlined blocks. */
+[data-display="eink"] .animate-pulse,
+[data-display="eink"] [data-lift-skeleton] .bg-muted {
+  outline: 2px solid var(--border);
+  outline-offset: -2px;
+}
+
+/* Bolder text: body at medium, nothing lighter than medium, small labels semibold. */
+[data-display="eink"] body {
+  font-weight: 500;
+}
+[data-display="eink"] .font-normal,
+[data-display="eink"] .font-light,
+[data-display="eink"] .font-extralight,
+[data-display="eink"] .font-thin {
+  font-weight: 500;
+}
+[data-display="eink"] .text-xs:not(.font-bold):not(.font-extrabold):not(.font-black),
+[data-display="eink"] .text-\[9px\]:not(.font-bold):not(.font-extrabold):not(.font-black),
+[data-display="eink"] .text-\[10px\]:not(.font-bold):not(.font-extrabold):not(.font-black),
+[data-display="eink"] .text-\[11px\]:not(.font-bold):not(.font-extrabold):not(.font-black),
+[data-display="eink"] .text-\[12px\]:not(.font-bold):not(.font-extrabold):not(.font-black) {
+  font-weight: 600;
 }

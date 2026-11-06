@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import ExerciseImageCrossfade from '@/components/ui/ExerciseImageCrossfade'
 import type { MessageData } from '@/components/ui/MessageCard'
 import { MessageCard } from '@/components/ui/MessageCard'
+import { useReducedMotion } from '@/lib/display'
 import { pluralize } from '@/lib/format/pluralize'
 
 interface PrescribedSet {
@@ -77,8 +78,9 @@ export default function FollowAlongTabs({
   const directive = formatPrescriptionDirective(prescribedSets)
   const imageUrls = exercise.exerciseDefinition?.imageUrls || []
 
-  // Pulse animation — fires twice on exercise screen load
+  // Pulse animation — fires twice on exercise screen load (not with reduced motion or E-ink display)
   const cardRef = useRef<HTMLDivElement>(null)
+  const reducedMotion = useReducedMotion()
   const [pulseKey, setPulseKey] = useState(exercise.id)
 
   useEffect(() => {
@@ -90,8 +92,10 @@ export default function FollowAlongTabs({
     const el = cardRef.current
     if (!el) return
 
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (prefersReduced) return
+    if (reducedMotion) {
+      el.classList.remove('wtd-pulse')
+      return
+    }
 
     el.classList.remove('wtd-pulse')
     // Force reflow so re-adding the class restarts the animation
@@ -101,7 +105,7 @@ export default function FollowAlongTabs({
     const cleanup = () => el.classList.remove('wtd-pulse')
     el.addEventListener('animationend', cleanup, { once: true })
     return () => el.removeEventListener('animationend', cleanup)
-  }, [pulseKey])
+  }, [pulseKey, reducedMotion])
 
   // Track whether content is scrollable and not fully scrolled
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -135,19 +139,8 @@ export default function FollowAlongTabs({
           <div
             ref={cardRef}
             className="wtd-card px-[14px] py-[14px]"
-            style={{
-              backgroundColor: 'color-mix(in srgb, var(--primary) 8%, transparent)',
-              boxShadow: [
-                'inset 0 1px 0 color-mix(in srgb, var(--primary) 30%, transparent)',
-                'inset 0 -1px 0 rgba(0,0,0,0.30)',
-                'inset 0 0 0 1px color-mix(in srgb, var(--primary) 25%, transparent)',
-              ].join(', '),
-            }}
           >
-            <span
-              className="block text-[11px] font-medium uppercase tracking-[0.12em]"
-              style={{ color: 'var(--primary)' }}
-            >
+            <span className="block text-[11px] font-medium uppercase tracking-[0.12em] text-primary">
               What to do
             </span>
             <span className="block text-[22px] font-medium text-foreground leading-[1.1] mt-0.5">

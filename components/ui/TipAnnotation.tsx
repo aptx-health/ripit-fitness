@@ -126,10 +126,13 @@ function StillFrog({ className = '' }: { className?: string }) {
     <div
       aria-hidden="true"
       className={className}
+      data-sprite=""
       style={{
         width: '28px',
         height: '28px',
         backgroundImage: `url(${spriteUrl})`,
+        // Kept by the e-ink theme, which drops other background images
+        ['--sprite' as string]: `url(${spriteUrl})`,
         // Sprite is 5 frames horizontally; show only the first.
         backgroundSize: '140px 28px',
         backgroundPosition: '0 0',

@@ -42,3 +42,11 @@
 - 2026-11-02 CST: Dustin on the preview: 1–2 s with no feedback when opening a lift; wants a skeleton at once. Small fix 129 to implementer (test-builder skipped: small UI change).
 - 2026-11-02 CST: 129 back: skeleton at once via loading.tsx. Slowness was a client waterfall (server 5–13 ms), not queries. Preview restarted.
 - 2026-11-03 CST: Dustin approved the lift page on the preview. 125–129 accepted. Preview stopped. Committing and opening the PR into dev.
+- 2026-11-03 CST: PR #1035 (per-lift page) opened into dev. Dustin asked for automated perf checks for reviews; item 130 (perf-check skill) dispatched to reviewer in worktree1, branch feature/perf-check.
+- 2026-11-03 CST: Dustin merged #1035 (per-lift page) into dev; staging deploys from dev.
+- 2026-11-03 CST: 130 back: perf-check skill (static scan, throttled tap test, countQueries). Proof: lift page fails without loading.tsx (212 ms), passes with (44 ms). AGENTS.md bullet makes it part of UI/API done-when. PR next.
+- 2026-11-03 CST: Dustin merged #1036 (perf-check skill) into dev; 130 accepted.
+- 2026-11-03 CST: Release PR dev→main opened (#1035 + #1036; no migrations).
+- 2026-11-04 CST: Dustin merged release #1037 into main (6899ff97); images building.
+- 2026-11-04 CST: Images for 6899ff97 built. Infra agent asked for the prod tag-bump PR.
+- 2026-11-04 CST: infra PR ripit-infra #137 (tags to 6899ff97) open; waiting on Dustin's merge.
