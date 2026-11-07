@@ -42,3 +42,4 @@ A review packet with first line `Report: complete | needs decision | further han
 - 2026-11-07 CST: Dustin asked that the reviewer test the app hands-on after the build; section added.
 - 2026-11-07 CST: Dustin asked the reviewer to compare against the web app (staging or local); section added.
 - 2026-11-07 12:04 MST: dispatched to ios-review (running)
+- 2026-11-07 CST: verdict needs decision; lead answered Q1 a, Q2 a, Q3 keep the per-set unit; fixes in 163; ios-review asked for a revised verdict.
