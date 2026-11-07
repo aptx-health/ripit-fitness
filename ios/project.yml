@@ -28,6 +28,14 @@ targets:
       - path: App/ExerciseImages
         type: folder
         buildPhase: resources
+    # Show the app's Documents folder in Files and Finder, so an export file can be dropped in for import.
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UIFileSharingEnabled: true
+        LSSupportsOpeningDocumentsInPlace: true
     dependencies:
       - package: RipitCore
     settings:

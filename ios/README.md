@@ -30,6 +30,14 @@ If the script can't find the phone, open `ios/Ripit.xcodeproj` in Xcode, pick yo
 Every 7 days: free signing expires. Plug in and run `scripts/ios/install.sh` again. Your data stays.
 The free account allows 3 apps per device (Offscreen counts as one).
 
+## Import your ripit.fit history
+
+1. On ripit.fit: **Settings → Download my data**. You get `ripit-export-YYYY-MM-DD.json`.
+2. Get the file onto the phone: open it from Downloads or iCloud Drive, or drag it onto Ripit in Finder (iPhone → Files tab).
+3. In Ripit: **Import from ripit.fit** (under History), pick the file. A summary shows what the file held.
+
+Importing the same file again, or a later export, adds only what's new and keeps everything logged on the phone. A file that isn't a Ripit export, is damaged, or is a newer version is refused, and nothing changes.
+
 ## Exercise catalog and photos
 
 `node scripts/ios/build-catalog.ts` rebuilds `RipitCore/Sources/RipitCore/Resources/catalog.json` from `prisma/seeds/exercise-definitions.json` (312 system exercises) and downloads any missing photos into `App/ExerciseImages/` using `scripts/exercise-mapping.json`. 297 exercises have 2 photos each (594 files, about 36.5 MB); 15 have none and show a placeholder. Pass `--skip-images` to rebuild only the JSON.

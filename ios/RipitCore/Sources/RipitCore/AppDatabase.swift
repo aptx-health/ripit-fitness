@@ -8,7 +8,8 @@ import GRDB
 /// The phone's local SQLite database. Opening it creates the file if needed, runs any missing
 /// migrations in order, and seeds the system exercise catalog.
 public final class AppDatabase: Sendable {
-    private let dbQueue: DatabaseQueue
+    /// Internal so other files' extensions (Import.swift) can write in one transaction.
+    let dbQueue: DatabaseQueue
 
     private init(_ dbQueue: DatabaseQueue) {
         self.dbQueue = dbQueue
@@ -84,11 +85,16 @@ public final class AppDatabase: Sendable {
     /// Finished workouts, newest first. Unfinished workouts are not history.
     public func history() throws -> [HistoryEntry] {
         try dbQueue.read { db in
+            // A program session is named after its workout. Its exercises are the session's own plus the
+            // program exercises it logged sets against.
             try Row.fetchAll(db, sql: """
-                SELECT c.id, c.name, c.completedAt,
-                       (SELECT COUNT(*) FROM exercise e WHERE e.workoutCompletionId = c.id) AS exerciseCount,
+                SELECT c.id, COALESCE(c.name, w.name) AS name, c.completedAt,
+                       (SELECT COUNT(*) FROM (
+                            SELECT id FROM exercise WHERE workoutCompletionId = c.id
+                            UNION SELECT exerciseId FROM loggedSet WHERE completionId = c.id)) AS exerciseCount,
                        (SELECT COUNT(*) FROM loggedSet s WHERE s.completionId = c.id) AS setCount
                 FROM workoutCompletion c
+                LEFT JOIN workout w ON w.id = c.workoutId
                 WHERE c.status = 'completed'
                 ORDER BY c.completedAt DESC
                 """).map {
@@ -235,7 +241,7 @@ public final class AppDatabase: Sendable {
     }
 
     private static func detail(_ db: Database, _ id: String) throws -> WorkoutDetail {
-        guard let c = try Row.fetchOne(db, sql: "SELECT startedAt, completedAt FROM workoutCompletion WHERE id = ?", arguments: [id]) else {
+        guard let c = try Row.fetchOne(db, sql: "SELECT startedAt, completedAt, workoutId FROM workoutCompletion WHERE id = ?", arguments: [id]) else {
             throw RipitCoreError.notFound("workout \(id)")
         }
         let sets = try Row.fetchAll(db, sql: """
@@ -245,8 +251,8 @@ public final class AppDatabase: Sendable {
         let setsByExercise = Dictionary(grouping: sets) { $0["exerciseId"] as String }
         let exercises = try Row.fetchAll(db, sql: """
             SELECT id, exerciseDefinitionId, name, exerciseGroup FROM exercise
-            WHERE workoutCompletionId = ? ORDER BY "order"
-            """, arguments: [id]).map { e in
+            WHERE workoutCompletionId = ? OR (workoutId IS NOT NULL AND workoutId = ?) ORDER BY "order"
+            """, arguments: [id, c["workoutId"] as String?]).map { e in
             let exerciseId: String = e["id"]
             return ExerciseDetail(
                 id: exerciseId, definitionId: e["exerciseDefinitionId"], name: e["name"], group: e["exerciseGroup"],

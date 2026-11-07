@@ -20,6 +20,9 @@ final class WorkoutStore {
     /// The last error from a write, shown as an alert.
     var lastError: String?
     var showingWorkout = false
+    var importing = false
+    /// The outcome of the last import, shown as an alert.
+    var importResult: ImportResult?
 
     init(databaseURL: URL) {
         do {
@@ -87,6 +90,29 @@ final class WorkoutStore {
         guard let w = current?.id else { return }
         write { try $0.discardWorkout(w) }
         showingWorkout = false
+    }
+
+    // MARK: - Import
+
+    /// Imports a ripit-export file picked in the Files app. The work runs off the main thread.
+    func importFile(at url: URL) async {
+        guard let db else { return }
+        importing = true
+        defer { importing = false }
+        let result: ImportResult = await Task.detached {
+            let scoped = url.startAccessingSecurityScopedResource()
+            defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+            do {
+                let summary = try db.importExport(data: Data(contentsOf: url))
+                return .imported(summary)
+            } catch let refused as ImportError {
+                return .refused(refused.reason)
+            } catch {
+                return .refused("The file couldn't be read. Try downloading it again.")
+            }
+        }.value
+        importResult = result
+        reload()
     }
 
     private func write(_ change: (AppDatabase) throws -> Void) {
