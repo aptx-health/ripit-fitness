@@ -147,7 +147,10 @@ struct ImportFileTests {
         #expect(saved["sourceCompletionId"] as String? == FileIds.adHoc)
         #expect(saved["exerciseCount"] as Int == 2)
         let snapshot = try JSONSerialization.jsonObject(with: Data((saved["workoutData"] as String).utf8)) as? [[String: Any]]
-        #expect(snapshot?.compactMap { $0["exerciseDefinitionId"] as? String } == [FileIds.sledPush, FileIds.refPullUp])
+        // Pull-Up's ref id is unknown to the catalog but its name matches, so the snapshot points at the
+        // catalog row, like the imported exercises do (every snapshot id resolves locally).
+        let catalogPullUp = "cmiz7vkvr0008vr0m7rv3dapc"
+        #expect(snapshot?.compactMap { $0["exerciseDefinitionId"] as? String } == [FileIds.sledPush, catalogPullUp])
         #expect(snapshot?.last?["notes"] as? String == "Add load if 8 is easy")
     }
 

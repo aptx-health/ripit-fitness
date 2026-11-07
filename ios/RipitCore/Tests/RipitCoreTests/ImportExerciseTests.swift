@@ -2,8 +2,11 @@
 // and "system exercises are referenced by id, not copied".
 //
 // API used: importExport(data:), workout(_:), systemExerciseIds().
-// Rule assumed (work item 158 packet): a definition id the catalog lacks is kept under that same id,
-// as a non-system definition named from exerciseRefs.
+// Rule (lead, work item 158): an exercise ref resolves
+// 1. by id against the catalog, then
+// 2. by normalized name against the catalog (normalizeExerciseName in lib/validators/exercise-definition.ts:
+//    lowercase, trim, drop all but a-z 0-9 whitespace and '-', collapse spaces), mapping to the catalog row,
+// 3. else it is kept under its own id as a non-system definition named from exerciseRefs.
 
 import Foundation
 import GRDB
@@ -12,6 +15,8 @@ import Testing
 
 @Suite("Importing exercises the phone may not know")
 struct ImportExerciseTests {
+    let catalog = Dictionary(uniqueKeysWithValues: FileIds.toCatalog)
+
     @Test("Catalog ids: exercises point at the bundled catalog row, which is neither copied nor changed")
     func knownIdsUseCatalog() throws {
         let db = try TempDB().open()
@@ -45,19 +50,63 @@ struct ImportExerciseTests {
         #expect(try db.foreignKeyProblems().isEmpty)
     }
 
-    @Test("Unknown id: refs whose names match catalog exercises still import under their own ids")
-    func unknownIdsWithCatalogNames() throws {
-        // In the fixture as shipped, every ref id is unknown and four names equal catalog names
-        // (normalizedName is UNIQUE locally).
+    @Test("Name match: unknown ids whose names match the catalog map to the catalog row")
+    func unknownIdsMatchCatalogByName() throws {
+        // In the fixture as shipped every ref id is unknown; four names equal catalog names.
         let db = try TempDB().open()
         try db.importExport(data: ExportFixture.data())
         let pullUp = try #require(try db.workout(FileIds.adHoc).exercises.last)
         #expect(pullUp.id == FileIds.adHocPullUp)
         #expect(pullUp.name == "Pull-Up")
-        #expect(pullUp.definitionId == FileIds.refPullUp)
+        #expect(pullUp.definitionId == catalog[FileIds.refPullUp])
         #expect(pullUp.sets.map(\.reps) == [8, 6])
-        let refs = [FileIds.refSquat, FileIds.refBench, FileIds.refRow, FileIds.refDeadlift, FileIds.refPullUp]
-        #expect(try db.ids("exerciseDefinition", where: "isSystem = 0") == Set(refs + [FileIds.sledPush]))
+        let squat = try #require(try db.row("exercise", FileIds.w1Squat))
+        #expect(squat["exerciseDefinitionId"] as String? == catalog[FileIds.refSquat])
+        // Only Sled Push (custom) and the Bent-Over Row (no catalog name) are non-system.
+        #expect(try db.ids("exerciseDefinition", where: "isSystem = 0") == [FileIds.sledPush, FileIds.refRow])
         #expect(try db.systemExerciseIds().count == catalogSize)
+        #expect(try db.foreignKeyProblems().isEmpty)
+    }
+
+    @Test("Name match: the ref name is normalized like the web (case, spaces, punctuation)")
+    func nameMatchNormalizes() throws {
+        let db = try TempDB().open()
+        try db.importExport(data: ExportFixture.editing { file in
+            for case let ref as NSMutableDictionary in file["exerciseRefs"] as! NSMutableArray
+            where ref["id"] as? String == FileIds.refDeadlift {
+                ref["name"] = "  CONVENTIONAL   Deadlift! "
+            }
+        })
+        let deadlift = try #require(try db.row("exercise", "cmw6s043i00i2vrt45yt0676i"))
+        #expect(deadlift["exerciseDefinitionId"] as String? == catalog[FileIds.refDeadlift])
+        #expect(deadlift["name"] as String == "Conventional Deadlift")
+        #expect(try db.row("exerciseDefinition", FileIds.refDeadlift) == nil)
+    }
+
+    @Test("Unknown id: a ref with a name the catalog doesn't have stays its own non-system row")
+    func uniqueNameKeptAsOwnRow() throws {
+        let db = try TempDB().open()
+        try db.importExport(data: ExportFixture.editing { file in
+            (file["exerciseRefs"] as! NSMutableArray).add(["id": "ref-landmine", "name": "Landmine Press"] as NSDictionary)
+            let adHoc = (file["workoutCompletions"] as! NSMutableArray)
+                .first { ($0 as! NSDictionary)["id"] as? String == FileIds.adHoc } as! NSMutableDictionary
+            (adHoc["exercises"] as! NSMutableArray).add([
+                "id": "ex-landmine", "name": "Landmine Press", "exerciseDefinitionId": "ref-landmine", "order": 3,
+                "exerciseGroup": NSNull(), "workoutId": NSNull(), "notes": NSNull(), "userId": "test-user-pyq031e3h5i",
+                "isOneOff": true, "workoutCompletionId": FileIds.adHoc, "prescribedSets": [],
+            ] as NSDictionary)
+            (adHoc["loggedSets"] as! NSMutableArray).add([
+                "id": "set-landmine", "setNumber": 1, "reps": 10, "weight": 25, "weightUnit": "kg", "rpe": NSNull(),
+                "rir": NSNull(), "isWarmup": false, "exerciseId": "ex-landmine", "completionId": FileIds.adHoc,
+                "createdAt": "2026-10-11T16:45:00.000Z", "userId": "test-user-pyq031e3h5i",
+            ] as NSDictionary)
+        })
+        let def = try #require(try db.row("exerciseDefinition", "ref-landmine"))
+        #expect(def["name"] as String == "Landmine Press")
+        #expect(def["isSystem"] as Bool == false)
+        let ex = try #require(try db.workout(FileIds.adHoc).exercises.last)
+        #expect(ex.definitionId == "ref-landmine")
+        #expect(ex.sets.map(\.weight) == [25])
+        #expect(ex.sets.map(\.weightUnit) == ["kg"])
     }
 }

@@ -8,7 +8,11 @@
 // - Rows keep their ids, so importing the same file again adds nothing.
 // - Plan (prescribedSets under exercises) and reality (loggedSets under completions) stay apart.
 // - LoggedSet.weight is a number with weightUnit "lbs" or "kg"; nothing is converted.
-// - An exercise whose definition is not in the bundled catalog is kept with its name and sets.
+// - An exercise ref resolves by id against the catalog, then by normalized name against the catalog
+//   (the web's normalizeExerciseName), else it is kept under its own id as a non-system definition.
+//   Exercises and saved workout snapshots point at the resolved id.
+// - An imported draft session is resumable, with completedAt NULL like local drafts.
+// - The file's active program stays active only if the phone has no active program.
 // - Keys v1 doesn't use locally (settings, pinnedExercises, userId, copyStatus, ...) are ignored.
 
 import Foundation
