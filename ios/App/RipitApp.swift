@@ -1,4 +1,5 @@
 // Ripit for iPhone, slice 1 (work item 154): log an ad-hoc workout into a local SQLite database.
+// Slice 3 (work item 161) adds a Training tab for programs beside History.
 // No account, no network. Logic lives in RipitCore; this target is the SwiftUI layer.
 
 import SwiftUI
@@ -26,6 +27,8 @@ struct RipitApp: App {
 struct RootView: View {
     @Environment(WorkoutStore.self) private var store
     @State private var path: [String] = []
+    @State private var trainingPath: [TrainingRoute] = []
+    @State private var tab = DebugHooks.flag("demoHistoryTab") ? 1 : 0
 
     var body: some View {
         @Bindable var store = store
@@ -34,7 +37,14 @@ struct RootView: View {
                 ContentUnavailableView("Can't open your data", systemImage: "exclamationmark.triangle",
                                        description: Text(error))
             } else {
-                NavigationStack(path: $path) { HistoryView(path: $path) }
+                TabView(selection: $tab) {
+                    NavigationStack(path: $trainingPath) { TrainingView(path: $trainingPath) }
+                        .tabItem { Label("Training", systemImage: "figure.strengthtraining.traditional") }
+                        .tag(0)
+                    NavigationStack(path: $path) { HistoryView(path: $path) }
+                        .tabItem { Label("History", systemImage: "clock") }
+                        .tag(1)
+                }
                     .fullScreenCover(isPresented: $store.showingWorkout) {
                         NavigationStack { WorkoutView() }
                             .environment(store)

@@ -12,7 +12,8 @@ final class WorkoutStore {
         URL.applicationSupportDirectory.appendingPathComponent("ripit.sqlite")
     }
 
-    private let db: AppDatabase?
+    /// Internal so WorkoutStore+Programs.swift can reach it.
+    let db: AppDatabase?
     let catalog: ExerciseCatalog
     private(set) var history: [HistoryEntry] = []
     private(set) var current: WorkoutDetail?
@@ -20,6 +21,15 @@ final class WorkoutStore {
     /// The last error from a write, shown as an alert.
     var lastError: String?
     var showingWorkout = false
+    // Programs (slice 3); loaded by reloadPrograms() in WorkoutStore+Programs.swift.
+    var programs: [ProgramSummary] = []
+    var upNext: UpNext?
+    var activeProgram: ProgramDetail?
+    var activeProgress: ProgramProgress?
+    var activeDone: Set<String> = []
+    var currentWeek: Int?
+    /// The in-progress workout's plan when it is a program session.
+    var session: ProgramSession?
     var importing = false
     /// The outcome of the last import, shown as an alert.
     var importResult: ImportResult?
@@ -41,6 +51,7 @@ final class WorkoutStore {
             history = try db.history()
             current = try db.inProgressWorkout()
         }
+        reloadPrograms()
     }
 
     func detail(_ id: String) -> WorkoutDetail? {
@@ -115,13 +126,13 @@ final class WorkoutStore {
         reload()
     }
 
-    private func write(_ change: (AppDatabase) throws -> Void) {
+    func write(_ change: (AppDatabase) throws -> Void) {
         guard let db else { return }
         attempt { try change(db) }
         reload()
     }
 
-    private func attempt(_ body: () throws -> Void) {
+    func attempt(_ body: () throws -> Void) {
         do { try body() } catch { lastError = "\(error)" }
     }
 }

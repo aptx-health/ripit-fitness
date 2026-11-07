@@ -1,4 +1,5 @@
 // The workout in progress: add exercises, log sets, group supersets, finish or discard.
+// A program workout (slice 3) also shows each exercise's plan and prefills like the web.
 
 import RipitCore
 import SwiftUI
@@ -15,7 +16,7 @@ struct WorkoutView: View {
         ScrollView {
             if let w = store.current {
                 VStack(alignment: .leading, spacing: 20) {
-                    Text("Started \(Format.time(w.startedAt))")
+                    Text([sessionLabel, "Started \(Format.time(w.startedAt))"].compactMap { $0 }.joined(separator: " · "))
                         .foregroundStyle(Theme.mutedForeground)
 
                     if w.exercises.isEmpty {
@@ -27,7 +28,8 @@ struct WorkoutView: View {
                         FolderBlock(title: run.title, tone: run.group == nil ? .exercise : .superset) {
                             ForEach(Array(run.exercises.enumerated()), id: \.element.id) { i, ex in
                                 if i > 0 { RowDivider() }
-                                ExerciseLogger(exercise: ex, showName: run.group != nil,
+                                ExerciseLogger(exercise: ex, planned: store.session?.exercises.first { $0.id == ex.id }?.planned,
+                                               showName: run.group != nil,
                                                selecting: selecting, selected: selected.contains(ex.id)) {
                                     if selected.contains(ex.id) { selected.remove(ex.id) } else { selected.insert(ex.id) }
                                 }
@@ -62,7 +64,7 @@ struct WorkoutView: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .background(Theme.background)
-        .navigationTitle("Workout")
+        .navigationTitle(sessionName ?? "Workout")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
@@ -71,7 +73,7 @@ struct WorkoutView: View {
                     .accessibilityLabel("Back to history")
             }
             ToolbarItem(placement: .topBarTrailing) {
-                if (store.current?.exercises.count ?? 0) >= 2 {
+                if store.session == nil && (store.current?.exercises.count ?? 0) >= 2 {
                     Button(selecting ? "Cancel" : "Superset") {
                         selecting.toggle()
                         selected = []
@@ -106,10 +108,28 @@ struct WorkoutView: View {
     }
 }
 
-/// One exercise's sets plus the entry row for the next set.
+extension WorkoutView {
+    /// The program workout's name, when this is a program session.
+    private var sessionName: String? {
+        guard let s = store.session else { return nil }
+        return store.program(s.programId)?.weeks.flatMap(\.workouts).first { $0.id == s.workoutId }?.name
+    }
+
+    /// "Week 1 · Day 2" for a program session.
+    private var sessionLabel: String? {
+        guard let s = store.session, let p = store.program(s.programId),
+              let week = p.weeks.first(where: { $0.workouts.contains { $0.id == s.workoutId } }),
+              let w = week.workouts.first(where: { $0.id == s.workoutId }) else { return nil }
+        return "Week \(week.weekNumber) · Day \(w.dayNumber)"
+    }
+}
+
+/// One exercise's sets plus the entry row for the next set. A program exercise also shows its plan.
 private struct ExerciseLogger: View {
     @Environment(WorkoutStore.self) private var store
     let exercise: ExerciseDetail
+    /// The prescribed sets, for a program exercise.
+    let planned: [ProgramSetDetail]?
     let showName: Bool
     let selecting: Bool
     let selected: Bool
@@ -120,6 +140,8 @@ private struct ExerciseLogger: View {
     @State private var unit: String?
     @State private var weight = ""
     @State private var reps = ""
+    /// A logged set being changed in place.
+    @State private var editingSet: String?
     @FocusState private var focus: Field?
     private enum Field { case weight, reps }
 
@@ -141,9 +163,15 @@ private struct ExerciseLogger: View {
                 Text(exercise.name).font(.headline).foregroundStyle(Theme.foreground)
             }
 
+            if let planned, !planned.isEmpty, !selecting { PlanStrip(planned: planned, logged: exercise.sets.count) }
+
             ForEach(exercise.sets) { set in
                 HStack {
-                    SetRow(set: set)
+                    Button { edit(set) } label: { SetRow(set: set) }
+                        .buttonStyle(.plain)
+                        .padding(.vertical, 2)
+                        .background(editingSet == set.id ? Theme.muted : .clear, in: RoundedRectangle(cornerRadius: 6))
+                        .accessibilityLabel("Set \(set.setNumber), \(Format.weight(set.weight, set.weightUnit)) times \(set.reps). Tap to change")
                     Button { store.deleteSet(set.id) } label: {
                         Image(systemName: "xmark").font(.footnote)
                     }
@@ -176,7 +204,7 @@ private struct ExerciseLogger: View {
                 .keyboardType(.numberPad)
                 .focused($focus, equals: .reps)
                 .fieldStyle()
-            Button("Log") { log() }
+            Button(editingSet == nil ? "Log" : "Save") { log() }
                 .font(.headline)
                 .frame(width: 64, height: Theme.touch)
                 .background(Theme.primary.opacity(canLog ? 1 : 0.4), in: RoundedRectangle(cornerRadius: 8))
@@ -198,17 +226,72 @@ private struct ExerciseLogger: View {
 
     private func log() {
         guard let w = parsedWeight, let r = Int(reps), r > 0 else { return }
-        store.logSet(exerciseId: exercise.id, reps: r, weight: w, unit: currentUnit)
+        if let id = editingSet {
+            store.updateSet(id, reps: r, weight: w, unit: currentUnit)
+            editingSet = nil
+            prefill()
+        } else {
+            store.logSet(exerciseId: exercise.id, reps: r, weight: w, unit: currentUnit)
+        }
         lastUnit = currentUnit
         focus = nil
     }
 
-    /// Start the next set from the last one logged.
+    private func edit(_ set: SetDetail) {
+        guard !selecting else { return }
+        if editingSet == set.id {
+            editingSet = nil
+            prefill()
+            return
+        }
+        editingSet = set.id
+        weight = set.weight == 0 ? "" : set.weight.formatted(.number.precision(.fractionLength(0...2)).grouping(.never))
+        reps = "\(set.reps)"
+        unit = set.weightUnit
+    }
+
+    /// Start the next set: a program exercise prefills like the web (this session, then last time,
+    /// then the plan); an ad-hoc one from the last set logged.
     private func prefill() {
+        if planned != nil, let p = store.prefill(exerciseId: exercise.id, setNumber: exercise.sets.count + 1) {
+            weight = p.weight == "0" ? "" : p.weight
+            reps = p.reps
+            if let u = p.weightUnit { unit = u }
+            return
+        }
         guard let last = exercise.sets.last else { return }
         weight = last.weight == 0 ? "" : last.weight.formatted(.number.precision(.fractionLength(0...2)).grouping(.never))
         reps = "\(last.reps)"
         unit = last.weightUnit
+    }
+}
+
+/// The plan for a program exercise, one chip per prescribed set; logged ones are ticked.
+private struct PlanStrip: View {
+    let planned: [ProgramSetDetail]
+    let logged: Int
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("PLAN").font(.caption2.weight(.bold)).tracking(1).foregroundStyle(Theme.mutedForeground)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 6) {
+                    ForEach(planned) { s in
+                        let done = s.setNumber <= logged
+                        HStack(spacing: 4) {
+                            if done { Image(systemName: "checkmark").font(.caption2.weight(.bold)) }
+                            Text(PlanFormat.label(s)).font(.caption.monospacedDigit().weight(.semibold))
+                        }
+                        .padding(.horizontal, 8)
+                        .frame(minHeight: 28)
+                        .background(done ? Theme.primary.opacity(0.15) : Theme.muted, in: RoundedRectangle(cornerRadius: 6))
+                        .foregroundStyle(done ? Theme.primary : Theme.foreground)
+                    }
+                }
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Plan: \(PlanFormat.summary(planned)). \(logged) logged.")
     }
 }
 

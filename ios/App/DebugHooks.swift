@@ -9,6 +9,13 @@
 //   -demoImportPicker YES  open the Files picker for import
 //   -demoDetail YES     open the newest finished workout
 //   -demoDiscard YES    show the discard confirmation over the workout
+// Slice 3 (work item 161):
+//   -demoProgram YES    add an active 2-week sample program (synthetic), plus a second inactive one
+//   -demoDone <n>       finish the first n workouts of the sample program
+//   -demoSession YES    start Up Next and log one set, and open it
+//   -demoScreen <s>     open programs | program | edit | builder from Training
+//   -demoEditExercise YES  on the edit screen, open the first exercise's sheet
+//   -demoHistoryTab YES start on the History tab
 
 import Foundation
 import RipitCore
@@ -49,6 +56,7 @@ enum DebugHooks {
         if let path = d.string(forKey: "demoImport") {
             Task { await store.importFile(at: URL(fileURLWithPath: path)) }
         }
+        applyProgramDemo(store: store)
         guard d.bool(forKey: "demoHistory") || d.bool(forKey: "demoWorkout"),
               let db = try? AppDatabase.open(path: WorkoutStore.databaseURL.path) else { return }
         let bench = "cmiz7vjju0000vr0m4b1o6bec", row = "cmiz7vk1i0003vr0mqucd1f52", squat = "cmiz7vjpo0001vr0msv9of7ib"
@@ -73,6 +81,83 @@ enum DebugHooks {
         }
         store.reload()
         if d.bool(forKey: "demoWorkout") && !d.bool(forKey: "demoStayHome") { store.resumeWorkout() }
+        #endif
+    }
+
+    @MainActor
+    private static func applyProgramDemo(store: WorkoutStore) {
+        #if DEBUG
+        let d = UserDefaults.standard
+        guard d.bool(forKey: "demoProgram"), let db = try? AppDatabase.open(path: WorkoutStore.databaseURL.path) else { return }
+        let bench = "cmiz7vjju0000vr0m4b1o6bec", row = "cmiz7vk1i0003vr0mqucd1f52", squat = "cmiz7vjpo0001vr0msv9of7ib"
+        let day1 = PlannedWorkout("Upper A", [
+            PlannedExercise(bench, sets: Array(repeating: PlannedSet(reps: "5", weight: "75%"), count: 3)),
+            PlannedExercise(row, sets: Array(repeating: PlannedSet(reps: "8-12", weight: "RPE 8"), count: 3)),
+        ])
+        let day2 = PlannedWorkout("Lower A", [PlannedExercise(squat, sets: Array(repeating: PlannedSet(reps: "5", weight: "225"), count: 3))])
+        let day3 = PlannedWorkout("Full Body", [
+            PlannedExercise(bench, group: "A", sets: Array(repeating: PlannedSet(reps: "10"), count: 2)),
+            PlannedExercise(row, group: "A", sets: Array(repeating: PlannedSet(reps: "10"), count: 2)),
+            PlannedExercise(squat, sets: [PlannedSet(reps: "AMRAP", weight: "185")]),
+        ])
+        guard let id = try? db.createProgram(ProgramPlan(name: "Strength Base", weeks: [[day1, day2, day3], [day1, day2, day3]])),
+              let program = try? db.program(id) else { return }
+        _ = try? db.createProgram(ProgramPlan(name: "Summer Hypertrophy", weeks: [[day1, day3]]))
+        try? db.activateProgram(id)
+        let workouts = program.weeks.flatMap(\.workouts)
+        let start = Date().addingTimeInterval(-Double(workouts.count + 1) * 86_400)
+        for (i, w) in workouts.prefix(d.integer(forKey: "demoDone")).enumerated() {
+            let at = start.addingTimeInterval(Double(i) * 86_400)
+            guard let s = try? db.startProgramWorkout(w.id, at: at), let ex = try? db.programSession(s).exercises else { continue }
+            for e in ex { for _ in e.planned { _ = try? db.logSet(exerciseId: e.id, reps: 5, weight: e.definitionId == squat ? 225 : 135) } }
+            try? db.finishWorkout(s, at: at.addingTimeInterval(3600))
+        }
+        if d.bool(forKey: "demoSession"), let next = try? db.upNext(),
+           let s = try? db.startProgramWorkout(next.workoutId, at: Date().addingTimeInterval(-900)),
+           let first = try? db.programSession(s).exercises.first {
+            _ = try? db.logSet(exerciseId: first.id, reps: 5, weight: first.definitionId == squat ? 225 : 135)
+        }
+        store.reload()
+        if d.bool(forKey: "demoSession") { store.resumeWorkout() }
+        #endif
+    }
+
+    /// Opens the screen named by -demoScreen once, from the Training home.
+    @MainActor
+    static func openTrainingRoute(store: WorkoutStore, path: inout [TrainingRoute], building: inout Bool) {
+        #if DEBUG
+        guard path.isEmpty, !openedScreen, let screen = UserDefaults.standard.string(forKey: "demoScreen") else { return }
+        openedScreen = true
+        let id = store.activeProgram?.id ?? store.programs.first?.id
+        switch screen {
+        case "programs": path = [.programs]
+        case "program": if let id { path = [.programs, .program(id)] }
+        case "edit": if let id { path = [.programs, .program(id), .edit(id)] }
+        case "builder": building = true
+        default: break
+        }
+        #endif
+    }
+
+    @MainActor private static var openedScreen = false
+
+    /// A filled-in draft for the builder screenshot (-demoScreen builder).
+    @MainActor
+    static func demoDraft(_ store: WorkoutStore) -> PlanDraft? {
+        #if DEBUG
+        guard UserDefaults.standard.string(forKey: "demoScreen") == "builder" else { return nil }
+        var draft = PlanDraft()
+        draft.name = "5/3/1 Lite"
+        let bench = "cmiz7vjju0000vr0m4b1o6bec", row = "cmiz7vk1i0003vr0mqucd1f52"
+        draft.weeks = [[PlanDraft.Workout(name: "Press Day", exercises: [
+            .init(definitionId: bench, name: store.exercise(bench)?.name ?? "Bench", group: "A",
+                  sets: [EditableSet(reps: "5", weight: "65%"), EditableSet(reps: "5", weight: "75%"), EditableSet(reps: "5+", weight: "85%")]),
+            .init(definitionId: row, name: store.exercise(row)?.name ?? "Row", group: "A",
+                  sets: [EditableSet(reps: "10", weight: "RPE 8"), EditableSet(reps: "10", weight: "RPE 8")]),
+        ])]]
+        return draft
+        #else
+        return nil
         #endif
     }
 }
