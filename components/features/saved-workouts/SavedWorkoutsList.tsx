@@ -3,19 +3,18 @@
 import { ChevronDown, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
+import type { Trainee } from '@/components/coaching/SendToTrainee'
 import { useToast } from '@/components/ToastProvider'
 import { startFreestyleWorkout } from '@/lib/api/adhoc-workout'
 import { clientLogger } from '@/lib/client-logger'
 import { groupSavedWorkouts } from '@/lib/saved-workouts/groups'
 import ArchivedWorkoutRow from './ArchivedWorkoutRow'
 import DeleteSavedWorkoutDialog from './DeleteSavedWorkoutDialog'
-import NewWorkoutRow from './NewWorkoutRow'
+import GroupBox from './GroupBox'
 import RenameSavedWorkoutDialog from './RenameSavedWorkoutDialog'
 import SavedWorkoutDetailDialog from './SavedWorkoutDetailDialog'
 import SavedWorkoutRow, { type SavedWorkoutListItem } from './SavedWorkoutRow'
 
-/** A group's label, like Pinned on Progress's lifts panel. */
-const GROUP_HEADING = 'px-4 pb-1 pt-2.5 text-xs font-bold uppercase tracking-wider text-muted-foreground'
 type ArchiveState = Pick<SavedWorkoutListItem, 'archivedAt' | 'pinnedAt' | 'dismissedAt'>
 const stateOf = (item: SavedWorkoutListItem): ArchiveState => ({
   archivedAt: item.archivedAt ?? null,
@@ -23,17 +22,23 @@ const stateOf = (item: SavedWorkoutListItem): ArchiveState => ({
   dismissedAt: item.dismissedAt ?? null,
 })
 
-/** The Older and Show archived fold headers. */
+/** The Show archived fold header. */
 const FOLD_BUTTON =
-  'doom-focus-ring flex min-h-12 w-full items-center gap-2 px-4 text-left text-sm font-bold uppercase tracking-wider text-muted-foreground hover:bg-muted'
+  'doom-focus-ring flex min-h-12 w-full items-center gap-2 px-1 text-left text-sm font-bold uppercase tracking-wider text-muted-foreground hover:bg-muted'
 
 /**
- * The saved workouts, as rows for the Library's Workouts folder box (the box
- * itself is the caller's): New, Pinned, Recent, a closed "Older (n)" fold,
- * and last a closed "Show archived (n)". `onCountChange` reports the number of
- * unarchived workouts after each change, for the tab's count chip.
+ * The saved workouts, inside the Library's Workouts folder box (the box itself
+ * is the caller's): New, Pinned, Recent and a closed Older, each its own box
+ * with a coloured header tab and count (GroupBox), and last a closed "Show
+ * archived (n)". `onCountChange` reports the number of
+ * unarchived workouts after each change, for the tab's count chip. A row
+ * opens into a panel of its actions, one at a time; with `trainees` (the
+ * Library page's, coaching slice 2) each panel also has Send.
  */
-export default function SavedWorkoutsList({ onCountChange }: { onCountChange?: (count: number) => void } = {}) {
+export default function SavedWorkoutsList({
+  onCountChange,
+  trainees = [],
+}: { onCountChange?: (count: number) => void; trainees?: Trainee[] } = {}) {
   const toast = useToast()
   const router = useRouter()
 
@@ -42,6 +47,7 @@ export default function SavedWorkoutsList({ onCountChange }: { onCountChange?: (
   const [renameTarget, setRenameTarget] = useState<SavedWorkoutListItem | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<SavedWorkoutListItem | null>(null)
   const [detailId, setDetailId] = useState<string | null>(null)
+  const [expandedId, setExpandedId] = useState<string | null>(null)
   const [startingFreestyle, setStartingFreestyle] = useState(false)
   const [olderOpen, setOlderOpen] = useState(false)
   const [archivedOpen, setArchivedOpen] = useState(false)
@@ -162,6 +168,8 @@ export default function SavedWorkoutsList({ onCountChange }: { onCountChange?: (
 
   const handleArchive = useCallback(
     async (item: SavedWorkoutListItem, dismissed = false) => {
+      // The row leaves for Show archived, so its panel closes (and stays closed after Undo).
+      setExpandedId(null)
       const now = new Date().toISOString()
       const data = await sendArchive(
         item,
@@ -194,7 +202,7 @@ export default function SavedWorkoutsList({ onCountChange }: { onCountChange?: (
     [sendArchive]
   )
 
-  // Start from New, as the detail dialog starts one.
+  // Start from a row's panel, as the detail dialog starts one.
   const handleStart = useCallback(
     async (item: SavedWorkoutListItem) => {
       if (startingId) return
@@ -270,16 +278,23 @@ export default function SavedWorkoutsList({ onCountChange }: { onCountChange?: (
   const detailItem = items.find((item) => item.id === detailId) ?? null
 
   const groups = groupSavedWorkouts(items)
-  const rows = (group: SavedWorkoutListItem[], id?: string) => (
-    <ul id={id} className="divide-y divide-border border-t border-border">
+  const rows = (group: SavedWorkoutListItem[], id?: string, isNew = false) => (
+    <ul id={id} className="divide-y divide-border">
       {group.map((item) => (
         <li key={item.id}>
           <SavedWorkoutRow
             item={item}
+            isNew={isNew}
+            expanded={expandedId === item.id}
+            starting={startingId === item.id}
+            trainees={trainees}
+            onToggle={() => setExpandedId((open) => (open === item.id ? null : item.id))}
             onOpen={() => setDetailId(item.id)}
+            onStart={() => handleStart(item)}
             onTogglePin={() => handleTogglePin(item)}
             onRename={() => setRenameTarget(item)}
             onArchive={() => handleArchive(item)}
+            onDismiss={() => handleArchive(item, true)}
             onDelete={() => setDeleteTarget(item)}
           />
         </li>
@@ -290,58 +305,35 @@ export default function SavedWorkoutsList({ onCountChange }: { onCountChange?: (
 
   return (
     <>
-      <div className="divide-y divide-border">
+      {/* Boxes with space between them, not one shared grid (work 154). */}
+      <div className="space-y-4 px-3 pt-1 pb-3">
         {liveCount === 0 && (
-          <p className="px-4 py-5 text-sm text-muted-foreground">All your saved workouts are archived.</p>
+          <p className="px-1 py-2 text-sm text-muted-foreground">All your saved workouts are archived.</p>
         )}
         {groups.new.length > 0 && (
-          <section aria-label="New">
-            <h3 className={GROUP_HEADING}>New</h3>
-            <ul className="divide-y divide-border border-t border-border">
-              {groups.new.map((item) => (
-                <li key={item.id}>
-                  <NewWorkoutRow
-                    item={item}
-                    starting={startingId === item.id}
-                    onOpen={() => setDetailId(item.id)}
-                    onStart={() => handleStart(item)}
-                    onDismiss={() => handleArchive(item, true)}
-                  />
-                </li>
-              ))}
-            </ul>
-          </section>
+          <GroupBox label="New" tone="new" count={groups.new.length}>
+            {rows(groups.new, undefined, true)}
+          </GroupBox>
         )}
         {groups.pinned.length > 0 && (
-          <section aria-label="Pinned">
-            <h3 className={GROUP_HEADING}>Pinned</h3>
+          <GroupBox label="Pinned" tone="pinned" count={groups.pinned.length}>
             {rows(groups.pinned)}
-          </section>
+          </GroupBox>
         )}
         {groups.recent.length > 0 && (
-          <section aria-label="Recent">
-            <h3 className={GROUP_HEADING}>Recent</h3>
+          <GroupBox label="Recent" tone="recent" count={groups.recent.length}>
             {rows(groups.recent)}
-          </section>
+          </GroupBox>
         )}
         {groups.older.length > 0 && (
-          <section aria-label="Older">
-            <button
-              type="button"
-              aria-expanded={olderOpen}
-              aria-controls={olderListId}
-              onClick={() => setOlderOpen((open) => !open)}
-              className={FOLD_BUTTON}
-            >
-              <span className="flex-1">Older ({groups.older.length})</span>
-              <ChevronDown
-                size={18}
-                aria-hidden="true"
-                className={`transition-transform ${olderOpen ? 'rotate-180' : ''}`}
-              />
-            </button>
+          <GroupBox
+            label="Older"
+            tone="older"
+            count={groups.older.length}
+            fold={{ open: olderOpen, onToggle: () => setOlderOpen((open) => !open), controls: olderListId }}
+          >
             {olderOpen && rows(groups.older, olderListId)}
-          </section>
+          </GroupBox>
         )}
         {groups.archived.length > 0 && (
           <section aria-label="Archived">
@@ -360,7 +352,7 @@ export default function SavedWorkoutsList({ onCountChange }: { onCountChange?: (
               />
             </button>
             {archivedOpen && (
-              <ul id={archivedListId} className="divide-y divide-border border-t border-border">
+              <ul id={archivedListId} className="divide-y divide-border border-2 border-border bg-card">
                 {groups.archived.map((item) => (
                   <li key={item.id}>
                     <ArchivedWorkoutRow

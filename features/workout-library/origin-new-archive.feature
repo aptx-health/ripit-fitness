@@ -39,7 +39,7 @@ Feature: Workout library, slice 3: where a workout came from, the New group, and
 
   # Archive
   Scenario: Archive by hand
-    When the user archives a workout from its row menu
+    When the user archives a workout from its row panel
     Then it leaves every group, is unpinned, and no longer shows on Training or in the quick action sheet
     And an Undo toast brings it back as it was (pinned again if it was)
 
@@ -67,4 +67,4 @@ Feature: Workout library, slice 3: where a workout came from, the New group, and
     Then archive, restore and dismiss only touch the user's own workouts, are rate limited and log errors
 
   Scenario: Phone width
-    Then at 390px the New group, row menu and Show archived fit with 48px tap targets, in light, dark and E-INK
+    Then at 390px the New group, row panel and Show archived fit with 48px tap targets, in light, dark and E-INK

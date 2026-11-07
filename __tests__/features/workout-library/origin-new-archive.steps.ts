@@ -43,7 +43,7 @@
  *     The last thing in the list is a button "Show archived (n)" (none when n
  *     is 0). Opened, it lists the archived workouts, each with Restore and
  *     Delete buttons; Delete confirms through DeleteSavedWorkoutDialog.
- *     Every button in the list and the row menu is a 48px tap target.
+ *     Every button in the list and the row panel is a 48px tap target.
  *
  * Here the UI talks to the real route handlers: fetch is stubbed to call them.
  * vitest-cucumber runs every step as its own test and Testing Library cleans up
@@ -337,18 +337,35 @@ async function renderList() {
     ToastProvider: ComponentType<{ children: unknown }>
   }
   render(createElement(ToastProvider, null, createElement(List)))
-  await screen.findAllByRole('button', { name: /^View / })
+  await screen.findAllByRole('listitem') // work 153
 }
 const region = (name: string) => screen.queryByRole('region', { name })
-const viewName = (b: HTMLElement) => b.getAttribute('aria-label')?.replace(/^View /, '')
-const namesIn = (r: HTMLElement | null) =>
-  r ? within(r).queryAllByRole('button', { name: /^View / }).map(viewName) : []
+// work 153: a live row is one expandable button, name first, and View is in its
+// panel; an archived row still has its View button.
+const headerOf = (li: HTMLElement) =>
+  within(li)
+    .queryAllByRole('button')
+    .find((b) => b.hasAttribute('aria-expanded'))
+const nameOf = (li: HTMLElement) =>
+  headerOf(li)?.querySelector('span')?.textContent ??
+  within(li).getByRole('button', { name: /^View / }).getAttribute('aria-label')?.replace(/^View /, '')
+const namesIn = (r: HTMLElement | null) => (r ? within(r).queryAllByRole('listitem').map(nameOf) : [])
 const rowOf = (name: string, scope: HTMLElement = document.body) => {
-  const view = within(scope).queryByRole('button', { name: `View ${name}` })
-  const li = view?.closest('li') as HTMLElement | null
+  const li = within(scope)
+    .queryAllByText(name, { exact: true })
+    .map((el) => el.closest('li'))
+    .find(Boolean) as HTMLElement | undefined
   expect(li, `a row for ${name}`).toBeTruthy()
   return li as HTMLElement
 }
+/** work 153: tap the row to open its panel, where its actions are now. */
+const openRow = (name: string, scope: HTMLElement = document.body) => {
+  const li = rowOf(name, scope)
+  const header = headerOf(li) as HTMLElement
+  if (header.getAttribute('aria-expanded') !== 'true') fireEvent.click(header)
+  return li
+}
+const shown = (name: string) => screen.queryAllByText(name, { exact: true }).filter((el) => el.closest('li'))
 const showArchived = () => screen.queryByRole('button', { name: /^show archived/i })
 async function openOlder() {
   const fold = screen.queryByRole('button', { name: /^older \(\d+\)/i })
@@ -361,8 +378,8 @@ async function openArchived() {
   await waitFor(() => expect(screen.queryAllByRole('button', { name: /^restore\b/i }).length).toBeGreaterThan(0))
 }
 async function archiveFromMenu(name: string) {
-  fireEvent.click(within(rowOf(name)).getByRole('button', { name: `Actions for ${name}` }))
-  const item = await screen.findByRole('button', { name: /^archive\b/i })
+  // work 153: Archive is in the row's panel, not a ⋯ menu.
+  const item = within(openRow(name)).getByRole('button', { name: /^archive\b/i })
   fireEvent.click(item)
 }
 async function tapUndo() {
@@ -493,7 +510,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
         expect(namesIn(fresh)).toEqual(['Machine Upper'])
         const pinned = region('Pinned') as HTMLElement
         expect((fresh as HTMLElement).compareDocumentPosition(pinned) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-        const r = rowOf('Machine Upper', fresh as HTMLElement)
+        const r = openRow('Machine Upper', fresh as HTMLElement) // work 153
         expect(r.textContent).toContain('From Hermes')
         expect(within(r).getByRole('button', { name: /^start\b/i })).toBeTruthy()
         expect(within(r).getByRole('button', { name: /^dismiss\b/i })).toBeTruthy()
@@ -502,7 +519,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
     And('it is not also shown in Recent', async () => {
       await renderList()
       expect(namesIn(region('Recent'))).toEqual(['Leg Day'])
-      expect(screen.getAllByRole('button', { name: 'View Machine Upper' })).toHaveLength(1)
+      expect(shown('Machine Upper')).toHaveLength(1) // work 153
     })
   })
 
@@ -510,7 +527,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
     When('the user starts a workout from New', async () => {
       await approveAgentWorkout('Machine Upper')
       await renderList()
-      fireEvent.click(within(rowOf('Machine Upper', region('New') as HTMLElement)).getByRole('button', { name: /^start\b/i }))
+      fireEvent.click(within(openRow('Machine Upper', region('New') as HTMLElement)).getByRole('button', { name: /^start\b/i })) // work 153
       await waitFor(() => expect(nav.to.some((to) => to.startsWith('/training/adhoc/'))).toBe(true))
     })
     Then('it moves to Recent', async () => {
@@ -529,10 +546,10 @@ describeFeature(feature, ({ Background, Scenario }) => {
     Then('it is archived, and an Undo toast brings it back', async () => {
       expect(s.pending).toBe('dismiss')
       await renderList()
-      fireEvent.click(within(rowOf('Machine Upper', region('New') as HTMLElement)).getByRole('button', { name: /^dismiss\b/i }))
+      fireEvent.click(within(openRow('Machine Upper', region('New') as HTMLElement)).getByRole('button', { name: /^dismiss\b/i })) // work 153
       await waitFor(() => expect(region('New')).toBeNull())
       await untilDb(async () => (await archivedAt('Machine Upper')) !== null, 'Dismiss archives it')
-      expect(screen.queryByRole('button', { name: 'View Machine Upper' })).toBeNull()
+      expect(shown('Machine Upper')).toEqual([]) // work 153
 
       await tapUndo()
       await waitFor(() => expect(namesIn(region('New'))).toEqual(['Machine Upper']))
@@ -557,7 +574,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
 
   // Archive --------------------------------------------------------------------------
   Scenario('Archive by hand', ({ When, Then, And }) => {
-    When('the user archives a workout from its row menu', async () => {
+    When('the user archives a workout from its row panel', async () => {
       s.pending = 'archive Upper A'
     })
     Then(
@@ -566,7 +583,7 @@ describeFeature(feature, ({ Background, Scenario }) => {
         expect(s.pending).toBe('archive Upper A')
         await renderList()
         await archiveFromMenu('Upper A')
-        await waitFor(() => expect(screen.queryByRole('button', { name: 'View Upper A' })).toBeNull())
+        await waitFor(() => expect(shown('Upper A')).toEqual([])) // work 153
         expect(region('Pinned')).toBeNull()
         await untilDb(async () => (await archivedAt('Upper A')) !== null, 'archived')
         expect((await rowByName('Upper A')).pinnedAt).toBeNull()
@@ -606,12 +623,12 @@ describeFeature(feature, ({ Background, Scenario }) => {
       await renderList()
       const b = showArchived() as HTMLElement
       expect(b?.textContent).toMatch(/show archived \(3\)/i)
-      for (const v of screen.getAllByRole('button', { name: /^View / }))
+      for (const v of screen.getAllByRole('listitem')) // work 153
         expect(v.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
       const fold = screen.getByRole('button', { name: /^older \(\d+\)/i })
       expect(fold.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
       for (const name of ['Arch One', 'Arch Two', 'Arch Three'])
-        expect(screen.queryByRole('button', { name: `View ${name}` })).toBeNull()
+        expect(shown(name)).toEqual([]) // work 153
       expect(region('New')).toBeNull()
     })
     When('the user opens it', async () => {
@@ -737,12 +754,12 @@ describeFeature(feature, ({ Background, Scenario }) => {
   })
 
   Scenario('Phone width', ({ Then }) => {
-    Then('at 390px the New group, row menu and Show archived fit with 48px tap targets, in light, dark and E-INK', async () => {
+    Then('at 390px the New group, row panel and Show archived fit with 48px tap targets, in light, dark and E-INK', async () => {
       await approveAgentWorkout('Machine Upper')
       await seed('Arch One', { lastUsedAt: daysAgo(5), archivedAt: daysAgo(1) })
       await renderList()
       await openArchived()
-      fireEvent.click(within(rowOf('Leg Day')).getByRole('button', { name: 'Actions for Leg Day' }))
+      openRow('Leg Day') // work 153: the row's panel replaces its menu
       await screen.findByRole('button', { name: /^archive\b/i })
       const targets = [...document.body.querySelectorAll('button, a')] as HTMLElement[]
       expect(targets.length).toBeGreaterThan(8)

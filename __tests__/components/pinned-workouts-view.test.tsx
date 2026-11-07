@@ -245,11 +245,19 @@ let patchReply: Reply
 async function renderList() {
   const mod = (await load('@/components/features/saved-workouts/SavedWorkoutsList')) as { default: ComponentType }
   const result = render(createElement(mod.default))
-  await screen.findByRole('button', { name: 'View Upper Body' })
+  await screen.findByText('Upper Body') // work 153
   return result
 }
-const row = (name: string) => screen.getByRole('button', { name: `View ${name}` }).closest('li') as HTMLElement
-const toggle = (name: string) => within(row(name)).getByRole('button', { name: /^(un)?pin\b/i })
+// work 153: rows are found by name, and Pin/Unpin and View are in the row's panel, opened by tapping the row.
+const row = (name: string) => screen.getByText(name, { exact: true }).closest('li') as HTMLElement
+const openRow = (name: string) => {
+  const header = within(row(name))
+    .getAllByRole('button')
+    .find((b) => b.hasAttribute('aria-expanded')) as HTMLElement
+  if (header.getAttribute('aria-expanded') !== 'true') fireEvent.click(header)
+  return row(name)
+}
+const toggle = (name: string) => within(openRow(name)).getByRole('button', { name: /^(un)?pin\b/i })
 const patches = () => calls.filter((c) => c.method === 'PATCH')
 const listGets = () => calls.filter((c) => c.method === 'GET' && c.url.startsWith('/api/workouts/saved') && !/saved\/[^/?]+/.test(c.url))
 
@@ -340,7 +348,7 @@ describe('saved workouts list: pin toggle', () => {
 
   it('the detail dialog has the same toggle, in the state of the row', async () => {
     await renderList()
-    fireEvent.click(screen.getByRole('button', { name: 'View Mobility' }))
+    fireEvent.click(within(openRow('Mobility')).getByRole('button', { name: 'View Mobility' })) // work 153
     const dialog = await screen.findByRole('dialog')
     const inDialog = within(dialog).getByRole('button', { name: /^(un)?pin\b/i })
     expect(inDialog.getAttribute('aria-pressed')).toBe('true')
@@ -348,7 +356,7 @@ describe('saved workouts list: pin toggle', () => {
 
   it('pinning from the detail dialog is reflected on the row', async () => {
     await renderList()
-    fireEvent.click(screen.getByRole('button', { name: 'View Upper Body' }))
+    fireEvent.click(within(openRow('Upper Body')).getByRole('button', { name: 'View Upper Body' })) // work 153
     const dialog = await screen.findByRole('dialog')
     fireEvent.click(within(dialog).getByRole('button', { name: /^pin\b/i }))
     await waitFor(() => expect(patches()).toHaveLength(1))
