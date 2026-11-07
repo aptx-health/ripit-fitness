@@ -1,11 +1,12 @@
 ---
 id: 166
-state: ready
+state: running
 executor: ios-tests
 skill: handoff-test-builder
 from: lead (worktree-brave-field-c150)
 confirmed: 2026-11-07 Dustin (4h goal stretch: slice 4)
 updated: 2026-11-07
+waiting_on:
 ---
 # iOS slice 4 (stretch): tests for Progress
 
@@ -32,3 +33,4 @@ The `handoff-test-builder` packet, first line `Report: ...`, sent to wX:p1. Don'
 
 ## Log
 - 2026-11-07 CST: created (stretch slice started early: slices 1-3 built).
+- 2026-11-07 12:42 MST: dispatched to ios-tests (running)

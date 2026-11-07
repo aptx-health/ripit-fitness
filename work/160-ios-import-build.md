@@ -1,6 +1,6 @@
 ---
 id: 160
-state: running
+state: accepted
 waiting_on:
 executor: ios-impl
 skill: handoff-implementer
@@ -40,3 +40,4 @@ The `handoff-implementer` packet, first line `Report: ...`, sent to wX:p1. Don't
 - 2026-11-07 CST: created (waiting on 158's amendment).
 - 2026-11-07 12:20 MST: dispatched to ios-impl (running)
 - 2026-11-07 CST: back 4d3a414c; lead re-ran: Import + slice 1 pass, the only failures are the expected Program suites. ios-check stays red until 161 merges (accepted). To review (162). Asked programs-impl to merge it into feature/ios-programs.
+- 2026-11-07 CST: 164 re-check says accept; lead accepts slice 2 under 4h autonomy (should-fix follows in 167).

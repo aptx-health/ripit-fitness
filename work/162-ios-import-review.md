@@ -1,6 +1,6 @@
 ---
 id: 162
-state: running
+state: accepted
 waiting_on:
 executor: ios-review
 skill: reviewer
@@ -34,3 +34,4 @@ A review packet with first line `Report: ...` and a verdict, sent to wX:p1. Repo
 - 2026-11-07 CST: run in ~/projects/worktrees/ripit-fitness/worktree6 (detached at 4d3a414c) so ios-impl's 163 edits don't mix in.
 - 2026-11-07 12:27 MST: dispatched to ios-review (running)
 - 2026-11-07 CST: verdict needs decision; lead answers Q1 a (update rows that came from a file), Q2 a (24 h, else abandoned), Q3 a; fixes in 164. Import of 300 workouts / 5k sets took 1.3 s on the simulator.
+- 2026-11-07 CST: 164 re-check says accept; lead accepts slice 2 under 4h autonomy (should-fix follows in 167).

@@ -57,3 +57,21 @@ Nothing removed.
 - Simulator `ripit-162-review`: `xcrun simctl delete D43E5170-51DB-4D32-A864-483EC7F914D6`
 - `ios/Ripit.xcodeproj` generated in worktree6 (git-ignored)
 - Scratch DerivedData and files: /private/tmp/claude-501/-Users-dustin--herdr-worktrees-ripit-fitness-worktree-brave-field-c150/63d03f56-5ac0-462c-ab31-d70b9d53b0e3/scratchpad/162
+
+## Re-check against 164 (`3279a885`, 2026-11-07)
+Tested from a clean `git archive` of `3279a885`. Full `swift test`: 124 tests in 21 suites passed. Simulator build exit 0. The lead's 3 accepted calls (draft window measured from `exportedAt`, finding 5 handled in the History screen, empty-finish rule in core) are taken as given.
+
+| Item | Result |
+|---|---|
+| Q1 later export | **Met.** Fresh fixture then `later.json` in `ripit-162-review`: program renamed, abandoned → completed, extra set added, nothing duplicated. |
+| Q2 drafts | **Met.** The weeks-old web draft in `later.json` was stored as abandoned, not offered as In progress. |
+| Q3 summary | **Met per the 164 packet and tests.** The report gives added, updated and unchanged counts. I didn't see the alert in my run because `-demoImport` lands on the Training tab. |
+| 155 gaps (superset of one, empty finish) | **Met per tests.** The superset group clears when a group drops to one; empty finish follows the lead's call. |
+
+New findings:
+1. **Should fix: a web set deletion makes every later import fail.** The web renumbers sets when one is deleted from a draft (`app/api/workouts/adhoc/[completionId]/sets/[setId]/route.ts`, and the same in the draft-sets route). Hand-made `renumbered.json` (fixture with set 1 of an exercise removed and sets 2 and 3 renumbered to 1 and 2): the import rolled back as a whole. Set numbers stayed 1/2/3, because updating set 2 to setNumber 1 hits `UNIQUE(completionId, exerciseId, setNumber)` while the phone still has the old set 1. So `DatabaseError` → "This file is damaged". The phone can't know about the deletion, so *every* later export of that session fails the same way. That only happens if a draft was imported and then edited on the web, so it's narrow, but it's a permanent lockout when it does. Fix options: within a completion that came from a file, delete file-origin sets the file no longer lists before updating; or update `setNumber` in two passes. I inferred the refusal from the unchanged rows; the alert sits on the History tab, which wasn't on screen.
+2. **Note (as the 164 packet says): rows imported before v4 never update.** Simulator DB from my 162 run (imported under `4d3a414c`), upgraded to v4, then `later.json`: no rename and no status change, but the new set and the web draft were added. Harmless if Dustin hasn't imported on his phone yet. If he has, he should delete the app data and import fresh.
+
+**Verdict: accept 164.** Finding 1 should be fixed before Dustin imports while a web workout is open. It needs no change for a one-time import.
+
+Screenshots: /private/tmp/claude-501/-Users-dustin--herdr-worktrees-ripit-fitness-worktree-brave-field-c150/63d03f56-5ac0-462c-ab31-d70b9d53b0e3/scratchpad/164/sheet-164.png (upgrade + later, fresh fixture, later with rename, home after, renumbered unchanged). Files: /private/tmp/claude-501/-Users-dustin--herdr-worktrees-ripit-fitness-worktree-brave-field-c150/63d03f56-5ac0-462c-ab31-d70b9d53b0e3/scratchpad/164/renumbered.json. Cleanup: /private/tmp/claude-501/-Users-dustin--herdr-worktrees-ripit-fitness-worktree-brave-field-c150/63d03f56-5ac0-462c-ab31-d70b9d53b0e3/scratchpad/164 (export, DerivedData).

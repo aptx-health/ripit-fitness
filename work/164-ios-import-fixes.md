@@ -1,6 +1,6 @@
 ---
 id: 164
-state: review
+state: accepted
 executor: ios-impl
 skill: handoff-implementer
 from: lead (worktree-brave-field-c150)
@@ -35,3 +35,4 @@ The `handoff-implementer` packet, first line `Report: ...`, sent to wX:p1. Don't
 - 2026-11-07 CST: created after review 162 (lead answers: Q1 a, Q2 a with 24 h, Q3 a, plus finding 5 and 161's archived-draft risk).
 - 2026-11-07 12:35 MST: dispatched to ios-impl (running)
 - 2026-11-07 CST: back 3279a885; lead re-ran: 124 pass + sim build. Lead accepts its 3 calls (24 h measured from exportedAt; detail filtering in UI only; core empty-finish only when there are no exercises either). Re-check by ios-review.
+- 2026-11-07 CST: 164 re-check says accept; lead accepts slice 2 under 4h autonomy (should-fix follows in 167).
