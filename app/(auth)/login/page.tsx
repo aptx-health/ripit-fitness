@@ -7,6 +7,7 @@ import { AuthPageHeader } from '@/components/features/auth/AuthPageHeader'
 import { OAuthButtons } from '@/components/features/auth/OAuthButtons'
 import { OrDivider } from '@/components/features/auth/OrDivider'
 import { Button } from '@/components/ui/Button'
+import { safeReturnPath, withReturnPath } from '@/lib/auth/return-path'
 import { signIn } from '@/lib/auth-client'
 
 function getOAuthError(errorParam: string | null): string | null {
@@ -19,6 +20,8 @@ function LoginForm() {
   const _router = useRouter()
   const searchParams = useSearchParams()
   const oauthError = getOAuthError(searchParams.get('error'))
+  // Where to go after signing in (a coach invite, say); same-origin paths only.
+  const next = safeReturnPath(searchParams.get('next'))
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -42,7 +45,7 @@ function LoginForm() {
         return
       }
 
-      window.location.href = '/'
+      window.location.href = next ?? '/'
     } catch {
       setError('An unexpected error occurred')
       setLoading(false)
@@ -130,7 +133,7 @@ function LoginForm() {
         <div className="border-t border-border pt-4">
           <p className="text-center text-[15px] text-muted-foreground">
             New to Ripit?{' '}
-            <Link href="/signup" className="font-semibold text-primary hover:text-primary-hover">
+            <Link href={withReturnPath('/signup', next)} className="font-semibold text-primary hover:text-primary-hover">
               Create an account &rarr;
             </Link>
           </p>

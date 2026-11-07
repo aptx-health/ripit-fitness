@@ -1,0 +1,5 @@
+Report: complete
+137 coaching slice 1 tests (test-builder, 2026-11-06). Files (locked): __tests__/features/coaching/invite-link.steps.ts, __tests__/app/coaching-invite-middleware.test.ts. 74 tests; 47 red for the right reasons (modules missing, no CHECK migration, middleware sends /coach/invite to /login, no Coaching row, onboarding goes to /). Correct scratch fake 74/74 twice; break matrix 39/39 killed. Full suite 4181 pass except the new 47.
+Decisions pinned in the file header: accept = POST /api/coaching/invites/accept {token}, refusals 4xx {code: invalid|self|already_linked}; CHECK as its own ALTER TABLE in the coachLinkId migration (tests apply it); middleware lets /coach/invite/* through signed out; new limiters listed in docs/RATE_LIMITING.md.
+Not verified: 390px look in light/dark/E-INK; Discord sign-in and Google sign-up for a new user; open redirect if the return path rides in a cookie.
+Needs a call: (1) Copy on open invites vs hash-only token; (2) Coaching row in the Account block because settings-page.test pins Training targets to four rows.

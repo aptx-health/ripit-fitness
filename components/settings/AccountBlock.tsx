@@ -1,16 +1,16 @@
 'use client'
 
-import { Link2, LogOut, Mail, UserRound } from 'lucide-react'
+import { Link2, LogOut, Mail, UserRound, Users } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
 import ChangePassword from './ChangePassword'
-import { OUTLINE_BUTTON, RowIcon, SettingsBlock } from './SettingsBlock'
+import { OUTLINE_BUTTON, RowIcon, SettingsBlock, SettingsLinkRow } from './SettingsBlock'
 
 const PROVIDER_LABELS: Record<string, string> = { google: 'Google' }
 
 /**
  * Account: the email (from the server), the sign-in methods connected besides
- * the password, Change password, and one quiet Sign out at the end.
+ * the password, Coaching, Change password, and one quiet Sign out at the end.
  */
 export default function AccountBlock({ email }: { email: string }) {
   // null until loaded. The API leaves out the password ("credential") account
@@ -63,6 +63,12 @@ export default function AccountBlock({ email }: { email: string }) {
           <span className="block text-sm text-foreground">{methods}</span>
         </span>
       </div>
+      <SettingsLinkRow
+        href="/settings/coaching"
+        icon={<Users size={18} />}
+        label="Coaching"
+        description="Invite a trainee, or see your coach"
+      />
       {/* Without a password (Google only), there is nothing to change. */}
       {hasPassword !== false && <ChangePassword />}
       <form action="/api/auth/signout" method="POST" className="px-4 py-3">

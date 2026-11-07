@@ -1,0 +1,12 @@
+# Coaching: status
+
+- 2026-11-06 CST: Started. Dustin: "a coaching interface: my friend is new to lifting; I'd like to create programs and workouts for them on my side and send them as proposals." Size: standard. Lead: lead-ripit-mcp. Dustin's answers: connect by invite link (either side can end it); the coach sees only what he sent (approved / declined / started), not the trainee's logs or Progress; programs and workouts arrive as proposals on the existing review screen, labelled with the coach's name, and approving adds the trainee's own copy. First step: discovery 136 (new agent `coach-disco`, worktree1 detached at origin/dev).
+- 2026-11-06 CST: Discovery 136 back (docs/136-discovery.md): reuse Proposal with nullable token + coachLinkId; slices schema → invite/link → send → coach view. Asking Dustin: custom exercises, ending a link, supersets.
+- 2026-11-06 CST: Dustin: (1) refuse sends with custom exercises, naming them; (2) ending a link leaves pending items (trainee can still decide; no withdrawn status); (3) carry supersets (exerciseGroup) in programInput, own small item. Lead: coach sees pending/accepted/declined only, no "started".
+- 2026-11-06 CST: Slice 1 spec (features/coaching/invite-link.feature) confirmed by Dustin. Tests 137 dispatched to new agent test-builder (worktree1, feature/coaching-invite). Supersets in programInput queued as small item 140 after 135.
+- 2026-11-06 CST: Dustin wants custom exercises bundled on send as a follow-up after slice 2 (ROADMAP). Slice 2 still refuses for now.
+- 2026-11-06 CST: Tests 137 back (74 tests, 47 red; break matrix 39/39). Lead decided: invite link copyable only at creation (hash-only); Coaching row in Account. Spec amended. Build 138 dispatched to new agent coach-impl (worktree1).
+- 2026-11-06 CST: Build 138 back (round 2: copy + waiver dotless-host redirect fixed). Lead re-ran 84/84. Review 139 dispatched to new agent coach-review.
+- 2026-11-06 CST: Review 139: ship after a perf:scan gate fix; no security holes; real browser flow verified. Asking Dustin about display names. Fixes 143 (allowlist, waiver gate on invite page, display names).
+- 2026-11-06 CST: Fixes 143 back (names fall back to email, waiver before invite, loading.tsx x3). Lead re-ran 82/82. Ready for Dustin's phone preview (worktree1) after the workout library preview.
+- 2026-11-06 CST: Slice 1 approved by Dustin on the phone preview. 137–139, 143 accepted. Committed on feature/coaching-invite; PR into dev. Next: slice 2 (send), after workout library slice 3 (origin + New).

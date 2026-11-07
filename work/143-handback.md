@@ -1,0 +1,4 @@
+Report: needs decision → resolved by lead
+143 coaching fixes (coach-impl, 2026-11-06). loading.tsx for settings and both admin proposal pages (perf:scan exits 0). lib/coaching/names.ts: displayName, else email before "@" from BetterAuth "user" ($queryRaw only for ids without a name), else "Ripit user". lib/auth/waiver.ts hasCurrentWaiver() used by the (app) layout and the invite page (→ /waiver?next=<invite>). New __tests__/app/coaching-names-and-waiver.test.tsx (8). Screenshots initiatives/coaching/docs/assets/143/.
+Lead: tagged the 2 new scenarios @work143 (excluded in the steps; covered by the new test) and seeded WaiverAcceptance in freshState (locked steps amended, work 143). Re-run: coaching 82/82, tsc clean. Implementer: suite 4181 pass apart from that file.
+Open: accept API doesn't check the waiver (page does) → ROADMAP; settings/loading.tsx also covers subpages during navigation.
