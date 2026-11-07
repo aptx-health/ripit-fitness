@@ -26,3 +26,4 @@ A review packet with first line `Report: ...` and a clear verdict, sent to wX:p1
 ## Log
 - 2026-11-07 CST: created (ready).
 - 2026-11-07 12:17 MST: dispatched to web-review (running)
+- 2026-11-07 CST: verdict meets spec; accepted.

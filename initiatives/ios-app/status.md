@@ -14,3 +14,4 @@
 - 2026-11-07: 156 back (a45d90c4); lead re-ran the export tests: 25/25 (needs Colima DOCKER_HOST). Lint already red on dev (81 biome / 5 eslint, not from 156): note for Dustin. 158 back; lead calls on 3 questions logged in work/158; amend in progress. Unverified for Dustin: are the bundled seed exercise ids the same as the prod ids?
 - 2026-11-07: 157 back; lead calls (follow the web on restart/rename, archive deactivates) logged in work/157; spec updated; amending.
 - 2026-11-07: 158 accepted (0ff6e408). 160 (import build) dispatched to ios-impl.
+- 2026-11-07: 159 verdict: web export meets spec. 156 accepted by lead (unpushed, worktree3 feature/data-export). Defaults kept: soft-deleted programs and all UserSettings columns exported. Notes for Dustin: exerciseRefs may name another user's custom exercise (low risk); iOS Safari blob download untested.

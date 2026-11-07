@@ -43,3 +43,4 @@ The `handoff-implementer` packet with the first line `Report: ...`, sent to the 
 - 2026-11-07 CST: created (ready).
 - 2026-11-07 12:01 MST: dispatched to export-web (running)
 - 2026-11-07 CST: back a45d90c4; lead re-ran 25/25 export tests. Soft-deleted programs kept (completions point at them). To review.
+- 2026-11-07 CST: review 159: meets spec, good to accept (3 non-blocking notes). Lead accepts under 4h autonomy; Dustin's final review on the Hub page. Branch unpushed.
