@@ -35,3 +35,4 @@ A review packet with first line `Report: ...` and a verdict, sent to wX:p1. Repo
 ## Log
 - 2026-11-07 CST: created (fresh reviewer; ios-review is on 155/163).
 - 2026-11-07 12:36 MST: dispatched to programs-review (running)
+- 2026-11-07 CST: verdict checks out with 3 should-fixes; all 10 scenarios driven by taps, including the imported program. Lead answers: per-week editing for now; one workout in progress on the phone (deliberate). Fixes in 170.
