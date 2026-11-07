@@ -133,6 +133,13 @@ private struct ExerciseEditSheet: View {
     @State private var group: String?
     @State private var sets: [EditableSet] = []
     @State private var confirmingRemove = false
+    @State private var confirmingCancel = false
+
+    /// Unsaved edits in the sheet.
+    private var hasChanges: Bool {
+        name.trimmingCharacters(in: .whitespaces) != exercise.name || group != exercise.group
+            || sets.map(\.planned) != exercise.sets.map { EditableSet($0).planned }
+    }
 
     var body: some View {
         ScrollView {
@@ -168,8 +175,16 @@ private struct ExerciseEditSheet: View {
         .navigationTitle(exercise.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.frame(minHeight: Theme.touch) }
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Cancel") { if hasChanges { confirmingCancel = true } else { dismiss() } }
+                    .frame(minHeight: Theme.touch)
+            }
             ToolbarItem(placement: .confirmationAction) { Button("Save", action: save).frame(minHeight: Theme.touch) }
+        }
+        .interactiveDismissDisabled(hasChanges)
+        .confirmationDialog("Discard your changes?", isPresented: $confirmingCancel, titleVisibility: .visible) {
+            Button("Discard changes", role: .destructive) { dismiss() }
+            Button("Keep editing", role: .cancel) {}
         }
         .onAppear {
             name = exercise.name
@@ -190,15 +205,9 @@ private struct ExerciseEditSheet: View {
         let trimmed = name.trimmingCharacters(in: .whitespaces)
         if !trimmed.isEmpty && trimmed != exercise.name { store.renameProgramExercise(exercise.id, to: trimmed) }
         if group != exercise.group { store.setProgramExerciseGroup(exercise.id, group) }
+        // Each set keeps its own RPE, RIR and warm-up flag (they live on EditableSet).
         let planned = sets.map(\.planned).filter { !$0.reps.isEmpty }
-        if planned != exercise.sets.map({ PlannedSet(reps: $0.reps, weight: $0.weight, rpe: $0.rpe, rir: $0.rir, isWarmup: $0.isWarmup) }) {
-            // Keep RPE, RIR and warm-up from the old set at the same position; the editor shows reps and weight only.
-            let merged = planned.enumerated().map { i, s in
-                let old = i < exercise.sets.count ? exercise.sets[i] : nil
-                return PlannedSet(reps: s.reps, weight: s.weight, rpe: old?.rpe, rir: old?.rir, isWarmup: old?.isWarmup ?? false)
-            }
-            store.setPrescribedSets(exercise.id, merged)
-        }
+        if planned != exercise.sets.map({ EditableSet($0).planned }) { store.setPrescribedSets(exercise.id, planned) }
         dismiss()
     }
 }

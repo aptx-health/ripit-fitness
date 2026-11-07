@@ -22,6 +22,11 @@
 //   -demoScreen <s>     open programs | program | edit | builder from Training
 //   -demoEditExercise YES  on the edit screen, open the first exercise's sheet
 //   -demoHistoryTab YES start on the History tab
+// Work item 170:
+//   -demoStayHome YES   with -demoSession too, stay on Training (shows the resume card)
+//   -demoArchiveActive YES  archive the sample program after starting its session
+//   -demoStartOther YES ask to start another program workout while the session is open
+//   -demoCancelBuilder YES  with -demoScreen builder, tap Cancel (shows the discard prompt)
 
 import Foundation
 import RipitCore
@@ -127,8 +132,12 @@ enum DebugHooks {
            let first = try? db.programSession(s).exercises.first {
             _ = try? db.logSet(exerciseId: first.id, reps: 5, weight: first.definitionId == squat ? 225 : 135)
         }
+        if d.bool(forKey: "demoArchiveActive") { try? db.archiveProgram(id) }
         store.reload()
-        if d.bool(forKey: "demoSession") { store.resumeWorkout() }
+        if d.bool(forKey: "demoSession") && !d.bool(forKey: "demoStayHome") { store.resumeWorkout() }
+        if d.bool(forKey: "demoStartOther"), let other = workouts.last(where: { $0.id != store.session?.workoutId }) {
+            store.startProgramWorkout(other.id)
+        }
         #endif
     }
 

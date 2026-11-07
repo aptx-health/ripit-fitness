@@ -49,6 +49,17 @@ struct RootView: View {
                         .tabItem { Label("Progress", systemImage: "chart.line.uptrend.xyaxis") }
                         .tag(2)
                 }
+                    .confirmationDialog("\(store.currentTitle) is in progress",
+                                        isPresented: Binding(get: { store.pendingStart != nil }, set: { if !$0 { store.pendingStart = nil } }),
+                                        titleVisibility: .visible, presenting: store.pendingStart) { pending in
+                        Button("Resume \(store.currentTitle)") {
+                            store.pendingStart = nil
+                            store.resumeWorkout()
+                        }
+                        Button("Discard it and start \(pending.name)", role: .destructive) { store.discardAndStartPending() }
+                    } message: { _ in
+                        Text("One workout at a time. Discarding deletes its logged sets.")
+                    }
                     .fullScreenCover(isPresented: $store.showingWorkout) {
                         NavigationStack { WorkoutView() }
                             .environment(store)

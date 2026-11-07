@@ -88,18 +88,21 @@ public final class AppDatabase: Sendable {
             // A program session is named after its workout. Its exercises are the session's own plus the
             // program exercises it logged sets against.
             try Row.fetchAll(db, sql: """
-                SELECT c.id, COALESCE(c.name, w.name) AS name, c.completedAt,
+                SELECT c.id, COALESCE(c.name, w.name) AS name, c.completedAt, p.name AS programName, k.weekNumber,
                        (SELECT COUNT(*) FROM (
                             SELECT id FROM exercise WHERE workoutCompletionId = c.id
                             UNION SELECT exerciseId FROM loggedSet WHERE completionId = c.id)) AS exerciseCount,
                        (SELECT COUNT(*) FROM loggedSet s WHERE s.completionId = c.id) AS setCount
                 FROM workoutCompletion c
                 LEFT JOIN workout w ON w.id = c.workoutId
+                LEFT JOIN week k ON k.id = w.weekId
+                LEFT JOIN program p ON p.id = k.programId
                 WHERE c.status = 'completed'
                 ORDER BY c.completedAt DESC
                 """).map {
                 HistoryEntry(id: $0["id"], name: $0["name"], completedAt: $0["completedAt"],
-                             exerciseCount: $0["exerciseCount"], setCount: $0["setCount"])
+                             exerciseCount: $0["exerciseCount"], setCount: $0["setCount"],
+                             programName: $0["programName"], weekNumber: $0["weekNumber"])
             }
         }
     }

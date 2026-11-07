@@ -57,10 +57,14 @@ extension AppDatabase {
                         INSERT INTO exercise (id, name, exerciseDefinitionId, "order", exerciseGroup, workoutId, notes)
                         VALUES (?, ?, ?, ?, ?, ?, ?)
                         """, arguments: [exerciseId, e["name"], e["exerciseDefinitionId"], e["order"], e["exerciseGroup"], workoutId, e["notes"]])
-                    try db.execute(sql: """
-                        INSERT INTO prescribedSet (id, setNumber, reps, weight, rpe, rir, isWarmup, exerciseId)
-                        SELECT lower(hex(randomblob(16))), setNumber, reps, weight, rpe, rir, isWarmup, ? FROM prescribedSet WHERE exerciseId = ?
-                        """, arguments: [exerciseId, e["id"] as String])
+                    for s in try Row.fetchAll(db, sql: """
+                        SELECT setNumber, reps, weight, rpe, rir, isWarmup FROM prescribedSet WHERE exerciseId = ? ORDER BY setNumber
+                        """, arguments: [e["id"] as String]) {
+                        try db.execute(sql: """
+                            INSERT INTO prescribedSet (id, setNumber, reps, weight, rpe, rir, isWarmup, exerciseId)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                            """, arguments: [Self.newId(), s["setNumber"], s["reps"], s["weight"], s["rpe"], s["rir"], s["isWarmup"], exerciseId])
+                    }
                 }
             }
         }

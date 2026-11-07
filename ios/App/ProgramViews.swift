@@ -117,7 +117,7 @@ struct ProgramDetailView: View {
 
                     if let w = p.weeks.first(where: { $0.weekNumber == shown }) {
                         ForEach(w.workouts) { workout in
-                            FolderBlock(title: "Day \(workout.dayNumber) · \(workout.name)",
+                            FolderBlock(title: Format.dayTitle(workout.dayNumber, workout.name),
                                         tone: done.contains(workout.id) ? .active : .exercise, trailing: {
                                 if done.contains(workout.id) {
                                     Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.primary)

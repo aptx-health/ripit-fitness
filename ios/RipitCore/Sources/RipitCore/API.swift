@@ -104,13 +104,20 @@ public struct HistoryEntry: Sendable, Equatable, Identifiable {
     public let completedAt: Date
     public let exerciseCount: Int
     public let setCount: Int
+    /// For a program session: its program and week (work item 170), so the app can say
+    /// "Strength Block · W2 · Pull". nil for ad-hoc workouts.
+    public let programName: String?
+    public let weekNumber: Int?
 
-    public init(id: String, name: String?, completedAt: Date, exerciseCount: Int, setCount: Int) {
+    public init(id: String, name: String?, completedAt: Date, exerciseCount: Int, setCount: Int,
+                programName: String? = nil, weekNumber: Int? = nil) {
         self.id = id
         self.name = name
         self.completedAt = completedAt
         self.exerciseCount = exerciseCount
         self.setCount = setCount
+        self.programName = programName
+        self.weekNumber = weekNumber
     }
 }
 

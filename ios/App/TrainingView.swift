@@ -14,6 +14,7 @@ struct TrainingView: View {
     @Environment(WorkoutStore.self) private var store
     @Binding var path: [TrainingRoute]
     @State private var building = false
+    @State private var confirmingDiscard = false
 
     var body: some View {
         ScrollView {
@@ -23,13 +24,19 @@ struct TrainingView: View {
                     .tracking(2)
                     .foregroundStyle(Theme.foreground)
 
-                if let current = store.current, store.session == nil {
+                // Any workout in progress, program or ad-hoc, even if its program was archived since.
+                if let current = store.current {
                     FolderBlock(title: "In progress", tone: .active) {
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("Ad-hoc workout, started \(Format.time(current.startedAt))")
-                                .font(.headline).foregroundStyle(Theme.foreground)
+                            Text(store.currentTitle).font(.headline).foregroundStyle(Theme.foreground)
+                            Text("Started \(Format.day(current.startedAt)), \(Format.time(current.startedAt)) · \(Format.counts(exercises: current.exercises.count, sets: current.exercises.reduce(0) { $0 + $1.sets.count }))")
+                                .font(.subheadline).foregroundStyle(Theme.mutedForeground)
+                            Text("One workout at a time: finish or discard this one to start another.")
+                                .font(.caption).foregroundStyle(Theme.mutedForeground)
                             Button("Resume workout") { store.resumeWorkout() }
                                 .buttonStyle(FilledButtonStyle())
+                            Button("Discard") { confirmingDiscard = true }
+                                .buttonStyle(OutlineButtonStyle(tint: Theme.error))
                         }
                         .padding(16)
                     }
@@ -82,6 +89,11 @@ struct TrainingView: View {
         .sheet(isPresented: $building) {
             NavigationStack { ProgramBuilderView() }.environment(store)
         }
+        .confirmationDialog("Discard \(store.currentTitle)?", isPresented: $confirmingDiscard, titleVisibility: .visible) {
+            Button("Discard workout", role: .destructive) { store.discardWorkout() }
+        } message: {
+            Text("Its logged sets are deleted. History is not changed.")
+        }
         .onAppear {
             store.reload()
             DebugHooks.openTrainingRoute(store: store, path: &path, building: &building)
@@ -105,9 +117,9 @@ struct TrainingView: View {
                         Text(w.exercises.map(\.name).joined(separator: " · "))
                             .font(.subheadline).foregroundStyle(Theme.mutedForeground).lineLimit(2)
                     }
+                    // With another workout open this asks to resume or discard it (RootView), never silently.
                     Button(next.hasDraft ? "Resume workout" : "Start workout") { store.startProgramWorkout(next.workoutId) }
                         .buttonStyle(FilledButtonStyle())
-                        .disabled(store.current != nil && store.session?.workoutId != next.workoutId)
                 } else if let progress = store.activeProgress, progress.isComplete {
                     Text("Program complete").font(.title2.weight(.bold)).foregroundStyle(Theme.foreground)
                     Text("All \(progress.totalWorkouts) workouts done (cycle \(progress.cycleNumber)). Restart to run it again; your history stays.")
@@ -150,7 +162,7 @@ struct WorkoutRow: View {
                     .font(.title3)
                     .foregroundStyle(done ? Theme.primary : isNext ? Theme.accent : Theme.border)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Day \(workout.dayNumber) · \(workout.name)")
+                    Text(Format.dayTitle(workout.dayNumber, workout.name))
                         .font(.headline).foregroundStyle(Theme.foreground)
                     Text(workout.exercises.isEmpty ? "No exercises" : workout.exercises.map(\.name).joined(separator: ", "))
                         .font(.caption).foregroundStyle(Theme.mutedForeground).lineLimit(1)

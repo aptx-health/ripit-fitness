@@ -30,6 +30,8 @@ final class WorkoutStore {
     var currentWeek: Int?
     /// The in-progress workout's plan when it is a program session.
     var session: ProgramSession?
+    /// A program workout the person asked to start while another one is in progress (work item 170).
+    var pendingStart: PendingStart?
     var importing = false
     @ObservationIgnored private var lastLog: (exerciseId: String, at: Date)?
     /// The outcome of the last import, shown as an alert.

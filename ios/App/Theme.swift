@@ -1,6 +1,7 @@
 // The web app's RIPIT default theme (app/globals.css, [data-theme="ripit"]), light and dark,
 // plus the folder-block pieces from docs/STYLING.md: a paper tab over a bordered box.
 
+import RipitCore
 import SwiftUI
 import UIKit
 
@@ -133,6 +134,25 @@ enum Format {
         w == 0 ? "BW" : "\(w.formatted(.number.precision(.fractionLength(0...2)))) \(unit)"
     }
 
+    /// "Day 1" or "Day 1 · Push": the day number only when the name doesn't already say it.
+    static func dayTitle(_ dayNumber: Int, _ name: String) -> String {
+        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        return trimmed.isEmpty || trimmed == "Day \(dayNumber)" ? "Day \(dayNumber)" : "Day \(dayNumber) · \(trimmed)"
+    }
+
+    /// "Strength Block · W2 · Pull".
+    static func sessionTitle(program: String, week: Int, workout: String) -> String {
+        "\(program) · W\(week) · \(workout)"
+    }
+
+    /// A history row's title: the program session's program, week and day, else its own name.
+    static func historyTitle(_ e: HistoryEntry) -> String {
+        if let program = e.programName, let week = e.weekNumber {
+            return sessionTitle(program: program, week: week, workout: e.name ?? "Workout")
+        }
+        return e.name ?? "Ad-hoc workout"
+    }
+
     static func counts(exercises: Int, sets: Int) -> String {
         "\(exercises) \(exercises == 1 ? "exercise" : "exercises") · \(sets) \(sets == 1 ? "set" : "sets")"
     }
@@ -144,4 +164,24 @@ enum Format {
     static func time(_ d: Date) -> String {
         d.formatted(date: .omitted, time: .shortened)
     }
+}
+
+/// Selects a text field's contents when it gets focus, so typing replaces a value (work item 170).
+private struct SelectAllOnFocus: ViewModifier {
+    @FocusState private var focused: Bool
+
+    func body(content: Content) -> some View {
+        content
+            .focused($focused)
+            .onChange(of: focused) { _, isFocused in
+                guard isFocused else { return }
+                DispatchQueue.main.async {
+                    UIApplication.shared.sendAction(#selector(UIResponder.selectAll(_:)), to: nil, from: nil, for: nil)
+                }
+            }
+    }
+}
+
+extension View {
+    func selectAllOnFocus() -> some View { modifier(SelectAllOnFocus()) }
 }

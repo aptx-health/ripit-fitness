@@ -34,13 +34,36 @@ extension WorkoutStore {
 
     // MARK: - Writes
 
-    /// Starts (or resumes) a program workout and opens it. An unfinished workout of another kind is
-    /// opened instead, so there is only ever one in progress.
+    /// Starts (or resumes) a program workout and opens it. The phone keeps one workout in progress:
+    /// if a different one is open, nothing starts and RootView asks whether to resume it or discard it.
     func startProgramWorkout(_ workoutId: String) {
         if current == nil || session?.workoutId == workoutId {
             write { _ = try $0.startProgramWorkout(workoutId, at: Date()) }
+            showingWorkout = current != nil
+        } else {
+            pendingStart = PendingStart(workoutId: workoutId, name: programWorkoutTitle(workoutId) ?? "this workout")
         }
-        showingWorkout = current != nil
+    }
+
+    /// Discards the workout in progress, then starts the pending one.
+    func discardAndStartPending() {
+        guard let pending = pendingStart else { return }
+        pendingStart = nil
+        discardWorkout()
+        startProgramWorkout(pending.workoutId)
+    }
+
+    /// "Strength Block · W2 · Pull" for a program workout.
+    func programWorkoutTitle(_ workoutId: String) -> String? {
+        guard let programId = try? db?.programId(forWorkout: workoutId), let p = program(programId),
+              let week = p.weeks.first(where: { $0.workouts.contains { $0.id == workoutId } }),
+              let w = week.workouts.first(where: { $0.id == workoutId }) else { return nil }
+        return Format.sessionTitle(program: p.name, week: week.weekNumber, workout: w.name)
+    }
+
+    /// What the workout in progress is called: its program workout, else "Ad-hoc workout".
+    var currentTitle: String {
+        session.flatMap { programWorkoutTitle($0.workoutId) } ?? "Ad-hoc workout"
     }
 
     @discardableResult

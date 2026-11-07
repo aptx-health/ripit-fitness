@@ -23,6 +23,12 @@ struct PlanDraft {
     var name = ""
     var weeks: [[Workout]] = [[Workout(name: "Day 1")]]
 
+    /// Nothing typed or added yet: safe to close without asking.
+    var isUntouched: Bool {
+        name.trimmingCharacters(in: .whitespaces).isEmpty && weeks.count == 1 && weeks[0].count == 1
+            && weeks[0][0].name == "Day 1" && weeks[0][0].exercises.isEmpty
+    }
+
     static let defaultSets = Array(repeating: PlannedSet(reps: "5"), count: 3)
 
     var plan: ProgramPlan {
@@ -42,23 +48,31 @@ struct PlanDraft {
     }
 }
 
-/// One prescribed set as editable text.
+/// One prescribed set as editable text. RPE, RIR and warm-up aren't edited here but travel with
+/// their set, so removing a set never shifts them onto another (work item 170).
 struct EditableSet: Identifiable, Equatable {
     var id = UUID()
     var reps: String
     var weight: String
+    var rpe: Int?
+    var rir: Int?
+    var isWarmup = false
 
-    init(reps: String, weight: String) {
+    init(reps: String, weight: String, rpe: Int? = nil, rir: Int? = nil, isWarmup: Bool = false) {
         self.reps = reps
         self.weight = weight
+        self.rpe = rpe
+        self.rir = rir
+        self.isWarmup = isWarmup
     }
 
-    init(_ s: PlannedSet) { self.init(reps: s.reps, weight: s.weight ?? "") }
-    init(_ s: ProgramSetDetail) { self.init(reps: s.reps, weight: s.weight ?? "") }
+    init(_ s: PlannedSet) { self.init(reps: s.reps, weight: s.weight ?? "", rpe: s.rpe, rir: s.rir, isWarmup: s.isWarmup) }
+    init(_ s: ProgramSetDetail) { self.init(reps: s.reps, weight: s.weight ?? "", rpe: s.rpe, rir: s.rir, isWarmup: s.isWarmup) }
 
     var planned: PlannedSet {
         let w = weight.trimmingCharacters(in: .whitespaces)
-        return PlannedSet(reps: reps.trimmingCharacters(in: .whitespaces), weight: w.isEmpty ? nil : w)
+        return PlannedSet(reps: reps.trimmingCharacters(in: .whitespaces), weight: w.isEmpty ? nil : w,
+                          rpe: rpe, rir: rir, isWarmup: isWarmup)
     }
 }
 
@@ -73,6 +87,7 @@ struct ProgramBuilderView: View {
     @State private var draft = PlanDraft()
     @State private var week = 0
     @State private var picking: UUID?
+    @State private var confirmingCancel = false
 
     private var canSave: Bool {
         !draft.name.trimmingCharacters(in: .whitespaces).isEmpty && draft.weeks.contains { $0.contains { !$0.exercises.isEmpty } }
@@ -82,6 +97,7 @@ struct ProgramBuilderView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 TextField("Program name", text: $draft.name)
+                    .selectAllOnFocus()
                     .font(.title3.weight(.semibold))
                     .padding(.horizontal, 12)
                     .frame(minHeight: Theme.touch)
@@ -122,7 +138,10 @@ struct ProgramBuilderView: View {
         .navigationTitle("New program")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.frame(minHeight: Theme.touch) }
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Cancel") { if draft.isUntouched { dismiss() } else { confirmingCancel = true } }
+                    .frame(minHeight: Theme.touch)
+            }
             ToolbarItem(placement: .confirmationAction) {
                 Button("Save") {
                     store.createProgram(draft.plan, activate: store.programs.allSatisfy { !$0.isActive })
@@ -144,7 +163,18 @@ struct ProgramBuilderView: View {
             }
             .environment(store)
         }
-        .onAppear { if let demo = DebugHooks.demoDraft(store) { draft = demo } }
+        // A swipe down can't throw away a half-built program; Cancel asks first.
+        .interactiveDismissDisabled(!draft.isUntouched)
+        .confirmationDialog("Discard this program?", isPresented: $confirmingCancel, titleVisibility: .visible) {
+            Button("Discard program", role: .destructive) { dismiss() }
+            Button("Keep editing", role: .cancel) {}
+        } message: {
+            Text("Nothing is saved until you tap Save.")
+        }
+        .onAppear {
+            if let demo = DebugHooks.demoDraft(store) { draft = demo }
+            if DebugHooks.flag("demoCancelBuilder") { confirmingCancel = true }
+        }
     }
 }
 
@@ -162,6 +192,7 @@ private struct WorkoutDraftBlock: View {
         }) {
             VStack(alignment: .leading, spacing: 0) {
                 TextField("Workout name", text: $workout.name)
+                    .selectAllOnFocus()
                     .font(.headline)
                     .padding(.horizontal, 16)
                     .frame(minHeight: Theme.touch)
@@ -237,7 +268,8 @@ struct SetsEditor: View {
                 }
             }
             Button {
-                sets.append(sets.last.map { EditableSet(reps: $0.reps, weight: $0.weight) } ?? EditableSet(reps: "5", weight: ""))
+                sets.append(sets.last.map { EditableSet(reps: $0.reps, weight: $0.weight, rpe: $0.rpe, rir: $0.rir) }
+                    ?? EditableSet(reps: "5", weight: ""))
             } label: { Label("Add set", systemImage: "plus").font(.subheadline.weight(.semibold)) }
                 .frame(minHeight: 40)
         }
@@ -247,6 +279,7 @@ struct SetsEditor: View {
 private extension View {
     func planField() -> some View {
         self
+            .selectAllOnFocus()
             .font(.body.monospacedDigit())
             .multilineTextAlignment(.center)
             .autocorrectionDisabled()

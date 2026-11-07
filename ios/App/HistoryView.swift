@@ -117,7 +117,7 @@ private struct HistoryRow: View {
                 : AnyLayout(HStackLayout())
             layout {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(entry.name ?? "Ad-hoc workout")
+                    Text(Format.historyTitle(entry))
                         .font(.headline)
                         .foregroundStyle(Theme.foreground)
                     Text(Format.counts(exercises: entry.exerciseCount, sets: entry.setCount))
@@ -150,6 +150,11 @@ struct WorkoutDetailView: View {
         ScrollView {
             if let w = store.detail(workoutId) {
                 VStack(alignment: .leading, spacing: 20) {
+                    if let entry = store.history.first(where: { $0.id == workoutId }) {
+                        Text(Format.historyTitle(entry))
+                            .font(.title2.weight(.bold))
+                            .foregroundStyle(Theme.foreground)
+                    }
                     if let done = w.completedAt {
                         Text("\(Format.day(done)), \(Format.time(w.startedAt))–\(Format.time(done))")
                             .foregroundStyle(Theme.mutedForeground)
