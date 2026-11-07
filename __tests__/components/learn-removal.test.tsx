@@ -1,14 +1,11 @@
 /**
  * Progress S1: Learn is unlinked (work item 107).
- * Spec: features/analytics/weekly-report.feature, "Old Learn links go to
- * Progress" and "The beginner primer has no Learn links". (The nav itself is in
+ * Spec: features/analytics/weekly-report.feature, "Learn links stay on
+ * Learn" and "The beginner primer has no Learn links". (The nav itself is in
  * nav-active-tab.test.tsx and library.steps.ts.)
  *
- * /learn, /learn/<anything> and /learn/collections/<id> end up on /progress. Either
- * way of doing it passes: a `redirects()` entry in next.config.ts whose destination
- * is /progress and whose source matches the path, or the old page redirecting
- * with next/navigation `redirect('/progress')`. The Learn data and admin CMS are
- * not touched by this item.
+ * work 135 (2026-11-06): Learn stays, linked from Settings, so /learn and its
+ * sub-pages are no longer redirected to /progress.
  */
 
 import { readFileSync } from 'node:fs'
@@ -61,38 +58,13 @@ function configRedirectsToProgress(): RegExp[] {
   return out
 }
 
-async function pageRedirectsToProgress(path: string): Promise<boolean> {
-  const spec =
-    path === '/learn'
-      ? ['@/app/(app)/learn/page', {}]
-      : path.startsWith('/learn/collections/')
-        ? ['@/app/(app)/learn/collections/[id]/page', { id: path.split('/').pop() }]
-        : ['@/app/(app)/learn/[slug]/page', { slug: path.split('/').pop() }]
-  let mod: { default: (props: unknown) => unknown }
-  try {
-    mod = (await load(spec[0] as string)) as typeof mod
-  } catch {
-    return false
-  }
-  try {
-    const out = mod.default({ params: Promise.resolve(spec[1]), searchParams: Promise.resolve({}) })
-    if (out instanceof Promise) await out
-    return false
-  } catch (e) {
-    return e instanceof Error && e.message === 'NEXT_REDIRECT /progress'
-  }
-}
-
-async function landsOnProgress(path: string): Promise<boolean> {
-  if (configRedirectsToProgress().some((re) => re.test(path))) return true
-  return pageRedirectsToProgress(path)
-}
-
-describe('Old Learn links go to Progress', () => {
+// work 135: Dustin keeps Learn, linked from Settings (2026-11-06), so old
+// Learn links no longer go to Progress.
+describe('Learn links stay on Learn', () => {
   it.each(['/learn', '/learn/some-article', '/learn/choosing-the-right-weight', '/learn/collections/c1'])(
-    'opening %s lands on /progress',
-    async (path) => {
-      expect(await landsOnProgress(path)).toBe(true)
+    'opening %s is not redirected to /progress',
+    (path) => {
+      expect(configRedirectsToProgress().some((re) => re.test(path))).toBe(false)
     },
   )
 })
