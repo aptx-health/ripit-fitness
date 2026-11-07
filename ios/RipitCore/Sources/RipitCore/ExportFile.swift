@@ -1,6 +1,6 @@
 // The ripit-export v1 file as Swift types (docs/RIPIT_EXPORT_FORMAT.md on feature/data-export).
 // Only the fields the phone stores are decoded; unknown keys are ignored, as v1 readers must.
-// settings, balanceSettings and pinnedExercises have no local tables yet and are skipped.
+// settings and balanceSettings have no local tables yet and are skipped.
 
 import Foundation
 
@@ -11,6 +11,8 @@ struct ExportFile: Decodable {
     let programs: [Program]
     let workoutCompletions: [WorkoutCompletion]
     let savedWorkouts: [SavedWorkout]
+    /// Lifts pinned on Progress (slice 4). Optional, so files built without it still import.
+    let pinnedExercises: [PinnedExercise]?
 
     /// Checks format and version first, so a newer file is refused by version even if its body changed.
     static func decode(_ data: Data) throws -> ExportFile {
@@ -59,6 +61,11 @@ struct ExportFile: Decodable {
         let isBodyweight: Bool
         let taggedAt: Date?
         let taggedBy: String?
+    }
+
+    struct PinnedExercise: Decodable {
+        let exerciseDefinitionId: String
+        let position: Int
     }
 
     struct ExerciseRef: Decodable {

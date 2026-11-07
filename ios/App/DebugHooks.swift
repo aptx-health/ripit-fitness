@@ -17,6 +17,8 @@
 //   -demoProgram YES    add an active 2-week sample program (synthetic), plus a second inactive one
 //   -demoDone <n>       finish the first n workouts of the sample program
 //   -demoSession YES    start Up Next and log one set, and open it
+//   -demoProgressTab YES  open on the Progress tab
+//   -demoLiftPage YES   with it, open the first lift of the week
 //   -demoScreen <s>     open programs | program | edit | builder from Training
 //   -demoEditExercise YES  on the edit screen, open the first exercise's sheet
 //   -demoHistoryTab YES start on the History tab

@@ -19,6 +19,7 @@ enum Schema {
         ("v2-training-model", v2TrainingModel),
         ("v3-program-cycle", v3ProgramCycle),
         ("v4-import-hash", v4ImportHash),
+        ("v5-pinned-exercise", v5PinnedExercise),
     ]
 
     static func v1ExerciseCatalog(_ db: Database) throws {
@@ -188,5 +189,15 @@ enum Schema {
                       "workoutCompletion", "loggedSet", "savedWorkout"] {
             try db.execute(sql: "ALTER TABLE \(table) ADD COLUMN importHash TEXT")
         }
+    }
+
+    /// Lifts pinned on Progress, in order (slice 4). The web keeps a row per user; one person per phone.
+    static func v5PinnedExercise(_ db: Database) throws {
+        try db.execute(sql: """
+            CREATE TABLE pinnedExercise (
+                exerciseDefinitionId TEXT PRIMARY KEY NOT NULL REFERENCES exerciseDefinition(id) ON DELETE CASCADE,
+                position INTEGER NOT NULL
+            )
+            """)
     }
 }

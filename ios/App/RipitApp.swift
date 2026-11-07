@@ -1,5 +1,5 @@
 // Ripit for iPhone, slice 1 (work item 154): log an ad-hoc workout into a local SQLite database.
-// Slice 3 (work item 161) adds a Training tab for programs beside History.
+// Slice 3 (work item 161) adds a Training tab for programs beside History; slice 4 (168) adds Progress.
 // No account, no network. Logic lives in RipitCore; this target is the SwiftUI layer.
 
 import SwiftUI
@@ -28,7 +28,8 @@ struct RootView: View {
     @Environment(WorkoutStore.self) private var store
     @State private var path: [String] = []
     @State private var trainingPath: [TrainingRoute] = []
-    @State private var tab = DebugHooks.flag("demoHistoryTab") ? 1 : 0
+    @State private var progressPath: [String] = []
+    @State private var tab = DebugHooks.flag("demoHistoryTab") ? 1 : DebugHooks.flag("demoProgressTab") ? 2 : 0
 
     var body: some View {
         @Bindable var store = store
@@ -44,6 +45,9 @@ struct RootView: View {
                     NavigationStack(path: $path) { HistoryView(path: $path) }
                         .tabItem { Label("History", systemImage: "clock") }
                         .tag(1)
+                    NavigationStack(path: $progressPath) { ProgressTabView(path: $progressPath) }
+                        .tabItem { Label("Progress", systemImage: "chart.line.uptrend.xyaxis") }
+                        .tag(2)
                 }
                     .fullScreenCover(isPresented: $store.showingWorkout) {
                         NavigationStack { WorkoutView() }

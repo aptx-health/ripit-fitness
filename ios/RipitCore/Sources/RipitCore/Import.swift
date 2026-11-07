@@ -16,7 +16,8 @@
 //   has no open draft and the draft was active within 24 hours of the export; otherwise it is stored
 //   as abandoned (work item 164).
 // - The file's active program stays active only if the phone has no active program.
-// - Keys v1 doesn't use locally (settings, pinnedExercises, userId, copyStatus, ...) are ignored.
+// - pinnedExercises become the phone's pins when it has none (slice 4).
+// - Keys v1 doesn't use locally (settings, userId, copyStatus, ...) are ignored.
 
 import CryptoKit
 import Foundation
@@ -165,6 +166,7 @@ private struct ExportImporter {
             tally(outcome)
             if outcome == .added { counts["addedWorkouts", default: 0] += 1 }
         }
+        try importPins()
         for saved in file.savedWorkouts {
             let outcome = try upsert(saved)
             tally(outcome)
@@ -415,6 +417,16 @@ private struct ExportImporter {
                            arguments: [s.setNumber, s.id])
         }
         return phoneMoved
+    }
+
+    /// The file's pinned lifts become the phone's pins only when the phone has none, so a later
+    /// import never brings back a lift unpinned on the phone.
+    private func importPins() throws {
+        guard let pins = file.pinnedExercises, !pins.isEmpty,
+              try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM pinnedExercise") == 0 else { return }
+        for pin in pins.sorted(by: { $0.position < $1.position }) {
+            try AppDatabase.appendPin(db, try definitionId(pin.exerciseDefinitionId))
+        }
     }
 
     /// A web draft can be resumed on the phone only if the phone has no open draft of its own and the

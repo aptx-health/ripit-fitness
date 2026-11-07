@@ -1,5 +1,5 @@
-// Public API surface for slice 4, Progress (work item 166). Every body is a stub that throws
-// `RipitCoreError.notImplemented`; the slice 4 implementer replaces them. The tests in
+// Public API for slice 4, Progress. Shapes were fixed by work item 166; work item 168 filled in the
+// bodies (the maths is in ProgressMath.swift, ported from the web). The tests in
 // Tests/RipitCoreTests/Progress*Tests.swift are the contract, and Tests/Fixtures/progress/*.json
 // hold the web's answers (scripts/ios/progress-goldens.ts). Change the bodies, not the shapes:
 // property names match the web's JSON field names, because the tests encode these types and
@@ -17,6 +17,7 @@
 //   nothing saved there are no pins. An imported ripit-export file's pinnedExercises become the pins.
 
 import Foundation
+import GRDB
 
 public enum WeightUnit: String, Sendable, Codable {
     case lbs, kg
@@ -372,36 +373,119 @@ public struct ChartSeries: Sendable, Equatable, Codable {
 public enum ProgressCalendar {
     /// The local Monday of the instant's week, as 'YYYY-MM-DD' (the web's weekStartFor).
     public static func weekStart(for instant: Date, timeZone: TimeZone) throws -> String {
-        throw RipitCoreError.notImplemented
+        Civil.weekStart(for: instant, timeZone: timeZone)
     }
 }
 
 // MARK: - Database
 
+/// Pins are kept to the web's limit.
+let maxPins = 12
+
 extension AppDatabase {
     /// The Progress report for the week starting `weekStart` (a Monday, 'YYYY-MM-DD').
     public func weeklyReport(weekStart: String, timeZone: TimeZone, now: Date, unit: WeightUnit, target: Int) throws -> WeeklyReport {
-        throw RipitCoreError.notImplemented
+        try dbQueue.read { db in
+            let history = try Self.progressSets(db)
+            let pins = try Row.fetchAll(db, sql: """
+                SELECT p.exerciseDefinitionId AS id, d.name FROM pinnedExercise p
+                JOIN exerciseDefinition d ON d.id = p.exerciseDefinitionId ORDER BY p.position
+                """).map { (id: $0["id"] as String, name: $0["name"] as String) }
+            return buildWeeklyReport(weekStart: weekStart, workouts: try Self.progressWorkouts(db, history), history: history,
+                                     pins: pins, timeZone: timeZone, now: now, unit: unit, target: target)
+        }
     }
 
     /// One lift's page, or nil when the exercise definition doesn't exist.
     public func liftHistory(_ exerciseDefinitionId: String, timeZone: TimeZone, now: Date, unit: WeightUnit) throws -> LiftHistory? {
-        throw RipitCoreError.notImplemented
+        try dbQueue.read { db -> LiftHistory? in
+            guard let name = try String.fetchOne(db, sql: "SELECT name FROM exerciseDefinition WHERE id = ?",
+                                                 arguments: [exerciseDefinitionId]) else { return nil }
+            let history = try Self.progressSets(db, exerciseDefinitionId: exerciseDefinitionId).filter { !$0.isWarmup }
+            let thisWeek = Civil.weekBounds(Civil.weekStart(for: now, timeZone: timeZone), timeZone).start
+            return LiftHistory(name: name, weightUnit: unit,
+                               isBodyweight: !history.isEmpty && history.allSatisfy { $0.weight == 0 },
+                               sessions: computeLiftSessions(history, unit: unit),
+                               records: computeRepRecords(history, unit: unit, weekStart: thisWeek),
+                               weeklySets: weeklySets(history, now: now, timeZone: timeZone))
+        }
     }
 
     /// The lift's chart for a range.
     public func liftChart(_ exerciseDefinitionId: String, range: ChartRange, timeZone: TimeZone, now: Date, unit: WeightUnit) throws -> ChartSeries {
-        throw RipitCoreError.notImplemented
+        let history = try dbQueue.read { try Self.progressSets($0, exerciseDefinitionId: exerciseDefinitionId) }
+        return chartSeries(computeLiftSessions(history, unit: unit), range: range, now: now, timeZone: timeZone)
     }
 
     /// The pinned exercise definition ids, in order.
-    public func pinnedLifts() throws -> [String] { throw RipitCoreError.notImplemented }
+    public func pinnedLifts() throws -> [String] {
+        try dbQueue.read { try String.fetchAll($0, sql: "SELECT exerciseDefinitionId FROM pinnedExercise ORDER BY position") }
+    }
 
     /// Replaces the pins with `ids`, in order.
-    public func savePins(_ ids: [String]) throws { throw RipitCoreError.notImplemented }
+    public func savePins(_ ids: [String]) throws {
+        try dbQueue.write { db in
+            try db.execute(sql: "DELETE FROM pinnedExercise")
+            var seen = Set<String>()
+            for id in ids where seen.insert(id).inserted && seen.count <= maxPins {
+                try db.execute(sql: "INSERT INTO pinnedExercise (exerciseDefinitionId, position) VALUES (?, ?)",
+                               arguments: [id, seen.count - 1])
+            }
+        }
+    }
 
     /// Adds a pin at the end; pinning a pinned lift changes nothing.
-    public func pinLift(_ exerciseDefinitionId: String) throws { throw RipitCoreError.notImplemented }
+    public func pinLift(_ exerciseDefinitionId: String) throws {
+        try dbQueue.write { try Self.appendPin($0, exerciseDefinitionId) }
+    }
 
-    public func unpinLift(_ exerciseDefinitionId: String) throws { throw RipitCoreError.notImplemented }
+    public func unpinLift(_ exerciseDefinitionId: String) throws {
+        try dbQueue.write { db in
+            try db.execute(sql: "DELETE FROM pinnedExercise WHERE exerciseDefinitionId = ?", arguments: [exerciseDefinitionId])
+        }
+    }
+
+    /// Appends a pin unless it is already pinned or the list is full.
+    static func appendPin(_ db: Database, _ id: String) throws {
+        let pins = try String.fetchAll(db, sql: "SELECT exerciseDefinitionId FROM pinnedExercise")
+        guard !pins.contains(id), pins.count < maxPins else { return }
+        try db.execute(sql: """
+            INSERT INTO pinnedExercise (exerciseDefinitionId, position)
+            VALUES (?, (SELECT COALESCE(MAX(position), -1) + 1 FROM pinnedExercise))
+            """, arguments: [id])
+    }
+
+    // MARK: Reads
+
+    /// Logged sets of completed, un-archived workouts, oldest first, in exercise and set order.
+    /// Names are the definition's, as on the web.
+    static func progressSets(_ db: Database, exerciseDefinitionId: String? = nil) throws -> [ProgressSet] {
+        try Row.fetchAll(db, sql: """
+            SELECT ls.reps, ls.weight, ls.weightUnit, ls.isWarmup, ls.rpe, ls.rir, c.id AS completionId, c.completedAt,
+                   e.exerciseDefinitionId, d.name
+            FROM loggedSet ls
+            JOIN workoutCompletion c ON c.id = ls.completionId
+            JOIN exercise e ON e.id = ls.exerciseId
+            JOIN exerciseDefinition d ON d.id = e.exerciseDefinitionId
+            WHERE c.status = 'completed' AND c.isArchived = 0 AND (? IS NULL OR e.exerciseDefinitionId = ?)
+            ORDER BY c.completedAt, c.id, e."order", ls.setNumber
+            """, arguments: [exerciseDefinitionId, exerciseDefinitionId]).map {
+            ProgressSet(completionId: $0["completionId"], completedAt: $0["completedAt"],
+                        exerciseDefinitionId: $0["exerciseDefinitionId"], name: $0["name"], reps: $0["reps"],
+                        weight: $0["weight"], weightUnit: $0["weightUnit"], isWarmup: $0["isWarmup"], rpe: $0["rpe"],
+                        rir: $0["rir"])
+        }
+    }
+
+    /// Completed, un-archived workouts with their sets (`history` from `progressSets`).
+    static func progressWorkouts(_ db: Database, _ history: [ProgressSet]) throws -> [ProgressWorkout] {
+        let setsByCompletion = Dictionary(grouping: history, by: \.completionId)
+        return try Row.fetchAll(db, sql: """
+            SELECT id, completedAt, startedAt, durationSeconds FROM workoutCompletion
+            WHERE status = 'completed' AND isArchived = 0 ORDER BY completedAt, id
+            """).map {
+            ProgressWorkout(completedAt: $0["completedAt"], startedAt: $0["startedAt"], durationSeconds: $0["durationSeconds"],
+                            sets: setsByCompletion[$0["id"] as String] ?? [])
+        }
+    }
 }
