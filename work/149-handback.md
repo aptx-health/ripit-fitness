@@ -1,0 +1,4 @@
+Report: complete
+149 theme page (implementer, 2026-11-07). Theme row is a link to /settings/theme (LookBlock); page + loading.tsx; ThemePicker (SubpageHeader, mode line, card per theme, aria-pressed, check + Current); ThemePreview (data-theme/data-mode on its own wrapper, inline var() styles). E-INK: Light + "Light only". Header ThemeSelector menu capped to the Radix available height with overflow-y-auto. New __tests__/components/theme-page.test.tsx (13, red first).
+Locked amendments (lead-authorised, // work 149): settings-page.test L241/L251 button→link; eink-theme-ui themeLink()+pickOnPage(), "the Theme page" describe, L400 pickOnPage. No assertion about what picking does was removed (lead checked the diff).
+Checks: suite 4288 pass; tsc clean; perf:scan no findings; 390px no h-scroll, ≥48px in 5 themes. Lead re-ran 92/92, tsc clean. Screenshots initiatives/ui-audit/docs/assets/149/.

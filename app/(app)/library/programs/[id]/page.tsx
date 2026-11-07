@@ -1,11 +1,13 @@
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { Suspense } from 'react'
+import SendToTrainee from '@/components/coaching/SendToTrainee'
 import ProgramBackLink from '@/components/programs/ProgramBackLink'
 import StrengthWeekView from '@/components/StrengthWeekView'
 import { RestoringWorkoutSpinner } from '@/components/ui/RestoringWorkoutSpinner'
 import { isEditorRole } from '@/lib/admin/auth'
 import { getCurrentUser } from '@/lib/auth/server'
+import { listTrainees } from '@/lib/coaching/links'
 import { prisma } from '@/lib/db'
 import { getProgramWeek } from '@/lib/db/program-week'
 
@@ -51,11 +53,12 @@ async function ProgramDetailContent({ programId, query }: { programId: string; q
   const requestedWeek = query.week ? parseInt(query.week, 10) : NaN
   const weekNumber = Number.isInteger(requestedWeek) && requestedWeek > 0 ? requestedWeek : undefined
 
-  const [data, rawHistoryCount] = await Promise.all([
+  const [data, rawHistoryCount, trainees] = await Promise.all([
     getProgramWeek(programId, user.id, weekNumber),
     prisma.workoutCompletion.count({
       where: { userId: user.id, status: { in: ['completed', 'draft'] } },
     }),
+    listTrainees(prisma, user.id),
   ])
   if (!data) notFound()
 
@@ -67,16 +70,19 @@ async function ProgramDetailContent({ programId, query }: { programId: string; q
   const historyCount =
     debugOverride !== undefined && !Number.isNaN(debugOverride) ? debugOverride : rawHistoryCount
 
+  // A coach can send a copy of their own program to a trainee (coaching slice 2).
+  const send = <SendToTrainee kind="program" sourceId={data.program.id} trainees={trainees} />
+
   if (!data.week) {
     return (
-      <ProgramDetailShell>
+      <ProgramDetailShell action={send}>
         <NoWeeks programId={data.program.id} programName={data.program.name} canEdit={!data.program.isArchived} />
       </ProgramDetailShell>
     )
   }
 
   return (
-    <ProgramDetailShell>
+    <ProgramDetailShell action={send}>
       <StrengthWeekView
         programId={data.program.id}
         programName={data.program.name}
@@ -108,13 +114,14 @@ function NoWeeks({ programId, programName, canEdit }: { programId: string; progr
   )
 }
 
-function ProgramDetailShell({ children }: { children?: React.ReactNode }) {
+function ProgramDetailShell({ children, action }: { children?: React.ReactNode; action?: React.ReactNode }) {
   return (
     <div className="bg-background">
       <div className="max-w-2xl mx-auto sm:px-6 py-4">
         {/* pt-2 on top of the shell's py-4 puts the 48px link where SubpageHeader's sits (24px). */}
-        <div className="px-4 sm:px-0 pt-2 mb-3">
+        <div className="px-4 sm:px-0 pt-2 mb-3 flex items-center justify-between gap-2">
           <ProgramBackLink />
+          {action}
         </div>
         <div className="px-4 sm:px-0">{children}</div>
       </div>

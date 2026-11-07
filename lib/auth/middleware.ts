@@ -27,6 +27,8 @@ export async function updateSession(request: NextRequest) {
       !pathname.startsWith('/auth/complete-profile') &&
       !pathname.startsWith('/go') &&
       !pathname.startsWith('/waiver') &&
+      // Coach invite links: the page offers Sign up / Sign in and brings the user back.
+      !pathname.startsWith('/coach/invite/') &&
       !pathname.startsWith('/_next') &&
       !pathname.startsWith('/api')) {
     const url = request.nextUrl.clone()

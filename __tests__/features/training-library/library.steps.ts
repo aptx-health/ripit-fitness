@@ -578,7 +578,9 @@ describe('library view: My Workouts', () => {
   it('lists the saved workouts under the heading, unchanged', async () => {
     await openLibrary('?type=workouts')
     expect(screen.getByRole('heading', { name: /my workouts/i })).toBeTruthy()
-    expect(await screen.findByRole('button', { name: /view push day/i })).toBeTruthy()
+    // work 153: the row opens a panel, and View is in it.
+    fireEvent.click(await screen.findByRole('button', { name: /push day/i, expanded: false }))
+    expect(screen.getByRole('button', { name: /view push day/i })).toBeTruthy()
   })
 
   it('keeps today\'s empty message and the freestyle button', async () => {

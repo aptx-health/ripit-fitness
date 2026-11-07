@@ -1,0 +1,245 @@
+{
+ "01-training": {
+  "state": {
+   "theme": "ripit",
+   "mode": "dark",
+   "display": "eink",
+   "dark": true
+  },
+  "motion": "0 running",
+  "hscroll": 0,
+  "audit": {
+   "low": [
+    "6.4:1 \"Recent\" button.relative inline-flex items-center gap-1.5 whitespa",
+    "2.5:1 \"Up Next\" button.relative inline-flex items-center gap-1.5 whitespa",
+    "6.7:1 \"r133 Strength\" p.text-sm font-semibold uppercase tracking-wider tex",
+    "2.5:1 \"Continue\" a.inline-flex items-center justify-center gap-2 px-4"
+   ],
+   "lowCount": 4,
+   "coloured": [
+    "\"r133 Strength\" rgb(16,185,129)",
+    "\"Training\" rgb(251,191,36)"
+   ],
+   "thin": [
+    "1px li.px-4 py-3",
+    "1px button.shrink-0 inline-flex items-center gap-1."
+   ],
+   "fx": [
+    "h1.text-4xl font-bold text-foreground doom- ",
+    "button.relative inline-flex items-center gap-1. shadow ",
+    "h3.text-xl font-bold text-foreground doom-h ",
+    "a.inline-flex items-center justify-center  shadow ",
+    "nav.md:hidden fixed bottom-0 left-0 right-0  ",
+    "span.relative inline-flex flex-col items-cent shadow ",
+    "span.chip-gold-shine bgimg "
+   ]
+  }
+ },
+ "04-progress": {
+  "state": {
+   "theme": "ripit",
+   "mode": "dark",
+   "display": "eink",
+   "dark": true
+  },
+  "motion": "0 running",
+  "hscroll": 0,
+  "audit": {
+   "low": [
+    "2.5:1 \"Report card\" h2.inline-flex min-w-0 items-center gap-2 font-bold u",
+    "5.1:1 \"Done\" span.inline-block bg-primary-muted px-1.5 text-xs font-"
+   ],
+   "lowCount": 2,
+   "coloured": [
+    "\"Done\" rgb(52,211,153)",
+    "\"+195%\" rgb(52,211,153)",
+    "\"+3h 6m\" rgb(52,211,153)",
+    "\"5\" rgb(251,191,36)",
+    "\"Progress\" rgb(251,191,36)"
+   ],
+   "thin": [
+    "1px div.flex min-h-14 items-center gap-3 px-3 py",
+    "1px i.h-3.5 flex-1 border border-primary bg-pr",
+    "1px i.h-3.5 flex-1 border border-border bg-mut",
+    "1px div.flex min-h-14 items-center gap-3 py-2.5 "
+   ],
+   "fx": [
+    "h1.text-4xl font-bold text-foreground doom- ",
+    "button.relative inline-flex items-center gap-1. shadow ",
+    "nav.md:hidden fixed bottom-0 left-0 right-0  ",
+    "span.relative inline-flex flex-col items-cent shadow ",
+    "span.chip-gold-shine bgimg "
+   ]
+  }
+ },
+ "06-lift-page": {
+  "state": {
+   "theme": "ripit",
+   "mode": "dark",
+   "display": "eink",
+   "dark": true
+  },
+  "motion": "0 running",
+  "hscroll": 0,
+  "audit": {
+   "low": [
+    "6.4:1 \"Barbell Back Squat\" a.inline-flex min-h-12 shrink-0 items-center whitesp",
+    "6.4:1 \"e1RM\" button.relative inline-flex min-h-12 items-end gap-1.5 wh",
+    "6.4:1 \"Sessions\" h2.inline-flex min-w-0 items-center gap-2 font-bold u",
+    "6.4:1 \"9\" span.px-1.5 text-xs font-bold leading-5 bg-secondary-fo"
+   ],
+   "lowCount": 4,
+   "coloured": [
+    "\"+9.5%\" rgb(52,211,153)",
+    "\"9\" rgb(146,64,14)",
+    "\"Progress\" rgb(251,191,36)"
+   ],
+   "thin": [
+    "1px div.grid grid-cols-3 divide-x divide-border ",
+    "1px div.min-w-0 px-3 py-2.5",
+    "1px i.inline-block size-2.5 rounded-full borde",
+    "1px div.flex border-t border-border",
+    "1px div.flex min-h-12 items-center gap-3 px-3 py"
+   ],
+   "fx": [
+    "h1.text-4xl font-bold text-foreground doom- ",
+    "button.relative inline-flex min-h-12 items-end  shadow ",
+    "nav.md:hidden fixed bottom-0 left-0 right-0  ",
+    "span.relative inline-flex flex-col items-cent shadow ",
+    "span.chip-gold-shine bgimg "
+   ]
+  }
+ },
+ "07-settings": {
+  "state": {
+   "theme": "ripit",
+   "mode": "dark",
+   "display": "eink",
+   "dark": true
+  },
+  "motion": "0 running",
+  "hscroll": 0,
+  "audit": {
+   "low": [
+    "2.5:1 \"Log Sets\" button.relative flex-1 min-h-12 px-3 py-2.5 text-sm font-",
+    "2.5:1 \"RPE\" button.relative flex-1 min-h-12 px-3 py-2.5 text-sm font-"
+   ],
+   "lowCount": 2,
+   "coloured": [
+    "\"Settings\" rgb(251,191,36)"
+   ],
+   "thin": [
+    "1px div.relative z-10 inline-flex min-w-0 items-",
+    "1px div.folder-box border border-border bg-card ",
+    "1px button.flex min-h-12 w-full items-center gap-3 ",
+    "1px div.flex border-b border-border bg-muted/40 "
+   ],
+   "fx": [
+    "h1.text-4xl font-bold text-foreground doom- ",
+    "nav.md:hidden fixed bottom-0 left-0 right-0  ",
+    "span.relative inline-flex flex-col items-cent shadow ",
+    "span.chip-gold-shine bgimg "
+   ]
+  }
+ },
+ "09-logger": {
+  "state": {
+   "theme": "ripit",
+   "mode": "dark",
+   "display": "eink",
+   "dark": true
+  },
+  "motion": "0 running",
+  "hscroll": 0,
+  "audit": {
+   "low": [
+    "2.5:1 \"Week 1 of 4\" h2.px-1 font-bold uppercase tracking-wider whitespace",
+    "6.4:1 \"Plan 1 / 5\" span.tabular-nums",
+    "6.4:1 \"01:56\" span.text-lg font-medium text-secondary-foreground tabu",
+    "2.5:1 \"FINISH\" button.h-12 px-3 bg-primary text-primary-foreground text-",
+    "6.4:1 \"Log\" button.relative inline-flex items-center gap-1.5 whitespa",
+    "7.0:1 \"reps\" span.text-sm font-semibold ml-2 readout-stamped-digit o",
+    "7.0:1 \"lbs\" span.text-sm font-semibold ml-2 readout-stamped-digit o",
+    "6.7:1 \"Resting\" span.text-[10px] font-bold text-primary uppercase track",
+    "3.9:1 \"3\" span.w-6 text-muted-foreground font-bold",
+    "3.9:1 \"5 reps @ 155lbs · RIR 3\" span.flex-1 text-muted-foreground",
+    "3.9:1 \"4\" span.w-6 text-muted-foreground font-bold"
+   ],
+   "lowCount": 12,
+   "coloured": [
+    "\"Library\" rgb(251,191,36)",
+    "\"Resting\" rgb(16,185,129)"
+   ],
+   "thin": [
+    "1px div.",
+    "1px div.relative z-10 inline-flex min-w-0 items-",
+    "1px div.folder-box border border-border bg-card",
+    "1px div.px-4 pt-2 pb-2 border-b border-border/60",
+    "1px div.border border-border bg-card divide-y di",
+    "1px div.py-1",
+    "1px div.px-3 py-2"
+   ],
+   "fx": [
+    "span.doom-badge doom-badge-accent text-xs shadow ",
+    "nav.md:hidden fixed bottom-0 left-0 right-0  ",
+    "span.relative inline-flex flex-col items-cent shadow ",
+    "span.chip-gold-shine bgimg ",
+    "div.fixed inset-0 z-50 backdrop-blur-md bg-b ",
+    "div.bg-background w-full h-[100dvh] sm:h-[85 shadow ",
+    "button.h-12 px-3 bg-primary text-primary-foregr shadow ",
+    "button.relative inline-flex items-center gap-1. shadow ",
+    "h2.text-xl font-bold text-foreground doom-h ",
+    "button.button-stamped flex-shrink-0 w-20 h-12 f shadow "
+   ]
+  }
+ },
+ "11-rest-timer": {
+  "state": {
+   "theme": "ripit",
+   "mode": "dark",
+   "display": "eink",
+   "dark": true
+  },
+  "motion": "0 running",
+  "hscroll": 0,
+  "audit": {
+   "low": [
+    "2.5:1 \"Week 1 of 4\" h2.px-1 font-bold uppercase tracking-wider whitespace",
+    "6.4:1 \"Plan 1 / 5\" span.tabular-nums",
+    "6.4:1 \"02:30\" span.text-lg font-medium text-secondary-foreground tabu",
+    "2.5:1 \"FINISH\" button.h-12 px-3 bg-primary text-primary-foreground text-",
+    "6.4:1 \"Log\" button.relative inline-flex items-center gap-1.5 whitespa",
+    "7.0:1 \"reps\" span.text-sm font-semibold ml-2 readout-stamped-digit o",
+    "7.0:1 \"lbs\" span.text-sm font-semibold ml-2 readout-stamped-digit o",
+    "6.7:1 \"Resting\" span.text-[10px] font-bold text-primary uppercase track",
+    "3.9:1 \"4\" span.w-6 text-muted-foreground font-bold",
+    "3.9:1 \"5 reps @ 155lbs · RIR 3\" span.flex-1 text-muted-foreground"
+   ],
+   "lowCount": 10,
+   "coloured": [
+    "\"Library\" rgb(251,191,36)",
+    "\"Resting\" rgb(16,185,129)"
+   ],
+   "thin": [
+    "1px div.",
+    "1px div.relative z-10 inline-flex min-w-0 items-",
+    "1px div.folder-box border border-border bg-card",
+    "1px div.px-4 pt-2 pb-2 border-b border-border/60",
+    "1px div.border border-border bg-card divide-y di",
+    "1px div.py-1"
+   ],
+   "fx": [
+    "span.doom-badge doom-badge-accent text-xs shadow ",
+    "nav.md:hidden fixed bottom-0 left-0 right-0  ",
+    "span.relative inline-flex flex-col items-cent shadow ",
+    "span.chip-gold-shine bgimg ",
+    "div.fixed inset-0 z-50 backdrop-blur-md bg-b ",
+    "div.bg-background w-full h-[100dvh] sm:h-[85 shadow ",
+    "button.h-12 px-3 bg-primary text-primary-foregr shadow ",
+    "button.relative inline-flex items-center gap-1. shadow ",
+    "h2.text-xl font-bold text-foreground doom-h ",
+    "button.button-stamped flex-shrink-0 w-20 h-12 f shadow "
+   ]
+  }
+ }
+}

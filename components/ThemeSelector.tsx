@@ -2,8 +2,9 @@
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { Moon, Palette, Sun } from 'lucide-react';
-import { useThemePreference } from '@/hooks/useThemePreference';
+import { pickTheme, useThemePreference } from '@/hooks/useThemePreference';
 import {
+  isLightOnly,
   THEME_LABELS,
   THEMES,
   type ThemeName,
@@ -14,7 +15,7 @@ export function ThemeSelector() {
 
   const handleThemeChange = (themeName: ThemeName) => {
     if (!preference) return;
-    updateTheme({ ...preference, themeName });
+    pickTheme(preference, themeName);
   };
 
   const handleModeToggle = () => {
@@ -50,8 +51,9 @@ export function ThemeSelector() {
         </DropdownMenu.Trigger>
 
         <DropdownMenu.Portal>
+          {/* Capped to the room Radix measures below the button, scrolling inside, so no theme is out of reach. */}
           <DropdownMenu.Content
-            className="bg-card border-2 border-primary shadow-lg z-50 min-w-[180px]"
+            className="bg-card border-2 border-primary shadow-lg z-50 min-w-[180px] max-h-[var(--radix-dropdown-menu-content-available-height)] overflow-y-auto"
             sideOffset={5}
             align="end"
           >
@@ -72,7 +74,8 @@ export function ThemeSelector() {
         </DropdownMenu.Portal>
       </DropdownMenu.Root>
 
-      {/* Mode Toggle Button */}
+      {/* Mode Toggle Button (none for a light-only theme) */}
+      {!isLightOnly(preference.themeName) && (
       <button type="button"
         onClick={handleModeToggle}
         className="h-9 w-9 flex items-center justify-center cursor-pointer border-2 bg-input transition-all hover:border-primary hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
@@ -88,6 +91,7 @@ export function ThemeSelector() {
           <Moon className="w-5 h-5" strokeWidth={2} />
         )}
       </button>
+      )}
     </div>
   );
 }

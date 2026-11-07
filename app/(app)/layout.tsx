@@ -7,7 +7,7 @@ import { SessionContextTracker } from '@/components/features/SessionContextTrack
 import { SignupCompletedTracker } from '@/components/features/SignupCompletedTracker'
 import Header from '@/components/Header'
 import { getCurrentUser } from '@/lib/auth/server'
-import { CURRENT_WAIVER_VERSION } from '@/lib/constants/waiver'
+import { hasCurrentWaiver } from '@/lib/auth/waiver'
 import { DraftWorkoutProvider } from '@/lib/contexts/DraftWorkoutContext'
 import { prisma } from '@/lib/db'
 
@@ -24,12 +24,7 @@ export default async function AppLayout({
 
   // Waiver gate: redirect to waiver screen if user has not accepted
   // the current version. Authoritative DB check (middleware is edge-only).
-  const latestAcceptance = await prisma.waiverAcceptance.findFirst({
-    where: { userId: user.id, waiverVersion: CURRENT_WAIVER_VERSION },
-    select: { id: true },
-  })
-
-  if (!latestAcceptance) {
+  if (!(await hasCurrentWaiver(prisma, user.id))) {
     redirect('/waiver')
   }
 

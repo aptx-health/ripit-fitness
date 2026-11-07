@@ -1,0 +1,6 @@
+Report: complete
+150 coaching slice 2 build (coach-impl, 2026-11-07). Uncommitted on feature/coaching-send. lib/coaching/send.ts (converters, sendToTrainee, listSent); CreateProposalInput takes a sender (agent token or coach link); approve passes origin from coachLinkId; POST /api/coaching/send, GET /api/coaching/trainees (+ coachSend 30/3600s, coachTrainees 60/60s); SendToTrainee on the Library program page header and SavedWorkoutDetailDialog; "From X" on Training, coach rows, review, /suggestions; Sent list on Settings → Coaching; loading.tsx for /suggestions and [id].
+Checks: locked 54/54 + 5/5 unedited; suite 4398 pass; tsc clean; perf:scan exit 0. Lead re-ran coaching 130/130, tsc clean. 21 screenshots initiatives/coaching/docs/assets/150/.
+Decisions: "From X" on its own line; coachName new field; coach-name lookup failure logs a warn and falls back to "From your coach" (test DB has no BetterAuth user table); listSent maps reverted→declined, conflict→pending; bad superset labels make a send invalid.
+Not verified: perf:tap; New-row screenshot; real phone.
+Preview data in wt1 DB: coach-preview@test.com / sam-preview@test.com / alex-preview@test.com, password1; removal SQL initiatives/coaching/docs/assets/150/remove-preview-data.sql.

@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { pluralize } from '@/lib/format/pluralize'
 import type { SavedWorkoutData } from '@/types/saved-workout'
 import { visibleTo } from './exercise-definition'
+import { exerciseGroup, withGroupRules } from './groups'
 import { prescribedSet } from './program'
 
 /**
@@ -24,11 +25,12 @@ const workoutExercise = z
   .object({
     exerciseDefinitionId: z.string().min(1),
     notes: z.string().trim().max(500).optional(),
+    group: exerciseGroup.optional(),
     sets: z.array(workoutSet).min(1).max(10),
   })
   .strict()
 
-export const workoutExercises = z.array(workoutExercise).min(1).max(15)
+export const workoutExercises = withGroupRules(z.array(workoutExercise).min(1).max(15))
 export const workoutName = z.string().trim().min(1).max(100)
 export const workoutNotes = z.string().trim().max(1000)
 
@@ -119,7 +121,7 @@ export function buildWorkoutData(exercises: ExerciseInput[], definitionNames: Ma
     exerciseDefinitionId: e.exerciseDefinitionId,
     order: i + 1,
     notes: e.notes ? e.notes : null,
-    exerciseGroup: null,
+    exerciseGroup: e.group ?? null,
     sets: e.sets.map((s, j) => ({
       setNumber: j + 1,
       reps: s.reps,
@@ -199,12 +201,13 @@ async function writeFields(tx: Prisma.TransactionClient, row: SavedWorkout, fiel
   if (written.count === 0) throw new SavedWorkoutConflict(`saved workout changed ${when}`)
 }
 
-/** Approve a create: the new saved workout, never started. */
+/** Approve a create: the new saved workout, never started. `origin` is who sent it. */
 export async function createSavedWorkout(
   tx: Prisma.TransactionClient,
   userId: string,
   input: WorkoutCreateInput,
-  definitionNames: Map<string, string>
+  definitionNames: Map<string, string>,
+  origin: 'agent' | 'coach'
 ) {
   const workoutData = buildWorkoutData(input.exercises, definitionNames)
   return tx.savedWorkout.create({
@@ -215,6 +218,7 @@ export async function createSavedWorkout(
       workoutData: workoutData as unknown as Prisma.InputJsonValue,
       exerciseCount: workoutData.length,
       lastUsedAt: null,
+      origin,
     },
     select: { id: true },
   })

@@ -217,6 +217,12 @@ model SavedWorkout {
   updatedAt          DateTime  @updatedAt
   lastUsedAt         DateTime?
   pinnedAt           DateTime?
+  /// Where it came from: session (saved after a workout) | agent (an approved proposal) | coach.
+  origin             String    @default("session")
+  /// Archived by hand; hidden from every group except Show archived. Never set automatically.
+  archivedAt         DateTime?
+  /// Set by Dismiss (and by Restore), so the workout never returns to the New group.
+  dismissedAt        DateTime?
 
   @@index([userId, lastUsedAt(sort: Desc)])
   @@index([userId, createdAt(sort: Desc)])
@@ -774,7 +780,9 @@ model AgentToken {
 model Proposal {
   id           String     @id @default(cuid())
   userId       String
-  agentTokenId String
+  /// Exactly one of agentTokenId and coachLinkId is set (CHECK in the migration).
+  agentTokenId String?
+  coachLinkId  String?
   kind         String
   status       String     @default("pending")
   summary      String
@@ -790,10 +798,41 @@ model Proposal {
   decidedAt    DateTime?
   /// The user feedback this proposal addresses. Approving resolves it.
   feedbackId   String?
-  agentToken   AgentToken @relation(fields: [agentTokenId], references: [id], onDelete: Cascade)
-  feedback     Feedback?  @relation(fields: [feedbackId], references: [id], onDelete: SetNull)
+  agentToken   AgentToken? @relation(fields: [agentTokenId], references: [id], onDelete: Cascade)
+  coachLink    CoachLink?  @relation(fields: [coachLinkId], references: [id], onDelete: Cascade)
+  feedback     Feedback?   @relation(fields: [feedbackId], references: [id], onDelete: SetNull)
 
   @@index([userId, status, createdAt])
   @@index([agentTokenId])
+  @@index([coachLinkId])
   @@index([feedbackId])
+}
+
+/// A single-use link a coach sends a trainee (lib/coaching/invites.ts). The
+/// plain token is shown once at creation; only its SHA-256 hash is stored.
+model CoachInvite {
+  id          String    @id @default(cuid())
+  coachUserId String
+  tokenHash   String    @unique
+  expiresAt   DateTime
+  usedAt      DateTime?
+  revokedAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([coachUserId])
+}
+
+/// A coach and a trainee, linked by an accepted invite. Ending it sets endedAt
+/// and endedBy (either side); the row stays so sent proposals keep their sender.
+model CoachLink {
+  id            String     @id @default(cuid())
+  coachUserId   String
+  traineeUserId String
+  createdAt     DateTime   @default(now())
+  endedAt       DateTime?
+  endedBy       String?
+  proposals     Proposal[]
+
+  @@index([coachUserId])
+  @@index([traineeUserId])
 }

@@ -14,18 +14,21 @@ export default function AuthLayout({
               var themeName = 'ripit';
               var mode = 'dark';
               var hasStored = false;
-              var stored = localStorage.getItem('themePreference');
+              // Storage can throw (blocked or private mode): the cookie fallback below still applies
+              var stored = null;
+              try { stored = localStorage.getItem('themePreference'); } catch (e) {}
               if (stored) {
                 try {
                   var parsed = JSON.parse(stored);
                   themeName = parsed.themeName || 'ripit';
                   mode = parsed.mode || 'dark';
                   hasStored = true;
+                  if (themeName === 'eink') mode = 'light';
                 } catch (e) {}
               } else {
                 // Fallback: check cookie (survives iOS localStorage eviction)
                 // Keep in sync with THEMES/MODES in lib/theme.ts
-                var VALID_THEMES = ['ripit','doom','catppuccin','cyber','forest','synthwave','dracula','github','clyde','ninety','blossom','okabe'];
+                var VALID_THEMES = ['ripit','doom','catppuccin','cyber','forest','synthwave','dracula','github','clyde','ninety','blossom','okabe','eink'];
                 var VALID_MODES = ['light','dark'];
                 var cookies = document.cookie.split(';');
                 for (var i = 0; i < cookies.length; i++) {
@@ -34,7 +37,7 @@ export default function AuthLayout({
                     var vals = parts[1].split(':');
                     if (vals.length === 2 && VALID_THEMES.indexOf(vals[0]) !== -1 && VALID_MODES.indexOf(vals[1]) !== -1) {
                       themeName = vals[0];
-                      mode = vals[1];
+                      mode = vals[0] === 'eink' ? 'light' : vals[1];
                       hasStored = true;
                       try { localStorage.setItem('themePreference', JSON.stringify({ themeName: themeName, mode: mode })); } catch (e) {}
                     }
@@ -52,6 +55,17 @@ export default function AuthLayout({
               if (hasStored) {
                 document.cookie = COOKIE_KEY + '=' + themeName + ':' + mode + ';path=/;max-age=31536000;SameSite=Lax';
               }
+              // E-ink display (any theme): localStorage, else the cookie. Keep in sync with lib/display.ts
+              var einkDisplay = null;
+              try { einkDisplay = localStorage.getItem('einkDisplay'); } catch (e) {}
+              if (einkDisplay !== 'true' && einkDisplay !== 'false') {
+                var einkCookies = document.cookie.split(';');
+                for (var j = 0; j < einkCookies.length; j++) {
+                  var einkParts = einkCookies[j].trim().split('=');
+                  if (einkParts[0] === 'eink_display') { einkDisplay = einkParts[1]; break; }
+                }
+              }
+              if (einkDisplay === 'true') { root.dataset.display = 'eink'; } else { root.removeAttribute('data-display'); }
               if (!hasStored && !window.__authThemeListenerAttached) {
                 var mql = window.matchMedia('(prefers-color-scheme: dark)');
                 mql.addEventListener('change', function(e) {

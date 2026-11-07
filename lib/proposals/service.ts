@@ -75,10 +75,13 @@ export type DecisionResult =
   | { ok: true; proposal: Proposal }
   | { ok: false; code: DecisionCode; error: string }
 
-export type CreateProposalInput =
+/** Who sent a proposal: an agent token, or a coach link (coaching slice 2). Exactly one. */
+export type ProposalSender = { agentTokenId: string; coachLinkId?: null } | { agentTokenId: null; coachLinkId: string }
+
+export type CreateProposalInput = ProposalSender &
+  (
   | {
       userId: string
-      agentTokenId: string
       kind: 'exercise_definition.create'
       rationale: string
       definition: CreateExerciseDefinitionInput
@@ -86,7 +89,6 @@ export type CreateProposalInput =
     }
   | {
       userId: string
-      agentTokenId: string
       kind: 'exercise_definition.update'
       rationale: string
       id: string
@@ -95,7 +97,6 @@ export type CreateProposalInput =
     }
   | {
       userId: string
-      agentTokenId: string
       kind: 'program.create'
       rationale: string
       program: unknown
@@ -103,7 +104,6 @@ export type CreateProposalInput =
     }
   | {
       userId: string
-      agentTokenId: string
       kind: 'anchors.update'
       rationale: string
       /** Pattern -> exercise ids; only the named patterns change. */
@@ -112,7 +112,6 @@ export type CreateProposalInput =
     }
   | {
       userId: string
-      agentTokenId: string
       kind: 'balance_targets.update'
       rationale: string
       /** FAU -> target; only the named FAUs change. */
@@ -121,7 +120,6 @@ export type CreateProposalInput =
     }
   | {
       userId: string
-      agentTokenId: string
       kind: 'saved_workout.create'
       rationale: string
       workout: unknown
@@ -129,7 +127,6 @@ export type CreateProposalInput =
     }
   | {
       userId: string
-      agentTokenId: string
       kind: 'saved_workout.update'
       rationale: string
       savedWorkoutId: string
@@ -137,6 +134,7 @@ export type CreateProposalInput =
       changes: unknown
       feedbackId?: string
     }
+  )
 
 export type CreateProposalResult =
   | { ok: true; proposal: Proposal }
@@ -206,6 +204,10 @@ async function resolveLinkedFeedback(tx: Prisma.TransactionClient, proposal: Pro
   })
 }
 
+function senderOf(input: ProposalSender) {
+  return { agentTokenId: input.agentTokenId, coachLinkId: input.coachLinkId ?? null }
+}
+
 function proposalUrl(id: string): string {
   return `${process.env.NEXT_PUBLIC_APP_URL ?? ''}/admin/proposals/${id}`
 }
@@ -239,7 +241,7 @@ export async function createProposal(
     if (!check.ok) return check
     data = {
       userId: input.userId,
-      agentTokenId: input.agentTokenId,
+      ...senderOf(input),
       kind: input.kind,
       summary: `Create exercise "${input.definition.name}"`,
       rationale: input.rationale,
@@ -250,7 +252,7 @@ export async function createProposal(
     if (!check.ok) return check
     data = {
       userId: input.userId,
-      agentTokenId: input.agentTokenId,
+      ...senderOf(input),
       kind: input.kind,
       summary: programSummary(check.program),
       rationale: input.rationale,
@@ -262,7 +264,7 @@ export async function createProposal(
     const before = await anchorsBefore(prisma, input.userId, check.changes)
     data = {
       userId: input.userId,
-      agentTokenId: input.agentTokenId,
+      ...senderOf(input),
       kind: input.kind,
       summary: anchorSummary(check.changes),
       rationale: input.rationale,
@@ -275,7 +277,7 @@ export async function createProposal(
     const before = await targetsBefore(prisma, input.userId, check.changes)
     data = {
       userId: input.userId,
-      agentTokenId: input.agentTokenId,
+      ...senderOf(input),
       kind: input.kind,
       summary: targetSummary(check.changes, before),
       rationale: input.rationale,
@@ -287,7 +289,7 @@ export async function createProposal(
     if (!check.ok) return check
     data = {
       userId: input.userId,
-      agentTokenId: input.agentTokenId,
+      ...senderOf(input),
       kind: input.kind,
       summary: createSummary(check.value),
       rationale: input.rationale,
@@ -303,7 +305,7 @@ export async function createProposal(
     if (!check.ok) return check
     data = {
       userId: input.userId,
-      agentTokenId: input.agentTokenId,
+      ...senderOf(input),
       kind: input.kind,
       summary: updateSummary(current.name, check.value),
       rationale: input.rationale,
@@ -322,7 +324,7 @@ export async function createProposal(
     if (!check.ok) return check
     data = {
       userId: input.userId,
-      agentTokenId: input.agentTokenId,
+      ...senderOf(input),
       kind: input.kind,
       summary: `Update exercise "${current.name}": ${Object.keys(changes).join(', ')}`,
       rationale: input.rationale,
@@ -433,7 +435,9 @@ export async function approveProposal(
       if (existing.kind === 'saved_workout.create') {
         const check = await checkWorkoutCreate(tx, existing.payload, userId)
         if (!check.ok) throw new Refusal('invalid', check.error)
-        const created = await createSavedWorkout(tx, userId, check.value, check.definitionNames)
+        // A coach's send makes a "coach" workout; an agent's an "agent" one (the New group says who).
+        const origin = existing.coachLinkId ? 'coach' : 'agent'
+        const created = await createSavedWorkout(tx, userId, check.value, check.definitionNames, origin)
         const inverse: CreateInverse = { op: 'delete', id: created.id }
         await resolveLinkedFeedback(tx, existing, userId)
         return tx.proposal.update({

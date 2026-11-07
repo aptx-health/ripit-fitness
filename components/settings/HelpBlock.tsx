@@ -1,11 +1,11 @@
 'use client'
 
-import { ChevronRight, Heart, LifeBuoy, MessageSquarePlus } from 'lucide-react'
+import { BookOpen, ChevronRight, Heart, LifeBuoy, MessageSquarePlus } from 'lucide-react'
 import { useState } from 'react'
 import FeedbackModal from '@/components/features/FeedbackModal'
-import { ROW, ROW_LABEL, RowIcon, SettingsBlock } from './SettingsBlock'
+import { ROW, ROW_LABEL, RowIcon, SettingsBlock, SettingsLinkRow } from './SettingsBlock'
 
-/** Help: send feedback, and support the app when a Venmo handle is set. */
+/** Help: Learn articles, send feedback, and support the app when a Venmo handle is set. */
 export default function HelpBlock() {
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   const venmo = process.env.NEXT_PUBLIC_VENMO_HANDLE
@@ -13,6 +13,7 @@ export default function HelpBlock() {
   return (
     <>
       <SettingsBlock title="Help" icon={<LifeBuoy size={16} />}>
+        <SettingsLinkRow href="/learn" icon={<BookOpen size={18} />} label="Learn" description="Articles and guides" />
         <button type="button" onClick={() => setFeedbackOpen(true)} className={`${ROW} hover:bg-muted/50`}>
           <RowIcon>
             <MessageSquarePlus size={18} />

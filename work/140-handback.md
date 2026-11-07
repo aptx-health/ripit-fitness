@@ -1,0 +1,4 @@
+Report: complete
+140 proposals keep supersets (coach-impl, 2026-11-07). Optional `group` (1–3 letters, upper-cased) on program and saved-workout proposal exercises → `exerciseGroup` on approve (program rows; SavedWorkout.workoutData, kept on start). Validation: label format, ≥2 exercises, adjacent, same workout; refused as invalid with the reason; checkProgram re-checks on approve. Review screens show a "Superset A" block; MCP descriptions updated; get_program returns exerciseGroup. New: lib/proposals/groups.ts, lib/format/supersets.ts, components/suggestions/SupersetBlock.tsx, steps __tests__/features/agent-tools/proposal-supersets.steps.ts (11).
+Checks: suite 4167 pass; tsc clean; perf:scan 0 findings. Lead re-ran proposals + agent-tools 838/838, tsc clean. Screenshots work/assets/140/.
+Notes: admin/proposals/[id]/loading.tsx copied byte-for-byte from #1041; an update replaces the exercise list, so agents re-send group (documented).

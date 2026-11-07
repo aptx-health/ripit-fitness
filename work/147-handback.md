@@ -1,0 +1,3 @@
+Report: complete
+147 slice 3 fixes (implementer, 2026-11-07). Rebased onto origin/dev 88edfe0a (uncommitted). (1) agentToken?.name + fromCoach → "From your coach"; (2) Undo 400 unless archived and pinnedAt ≤ now; (3) start restores an archived workout in the same transaction; (4) toast Close 48px; (5) welcome no-loading allowlisted. New __tests__/api/saved-workout-origin-fixes.test.ts (6; 4 red before). Suite 4339 pass; tsc clean; perf:scan exit 0. Lead re-ran 64/64, tsc clean.
+Note for coaching slice 2: createSavedWorkout still hard-codes origin 'agent'; coach rows flagged by fromCoach for now.

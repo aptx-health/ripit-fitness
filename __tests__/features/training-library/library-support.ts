@@ -116,7 +116,8 @@ export const SAVED = [
     notes: null,
     exerciseCount: 5,
     lastUsedAt: null,
-    createdAt: '2026-10-01T12:00:00Z',
+    // work 142: relative to now, so the row stays in Recent, not the Older fold.
+  createdAt: new Date(Date.now() - 2 * 86_400_000).toISOString(),
   },
 ]
 

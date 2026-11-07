@@ -59,7 +59,7 @@ export default async function ProposalsPage() {
                     <ProposalStatusBadge status={p.status} />
                     <span>{PROPOSAL_KIND_LABELS[p.kind as ProposalKind] ?? p.kind}</span>
                     <span>·</span>
-                    <span>{p.agentToken.name}</span>
+                    <span>{p.agentToken?.name ?? 'Coach'}</span>
                     <span>·</span>
                     <span>{(p.decidedAt ?? p.createdAt).toLocaleString('en-US', DATE_FORMAT)}</span>
                   </div>

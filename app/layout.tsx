@@ -83,31 +83,38 @@ export default function RootLayout({
                 let hasStored = false;
 
                 // Check for new format first
-                const stored = localStorage.getItem(STORAGE_KEY);
+                // Storage can throw (blocked or private mode): the cookie fallback below still applies
+                var stored = null;
+                try { stored = localStorage.getItem(STORAGE_KEY); } catch (e) {}
                 if (stored) {
                   try {
                     const parsed = JSON.parse(stored);
                     themeName = parsed.themeName || DEFAULT_THEME;
                     mode = parsed.mode || 'dark';
                     hasStored = true;
+                    // E-INK is light only
+                    if (themeName === 'eink') mode = 'light';
                   } catch (e) {
                     console.error('Failed to parse theme preference:', e);
                   }
                 } else {
                   // Migrate from old darkMode format
-                  const oldValue = localStorage.getItem(OLD_STORAGE_KEY);
+                  var oldValue = null;
+                  try { oldValue = localStorage.getItem(OLD_STORAGE_KEY); } catch (e) {}
                   if (oldValue !== null) {
                     mode = oldValue === 'true' ? 'dark' : 'light';
                     // Save in new format
                     const preference = { themeName: DEFAULT_THEME, mode: mode };
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(preference));
-                    // Remove old key
-                    localStorage.removeItem(OLD_STORAGE_KEY);
+                    try {
+                      localStorage.setItem(STORAGE_KEY, JSON.stringify(preference));
+                      // Remove old key
+                      localStorage.removeItem(OLD_STORAGE_KEY);
+                    } catch (e) {}
                     hasStored = true;
                   } else {
                     // Fallback: check cookie (survives iOS localStorage eviction)
                     // Keep in sync with THEMES/MODES in lib/theme.ts
-                    var VALID_THEMES = ['ripit','doom','catppuccin','cyber','forest','synthwave','dracula','github','clyde','ninety','blossom','okabe'];
+                    var VALID_THEMES = ['ripit','doom','catppuccin','cyber','forest','synthwave','dracula','github','clyde','ninety','blossom','okabe','eink'];
                     var VALID_MODES = ['light','dark'];
                     var cookies = document.cookie.split(';');
                     for (var i = 0; i < cookies.length; i++) {
@@ -116,7 +123,7 @@ export default function RootLayout({
                         var vals = parts[1].split(':');
                         if (vals.length === 2 && VALID_THEMES.indexOf(vals[0]) !== -1 && VALID_MODES.indexOf(vals[1]) !== -1) {
                           themeName = vals[0];
-                          mode = vals[1];
+                          mode = vals[0] === 'eink' ? 'light' : vals[1];
                           hasStored = true;
                           // Re-populate localStorage from cookie
                           try {
@@ -148,6 +155,22 @@ export default function RootLayout({
                 // Ensure cookie is always in sync (populates cookie for existing users)
                 if (hasStored) {
                   document.cookie = COOKIE_KEY + '=' + themeName + ':' + mode + ';path=/;max-age=31536000;SameSite=Lax';
+                }
+
+                // E-ink display (any theme): localStorage, else the cookie. Keep in sync with lib/display.ts
+                var einkDisplay = null;
+                try { einkDisplay = localStorage.getItem('einkDisplay'); } catch (e) {}
+                if (einkDisplay !== 'true' && einkDisplay !== 'false') {
+                  var einkCookies = document.cookie.split(';');
+                  for (var j = 0; j < einkCookies.length; j++) {
+                    var einkParts = einkCookies[j].trim().split('=');
+                    if (einkParts[0] === 'eink_display') { einkDisplay = einkParts[1]; break; }
+                  }
+                }
+                if (einkDisplay === 'true') {
+                  root.dataset.display = 'eink';
+                } else {
+                  root.removeAttribute('data-display');
                 }
 
                 // Listen for system preference changes (only if no stored preference)

@@ -29,13 +29,7 @@ export default function RestStopwatch({
   if (!isRunning || dismissed) return null
 
   return (
-    <div
-      className="px-2.5"
-      style={{
-        backgroundColor: 'color-mix(in srgb, var(--success) 8%, transparent)',
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04), inset 0 -1px 0 rgba(0,0,0,0.30)',
-      }}
-    >
+    <div className="rest-stopwatch px-2.5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 bg-primary rounded-full animate-pulse flex-shrink-0" />

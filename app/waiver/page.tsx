@@ -2,9 +2,8 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useState } from 'react'
+import { safeReturnPath } from '@/lib/auth/return-path'
 import { CURRENT_WAIVER_VERSION, WAIVER_TEXT } from '@/lib/constants/waiver'
-
-const SAFE_NEXT_PATH = /^\/[a-zA-Z0-9/_?=&%-]*$/
 
 /**
  * Waiver acceptance screen.
@@ -26,8 +25,8 @@ export default function WaiverPage() {
 function WaiverForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const nextParam = searchParams.get('next')
-  const next = nextParam && SAFE_NEXT_PATH.test(nextParam) ? nextParam : '/'
+  // Same-origin paths only: //evil.com, https://evil.com and /\evil.com go home.
+  const next = safeReturnPath(searchParams.get('next')) ?? '/'
   const [accepting, setAccepting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
