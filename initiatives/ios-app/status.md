@@ -16,3 +16,5 @@
 - 2026-11-07: 158 accepted (0ff6e408). 160 (import build) dispatched to ios-impl.
 - 2026-11-07: 159 verdict: web export meets spec. 156 accepted by lead (unpushed, worktree3 feature/data-export). Defaults kept: soft-deleted programs and all UserSettings columns exported. Notes for Dustin: exerciseRefs may name another user's custom exercise (low risk); iOS Safari blob download untested.
 - 2026-11-07: 157 accepted (24961d2f). 161 (programs build) dispatched to new agent programs-impl in worktree5 (branch feature/ios-programs off feature/ios-skeleton), parallel to 160.
+- 2026-11-07: 160 back (4d3a414c): import works on the fixture; Import + slice 1 pass. 162 (import review) queued for ios-review after 155.
+- 2026-11-07: 155 review: slice 1 meets all 9 scenarios; must-fix weight bounds and hyphen search. Lead answers: fix search now; remove-exercise and block empty finish now; keep the per-set lbs/kg toggle (the web uses the settings unit; Dustin may overrule). 163 (fixes 1-8) dispatched to ios-impl. Outside: dev.sh slot collision between this worktree and worktree1.

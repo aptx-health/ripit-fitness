@@ -8,7 +8,7 @@ import GRDB
 /// The phone's local SQLite database. Opening it creates the file if needed, runs any missing
 /// migrations in order, and seeds the system exercise catalog.
 public final class AppDatabase: Sendable {
-    /// Internal so other files' extensions (Programs.swift) can write in one transaction.
+    /// Internal so other files' extensions (Import.swift, Programs.swift) can write in one transaction.
     let dbQueue: DatabaseQueue
 
     private init(_ dbQueue: DatabaseQueue) {

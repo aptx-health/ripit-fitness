@@ -2,10 +2,12 @@
 
 import RipitCore
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct HistoryView: View {
     @Environment(WorkoutStore.self) private var store
     @Binding var path: [String]
+    @State private var pickingFile = false
 
     var body: some View {
         ScrollView {
@@ -26,9 +28,15 @@ struct HistoryView: View {
 
                 FolderBlock(title: "History") {
                     if store.history.isEmpty {
-                        Text("No workouts yet. Start one and it will show up here.")
-                            .foregroundStyle(Theme.mutedForeground)
-                            .padding(16)
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("No workouts yet. Start one and it will show up here.")
+                                .foregroundStyle(Theme.mutedForeground)
+                            Text("Used Ripit on the web? Download my data in ripit.fit Settings, then import the file.")
+                                .font(.subheadline)
+                                .foregroundStyle(Theme.mutedForeground)
+                            importButton
+                        }
+                        .padding(16)
                     } else {
                         ForEach(Array(store.history.enumerated()), id: \.element.id) { i, entry in
                             if i > 0 { RowDivider() }
@@ -37,16 +45,42 @@ struct HistoryView: View {
                         }
                     }
                 }
+
+                if !store.history.isEmpty { importButton }
             }
             .padding(16)
         }
         .background(Theme.background)
+        .overlay {
+            if store.importing {
+                ProgressView("Importing…")
+                    .padding(24)
+                    .background(Theme.card, in: RoundedRectangle(cornerRadius: 12))
+            }
+        }
+        .fileImporter(isPresented: $pickingFile, allowedContentTypes: [.json]) { result in
+            if case .success(let url) = result { Task { await store.importFile(at: url) } }
+        }
+        .alert(item: Binding(get: { store.importResult }, set: { store.importResult = $0 })) { result in
+            Alert(title: Text(result.title), message: Text(result.message), dismissButton: .default(Text("OK")))
+        }
         .navigationDestination(for: String.self) { WorkoutDetailView(workoutId: $0) }
         .toolbar(.hidden, for: .navigationBar)
         .onAppear {
             store.reload()
+            if DebugHooks.flag("demoImportPicker") { pickingFile = true }
             if DebugHooks.flag("demoDetail"), let first = store.history.first, path.isEmpty { path = [first.id] }
         }
+    }
+}
+
+extension HistoryView {
+    private var importButton: some View {
+        Button { pickingFile = true } label: {
+            Label("Import from ripit.fit", systemImage: "square.and.arrow.down")
+        }
+        .buttonStyle(OutlineButtonStyle())
+        .disabled(store.importing)
     }
 }
 

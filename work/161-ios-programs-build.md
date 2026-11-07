@@ -1,11 +1,12 @@
 ---
 id: 161
-state: ready
+state: running
 executor: programs-impl
 skill: handoff-implementer
 from: lead (worktree-brave-field-c150)
 confirmed: 2026-11-07 Dustin (4h goal slices 1-3; lead runs the loops)
 updated: 2026-11-07
+waiting_on:
 ---
 # iOS slice 3: programs
 
@@ -35,3 +36,4 @@ The `handoff-implementer` packet, first line `Report: ...`, sent to wX:p1. Use y
 
 ## Log
 - 2026-11-07 CST: created and dispatched.
+- 2026-11-07 12:22 MST: dispatched to programs-impl (running)
