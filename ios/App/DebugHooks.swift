@@ -7,6 +7,10 @@
 //   -demoPicker <query> open the exercise picker over the workout, searching <query>
 //   -demoImport <path>  import that file at launch (it must be inside the app's container)
 //   -demoImportPicker YES  open the Files picker for import
+//   -demoEmptyWorkout YES  open a workout with one exercise and no sets
+//   -demoFinish YES     tap Finish on the open workout
+//   -demoRemove YES     show the remove confirmation for the first exercise
+//   -demoFocusWeight YES  focus the first exercise's weight field (shows select-all)
 //   -demoDetail YES     open the newest finished workout
 //   -demoDiscard YES    show the discard confirmation over the workout
 // Slice 3 (work item 161):
@@ -57,7 +61,7 @@ enum DebugHooks {
             Task { await store.importFile(at: URL(fileURLWithPath: path)) }
         }
         applyProgramDemo(store: store)
-        guard d.bool(forKey: "demoHistory") || d.bool(forKey: "demoWorkout"),
+        guard d.bool(forKey: "demoHistory") || d.bool(forKey: "demoWorkout") || d.bool(forKey: "demoEmptyWorkout"),
               let db = try? AppDatabase.open(path: WorkoutStore.databaseURL.path) else { return }
         let bench = "cmiz7vjju0000vr0m4b1o6bec", row = "cmiz7vk1i0003vr0mqucd1f52", squat = "cmiz7vjpo0001vr0msv9of7ib"
         let day: TimeInterval = 86_400
@@ -79,7 +83,11 @@ enum DebugHooks {
                 try? db.groupAsSuperset([ids[0], ids[1]])
             }
         }
+        if d.bool(forKey: "demoEmptyWorkout"), let w = try? db.startWorkout(at: Date().addingTimeInterval(-300)) {
+            _ = try? db.addExercise(definitionId: bench, to: w)
+        }
         store.reload()
+        if d.bool(forKey: "demoEmptyWorkout") { store.resumeWorkout() }
         if d.bool(forKey: "demoWorkout") && !d.bool(forKey: "demoStayHome") { store.resumeWorkout() }
         #endif
     }

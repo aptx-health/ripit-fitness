@@ -18,3 +18,4 @@
 - 2026-11-07: 157 accepted (24961d2f). 161 (programs build) dispatched to new agent programs-impl in worktree5 (branch feature/ios-programs off feature/ios-skeleton), parallel to 160.
 - 2026-11-07: 160 back (4d3a414c): import works on the fixture; Import + slice 1 pass. 162 (import review) queued for ios-review after 155.
 - 2026-11-07: 155 review: slice 1 meets all 9 scenarios; must-fix weight bounds and hyphen search. Lead answers: fix search now; remove-exercise and block empty finish now; keep the per-set lbs/kg toggle (the web uses the settings unit; Dustin may overrule). 163 (fixes 1-8) dispatched to ios-impl. Outside: dev.sh slot collision between this worktree and worktree1.
+- 2026-11-07: 163 back (e3ee71a6), 69/69 non-program tests pass; re-check queued for ios-review after 162. programs-impl asked to merge feature/ios-skeleton again.

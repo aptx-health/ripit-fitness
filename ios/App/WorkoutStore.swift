@@ -31,6 +31,7 @@ final class WorkoutStore {
     /// The in-progress workout's plan when it is a program session.
     var session: ProgramSession?
     var importing = false
+    @ObservationIgnored private var lastLog: (exerciseId: String, at: Date)?
     /// The outcome of the last import, shown as an alert.
     var importResult: ImportResult?
 
@@ -80,11 +81,19 @@ final class WorkoutStore {
     }
 
     func logSet(exerciseId: String, reps: Int, weight: Double, unit: String) {
+        // Fast repeated taps on Log make one set, not several.
+        let now = Date()
+        if let last = lastLog, last.exerciseId == exerciseId, now.timeIntervalSince(last.at) < 0.6 { return }
+        lastLog = (exerciseId, now)
         write { _ = try $0.logSet(exerciseId: exerciseId, reps: reps, weight: weight, unit: unit) }
     }
 
     func deleteSet(_ setId: String) {
         write { try $0.deleteSet(setId) }
+    }
+
+    func removeExercise(_ exerciseId: String) {
+        write { try $0.removeExercise(exerciseId) }
     }
 
     func groupAsSuperset(_ exerciseIds: [String]) {

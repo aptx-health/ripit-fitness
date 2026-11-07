@@ -73,40 +73,55 @@ private struct ExerciseRow: View {
     }
 }
 
-/// A bundled photo from ExerciseImages, or a placeholder when there is none.
+/// A bundled photo from ExerciseImages, or a placeholder when there is none. Photos decode off
+/// the main thread, so scrolling the picker stays smooth.
 struct ExercisePhoto: View {
     let name: String?
     let size: CGSize
+    @State private var image: UIImage?
 
     var body: some View {
         Group {
-            if let name, let image = PhotoCache.image(name) {
+            if let image {
                 Image(uiImage: image)
                     .resizable()
                     .scaledToFill()
                     .frame(width: size.width, height: size.height)
             } else {
                 Theme.muted
-                    .overlay(Image(systemName: "dumbbell").foregroundStyle(Theme.mutedForeground))
-                    .accessibilityLabel("No photo")
+                    .overlay {
+                        if name == nil { Image(systemName: "dumbbell").foregroundStyle(Theme.mutedForeground) }
+                    }
+                    .accessibilityLabel(name == nil ? "No photo" : "Photo loading")
             }
         }
         .frame(width: size.width, height: size.height)
         .clipShape(RoundedRectangle(cornerRadius: 6))
+        .task(id: name) {
+            guard let name else { image = nil; return }
+            image = PhotoCache.cached(name)
+            if image == nil { image = await PhotoCache.load(name) }
+        }
     }
 }
 
-@MainActor
 enum PhotoCache {
-    private static let cache = NSCache<NSString, UIImage>()
+    // NSCache is thread-safe.
+    nonisolated(unsafe) private static let cache = NSCache<NSString, UIImage>()
 
-    static func image(_ name: String) -> UIImage? {
-        if let hit = cache.object(forKey: name as NSString) { return hit }
-        guard let url = Bundle.main.url(forResource: name, withExtension: nil, subdirectory: "ExerciseImages"),
-              let image = UIImage(contentsOfFile: url.path)?.preparingThumbnail(of: CGSize(width: 180, height: 120))
-        else { return nil }
-        cache.setObject(image, forKey: name as NSString)
-        return image
+    static func cached(_ name: String) -> UIImage? {
+        cache.object(forKey: name as NSString)
+    }
+
+    /// Reads and downsamples a photo on a background thread.
+    static func load(_ name: String) async -> UIImage? {
+        await Task.detached(priority: .userInitiated) {
+            guard let url = Bundle.main.url(forResource: name, withExtension: nil, subdirectory: "ExerciseImages"),
+                  let image = UIImage(contentsOfFile: url.path)?.preparingThumbnail(of: CGSize(width: 180, height: 120))
+            else { return nil }
+            cache.setObject(image, forKey: name as NSString)
+            return image
+        }.value
     }
 }
 
