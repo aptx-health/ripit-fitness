@@ -1,6 +1,6 @@
 ---
 id: 158
-state: ready
+state: running
 waiting_on:
 executor: import-tests
 skill: handoff-test-builder
@@ -37,3 +37,5 @@ The `handoff-test-builder` packet, first line `Report: ...`, sent to wX:p1. Don'
 
 ## Log
 - 2026-11-07 CST: created (ready); fixture from 575a5d05.
+- 2026-11-07 12:08 MST: dispatched to import-tests (running)
+- 2026-11-07 CST: back 0f32091d (24 tests, 17/17 breaks). Lead calls: drafts resumable; the file's active program wins only when no local active one; exercise refs resolve by id, then catalog normalizedName, then kept as their own id. Sent back to amend (1).

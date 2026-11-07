@@ -1,6 +1,6 @@
 ---
 id: 157
-state: ready
+state: running
 waiting_on:
 executor: ios-tests
 skill: handoff-test-builder
@@ -38,3 +38,4 @@ The `handoff-test-builder` packet, first line `Report: ...`, sent to wX:p1. Don'
 
 ## Log
 - 2026-11-07 CST: created (ready).
+- 2026-11-07 12:05 MST: dispatched to ios-tests (running)
