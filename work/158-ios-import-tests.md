@@ -39,3 +39,4 @@ The `handoff-test-builder` packet, first line `Report: ...`, sent to wX:p1. Don'
 - 2026-11-07 CST: created (ready); fixture from 575a5d05.
 - 2026-11-07 12:08 MST: dispatched to import-tests (running)
 - 2026-11-07 CST: back 0f32091d (24 tests, 17/17 breaks). Lead calls: drafts resumable; the file's active program wins only when no local active one; exercise refs resolve by id, then catalog normalizedName, then kept as their own id. Sent back to amend (1).
+- 2026-11-07 CST: round 2 0ff6e408 (29 tests, 21/21 breaks). Lead call: custom exercises whose name matches a catalog row resolve the same way (map to the catalog row). Lead accepts (tests item).

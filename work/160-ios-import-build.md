@@ -1,7 +1,7 @@
 ---
 id: 160
-state: waiting
-waiting_on: 158
+state: ready
+waiting_on:
 executor: ios-impl
 skill: handoff-implementer
 from: lead (worktree-brave-field-c150)
@@ -20,6 +20,7 @@ The phone imports the file from the web's "Download my data", so Dustin's histor
 ## Do
 - Implement `AppDatabase.importExport(data:)` in RipitCore so the locked Import tests pass. Run it in one transaction.
 - In the app: an "Import from ripit.fit" action (Settings or the history empty state) using the iOS file picker (`.fileImporter`), a summary afterwards ("12 programs, 340 workouts..."), and a plain error message for refused files.
+- Custom exercises in the file resolve like refs: by id, then a catalog normalizedName match (map to the catalog row and rewrite references), then their own row. This avoids the UNIQUE normalizedName clash (lead call).
 - Imported program-linked completions must show in history with their workout name, even though program screens come in slice 3.
 
 ## Done when

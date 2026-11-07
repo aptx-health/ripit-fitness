@@ -46,3 +46,30 @@ Report: complete
 
 ## Cleanup (not removed, per no-rm)
 - The scratchpad folder `/private/tmp/claude-501/-Users-dustin--herdr-worktrees-ripit-fitness-worktree-brave-field-c150/42c9e48e-383c-40cc-8a8f-da18d573ba81/scratchpad/`, which holds `fake/` (a package copy with `.build`, about 550 MB), the break logs and the run logs.
+
+---
+
+Report: complete
+
+# 158 round 2: the lead's calls applied (commit `0ff6e408`)
+
+## Verdict
+There are now 29 import tests. Against the stub, every one of the 32 issues is `notImplemented`, and the slice 1 suites pass. The tests are locked again (`chmod 444`).
+
+## Changed
+- **Exercise refs:** resolved by catalog id, then by catalog `normalizedName` (the web's `normalizeExerciseName`), then kept under their own id as a non-system row. The tests changed to match, and new tests cover name normalization and an unknown id with a unique name ("Landmine Press") staying as its own row.
+- **Drafts:** a hand-made variant adds a draft session. It's resumable through `inProgressWorkout()`, with `completedAt` NULL and no history entry.
+- **Active program:** if the phone already has an active program, the imported one comes in inactive. If the phone has programs but none active, the file's active program wins. The fresh-phone case is unchanged.
+
+## Verified
+- A correct scratch fake passes 29/29.
+- 21 broken versions are all caught by assertions. The "mapped by name" break is now "name match skipped". New breaks: name not normalized, snapshot ids not rewritten, draft keeps `completedAt`, file's active program always wins.
+
+## Decision beyond the calls
+- Saved workout snapshots (`workoutData`) are rewritten to the resolved exercise id, so every snapshot id points at a real local row. The test is `customAndSaved`.
+
+## Open
+- A **custom** exercise whose name matches a catalog row would still clash on the UNIQUE `normalizedName`. The fixture doesn't have this case, and the calls didn't cover it.
+
+## Cleanup (not removed)
+- The same scratchpad folder as round 1, now also holding `final-run2.txt`.
