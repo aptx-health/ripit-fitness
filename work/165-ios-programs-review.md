@@ -1,11 +1,12 @@
 ---
 id: 165
-state: ready
+state: running
 executor: programs-review
 skill: reviewer
 from: lead (worktree-brave-field-c150)
 confirmed: 2026-11-07 Dustin (4h goal; lead runs the loops)
 updated: 2026-11-07
+waiting_on:
 ---
 # iOS slice 3 review: programs
 
@@ -33,3 +34,4 @@ A review packet with first line `Report: ...` and a verdict, sent to wX:p1. Repo
 
 ## Log
 - 2026-11-07 CST: created (fresh reviewer; ios-review is on 155/163).
+- 2026-11-07 12:36 MST: dispatched to programs-review (running)

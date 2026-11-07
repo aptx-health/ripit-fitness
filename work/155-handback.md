@@ -142,3 +142,26 @@ I removed nothing. These are mine:
 - Scratch Xcode project and DerivedData: `/private/tmp/claude-501/-Users-dustin--herdr-worktrees-ripit-fitness-worktree-brave-field-c150/63d03f56-5ac0-462c-ab31-d70b9d53b0e3/scratchpad/uitest`, `/private/tmp/claude-501/-Users-dustin--herdr-worktrees-ripit-fitness-worktree-brave-field-c150/63d03f56-5ac0-462c-ab31-d70b9d53b0e3/scratchpad/dd`
 - `ios/build/` was written by `mise run ios-check` (git-ignored; the check always writes it)
 - Chrome tab group left open with one localhost tab
+
+## Re-check against 163 (`e3ee71a6`, 2026-11-07)
+Tested from a clean `git archive` of `e3ee71a6`, so no in-flight edits could mix in. `swift test --skip Program`: 69 tests in 13 suites passed. 153's and 158's test files are unchanged; 163 only adds `SliceOneFixTests.swift`. Simulator build exit 0. Walked by hand in `ripit-155-review` with a scratch XCUITest.
+
+| # | Condition | Result |
+|---|---|---|
+| 1 | Finite, capped weight in UI and DB | **Met.** "inf" and 2001 disable Log and show "Weight must be 0 to 2,000."; 2000 is allowed. `AppDatabase.logSet` throws `invalidWeight`; tests cover non-finite, negative and >2000. |
+| 2 | Hyphen/space search | **Met.** "BENCH-press!" → 9 bench presses; "pull up" → all 9 Pull-Up names; "push up" → the Push-Up variants; "lockoff" → Lock-Off Hold. Correction to my first pass: "t bar row" returns nothing because the catalog has no T-Bar Row, not because of a bug. |
+| 3 | Usable at AX-XXXL | **Met.** The entry row stacks: weight + unit, reps, then a full-width Log. Logging works. History rows put the date under the name. Folder tabs wrap instead of truncating. |
+| 4 | Remove exercise; no empty finish | **Mostly met.** Remove via the "…" menu with a confirm, sets go too, and finished workouts can't be edited (tested). Finishing with no logged sets shows "Log a set first, or discard". Two gaps: (a) removing one exercise of a 2-exercise superset leaves a lone "SUPERSET A" header on the other (screen `r-after-remove.png`); (b) the empty-finish block is UI-only (`WorkoutView.finish`), so `AppDatabase.finishWorkout` still accepts an empty workout and no RipitCore test covers it. |
+| 5 | Prefill replace | **Met.** Tapping a prefilled 135 and typing 155 logs 155. |
+| 6 | Plural | **Met.** "1 exercise · 2 sets". |
+| 7 | Fast taps | **Met.** A double tap on Log logs one set (0.6 s guard per exercise in `WorkoutStore.logSet`). |
+| 8 | Photos off main thread | **Met in code.** `ExercisePhoto` loads in `.task` via `Task.detached`. The XCUITest scroll timing is unchanged (26.8 s for 10 swipes), so that measure reflects XCUITest's idle waits, not the app. Smoothness still needs a real device. |
+| 9 | No regressions | **Met.** ios-check passes in the agreed sense. The core scenarios still pass (start, log, finish, resume card, superset, history). |
+
+**Verdict: accept slice 1.** The two gaps in condition 4 are small and safe to carry into slice 3: clear `exerciseGroup` when a group drops to one exercise, and add the empty-finish check plus a test in RipitCore. Neither loses data.
+
+Re-check screenshots (iPhone 16):
+- /private/tmp/claude-501/-Users-dustin--herdr-worktrees-ripit-fitness-worktree-brave-field-c150/63d03f56-5ac0-462c-ab31-d70b9d53b0e3/scratchpad/163/sheet-recheck.png (AX-XXXL history, workout, after log; after remove; resume card; inf refused)
+- /private/tmp/claude-501/-Users-dustin--herdr-worktrees-ripit-fitness-worktree-brave-field-c150/63d03f56-5ac0-462c-ab31-d70b9d53b0e3/scratchpad/163/shots/ (all: s-* search, f-empty-finish-blocked, w-*, p-*, r-*, d-*, h-resume-card)
+
+More cleanup for Dustin: /private/tmp/claude-501/-Users-dustin--herdr-worktrees-ripit-fitness-worktree-brave-field-c150/63d03f56-5ac0-462c-ab31-d70b9d53b0e3/scratchpad/163 (export, DerivedData, scratch UI tests).

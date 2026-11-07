@@ -1,11 +1,12 @@
 ---
 id: 164
-state: ready
+state: running
 executor: ios-impl
 skill: handoff-implementer
 from: lead (worktree-brave-field-c150)
 confirmed: 2026-11-07 Dustin (4h goal; lead runs the loops)
 updated: 2026-11-07
+waiting_on:
 ---
 # iOS slice 2: import fixes after review 162
 
@@ -32,3 +33,4 @@ The `handoff-implementer` packet, first line `Report: ...`, sent to wX:p1. Don't
 
 ## Log
 - 2026-11-07 CST: created after review 162 (lead answers: Q1 a, Q2 a with 24 h, Q3 a, plus finding 5 and 161's archived-draft risk).
+- 2026-11-07 12:35 MST: dispatched to ios-impl (running)

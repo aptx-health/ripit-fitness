@@ -1,6 +1,6 @@
 ---
 id: 163
-state: running
+state: accepted
 executor: ios-impl
 skill: handoff-implementer
 from: lead (worktree-brave-field-c150)
@@ -39,3 +39,4 @@ The `handoff-implementer` packet, first line `Report: ...`, sent to wX:p1. Don't
 - 2026-11-07 CST: created after review 155; lead answered the review questions: 1 = fix search, 2 = fix now, 3 = keep the per-set unit.
 - 2026-11-07 12:27 MST: dispatched to ios-impl (running)
 - 2026-11-07 CST: back e3ee71a6; lead re-ran: 69 passed (--skip Program). Lead call: import keeps over-2000 weights as in the file (faithful copy of web data; the bound applies to new logging). Re-check by ios-review after 162.
+- 2026-11-07 CST: re-check of e3ee71a6 says accept (8 of 9 met; 2 small gaps moved into 164). Lead accepts slice 1 under 4h autonomy; Dustin's final review on the Hub page.

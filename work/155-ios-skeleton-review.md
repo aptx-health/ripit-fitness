@@ -1,6 +1,6 @@
 ---
 id: 155
-state: running
+state: accepted
 waiting_on:
 executor: ios-review
 skill: reviewer
@@ -43,3 +43,4 @@ A review packet with first line `Report: complete | needs decision | further han
 - 2026-11-07 CST: Dustin asked the reviewer to compare against the web app (staging or local); section added.
 - 2026-11-07 12:04 MST: dispatched to ios-review (running)
 - 2026-11-07 CST: verdict needs decision; lead answered Q1 a, Q2 a, Q3 keep the per-set unit; fixes in 163; ios-review asked for a revised verdict.
+- 2026-11-07 CST: re-check of e3ee71a6 says accept (8 of 9 met; 2 small gaps moved into 164). Lead accepts slice 1 under 4h autonomy; Dustin's final review on the Hub page.
