@@ -247,7 +247,17 @@ describe('Settings page', () => {
   }
   const eink = () => screen.getByRole('switch', { name: /e-ink display/i })
   const look = () => screen.getByRole('region', { name: 'Look' })
-  const themeButton = () => within(look()).getByRole('button', { name: /theme/i })
+  // work 149: the Theme row is a link to /settings/theme; themes are picked there, on its cards.
+  const themeLink = () => within(look()).getByRole('link', { name: /theme/i })
+  async function pickOnPage(label: string) {
+    if (!screen.queryByRole('button', { name: label })) {
+      const page = (await load('@/app/(app)/settings/theme/page')) as { default: () => React.ReactElement }
+      render(page.default())
+      await act(async () => {})
+    }
+    fireEvent.click(screen.getByRole('button', { name: label }))
+    await act(async () => {})
+  }
 
   describe('the E-ink display switch', () => {
     it('is a switch named "E-ink display" with the hint, and off on a new device', async () => {
@@ -327,19 +337,22 @@ describe('Settings page', () => {
     })
   })
 
-  describe('the Theme menu', () => {
+  // work 149: was "the Theme menu" (a dropdown); now the Theme link and the /settings/theme cards.
+  describe('the Theme page', () => {
     it('lists E-INK', async () => {
       await seed({ themeName: 'ripit', mode: 'dark' })
       await open()
-      fireEvent.keyDown(themeButton(), { key: 'Enter' })
-      expect(await screen.findByRole('menuitem', { name: 'E-INK' })).toBeTruthy()
+      expect(themeLink().getAttribute('href')).toBe('/settings/theme') // work 149
+      const page = (await load('@/app/(app)/settings/theme/page')) as { default: () => React.ReactElement } // work 149
+      render(page.default()) // work 149
+      expect(await screen.findByRole('button', { name: 'E-INK' })).toBeTruthy() // work 149
     })
 
     it('picking E-INK applies it in light mode and flips the E-ink display switch on', async () => {
       await seed({ themeName: 'ripit', mode: 'dark' })
       await open()
       expect(eink().getAttribute('aria-checked')).toBe('false')
-      await pick(themeButton(), 'E-INK')
+      await pickOnPage('E-INK') // work 149
       await waitFor(() => expect(eink().getAttribute('aria-checked')).toBe('true'))
       expect(root.dataset.theme).toBe('eink')
       expect(root.dataset.mode).toBe('light')
@@ -352,14 +365,14 @@ describe('Settings page', () => {
     it('the Theme row shows E-INK once picked', async () => {
       await seed({ themeName: 'ripit', mode: 'dark' })
       await open()
-      await pick(themeButton(), 'E-INK')
-      await waitFor(() => expect(within(look()).getByRole('button', { name: /theme/i }).textContent).toMatch(/E-INK/))
+      await pickOnPage('E-INK') // work 149
+      await waitFor(() => expect(themeLink().textContent).toMatch(/E-INK/)) // work 149
     })
 
     it('picking another theme leaves the switch where it was', async () => {
       await seed({ themeName: 'ripit', mode: 'dark' }, true)
       await open()
-      await pick(themeButton(), 'DRACULA')
+      await pickOnPage('DRACULA') // work 149
       expect(root.dataset.theme).toBe('dracula')
       expect(eink().getAttribute('aria-checked')).toBe('true')
       expect(localStorage.getItem('einkDisplay')).toBe('true')
@@ -368,7 +381,7 @@ describe('Settings page', () => {
     it('picking another theme does not turn a switch that is off on', async () => {
       await seed({ themeName: 'ripit', mode: 'dark' })
       await open()
-      await pick(themeButton(), 'DRACULA')
+      await pickOnPage('DRACULA') // work 149
       expect(eink().getAttribute('aria-checked')).toBe('false')
       expect(root.hasAttribute('data-display')).toBe(false)
     })
@@ -397,7 +410,7 @@ describe('Settings page', () => {
       await seed({ themeName: 'ripit', mode: 'dark' })
       await open()
       expect(modeRow()).not.toBeNull()
-      await pick(themeButton(), 'E-INK')
+      await pickOnPage('E-INK') // work 149
       await waitFor(() => lightOnlyOk(modeRow(), look()))
     })
 

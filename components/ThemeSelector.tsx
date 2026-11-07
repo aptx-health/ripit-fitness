@@ -51,8 +51,9 @@ export function ThemeSelector() {
         </DropdownMenu.Trigger>
 
         <DropdownMenu.Portal>
+          {/* Capped to the room Radix measures below the button, scrolling inside, so no theme is out of reach. */}
           <DropdownMenu.Content
-            className="bg-card border-2 border-primary shadow-lg z-50 min-w-[180px]"
+            className="bg-card border-2 border-primary shadow-lg z-50 min-w-[180px] max-h-[var(--radix-dropdown-menu-content-available-height)] overflow-y-auto"
             sideOffset={5}
             align="end"
           >
