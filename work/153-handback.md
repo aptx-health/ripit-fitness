@@ -1,5 +1,8 @@
 Report: complete
 
+## Amendment (2026-11-07, commit `86be3729`)
+Dustin's decision: logged weight works like the web app, a `Double` plus `weightUnit` (default "lbs"). The free-text weight tests are replaced by 4 tests (62.5 kg x 5, the lbs default, fractional and zero values, and a REAL `weight` column with a `weightUnit` column). There are now 32 tests. They are red on the stub, all 32 pass on the fake, and 24 out of 24 breaks are caught, with no crashes. The "Needs a call" item and the free-text rows below no longer apply.
+
 ## Verdict
 Checks out. 30 Swift Testing tests cover every logic scenario. They all fail on the stub API, pass against a correct scratch fake, and catch 22 out of 22 deliberately broken fakes. Commit `e039c913` on `feature/ios-skeleton`.
 

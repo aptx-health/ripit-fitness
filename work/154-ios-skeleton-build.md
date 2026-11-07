@@ -1,7 +1,7 @@
 ---
 id: 154
-state: waiting
-waiting_on: 153
+state: ready
+waiting_on:
 executor: ios-impl
 skill: handoff-implementer
 from: lead (worktree-brave-field-c150)
