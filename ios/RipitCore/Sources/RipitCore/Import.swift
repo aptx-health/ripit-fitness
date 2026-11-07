@@ -74,9 +74,11 @@ public struct ImportReport: Sendable, Equatable {
     public let updated: Int
     /// Programs, workouts and saved workouts already on the phone and already up to date.
     public let unchanged: Int
+    /// Logged sets that came from an earlier file and that the web has since deleted.
+    public let removedSets: Int
 
     public init(file: ImportSummary, addedPrograms: Int, addedWorkouts: Int, addedSets: Int, addedSavedWorkouts: Int,
-                addedCustomExercises: Int, updated: Int, unchanged: Int) {
+                addedCustomExercises: Int, updated: Int, unchanged: Int, removedSets: Int = 0) {
         self.file = file
         self.addedPrograms = addedPrograms
         self.addedWorkouts = addedWorkouts
@@ -85,6 +87,7 @@ public struct ImportReport: Sendable, Equatable {
         self.addedCustomExercises = addedCustomExercises
         self.updated = updated
         self.unchanged = unchanged
+        self.removedSets = removedSets
     }
 }
 
@@ -177,7 +180,8 @@ private struct ExportImporter {
             addedPrograms: counts["addedPrograms", default: 0], addedWorkouts: counts["addedWorkouts", default: 0],
             addedSets: counts["addedSets", default: 0], addedSavedWorkouts: counts["addedSavedWorkouts", default: 0],
             addedCustomExercises: counts["addedCustomExercises", default: 0],
-            updated: counts["updated", default: 0], unchanged: counts["unchanged", default: 0])
+            updated: counts["updated", default: 0], unchanged: counts["unchanged", default: 0],
+            removedSets: counts["removedSets", default: 0])
     }
 
     private mutating func tally(_ outcome: Outcome) {
@@ -346,6 +350,8 @@ private struct ExportImporter {
         var outcome = try upsert("workoutCompletion", id: c.id, columns: columns, hashed: fields.map(\.1),
                                  linkColumns: [("workoutId", c.workoutId)])
         for exercise in c.exercises { outcome = outcome.merged(try upsert(exercise)) }
+        // A session that came from an earlier file: the file is the truth for its file-origin sets.
+        let phoneSets = outcome == .added || outcome == .keptLocal ? [] : try reconcileSets(c, &outcome)
         for s in c.loggedSets {
             let setFields: [(String, (any DatabaseValueConvertible)?)] = [
                 ("setNumber", s.setNumber), ("reps", s.reps), ("weight", s.weight), ("weightUnit", s.weightUnit),
@@ -356,7 +362,59 @@ private struct ExportImporter {
             if setOutcome == .added { counts["addedSets", default: 0] += 1 }
             outcome = outcome.merged(setOutcome)
         }
+        // Phone sets moved aside go after the file's sets for their exercise, in their old order.
+        for phoneSet in phoneSets {
+            try db.execute(sql: """
+                UPDATE loggedSet SET setNumber =
+                    (SELECT MAX(setNumber) FROM loggedSet WHERE completionId = ? AND exerciseId = ?) + 1
+                WHERE id = ?
+                """, arguments: [c.id, phoneSet.exerciseId, phoneSet.id])
+        }
         return outcome
+    }
+
+    /// Before a file-origin session's sets are written: deletes file-origin sets the file no longer
+    /// lists, moves the rest to their file numbers in two passes (temporary negatives first, so
+    /// UNIQUE(completionId, exerciseId, setNumber) never trips), and moves phone sets that would
+    /// collide out of the way. Returns those phone sets, to be numbered after the file's sets.
+    private mutating func reconcileSets(_ c: ExportFile.WorkoutCompletion, _ outcome: inout Outcome)
+        throws -> [(id: String, exerciseId: String)]
+    {
+        let fileIds = c.loggedSets.map(\.id)
+        let marks = fileIds.isEmpty ? "NULL" : databaseQuestionMarks(count: fileIds.count)
+        try db.execute(sql: """
+            DELETE FROM loggedSet WHERE completionId = ? AND importHash IS NOT NULL AND id NOT IN (\(marks))
+            """, arguments: StatementArguments([c.id] + fileIds))
+        if db.changesCount > 0 {
+            counts["removedSets", default: 0] += db.changesCount
+            outcome = outcome.merged(.updated)
+        }
+
+        // Pass 1: every set of this session that the file lists, and every phone set sitting on a number
+        // the file wants, goes to a unique negative number.
+        let targets = Set(c.loggedSets.map { "\($0.exerciseId)|\($0.setNumber)" })
+        let rows = try Row.fetchAll(db, sql: """
+            SELECT id, exerciseId, setNumber, importHash FROM loggedSet WHERE completionId = ? ORDER BY setNumber
+            """, arguments: [c.id])
+        var phoneMoved: [(id: String, exerciseId: String)] = []
+        var temp = -1
+        for row in rows {
+            let id: String = row["id"]
+            let exerciseId: String = row["exerciseId"]
+            let setNumber: Int = row["setNumber"]
+            let fromFile = (row["importHash"] as String?) != nil
+            guard fromFile || targets.contains("\(exerciseId)|\(setNumber)") else { continue }
+            try db.execute(sql: "UPDATE loggedSet SET setNumber = ? WHERE id = ?", arguments: [temp, id])
+            temp -= 1
+            if !fromFile { phoneMoved.append((id, exerciseId)) }
+        }
+        // Pass 2: file sets already here take the file's numbers; the upserts that follow compare the
+        // rest of their values.
+        for s in c.loggedSets {
+            try db.execute(sql: "UPDATE loggedSet SET setNumber = ? WHERE id = ? AND importHash IS NOT NULL",
+                           arguments: [s.setNumber, s.id])
+        }
+        return phoneMoved
     }
 
     /// A web draft can be resumed on the phone only if the phone has no open draft of its own and the

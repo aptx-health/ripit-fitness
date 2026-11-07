@@ -26,6 +26,7 @@ enum ImportResult: Identifiable {
             ].filter { $0.0 > 0 }.map { Self.count($0.0, $0.1) }
             var parts = [added.isEmpty ? "Nothing new to add" : "Added " + added.joined(separator: ", ")]
             if r.updated > 0 { parts.append("updated \(r.updated)") }
+            if r.removedSets > 0 { parts.append("removed \(Self.count(r.removedSets, "set"))") }
             if r.unchanged > 0 { parts.append("\(r.unchanged) already up to date") }
             return parts.joined(separator: "; ") + ". Workouts logged on this phone were kept."
         case .refused(let reason):
