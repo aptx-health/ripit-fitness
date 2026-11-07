@@ -33,15 +33,25 @@ enum Repo {
     }
 }
 
-/// A fresh database file in its own temp directory. The directory is left for the OS to clean:
-/// `TempDB().open()` drops the TempDB while the database is still open, so deleting in deinit
-/// would pull the file out from under SQLite.
+/// One temp folder per test process, removed when the process exits, after every database is
+/// closed. TempDB can't remove its own folder in deinit: `TempDB().open()` drops the TempDB while
+/// the database is still open, and removing the folder then pulls the file out from under SQLite.
+enum TempRoot {
+    static let url: URL = {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("ripitcore-\(UUID().uuidString)")
+        try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        atexit { try? FileManager.default.removeItem(at: TempRoot.url) }
+        return url
+    }()
+}
+
+/// A fresh database file in its own folder under TempRoot.
 final class TempDB {
     let dir: URL
     var path: String { dir.appendingPathComponent("ripit.sqlite").path }
 
     init() throws {
-        dir = FileManager.default.temporaryDirectory.appendingPathComponent("ripitcore-\(UUID().uuidString)")
+        dir = TempRoot.url.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
     }
 
