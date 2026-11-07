@@ -104,7 +104,7 @@ struct LiftPageView: View {
         let change = history.isBodyweight ? chart.change.reps : chart.change.e1rm
         if let change {
             let amount = Words.signed(change.last - change.first) { Words.weight($0) }
-            let pct = Words.signed(change.percent) { $0.formatted(.number.precision(.fractionLength(1))) + "%" }
+            let pct = Words.signed(change.percent) { WebRounding.toFixed($0, 1) + "%" }
             parts.append("\(amount)\(history.isBodyweight ? " reps" : " \(Words.unitLabel(unit))") (\(pct))")
         }
         if let since = chart.since { parts.append("since \(Format.day(since)) · \(Words.plural(chart.sessions, "session"))") }
@@ -112,7 +112,7 @@ struct LiftPageView: View {
         if history.isBodyweight, let most = chart.mostReps {
             text += (text.isEmpty ? "" : ". ") + "Most reps \(most.reps)."
         } else if let best = chart.best {
-            text += (text.isEmpty ? "" : ". ") + "Best e1RM \(Int(best.e1rm.rounded())) on \(Format.day(best.date))."
+            text += (text.isEmpty ? "" : ". ") + "Best e1RM \(WebRounding.round(best.e1rm)) on \(Format.day(best.date))."
         }
         return text
     }
@@ -138,7 +138,7 @@ struct LiftPageView: View {
                 ProgressRow(name: Format.day(s.date),
                             detail: s.sets.map { Words.set($0.weight, $0.reps) }.joined(separator: ", ")) {
                     VStack(alignment: .trailing, spacing: 2) {
-                        if let e = s.e1rm { Text("e1RM \(Int(e.rounded()))").font(.subheadline.bold()).foregroundStyle(Theme.foreground) }
+                        if let e = s.e1rm { Text("e1RM \(WebRounding.round(e))").font(.subheadline.bold()).foregroundStyle(Theme.foreground) }
                         if let rpe = s.avgRpe { Text("RPE \(Words.rpe(rpe))").font(.caption).foregroundStyle(Theme.mutedForeground) }
                     }
                 }

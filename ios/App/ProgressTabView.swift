@@ -54,6 +54,8 @@ struct ProgressTabView: View {
         .navigationDestination(for: String.self) { LiftPageView(exerciseDefinitionId: $0) }
         .onAppear(perform: load)
         .onChange(of: unitRaw) { load() }
+        // Any write (a logged set, an import, a pin) re-reads the report while it is on screen.
+        .onChange(of: store.revision) { load() }
         .onChange(of: target) { load() }
         .onChange(of: weekStart) { load() }
         .sheet(isPresented: $showingSettings) { ProgressSettingsSheet().presentationDetents([.medium]) }
@@ -189,7 +191,7 @@ private struct ReportCard: View {
         FolderBlock(title: "Report card", tone: .active) {
             CardRow(label: "Workouts", value: "\(current.workouts) of \(report.target)") {
                 if current.workouts >= report.target { Chip("Done", fill: Theme.primary, text: .white) }
-                Muted(hasNormal && normal.workouts > 0 ? "normal \(normal.workouts.formatted(.number.precision(.fractionLength(1))))" : "–")
+                Muted(hasNormal && normal.workouts > 0 ? "normal \(WebRounding.toFixed(normal.workouts, 1))" : "–")
             }
             RowDivider()
             CardRow(label: "Working sets", value: "\(current.workingSets)") {
@@ -197,7 +199,7 @@ private struct ReportCard: View {
                     Text(Words.signed(Double(change)) { "\(Int($0))%" })
                         .font(.subheadline.bold())
                         .foregroundStyle(change > 0 ? Theme.primary : Theme.foreground)
-                    Muted("normal \(Int(normal.workingSets.rounded()))")
+                    Muted("normal \(WebRounding.round(normal.workingSets))")
                 } else {
                     Muted("–")
                 }
@@ -208,7 +210,7 @@ private struct ReportCard: View {
                     let change = (Double(current.durationSeconds) - normal.durationSeconds) / 60
                     Text(Words.signed(change, Words.minutes))
                         .font(.subheadline.bold())
-                        .foregroundStyle(change.rounded() > 0 ? Theme.primary : Theme.foreground)
+                        .foregroundStyle(WebRounding.round(change) > 0 ? Theme.primary : Theme.foreground)
                 } else {
                     Muted("–")
                 }
@@ -219,7 +221,7 @@ private struct ReportCard: View {
                         ?? (current.workingSets > 0 ? "Effort isn't tracked enough this week" : nil)) {
                 if let effort = current.effort {
                     if hasNormal, let n = normal.avgRpe {
-                        Text(Words.signed(effort.avgRpe - n) { $0.formatted(.number.precision(.fractionLength(1))) })
+                        Text(Words.signed(effort.avgRpe - n) { WebRounding.toFixed($0, 1) })
                             .font(.subheadline.bold())
                             .foregroundStyle(Theme.foreground)
                         Muted("normal \(Words.rpe(n))")
@@ -251,17 +253,24 @@ private struct CardRow<Aside: View>: View {
     let value: String
     var detail: String?
     @ViewBuilder var aside: () -> Aside
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
-        HStack(alignment: .center, spacing: 12) {
+        // At accessibility sizes the aside goes under the value, so the label keeps the full width.
+        let stacked = typeSize.isAccessibilitySize
+        let layout = stacked ? AnyLayout(VStackLayout(alignment: .leading, spacing: 6)) : AnyLayout(HStackLayout(alignment: .center, spacing: 12))
+        layout {
             VStack(alignment: .leading, spacing: 2) {
+                // Whole words only: shrink a long label rather than break it mid-word.
                 Text(label.uppercased()).font(.caption.bold()).tracking(1).foregroundStyle(Theme.mutedForeground)
+                    .lineLimit(1).minimumScaleFactor(0.5)
                 Text(value).font(.title2.bold().monospacedDigit()).foregroundStyle(Theme.foreground)
                 if let detail { Text(detail).font(.subheadline).foregroundStyle(Theme.mutedForeground) }
             }
-            Spacer(minLength: 8)
-            VStack(alignment: .trailing, spacing: 2, content: aside)
+            if !stacked { Spacer(minLength: 8) }
+            VStack(alignment: stacked ? .leading : .trailing, spacing: 2, content: aside)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
         .frame(minHeight: 56)
@@ -281,9 +290,9 @@ struct LiftRow: View {
             HStack(spacing: 8) {
                 if flat { Chip("Flat", fill: Theme.muted, text: Theme.mutedForeground) }
                 if let change {
-                    Text(Words.signed(change) { "\(Int($0.rounded()))" })
+                    Text(Words.signed(change) { "\(WebRounding.round($0))" })
                         .font(.subheadline.bold())
-                        .foregroundStyle(change.rounded() > 0 ? Theme.primary : Theme.foreground)
+                        .foregroundStyle(WebRounding.round(change) > 0 ? Theme.primary : Theme.foreground)
                         .accessibilityLabel("e1RM change since the last session")
                 }
             }
@@ -387,17 +396,17 @@ enum Words {
 
     /// At most one decimal, no trailing ".0": 275, 102.5.
     static func weight(_ w: Double) -> String {
-        ((w * 10).rounded() / 10).formatted(.number.precision(.fractionLength(0...1)).grouping(.never))
+        WebRounding.oneDecimal(w)
     }
 
     static func unitLabel(_ unit: WeightUnit) -> String { unit == .kg ? "kg" : "lb" }
 
     static func rpe(_ rpe: Double?) -> String {
-        rpe.map { $0.formatted(.number.precision(.fractionLength(1))) } ?? "–"
+        rpe.map { WebRounding.toFixed($0, 1) } ?? "–"
     }
 
     static func minutes(_ total: Double) -> String {
-        let m = Int(abs(total).rounded())
+        let m = WebRounding.round(abs(total))
         return m < 60 ? "\(m)m" : "\(m / 60)h \(m % 60)m"
     }
 
@@ -409,7 +418,7 @@ enum Words {
 
     static func percentChange(_ value: Double, _ normal: Double?) -> Int? {
         guard let normal, normal != 0 else { return nil }
-        return Int(((value - normal) / normal * 100).rounded())
+        return WebRounding.round((value - normal) / normal * 100)
     }
 
     static func plural(_ n: Int, _ noun: String) -> String { "\(n) \(noun)\(n == 1 ? "" : "s")" }
@@ -429,16 +438,16 @@ enum Words {
         if r.weight == 0 { return "\(r.reps) reps (was \(Int(r.previous)))" }
         let set = "\(weight(r.weight))×\(r.reps)"
         if r.kind == "e1rm" {
-            return "\(set) · e1RM \(Int((r.e1rm ?? 0).rounded())) \(unitLabel(unit)) (was \(Int(r.previous.rounded())))"
+            return "\(set) · e1RM \(WebRounding.round(r.e1rm ?? 0)) \(unitLabel(unit)) (was \(WebRounding.round(r.previous)))"
         }
         return "\(set) · best \(r.reps)-rep set (was \(weight(r.previous)))"
     }
 
     static func lift(_ l: WeekLift) -> String {
         let s = set(l.bestSet.weight, l.bestSet.reps)
-        var parts = [l.e1rm.map { "\(s) · e1RM \(Int($0.rounded()))" } ?? s]
+        var parts = [l.e1rm.map { "\(s) · e1RM \(WebRounding.round($0))" } ?? s]
         if l.sessionsBelowBest >= 3, let best = l.bestE1rm {
-            parts.append("\(ordinal(l.sessionsBelowBest)) session below \(Int(best.rounded()))")
+            parts.append("\(ordinal(l.sessionsBelowBest)) session below \(WebRounding.round(best))")
         }
         return parts.joined(separator: ", ")
     }
@@ -446,7 +455,7 @@ enum Words {
     static func last(_ last: LastSet?) -> String {
         guard let last else { return "Not done yet" }
         let s = set(last.weight, last.reps)
-        return "Last \(Format.day(last.completedAt)): " + (last.e1rm.map { "\(s) · e1RM \(Int($0.rounded()))" } ?? s)
+        return "Last \(Format.day(last.completedAt)): " + (last.e1rm.map { "\(s) · e1RM \(WebRounding.round($0))" } ?? s)
     }
 
     static func trend(_ t: TrendNote) -> String {

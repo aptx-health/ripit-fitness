@@ -60,6 +60,10 @@ struct RootView: View {
                     } message: { _ in
                         Text("One workout at a time. Discarding deletes its logged sets.")
                     }
+                    // The import result shows wherever the import was started.
+                    .alert(item: $store.importResult) { result in
+                        Alert(title: Text(result.title), message: Text(result.message), dismissButton: .default(Text("OK")))
+                    }
                     .fullScreenCover(isPresented: $store.showingWorkout) {
                         NavigationStack { WorkoutView() }
                             .environment(store)

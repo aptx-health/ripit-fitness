@@ -61,9 +61,6 @@ struct HistoryView: View {
         .fileImporter(isPresented: $pickingFile, allowedContentTypes: [.json]) { result in
             if case .success(let url) = result { Task { await store.importFile(at: url) } }
         }
-        .alert(item: Binding(get: { store.importResult }, set: { store.importResult = $0 })) { result in
-            Alert(title: Text(result.title), message: Text(result.message), dismissButton: .default(Text("OK")))
-        }
         .navigationDestination(for: String.self) { WorkoutDetailView(workoutId: $0) }
         .toolbar(.hidden, for: .navigationBar)
         .onAppear {

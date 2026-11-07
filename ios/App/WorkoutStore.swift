@@ -136,6 +136,7 @@ final class WorkoutStore {
             }
         }.value
         importResult = result
+        revision += 1
         reload()
     }
 
