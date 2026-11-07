@@ -36,7 +36,9 @@ The free account allows 3 apps per device (Offscreen counts as one).
 2. Get the file onto the phone: open it from Downloads or iCloud Drive, or drag it onto Ripit in Finder (iPhone → Files tab).
 3. In Ripit: **Import from ripit.fit** (under History), pick the file. A summary shows what the file held.
 
-Importing the same file again, or a later export, adds only what's new and keeps everything logged on the phone. A file that isn't a Ripit export, is damaged, or is a newer version is refused, and nothing changes.
+Importing the same file again changes nothing. A later export adds what's new and brings rows that came from a file up to date where the web changed them (a session finished, a program renamed). Workouts logged on the phone are never touched, and neither are phone edits to rows the web left alone (a program restart's archived sessions, for example). The summary says what changed: "Added 12 workouts, 140 sets; updated 2; 3 already up to date."
+
+A web workout still in progress comes in resumable only if the phone has no open workout and it was active within 24 hours before the export; otherwise it is stored as abandoned. A file that isn't a Ripit export, is damaged, or is a newer version is refused, and nothing changes.
 
 ## Exercise catalog and photos
 

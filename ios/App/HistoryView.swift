@@ -154,7 +154,8 @@ struct WorkoutDetailView: View {
                         Text("\(Format.day(done)), \(Format.time(w.startedAt))–\(Format.time(done))")
                             .foregroundStyle(Theme.mutedForeground)
                     }
-                    ForEach(SupersetRun.runs(w.exercises), id: \.id) { run in
+                    // A program session lists every planned exercise; history shows only what was done.
+                    ForEach(SupersetRun.runs(w.exercises.filter { !$0.sets.isEmpty }), id: \.id) { run in
                         FolderBlock(title: run.title, tone: run.group == nil ? .exercise : .superset) {
                             ForEach(Array(run.exercises.enumerated()), id: \.element.id) { i, ex in
                                 if i > 0 { RowDivider() }

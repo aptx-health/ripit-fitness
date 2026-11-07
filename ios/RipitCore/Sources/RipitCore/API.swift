@@ -9,6 +9,8 @@ public enum RipitCoreError: Error, Equatable {
     case notFound(String)
     /// A logged weight that isn't a finite number from 0 to `LoggedWeight.max`.
     case invalidWeight(Double)
+    /// Finishing a workout with no exercises and no logged sets: log a set first, or discard it.
+    case emptyWorkout
 }
 
 public enum LoggedWeight {

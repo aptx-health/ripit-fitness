@@ -18,6 +18,7 @@ enum Schema {
         ("v1-exercise-catalog", v1ExerciseCatalog),
         ("v2-training-model", v2TrainingModel),
         ("v3-program-cycle", v3ProgramCycle),
+        ("v4-import-hash", v4ImportHash),
     ]
 
     static func v1ExerciseCatalog(_ db: Database) throws {
@@ -177,5 +178,15 @@ enum Schema {
     /// completions but never raises the cycle; the phone does (features/ios-app/programs.feature).
     static func v3ProgramCycle(_ db: Database) throws {
         try db.execute(sql: "ALTER TABLE program ADD COLUMN cycleNumber INTEGER NOT NULL DEFAULT 1")
+    }
+
+    /// Where a row came from (work item 164). NULL: created on the phone, never touched by an import.
+    /// Otherwise a hash of the file's values at the last import, so a later export updates only rows
+    /// the web changed since. Exercise definitions from a file hold 'insert-only'.
+    static func v4ImportHash(_ db: Database) throws {
+        for table in ["exerciseDefinition", "program", "week", "workout", "exercise", "prescribedSet",
+                      "workoutCompletion", "loggedSet", "savedWorkout"] {
+            try db.execute(sql: "ALTER TABLE \(table) ADD COLUMN importHash TEXT")
+        }
     }
 }

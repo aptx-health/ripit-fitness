@@ -115,11 +115,13 @@ public final class AppDatabase: Sendable {
         return id
     }
 
-    /// The unfinished workout to offer for resume, if any.
+    /// The unfinished workout to offer for resume, if any. An archived draft (a program restart archives
+    /// open sessions) is never offered.
     public func inProgressWorkout() throws -> WorkoutDetail? {
         try dbQueue.read { db in
             let id = try String.fetchOne(db, sql: """
-                SELECT id FROM workoutCompletion WHERE status = 'draft' ORDER BY startedAt DESC LIMIT 1
+                SELECT id FROM workoutCompletion WHERE status = 'draft' AND isArchived = 0
+                ORDER BY startedAt DESC LIMIT 1
                 """)
             return try id.map { try Self.detail(db, $0) }
         }
@@ -193,12 +195,23 @@ public final class AppDatabase: Sendable {
     /// Removes an exercise and its logged sets from an unfinished workout. Finished history is never edited.
     public func removeExercise(_ exerciseId: String) throws {
         try dbQueue.write { db in
-            // Logged sets go with it (ON DELETE CASCADE).
-            try db.execute(sql: """
-                DELETE FROM exercise WHERE id = ? AND workoutCompletionId IN
-                    (SELECT id FROM workoutCompletion WHERE status = 'draft')
+            let row = try Row.fetchOne(db, sql: """
+                SELECT e.workoutCompletionId, e.exerciseGroup FROM exercise e
+                JOIN workoutCompletion c ON c.id = e.workoutCompletionId
+                WHERE e.id = ? AND c.status = 'draft'
                 """, arguments: [exerciseId])
-            if db.changesCount == 0 { throw RipitCoreError.notFound("exercise \(exerciseId) in an unfinished workout") }
+            guard let row else { throw RipitCoreError.notFound("exercise \(exerciseId) in an unfinished workout") }
+            // Logged sets go with it (ON DELETE CASCADE).
+            try db.execute(sql: "DELETE FROM exercise WHERE id = ?", arguments: [exerciseId])
+            // Like the web's normalise rule: a superset left with one exercise is no longer a superset.
+            if let group: String = row["exerciseGroup"] {
+                let completionId: String = row["workoutCompletionId"]
+                try db.execute(sql: """
+                    UPDATE exercise SET exerciseGroup = NULL
+                    WHERE workoutCompletionId = ? AND exerciseGroup = ?
+                      AND (SELECT COUNT(*) FROM exercise WHERE workoutCompletionId = ? AND exerciseGroup = ?) = 1
+                    """, arguments: [completionId, group, completionId, group])
+            }
         }
     }
 
@@ -226,9 +239,17 @@ public final class AppDatabase: Sendable {
         }
     }
 
+    /// Finishes a workout. A workout with no logged sets and no exercises at all is refused with
+    /// `RipitCoreError.emptyWorkout`; one with exercises but no sets yet is allowed (slice 1 tests do that).
     public func finishWorkout(_ workoutId: String, at date: Date) throws {
         try dbQueue.write { db in
             try Self.requireCompletion(db, workoutId)
+            let hasContent = try Bool.fetchOne(db, sql: """
+                SELECT EXISTS (SELECT 1 FROM loggedSet WHERE completionId = ?)
+                    OR EXISTS (SELECT 1 FROM exercise WHERE workoutCompletionId = ?)
+                    OR EXISTS (SELECT 1 FROM exercise e JOIN workoutCompletion c ON c.workoutId = e.workoutId WHERE c.id = ?)
+                """, arguments: [workoutId, workoutId, workoutId]) ?? false
+            guard hasContent else { throw RipitCoreError.emptyWorkout }
             try db.execute(sql: """
                 UPDATE workoutCompletion
                 SET status = 'completed', completedAt = ?,

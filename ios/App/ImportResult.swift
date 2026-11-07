@@ -4,7 +4,7 @@ import Foundation
 import RipitCore
 
 enum ImportResult: Identifiable {
-    case imported(ImportSummary)
+    case imported(ImportReport)
     case refused(String)
 
     var id: String { title + message }
@@ -18,13 +18,16 @@ enum ImportResult: Identifiable {
 
     var message: String {
         switch self {
-        case .imported(let s):
-            let parts = [
-                Self.count(s.programs, "program"), Self.count(s.workouts, "workout"),
-                Self.count(s.loggedSets, "logged set"), Self.count(s.savedWorkouts, "saved workout"),
-                Self.count(s.customExercises, "custom exercise"),
-            ]
-            return "From the file: " + parts.joined(separator: ", ") + ". Anything already on this phone was kept, not duplicated."
+        case .imported(let r):
+            // What changed on the phone, e.g. "Added 12 workouts, 140 sets; updated 2; 3 already up to date."
+            let added = [
+                (r.addedPrograms, "program"), (r.addedWorkouts, "workout"), (r.addedSets, "set"),
+                (r.addedSavedWorkouts, "saved workout"), (r.addedCustomExercises, "custom exercise"),
+            ].filter { $0.0 > 0 }.map { Self.count($0.0, $0.1) }
+            var parts = [added.isEmpty ? "Nothing new to add" : "Added " + added.joined(separator: ", ")]
+            if r.updated > 0 { parts.append("updated \(r.updated)") }
+            if r.unchanged > 0 { parts.append("\(r.unchanged) already up to date") }
+            return parts.joined(separator: "; ") + ". Workouts logged on this phone were kept."
         case .refused(let reason):
             return reason + " Nothing on this phone was changed."
         }

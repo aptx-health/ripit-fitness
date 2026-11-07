@@ -123,7 +123,7 @@ final class WorkoutStore {
             let scoped = url.startAccessingSecurityScopedResource()
             defer { if scoped { url.stopAccessingSecurityScopedResource() } }
             do {
-                let summary = try db.importExport(data: Data(contentsOf: url))
+                let summary = try db.importReport(data: Data(contentsOf: url))
                 return .imported(summary)
             } catch let refused as ImportError {
                 return .refused(refused.reason)

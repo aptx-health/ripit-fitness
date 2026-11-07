@@ -4,16 +4,21 @@
 // The format is docs/RIPIT_EXPORT_FORMAT.md (branch feature/data-export, commit 575a5d05):
 // - Refuse a file whose `format` is not "ripit-export" or whose `version` is not 1, and a file
 //   that isn't valid JSON. A refused file changes nothing.
-// - Rows keep their ids, so importing the same file again adds nothing.
+// - Rows keep their ids, so importing the same file again adds nothing. A later export updates rows
+//   that came from a file, but only where the web changed them since the last import (work item 164);
+//   rows created on the phone, and phone edits to rows the web didn't change, are kept.
 // - Plan (prescribedSets under exercises) and reality (loggedSets under completions) stay apart.
 // - LoggedSet.weight is a number with weightUnit "lbs" or "kg"; nothing is converted.
 // - An exercise ref resolves by id against the catalog, then by normalized name against the catalog
 //   (the web's normalizeExerciseName), else it is kept under its own id as a non-system definition.
 //   Exercises and saved workout snapshots point at the resolved id.
-// - An imported draft session is resumable, with completedAt NULL like local drafts.
+// - An imported draft session is resumable, with completedAt NULL like local drafts, when the phone
+//   has no open draft and the draft was active within 24 hours of the export; otherwise it is stored
+//   as abandoned (work item 164).
 // - The file's active program stays active only if the phone has no active program.
 // - Keys v1 doesn't use locally (settings, pinnedExercises, userId, copyStatus, ...) are ignored.
 
+import CryptoKit
 import Foundation
 import GRDB
 
@@ -55,23 +60,56 @@ public struct ImportSummary: Sendable, Equatable {
     }
 }
 
+/// What one import changed on the phone, next to what the file held.
+public struct ImportReport: Sendable, Equatable {
+    /// Counts of rows in the file, by kind.
+    public let file: ImportSummary
+    public let addedPrograms: Int
+    public let addedWorkouts: Int
+    public let addedSets: Int
+    public let addedSavedWorkouts: Int
+    public let addedCustomExercises: Int
+    /// Programs, workouts and saved workouts already on the phone that the file changed
+    /// (their own row or anything under them).
+    public let updated: Int
+    /// Programs, workouts and saved workouts already on the phone and already up to date.
+    public let unchanged: Int
+
+    public init(file: ImportSummary, addedPrograms: Int, addedWorkouts: Int, addedSets: Int, addedSavedWorkouts: Int,
+                addedCustomExercises: Int, updated: Int, unchanged: Int) {
+        self.file = file
+        self.addedPrograms = addedPrograms
+        self.addedWorkouts = addedWorkouts
+        self.addedSets = addedSets
+        self.addedSavedWorkouts = addedSavedWorkouts
+        self.addedCustomExercises = addedCustomExercises
+        self.updated = updated
+        self.unchanged = unchanged
+    }
+}
+
 extension AppDatabase {
     /// Imports a ripit-export v1 file in one transaction. Throws `ImportError` for a refused file.
     @discardableResult
     public func importExport(data: Data) throws -> ImportSummary {
+        try importReport(data: data).file
+    }
+
+    /// Imports a ripit-export v1 file in one transaction and says what changed.
+    /// Throws `ImportError` for a refused file.
+    @discardableResult
+    public func importReport(data: Data) throws -> ImportReport {
         let file = try ExportFile.decode(data)
         do {
-            try dbQueue.write { db in
+            return try dbQueue.write { db in
                 var importer = ExportImporter(file: file, db: db)
                 try importer.run()
+                return importer.report()
             }
         } catch is DatabaseError {
             // A row the schema rejects (a dangling reference, a missing value): the transaction rolled back.
             throw ImportError.corrupt
         }
-        return ImportSummary(programs: file.programs.count, workouts: file.workoutCompletions.count,
-                             savedWorkouts: file.savedWorkouts.count, customExercises: file.customExercises.count,
-                             loggedSets: file.workoutCompletions.reduce(0) { $0 + $1.loggedSets.count })
     }
 }
 
@@ -86,11 +124,28 @@ func normalizeExerciseName(_ name: String) -> String {
 
 // MARK: - Writing rows
 
+/// What happened to one row.
+private enum Outcome {
+    case added, updated, unchanged
+    /// The id exists but the row was created on the phone: never touched.
+    case keptLocal
+
+    /// The outcome of a parent and its children: added wins, then updated.
+    func merged(_ other: Outcome) -> Outcome {
+        switch (self, other) {
+        case (.added, _): .added
+        case (_, .updated), (.updated, _), (_, .added): .updated
+        default: self
+        }
+    }
+}
+
 private struct ExportImporter {
     let file: ExportFile
     let db: Database
     /// File exercise definition id -> local exerciseDefinition id.
     private var definitionIds: [String: String] = [:]
+    private var counts: [String: Int] = [:]
 
     init(file: ExportFile, db: Database) {
         self.file = file
@@ -101,12 +156,39 @@ private struct ExportImporter {
         for custom in file.customExercises { try resolveCustom(custom) }
         for ref in file.exerciseRefs where definitionIds[ref.id] == nil { try resolveRef(ref) }
 
-        // The file's active program stays active only if the phone has none.
-        let phoneHasActive = try Bool.fetchOne(db, sql: "SELECT 1 FROM program WHERE isActive = 1") ?? false
-        for program in file.programs { try insert(program, keepActive: !phoneHasActive) }
-        for completion in file.workoutCompletions { try insert(completion) }
-        for saved in file.savedWorkouts { try insert(saved) }
+        for program in file.programs { tally(try upsert(program)) }
+        for completion in file.workoutCompletions {
+            let outcome = try upsert(completion)
+            tally(outcome)
+            if outcome == .added { counts["addedWorkouts", default: 0] += 1 }
+        }
+        for saved in file.savedWorkouts {
+            let outcome = try upsert(saved)
+            tally(outcome)
+            if outcome == .added { counts["addedSavedWorkouts", default: 0] += 1 }
+        }
     }
+
+    func report() -> ImportReport {
+        ImportReport(
+            file: ImportSummary(programs: file.programs.count, workouts: file.workoutCompletions.count,
+                                savedWorkouts: file.savedWorkouts.count, customExercises: file.customExercises.count,
+                                loggedSets: file.workoutCompletions.reduce(0) { $0 + $1.loggedSets.count }),
+            addedPrograms: counts["addedPrograms", default: 0], addedWorkouts: counts["addedWorkouts", default: 0],
+            addedSets: counts["addedSets", default: 0], addedSavedWorkouts: counts["addedSavedWorkouts", default: 0],
+            addedCustomExercises: counts["addedCustomExercises", default: 0],
+            updated: counts["updated", default: 0], unchanged: counts["unchanged", default: 0])
+    }
+
+    private mutating func tally(_ outcome: Outcome) {
+        switch outcome {
+        case .updated: counts["updated", default: 0] += 1
+        case .unchanged, .keptLocal: counts["unchanged", default: 0] += 1
+        case .added: break
+        }
+    }
+
+    // MARK: Exercise definitions (insert only)
 
     private func exists(_ table: String, _ id: String) throws -> Bool {
         try Bool.fetchOne(db, sql: "SELECT 1 FROM \"\(table)\" WHERE id = ?", arguments: [id]) ?? false
@@ -129,8 +211,8 @@ private struct ExportImporter {
             INSERT INTO exerciseDefinition
                 (id, name, normalizedName, aliases, category, isSystem, createdBy, createdAt, updatedAt, equipment,
                  instructions, notes, imageUrls, primaryFAUs, secondaryFAUs, force, mechanic, level,
-                 movementPattern, intensityClass, isBodyweight, taggedAt, taggedBy)
-            VALUES (?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 movementPattern, intensityClass, isBodyweight, taggedAt, taggedBy, importHash)
+            VALUES (?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'insert-only')
             """, arguments: [
                 e.id, e.name, normalizeExerciseName(e.name), try jsonText(e.aliases), e.category, e.createdBy,
                 e.createdAt, e.updatedAt, try jsonText(e.equipment), e.instructions, e.notes, try jsonText(e.imageUrls),
@@ -138,6 +220,7 @@ private struct ExportImporter {
                 e.movementPattern, e.intensityClass, e.isBodyweight, e.taggedAt, e.taggedBy,
             ])
         definitionIds[e.id] = e.id
+        counts["addedCustomExercises", default: 0] += 1
     }
 
     private mutating func resolveRef(_ ref: ExportFile.ExerciseRef) throws {
@@ -147,8 +230,8 @@ private struct ExportImporter {
         }
         // Not in the catalog: keep it under its own id, so its sets keep their exercise.
         try db.execute(sql: """
-            INSERT INTO exerciseDefinition (id, name, normalizedName, isSystem, createdAt, updatedAt)
-            VALUES (?, ?, ?, 0, ?, ?)
+            INSERT INTO exerciseDefinition (id, name, normalizedName, isSystem, createdAt, updatedAt, importHash)
+            VALUES (?, ?, ?, 0, ?, ?, 'insert-only')
             """, arguments: [ref.id, ref.name, normalizeExerciseName(ref.name), file.exportedAt, file.exportedAt])
         definitionIds[ref.id] = ref.id
     }
@@ -158,94 +241,145 @@ private struct ExportImporter {
         return local
     }
 
-    private func insert(_ p: ExportFile.Program, keepActive: Bool) throws {
-        if try !exists("program", p.id) {
-            try db.execute(sql: """
-                INSERT INTO program
-                    (id, name, description, isActive, createdAt, updatedAt, isUserCreated, programType, isArchived,
-                     archivedAt, deletedAt, goals, level, durationWeeks, durationDisplay, targetDaysPerWeek,
-                     equipmentNeeded, focusAreas, sourceCommunityProgramId)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, arguments: [
-                    p.id, p.name, p.description, p.isActive && keepActive, p.createdAt, p.updatedAt, p.isUserCreated,
-                    p.programType, p.isArchived, p.archivedAt, p.deletedAt, try jsonText(p.goals), p.level,
-                    p.durationWeeks, p.durationDisplay, p.targetDaysPerWeek, try jsonText(p.equipmentNeeded),
-                    try jsonText(p.focusAreas), p.sourceCommunityProgramId,
-                ])
+    // MARK: Upsert
+
+    /// Inserts the row if its id is new. If it exists and came from a file, updates `columns` only when
+    /// the file's values changed since the last import (`importHash`), so phone edits to rows the web
+    /// left alone survive. `hashed` are the file's own values; `columns` may differ from them where the
+    /// phone applies a rule (the active program, imported drafts). `linkColumns` are set on insert only.
+    private func upsert(_ table: String, id: String, columns: [(String, (any DatabaseValueConvertible)?)],
+                        hashed: [(any DatabaseValueConvertible)?], linkColumns: [(String, (any DatabaseValueConvertible)?)] = [])
+        throws -> Outcome
+    {
+        let hash = Self.hash(hashed)
+        guard let existing = try Row.fetchOne(db, sql: "SELECT importHash FROM \"\(table)\" WHERE id = ?", arguments: [id]) else {
+            let all = [("id", id as (any DatabaseValueConvertible)?)] + linkColumns + columns + [("importHash", hash)]
+            let names = all.map { "\"\($0.0)\"" }.joined(separator: ", ")
+            try db.execute(sql: "INSERT INTO \"\(table)\" (\(names)) VALUES (\(databaseQuestionMarks(count: all.count)))",
+                           arguments: StatementArguments(all.map(\.1)))
+            return .added
         }
+        guard let stored: String = existing["importHash"] else { return .keptLocal }
+        if stored == hash { return .unchanged }
+        let sets = (columns.map { "\"\($0.0)\" = ?" } + ["importHash = ?"]).joined(separator: ", ")
+        try db.execute(sql: "UPDATE \"\(table)\" SET \(sets) WHERE id = ?",
+                       arguments: StatementArguments(columns.map(\.1) + [hash, id]))
+        return .updated
+    }
+
+    private static func hash(_ values: [(any DatabaseValueConvertible)?]) -> String {
+        let text = values.map { ($0?.databaseValue ?? .null).description }.joined(separator: "\u{1F}")
+        return SHA256.hash(data: Data(text.utf8)).map { String(format: "%02x", $0) }.joined()
+    }
+
+    private mutating func upsert(_ p: ExportFile.Program) throws -> Outcome {
+        // The file's active program stays active only if the phone has no other active program.
+        let otherActive = try Bool.fetchOne(db, sql: "SELECT 1 FROM program WHERE isActive = 1 AND id != ?",
+                                            arguments: [p.id]) ?? false
+        let fields: [(String, (any DatabaseValueConvertible)?)] = [
+            ("name", p.name), ("description", p.description), ("isActive", p.isActive),
+            ("createdAt", p.createdAt), ("updatedAt", p.updatedAt), ("isUserCreated", p.isUserCreated),
+            ("programType", p.programType), ("isArchived", p.isArchived), ("archivedAt", p.archivedAt),
+            ("deletedAt", p.deletedAt), ("goals", try jsonText(p.goals)), ("level", p.level),
+            ("durationWeeks", p.durationWeeks), ("durationDisplay", p.durationDisplay),
+            ("targetDaysPerWeek", p.targetDaysPerWeek), ("equipmentNeeded", try jsonText(p.equipmentNeeded)),
+            ("focusAreas", try jsonText(p.focusAreas)), ("sourceCommunityProgramId", p.sourceCommunityProgramId),
+        ]
+        let columns = fields.map { $0.0 == "isActive" ? ($0.0, p.isActive && !otherActive) : $0 }
+        var outcome = try upsert("program", id: p.id, columns: columns, hashed: fields.map(\.1))
+        if outcome == .added { counts["addedPrograms", default: 0] += 1 }
         for week in p.weeks {
-            if try !exists("week", week.id) {
-                try db.execute(sql: """
-                    INSERT INTO week (id, weekNumber, name, description, programId) VALUES (?, ?, ?, ?, ?)
-                    """, arguments: [week.id, week.weekNumber, week.name, week.description, p.id])
-            }
+            let weekFields: [(String, (any DatabaseValueConvertible)?)] = [
+                ("weekNumber", week.weekNumber), ("name", week.name), ("description", week.description),
+            ]
+            outcome = outcome.merged(try upsert("week", id: week.id, columns: weekFields, hashed: weekFields.map(\.1),
+                                                linkColumns: [("programId", p.id)]))
             for workout in week.workouts {
-                if try !exists("workout", workout.id) {
-                    try db.execute(sql: "INSERT INTO workout (id, name, dayNumber, weekId) VALUES (?, ?, ?, ?)",
-                                   arguments: [workout.id, workout.name, workout.dayNumber, week.id])
-                }
-                for exercise in workout.exercises { try insert(exercise) }
+                let workoutFields: [(String, (any DatabaseValueConvertible)?)] = [
+                    ("name", workout.name), ("dayNumber", workout.dayNumber),
+                ]
+                outcome = outcome.merged(try upsert("workout", id: workout.id, columns: workoutFields,
+                                                    hashed: workoutFields.map(\.1), linkColumns: [("weekId", week.id)]))
+                for exercise in workout.exercises { outcome = outcome.merged(try upsert(exercise)) }
             }
         }
+        return outcome
     }
 
-    private func insert(_ e: ExportFile.Exercise) throws {
-        if try !exists("exercise", e.id) {
-            try db.execute(sql: """
-                INSERT INTO exercise
-                    (id, name, exerciseDefinitionId, "order", exerciseGroup, workoutId, notes, isOneOff, workoutCompletionId)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, arguments: [
-                    e.id, e.name, try definitionId(e.exerciseDefinitionId), e.order, e.exerciseGroup, e.workoutId,
-                    e.notes, e.isOneOff, e.workoutCompletionId,
-                ])
+    private func upsert(_ e: ExportFile.Exercise) throws -> Outcome {
+        let fields: [(String, (any DatabaseValueConvertible)?)] = [
+            ("name", e.name), ("exerciseDefinitionId", try definitionId(e.exerciseDefinitionId)), ("order", e.order),
+            ("exerciseGroup", e.exerciseGroup), ("notes", e.notes), ("isOneOff", e.isOneOff),
+        ]
+        var outcome = try upsert("exercise", id: e.id, columns: fields, hashed: fields.map(\.1),
+                                 linkColumns: [("workoutId", e.workoutId), ("workoutCompletionId", e.workoutCompletionId)])
+        for s in e.prescribedSets {
+            let setFields: [(String, (any DatabaseValueConvertible)?)] = [
+                ("setNumber", s.setNumber), ("reps", s.reps), ("weight", s.weight), ("rpe", s.rpe), ("rir", s.rir),
+                ("isWarmup", s.isWarmup),
+            ]
+            outcome = outcome.merged(try upsert("prescribedSet", id: s.id, columns: setFields, hashed: setFields.map(\.1),
+                                                linkColumns: [("exerciseId", e.id)]))
         }
-        for s in e.prescribedSets where try !exists("prescribedSet", s.id) {
-            try db.execute(sql: """
-                INSERT INTO prescribedSet (id, setNumber, reps, weight, rpe, rir, isWarmup, exerciseId)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """, arguments: [s.id, s.setNumber, s.reps, s.weight, s.rpe, s.rir, s.isWarmup, e.id])
-        }
+        return outcome
     }
 
-    private func insert(_ c: ExportFile.WorkoutCompletion) throws {
-        if try !exists("workoutCompletion", c.id) {
-            try db.execute(sql: """
-                INSERT INTO workoutCompletion
-                    (id, workoutId, savedWorkoutId, completedAt, startedAt, status, notes, isArchived, cycleNumber,
-                     isAdHoc, name, durationSeconds, sessionRpe)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, arguments: [
-                    // The web sets completedAt when a session starts; a local draft has none.
-                    c.id, c.workoutId, c.savedWorkoutId, c.status == "draft" ? nil : c.completedAt, c.startedAt,
-                    c.status, c.notes, c.isArchived, c.cycleNumber, c.isAdHoc, c.name, c.durationSeconds, c.sessionRpe,
-                ])
+    private mutating func upsert(_ c: ExportFile.WorkoutCompletion) throws -> Outcome {
+        let fields: [(String, (any DatabaseValueConvertible)?)] = [
+            ("savedWorkoutId", c.savedWorkoutId), ("completedAt", c.completedAt), ("startedAt", c.startedAt),
+            ("status", c.status), ("notes", c.notes), ("isArchived", c.isArchived), ("cycleNumber", c.cycleNumber),
+            ("isAdHoc", c.isAdHoc), ("name", c.name), ("durationSeconds", c.durationSeconds),
+            ("sessionRpe", c.sessionRpe),
+        ]
+        var columns = fields
+        if c.status == "draft" {
+            let status = try resumable(c) ? "draft" : "abandoned"
+            columns = fields.map { field -> (String, (any DatabaseValueConvertible)?) in
+                switch field.0 {
+                // The web sets completedAt when a session starts; a local draft has none.
+                case "completedAt": ("completedAt", status == "draft" ? nil : c.completedAt)
+                case "status": ("status", status)
+                default: field
+                }
+            }
         }
-        for exercise in c.exercises { try insert(exercise) }
-        for s in c.loggedSets where try !exists("loggedSet", s.id) {
-            try db.execute(sql: """
-                INSERT INTO loggedSet
-                    (id, setNumber, reps, weight, weightUnit, rpe, rir, isWarmup, exerciseId, completionId, createdAt)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, arguments: [
-                    s.id, s.setNumber, s.reps, s.weight, s.weightUnit, s.rpe, s.rir, s.isWarmup, s.exerciseId, c.id,
-                    s.createdAt,
-                ])
+        var outcome = try upsert("workoutCompletion", id: c.id, columns: columns, hashed: fields.map(\.1),
+                                 linkColumns: [("workoutId", c.workoutId)])
+        for exercise in c.exercises { outcome = outcome.merged(try upsert(exercise)) }
+        for s in c.loggedSets {
+            let setFields: [(String, (any DatabaseValueConvertible)?)] = [
+                ("setNumber", s.setNumber), ("reps", s.reps), ("weight", s.weight), ("weightUnit", s.weightUnit),
+                ("rpe", s.rpe), ("rir", s.rir), ("isWarmup", s.isWarmup), ("createdAt", s.createdAt),
+            ]
+            let setOutcome = try upsert("loggedSet", id: s.id, columns: setFields, hashed: setFields.map(\.1),
+                                        linkColumns: [("exerciseId", s.exerciseId), ("completionId", c.id)])
+            if setOutcome == .added { counts["addedSets", default: 0] += 1 }
+            outcome = outcome.merged(setOutcome)
         }
+        return outcome
     }
 
-    private func insert(_ w: ExportFile.SavedWorkout) throws {
-        guard try !exists("savedWorkout", w.id) else { return }
-        try db.execute(sql: """
-            INSERT INTO savedWorkout
-                (id, name, notes, sourceCompletionId, workoutData, exerciseCount, createdAt, updatedAt, lastUsedAt,
-                 pinnedAt, origin, archivedAt, dismissedAt)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, arguments: [
-                w.id, w.name, w.notes, w.sourceCompletionId, try jsonText(rewritingDefinitionIds(w.workoutData)),
-                w.exerciseCount, w.createdAt, w.updatedAt, w.lastUsedAt, w.pinnedAt, w.origin, w.archivedAt,
-                w.dismissedAt,
-            ])
+    /// A web draft can be resumed on the phone only if the phone has no open draft of its own and the
+    /// draft was active (started, or last logged a set) within 24 hours before the export.
+    private func resumable(_ c: ExportFile.WorkoutCompletion) throws -> Bool {
+        let otherDraft = try Bool.fetchOne(db, sql: """
+            SELECT 1 FROM workoutCompletion WHERE status = 'draft' AND isArchived = 0 AND id != ?
+            """, arguments: [c.id]) ?? false
+        if otherDraft { return false }
+        let activity = ([c.startedAt, c.completedAt] + c.loggedSets.map(\.createdAt)).compactMap { $0 }.max()
+        guard let activity else { return false }
+        return file.exportedAt.timeIntervalSince(activity) <= 24 * 3600
+    }
+
+    private func upsert(_ w: ExportFile.SavedWorkout) throws -> Outcome {
+        let fields: [(String, (any DatabaseValueConvertible)?)] = [
+            ("name", w.name), ("notes", w.notes), ("sourceCompletionId", w.sourceCompletionId),
+            ("workoutData", try jsonText(rewritingDefinitionIds(w.workoutData))), ("exerciseCount", w.exerciseCount),
+            ("createdAt", w.createdAt), ("updatedAt", w.updatedAt), ("lastUsedAt", w.lastUsedAt),
+            ("pinnedAt", w.pinnedAt), ("origin", w.origin), ("archivedAt", w.archivedAt),
+            ("dismissedAt", w.dismissedAt),
+        ]
+        return try upsert("savedWorkout", id: w.id, columns: fields, hashed: fields.map(\.1))
     }
 
     /// The snapshot with every exerciseDefinitionId pointing at the resolved local row.
