@@ -6,7 +6,7 @@ None
 Running quietly: None.
 
 ## Active
-- Coaching (initiatives/coaching): slice 1 (invite + link) merged to dev 2026-11-07 (#1041). Next: slice 2 (send), after workout library slice 3.
+- Coaching (initiatives/coaching): slice 1 (invite + link) merged to dev 2026-11-07 (#1041). Slice 2 (send + Sent list) tests 148 running.
 - Workout library (initiatives/workout-library): tidy saved workouts (pinned + tags), incl. where AI and coach workouts land. Slices 1 (#1040) and 3 (origin + New + archive, approved 2026-11-07) done; slice 3 PR into dev. Later: slice 2 (tags + search), slice 4 (bulk tidy).
 - Learn linked from Settings (work 135): merged to dev 2026-11-06 (#1039); next release to prod.
 - E-ink theme + display toggle (initiatives/eink-theme): merged to dev 2026-11-06 (#1038); next release to prod.

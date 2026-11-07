@@ -15,3 +15,4 @@
 - 2026-11-07 CST: Supersets (140) approved from the screenshot; PR #1042.
 - 2026-11-07 CST: Supersets merged to dev (#1042).
 - 2026-11-07 CST: Dustin: prod release waits until all coach features are in dev (coaching slices 2 and 3, after workout library slice 3).
+- 2026-11-07 CST: Slice 2 (send + Sent list, features/coaching/send.feature) confirmed by Dustin. Bundling custom exercises stays a follow-up after prod. Tests 148 dispatched to test-builder (worktree1, feature/coaching-send, stacked on #1043).
