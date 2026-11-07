@@ -1,0 +1,174 @@
+// Home: start or resume a workout, and the finished workouts, newest first.
+
+import RipitCore
+import SwiftUI
+
+struct HistoryView: View {
+    @Environment(WorkoutStore.self) private var store
+    @Binding var path: [String]
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                Text("RIPIT")
+                    .font(.system(size: 40, weight: .black))
+                    .tracking(2)
+                    .foregroundStyle(Theme.foreground)
+
+                if let current = store.current {
+                    ResumeCard(workout: current)
+                } else {
+                    Button { store.startWorkout() } label: {
+                        Label("Start workout", systemImage: "plus")
+                    }
+                    .buttonStyle(FilledButtonStyle())
+                }
+
+                FolderBlock(title: "History") {
+                    if store.history.isEmpty {
+                        Text("No workouts yet. Start one and it will show up here.")
+                            .foregroundStyle(Theme.mutedForeground)
+                            .padding(16)
+                    } else {
+                        ForEach(Array(store.history.enumerated()), id: \.element.id) { i, entry in
+                            if i > 0 { RowDivider() }
+                            NavigationLink(value: entry.id) { HistoryRow(entry: entry) }
+                                .buttonStyle(.plain)
+                        }
+                    }
+                }
+            }
+            .padding(16)
+        }
+        .background(Theme.background)
+        .navigationDestination(for: String.self) { WorkoutDetailView(workoutId: $0) }
+        .toolbar(.hidden, for: .navigationBar)
+        .onAppear {
+            store.reload()
+            if DebugHooks.flag("demoDetail"), let first = store.history.first, path.isEmpty { path = [first.id] }
+        }
+    }
+}
+
+private struct ResumeCard: View {
+    @Environment(WorkoutStore.self) private var store
+    let workout: WorkoutDetail
+
+    var body: some View {
+        FolderBlock(title: "In progress", tone: .active) {
+            VStack(alignment: .leading, spacing: 12) {
+                let sets = workout.exercises.reduce(0) { $0 + $1.sets.count }
+                Text("Started \(Format.day(workout.startedAt)), \(Format.time(workout.startedAt))")
+                    .font(.headline)
+                    .foregroundStyle(Theme.foreground)
+                Text("\(workout.exercises.count) exercises · \(sets) sets")
+                    .foregroundStyle(Theme.mutedForeground)
+                Button("Resume workout") { store.resumeWorkout() }
+                    .buttonStyle(FilledButtonStyle())
+            }
+            .padding(16)
+        }
+    }
+}
+
+private struct HistoryRow: View {
+    let entry: HistoryEntry
+
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(entry.name ?? "Ad-hoc workout")
+                    .font(.headline)
+                    .foregroundStyle(Theme.foreground)
+                Text("\(entry.exerciseCount) \(entry.exerciseCount == 1 ? "exercise" : "exercises") · \(entry.setCount) \(entry.setCount == 1 ? "set" : "sets")")
+                    .font(.subheadline)
+                    .foregroundStyle(Theme.mutedForeground)
+            }
+            Spacer()
+            VStack(alignment: .trailing, spacing: 4) {
+                Text(Format.day(entry.completedAt)).font(.subheadline.weight(.semibold))
+                Text(Format.time(entry.completedAt)).font(.caption)
+            }
+            .foregroundStyle(Theme.mutedForeground)
+            Image(systemName: "chevron.right").font(.caption).foregroundStyle(Theme.border)
+        }
+        .padding(.horizontal, 16)
+        .frame(minHeight: 64)
+        .contentShape(Rectangle())
+    }
+}
+
+/// A finished workout, read-only.
+struct WorkoutDetailView: View {
+    @Environment(WorkoutStore.self) private var store
+    let workoutId: String
+
+    var body: some View {
+        ScrollView {
+            if let w = store.detail(workoutId) {
+                VStack(alignment: .leading, spacing: 20) {
+                    if let done = w.completedAt {
+                        Text("\(Format.day(done)), \(Format.time(w.startedAt))–\(Format.time(done))")
+                            .foregroundStyle(Theme.mutedForeground)
+                    }
+                    ForEach(SupersetRun.runs(w.exercises), id: \.id) { run in
+                        FolderBlock(title: run.title, tone: run.group == nil ? .exercise : .superset) {
+                            ForEach(Array(run.exercises.enumerated()), id: \.element.id) { i, ex in
+                                if i > 0 { RowDivider() }
+                                VStack(alignment: .leading, spacing: 8) {
+                                    if run.group != nil { Text(ex.name).font(.headline).foregroundStyle(Theme.foreground) }
+                                    ForEach(ex.sets) { SetRow(set: $0) }
+                                }
+                                .padding(16)
+                            }
+                        }
+                    }
+                }
+                .padding(16)
+            }
+        }
+        .background(Theme.background)
+        .navigationTitle("Workout")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+struct SetRow: View {
+    let set: SetDetail
+
+    var body: some View {
+        HStack {
+            Text("\(set.setNumber)")
+                .font(.subheadline.weight(.bold))
+                .foregroundStyle(Theme.mutedForeground)
+                .frame(width: 28, alignment: .leading)
+            Text(Format.weight(set.weight, set.weightUnit))
+            Text("×").foregroundStyle(Theme.mutedForeground)
+            Text("\(set.reps)")
+            Spacer()
+        }
+        .font(.body.monospacedDigit())
+        .foregroundStyle(Theme.foreground)
+    }
+}
+
+/// Consecutive exercises sharing a superset group, shown as one folder block.
+struct SupersetRun {
+    let id: String
+    let group: String?
+    let exercises: [ExerciseDetail]
+
+    var title: String { group.map { "Superset \($0)" } ?? exercises[0].name }
+
+    static func runs(_ exercises: [ExerciseDetail]) -> [SupersetRun] {
+        var out: [SupersetRun] = []
+        for ex in exercises {
+            if let g = ex.group, let last = out.last, last.group == g {
+                out[out.count - 1] = SupersetRun(id: last.id, group: g, exercises: last.exercises + [ex])
+            } else {
+                out.append(SupersetRun(id: ex.id, group: ex.group, exercises: [ex]))
+            }
+        }
+        return out
+    }
+}

@@ -11,7 +11,8 @@ let package = Package(
         .package(url: "https://github.com/groue/GRDB.swift.git", from: "7.12.0"),
     ],
     targets: [
-        .target(name: "RipitCore", dependencies: [.product(name: "GRDB", package: "GRDB.swift")]),
+        .target(name: "RipitCore", dependencies: [.product(name: "GRDB", package: "GRDB.swift")],
+                resources: [.copy("Resources/catalog.json")]),
         .testTarget(name: "RipitCoreTests", dependencies: ["RipitCore", .product(name: "GRDB", package: "GRDB.swift")]),
     ]
 )

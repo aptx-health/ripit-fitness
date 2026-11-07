@@ -1,0 +1,49 @@
+# XcodeGen spec for the iPhone app (initiative ios-app, work item 154). Generate with
+#   xcodegen generate --spec ios/project.yml --project ios
+# The generated Ripit.xcodeproj is git-ignored; edit this file instead.
+name: Ripit
+options:
+  bundleIdPrefix: fit.ripit
+  deploymentTarget:
+    iOS: "18.0"
+  createIntermediateGroups: true
+packages:
+  RipitCore:
+    path: RipitCore
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "0.1"
+    CURRENT_PROJECT_VERSION: "1"
+targets:
+  Ripit:
+    type: application
+    platform: iOS
+    sources:
+      - path: App
+        excludes:
+          - ExerciseImages
+      # Start/finish photos from free-exercise-db (scripts/ios/build-catalog.ts), kept as a folder
+      # so the app finds them at ExerciseImages/<name>.
+      - path: App/ExerciseImages
+        type: folder
+        buildPhase: resources
+    dependencies:
+      - package: RipitCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: fit.ripit.ios   # fallback if unavailable: io.dustin.ripit
+        PRODUCT_NAME: Ripit
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 3W38M2V9FB   # Dustin's free Personal Team
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Ripit
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+schemes:
+  Ripit:
+    build:
+      targets:
+        Ripit: all

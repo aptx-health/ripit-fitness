@@ -1,6 +1,5 @@
-// Public API surface for slice 1 (work item 153). Every body is a stub that throws
-// `RipitCoreError.notImplemented`; work item 154 replaces them with GRDB-backed code.
-// The tests in Tests/RipitCoreTests are the contract: change the bodies, not the shapes.
+// Public API for slice 1. Shapes were fixed by work item 153's tests (Tests/RipitCoreTests, the
+// contract); work item 154 filled in the GRDB-backed bodies. The schema is in Schema.swift.
 
 import Foundation
 import GRDB
@@ -42,13 +41,27 @@ public struct ExerciseCatalog: Sendable {
 
     /// The catalog that ships with the app. Works offline.
     public static func bundled() throws -> ExerciseCatalog {
-        throw RipitCoreError.notImplemented
+        try BundledCatalog.load().catalog
     }
 
     /// Exercises whose name or any alias contains the query, ignoring case and punctuation.
     /// Each exercise appears at most once.
+    /// Name matches come first, then alias-only matches, each alphabetical. An empty query returns
+    /// every exercise alphabetically.
     public func search(_ query: String) throws -> [CatalogExercise] {
-        throw RipitCoreError.notImplemented
+        let q = Self.normalize(query)
+        let sorted = exercises.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        if q.isEmpty { return sorted }
+        let byName = sorted.filter { Self.normalize($0.name).contains(q) }
+        let named = Set(byName.map(\.id))
+        let byAlias = sorted.filter { !named.contains($0.id) && $0.aliases.contains { Self.normalize($0).contains(q) } }
+        return byName + byAlias
+    }
+
+    /// Lowercase, drop everything but letters, digits and spaces, trim.
+    static func normalize(_ s: String) -> String {
+        String(s.lowercased().filter { $0.isLetter || $0.isNumber || $0 == " " })
+            .trimmingCharacters(in: .whitespaces)
     }
 }
 
@@ -132,53 +145,3 @@ public struct WorkoutDetail: Sendable, Equatable, Identifiable {
     }
 }
 
-/// The phone's local SQLite database. Opening it creates the file if needed, runs any missing
-/// migrations in order, and seeds the system exercise catalog.
-public final class AppDatabase: Sendable {
-    /// The app's own migrations, oldest first.
-    public static var migrationIdentifiers: [String] { [] }
-
-    /// Opens (or creates) the database at `path`. `upTo` stops after that app migration
-    /// (to build an older database); `extraMigrations` run after the app's own.
-    public static func open(path: String, upTo: String? = nil, extraMigrations: [ExtraMigration] = []) throws -> AppDatabase {
-        throw RipitCoreError.notImplemented
-    }
-
-    public static func inMemory() throws -> AppDatabase {
-        throw RipitCoreError.notImplemented
-    }
-
-    /// Identifiers of every migration applied to this database, in the order they ran.
-    public func appliedMigrations() throws -> [String] { throw RipitCoreError.notImplemented }
-
-    /// Read-only access for inspection (tests, debugging).
-    public func read<T>(_ block: (Database) throws -> T) throws -> T { throw RipitCoreError.notImplemented }
-
-    /// Ids of the system exercise definitions in the database.
-    public func systemExerciseIds() throws -> [String] { throw RipitCoreError.notImplemented }
-
-    /// Finished workouts, newest first. Unfinished workouts are not history.
-    public func history() throws -> [HistoryEntry] { throw RipitCoreError.notImplemented }
-
-    /// Starts an ad-hoc workout and returns its id.
-    public func startWorkout(at date: Date) throws -> String { throw RipitCoreError.notImplemented }
-
-    /// The unfinished workout to offer for resume, if any.
-    public func inProgressWorkout() throws -> WorkoutDetail? { throw RipitCoreError.notImplemented }
-
-    /// Adds a catalog exercise to a workout and returns the new exercise id.
-    public func addExercise(definitionId: String, to workoutId: String) throws -> String { throw RipitCoreError.notImplemented }
-
-    /// Logs the next set for an exercise and returns the set id.
-    public func logSet(exerciseId: String, reps: Int, weight: Double, unit: String = "lbs") throws -> String { throw RipitCoreError.notImplemented }
-
-    /// Groups exercises of one workout as a superset.
-    public func groupAsSuperset(_ exerciseIds: [String]) throws { throw RipitCoreError.notImplemented }
-
-    public func finishWorkout(_ workoutId: String, at date: Date) throws { throw RipitCoreError.notImplemented }
-
-    /// Deletes an unfinished workout with its exercises and sets.
-    public func discardWorkout(_ workoutId: String) throws { throw RipitCoreError.notImplemented }
-
-    public func workout(_ id: String) throws -> WorkoutDetail { throw RipitCoreError.notImplemented }
-}
