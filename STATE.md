@@ -6,7 +6,7 @@ None
 Running quietly: None.
 
 ## Active
-- Coaching (initiatives/coaching): slice 1 (invite + link) merged to dev 2026-11-07 (#1041). Slice 2 (send + Sent list) approved 2026-11-07; PR into dev. Next: quick Send actions + expandable workout rows.
+- Coaching (initiatives/coaching): slice 1 (invite + link) merged to dev 2026-11-07 (#1041). Slice 2 (send + Sent list) approved 2026-11-07; PR into dev. Row panel + quick Send + section headers (153–155) accepted; PR stacked on #1045.
 - Workout library (initiatives/workout-library): tidy saved workouts (pinned + tags), incl. where AI and coach workouts land. Slices 1 (#1040) and 3 (origin + New + archive, approved 2026-11-07) done; slice 3 PR into dev. Later: slice 2 (tags + search), slice 4 (bulk tidy).
 - Theme page with light/dark previews (work 149, small; fixes the theme menu running off screen): approved 2026-11-07; PR into dev.
 - Coaching (initiatives/coaching): slice 1 (invite + link) merged to dev 2026-11-07 (#1041). Slice 2 (send + Sent list) fixed; Dustin's phone preview next.
