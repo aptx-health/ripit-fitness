@@ -24,3 +24,4 @@
 - 2026-11-07: 164 back (3279a885, 124 tests); re-check with ios-review. Stretch slice 4 started: spec features/ios-app/progress.feature; 166 (Progress tests, goldens from the web's pure functions) to ios-tests.
 - 2026-11-07: slice 2 accepted (164 re-check). Should-fix 167 (sets renumbered on the web break later imports) to ios-impl. For Dustin: only matters if he already imported on a phone build before v4 (then reinstall and import fresh).
 - 2026-11-07: 167 accepted (84adc531).
+- 2026-11-07: 166 back (10828474: 16 Progress tests + web goldens, 27/27 breaks). 168 (Progress build) dispatched to ios-impl.
