@@ -1,11 +1,12 @@
 ---
 id: 172
-state: ready
+state: accepted
 executor: ios-impl
 skill: handoff-implementer
 from: lead (worktree-brave-field-c150)
 confirmed: 2026-11-07 Dustin (4h goal stretch: slice 4)
 updated: 2026-11-07
+waiting_on:
 ---
 # iOS slice 4: fixes after review 169
 
@@ -29,3 +30,5 @@ A short packet, first line `Report: ...`, sent to wX:p1. Commit your paths only.
 
 ## Log
 - 2026-11-07 CST: created after review 169 (Q1 b, Q2 b, Q3 a).
+- 2026-11-07 13:19 MST: dispatched to ios-impl (running)
+- 2026-11-07 CST: 172 fixes 3d660945; lead re-ran: 155 pass + sim build. Lead accepts slice 4 (fixes not re-reviewed by hand; noted on the Hub page).

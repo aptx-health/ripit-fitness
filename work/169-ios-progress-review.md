@@ -1,6 +1,6 @@
 ---
 id: 169
-state: running
+state: accepted
 executor: ios-review
 skill: reviewer
 from: lead (worktree-brave-field-c150)
@@ -28,3 +28,4 @@ A review packet with first line `Report: ...` and a verdict, sent to wX:p1. Repo
 - 2026-11-07 CST: created.
 - 2026-11-07 13:01 MST: dispatched to ios-review (running)
 - 2026-11-07 CST: verdict: meets all 6 scenarios, numbers match the goldens hands-on; should-fixes go to 172. Lead: Top set/Volume and programWeek deferred.
+- 2026-11-07 CST: 172 fixes 3d660945; lead re-ran: 155 pass + sim build. Lead accepts slice 4 (fixes not re-reviewed by hand; noted on the Hub page).

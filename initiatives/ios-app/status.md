@@ -31,3 +31,4 @@
 - 2026-11-07: slice 3 accepted (165 re-check). 171 (stale Edit screen after a save) to ios-impl.
 - 2026-11-07: 171 accepted (197ef248). Waiting on 169 (Progress review).
 - 2026-11-07: 169 Progress review: meets 6/6, numbers match the web. 172 (half-up rounding, AX labels, refresh, app-level import alert) to ios-impl. Backlog: lift page Top set/Volume tabs, programWeek line, a web-side golden drift test.
+- 2026-11-07: 172 back (3d660945); 155 tests + sim build green. Slice 4 accepted by lead. All 4 slices done. Final review page published on Handoff Hub (ripit-fitness/ios-first-sweep). Waiting on Dustin: review, phone install, whether to open PRs, cleanup.sh.
