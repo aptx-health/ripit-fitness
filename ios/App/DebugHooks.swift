@@ -26,6 +26,8 @@
 //   -demoStayHome YES   with -demoSession too, stay on Training (shows the resume card)
 //   -demoArchiveActive YES  archive the sample program after starting its session
 //   -demoStartOther YES ask to start another program workout while the session is open
+//   -demoEditFlow YES   with -demoScreen edit (work item 171): open the first exercise, remove its
+//                       first set and save; reopen it (shows the saved plan), change a rep and save
 //   -demoCancelBuilder YES  with -demoScreen builder, tap Cancel (shows the discard prompt)
 
 import Foundation
@@ -140,6 +142,44 @@ enum DebugHooks {
         }
         #endif
     }
+
+    /// -demoEditFlow: 0 = first open, 1 = saved once, 2 = reopened.
+    @MainActor private static var editFlow = 0
+
+    /// Runs the reviewer's 165 flow inside the exercise sheet, one step per open.
+    @MainActor
+    static func editFlowStep(removeFirstSet: @escaping () -> Void, changeRep: @escaping () -> Void, save: @escaping () -> Void) {
+        #if DEBUG
+        guard flag("demoEditFlow") else { return }
+        switch editFlow {
+        case 0:
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                removeFirstSet()
+                editFlow = 1
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: save)
+            }
+        case 2:
+            // Leave the reopened sheet on screen for the screenshot, then save again.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+                changeRep()
+                editFlow = 3
+                save()
+            }
+        default: break
+        }
+        #endif
+    }
+
+    @MainActor
+    static func editFlowDismissed(reopen: @escaping (String) -> Void) {
+        #if DEBUG
+        guard flag("demoEditFlow"), editFlow == 1, let id = editFlowExerciseId else { return }
+        editFlow = 2
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { reopen(id) }
+        #endif
+    }
+
+    @MainActor static var editFlowExerciseId: String?
 
     /// Opens the screen named by -demoScreen once, from the Training home.
     @MainActor

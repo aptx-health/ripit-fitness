@@ -11,10 +11,11 @@ struct ProgramEditView: View {
     @State private var week: Int?
     @State private var name = ""
     @State private var addingTo: String?
-    @State private var editing: ProgramExercise?
+    /// The exercise whose sheet is open, by id: the sheet always gets the saved plan (work item 171).
+    @State private var editingId: String?
 
     var body: some View {
-        let _ = store.programs   // re-read after each write
+        let _ = store.revision   // re-read the program after every write
         ScrollView {
             if let p = store.program(programId) {
                 let shown = week ?? p.weeks.first?.weekNumber
@@ -40,7 +41,7 @@ struct ProgramEditView: View {
 
                     if let w = p.weeks.first(where: { $0.weekNumber == shown }) {
                         ForEach(w.workouts) { workout in
-                            WorkoutEditBlock(workout: workout, onAdd: { addingTo = workout.id }, onEdit: { editing = $0 })
+                            WorkoutEditBlock(workout: workout, onAdd: { addingTo = workout.id }, onEdit: { editingId = $0.id })
                         }
                         Button {
                             store.addProgramWorkout(weekId: w.id, name: "Day \(w.workouts.count + 1)")
@@ -66,13 +67,21 @@ struct ProgramEditView: View {
             }
             .environment(store)
         }
-        .sheet(item: $editing) { ex in
-            NavigationStack { ExerciseEditSheet(exercise: ex) }.environment(store)
+        .sheet(isPresented: Binding(get: { editingId != nil }, set: { if !$0 { editingId = nil } }),
+               onDismiss: { DebugHooks.editFlowDismissed(reopen: { editingId = $0 }) }) {
+            if let id = editingId, let ex = exercise(id) {
+                NavigationStack { ExerciseEditSheet(exercise: ex) }.environment(store)
+            }
         }
         .onAppear {
-            if DebugHooks.flag("demoEditExercise"), editing == nil,
-               let ex = store.program(programId)?.weeks.first?.workouts.first?.exercises.first { editing = ex }
+            if DebugHooks.flag("demoEditExercise") || DebugHooks.flag("demoEditFlow"), editingId == nil,
+               let ex = store.program(programId)?.weeks.first?.workouts.first?.exercises.first { editingId = ex.id; DebugHooks.editFlowExerciseId = ex.id }
         }
+    }
+
+    /// The exercise as saved now.
+    private func exercise(_ id: String) -> ProgramExercise? {
+        store.program(programId)?.weeks.flatMap(\.workouts).flatMap(\.exercises).first { $0.id == id }
     }
 
     private func saveName(_ p: ProgramDetail) {
@@ -187,6 +196,7 @@ private struct ExerciseEditSheet: View {
             Button("Keep editing", role: .cancel) {}
         }
         .onAppear {
+            DebugHooks.editFlowStep(removeFirstSet: { sets.removeFirst() }, changeRep: { sets[0].reps = "6" }, save: save)
             name = exercise.name
             group = exercise.group
             sets = exercise.sets.map(EditableSet.init)

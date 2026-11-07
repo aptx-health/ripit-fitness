@@ -32,6 +32,8 @@ final class WorkoutStore {
     var session: ProgramSession?
     /// A program workout the person asked to start while another one is in progress (work item 170).
     var pendingStart: PendingStart?
+    /// Goes up after every write, so screens that read the database directly re-read (work item 171).
+    private(set) var revision = 0
     var importing = false
     @ObservationIgnored private var lastLog: (exerciseId: String, at: Date)?
     /// The outcome of the last import, shown as an alert.
@@ -140,6 +142,7 @@ final class WorkoutStore {
     func write(_ change: (AppDatabase) throws -> Void) {
         guard let db else { return }
         attempt { try change(db) }
+        revision += 1
         reload()
     }
 
