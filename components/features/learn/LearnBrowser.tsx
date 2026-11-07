@@ -1,6 +1,6 @@
 'use client'
 
-import { BookOpen, Clock, Search, X } from 'lucide-react'
+import { ArrowLeft, BookOpen, Clock, Search, X } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
@@ -148,6 +148,13 @@ export default function LearnBrowser() {
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
+          <Link
+            href="/settings"
+            className="mb-3 inline-flex min-h-12 items-center gap-2 text-sm font-bold uppercase tracking-wider text-muted-foreground doom-focus-ring hover:text-foreground"
+          >
+            <ArrowLeft size={16} aria-hidden="true" />
+            Settings
+          </Link>
           <h1 className="text-4xl font-bold text-foreground doom-title uppercase tracking-wider">
             LEARN
           </h1>

@@ -14,9 +14,10 @@ Feature: Progress tab, weekly report (S1)
     Then the bottom nav shows Training, Library, Workout, Progress, Settings
     And no nav item links to /learn
 
-  Scenario: Old Learn links go to Progress
+  # Changed 2026-11-06 (work 135): Learn stays, linked from Settings → Help.
+  Scenario: Learn links stay on Learn
     When the user opens /learn or /learn/some-article
-    Then they land on /progress
+    Then they see Learn, not /progress
 
   Scenario: The beginner primer has no Learn links
     Then the beginner primer wizard links to no /learn page

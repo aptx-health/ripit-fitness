@@ -6,7 +6,10 @@ None
 Running quietly: None.
 
 ## Active
-- E-ink theme + display toggle for color e-ink (initiatives/eink-theme): accepted on the BOOX 2026-11-05; PR into dev open.
+- Coaching (initiatives/coaching): send programs and workouts to a trainee as proposals. Slice 1 (invite + link) build 138 running in worktree1 (coach-impl).
+- Workout library (initiatives/workout-library): tidy saved workouts (pinned + tags), incl. where AI and coach workouts land. Discovery 141 running.
+- Learn linked from Settings (work 135, small): approved by Dustin 2026-11-06; PR into dev.
+- E-ink theme + display toggle (initiatives/eink-theme): merged to dev 2026-11-06 (#1038); next release to prod.
 - Progress tab replacing Learn (initiatives/analytics): S1–S3 in prod 2026-11-02 (release #1034, infra #136). Per-lift page (/progress/lift/[id]) in prod 2026-11-05 (release #1037, infra #137).
 - Planned sets in the workout logger (initiatives/agent-tools): in prod 2026-11-02 (release #1034, infra #136).
 - Balance targets, one source of truth (initiatives/agent-tools): in prod (#1028, release #1029, infra #135, 2026-11-01).
