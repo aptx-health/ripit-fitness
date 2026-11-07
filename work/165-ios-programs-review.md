@@ -1,6 +1,6 @@
 ---
 id: 165
-state: running
+state: accepted
 executor: programs-review
 skill: reviewer
 from: lead (worktree-brave-field-c150)
@@ -36,3 +36,4 @@ A review packet with first line `Report: ...` and a verdict, sent to wX:p1. Repo
 - 2026-11-07 CST: created (fresh reviewer; ios-review is on 155/163).
 - 2026-11-07 12:36 MST: dispatched to programs-review (running)
 - 2026-11-07 CST: verdict checks out with 3 should-fixes; all 10 scenarios driven by taps, including the imported program. Lead answers: per-week editing for now; one workout in progress on the phone (deliberate). Fixes in 170.
+- 2026-11-07 CST: 165 re-check says accept 170; lead accepts slice 3 under 4h autonomy (should-fix 171 follows).

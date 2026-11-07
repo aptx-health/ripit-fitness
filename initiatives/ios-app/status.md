@@ -28,3 +28,4 @@
 - 2026-11-07: 168 back (60623a5c): all 4 slices built; 144 tests + sim build green. 169 Progress review to ios-review.
 - 2026-11-07: 165 programs review: all 10 scenarios pass by tap (hand-built and imported programs); should-fix S1 (builder swipe loses the draft), S2 (no resume card for program drafts), S3 (editor RPE/RIR by position). Lead: per-week editing; one workout in progress on the phone. 170 to ios-impl. Cleanup from reviewer: a worktree5 overmind/tmux + wt7 containers, and the worktree3 web app still running.
 - 2026-11-07: 170 back (218f6592, 151 tests); re-check with programs-review.
+- 2026-11-07: slice 3 accepted (165 re-check). 171 (stale Edit screen after a save) to ios-impl.

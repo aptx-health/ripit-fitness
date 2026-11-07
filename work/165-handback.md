@@ -53,3 +53,24 @@ Checks out, with adjustments. All 10 scenarios work when driven by taps in the s
 - The worktree3 web app (`./scripts/dev.sh start -l postgres,app`, port 3600, socket `/tmp/fitcsv-overmind-wt6.sock`) is still running.
 - Simulator `ripit-165-review` (66E7D165-0F47-44ED-AAD5-09D5B8E43D44); a copy of the fixture is in its app Documents.
 - My scratchpad: `/private/tmp/claude-501/-Users-dustin-projects-worktrees-ripit-fitness-worktree5/fff5394c-578e-4e17-9207-813c494cb97e/scratchpad/` (`uitest/`, `dd/`, `shots/`, `small/`, logs).
+
+---
+
+## Re-check after 170 (HEAD 2fb9e09d, by tap)
+Accept 170. S1, S2, S3 and the minor items are fixed. I found one new should-fix, which already existed at 590d0570 and isn't from 170.
+
+- `mise run ios-check`: 151 tests in 25 suites passed, and the build passed.
+- **S1:** swiping the builder down no longer closes it. Cancel asks "Discard this program?", and Keep editing keeps the draft. An untouched builder closes without asking. The exercise sheet asks "Discard your changes?" too.
+- **S2:** Training shows an "In progress · Strength Block · W1 · Squat + Press" card. Up Next Start now opens a dialog: Resume, or "Discard it and start … Pull". After archiving with a draft open, the card is still there and Resume opens the workout.
+- **S3:** on the imported squat (warm-up 135lbs, then 2 × 225lbs RIR 2), I removed the warm-up and saved. The database then held 2 × 225lbs with RIR 2 and no warm-up. Add set copied RIR 2 without the warm-up flag, and reweighing set 1 kept its RIR.
+- **Minor items:**
+  - History rows read "Strength Block · W1 · Squat + Press".
+  - The default day shows "Day 1" once.
+  - Tapping a builder reps field selects its text (typing 8 over 5 gives 8).
+- **New should-fix: the Edit program screen doesn't refresh after saving an exercise, so a second edit can undo the first.** Edit squat → remove the warm-up → Save. The row still shows the old plan. Reopen squat on the same screen and the sheet shows 3 sets (135, 225, 225). Change a rep and Save, and the database has the warm-up set back. Leaving and re-entering Edit shows fresh data.
+  - The screen re-reads only via `let _ = store.programs` (`ios/App/ProgramEditView.swift:17`), and `editing` holds that stale `ProgramExercise`.
+  - My 165 shot `34-edit-after-save.png` shows the same stale screen; I missed it then.
+  - Recommendation: a small fix before Dustin's acceptance, because the "Editing the plan" scenario depends on it.
+  - Evidence: `/private/tmp/claude-501/-Users-dustin-projects-worktrees-ripit-fitness-worktree5/fff5394c-578e-4e17-9207-813c494cb97e/scratchpad/shots/r11-stale-reopen.png` and `r4-after-remove-warmup.png`.
+- More screenshots: `/private/tmp/claude-501/-Users-dustin-projects-worktrees-ripit-fitness-worktree5/fff5394c-578e-4e17-9207-813c494cb97e/scratchpad/shots/r1-after-swipe.png`, `r2-cancel-dialog.png`, `r6-home-resume-card.png`, `r7-conflict-dialog.png`, `r8-archived-draft-home.png`, `r9-history-rows.png`.
+- **Cleanup:** same as above, plus `/private/tmp/claude-501/-Users-dustin-projects-worktrees-ripit-fitness-worktree5/fff5394c-578e-4e17-9207-813c494cb97e/scratchpad/uitest/old/`. I didn't run dev.sh this time.

@@ -1,6 +1,6 @@
 ---
 id: 170
-state: review
+state: accepted
 executor: ios-impl
 skill: handoff-implementer
 from: lead (worktree-brave-field-c150)
@@ -36,3 +36,4 @@ The `handoff-implementer` packet, first line `Report: ...`, sent to wX:p1. Commi
 - 2026-11-07 CST: created after review 165.
 - 2026-11-07 13:04 MST: dispatched to ios-impl (running)
 - 2026-11-07 CST: back 218f6592; lead re-ran: 151 pass + sim build. Re-check by programs-review.
+- 2026-11-07 CST: 165 re-check says accept 170; lead accepts slice 3 under 4h autonomy (should-fix 171 follows).
