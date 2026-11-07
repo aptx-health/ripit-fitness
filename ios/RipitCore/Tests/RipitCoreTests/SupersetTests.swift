@@ -19,7 +19,7 @@ struct SupersetTests {
         let bench = try db.addExercise(definitionId: benchPressId, to: w)
         let row = try db.addExercise(definitionId: rowId, to: w)
         let squat = try db.addExercise(definitionId: squatId, to: w)
-        for e in [bench, row, squat] { _ = try db.logSet(exerciseId: e, reps: 8, weight: "135lbs") }
+        for e in [bench, row, squat] { _ = try db.logSet(exerciseId: e, reps: 8, weight: 135) }
         try db.groupAsSuperset([bench, row])
         return (w, bench, row, squat)
     }

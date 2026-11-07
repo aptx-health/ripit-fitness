@@ -85,14 +85,17 @@ public struct SetDetail: Sendable, Equatable, Identifiable {
     public let id: String
     public let setNumber: Int
     public let reps: Int
-    /// Free text, stored and shown exactly as typed ("135lbs", "65%", "RPE 8").
-    public let weight: String
+    /// A number, like the web app's LoggedSet.weight (0 for bodyweight).
+    public let weight: Double
+    /// "lbs" or "kg"; defaults to "lbs".
+    public let weightUnit: String
 
-    public init(id: String, setNumber: Int, reps: Int, weight: String) {
+    public init(id: String, setNumber: Int, reps: Int, weight: Double, weightUnit: String) {
         self.id = id
         self.setNumber = setNumber
         self.reps = reps
         self.weight = weight
+        self.weightUnit = weightUnit
     }
 }
 
@@ -167,7 +170,7 @@ public final class AppDatabase: Sendable {
     public func addExercise(definitionId: String, to workoutId: String) throws -> String { throw RipitCoreError.notImplemented }
 
     /// Logs the next set for an exercise and returns the set id.
-    public func logSet(exerciseId: String, reps: Int, weight: String) throws -> String { throw RipitCoreError.notImplemented }
+    public func logSet(exerciseId: String, reps: Int, weight: Double, unit: String = "lbs") throws -> String { throw RipitCoreError.notImplemented }
 
     /// Groups exercises of one workout as a superset.
     public func groupAsSuperset(_ exerciseIds: [String]) throws { throw RipitCoreError.notImplemented }

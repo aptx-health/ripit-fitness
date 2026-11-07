@@ -75,9 +75,9 @@ enum Clock {
 let benchPressId = "cmiz7vjju0000vr0m4b1o6bec"   // Barbell Bench Press
 
 extension AppDatabase {
-    /// An ad-hoc workout with one exercise per (definitionId, [(reps, weight)]), finished at `finish` if given.
+    /// An ad-hoc workout with one exercise per (definitionId, [(reps, weight in lbs)]), finished at `finish` if given.
     @discardableResult
-    func makeWorkout(start: Date, finish: Date?, _ exercises: [(String, [(Int, String)])]) throws -> String {
+    func makeWorkout(start: Date, finish: Date?, _ exercises: [(String, [(Int, Double)])]) throws -> String {
         let w = try startWorkout(at: start)
         for (def, sets) in exercises {
             let e = try addExercise(definitionId: def, to: w)

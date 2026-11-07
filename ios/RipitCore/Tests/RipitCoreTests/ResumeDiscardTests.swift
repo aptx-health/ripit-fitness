@@ -15,7 +15,7 @@ struct ResumeDiscardTests {
     @Test("Resume: after closing and reopening, the unfinished workout is offered with its set")
     func resumeAfterReopen() throws {
         let tmp = try TempDB()
-        let w = try tmp.open().makeWorkout(start: start, finish: nil, [(benchPressId, [(8, "135lbs")])])
+        let w = try tmp.open().makeWorkout(start: start, finish: nil, [(benchPressId, [(8, 135)])])
 
         let reopened = try tmp.open()
         let resume = try #require(try reopened.inProgressWorkout())
@@ -23,7 +23,7 @@ struct ResumeDiscardTests {
         #expect(resume.completedAt == nil)
         #expect(abs(resume.startedAt.timeIntervalSince(start)) < 1)
         #expect(resume.exercises.map(\.name) == ["Barbell Bench Press"])
-        #expect(resume.exercises.first?.sets.map(\.weight) == ["135lbs"])
+        #expect(resume.exercises.first?.sets.map(\.weight) == [135])
         #expect(resume.exercises.first?.sets.map(\.reps) == [8])
         #expect(try reopened.history().isEmpty, "an unfinished workout is not history")
     }
@@ -31,10 +31,10 @@ struct ResumeDiscardTests {
     @Test("Resume: logging continues after reopening and the workout can be finished")
     func continueAfterReopen() throws {
         let tmp = try TempDB()
-        let w = try tmp.open().makeWorkout(start: start, finish: nil, [(benchPressId, [(8, "135lbs")])])
+        let w = try tmp.open().makeWorkout(start: start, finish: nil, [(benchPressId, [(8, 135)])])
         let db = try tmp.open()
         let e = try #require(try db.inProgressWorkout()?.exercises.first?.id)
-        _ = try db.logSet(exerciseId: e, reps: 5, weight: "155lbs")
+        _ = try db.logSet(exerciseId: e, reps: 5, weight: 155)
         try db.finishWorkout(w, at: start.addingTimeInterval(1800))
         #expect(try db.inProgressWorkout() == nil)
         #expect(try db.history().map(\.setCount) == [2])
@@ -44,7 +44,7 @@ struct ResumeDiscardTests {
     @Test("Resume: a finished workout is not offered")
     func finishedNotOffered() throws {
         let tmp = try TempDB()
-        try tmp.open().makeWorkout(start: start, finish: start.addingTimeInterval(60), [(benchPressId, [(8, "135lbs")])])
+        try tmp.open().makeWorkout(start: start, finish: start.addingTimeInterval(60), [(benchPressId, [(8, 135)])])
         #expect(try tmp.open().inProgressWorkout() == nil)
     }
 
@@ -53,9 +53,9 @@ struct ResumeDiscardTests {
         let tmp = try TempDB()
         let db = try tmp.open()
         let done = try db.makeWorkout(start: Clock.at(2026, 11, 6, 9), finish: Clock.at(2026, 11, 6, 10),
-                                      [(benchPressId, [(8, "135lbs"), (5, "155lbs")])])
+                                      [(benchPressId, [(8, 135), (5, 155)])])
         let before = try db.history()
-        let draft = try db.makeWorkout(start: start, finish: nil, [(benchPressId, [(3, "175lbs")]), ("ex_bw_034", [(10, "BW")])])
+        let draft = try db.makeWorkout(start: start, finish: nil, [(benchPressId, [(3, 175)]), ("ex_bw_034", [(10, 0)])])
 
         try db.discardWorkout(draft)
 
@@ -69,8 +69,8 @@ struct ResumeDiscardTests {
     @Test("Discard: its exercises and sets are deleted too, nothing else")
     func discardLeavesNoOrphans() throws {
         let db = try TempDB().open()
-        try db.makeWorkout(start: Clock.at(2026, 11, 6, 9), finish: Clock.at(2026, 11, 6, 10), [(benchPressId, [(8, "135lbs")])])
-        let draft = try db.makeWorkout(start: start, finish: nil, [(benchPressId, [(3, "175lbs"), (3, "175lbs")]), ("ex_bw_034", [(10, "BW")])])
+        try db.makeWorkout(start: Clock.at(2026, 11, 6, 9), finish: Clock.at(2026, 11, 6, 10), [(benchPressId, [(8, 135)])])
+        let draft = try db.makeWorkout(start: start, finish: nil, [(benchPressId, [(3, 175), (3, 175)]), ("ex_bw_034", [(10, 0)])])
         try db.discardWorkout(draft)
         #expect(try db.count("loggedSet") == 1)
         #expect(try db.count("exercise") == 1)

@@ -77,7 +77,7 @@ struct MigrationTests {
         let tmp = try TempDB()
         let start = Clock.at(2026, 11, 7, 9)
         let id = try tmp.open().makeWorkout(start: start, finish: start.addingTimeInterval(3600),
-                                            [(benchPressId, [(8, "135lbs"), (5, "155lbs")])])
+                                            [(benchPressId, [(8, 135), (5, 155)])])
         let seen = Mutex<Int>(-1)
         let db = try tmp.open(extra: [ExtraMigration("test-count-sets") { db in
             let n = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM loggedSet") ?? -1
@@ -87,6 +87,6 @@ struct MigrationTests {
         let history = try db.history()
         #expect(history.map(\.id) == [id])
         #expect(history.first?.setCount == 2)
-        #expect(try db.workout(id).exercises.first?.sets.map(\.weight) == ["135lbs", "155lbs"])
+        #expect(try db.workout(id).exercises.first?.sets.map(\.weight) == [135, 155])
     }
 }
