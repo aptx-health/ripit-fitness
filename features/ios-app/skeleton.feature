@@ -26,13 +26,14 @@ Feature: iOS app slice 1 - skeleton and ad-hoc logging
 
   Scenario: Log an ad-hoc workout
     Given I start a new workout
-    When I add "Barbell Bench Press" and log sets "135lbs x 8" and "155lbs x 5"
+    When I add "Barbell Bench Press" and log sets of 135 lbs x 8 and 155 lbs x 5
     And I finish the workout
     Then the history shows one workout dated today with 1 exercise and 2 sets
 
-  Scenario: Weight stays free text
-    When I log a set with weight "RPE 8"
-    Then it is saved and shown exactly as "RPE 8"
+  Scenario: Logged weight is a number with a unit, like the web app
+    When I log a set of 62.5 kg x 5
+    Then it is saved as weight 62.5 with unit "kg" and reps 5
+    And a set logged with no unit defaults to "lbs"
 
   Scenario: A workout in progress survives the app closing
     Given I have logged 1 set in an unfinished workout
