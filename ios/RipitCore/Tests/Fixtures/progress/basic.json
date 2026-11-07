@@ -1,0 +1,6626 @@
+{
+ "about": "Ten steady weeks over the DST change, then an open week with e1RM PRs and a rep PR (press at 10 reps)",
+ "generatedBy": "scripts/ios/progress-goldens.ts",
+ "timeZone": "America/Denver",
+ "now": "2026-11-05T19:00:00.000Z",
+ "unit": "lbs",
+ "target": 3,
+ "file": {
+  "format": "ripit-export",
+  "version": 1,
+  "exportedAt": "2026-11-05T19:00:00.000Z",
+  "userId": "golden-user",
+  "settings": {},
+  "balanceSettings": {},
+  "customExercises": [],
+  "exerciseRefs": [
+   {
+    "id": "cmiz7vjju0000vr0m4b1o6bec",
+    "name": "Barbell Bench Press"
+   },
+   {
+    "id": "cmiz7vk1i0003vr0mqucd1f52",
+    "name": "Barbell Row"
+   },
+   {
+    "id": "cmiz7vjpo0001vr0msv9of7ib",
+    "name": "Barbell Back Squat"
+   },
+   {
+    "id": "cmiz7vk780004vr0md53c57bz",
+    "name": "Overhead Press"
+   },
+   {
+    "id": "cmiz7vkvr0008vr0m7rv3dapc",
+    "name": "Pull-Up"
+   },
+   {
+    "id": "cmiz7vjvh0002vr0mtcmhiz70",
+    "name": "Conventional Deadlift"
+   }
+  ],
+  "programs": [],
+  "workoutCompletions": [
+   {
+    "id": "c-basic-001",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-08-25T01:00:00.000Z",
+    "startedAt": "2026-08-25T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 1",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-001-e1",
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-001",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-basic-001-e2",
+      "name": "Barbell Row",
+      "exerciseDefinitionId": "cmiz7vk1i0003vr0mqucd1f52",
+      "order": 2,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-001",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-001-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 135,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": true,
+      "exerciseId": "c-basic-001-e1",
+      "completionId": "c-basic-001",
+      "createdAt": "2026-08-25T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-001-e1-s2",
+      "setNumber": 2,
+      "reps": 5,
+      "weight": 185,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-001-e1",
+      "completionId": "c-basic-001",
+      "createdAt": "2026-08-25T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-001-e1-s3",
+      "setNumber": 3,
+      "reps": 5,
+      "weight": 185,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-001-e1",
+      "completionId": "c-basic-001",
+      "createdAt": "2026-08-25T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-001-e2-s1",
+      "setNumber": 1,
+      "reps": 8,
+      "weight": 155,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": 2,
+      "isWarmup": false,
+      "exerciseId": "c-basic-001-e2",
+      "completionId": "c-basic-001",
+      "createdAt": "2026-08-25T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-002",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-08-27T01:00:00.000Z",
+    "startedAt": "2026-08-27T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 2",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-002-e1",
+      "name": "Barbell Back Squat",
+      "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-002",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-002-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 245,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-002-e1",
+      "completionId": "c-basic-002",
+      "createdAt": "2026-08-27T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-002-e1-s2",
+      "setNumber": 2,
+      "reps": 3,
+      "weight": 265,
+      "weightUnit": "lbs",
+      "rpe": 9,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-002-e1",
+      "completionId": "c-basic-002",
+      "createdAt": "2026-08-27T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-003",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-08-28T16:30:00.000Z",
+    "startedAt": "2026-08-28T15:30:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 3",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-003-e1",
+      "name": "Overhead Press",
+      "exerciseDefinitionId": "cmiz7vk780004vr0md53c57bz",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-003",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-basic-003-e2",
+      "name": "Pull-Up",
+      "exerciseDefinitionId": "cmiz7vkvr0008vr0m7rv3dapc",
+      "order": 2,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-003",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-003-e1-s1",
+      "setNumber": 1,
+      "reps": 6,
+      "weight": 95,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-003-e1",
+      "completionId": "c-basic-003",
+      "createdAt": "2026-08-28T16:30:00.000Z"
+     },
+     {
+      "id": "c-basic-003-e2-s1",
+      "setNumber": 1,
+      "reps": 8,
+      "weight": 0,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-003-e2",
+      "completionId": "c-basic-003",
+      "createdAt": "2026-08-28T16:30:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-004",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-09-01T01:00:00.000Z",
+    "startedAt": "2026-09-01T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 4",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-004-e1",
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-004",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-basic-004-e2",
+      "name": "Barbell Row",
+      "exerciseDefinitionId": "cmiz7vk1i0003vr0mqucd1f52",
+      "order": 2,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-004",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-004-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 135,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": true,
+      "exerciseId": "c-basic-004-e1",
+      "completionId": "c-basic-004",
+      "createdAt": "2026-09-01T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-004-e1-s2",
+      "setNumber": 2,
+      "reps": 5,
+      "weight": 187.5,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-004-e1",
+      "completionId": "c-basic-004",
+      "createdAt": "2026-09-01T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-004-e1-s3",
+      "setNumber": 3,
+      "reps": 5,
+      "weight": 187.5,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-004-e1",
+      "completionId": "c-basic-004",
+      "createdAt": "2026-09-01T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-004-e2-s1",
+      "setNumber": 1,
+      "reps": 8,
+      "weight": 155,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": 2,
+      "isWarmup": false,
+      "exerciseId": "c-basic-004-e2",
+      "completionId": "c-basic-004",
+      "createdAt": "2026-09-01T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-005",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-09-03T01:00:00.000Z",
+    "startedAt": "2026-09-03T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 5",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-005-e1",
+      "name": "Barbell Back Squat",
+      "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-005",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-005-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 250,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-005-e1",
+      "completionId": "c-basic-005",
+      "createdAt": "2026-09-03T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-005-e1-s2",
+      "setNumber": 2,
+      "reps": 3,
+      "weight": 270,
+      "weightUnit": "lbs",
+      "rpe": 9,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-005-e1",
+      "completionId": "c-basic-005",
+      "createdAt": "2026-09-03T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-006",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-09-04T16:30:00.000Z",
+    "startedAt": "2026-09-04T15:30:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 6",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-006-e1",
+      "name": "Overhead Press",
+      "exerciseDefinitionId": "cmiz7vk780004vr0md53c57bz",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-006",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-basic-006-e2",
+      "name": "Pull-Up",
+      "exerciseDefinitionId": "cmiz7vkvr0008vr0m7rv3dapc",
+      "order": 2,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-006",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-006-e1-s1",
+      "setNumber": 1,
+      "reps": 6,
+      "weight": 95,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-006-e1",
+      "completionId": "c-basic-006",
+      "createdAt": "2026-09-04T16:30:00.000Z"
+     },
+     {
+      "id": "c-basic-006-e2-s1",
+      "setNumber": 1,
+      "reps": 8,
+      "weight": 0,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-006-e2",
+      "completionId": "c-basic-006",
+      "createdAt": "2026-09-04T16:30:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-007",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-09-08T01:00:00.000Z",
+    "startedAt": "2026-09-08T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 7",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-007-e1",
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-007",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-basic-007-e2",
+      "name": "Barbell Row",
+      "exerciseDefinitionId": "cmiz7vk1i0003vr0mqucd1f52",
+      "order": 2,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-007",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-007-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 135,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": true,
+      "exerciseId": "c-basic-007-e1",
+      "completionId": "c-basic-007",
+      "createdAt": "2026-09-08T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-007-e1-s2",
+      "setNumber": 2,
+      "reps": 5,
+      "weight": 190,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-007-e1",
+      "completionId": "c-basic-007",
+      "createdAt": "2026-09-08T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-007-e1-s3",
+      "setNumber": 3,
+      "reps": 5,
+      "weight": 190,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-007-e1",
+      "completionId": "c-basic-007",
+      "createdAt": "2026-09-08T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-007-e2-s1",
+      "setNumber": 1,
+      "reps": 8,
+      "weight": 155,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": 2,
+      "isWarmup": false,
+      "exerciseId": "c-basic-007-e2",
+      "completionId": "c-basic-007",
+      "createdAt": "2026-09-08T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-008",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-09-10T01:00:00.000Z",
+    "startedAt": "2026-09-10T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 8",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-008-e1",
+      "name": "Barbell Back Squat",
+      "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-008",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-008-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 255,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-008-e1",
+      "completionId": "c-basic-008",
+      "createdAt": "2026-09-10T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-008-e1-s2",
+      "setNumber": 2,
+      "reps": 3,
+      "weight": 275,
+      "weightUnit": "lbs",
+      "rpe": 9,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-008-e1",
+      "completionId": "c-basic-008",
+      "createdAt": "2026-09-10T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-009",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-09-11T16:30:00.000Z",
+    "startedAt": "2026-09-11T15:30:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 9",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-009-e1",
+      "name": "Overhead Press",
+      "exerciseDefinitionId": "cmiz7vk780004vr0md53c57bz",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-009",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-basic-009-e2",
+      "name": "Pull-Up",
+      "exerciseDefinitionId": "cmiz7vkvr0008vr0m7rv3dapc",
+      "order": 2,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-009",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-009-e1-s1",
+      "setNumber": 1,
+      "reps": 6,
+      "weight": 95,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-009-e1",
+      "completionId": "c-basic-009",
+      "createdAt": "2026-09-11T16:30:00.000Z"
+     },
+     {
+      "id": "c-basic-009-e2-s1",
+      "setNumber": 1,
+      "reps": 8,
+      "weight": 0,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-009-e2",
+      "completionId": "c-basic-009",
+      "createdAt": "2026-09-11T16:30:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-010",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-09-15T01:00:00.000Z",
+    "startedAt": "2026-09-15T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 10",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-010-e1",
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-010",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-basic-010-e2",
+      "name": "Barbell Row",
+      "exerciseDefinitionId": "cmiz7vk1i0003vr0mqucd1f52",
+      "order": 2,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-010",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-010-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 135,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": true,
+      "exerciseId": "c-basic-010-e1",
+      "completionId": "c-basic-010",
+      "createdAt": "2026-09-15T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-010-e1-s2",
+      "setNumber": 2,
+      "reps": 5,
+      "weight": 192.5,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-010-e1",
+      "completionId": "c-basic-010",
+      "createdAt": "2026-09-15T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-010-e1-s3",
+      "setNumber": 3,
+      "reps": 5,
+      "weight": 192.5,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-010-e1",
+      "completionId": "c-basic-010",
+      "createdAt": "2026-09-15T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-010-e2-s1",
+      "setNumber": 1,
+      "reps": 8,
+      "weight": 155,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": 2,
+      "isWarmup": false,
+      "exerciseId": "c-basic-010-e2",
+      "completionId": "c-basic-010",
+      "createdAt": "2026-09-15T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-011",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-09-17T01:00:00.000Z",
+    "startedAt": "2026-09-17T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 11",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-011-e1",
+      "name": "Barbell Back Squat",
+      "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-011",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-011-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 260,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-011-e1",
+      "completionId": "c-basic-011",
+      "createdAt": "2026-09-17T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-011-e1-s2",
+      "setNumber": 2,
+      "reps": 3,
+      "weight": 280,
+      "weightUnit": "lbs",
+      "rpe": 9,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-011-e1",
+      "completionId": "c-basic-011",
+      "createdAt": "2026-09-17T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-012",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-09-18T16:30:00.000Z",
+    "startedAt": "2026-09-18T15:30:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 12",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-012-e1",
+      "name": "Overhead Press",
+      "exerciseDefinitionId": "cmiz7vk780004vr0md53c57bz",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-012",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-basic-012-e2",
+      "name": "Pull-Up",
+      "exerciseDefinitionId": "cmiz7vkvr0008vr0m7rv3dapc",
+      "order": 2,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-012",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-012-e1-s1",
+      "setNumber": 1,
+      "reps": 6,
+      "weight": 95,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-012-e1",
+      "completionId": "c-basic-012",
+      "createdAt": "2026-09-18T16:30:00.000Z"
+     },
+     {
+      "id": "c-basic-012-e2-s1",
+      "setNumber": 1,
+      "reps": 8,
+      "weight": 0,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-012-e2",
+      "completionId": "c-basic-012",
+      "createdAt": "2026-09-18T16:30:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-013",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-09-22T01:00:00.000Z",
+    "startedAt": "2026-09-22T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 13",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-013-e1",
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-013",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-basic-013-e2",
+      "name": "Barbell Row",
+      "exerciseDefinitionId": "cmiz7vk1i0003vr0mqucd1f52",
+      "order": 2,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-013",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-013-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 135,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": true,
+      "exerciseId": "c-basic-013-e1",
+      "completionId": "c-basic-013",
+      "createdAt": "2026-09-22T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-013-e1-s2",
+      "setNumber": 2,
+      "reps": 5,
+      "weight": 195,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-013-e1",
+      "completionId": "c-basic-013",
+      "createdAt": "2026-09-22T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-013-e1-s3",
+      "setNumber": 3,
+      "reps": 5,
+      "weight": 195,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-013-e1",
+      "completionId": "c-basic-013",
+      "createdAt": "2026-09-22T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-013-e2-s1",
+      "setNumber": 1,
+      "reps": 8,
+      "weight": 155,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": 2,
+      "isWarmup": false,
+      "exerciseId": "c-basic-013-e2",
+      "completionId": "c-basic-013",
+      "createdAt": "2026-09-22T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-014",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-09-24T01:00:00.000Z",
+    "startedAt": "2026-09-24T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 14",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-014-e1",
+      "name": "Barbell Back Squat",
+      "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-014",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-014-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 265,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-014-e1",
+      "completionId": "c-basic-014",
+      "createdAt": "2026-09-24T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-014-e1-s2",
+      "setNumber": 2,
+      "reps": 3,
+      "weight": 285,
+      "weightUnit": "lbs",
+      "rpe": 9,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-014-e1",
+      "completionId": "c-basic-014",
+      "createdAt": "2026-09-24T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-015",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-09-25T16:30:00.000Z",
+    "startedAt": "2026-09-25T15:30:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 15",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-015-e1",
+      "name": "Overhead Press",
+      "exerciseDefinitionId": "cmiz7vk780004vr0md53c57bz",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-015",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-basic-015-e2",
+      "name": "Pull-Up",
+      "exerciseDefinitionId": "cmiz7vkvr0008vr0m7rv3dapc",
+      "order": 2,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-015",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-015-e1-s1",
+      "setNumber": 1,
+      "reps": 6,
+      "weight": 95,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-015-e1",
+      "completionId": "c-basic-015",
+      "createdAt": "2026-09-25T16:30:00.000Z"
+     },
+     {
+      "id": "c-basic-015-e2-s1",
+      "setNumber": 1,
+      "reps": 8,
+      "weight": 0,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-015-e2",
+      "completionId": "c-basic-015",
+      "createdAt": "2026-09-25T16:30:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-016",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-09-29T01:00:00.000Z",
+    "startedAt": "2026-09-29T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 16",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-016-e1",
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-016",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-basic-016-e2",
+      "name": "Barbell Row",
+      "exerciseDefinitionId": "cmiz7vk1i0003vr0mqucd1f52",
+      "order": 2,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-016",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-016-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 135,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": true,
+      "exerciseId": "c-basic-016-e1",
+      "completionId": "c-basic-016",
+      "createdAt": "2026-09-29T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-016-e1-s2",
+      "setNumber": 2,
+      "reps": 5,
+      "weight": 197.5,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-016-e1",
+      "completionId": "c-basic-016",
+      "createdAt": "2026-09-29T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-016-e1-s3",
+      "setNumber": 3,
+      "reps": 5,
+      "weight": 197.5,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-016-e1",
+      "completionId": "c-basic-016",
+      "createdAt": "2026-09-29T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-016-e2-s1",
+      "setNumber": 1,
+      "reps": 8,
+      "weight": 155,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": 2,
+      "isWarmup": false,
+      "exerciseId": "c-basic-016-e2",
+      "completionId": "c-basic-016",
+      "createdAt": "2026-09-29T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-017",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-10-01T01:00:00.000Z",
+    "startedAt": "2026-10-01T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 17",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-017-e1",
+      "name": "Barbell Back Squat",
+      "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-017",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-017-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 270,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-017-e1",
+      "completionId": "c-basic-017",
+      "createdAt": "2026-10-01T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-017-e1-s2",
+      "setNumber": 2,
+      "reps": 3,
+      "weight": 290,
+      "weightUnit": "lbs",
+      "rpe": 9,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-017-e1",
+      "completionId": "c-basic-017",
+      "createdAt": "2026-10-01T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-018",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-10-02T16:30:00.000Z",
+    "startedAt": "2026-10-02T15:30:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 18",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-018-e1",
+      "name": "Overhead Press",
+      "exerciseDefinitionId": "cmiz7vk780004vr0md53c57bz",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-018",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-basic-018-e2",
+      "name": "Pull-Up",
+      "exerciseDefinitionId": "cmiz7vkvr0008vr0m7rv3dapc",
+      "order": 2,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-018",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-018-e1-s1",
+      "setNumber": 1,
+      "reps": 6,
+      "weight": 95,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-018-e1",
+      "completionId": "c-basic-018",
+      "createdAt": "2026-10-02T16:30:00.000Z"
+     },
+     {
+      "id": "c-basic-018-e2-s1",
+      "setNumber": 1,
+      "reps": 8,
+      "weight": 0,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-018-e2",
+      "completionId": "c-basic-018",
+      "createdAt": "2026-10-02T16:30:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-019",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-10-06T01:00:00.000Z",
+    "startedAt": "2026-10-06T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 19",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-019-e1",
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-019",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-basic-019-e2",
+      "name": "Barbell Row",
+      "exerciseDefinitionId": "cmiz7vk1i0003vr0mqucd1f52",
+      "order": 2,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-019",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-019-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 135,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": true,
+      "exerciseId": "c-basic-019-e1",
+      "completionId": "c-basic-019",
+      "createdAt": "2026-10-06T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-019-e1-s2",
+      "setNumber": 2,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-019-e1",
+      "completionId": "c-basic-019",
+      "createdAt": "2026-10-06T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-019-e1-s3",
+      "setNumber": 3,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-019-e1",
+      "completionId": "c-basic-019",
+      "createdAt": "2026-10-06T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-019-e2-s1",
+      "setNumber": 1,
+      "reps": 8,
+      "weight": 155,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": 2,
+      "isWarmup": false,
+      "exerciseId": "c-basic-019-e2",
+      "completionId": "c-basic-019",
+      "createdAt": "2026-10-06T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-020",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-10-08T01:00:00.000Z",
+    "startedAt": "2026-10-08T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 20",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-020-e1",
+      "name": "Barbell Back Squat",
+      "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-020",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-020-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 275,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-020-e1",
+      "completionId": "c-basic-020",
+      "createdAt": "2026-10-08T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-020-e1-s2",
+      "setNumber": 2,
+      "reps": 3,
+      "weight": 295,
+      "weightUnit": "lbs",
+      "rpe": 9,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-020-e1",
+      "completionId": "c-basic-020",
+      "createdAt": "2026-10-08T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-021",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-10-09T16:30:00.000Z",
+    "startedAt": "2026-10-09T15:30:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 21",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-021-e1",
+      "name": "Overhead Press",
+      "exerciseDefinitionId": "cmiz7vk780004vr0md53c57bz",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-021",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-basic-021-e2",
+      "name": "Pull-Up",
+      "exerciseDefinitionId": "cmiz7vkvr0008vr0m7rv3dapc",
+      "order": 2,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-021",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-021-e1-s1",
+      "setNumber": 1,
+      "reps": 6,
+      "weight": 95,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-021-e1",
+      "completionId": "c-basic-021",
+      "createdAt": "2026-10-09T16:30:00.000Z"
+     },
+     {
+      "id": "c-basic-021-e2-s1",
+      "setNumber": 1,
+      "reps": 8,
+      "weight": 0,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-021-e2",
+      "completionId": "c-basic-021",
+      "createdAt": "2026-10-09T16:30:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-022",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-10-13T01:00:00.000Z",
+    "startedAt": "2026-10-13T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 22",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-022-e1",
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-022",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-basic-022-e2",
+      "name": "Barbell Row",
+      "exerciseDefinitionId": "cmiz7vk1i0003vr0mqucd1f52",
+      "order": 2,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-022",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-022-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 135,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": true,
+      "exerciseId": "c-basic-022-e1",
+      "completionId": "c-basic-022",
+      "createdAt": "2026-10-13T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-022-e1-s2",
+      "setNumber": 2,
+      "reps": 5,
+      "weight": 202.5,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-022-e1",
+      "completionId": "c-basic-022",
+      "createdAt": "2026-10-13T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-022-e1-s3",
+      "setNumber": 3,
+      "reps": 5,
+      "weight": 202.5,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-022-e1",
+      "completionId": "c-basic-022",
+      "createdAt": "2026-10-13T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-022-e2-s1",
+      "setNumber": 1,
+      "reps": 8,
+      "weight": 155,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": 2,
+      "isWarmup": false,
+      "exerciseId": "c-basic-022-e2",
+      "completionId": "c-basic-022",
+      "createdAt": "2026-10-13T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-023",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-10-15T01:00:00.000Z",
+    "startedAt": "2026-10-15T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 23",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-023-e1",
+      "name": "Barbell Back Squat",
+      "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-023",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-023-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 280,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-023-e1",
+      "completionId": "c-basic-023",
+      "createdAt": "2026-10-15T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-023-e1-s2",
+      "setNumber": 2,
+      "reps": 3,
+      "weight": 300,
+      "weightUnit": "lbs",
+      "rpe": 9,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-023-e1",
+      "completionId": "c-basic-023",
+      "createdAt": "2026-10-15T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-024",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-10-16T16:30:00.000Z",
+    "startedAt": "2026-10-16T15:30:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 24",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-024-e1",
+      "name": "Overhead Press",
+      "exerciseDefinitionId": "cmiz7vk780004vr0md53c57bz",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-024",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-basic-024-e2",
+      "name": "Pull-Up",
+      "exerciseDefinitionId": "cmiz7vkvr0008vr0m7rv3dapc",
+      "order": 2,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-024",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-024-e1-s1",
+      "setNumber": 1,
+      "reps": 6,
+      "weight": 95,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-024-e1",
+      "completionId": "c-basic-024",
+      "createdAt": "2026-10-16T16:30:00.000Z"
+     },
+     {
+      "id": "c-basic-024-e2-s1",
+      "setNumber": 1,
+      "reps": 8,
+      "weight": 0,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-024-e2",
+      "completionId": "c-basic-024",
+      "createdAt": "2026-10-16T16:30:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-025",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-10-20T01:00:00.000Z",
+    "startedAt": "2026-10-20T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 25",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-025-e1",
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-025",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-basic-025-e2",
+      "name": "Barbell Row",
+      "exerciseDefinitionId": "cmiz7vk1i0003vr0mqucd1f52",
+      "order": 2,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-025",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-025-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 135,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": true,
+      "exerciseId": "c-basic-025-e1",
+      "completionId": "c-basic-025",
+      "createdAt": "2026-10-20T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-025-e1-s2",
+      "setNumber": 2,
+      "reps": 5,
+      "weight": 205,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-025-e1",
+      "completionId": "c-basic-025",
+      "createdAt": "2026-10-20T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-025-e1-s3",
+      "setNumber": 3,
+      "reps": 5,
+      "weight": 205,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-025-e1",
+      "completionId": "c-basic-025",
+      "createdAt": "2026-10-20T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-025-e2-s1",
+      "setNumber": 1,
+      "reps": 8,
+      "weight": 155,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": 2,
+      "isWarmup": false,
+      "exerciseId": "c-basic-025-e2",
+      "completionId": "c-basic-025",
+      "createdAt": "2026-10-20T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-026",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-10-22T01:00:00.000Z",
+    "startedAt": "2026-10-22T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 26",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-026-e1",
+      "name": "Barbell Back Squat",
+      "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-026",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-026-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 285,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-026-e1",
+      "completionId": "c-basic-026",
+      "createdAt": "2026-10-22T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-026-e1-s2",
+      "setNumber": 2,
+      "reps": 3,
+      "weight": 305,
+      "weightUnit": "lbs",
+      "rpe": 9,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-026-e1",
+      "completionId": "c-basic-026",
+      "createdAt": "2026-10-22T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-027",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-10-23T16:30:00.000Z",
+    "startedAt": "2026-10-23T15:30:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 27",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-027-e1",
+      "name": "Overhead Press",
+      "exerciseDefinitionId": "cmiz7vk780004vr0md53c57bz",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-027",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-basic-027-e2",
+      "name": "Pull-Up",
+      "exerciseDefinitionId": "cmiz7vkvr0008vr0m7rv3dapc",
+      "order": 2,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-027",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-027-e1-s1",
+      "setNumber": 1,
+      "reps": 6,
+      "weight": 95,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-027-e1",
+      "completionId": "c-basic-027",
+      "createdAt": "2026-10-23T16:30:00.000Z"
+     },
+     {
+      "id": "c-basic-027-e2-s1",
+      "setNumber": 1,
+      "reps": 8,
+      "weight": 0,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-027-e2",
+      "completionId": "c-basic-027",
+      "createdAt": "2026-10-23T16:30:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-028",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-10-27T01:00:00.000Z",
+    "startedAt": "2026-10-27T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 28",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-028-e1",
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-028",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-basic-028-e2",
+      "name": "Barbell Row",
+      "exerciseDefinitionId": "cmiz7vk1i0003vr0mqucd1f52",
+      "order": 2,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-028",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-028-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 135,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": true,
+      "exerciseId": "c-basic-028-e1",
+      "completionId": "c-basic-028",
+      "createdAt": "2026-10-27T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-028-e1-s2",
+      "setNumber": 2,
+      "reps": 5,
+      "weight": 207.5,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-028-e1",
+      "completionId": "c-basic-028",
+      "createdAt": "2026-10-27T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-028-e1-s3",
+      "setNumber": 3,
+      "reps": 5,
+      "weight": 207.5,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-028-e1",
+      "completionId": "c-basic-028",
+      "createdAt": "2026-10-27T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-028-e2-s1",
+      "setNumber": 1,
+      "reps": 8,
+      "weight": 155,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": 2,
+      "isWarmup": false,
+      "exerciseId": "c-basic-028-e2",
+      "completionId": "c-basic-028",
+      "createdAt": "2026-10-27T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-029",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-10-29T01:00:00.000Z",
+    "startedAt": "2026-10-29T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 29",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-029-e1",
+      "name": "Barbell Back Squat",
+      "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-029",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-029-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 290,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-029-e1",
+      "completionId": "c-basic-029",
+      "createdAt": "2026-10-29T01:00:00.000Z"
+     },
+     {
+      "id": "c-basic-029-e1-s2",
+      "setNumber": 2,
+      "reps": 3,
+      "weight": 310,
+      "weightUnit": "lbs",
+      "rpe": 9,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-029-e1",
+      "completionId": "c-basic-029",
+      "createdAt": "2026-10-29T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-030",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-10-30T16:30:00.000Z",
+    "startedAt": "2026-10-30T15:30:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 30",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-030-e1",
+      "name": "Overhead Press",
+      "exerciseDefinitionId": "cmiz7vk780004vr0md53c57bz",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-030",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-basic-030-e2",
+      "name": "Pull-Up",
+      "exerciseDefinitionId": "cmiz7vkvr0008vr0m7rv3dapc",
+      "order": 2,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-030",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-030-e1-s1",
+      "setNumber": 1,
+      "reps": 6,
+      "weight": 95,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-030-e1",
+      "completionId": "c-basic-030",
+      "createdAt": "2026-10-30T16:30:00.000Z"
+     },
+     {
+      "id": "c-basic-030-e2-s1",
+      "setNumber": 1,
+      "reps": 8,
+      "weight": 0,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-030-e2",
+      "completionId": "c-basic-030",
+      "createdAt": "2026-10-30T16:30:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-031",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-09-05T17:00:00.000Z",
+    "startedAt": "2026-09-05T16:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 31",
+    "durationSeconds": 2880,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-031-e1",
+      "name": "Overhead Press",
+      "exerciseDefinitionId": "cmiz7vk780004vr0md53c57bz",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-031",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-031-e1-s1",
+      "setNumber": 1,
+      "reps": 10,
+      "weight": 70,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-031-e1",
+      "completionId": "c-basic-031",
+      "createdAt": "2026-09-05T17:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-032",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-10-19T03:10:00.000Z",
+    "startedAt": "2026-10-19T02:30:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 32",
+    "durationSeconds": null,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-032-e1",
+      "name": "Barbell Row",
+      "exerciseDefinitionId": "cmiz7vk1i0003vr0mqucd1f52",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-032",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-032-e1-s1",
+      "setNumber": 1,
+      "reps": 8,
+      "weight": 150,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": 3,
+      "isWarmup": false,
+      "exerciseId": "c-basic-032-e1",
+      "completionId": "c-basic-032",
+      "createdAt": "2026-10-19T03:10:00.000Z"
+     },
+     {
+      "id": "c-basic-032-e1-s2",
+      "setNumber": 2,
+      "reps": 8,
+      "weight": 150,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": 2,
+      "isWarmup": false,
+      "exerciseId": "c-basic-032-e1",
+      "completionId": "c-basic-032",
+      "createdAt": "2026-10-19T03:10:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-033",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-11-03T02:00:00.000Z",
+    "startedAt": "2026-11-03T01:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 33",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-033-e1",
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-033",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-basic-033-e2",
+      "name": "Barbell Row",
+      "exerciseDefinitionId": "cmiz7vk1i0003vr0mqucd1f52",
+      "order": 2,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-033",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-033-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 215,
+      "weightUnit": "lbs",
+      "rpe": 9,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-033-e1",
+      "completionId": "c-basic-033",
+      "createdAt": "2026-11-03T02:00:00.000Z"
+     },
+     {
+      "id": "c-basic-033-e1-s2",
+      "setNumber": 2,
+      "reps": 3,
+      "weight": 225,
+      "weightUnit": "lbs",
+      "rpe": 10,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-033-e1",
+      "completionId": "c-basic-033",
+      "createdAt": "2026-11-03T02:00:00.000Z"
+     },
+     {
+      "id": "c-basic-033-e2-s1",
+      "setNumber": 1,
+      "reps": 8,
+      "weight": 160,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": 1,
+      "isWarmup": false,
+      "exerciseId": "c-basic-033-e2",
+      "completionId": "c-basic-033",
+      "createdAt": "2026-11-03T02:00:00.000Z"
+     },
+     {
+      "id": "c-basic-033-e2-s2",
+      "setNumber": 2,
+      "reps": 8,
+      "weight": 160,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": 1,
+      "isWarmup": false,
+      "exerciseId": "c-basic-033-e2",
+      "completionId": "c-basic-033",
+      "createdAt": "2026-11-03T02:00:00.000Z"
+     },
+     {
+      "id": "c-basic-033-e2-s3",
+      "setNumber": 3,
+      "reps": 8,
+      "weight": 160,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": 0,
+      "isWarmup": false,
+      "exerciseId": "c-basic-033-e2",
+      "completionId": "c-basic-033",
+      "createdAt": "2026-11-03T02:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-basic-034",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-11-04T15:15:00.000Z",
+    "startedAt": "2026-11-04T14:15:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 34",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-basic-034-e1",
+      "name": "Barbell Back Squat",
+      "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-034",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-basic-034-e2",
+      "name": "Overhead Press",
+      "exerciseDefinitionId": "cmiz7vk780004vr0md53c57bz",
+      "order": 2,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-basic-034",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-basic-034-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 300,
+      "weightUnit": "lbs",
+      "rpe": 9,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-034-e1",
+      "completionId": "c-basic-034",
+      "createdAt": "2026-11-04T15:15:00.000Z"
+     },
+     {
+      "id": "c-basic-034-e1-s2",
+      "setNumber": 2,
+      "reps": 12,
+      "weight": 185,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-034-e1",
+      "completionId": "c-basic-034",
+      "createdAt": "2026-11-04T15:15:00.000Z"
+     },
+     {
+      "id": "c-basic-034-e1-s3",
+      "setNumber": 3,
+      "reps": 15,
+      "weight": 205,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-034-e1",
+      "completionId": "c-basic-034",
+      "createdAt": "2026-11-04T15:15:00.000Z"
+     },
+     {
+      "id": "c-basic-034-e2-s1",
+      "setNumber": 1,
+      "reps": 10,
+      "weight": 75,
+      "weightUnit": "lbs",
+      "rpe": 9,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-basic-034-e2",
+      "completionId": "c-basic-034",
+      "createdAt": "2026-11-04T15:15:00.000Z"
+     }
+    ]
+   }
+  ],
+  "savedWorkouts": [],
+  "pinnedExercises": [
+   {
+    "id": "pin-basic-0",
+    "userId": "golden-user",
+    "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib",
+    "position": 0,
+    "createdAt": "2026-11-05T19:00:00.000Z"
+   },
+   {
+    "id": "pin-basic-1",
+    "userId": "golden-user",
+    "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70",
+    "position": 1,
+    "createdAt": "2026-11-05T19:00:00.000Z"
+   },
+   {
+    "id": "pin-basic-2",
+    "userId": "golden-user",
+    "exerciseDefinitionId": "cmiz7vkvr0008vr0m7rv3dapc",
+    "position": 2,
+    "createdAt": "2026-11-05T19:00:00.000Z"
+   }
+  ]
+ },
+ "weekStarts": [
+  {
+   "instant": "2026-08-25T01:00:00.000Z",
+   "weekStart": "2026-08-24"
+  },
+  {
+   "instant": "2026-08-27T01:00:00.000Z",
+   "weekStart": "2026-08-24"
+  },
+  {
+   "instant": "2026-08-28T16:30:00.000Z",
+   "weekStart": "2026-08-24"
+  },
+  {
+   "instant": "2026-09-01T01:00:00.000Z",
+   "weekStart": "2026-08-31"
+  },
+  {
+   "instant": "2026-09-03T01:00:00.000Z",
+   "weekStart": "2026-08-31"
+  },
+  {
+   "instant": "2026-09-04T16:30:00.000Z",
+   "weekStart": "2026-08-31"
+  },
+  {
+   "instant": "2026-09-08T01:00:00.000Z",
+   "weekStart": "2026-09-07"
+  },
+  {
+   "instant": "2026-09-10T01:00:00.000Z",
+   "weekStart": "2026-09-07"
+  },
+  {
+   "instant": "2026-09-11T16:30:00.000Z",
+   "weekStart": "2026-09-07"
+  },
+  {
+   "instant": "2026-09-15T01:00:00.000Z",
+   "weekStart": "2026-09-14"
+  },
+  {
+   "instant": "2026-09-17T01:00:00.000Z",
+   "weekStart": "2026-09-14"
+  },
+  {
+   "instant": "2026-09-18T16:30:00.000Z",
+   "weekStart": "2026-09-14"
+  },
+  {
+   "instant": "2026-09-22T01:00:00.000Z",
+   "weekStart": "2026-09-21"
+  },
+  {
+   "instant": "2026-09-24T01:00:00.000Z",
+   "weekStart": "2026-09-21"
+  },
+  {
+   "instant": "2026-09-25T16:30:00.000Z",
+   "weekStart": "2026-09-21"
+  },
+  {
+   "instant": "2026-09-29T01:00:00.000Z",
+   "weekStart": "2026-09-28"
+  },
+  {
+   "instant": "2026-10-01T01:00:00.000Z",
+   "weekStart": "2026-09-28"
+  },
+  {
+   "instant": "2026-10-02T16:30:00.000Z",
+   "weekStart": "2026-09-28"
+  },
+  {
+   "instant": "2026-10-06T01:00:00.000Z",
+   "weekStart": "2026-10-05"
+  },
+  {
+   "instant": "2026-10-08T01:00:00.000Z",
+   "weekStart": "2026-10-05"
+  },
+  {
+   "instant": "2026-10-09T16:30:00.000Z",
+   "weekStart": "2026-10-05"
+  },
+  {
+   "instant": "2026-10-13T01:00:00.000Z",
+   "weekStart": "2026-10-12"
+  },
+  {
+   "instant": "2026-10-15T01:00:00.000Z",
+   "weekStart": "2026-10-12"
+  },
+  {
+   "instant": "2026-10-16T16:30:00.000Z",
+   "weekStart": "2026-10-12"
+  },
+  {
+   "instant": "2026-10-20T01:00:00.000Z",
+   "weekStart": "2026-10-19"
+  },
+  {
+   "instant": "2026-10-22T01:00:00.000Z",
+   "weekStart": "2026-10-19"
+  },
+  {
+   "instant": "2026-10-23T16:30:00.000Z",
+   "weekStart": "2026-10-19"
+  },
+  {
+   "instant": "2026-10-27T01:00:00.000Z",
+   "weekStart": "2026-10-26"
+  },
+  {
+   "instant": "2026-10-29T01:00:00.000Z",
+   "weekStart": "2026-10-26"
+  },
+  {
+   "instant": "2026-10-30T16:30:00.000Z",
+   "weekStart": "2026-10-26"
+  },
+  {
+   "instant": "2026-09-05T17:00:00.000Z",
+   "weekStart": "2026-08-31"
+  },
+  {
+   "instant": "2026-10-19T03:10:00.000Z",
+   "weekStart": "2026-10-12"
+  },
+  {
+   "instant": "2026-11-03T02:00:00.000Z",
+   "weekStart": "2026-11-02"
+  },
+  {
+   "instant": "2026-11-04T15:15:00.000Z",
+   "weekStart": "2026-11-02"
+  }
+ ],
+ "reports": {
+  "2026-11-02": {
+   "weekStart": "2026-11-02",
+   "isCurrentWeek": true,
+   "target": 3,
+   "current": {
+    "weekStart": "2026-11-02",
+    "workouts": 2,
+    "workingSets": 9,
+    "durationSeconds": 7200,
+    "cardioMinutes": 0,
+    "effort": {
+     "avgRpe": 9.285714285714286,
+     "pctAtOrAbove9": 100,
+     "setsAt10": 2,
+     "ratedSets": 7
+    }
+   },
+   "normal": {
+    "workouts": 3.125,
+    "workingSets": 7.25,
+    "durationSeconds": 11100,
+    "cardioMinutes": 0,
+    "avgRpe": 7.984375
+   },
+   "normalWeeks": 8,
+   "streak": 10,
+   "weeks": [
+    {
+     "weekStart": "2026-09-14",
+     "workouts": 3,
+     "workingSets": 7,
+     "durationSeconds": 10800,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 8,
+      "pctAtOrAbove9": 17,
+      "setsAt10": 0,
+      "ratedSets": 6
+     }
+    },
+    {
+     "weekStart": "2026-09-21",
+     "workouts": 3,
+     "workingSets": 7,
+     "durationSeconds": 10800,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 8,
+      "pctAtOrAbove9": 17,
+      "setsAt10": 0,
+      "ratedSets": 6
+     }
+    },
+    {
+     "weekStart": "2026-09-28",
+     "workouts": 3,
+     "workingSets": 7,
+     "durationSeconds": 10800,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 8,
+      "pctAtOrAbove9": 17,
+      "setsAt10": 0,
+      "ratedSets": 6
+     }
+    },
+    {
+     "weekStart": "2026-10-05",
+     "workouts": 3,
+     "workingSets": 7,
+     "durationSeconds": 10800,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 8,
+      "pctAtOrAbove9": 17,
+      "setsAt10": 0,
+      "ratedSets": 6
+     }
+    },
+    {
+     "weekStart": "2026-10-12",
+     "workouts": 4,
+     "workingSets": 9,
+     "durationSeconds": 13200,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 7.875,
+      "pctAtOrAbove9": 13,
+      "setsAt10": 0,
+      "ratedSets": 8
+     }
+    },
+    {
+     "weekStart": "2026-10-19",
+     "workouts": 3,
+     "workingSets": 7,
+     "durationSeconds": 10800,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 8,
+      "pctAtOrAbove9": 17,
+      "setsAt10": 0,
+      "ratedSets": 6
+     }
+    },
+    {
+     "weekStart": "2026-10-26",
+     "workouts": 3,
+     "workingSets": 7,
+     "durationSeconds": 10800,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 8,
+      "pctAtOrAbove9": 17,
+      "setsAt10": 0,
+      "ratedSets": 6
+     }
+    },
+    {
+     "weekStart": "2026-11-02",
+     "workouts": 2,
+     "workingSets": 9,
+     "durationSeconds": 7200,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 9.285714285714286,
+      "pctAtOrAbove9": 100,
+      "setsAt10": 2,
+      "ratedSets": 7
+     }
+    }
+   ],
+   "weightUnit": "lbs",
+   "records": [
+    {
+     "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib",
+     "name": "Barbell Back Squat",
+     "kind": "e1rm",
+     "weight": 300,
+     "reps": 5,
+     "e1rm": 350,
+     "previous": 341
+    },
+    {
+     "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+     "name": "Barbell Bench Press",
+     "kind": "e1rm",
+     "weight": 215,
+     "reps": 5,
+     "e1rm": 250.83333333333334,
+     "previous": 242.08333333333334
+    },
+    {
+     "exerciseDefinitionId": "cmiz7vk1i0003vr0mqucd1f52",
+     "name": "Barbell Row",
+     "kind": "e1rm",
+     "weight": 160,
+     "reps": 8,
+     "e1rm": 202.66666666666666,
+     "previous": 196.33333333333331
+    },
+    {
+     "exerciseDefinitionId": "cmiz7vk780004vr0md53c57bz",
+     "name": "Overhead Press",
+     "kind": "rep",
+     "weight": 75,
+     "reps": 10,
+     "e1rm": 100,
+     "previous": 70
+    }
+   ],
+   "lifts": [
+    {
+     "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib",
+     "name": "Barbell Back Squat",
+     "workingSets": 3,
+     "bestSet": {
+      "weight": 300,
+      "reps": 5
+     },
+     "e1rm": 350,
+     "previousE1rm": 341,
+     "bestE1rm": 350,
+     "sessionsBelowBest": 0
+    },
+    {
+     "exerciseDefinitionId": "cmiz7vk1i0003vr0mqucd1f52",
+     "name": "Barbell Row",
+     "workingSets": 3,
+     "bestSet": {
+      "weight": 160,
+      "reps": 8
+     },
+     "e1rm": 202.66666666666666,
+     "previousE1rm": 196.33333333333331,
+     "bestE1rm": 202.66666666666666,
+     "sessionsBelowBest": 0
+    },
+    {
+     "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+     "name": "Barbell Bench Press",
+     "workingSets": 2,
+     "bestSet": {
+      "weight": 215,
+      "reps": 5
+     },
+     "e1rm": 250.83333333333334,
+     "previousE1rm": 242.08333333333334,
+     "bestE1rm": 250.83333333333334,
+     "sessionsBelowBest": 0
+    },
+    {
+     "exerciseDefinitionId": "cmiz7vk780004vr0md53c57bz",
+     "name": "Overhead Press",
+     "workingSets": 1,
+     "bestSet": {
+      "weight": 75,
+      "reps": 10
+     },
+     "e1rm": 100,
+     "previousE1rm": 114,
+     "bestE1rm": 114,
+     "sessionsBelowBest": 1
+    }
+   ],
+   "trend": {
+    "effortRisingWeeks": 0,
+    "effortFrom": null,
+    "effortTo": null,
+    "lastLightWeeksAgo": null,
+    "lightWeeksSearched": 8
+   },
+   "pinned": [
+    {
+     "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib",
+     "name": "Barbell Back Squat",
+     "lift": {
+      "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib",
+      "name": "Barbell Back Squat",
+      "workingSets": 3,
+      "bestSet": {
+       "weight": 300,
+       "reps": 5
+      },
+      "e1rm": 350,
+      "previousE1rm": 341,
+      "bestE1rm": 350,
+      "sessionsBelowBest": 0
+     },
+     "last": null
+    },
+    {
+     "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70",
+     "name": "Conventional Deadlift",
+     "lift": null,
+     "last": null
+    },
+    {
+     "exerciseDefinitionId": "cmiz7vkvr0008vr0m7rv3dapc",
+     "name": "Pull-Up",
+     "lift": null,
+     "last": {
+      "weight": 0,
+      "reps": 8,
+      "e1rm": null,
+      "completedAt": "2026-10-30T16:30:00.000Z"
+     }
+    }
+   ]
+  },
+  "2026-10-26": {
+   "weekStart": "2026-10-26",
+   "isCurrentWeek": false,
+   "target": 3,
+   "current": {
+    "weekStart": "2026-10-26",
+    "workouts": 3,
+    "workingSets": 7,
+    "durationSeconds": 10800,
+    "cardioMinutes": 0,
+    "effort": {
+     "avgRpe": 8,
+     "pctAtOrAbove9": 17,
+     "setsAt10": 0,
+     "ratedSets": 6
+    }
+   },
+   "normal": {
+    "workouts": 3.25,
+    "workingSets": 7.375,
+    "durationSeconds": 11460,
+    "cardioMinutes": 0,
+    "avgRpe": 7.984375
+   },
+   "normalWeeks": 8,
+   "streak": 10,
+   "weeks": [
+    {
+     "weekStart": "2026-09-07",
+     "workouts": 3,
+     "workingSets": 7,
+     "durationSeconds": 10800,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 8,
+      "pctAtOrAbove9": 17,
+      "setsAt10": 0,
+      "ratedSets": 6
+     }
+    },
+    {
+     "weekStart": "2026-09-14",
+     "workouts": 3,
+     "workingSets": 7,
+     "durationSeconds": 10800,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 8,
+      "pctAtOrAbove9": 17,
+      "setsAt10": 0,
+      "ratedSets": 6
+     }
+    },
+    {
+     "weekStart": "2026-09-21",
+     "workouts": 3,
+     "workingSets": 7,
+     "durationSeconds": 10800,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 8,
+      "pctAtOrAbove9": 17,
+      "setsAt10": 0,
+      "ratedSets": 6
+     }
+    },
+    {
+     "weekStart": "2026-09-28",
+     "workouts": 3,
+     "workingSets": 7,
+     "durationSeconds": 10800,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 8,
+      "pctAtOrAbove9": 17,
+      "setsAt10": 0,
+      "ratedSets": 6
+     }
+    },
+    {
+     "weekStart": "2026-10-05",
+     "workouts": 3,
+     "workingSets": 7,
+     "durationSeconds": 10800,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 8,
+      "pctAtOrAbove9": 17,
+      "setsAt10": 0,
+      "ratedSets": 6
+     }
+    },
+    {
+     "weekStart": "2026-10-12",
+     "workouts": 4,
+     "workingSets": 9,
+     "durationSeconds": 13200,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 7.875,
+      "pctAtOrAbove9": 13,
+      "setsAt10": 0,
+      "ratedSets": 8
+     }
+    },
+    {
+     "weekStart": "2026-10-19",
+     "workouts": 3,
+     "workingSets": 7,
+     "durationSeconds": 10800,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 8,
+      "pctAtOrAbove9": 17,
+      "setsAt10": 0,
+      "ratedSets": 6
+     }
+    },
+    {
+     "weekStart": "2026-10-26",
+     "workouts": 3,
+     "workingSets": 7,
+     "durationSeconds": 10800,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 8,
+      "pctAtOrAbove9": 17,
+      "setsAt10": 0,
+      "ratedSets": 6
+     }
+    }
+   ],
+   "weightUnit": "lbs",
+   "records": [
+    {
+     "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib",
+     "name": "Barbell Back Squat",
+     "kind": "e1rm",
+     "weight": 310,
+     "reps": 3,
+     "e1rm": 341,
+     "previous": 335.5
+    },
+    {
+     "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+     "name": "Barbell Bench Press",
+     "kind": "e1rm",
+     "weight": 207.5,
+     "reps": 5,
+     "e1rm": 242.08333333333334,
+     "previous": 239.16666666666669
+    }
+   ],
+   "lifts": [
+    {
+     "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib",
+     "name": "Barbell Back Squat",
+     "workingSets": 2,
+     "bestSet": {
+      "weight": 310,
+      "reps": 3
+     },
+     "e1rm": 341,
+     "previousE1rm": 335.5,
+     "bestE1rm": 341,
+     "sessionsBelowBest": 0
+    },
+    {
+     "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+     "name": "Barbell Bench Press",
+     "workingSets": 2,
+     "bestSet": {
+      "weight": 207.5,
+      "reps": 5
+     },
+     "e1rm": 242.08333333333334,
+     "previousE1rm": 239.16666666666669,
+     "bestE1rm": 242.08333333333334,
+     "sessionsBelowBest": 0
+    },
+    {
+     "exerciseDefinitionId": "cmiz7vk1i0003vr0mqucd1f52",
+     "name": "Barbell Row",
+     "workingSets": 1,
+     "bestSet": {
+      "weight": 155,
+      "reps": 8
+     },
+     "e1rm": 196.33333333333331,
+     "previousE1rm": 196.33333333333331,
+     "bestE1rm": 196.33333333333331,
+     "sessionsBelowBest": 0
+    },
+    {
+     "exerciseDefinitionId": "cmiz7vk780004vr0md53c57bz",
+     "name": "Overhead Press",
+     "workingSets": 1,
+     "bestSet": {
+      "weight": 95,
+      "reps": 6
+     },
+     "e1rm": 114,
+     "previousE1rm": 114,
+     "bestE1rm": 114,
+     "sessionsBelowBest": 0
+    },
+    {
+     "exerciseDefinitionId": "cmiz7vkvr0008vr0m7rv3dapc",
+     "name": "Pull-Up",
+     "workingSets": 1,
+     "bestSet": {
+      "weight": 0,
+      "reps": 8
+     },
+     "e1rm": null,
+     "previousE1rm": null,
+     "bestE1rm": null,
+     "sessionsBelowBest": 0
+    }
+   ],
+   "trend": {
+    "effortRisingWeeks": 0,
+    "effortFrom": null,
+    "effortTo": null,
+    "lastLightWeeksAgo": null,
+    "lightWeeksSearched": 8
+   },
+   "pinned": [
+    {
+     "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib",
+     "name": "Barbell Back Squat",
+     "lift": {
+      "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib",
+      "name": "Barbell Back Squat",
+      "workingSets": 2,
+      "bestSet": {
+       "weight": 310,
+       "reps": 3
+      },
+      "e1rm": 341,
+      "previousE1rm": 335.5,
+      "bestE1rm": 341,
+      "sessionsBelowBest": 0
+     },
+     "last": null
+    },
+    {
+     "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70",
+     "name": "Conventional Deadlift",
+     "lift": null,
+     "last": null
+    },
+    {
+     "exerciseDefinitionId": "cmiz7vkvr0008vr0m7rv3dapc",
+     "name": "Pull-Up",
+     "lift": {
+      "exerciseDefinitionId": "cmiz7vkvr0008vr0m7rv3dapc",
+      "name": "Pull-Up",
+      "workingSets": 1,
+      "bestSet": {
+       "weight": 0,
+       "reps": 8
+      },
+      "e1rm": null,
+      "previousE1rm": null,
+      "bestE1rm": null,
+      "sessionsBelowBest": 0
+     },
+     "last": null
+    }
+   ]
+  }
+ },
+ "lifts": {
+  "cmiz7vjju0000vr0m4b1o6bec": {
+   "history": {
+    "name": "Barbell Bench Press",
+    "weightUnit": "lbs",
+    "isBodyweight": false,
+    "sessions": [
+     {
+      "completionId": "c-basic-033",
+      "date": "2026-11-03T02:00:00.000Z",
+      "sets": [
+       {
+        "weight": 215,
+        "reps": 5
+       },
+       {
+        "weight": 225,
+        "reps": 3
+       }
+      ],
+      "e1rm": 250.83333333333334,
+      "topSet": {
+       "weight": 225,
+       "reps": 3
+      },
+      "avgRpe": 9.5
+     },
+     {
+      "completionId": "c-basic-028",
+      "date": "2026-10-27T01:00:00.000Z",
+      "sets": [
+       {
+        "weight": 207.5,
+        "reps": 5
+       },
+       {
+        "weight": 207.5,
+        "reps": 5
+       }
+      ],
+      "e1rm": 242.08333333333334,
+      "topSet": {
+       "weight": 207.5,
+       "reps": 5
+      },
+      "avgRpe": 7.5
+     },
+     {
+      "completionId": "c-basic-025",
+      "date": "2026-10-20T01:00:00.000Z",
+      "sets": [
+       {
+        "weight": 205,
+        "reps": 5
+       },
+       {
+        "weight": 205,
+        "reps": 5
+       }
+      ],
+      "e1rm": 239.16666666666669,
+      "topSet": {
+       "weight": 205,
+       "reps": 5
+      },
+      "avgRpe": 7.5
+     },
+     {
+      "completionId": "c-basic-022",
+      "date": "2026-10-13T01:00:00.000Z",
+      "sets": [
+       {
+        "weight": 202.5,
+        "reps": 5
+       },
+       {
+        "weight": 202.5,
+        "reps": 5
+       }
+      ],
+      "e1rm": 236.25000000000003,
+      "topSet": {
+       "weight": 202.5,
+       "reps": 5
+      },
+      "avgRpe": 7.5
+     },
+     {
+      "completionId": "c-basic-019",
+      "date": "2026-10-06T01:00:00.000Z",
+      "sets": [
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       }
+      ],
+      "e1rm": 233.33333333333334,
+      "topSet": {
+       "weight": 200,
+       "reps": 5
+      },
+      "avgRpe": 7.5
+     },
+     {
+      "completionId": "c-basic-016",
+      "date": "2026-09-29T01:00:00.000Z",
+      "sets": [
+       {
+        "weight": 197.5,
+        "reps": 5
+       },
+       {
+        "weight": 197.5,
+        "reps": 5
+       }
+      ],
+      "e1rm": 230.41666666666669,
+      "topSet": {
+       "weight": 197.5,
+       "reps": 5
+      },
+      "avgRpe": 7.5
+     },
+     {
+      "completionId": "c-basic-013",
+      "date": "2026-09-22T01:00:00.000Z",
+      "sets": [
+       {
+        "weight": 195,
+        "reps": 5
+       },
+       {
+        "weight": 195,
+        "reps": 5
+       }
+      ],
+      "e1rm": 227.50000000000003,
+      "topSet": {
+       "weight": 195,
+       "reps": 5
+      },
+      "avgRpe": 7.5
+     },
+     {
+      "completionId": "c-basic-010",
+      "date": "2026-09-15T01:00:00.000Z",
+      "sets": [
+       {
+        "weight": 192.5,
+        "reps": 5
+       },
+       {
+        "weight": 192.5,
+        "reps": 5
+       }
+      ],
+      "e1rm": 224.58333333333334,
+      "topSet": {
+       "weight": 192.5,
+       "reps": 5
+      },
+      "avgRpe": 7.5
+     },
+     {
+      "completionId": "c-basic-007",
+      "date": "2026-09-08T01:00:00.000Z",
+      "sets": [
+       {
+        "weight": 190,
+        "reps": 5
+       },
+       {
+        "weight": 190,
+        "reps": 5
+       }
+      ],
+      "e1rm": 221.66666666666669,
+      "topSet": {
+       "weight": 190,
+       "reps": 5
+      },
+      "avgRpe": 7.5
+     },
+     {
+      "completionId": "c-basic-004",
+      "date": "2026-09-01T01:00:00.000Z",
+      "sets": [
+       {
+        "weight": 187.5,
+        "reps": 5
+       },
+       {
+        "weight": 187.5,
+        "reps": 5
+       }
+      ],
+      "e1rm": 218.75,
+      "topSet": {
+       "weight": 187.5,
+       "reps": 5
+      },
+      "avgRpe": 7.5
+     },
+     {
+      "completionId": "c-basic-001",
+      "date": "2026-08-25T01:00:00.000Z",
+      "sets": [
+       {
+        "weight": 185,
+        "reps": 5
+       },
+       {
+        "weight": 185,
+        "reps": 5
+       }
+      ],
+      "e1rm": 215.83333333333334,
+      "topSet": {
+       "weight": 185,
+       "reps": 5
+      },
+      "avgRpe": 7.5
+     }
+    ],
+    "records": [
+     {
+      "reps": 3,
+      "weight": 225,
+      "date": "2026-11-03T02:00:00.000Z",
+      "isNew": true
+     },
+     {
+      "reps": 5,
+      "weight": 215,
+      "date": "2026-11-03T02:00:00.000Z",
+      "isNew": true
+     }
+    ],
+    "weeklySets": [
+     {
+      "weekStart": "2026-08-24",
+      "sets": 2
+     },
+     {
+      "weekStart": "2026-08-31",
+      "sets": 2
+     },
+     {
+      "weekStart": "2026-09-07",
+      "sets": 2
+     },
+     {
+      "weekStart": "2026-09-14",
+      "sets": 2
+     },
+     {
+      "weekStart": "2026-09-21",
+      "sets": 2
+     },
+     {
+      "weekStart": "2026-09-28",
+      "sets": 2
+     },
+     {
+      "weekStart": "2026-10-05",
+      "sets": 2
+     },
+     {
+      "weekStart": "2026-10-12",
+      "sets": 2
+     },
+     {
+      "weekStart": "2026-10-19",
+      "sets": 2
+     },
+     {
+      "weekStart": "2026-10-26",
+      "sets": 2
+     },
+     {
+      "weekStart": "2026-11-02",
+      "sets": 2
+     }
+    ]
+   },
+   "charts": {
+    "3M": {
+     "points": [
+      {
+       "date": "2026-08-25T01:00:00.000Z",
+       "e1rm": 215.83333333333334,
+       "topSet": {
+        "weight": 185,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-01T01:00:00.000Z",
+       "e1rm": 218.75,
+       "topSet": {
+        "weight": 187.5,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-08T01:00:00.000Z",
+       "e1rm": 221.66666666666669,
+       "topSet": {
+        "weight": 190,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-15T01:00:00.000Z",
+       "e1rm": 224.58333333333334,
+       "topSet": {
+        "weight": 192.5,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-22T01:00:00.000Z",
+       "e1rm": 227.50000000000003,
+       "topSet": {
+        "weight": 195,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-29T01:00:00.000Z",
+       "e1rm": 230.41666666666669,
+       "topSet": {
+        "weight": 197.5,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-06T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-13T01:00:00.000Z",
+       "e1rm": 236.25000000000003,
+       "topSet": {
+        "weight": 202.5,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-20T01:00:00.000Z",
+       "e1rm": 239.16666666666669,
+       "topSet": {
+        "weight": 205,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-27T01:00:00.000Z",
+       "e1rm": 242.08333333333334,
+       "topSet": {
+        "weight": 207.5,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-11-03T02:00:00.000Z",
+       "e1rm": 250.83333333333334,
+       "topSet": {
+        "weight": 225,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": true
+      }
+     ],
+     "change": {
+      "e1rm": {
+       "first": 215.83333333333334,
+       "last": 250.83333333333334,
+       "percent": 16.216216216216214
+      },
+      "topSet": {
+       "first": 185,
+       "last": 225,
+       "percent": 21.62162162162162
+      },
+      "reps": {
+       "first": 5,
+       "last": 5,
+       "percent": 0
+      }
+     },
+     "best": {
+      "e1rm": 250.83333333333334,
+      "date": "2026-11-03T02:00:00.000Z"
+     },
+     "heaviest": {
+      "weight": 225,
+      "reps": 3,
+      "date": "2026-11-03T02:00:00.000Z"
+     },
+     "mostReps": {
+      "reps": 5,
+      "date": "2026-08-25T01:00:00.000Z"
+     },
+     "sessions": 11,
+     "since": "2026-08-25T01:00:00.000Z"
+    },
+    "6M": {
+     "points": [
+      {
+       "date": "2026-08-25T01:00:00.000Z",
+       "e1rm": 215.83333333333334,
+       "topSet": {
+        "weight": 185,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-01T01:00:00.000Z",
+       "e1rm": 218.75,
+       "topSet": {
+        "weight": 187.5,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-08T01:00:00.000Z",
+       "e1rm": 221.66666666666669,
+       "topSet": {
+        "weight": 190,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-15T01:00:00.000Z",
+       "e1rm": 224.58333333333334,
+       "topSet": {
+        "weight": 192.5,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-22T01:00:00.000Z",
+       "e1rm": 227.50000000000003,
+       "topSet": {
+        "weight": 195,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-29T01:00:00.000Z",
+       "e1rm": 230.41666666666669,
+       "topSet": {
+        "weight": 197.5,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-06T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-13T01:00:00.000Z",
+       "e1rm": 236.25000000000003,
+       "topSet": {
+        "weight": 202.5,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-20T01:00:00.000Z",
+       "e1rm": 239.16666666666669,
+       "topSet": {
+        "weight": 205,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-27T01:00:00.000Z",
+       "e1rm": 242.08333333333334,
+       "topSet": {
+        "weight": 207.5,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-11-03T02:00:00.000Z",
+       "e1rm": 250.83333333333334,
+       "topSet": {
+        "weight": 225,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": true
+      }
+     ],
+     "change": {
+      "e1rm": {
+       "first": 215.83333333333334,
+       "last": 250.83333333333334,
+       "percent": 16.216216216216214
+      },
+      "topSet": {
+       "first": 185,
+       "last": 225,
+       "percent": 21.62162162162162
+      },
+      "reps": {
+       "first": 5,
+       "last": 5,
+       "percent": 0
+      }
+     },
+     "best": {
+      "e1rm": 250.83333333333334,
+      "date": "2026-11-03T02:00:00.000Z"
+     },
+     "heaviest": {
+      "weight": 225,
+      "reps": 3,
+      "date": "2026-11-03T02:00:00.000Z"
+     },
+     "mostReps": {
+      "reps": 5,
+      "date": "2026-08-25T01:00:00.000Z"
+     },
+     "sessions": 11,
+     "since": "2026-08-25T01:00:00.000Z"
+    },
+    "1Y": {
+     "points": [
+      {
+       "date": "2026-08-25T01:00:00.000Z",
+       "e1rm": 215.83333333333334,
+       "topSet": {
+        "weight": 185,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-01T01:00:00.000Z",
+       "e1rm": 218.75,
+       "topSet": {
+        "weight": 187.5,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-08T01:00:00.000Z",
+       "e1rm": 221.66666666666669,
+       "topSet": {
+        "weight": 190,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-15T01:00:00.000Z",
+       "e1rm": 224.58333333333334,
+       "topSet": {
+        "weight": 192.5,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-22T01:00:00.000Z",
+       "e1rm": 227.50000000000003,
+       "topSet": {
+        "weight": 195,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-29T01:00:00.000Z",
+       "e1rm": 230.41666666666669,
+       "topSet": {
+        "weight": 197.5,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-06T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-13T01:00:00.000Z",
+       "e1rm": 236.25000000000003,
+       "topSet": {
+        "weight": 202.5,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-20T01:00:00.000Z",
+       "e1rm": 239.16666666666669,
+       "topSet": {
+        "weight": 205,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-27T01:00:00.000Z",
+       "e1rm": 242.08333333333334,
+       "topSet": {
+        "weight": 207.5,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-11-03T02:00:00.000Z",
+       "e1rm": 250.83333333333334,
+       "topSet": {
+        "weight": 225,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": true
+      }
+     ],
+     "change": {
+      "e1rm": {
+       "first": 215.83333333333334,
+       "last": 250.83333333333334,
+       "percent": 16.216216216216214
+      },
+      "topSet": {
+       "first": 185,
+       "last": 225,
+       "percent": 21.62162162162162
+      },
+      "reps": {
+       "first": 5,
+       "last": 5,
+       "percent": 0
+      }
+     },
+     "best": {
+      "e1rm": 250.83333333333334,
+      "date": "2026-11-03T02:00:00.000Z"
+     },
+     "heaviest": {
+      "weight": 225,
+      "reps": 3,
+      "date": "2026-11-03T02:00:00.000Z"
+     },
+     "mostReps": {
+      "reps": 5,
+      "date": "2026-08-25T01:00:00.000Z"
+     },
+     "sessions": 11,
+     "since": "2026-08-25T01:00:00.000Z"
+    },
+    "All": {
+     "points": [
+      {
+       "date": "2026-08-25T01:00:00.000Z",
+       "e1rm": 215.83333333333334,
+       "topSet": {
+        "weight": 185,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-01T01:00:00.000Z",
+       "e1rm": 218.75,
+       "topSet": {
+        "weight": 187.5,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-08T01:00:00.000Z",
+       "e1rm": 221.66666666666669,
+       "topSet": {
+        "weight": 190,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-15T01:00:00.000Z",
+       "e1rm": 224.58333333333334,
+       "topSet": {
+        "weight": 192.5,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-22T01:00:00.000Z",
+       "e1rm": 227.50000000000003,
+       "topSet": {
+        "weight": 195,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-29T01:00:00.000Z",
+       "e1rm": 230.41666666666669,
+       "topSet": {
+        "weight": 197.5,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-06T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-13T01:00:00.000Z",
+       "e1rm": 236.25000000000003,
+       "topSet": {
+        "weight": 202.5,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-20T01:00:00.000Z",
+       "e1rm": 239.16666666666669,
+       "topSet": {
+        "weight": 205,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-27T01:00:00.000Z",
+       "e1rm": 242.08333333333334,
+       "topSet": {
+        "weight": 207.5,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-11-03T02:00:00.000Z",
+       "e1rm": 250.83333333333334,
+       "topSet": {
+        "weight": 225,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": true
+      }
+     ],
+     "change": {
+      "e1rm": {
+       "first": 215.83333333333334,
+       "last": 250.83333333333334,
+       "percent": 16.216216216216214
+      },
+      "topSet": {
+       "first": 185,
+       "last": 225,
+       "percent": 21.62162162162162
+      },
+      "reps": {
+       "first": 5,
+       "last": 5,
+       "percent": 0
+      }
+     },
+     "best": {
+      "e1rm": 250.83333333333334,
+      "date": "2026-11-03T02:00:00.000Z"
+     },
+     "heaviest": {
+      "weight": 225,
+      "reps": 3,
+      "date": "2026-11-03T02:00:00.000Z"
+     },
+     "mostReps": {
+      "reps": 5,
+      "date": "2026-08-25T01:00:00.000Z"
+     },
+     "sessions": 11,
+     "since": "2026-08-25T01:00:00.000Z"
+    }
+   }
+  },
+  "cmiz7vjpo0001vr0msv9of7ib": {
+   "history": {
+    "name": "Barbell Back Squat",
+    "weightUnit": "lbs",
+    "isBodyweight": false,
+    "sessions": [
+     {
+      "completionId": "c-basic-034",
+      "date": "2026-11-04T15:15:00.000Z",
+      "sets": [
+       {
+        "weight": 300,
+        "reps": 5
+       },
+       {
+        "weight": 185,
+        "reps": 12
+       },
+       {
+        "weight": 205,
+        "reps": 15
+       }
+      ],
+      "e1rm": 350,
+      "topSet": {
+       "weight": 300,
+       "reps": 5
+      },
+      "avgRpe": 9
+     },
+     {
+      "completionId": "c-basic-029",
+      "date": "2026-10-29T01:00:00.000Z",
+      "sets": [
+       {
+        "weight": 290,
+        "reps": 5
+       },
+       {
+        "weight": 310,
+        "reps": 3
+       }
+      ],
+      "e1rm": 341,
+      "topSet": {
+       "weight": 310,
+       "reps": 3
+      },
+      "avgRpe": 8.5
+     },
+     {
+      "completionId": "c-basic-026",
+      "date": "2026-10-22T01:00:00.000Z",
+      "sets": [
+       {
+        "weight": 285,
+        "reps": 5
+       },
+       {
+        "weight": 305,
+        "reps": 3
+       }
+      ],
+      "e1rm": 335.5,
+      "topSet": {
+       "weight": 305,
+       "reps": 3
+      },
+      "avgRpe": 8.5
+     },
+     {
+      "completionId": "c-basic-023",
+      "date": "2026-10-15T01:00:00.000Z",
+      "sets": [
+       {
+        "weight": 280,
+        "reps": 5
+       },
+       {
+        "weight": 300,
+        "reps": 3
+       }
+      ],
+      "e1rm": 330,
+      "topSet": {
+       "weight": 300,
+       "reps": 3
+      },
+      "avgRpe": 8.5
+     },
+     {
+      "completionId": "c-basic-020",
+      "date": "2026-10-08T01:00:00.000Z",
+      "sets": [
+       {
+        "weight": 275,
+        "reps": 5
+       },
+       {
+        "weight": 295,
+        "reps": 3
+       }
+      ],
+      "e1rm": 324.5,
+      "topSet": {
+       "weight": 295,
+       "reps": 3
+      },
+      "avgRpe": 8.5
+     },
+     {
+      "completionId": "c-basic-017",
+      "date": "2026-10-01T01:00:00.000Z",
+      "sets": [
+       {
+        "weight": 270,
+        "reps": 5
+       },
+       {
+        "weight": 290,
+        "reps": 3
+       }
+      ],
+      "e1rm": 319,
+      "topSet": {
+       "weight": 290,
+       "reps": 3
+      },
+      "avgRpe": 8.5
+     },
+     {
+      "completionId": "c-basic-014",
+      "date": "2026-09-24T01:00:00.000Z",
+      "sets": [
+       {
+        "weight": 265,
+        "reps": 5
+       },
+       {
+        "weight": 285,
+        "reps": 3
+       }
+      ],
+      "e1rm": 313.5,
+      "topSet": {
+       "weight": 285,
+       "reps": 3
+      },
+      "avgRpe": 8.5
+     },
+     {
+      "completionId": "c-basic-011",
+      "date": "2026-09-17T01:00:00.000Z",
+      "sets": [
+       {
+        "weight": 260,
+        "reps": 5
+       },
+       {
+        "weight": 280,
+        "reps": 3
+       }
+      ],
+      "e1rm": 308,
+      "topSet": {
+       "weight": 280,
+       "reps": 3
+      },
+      "avgRpe": 8.5
+     },
+     {
+      "completionId": "c-basic-008",
+      "date": "2026-09-10T01:00:00.000Z",
+      "sets": [
+       {
+        "weight": 255,
+        "reps": 5
+       },
+       {
+        "weight": 275,
+        "reps": 3
+       }
+      ],
+      "e1rm": 302.5,
+      "topSet": {
+       "weight": 275,
+       "reps": 3
+      },
+      "avgRpe": 8.5
+     },
+     {
+      "completionId": "c-basic-005",
+      "date": "2026-09-03T01:00:00.000Z",
+      "sets": [
+       {
+        "weight": 250,
+        "reps": 5
+       },
+       {
+        "weight": 270,
+        "reps": 3
+       }
+      ],
+      "e1rm": 297,
+      "topSet": {
+       "weight": 270,
+       "reps": 3
+      },
+      "avgRpe": 8.5
+     },
+     {
+      "completionId": "c-basic-002",
+      "date": "2026-08-27T01:00:00.000Z",
+      "sets": [
+       {
+        "weight": 245,
+        "reps": 5
+       },
+       {
+        "weight": 265,
+        "reps": 3
+       }
+      ],
+      "e1rm": 291.5,
+      "topSet": {
+       "weight": 265,
+       "reps": 3
+      },
+      "avgRpe": 8.5
+     }
+    ],
+    "records": [
+     {
+      "reps": 3,
+      "weight": 310,
+      "date": "2026-10-29T01:00:00.000Z",
+      "isNew": false
+     },
+     {
+      "reps": 5,
+      "weight": 300,
+      "date": "2026-11-04T15:15:00.000Z",
+      "isNew": true
+     },
+     {
+      "reps": 12,
+      "weight": 185,
+      "date": "2026-11-04T15:15:00.000Z",
+      "isNew": true
+     },
+     {
+      "reps": 15,
+      "weight": 205,
+      "date": "2026-11-04T15:15:00.000Z",
+      "isNew": true
+     }
+    ],
+    "weeklySets": [
+     {
+      "weekStart": "2026-08-24",
+      "sets": 2
+     },
+     {
+      "weekStart": "2026-08-31",
+      "sets": 2
+     },
+     {
+      "weekStart": "2026-09-07",
+      "sets": 2
+     },
+     {
+      "weekStart": "2026-09-14",
+      "sets": 2
+     },
+     {
+      "weekStart": "2026-09-21",
+      "sets": 2
+     },
+     {
+      "weekStart": "2026-09-28",
+      "sets": 2
+     },
+     {
+      "weekStart": "2026-10-05",
+      "sets": 2
+     },
+     {
+      "weekStart": "2026-10-12",
+      "sets": 2
+     },
+     {
+      "weekStart": "2026-10-19",
+      "sets": 2
+     },
+     {
+      "weekStart": "2026-10-26",
+      "sets": 2
+     },
+     {
+      "weekStart": "2026-11-02",
+      "sets": 3
+     }
+    ]
+   },
+   "charts": {
+    "3M": {
+     "points": [
+      {
+       "date": "2026-08-27T01:00:00.000Z",
+       "e1rm": 291.5,
+       "topSet": {
+        "weight": 265,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-03T01:00:00.000Z",
+       "e1rm": 297,
+       "topSet": {
+        "weight": 270,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-10T01:00:00.000Z",
+       "e1rm": 302.5,
+       "topSet": {
+        "weight": 275,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-17T01:00:00.000Z",
+       "e1rm": 308,
+       "topSet": {
+        "weight": 280,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-24T01:00:00.000Z",
+       "e1rm": 313.5,
+       "topSet": {
+        "weight": 285,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-01T01:00:00.000Z",
+       "e1rm": 319,
+       "topSet": {
+        "weight": 290,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-08T01:00:00.000Z",
+       "e1rm": 324.5,
+       "topSet": {
+        "weight": 295,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-15T01:00:00.000Z",
+       "e1rm": 330,
+       "topSet": {
+        "weight": 300,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-22T01:00:00.000Z",
+       "e1rm": 335.5,
+       "topSet": {
+        "weight": 305,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-29T01:00:00.000Z",
+       "e1rm": 341,
+       "topSet": {
+        "weight": 310,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-11-04T15:15:00.000Z",
+       "e1rm": 350,
+       "topSet": {
+        "weight": 300,
+        "reps": 5
+       },
+       "reps": 15,
+       "isPr": true
+      }
+     ],
+     "change": {
+      "e1rm": {
+       "first": 291.5,
+       "last": 350,
+       "percent": 20.06861063464837
+      },
+      "topSet": {
+       "first": 265,
+       "last": 300,
+       "percent": 13.20754716981132
+      },
+      "reps": {
+       "first": 5,
+       "last": 15,
+       "percent": 200
+      }
+     },
+     "best": {
+      "e1rm": 350,
+      "date": "2026-11-04T15:15:00.000Z"
+     },
+     "heaviest": {
+      "weight": 310,
+      "reps": 3,
+      "date": "2026-10-29T01:00:00.000Z"
+     },
+     "mostReps": {
+      "reps": 15,
+      "date": "2026-11-04T15:15:00.000Z"
+     },
+     "sessions": 11,
+     "since": "2026-08-27T01:00:00.000Z"
+    },
+    "6M": {
+     "points": [
+      {
+       "date": "2026-08-27T01:00:00.000Z",
+       "e1rm": 291.5,
+       "topSet": {
+        "weight": 265,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-03T01:00:00.000Z",
+       "e1rm": 297,
+       "topSet": {
+        "weight": 270,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-10T01:00:00.000Z",
+       "e1rm": 302.5,
+       "topSet": {
+        "weight": 275,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-17T01:00:00.000Z",
+       "e1rm": 308,
+       "topSet": {
+        "weight": 280,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-24T01:00:00.000Z",
+       "e1rm": 313.5,
+       "topSet": {
+        "weight": 285,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-01T01:00:00.000Z",
+       "e1rm": 319,
+       "topSet": {
+        "weight": 290,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-08T01:00:00.000Z",
+       "e1rm": 324.5,
+       "topSet": {
+        "weight": 295,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-15T01:00:00.000Z",
+       "e1rm": 330,
+       "topSet": {
+        "weight": 300,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-22T01:00:00.000Z",
+       "e1rm": 335.5,
+       "topSet": {
+        "weight": 305,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-29T01:00:00.000Z",
+       "e1rm": 341,
+       "topSet": {
+        "weight": 310,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-11-04T15:15:00.000Z",
+       "e1rm": 350,
+       "topSet": {
+        "weight": 300,
+        "reps": 5
+       },
+       "reps": 15,
+       "isPr": true
+      }
+     ],
+     "change": {
+      "e1rm": {
+       "first": 291.5,
+       "last": 350,
+       "percent": 20.06861063464837
+      },
+      "topSet": {
+       "first": 265,
+       "last": 300,
+       "percent": 13.20754716981132
+      },
+      "reps": {
+       "first": 5,
+       "last": 15,
+       "percent": 200
+      }
+     },
+     "best": {
+      "e1rm": 350,
+      "date": "2026-11-04T15:15:00.000Z"
+     },
+     "heaviest": {
+      "weight": 310,
+      "reps": 3,
+      "date": "2026-10-29T01:00:00.000Z"
+     },
+     "mostReps": {
+      "reps": 15,
+      "date": "2026-11-04T15:15:00.000Z"
+     },
+     "sessions": 11,
+     "since": "2026-08-27T01:00:00.000Z"
+    },
+    "1Y": {
+     "points": [
+      {
+       "date": "2026-08-27T01:00:00.000Z",
+       "e1rm": 291.5,
+       "topSet": {
+        "weight": 265,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-03T01:00:00.000Z",
+       "e1rm": 297,
+       "topSet": {
+        "weight": 270,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-10T01:00:00.000Z",
+       "e1rm": 302.5,
+       "topSet": {
+        "weight": 275,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-17T01:00:00.000Z",
+       "e1rm": 308,
+       "topSet": {
+        "weight": 280,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-24T01:00:00.000Z",
+       "e1rm": 313.5,
+       "topSet": {
+        "weight": 285,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-01T01:00:00.000Z",
+       "e1rm": 319,
+       "topSet": {
+        "weight": 290,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-08T01:00:00.000Z",
+       "e1rm": 324.5,
+       "topSet": {
+        "weight": 295,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-15T01:00:00.000Z",
+       "e1rm": 330,
+       "topSet": {
+        "weight": 300,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-22T01:00:00.000Z",
+       "e1rm": 335.5,
+       "topSet": {
+        "weight": 305,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-29T01:00:00.000Z",
+       "e1rm": 341,
+       "topSet": {
+        "weight": 310,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-11-04T15:15:00.000Z",
+       "e1rm": 350,
+       "topSet": {
+        "weight": 300,
+        "reps": 5
+       },
+       "reps": 15,
+       "isPr": true
+      }
+     ],
+     "change": {
+      "e1rm": {
+       "first": 291.5,
+       "last": 350,
+       "percent": 20.06861063464837
+      },
+      "topSet": {
+       "first": 265,
+       "last": 300,
+       "percent": 13.20754716981132
+      },
+      "reps": {
+       "first": 5,
+       "last": 15,
+       "percent": 200
+      }
+     },
+     "best": {
+      "e1rm": 350,
+      "date": "2026-11-04T15:15:00.000Z"
+     },
+     "heaviest": {
+      "weight": 310,
+      "reps": 3,
+      "date": "2026-10-29T01:00:00.000Z"
+     },
+     "mostReps": {
+      "reps": 15,
+      "date": "2026-11-04T15:15:00.000Z"
+     },
+     "sessions": 11,
+     "since": "2026-08-27T01:00:00.000Z"
+    },
+    "All": {
+     "points": [
+      {
+       "date": "2026-08-27T01:00:00.000Z",
+       "e1rm": 291.5,
+       "topSet": {
+        "weight": 265,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-03T01:00:00.000Z",
+       "e1rm": 297,
+       "topSet": {
+        "weight": 270,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-10T01:00:00.000Z",
+       "e1rm": 302.5,
+       "topSet": {
+        "weight": 275,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-17T01:00:00.000Z",
+       "e1rm": 308,
+       "topSet": {
+        "weight": 280,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-24T01:00:00.000Z",
+       "e1rm": 313.5,
+       "topSet": {
+        "weight": 285,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-01T01:00:00.000Z",
+       "e1rm": 319,
+       "topSet": {
+        "weight": 290,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-08T01:00:00.000Z",
+       "e1rm": 324.5,
+       "topSet": {
+        "weight": 295,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-15T01:00:00.000Z",
+       "e1rm": 330,
+       "topSet": {
+        "weight": 300,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-22T01:00:00.000Z",
+       "e1rm": 335.5,
+       "topSet": {
+        "weight": 305,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-29T01:00:00.000Z",
+       "e1rm": 341,
+       "topSet": {
+        "weight": 310,
+        "reps": 3
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-11-04T15:15:00.000Z",
+       "e1rm": 350,
+       "topSet": {
+        "weight": 300,
+        "reps": 5
+       },
+       "reps": 15,
+       "isPr": true
+      }
+     ],
+     "change": {
+      "e1rm": {
+       "first": 291.5,
+       "last": 350,
+       "percent": 20.06861063464837
+      },
+      "topSet": {
+       "first": 265,
+       "last": 300,
+       "percent": 13.20754716981132
+      },
+      "reps": {
+       "first": 5,
+       "last": 15,
+       "percent": 200
+      }
+     },
+     "best": {
+      "e1rm": 350,
+      "date": "2026-11-04T15:15:00.000Z"
+     },
+     "heaviest": {
+      "weight": 310,
+      "reps": 3,
+      "date": "2026-10-29T01:00:00.000Z"
+     },
+     "mostReps": {
+      "reps": 15,
+      "date": "2026-11-04T15:15:00.000Z"
+     },
+     "sessions": 11,
+     "since": "2026-08-27T01:00:00.000Z"
+    }
+   }
+  },
+  "cmiz7vkvr0008vr0m7rv3dapc": {
+   "history": {
+    "name": "Pull-Up",
+    "weightUnit": "lbs",
+    "isBodyweight": true,
+    "sessions": [
+     {
+      "completionId": "c-basic-030",
+      "date": "2026-10-30T16:30:00.000Z",
+      "sets": [
+       {
+        "weight": 0,
+        "reps": 8
+       }
+      ],
+      "e1rm": null,
+      "topSet": {
+       "weight": 0,
+       "reps": 8
+      },
+      "avgRpe": null
+     },
+     {
+      "completionId": "c-basic-027",
+      "date": "2026-10-23T16:30:00.000Z",
+      "sets": [
+       {
+        "weight": 0,
+        "reps": 8
+       }
+      ],
+      "e1rm": null,
+      "topSet": {
+       "weight": 0,
+       "reps": 8
+      },
+      "avgRpe": null
+     },
+     {
+      "completionId": "c-basic-024",
+      "date": "2026-10-16T16:30:00.000Z",
+      "sets": [
+       {
+        "weight": 0,
+        "reps": 8
+       }
+      ],
+      "e1rm": null,
+      "topSet": {
+       "weight": 0,
+       "reps": 8
+      },
+      "avgRpe": null
+     },
+     {
+      "completionId": "c-basic-021",
+      "date": "2026-10-09T16:30:00.000Z",
+      "sets": [
+       {
+        "weight": 0,
+        "reps": 8
+       }
+      ],
+      "e1rm": null,
+      "topSet": {
+       "weight": 0,
+       "reps": 8
+      },
+      "avgRpe": null
+     },
+     {
+      "completionId": "c-basic-018",
+      "date": "2026-10-02T16:30:00.000Z",
+      "sets": [
+       {
+        "weight": 0,
+        "reps": 8
+       }
+      ],
+      "e1rm": null,
+      "topSet": {
+       "weight": 0,
+       "reps": 8
+      },
+      "avgRpe": null
+     },
+     {
+      "completionId": "c-basic-015",
+      "date": "2026-09-25T16:30:00.000Z",
+      "sets": [
+       {
+        "weight": 0,
+        "reps": 8
+       }
+      ],
+      "e1rm": null,
+      "topSet": {
+       "weight": 0,
+       "reps": 8
+      },
+      "avgRpe": null
+     },
+     {
+      "completionId": "c-basic-012",
+      "date": "2026-09-18T16:30:00.000Z",
+      "sets": [
+       {
+        "weight": 0,
+        "reps": 8
+       }
+      ],
+      "e1rm": null,
+      "topSet": {
+       "weight": 0,
+       "reps": 8
+      },
+      "avgRpe": null
+     },
+     {
+      "completionId": "c-basic-009",
+      "date": "2026-09-11T16:30:00.000Z",
+      "sets": [
+       {
+        "weight": 0,
+        "reps": 8
+       }
+      ],
+      "e1rm": null,
+      "topSet": {
+       "weight": 0,
+       "reps": 8
+      },
+      "avgRpe": null
+     },
+     {
+      "completionId": "c-basic-006",
+      "date": "2026-09-04T16:30:00.000Z",
+      "sets": [
+       {
+        "weight": 0,
+        "reps": 8
+       }
+      ],
+      "e1rm": null,
+      "topSet": {
+       "weight": 0,
+       "reps": 8
+      },
+      "avgRpe": null
+     },
+     {
+      "completionId": "c-basic-003",
+      "date": "2026-08-28T16:30:00.000Z",
+      "sets": [
+       {
+        "weight": 0,
+        "reps": 8
+       }
+      ],
+      "e1rm": null,
+      "topSet": {
+       "weight": 0,
+       "reps": 8
+      },
+      "avgRpe": null
+     }
+    ],
+    "records": [
+     {
+      "reps": 8,
+      "weight": 0,
+      "date": "2026-08-28T16:30:00.000Z",
+      "isNew": false
+     }
+    ],
+    "weeklySets": [
+     {
+      "weekStart": "2026-08-24",
+      "sets": 1
+     },
+     {
+      "weekStart": "2026-08-31",
+      "sets": 1
+     },
+     {
+      "weekStart": "2026-09-07",
+      "sets": 1
+     },
+     {
+      "weekStart": "2026-09-14",
+      "sets": 1
+     },
+     {
+      "weekStart": "2026-09-21",
+      "sets": 1
+     },
+     {
+      "weekStart": "2026-09-28",
+      "sets": 1
+     },
+     {
+      "weekStart": "2026-10-05",
+      "sets": 1
+     },
+     {
+      "weekStart": "2026-10-12",
+      "sets": 1
+     },
+     {
+      "weekStart": "2026-10-19",
+      "sets": 1
+     },
+     {
+      "weekStart": "2026-10-26",
+      "sets": 1
+     },
+     {
+      "weekStart": "2026-11-02",
+      "sets": 0
+     }
+    ]
+   },
+   "charts": {
+    "3M": {
+     "points": [
+      {
+       "date": "2026-08-28T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-04T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-11T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-18T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-25T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-02T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-09T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-16T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-23T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-30T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      }
+     ],
+     "change": {
+      "e1rm": null,
+      "topSet": null,
+      "reps": {
+       "first": 8,
+       "last": 8,
+       "percent": 0
+      }
+     },
+     "best": null,
+     "heaviest": {
+      "weight": 0,
+      "reps": 8,
+      "date": "2026-08-28T16:30:00.000Z"
+     },
+     "mostReps": {
+      "reps": 8,
+      "date": "2026-08-28T16:30:00.000Z"
+     },
+     "sessions": 10,
+     "since": "2026-08-28T16:30:00.000Z"
+    },
+    "6M": {
+     "points": [
+      {
+       "date": "2026-08-28T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-04T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-11T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-18T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-25T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-02T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-09T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-16T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-23T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-30T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      }
+     ],
+     "change": {
+      "e1rm": null,
+      "topSet": null,
+      "reps": {
+       "first": 8,
+       "last": 8,
+       "percent": 0
+      }
+     },
+     "best": null,
+     "heaviest": {
+      "weight": 0,
+      "reps": 8,
+      "date": "2026-08-28T16:30:00.000Z"
+     },
+     "mostReps": {
+      "reps": 8,
+      "date": "2026-08-28T16:30:00.000Z"
+     },
+     "sessions": 10,
+     "since": "2026-08-28T16:30:00.000Z"
+    },
+    "1Y": {
+     "points": [
+      {
+       "date": "2026-08-28T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-04T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-11T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-18T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-25T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-02T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-09T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-16T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-23T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-30T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      }
+     ],
+     "change": {
+      "e1rm": null,
+      "topSet": null,
+      "reps": {
+       "first": 8,
+       "last": 8,
+       "percent": 0
+      }
+     },
+     "best": null,
+     "heaviest": {
+      "weight": 0,
+      "reps": 8,
+      "date": "2026-08-28T16:30:00.000Z"
+     },
+     "mostReps": {
+      "reps": 8,
+      "date": "2026-08-28T16:30:00.000Z"
+     },
+     "sessions": 10,
+     "since": "2026-08-28T16:30:00.000Z"
+    },
+    "All": {
+     "points": [
+      {
+       "date": "2026-08-28T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-04T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-11T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-18T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-25T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-02T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-09T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-16T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-23T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-30T16:30:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 0,
+        "reps": 8
+       },
+       "reps": 8,
+       "isPr": false
+      }
+     ],
+     "change": {
+      "e1rm": null,
+      "topSet": null,
+      "reps": {
+       "first": 8,
+       "last": 8,
+       "percent": 0
+      }
+     },
+     "best": null,
+     "heaviest": {
+      "weight": 0,
+      "reps": 8,
+      "date": "2026-08-28T16:30:00.000Z"
+     },
+     "mostReps": {
+      "reps": 8,
+      "date": "2026-08-28T16:30:00.000Z"
+     },
+     "sessions": 10,
+     "since": "2026-08-28T16:30:00.000Z"
+    }
+   }
+  },
+  "cmiz7vk780004vr0md53c57bz": {
+   "history": {
+    "name": "Overhead Press",
+    "weightUnit": "lbs",
+    "isBodyweight": false,
+    "sessions": [
+     {
+      "completionId": "c-basic-034",
+      "date": "2026-11-04T15:15:00.000Z",
+      "sets": [
+       {
+        "weight": 75,
+        "reps": 10
+       }
+      ],
+      "e1rm": 100,
+      "topSet": {
+       "weight": 75,
+       "reps": 10
+      },
+      "avgRpe": 9
+     },
+     {
+      "completionId": "c-basic-030",
+      "date": "2026-10-30T16:30:00.000Z",
+      "sets": [
+       {
+        "weight": 95,
+        "reps": 6
+       }
+      ],
+      "e1rm": 114,
+      "topSet": {
+       "weight": 95,
+       "reps": 6
+      },
+      "avgRpe": 8
+     },
+     {
+      "completionId": "c-basic-027",
+      "date": "2026-10-23T16:30:00.000Z",
+      "sets": [
+       {
+        "weight": 95,
+        "reps": 6
+       }
+      ],
+      "e1rm": 114,
+      "topSet": {
+       "weight": 95,
+       "reps": 6
+      },
+      "avgRpe": 8
+     },
+     {
+      "completionId": "c-basic-024",
+      "date": "2026-10-16T16:30:00.000Z",
+      "sets": [
+       {
+        "weight": 95,
+        "reps": 6
+       }
+      ],
+      "e1rm": 114,
+      "topSet": {
+       "weight": 95,
+       "reps": 6
+      },
+      "avgRpe": 8
+     },
+     {
+      "completionId": "c-basic-021",
+      "date": "2026-10-09T16:30:00.000Z",
+      "sets": [
+       {
+        "weight": 95,
+        "reps": 6
+       }
+      ],
+      "e1rm": 114,
+      "topSet": {
+       "weight": 95,
+       "reps": 6
+      },
+      "avgRpe": 8
+     },
+     {
+      "completionId": "c-basic-018",
+      "date": "2026-10-02T16:30:00.000Z",
+      "sets": [
+       {
+        "weight": 95,
+        "reps": 6
+       }
+      ],
+      "e1rm": 114,
+      "topSet": {
+       "weight": 95,
+       "reps": 6
+      },
+      "avgRpe": 8
+     },
+     {
+      "completionId": "c-basic-015",
+      "date": "2026-09-25T16:30:00.000Z",
+      "sets": [
+       {
+        "weight": 95,
+        "reps": 6
+       }
+      ],
+      "e1rm": 114,
+      "topSet": {
+       "weight": 95,
+       "reps": 6
+      },
+      "avgRpe": 8
+     },
+     {
+      "completionId": "c-basic-012",
+      "date": "2026-09-18T16:30:00.000Z",
+      "sets": [
+       {
+        "weight": 95,
+        "reps": 6
+       }
+      ],
+      "e1rm": 114,
+      "topSet": {
+       "weight": 95,
+       "reps": 6
+      },
+      "avgRpe": 8
+     },
+     {
+      "completionId": "c-basic-009",
+      "date": "2026-09-11T16:30:00.000Z",
+      "sets": [
+       {
+        "weight": 95,
+        "reps": 6
+       }
+      ],
+      "e1rm": 114,
+      "topSet": {
+       "weight": 95,
+       "reps": 6
+      },
+      "avgRpe": 8
+     },
+     {
+      "completionId": "c-basic-031",
+      "date": "2026-09-05T17:00:00.000Z",
+      "sets": [
+       {
+        "weight": 70,
+        "reps": 10
+       }
+      ],
+      "e1rm": 93.33333333333333,
+      "topSet": {
+       "weight": 70,
+       "reps": 10
+      },
+      "avgRpe": 8
+     },
+     {
+      "completionId": "c-basic-006",
+      "date": "2026-09-04T16:30:00.000Z",
+      "sets": [
+       {
+        "weight": 95,
+        "reps": 6
+       }
+      ],
+      "e1rm": 114,
+      "topSet": {
+       "weight": 95,
+       "reps": 6
+      },
+      "avgRpe": 8
+     },
+     {
+      "completionId": "c-basic-003",
+      "date": "2026-08-28T16:30:00.000Z",
+      "sets": [
+       {
+        "weight": 95,
+        "reps": 6
+       }
+      ],
+      "e1rm": 114,
+      "topSet": {
+       "weight": 95,
+       "reps": 6
+      },
+      "avgRpe": 8
+     }
+    ],
+    "records": [
+     {
+      "reps": 6,
+      "weight": 95,
+      "date": "2026-08-28T16:30:00.000Z",
+      "isNew": false
+     },
+     {
+      "reps": 10,
+      "weight": 75,
+      "date": "2026-11-04T15:15:00.000Z",
+      "isNew": true
+     }
+    ],
+    "weeklySets": [
+     {
+      "weekStart": "2026-08-24",
+      "sets": 1
+     },
+     {
+      "weekStart": "2026-08-31",
+      "sets": 2
+     },
+     {
+      "weekStart": "2026-09-07",
+      "sets": 1
+     },
+     {
+      "weekStart": "2026-09-14",
+      "sets": 1
+     },
+     {
+      "weekStart": "2026-09-21",
+      "sets": 1
+     },
+     {
+      "weekStart": "2026-09-28",
+      "sets": 1
+     },
+     {
+      "weekStart": "2026-10-05",
+      "sets": 1
+     },
+     {
+      "weekStart": "2026-10-12",
+      "sets": 1
+     },
+     {
+      "weekStart": "2026-10-19",
+      "sets": 1
+     },
+     {
+      "weekStart": "2026-10-26",
+      "sets": 1
+     },
+     {
+      "weekStart": "2026-11-02",
+      "sets": 1
+     }
+    ]
+   },
+   "charts": {
+    "3M": {
+     "points": [
+      {
+       "date": "2026-08-28T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": true
+      },
+      {
+       "date": "2026-09-04T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-05T17:00:00.000Z",
+       "e1rm": 93.33333333333333,
+       "topSet": {
+        "weight": 70,
+        "reps": 10
+       },
+       "reps": 10,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-11T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-18T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-25T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-02T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-09T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-16T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-23T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-30T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-11-04T15:15:00.000Z",
+       "e1rm": 100,
+       "topSet": {
+        "weight": 75,
+        "reps": 10
+       },
+       "reps": 10,
+       "isPr": false
+      }
+     ],
+     "change": {
+      "e1rm": {
+       "first": 114,
+       "last": 100,
+       "percent": -12.280701754385964
+      },
+      "topSet": {
+       "first": 95,
+       "last": 75,
+       "percent": -21.052631578947366
+      },
+      "reps": {
+       "first": 6,
+       "last": 10,
+       "percent": 66.66666666666666
+      }
+     },
+     "best": {
+      "e1rm": 114,
+      "date": "2026-08-28T16:30:00.000Z"
+     },
+     "heaviest": {
+      "weight": 95,
+      "reps": 6,
+      "date": "2026-08-28T16:30:00.000Z"
+     },
+     "mostReps": {
+      "reps": 10,
+      "date": "2026-09-05T17:00:00.000Z"
+     },
+     "sessions": 12,
+     "since": "2026-08-28T16:30:00.000Z"
+    },
+    "6M": {
+     "points": [
+      {
+       "date": "2026-08-28T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": true
+      },
+      {
+       "date": "2026-09-04T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-05T17:00:00.000Z",
+       "e1rm": 93.33333333333333,
+       "topSet": {
+        "weight": 70,
+        "reps": 10
+       },
+       "reps": 10,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-11T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-18T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-25T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-02T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-09T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-16T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-23T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-30T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-11-04T15:15:00.000Z",
+       "e1rm": 100,
+       "topSet": {
+        "weight": 75,
+        "reps": 10
+       },
+       "reps": 10,
+       "isPr": false
+      }
+     ],
+     "change": {
+      "e1rm": {
+       "first": 114,
+       "last": 100,
+       "percent": -12.280701754385964
+      },
+      "topSet": {
+       "first": 95,
+       "last": 75,
+       "percent": -21.052631578947366
+      },
+      "reps": {
+       "first": 6,
+       "last": 10,
+       "percent": 66.66666666666666
+      }
+     },
+     "best": {
+      "e1rm": 114,
+      "date": "2026-08-28T16:30:00.000Z"
+     },
+     "heaviest": {
+      "weight": 95,
+      "reps": 6,
+      "date": "2026-08-28T16:30:00.000Z"
+     },
+     "mostReps": {
+      "reps": 10,
+      "date": "2026-09-05T17:00:00.000Z"
+     },
+     "sessions": 12,
+     "since": "2026-08-28T16:30:00.000Z"
+    },
+    "1Y": {
+     "points": [
+      {
+       "date": "2026-08-28T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": true
+      },
+      {
+       "date": "2026-09-04T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 10,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-11T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-18T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-25T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-02T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-09T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-16T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-23T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-30T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-11-04T15:15:00.000Z",
+       "e1rm": 100,
+       "topSet": {
+        "weight": 75,
+        "reps": 10
+       },
+       "reps": 10,
+       "isPr": false
+      }
+     ],
+     "change": {
+      "e1rm": {
+       "first": 114,
+       "last": 100,
+       "percent": -12.280701754385964
+      },
+      "topSet": {
+       "first": 95,
+       "last": 75,
+       "percent": -21.052631578947366
+      },
+      "reps": {
+       "first": 6,
+       "last": 10,
+       "percent": 66.66666666666666
+      }
+     },
+     "best": {
+      "e1rm": 114,
+      "date": "2026-08-28T16:30:00.000Z"
+     },
+     "heaviest": {
+      "weight": 95,
+      "reps": 6,
+      "date": "2026-08-28T16:30:00.000Z"
+     },
+     "mostReps": {
+      "reps": 10,
+      "date": "2026-09-05T17:00:00.000Z"
+     },
+     "sessions": 12,
+     "since": "2026-08-28T16:30:00.000Z"
+    },
+    "All": {
+     "points": [
+      {
+       "date": "2026-08-28T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": true
+      },
+      {
+       "date": "2026-09-04T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 10,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-11T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-18T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-25T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-02T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-09T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-16T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-23T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-30T16:30:00.000Z",
+       "e1rm": 114,
+       "topSet": {
+        "weight": 95,
+        "reps": 6
+       },
+       "reps": 6,
+       "isPr": false
+      },
+      {
+       "date": "2026-11-04T15:15:00.000Z",
+       "e1rm": 100,
+       "topSet": {
+        "weight": 75,
+        "reps": 10
+       },
+       "reps": 10,
+       "isPr": false
+      }
+     ],
+     "change": {
+      "e1rm": {
+       "first": 114,
+       "last": 100,
+       "percent": -12.280701754385964
+      },
+      "topSet": {
+       "first": 95,
+       "last": 75,
+       "percent": -21.052631578947366
+      },
+      "reps": {
+       "first": 6,
+       "last": 10,
+       "percent": 66.66666666666666
+      }
+     },
+     "best": {
+      "e1rm": 114,
+      "date": "2026-08-28T16:30:00.000Z"
+     },
+     "heaviest": {
+      "weight": 95,
+      "reps": 6,
+      "date": "2026-08-28T16:30:00.000Z"
+     },
+     "mostReps": {
+      "reps": 10,
+      "date": "2026-09-05T17:00:00.000Z"
+     },
+     "sessions": 12,
+     "since": "2026-08-28T16:30:00.000Z"
+    }
+   }
+  }
+ }
+}
