@@ -21,3 +21,4 @@
 - 2026-11-07: 163 back (e3ee71a6), 69/69 non-program tests pass; re-check queued for ios-review after 162. programs-impl asked to merge feature/ios-skeleton again.
 - 2026-11-07: 161 back; feature/ios-programs merged into feature/ios-skeleton (590d0570); full check green, 112 tests. 162 import review: sound and fast (300 workouts in 1.3 s); lead answered its 3 questions (later exports update rows that came from a file; stale web drafts become abandoned; the summary counts changes); 164 to ios-impl. 165 programs review to new agent programs-review in worktree5.
 - 2026-11-07: slice 1 accepted (155 re-check). Gaps added to 164: a lone superset label after removing a member; the empty-finish block also enforced in core.
+- 2026-11-07: 164 back (3279a885, 124 tests); re-check with ios-review. Stretch slice 4 started: spec features/ios-app/progress.feature; 166 (Progress tests, goldens from the web's pure functions) to ios-tests.
