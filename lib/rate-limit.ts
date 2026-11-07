@@ -172,6 +172,22 @@ export const eventIngestionLimiter = lazyLimiter({
  */
 export const agentMcpLimiter = lazyLimiter({ keyPrefix: 'agent-mcp', points: 60, duration: 60 })
 
+/**
+ * Coaching: making invites (Settings → Coaching), 10 req / 3600s per user.
+ */
+export const coachInviteLimiter = lazyLimiter({ keyPrefix: 'coach-invite', points: 10, duration: 3600 })
+
+/**
+ * Coaching: accepting an invite. Checked per user and per IP, so one client
+ * can't try many tokens: 10 req / 60s each.
+ */
+export const coachAcceptLimiter = lazyLimiter({ keyPrefix: 'coach-accept', points: 10, duration: 60 })
+
+/**
+ * Coaching: revoking an invite and ending a link, 20 req / 60s per user.
+ */
+export const coachLinkLimiter = lazyLimiter({ keyPrefix: 'coach-link', points: 20, duration: 60 })
+
 export type LimiterGetter = () => RateLimiterRedis | RateLimiterMemory
 
 /**

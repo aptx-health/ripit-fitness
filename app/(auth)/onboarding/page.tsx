@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
+import { currentReturnPath } from '@/lib/auth/return-path'
 import { libraryHref } from '@/lib/library/links'
 import { clearAttribution, getAttribution } from '@/lib/signup-attribution'
 
@@ -35,6 +36,18 @@ const INFO_GROUPS = [
     ],
   },
 ]
+
+/**
+ * Where onboarding sends the user. A return path (a coach invite they opened
+ * before signing up) replaces the usual landing page; the waiver still comes
+ * first when the server asks for it.
+ */
+function afterOnboarding(redirect: string | undefined): string {
+  const next = currentReturnPath()
+  if (!next) return redirect || '/'
+  if (redirect?.startsWith('/waiver')) return `/waiver?next=${encodeURIComponent(next)}`
+  return next
+}
 
 export default function OnboardingPage() {
   const router = useRouter()
@@ -133,7 +146,7 @@ export default function OnboardingPage() {
         await new Promise(resolve => setTimeout(resolve, 2500))
       }
 
-      window.location.href = data.redirect || '/'
+      window.location.href = afterOnboarding(data.redirect)
     } catch {
       setError('Network error. Please try again.')
       changeStep(level === 'beginner' ? 'info' : 'experience')
@@ -150,7 +163,7 @@ export default function OnboardingPage() {
         }
         const data = await res.json()
         if (data.settings?.onboardingCompleted) {
-          router.replace('/')
+          router.replace(currentReturnPath() ?? '/')
           return
         }
         applyQrMode()
