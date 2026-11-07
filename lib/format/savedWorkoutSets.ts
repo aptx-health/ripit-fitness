@@ -31,14 +31,20 @@ export function describeSavedSets(sets: SetLike[]): string {
 export interface ExerciseLine {
   name: string
   notes?: string | null
+  /** Superset label, as stored (`exerciseGroup`); null or absent for a straight set. */
+  exerciseGroup?: string | null
   sets: SetLike[]
 }
 
-/** One numbered line per exercise (`1. Bench Press: 3 × 8, RIR 2`), with its notes indented below. */
+/**
+ * One numbered line per exercise (`1. Bench Press: 3 × 8, RIR 2`), with its
+ * notes indented below. A superset member says so: `2. Row (Superset A): …`.
+ */
 export function describeSavedExercises(exercises: ExerciseLine[]): string {
   return exercises
     .map((e, i) => {
-      const line = `${i + 1}. ${e.name}: ${describeSavedSets(e.sets)}`
+      const label = e.exerciseGroup ? ` (Superset ${e.exerciseGroup})` : ''
+      const line = `${i + 1}. ${e.name}${label}: ${describeSavedSets(e.sets)}`
       return e.notes ? `${line}\n   ${e.notes}` : line
     })
     .join('\n')

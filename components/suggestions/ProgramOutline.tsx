@@ -1,6 +1,9 @@
+import { supersetRuns } from '@/lib/format/supersets'
 import type { ProgramInput } from '@/lib/proposals/program'
+import SupersetBlock from './SupersetBlock'
 
-type SetInput = ProgramInput['weeks'][number]['workouts'][number]['exercises'][number]['prescribedSets'][number]
+type ExerciseInput = ProgramInput['weeks'][number]['workouts'][number]['exercises'][number]
+type SetInput = ExerciseInput['prescribedSets'][number]
 
 function describeSet(set: SetInput): string {
   let text = set.reps
@@ -25,7 +28,8 @@ export function setSummary(sets: SetInput[]): string {
 
 /**
  * Read-only outline of a suggested program: weeks, workouts, exercises and a
- * set summary. Every value is agent-supplied, so it is rendered as plain text.
+ * set summary; a superset's exercises sit in one labelled block. Every value
+ * is agent-supplied, so it is rendered as plain text.
  */
 export default function ProgramOutline({
   program,
@@ -34,6 +38,19 @@ export default function ProgramOutline({
   program: ProgramInput
   definitionNames: Record<string, string>
 }) {
+  const line = (exercise: ExerciseInput, key: number) => (
+    <li key={key} className="text-sm">
+      <div className="flex flex-wrap gap-x-2">
+        <span className="text-foreground break-words">
+          {definitionNames[exercise.exerciseDefinitionId] ?? 'Missing exercise'}
+        </span>
+        <span className="text-muted-foreground">{setSummary(exercise.prescribedSets)}</span>
+      </div>
+      {exercise.notes && (
+        <div className="text-xs text-muted-foreground whitespace-pre-wrap break-words">{exercise.notes}</div>
+      )}
+    </li>
+  )
   return (
     <div className="space-y-3" data-testid="program-outline">
       {program.description && (
@@ -52,21 +69,15 @@ export default function ProgramOutline({
                   Day {di + 1} · {workout.name}
                 </div>
                 <ol className="space-y-1">
-                  {workout.exercises.map((exercise, oi) => (
-                    <li key={oi} className="text-sm">
-                      <div className="flex flex-wrap gap-x-2">
-                        <span className="text-foreground break-words">
-                          {definitionNames[exercise.exerciseDefinitionId] ?? 'Missing exercise'}
-                        </span>
-                        <span className="text-muted-foreground">{setSummary(exercise.prescribedSets)}</span>
-                      </div>
-                      {exercise.notes && (
-                        <div className="text-xs text-muted-foreground whitespace-pre-wrap break-words">
-                          {exercise.notes}
-                        </div>
-                      )}
-                    </li>
-                  ))}
+                  {supersetRuns(workout.exercises, (e) => e.group).map((run) =>
+                    run.group ? (
+                      <SupersetBlock key={run.entries[0].index} label={run.group}>
+                        {run.entries.map(({ item, index }) => line(item, index))}
+                      </SupersetBlock>
+                    ) : (
+                      line(run.entries[0].item, run.entries[0].index)
+                    )
+                  )}
                 </ol>
               </div>
             ))}

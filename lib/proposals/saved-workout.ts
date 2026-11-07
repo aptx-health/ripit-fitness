@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { pluralize } from '@/lib/format/pluralize'
 import type { SavedWorkoutData } from '@/types/saved-workout'
 import { visibleTo } from './exercise-definition'
+import { exerciseGroup, withGroupRules } from './groups'
 import { prescribedSet } from './program'
 
 /**
@@ -24,11 +25,12 @@ const workoutExercise = z
   .object({
     exerciseDefinitionId: z.string().min(1),
     notes: z.string().trim().max(500).optional(),
+    group: exerciseGroup.optional(),
     sets: z.array(workoutSet).min(1).max(10),
   })
   .strict()
 
-export const workoutExercises = z.array(workoutExercise).min(1).max(15)
+export const workoutExercises = withGroupRules(z.array(workoutExercise).min(1).max(15))
 export const workoutName = z.string().trim().min(1).max(100)
 export const workoutNotes = z.string().trim().max(1000)
 
@@ -119,7 +121,7 @@ export function buildWorkoutData(exercises: ExerciseInput[], definitionNames: Ma
     exerciseDefinitionId: e.exerciseDefinitionId,
     order: i + 1,
     notes: e.notes ? e.notes : null,
-    exerciseGroup: null,
+    exerciseGroup: e.group ?? null,
     sets: e.sets.map((s, j) => ({
       setNumber: j + 1,
       reps: s.reps,
