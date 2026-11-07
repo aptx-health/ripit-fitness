@@ -201,12 +201,13 @@ async function writeFields(tx: Prisma.TransactionClient, row: SavedWorkout, fiel
   if (written.count === 0) throw new SavedWorkoutConflict(`saved workout changed ${when}`)
 }
 
-/** Approve a create: the new saved workout, never started. */
+/** Approve a create: the new saved workout, never started. `origin` is who sent it. */
 export async function createSavedWorkout(
   tx: Prisma.TransactionClient,
   userId: string,
   input: WorkoutCreateInput,
-  definitionNames: Map<string, string>
+  definitionNames: Map<string, string>,
+  origin: 'agent' | 'coach'
 ) {
   const workoutData = buildWorkoutData(input.exercises, definitionNames)
   return tx.savedWorkout.create({
@@ -217,7 +218,7 @@ export async function createSavedWorkout(
       workoutData: workoutData as unknown as Prisma.InputJsonValue,
       exerciseCount: workoutData.length,
       lastUsedAt: null,
-      origin: 'agent',
+      origin,
     },
     select: { id: true },
   })

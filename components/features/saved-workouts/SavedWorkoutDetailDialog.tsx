@@ -4,6 +4,7 @@ import * as Dialog from '@radix-ui/react-dialog'
 import { Bookmark, Loader2, Play, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import SendToTrainee, { type Trainee } from '@/components/coaching/SendToTrainee'
 import { useToast } from '@/components/ToastProvider'
 import PaperTabTitle from '@/components/ui/PaperTabTitle'
 import { clientLogger } from '@/lib/client-logger'
@@ -33,6 +34,7 @@ export default function SavedWorkoutDetailDialog({ item, onTogglePin, onOpenChan
   const router = useRouter()
   const toast = useToast()
   const [detail, setDetail] = useState<SavedWorkoutDetail | null>(null)
+  const [trainees, setTrainees] = useState<Trainee[]>([])
   const [loadError, setLoadError] = useState<string | null>(null)
   const [starting, setStarting] = useState(false)
 
@@ -42,8 +44,11 @@ export default function SavedWorkoutDetailDialog({ item, onTogglePin, onOpenChan
       try {
         const res = await fetch(`/api/workouts/saved/${item.id}`, { cache: 'no-store' })
         if (!res.ok) throw new Error(`Request failed (${res.status})`)
-        const data = (await res.json()) as { saved: SavedWorkoutDetail }
-        if (!cancelled) setDetail(data.saved)
+        const data = (await res.json()) as { saved: SavedWorkoutDetail; trainees?: Trainee[] }
+        if (!cancelled) {
+          setDetail(data.saved)
+          setTrainees(data.trainees ?? [])
+        }
       } catch (err) {
         clientLogger.error('Failed to fetch saved workout detail', err)
         if (!cancelled) setLoadError('Could not load workout details.')
@@ -192,6 +197,7 @@ export default function SavedWorkoutDetailDialog({ item, onTogglePin, onOpenChan
                 <Play size={16} aria-hidden="true" />
                 {starting ? 'Starting...' : 'Start this workout'}
               </button>
+              <SendToTrainee kind="saved_workout" sourceId={item.id} trainees={trainees} className="mt-2 w-full" />
             </div>
           </div>
         </Dialog.Content>

@@ -16,3 +16,9 @@
 - 2026-11-07 CST: Supersets merged to dev (#1042).
 - 2026-11-07 CST: Dustin: prod release waits until all coach features are in dev (coaching slices 2 and 3, after workout library slice 3).
 - 2026-11-07 CST: Slice 2 (send + Sent list, features/coaching/send.feature) confirmed by Dustin. Bundling custom exercises stays a follow-up after prod. Tests 148 dispatched to test-builder (worktree1, feature/coaching-send, stacked on #1043).
+- 2026-11-07 CST: Tests 148 back (59 tests, break matrix 34/34); lead re-ran (35 red). Build 150 dispatched to coach-impl.
+- 2026-11-07 CST: Build 150 back (suite 4398 pass); lead re-ran 130/130. Review 151 dispatched to coach-review.
+- 2026-11-07 CST: Review 151: ship. Fixes 152 (send reasons + normalising rest days and labels, lookup error handling, duplicate sends, trainee fetch) dispatched to coach-impl.
+- 2026-11-07 CST: Fixes 152 back; lead amended two locked steps for the duplicate guard; 143/143. Slice 2 ready for Dustin's phone preview (after the theme page).
+- 2026-11-07 CST: #1043 merged; coaching-send rebased onto dev. Phone preview started for Dustin.
+- 2026-11-07 CST: Slice 2 approved by Dustin on the preview; 148, 150–152 accepted. PR into dev. Follow-up from him: quick Send actions on rows, and workout rows that expand like programs.

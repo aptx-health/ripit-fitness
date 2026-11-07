@@ -33,7 +33,10 @@ export default function SuggestionsList({ suggestions }: { suggestions: Suggesti
             <div className="flex-1 min-w-0 space-y-0.5">
               <p className="text-xs font-bold uppercase tracking-wider text-accent">{suggestionKindLabel(item.kind)}</p>
               <p className="font-semibold text-foreground break-words">{item.title}</p>
-              <p className="text-sm text-muted-foreground line-clamp-2 break-words">{item.rationale}</p>
+              <p className="text-xs text-muted-foreground break-words">From {item.from}</p>
+              {item.rationale && (
+                <p className="text-sm text-muted-foreground line-clamp-2 break-words">{item.rationale}</p>
+              )}
             </div>
             <ChevronRight size={18} className="shrink-0 text-muted-foreground" aria-hidden="true" />
           </Link>

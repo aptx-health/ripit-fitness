@@ -32,6 +32,8 @@ export interface SuggestionItem {
   exerciseCount?: number | null
   rationale: string
   createdAt: Date
+  /** Who sent it, shown as "From <from>": the coach's name or the agent token's name. */
+  from: string
 }
 
 export interface SuggestionDetail extends SuggestionItem {

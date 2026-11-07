@@ -19,10 +19,52 @@ export interface CoachingInvite {
   expiresAt: string
 }
 
+export interface SentRow {
+  name: string
+  kind: 'program' | 'saved_workout'
+  sentAt: string
+  status: 'pending' | 'accepted' | 'declined'
+}
+
 export interface CoachingPerson {
   linkId: string
   name: string
   linkedAt: string
+  /** For a trainee: what the coach sent them, newest first. */
+  sent?: SentRow[]
+}
+
+const SENT_KIND = { program: 'Program', saved_workout: 'Workout' } as const
+const SENT_STATUS = {
+  pending: { label: 'Pending', className: 'border-border text-muted-foreground' },
+  accepted: { label: 'Accepted', className: 'border-success text-success' },
+  declined: { label: 'Declined', className: 'border-error/50 text-error' },
+} as const
+
+/** What the coach sent this trainee: name, kind, date and status. Nothing about their own training. */
+function SentList({ name, sent }: { name: string; sent: SentRow[] }) {
+  return (
+    <div className="mt-2">
+      <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Sent</p>
+      <ul aria-label={`Sent to ${name}`} className="mt-1 divide-y divide-border border-l-2 border-border">
+        {sent.map((row, i) => (
+          <li key={i} className="flex items-center gap-2 py-2 pl-3">
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-foreground">{row.name}</p>
+              <p className="text-xs text-muted-foreground">
+                {SENT_KIND[row.kind]} · <ShortDate iso={row.sentAt} />
+              </p>
+            </div>
+            <span
+              className={`shrink-0 border px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wider ${SENT_STATUS[row.status].className}`}
+            >
+              {SENT_STATUS[row.status].label}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
 }
 
 const DANGER_BUTTON =
@@ -152,6 +194,7 @@ export default function Coaching({
           </button>
         )}
       </div>
+      {person.sent && person.sent.length > 0 && <SentList name={person.name} sent={person.sent} />}
       {confirming === person.linkId && (
         <div className="mt-2 space-y-2">
           <p className="text-sm font-semibold text-foreground">{endLabel}</p>

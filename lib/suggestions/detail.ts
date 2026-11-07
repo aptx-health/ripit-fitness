@@ -1,3 +1,4 @@
+import { coachingNames } from '@/lib/coaching/names'
 import { prisma } from '@/lib/db'
 import { suggestionBody } from './bodies'
 import { SUGGESTION_KINDS, suggestionKindLabel, suggestionOutcome } from './kinds'
@@ -13,7 +14,7 @@ const allowedKinds = { in: [...SUGGESTION_KINDS] }
 
 /** The proposal behind a suggestion id, or null when the user may not see it. */
 export function findSuggestion(userId: string, id: string) {
-  return prisma.proposal.findFirst({ where: { id, userId, kind: allowedKinds } })
+  return prisma.proposal.findFirst({ where: { id, userId, kind: allowedKinds }, include: senderSelect })
 }
 
 type TitleSource = { kind: string; payload: unknown; before: unknown; targetId: string | null }
@@ -34,6 +35,21 @@ async function titlesFor(userId: string, rows: TitleSource[]): Promise<string[]>
   return rows.map((r) => suggestionTitle(r.kind, r.payload, r.before, r.targetId ? names.get(r.targetId) : null))
 }
 
+type SenderSource = { agentToken: { name: string } | null; coachLink: { coachUserId: string } | null }
+
+const senderSelect = { agentToken: { select: { name: true } }, coachLink: { select: { coachUserId: true } } } as const
+
+/** Who sent each proposal: the coach by name (as Coaching shows it), else the agent token's name. */
+async function sendersFor(rows: SenderSource[]): Promise<string[]> {
+  const names = await coachingNames(
+    prisma,
+    rows.flatMap((r) => (r.coachLink ? [r.coachLink.coachUserId] : []))
+  )
+  return rows.map((r) =>
+    r.coachLink ? (names.get(r.coachLink.coachUserId) ?? 'your coach') : (r.agentToken?.name ?? 'your agent')
+  )
+}
+
 function exerciseCountOf(payload: unknown): number | null {
   const exercises = (payload as { exercises?: unknown } | null)?.exercises
   return Array.isArray(exercises) ? exercises.length : null
@@ -44,13 +60,24 @@ export async function listPendingSuggestions(userId: string, take?: number): Pro
   const rows = await prisma.proposal.findMany({
     where: { userId, status: 'pending', kind: allowedKinds },
     orderBy: { createdAt: 'desc' },
-    select: { id: true, kind: true, summary: true, rationale: true, createdAt: true, payload: true, before: true, targetId: true },
+    select: {
+      id: true,
+      kind: true,
+      summary: true,
+      rationale: true,
+      createdAt: true,
+      payload: true,
+      before: true,
+      targetId: true,
+      ...senderSelect,
+    },
     ...(take !== undefined && { take }),
   })
-  const titles = await titlesFor(userId, rows)
-  return rows.map(({ payload, before: _before, targetId: _targetId, ...item }, i) => ({
+  const [titles, senders] = await Promise.all([titlesFor(userId, rows), sendersFor(rows)])
+  return rows.map(({ payload, before: _before, targetId: _targetId, agentToken: _token, coachLink: _link, ...item }, i) => ({
     ...item,
     title: titles[i],
+    from: senders[i],
     exerciseCount: item.kind === 'saved_workout.create' ? exerciseCountOf(payload) : null,
   }))
 }
@@ -63,10 +90,11 @@ export function countPendingSuggestions(userId: string): Promise<number> {
 export async function getSuggestionDetail(userId: string, id: string): Promise<SuggestionDetail | null> {
   const proposal = await findSuggestion(userId, id)
   if (!proposal) return null
-  const [kindLabel, body, [title]] = [
+  const [kindLabel, body, [title], [from]] = [
     suggestionKindLabel(proposal.kind),
     await suggestionBody(proposal, userId),
     await titlesFor(userId, [proposal]),
+    await sendersFor([proposal]),
   ]
   if (!kindLabel || !body) return null
 
@@ -80,6 +108,7 @@ export async function getSuggestionDetail(userId: string, id: string): Promise<S
     summary: proposal.summary,
     rationale: proposal.rationale,
     createdAt: proposal.createdAt,
+    from,
     programId: proposal.kind === 'program.create' && proposal.status === 'applied' ? proposal.targetId : null,
     body,
   }

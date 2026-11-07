@@ -133,19 +133,21 @@ export default function SuggestionReview({ suggestion }: { suggestion: Suggestio
         <p className="text-xs font-bold uppercase tracking-wider text-accent">{suggestion.kindLabel}</p>
         <h1 className="text-xl font-bold text-foreground break-words">{suggestion.title}</h1>
         <p className="text-sm text-muted-foreground">
-          Suggested{' '}
+          From {suggestion.from} · Suggested{' '}
           <time dateTime={created.toISOString()}>
             {mounted ? created.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : null}
           </time>
         </p>
       </div>
 
-      <section className="space-y-1.5">
-        <h2 className="doom-label text-secondary">Why</h2>
-        <p className="text-sm text-foreground whitespace-pre-wrap break-words bg-muted p-3 border border-border">
-          {suggestion.rationale}
-        </p>
-      </section>
+      {suggestion.rationale && (
+        <section className="space-y-1.5">
+          <h2 className="doom-label text-secondary">Why</h2>
+          <p className="text-sm text-foreground whitespace-pre-wrap break-words bg-muted p-3 border border-border">
+            {suggestion.rationale}
+          </p>
+        </section>
+      )}
 
       <section className="space-y-1.5">
         <h2 className="doom-label text-secondary">What it changes</h2>

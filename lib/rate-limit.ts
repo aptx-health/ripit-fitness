@@ -188,6 +188,17 @@ export const coachAcceptLimiter = lazyLimiter({ keyPrefix: 'coach-accept', point
  */
 export const coachLinkLimiter = lazyLimiter({ keyPrefix: 'coach-link', points: 20, duration: 60 })
 
+/**
+ * Coaching: sending a program or saved workout to a trainee, 30 req / 3600s
+ * per user. Each send writes a proposal on someone else's account.
+ */
+export const coachSendLimiter = lazyLimiter({ keyPrefix: 'coach-send', points: 30, duration: 3600 })
+
+/**
+ * Coaching: listing your trainees for the Send button (Library pages), 60 req / 60s per user.
+ */
+export const coachTraineesLimiter = lazyLimiter({ keyPrefix: 'coach-trainees', points: 60, duration: 60 })
+
 export type LimiterGetter = () => RateLimiterRedis | RateLimiterMemory
 
 /**

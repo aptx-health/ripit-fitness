@@ -1,6 +1,6 @@
 ---
 id: 148
-state: running
+state: accepted
 waiting_on:
 executor: test-builder
 from: lead (lead-ripit-mcp)
@@ -40,3 +40,5 @@ Use `handoff-test-builder`. First line `Report: complete | needs decision | furt
 
 ## Log
 - 2026-11-07 CST: created; confirmed by Dustin; dispatched to test-builder (wE:p9), worktree1.
+- 2026-11-07 CST: back; lead re-ran (35 red). Build 150 dispatched to coach-impl.
+- 2026-11-07 CST: Dustin approved slice 2 on the preview ("everything works really well"). Accepted.

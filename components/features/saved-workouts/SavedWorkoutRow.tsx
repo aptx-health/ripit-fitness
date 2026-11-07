@@ -23,6 +23,8 @@ export type SavedWorkoutListItem = {
   source?: string | null
   /** A coach's proposal created it (coaching slice 2), so New says "From your coach". */
   fromCoach?: boolean
+  /** The coach's name, as Coaching shows it, for "From Dustin". */
+  coachName?: string | null
 }
 
 type Props = {
