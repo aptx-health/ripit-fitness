@@ -72,7 +72,7 @@ struct FolderBlock<Content: View, Trailing: View>: View {
                     .font(.footnote.weight(.bold))
                     .tracking(1)
                     .foregroundStyle(tone.label)
-                    .lineLimit(1)
+                    .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 7)
                     .background(tone.fill, in: UnevenRoundedRectangle(topLeadingRadius: 8, topTrailingRadius: 8))
@@ -131,6 +131,10 @@ struct RowDivider: View {
 enum Format {
     static func weight(_ w: Double, _ unit: String) -> String {
         w == 0 ? "BW" : "\(w.formatted(.number.precision(.fractionLength(0...2)))) \(unit)"
+    }
+
+    static func counts(exercises: Int, sets: Int) -> String {
+        "\(exercises) \(exercises == 1 ? "exercise" : "exercises") · \(sets) \(sets == 1 ? "set" : "sets")"
     }
 
     static func day(_ d: Date) -> String {

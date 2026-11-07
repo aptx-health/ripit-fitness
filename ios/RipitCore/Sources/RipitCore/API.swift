@@ -7,6 +7,17 @@ import GRDB
 public enum RipitCoreError: Error, Equatable {
     case notImplemented
     case notFound(String)
+    /// A logged weight that isn't a finite number from 0 to `LoggedWeight.max`.
+    case invalidWeight(Double)
+}
+
+public enum LoggedWeight {
+    /// The heaviest weight a set can log, in lbs or kg.
+    public static let max: Double = 2000
+
+    public static func isValid(_ weight: Double) -> Bool {
+        weight.isFinite && weight >= 0 && weight <= max
+    }
 }
 
 // MARK: - Catalog
@@ -45,6 +56,8 @@ public struct ExerciseCatalog: Sendable {
     }
 
     /// Exercises whose name or any alias contains the query, ignoring case and punctuation.
+    /// Punctuation counts as a space, and a match with every space removed also counts, so
+    /// "bench-press", "pull up" and "pullup" all find "Pull-Up" style names.
     /// Each exercise appears at most once.
     /// Name matches come first, then alias-only matches, each alphabetical. An empty query returns
     /// every exercise alphabetically.
@@ -52,16 +65,21 @@ public struct ExerciseCatalog: Sendable {
         let q = Self.normalize(query)
         let sorted = exercises.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
         if q.isEmpty { return sorted }
-        let byName = sorted.filter { Self.normalize($0.name).contains(q) }
+        let squashed = q.replacingOccurrences(of: " ", with: "")
+        func matches(_ text: String) -> Bool {
+            let t = Self.normalize(text)
+            return t.contains(q) || t.replacingOccurrences(of: " ", with: "").contains(squashed)
+        }
+        let byName = sorted.filter { matches($0.name) }
         let named = Set(byName.map(\.id))
-        let byAlias = sorted.filter { !named.contains($0.id) && $0.aliases.contains { Self.normalize($0).contains(q) } }
+        let byAlias = sorted.filter { !named.contains($0.id) && $0.aliases.contains(where: matches) }
         return byName + byAlias
     }
 
-    /// Lowercase, drop everything but letters, digits and spaces, trim.
+    /// Lowercase, turn everything but letters and digits into spaces, collapse spaces, trim.
     static func normalize(_ s: String) -> String {
-        String(s.lowercased().filter { $0.isLetter || $0.isNumber || $0 == " " })
-            .trimmingCharacters(in: .whitespaces)
+        String(s.lowercased().map { $0.isLetter || $0.isNumber ? $0 : " " })
+            .split(separator: " ").joined(separator: " ")
     }
 }
 

@@ -144,8 +144,10 @@ public final class AppDatabase: Sendable {
         return id
     }
 
-    /// Logs the next set for an exercise and returns the set id.
+    /// Logs the next set for an exercise and returns the set id. The weight must be a finite number
+    /// from 0 to `LoggedWeight.max`.
     public func logSet(exerciseId: String, reps: Int, weight: Double, unit: String = "lbs") throws -> String {
+        guard LoggedWeight.isValid(weight) else { throw RipitCoreError.invalidWeight(weight) }
         let id = Self.newId()
         try dbQueue.write { db in
             guard let completionId = try String.fetchOne(db, sql: "SELECT workoutCompletionId FROM exercise WHERE id = ?", arguments: [exerciseId]) else {
@@ -178,6 +180,18 @@ public final class AppDatabase: Sendable {
             for id in later {
                 try db.execute(sql: "UPDATE loggedSet SET setNumber = setNumber - 1 WHERE id = ?", arguments: [id])
             }
+        }
+    }
+
+    /// Removes an exercise and its logged sets from an unfinished workout. Finished history is never edited.
+    public func removeExercise(_ exerciseId: String) throws {
+        try dbQueue.write { db in
+            // Logged sets go with it (ON DELETE CASCADE).
+            try db.execute(sql: """
+                DELETE FROM exercise WHERE id = ? AND workoutCompletionId IN
+                    (SELECT id FROM workoutCompletion WHERE status = 'draft')
+                """, arguments: [exerciseId])
+            if db.changesCount == 0 { throw RipitCoreError.notFound("exercise \(exerciseId) in an unfinished workout") }
         }
     }
 

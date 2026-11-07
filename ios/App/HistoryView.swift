@@ -95,7 +95,7 @@ private struct ResumeCard: View {
                 Text("Started \(Format.day(workout.startedAt)), \(Format.time(workout.startedAt))")
                     .font(.headline)
                     .foregroundStyle(Theme.foreground)
-                Text("\(workout.exercises.count) exercises · \(sets) sets")
+                Text(Format.counts(exercises: workout.exercises.count, sets: sets))
                     .foregroundStyle(Theme.mutedForeground)
                 Button("Resume workout") { store.resumeWorkout() }
                     .buttonStyle(FilledButtonStyle())
@@ -107,25 +107,34 @@ private struct ResumeCard: View {
 
 private struct HistoryRow: View {
     let entry: HistoryEntry
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(entry.name ?? "Ad-hoc workout")
-                    .font(.headline)
-                    .foregroundStyle(Theme.foreground)
-                Text("\(entry.exerciseCount) \(entry.exerciseCount == 1 ? "exercise" : "exercises") · \(entry.setCount) \(entry.setCount == 1 ? "set" : "sets")")
-                    .font(.subheadline)
-                    .foregroundStyle(Theme.mutedForeground)
+            // At accessibility text sizes the date moves under the name instead of squeezing it.
+            let layout = typeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
+                : AnyLayout(HStackLayout())
+            layout {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(entry.name ?? "Ad-hoc workout")
+                        .font(.headline)
+                        .foregroundStyle(Theme.foreground)
+                    Text(Format.counts(exercises: entry.exerciseCount, sets: entry.setCount))
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.mutedForeground)
+                }
+                if !typeSize.isAccessibilitySize { Spacer() }
+                VStack(alignment: typeSize.isAccessibilitySize ? .leading : .trailing, spacing: 4) {
+                    Text(Format.day(entry.completedAt)).font(.subheadline.weight(.semibold))
+                    Text(Format.time(entry.completedAt)).font(.caption)
+                }
+                .foregroundStyle(Theme.mutedForeground)
             }
-            Spacer()
-            VStack(alignment: .trailing, spacing: 4) {
-                Text(Format.day(entry.completedAt)).font(.subheadline.weight(.semibold))
-                Text(Format.time(entry.completedAt)).font(.caption)
-            }
-            .foregroundStyle(Theme.mutedForeground)
+            if typeSize.isAccessibilitySize { Spacer(minLength: 0) }
             Image(systemName: "chevron.right").font(.caption).foregroundStyle(Theme.border)
         }
+        .padding(.vertical, typeSize.isAccessibilitySize ? 12 : 0)
         .padding(.horizontal, 16)
         .frame(minHeight: 64)
         .contentShape(Rectangle())
@@ -169,13 +178,14 @@ struct WorkoutDetailView: View {
 
 struct SetRow: View {
     let set: SetDetail
+    @ScaledMetric(relativeTo: .subheadline) private var numberWidth: CGFloat = 28
 
     var body: some View {
         HStack {
             Text("\(set.setNumber)")
                 .font(.subheadline.weight(.bold))
                 .foregroundStyle(Theme.mutedForeground)
-                .frame(width: 28, alignment: .leading)
+                .frame(minWidth: numberWidth, alignment: .leading)
             Text(Format.weight(set.weight, set.weightUnit))
             Text("×").foregroundStyle(Theme.mutedForeground)
             Text("\(set.reps)")
