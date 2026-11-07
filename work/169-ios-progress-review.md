@@ -27,3 +27,4 @@ A review packet with first line `Report: ...` and a verdict, sent to wX:p1. Repo
 ## Log
 - 2026-11-07 CST: created.
 - 2026-11-07 13:01 MST: dispatched to ios-review (running)
+- 2026-11-07 CST: verdict: meets all 6 scenarios, numbers match the goldens hands-on; should-fixes go to 172. Lead: Top set/Volume and programWeek deferred.
