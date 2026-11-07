@@ -217,6 +217,12 @@ model SavedWorkout {
   updatedAt          DateTime  @updatedAt
   lastUsedAt         DateTime?
   pinnedAt           DateTime?
+  /// Where it came from: session (saved after a workout) | agent (an approved proposal) | coach.
+  origin             String    @default("session")
+  /// Archived by hand; hidden from every group except Show archived. Never set automatically.
+  archivedAt         DateTime?
+  /// Set by Dismiss (and by Restore), so the workout never returns to the New group.
+  dismissedAt        DateTime?
 
   @@index([userId, lastUsedAt(sort: Desc)])
   @@index([userId, createdAt(sort: Desc)])

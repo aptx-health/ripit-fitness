@@ -119,15 +119,15 @@ export default function QuickActionSheet({ open, onOpenChange }: Props) {
 
   // Saved-workouts count drives whether the "My saved workouts" row appears.
   // Hidden for users with zero saved workouts so the sheet doesn't dead-end
-  // new users into an empty list.
+  // new users into an empty list. Archived ones don't count.
   useEffect(() => {
     if (!open) return
     let cancelled = false
-    fetchJsonWithRetry<{ saved: Array<{ id: string }> }>('/api/workouts/saved', {
+    fetchJsonWithRetry<{ saved: Array<{ id: string; archivedAt?: string | null }> }>('/api/workouts/saved', {
       cache: 'no-store',
     })
       .then((data) => {
-        if (!cancelled) setSavedWorkoutCount(data.saved?.length ?? 0)
+        if (!cancelled) setSavedWorkoutCount(data.saved?.filter((s) => !s.archivedAt).length ?? 0)
       })
       .catch((err) => {
         clientLogger.error('Failed to load saved workouts count:', err)

@@ -119,7 +119,7 @@ export default async function LibraryPage() {
       select: { customProgramLimitBypass: true },
     }),
     // For the Workouts tab's count chip
-    prisma.savedWorkout.count({ where: { userId: user.id } }),
+    prisma.savedWorkout.count({ where: { userId: user.id, archivedAt: null } }),
   ])
 
   const currentWeek = activeWeekInfo.length > 0

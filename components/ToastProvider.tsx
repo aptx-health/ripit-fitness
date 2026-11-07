@@ -6,17 +6,21 @@ import { createContext, type ReactNode, useContext, useState } from 'react'
 
 type ToastType = 'success' | 'error' | 'warning'
 
+/** A button on the toast, such as Undo; tapping it runs onClick and closes the toast. */
+export type ToastAction = { label: string; onClick: () => void }
+
 type ToastMessage = {
   id: string
   type: ToastType
   title: string
   description?: string
+  action?: ToastAction
 }
 
 type ToastContextType = {
-  success: (title: string, description?: string) => void
-  error: (title: string, description?: string) => void
-  warning: (title: string, description?: string) => void
+  success: (title: string, description?: string, action?: ToastAction) => void
+  error: (title: string, description?: string, action?: ToastAction) => void
+  warning: (title: string, description?: string, action?: ToastAction) => void
 }
 
 const ToastContext = createContext<ToastContextType | null>(null)
@@ -24,9 +28,9 @@ const ToastContext = createContext<ToastContextType | null>(null)
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastMessage[]>([])
 
-  const addToast = (type: ToastType, title: string, description?: string) => {
+  const addToast = (type: ToastType, title: string, description?: string, action?: ToastAction) => {
     const id = Math.random().toString(36).substring(7)
-    setToasts((prev) => [...prev, { id, type, title, description }])
+    setToasts((prev) => [...prev, { id, type, title, description, action }])
 
     // Auto-remove after 5 seconds
     setTimeout(() => {
@@ -34,16 +38,16 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     }, 5000)
   }
 
-  const success = (title: string, description?: string) => {
-    addToast('success', title, description)
+  const success = (title: string, description?: string, action?: ToastAction) => {
+    addToast('success', title, description, action)
   }
 
-  const error = (title: string, description?: string) => {
-    addToast('error', title, description)
+  const error = (title: string, description?: string, action?: ToastAction) => {
+    addToast('error', title, description, action)
   }
 
-  const warning = (title: string, description?: string) => {
-    addToast('warning', title, description)
+  const warning = (title: string, description?: string, action?: ToastAction) => {
+    addToast('warning', title, description, action)
   }
 
   const removeToast = (id: string) => {
@@ -85,9 +89,24 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                   </Toast.Description>
                 )}
               </div>
+              {toast.action && (
+                <Toast.Action asChild altText={toast.action.label}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      toast.action?.onClick()
+                      removeToast(toast.id)
+                    }}
+                    className="-my-2 flex min-h-12 flex-shrink-0 items-center px-3 text-sm font-bold uppercase tracking-wider underline underline-offset-4 hover:opacity-80 doom-focus-ring"
+                  >
+                    {toast.action.label}
+                  </button>
+                </Toast.Action>
+              )}
+              {/* 48px target; the negative margins keep the toast its usual height. */}
               <Toast.Close asChild>
                 <button type="button"
-                  className="flex-shrink-0 hover:opacity-80 transition-opacity"
+                  className="-my-3 -mr-3 flex min-h-12 min-w-12 flex-shrink-0 items-center justify-center hover:opacity-80 transition-opacity doom-focus-ring"
                   aria-label="Close"
                   onMouseDown={(e) => {
                     e.preventDefault()

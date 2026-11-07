@@ -15,6 +15,14 @@ export type SavedWorkoutListItem = {
   lastUsedAt: string | null
   createdAt: string
   pinnedAt?: string | null
+  /** session | agent | coach */
+  origin?: string
+  archivedAt?: string | null
+  dismissedAt?: string | null
+  /** Who sent an unstarted agent workout (the agent's name), for the New group. */
+  source?: string | null
+  /** A coach's proposal created it (coaching slice 2), so New says "From your coach". */
+  fromCoach?: boolean
 }
 
 type Props = {
@@ -22,10 +30,14 @@ type Props = {
   onOpen: () => void
   onTogglePin: () => void
   onRename: () => void
+  onArchive: () => void
   onDelete: () => void
 }
 
-export default function SavedWorkoutRow({ item, onOpen, onTogglePin, onRename, onDelete }: Props) {
+/** A row in the actions menu: 48px, like every tap target in the list. */
+const MENU_ITEM = 'doom-focus-ring flex min-h-12 w-full items-center px-4 text-left text-sm'
+
+export default function SavedWorkoutRow({ item, onOpen, onTogglePin, onRename, onArchive, onDelete }: Props) {
   const [menuOpen, setMenuOpen] = useState(false)
 
   const dateLabel = item.lastUsedAt
@@ -82,7 +94,7 @@ export default function SavedWorkoutRow({ item, onOpen, onTogglePin, onRename, o
                   setMenuOpen(false)
                   onRename()
                 }}
-                className="doom-focus-ring px-4 py-3 text-left text-sm text-foreground hover:bg-muted"
+                className={`${MENU_ITEM} text-foreground hover:bg-muted`}
               >
                 Rename
               </button>
@@ -90,9 +102,19 @@ export default function SavedWorkoutRow({ item, onOpen, onTogglePin, onRename, o
                 type="button"
                 onClick={() => {
                   setMenuOpen(false)
+                  onArchive()
+                }}
+                className={`${MENU_ITEM} text-foreground hover:bg-muted`}
+              >
+                Archive
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false)
                   onDelete()
                 }}
-                className="doom-focus-ring px-4 py-3 text-left text-sm text-error hover:bg-error/10"
+                className={`${MENU_ITEM} text-error hover:bg-error/10`}
               >
                 Delete
               </button>
