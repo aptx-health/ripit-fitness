@@ -37,3 +37,4 @@ The `handoff-implementer` packet, first line `Report: ...`, sent to wX:p1. Use y
 ## Log
 - 2026-11-07 CST: created and dispatched.
 - 2026-11-07 12:22 MST: dispatched to programs-impl (running)
+- 2026-11-07 CST: back 590d0570; lead fast-forwarded feature/ios-skeleton to it; full ios-check green, 112 tests. To review (165).
