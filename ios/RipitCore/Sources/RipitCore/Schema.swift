@@ -17,6 +17,7 @@ enum Schema {
     static let migrations: [(String, @Sendable (Database) throws -> Void)] = [
         ("v1-exercise-catalog", v1ExerciseCatalog),
         ("v2-training-model", v2TrainingModel),
+        ("v3-program-cycle", v3ProgramCycle),
     ]
 
     static func v1ExerciseCatalog(_ db: Database) throws {
@@ -170,5 +171,11 @@ enum Schema {
             CREATE INDEX loggedSet_exerciseId ON loggedSet(exerciseId);
             CREATE INDEX loggedSet_completionId ON loggedSet(completionId);
             """)
+    }
+
+    /// The program's current cycle (slice 3). The web has no such column: restart there archives
+    /// completions but never raises the cycle; the phone does (features/ios-app/programs.feature).
+    static func v3ProgramCycle(_ db: Database) throws {
+        try db.execute(sql: "ALTER TABLE program ADD COLUMN cycleNumber INTEGER NOT NULL DEFAULT 1")
     }
 }

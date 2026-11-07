@@ -8,7 +8,8 @@ import GRDB
 /// The phone's local SQLite database. Opening it creates the file if needed, runs any missing
 /// migrations in order, and seeds the system exercise catalog.
 public final class AppDatabase: Sendable {
-    private let dbQueue: DatabaseQueue
+    /// Internal so other files' extensions (Programs.swift) can write in one transaction.
+    let dbQueue: DatabaseQueue
 
     private init(_ dbQueue: DatabaseQueue) {
         self.dbQueue = dbQueue
@@ -84,11 +85,16 @@ public final class AppDatabase: Sendable {
     /// Finished workouts, newest first. Unfinished workouts are not history.
     public func history() throws -> [HistoryEntry] {
         try dbQueue.read { db in
+            // A program session is named after its workout. Its exercises are the session's own plus the
+            // program exercises it logged sets against.
             try Row.fetchAll(db, sql: """
-                SELECT c.id, c.name, c.completedAt,
-                       (SELECT COUNT(*) FROM exercise e WHERE e.workoutCompletionId = c.id) AS exerciseCount,
+                SELECT c.id, COALESCE(c.name, w.name) AS name, c.completedAt,
+                       (SELECT COUNT(*) FROM (
+                            SELECT id FROM exercise WHERE workoutCompletionId = c.id
+                            UNION SELECT exerciseId FROM loggedSet WHERE completionId = c.id)) AS exerciseCount,
                        (SELECT COUNT(*) FROM loggedSet s WHERE s.completionId = c.id) AS setCount
                 FROM workoutCompletion c
+                LEFT JOIN workout w ON w.id = c.workoutId
                 WHERE c.status = 'completed'
                 ORDER BY c.completedAt DESC
                 """).map {
@@ -138,16 +144,23 @@ public final class AppDatabase: Sendable {
         return id
     }
 
-    /// Logs the next set for an exercise and returns the set id.
+    /// Logs the next set for an exercise and returns the set id. A program exercise logs into its
+    /// workout's unfinished session.
     public func logSet(exerciseId: String, reps: Int, weight: Double, unit: String = "lbs") throws -> String {
         let id = Self.newId()
         try dbQueue.write { db in
-            guard let completionId = try String.fetchOne(db, sql: "SELECT workoutCompletionId FROM exercise WHERE id = ?", arguments: [exerciseId]) else {
+            guard let e = try Row.fetchOne(db, sql: "SELECT workoutCompletionId, workoutId FROM exercise WHERE id = ?", arguments: [exerciseId]) else {
                 throw RipitCoreError.notFound("exercise \(exerciseId)")
             }
+            guard let completionId = try e["workoutCompletionId"] as String? ?? String.fetchOne(db, sql: """
+                SELECT id FROM workoutCompletion WHERE workoutId = ? AND status = 'draft' AND isArchived = 0
+                ORDER BY startedAt DESC LIMIT 1
+                """, arguments: [e["workoutId"] as String?]) else {
+                throw RipitCoreError.notFound("unfinished session for exercise \(exerciseId)")
+            }
             let setNumber = try Int.fetchOne(db, sql: """
-                SELECT COALESCE(MAX(setNumber), 0) + 1 FROM loggedSet WHERE exerciseId = ?
-                """, arguments: [exerciseId]) ?? 1
+                SELECT COALESCE(MAX(setNumber), 0) + 1 FROM loggedSet WHERE exerciseId = ? AND completionId = ?
+                """, arguments: [exerciseId, completionId]) ?? 1
             try db.execute(sql: """
                 INSERT INTO loggedSet (id, setNumber, reps, weight, weightUnit, exerciseId, completionId, createdAt)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -159,16 +172,17 @@ public final class AppDatabase: Sendable {
     /// Deletes one logged set and renumbers the exercise's later sets.
     public func deleteSet(_ setId: String) throws {
         try dbQueue.write { db in
-            guard let row = try Row.fetchOne(db, sql: "SELECT exerciseId, setNumber FROM loggedSet WHERE id = ?", arguments: [setId]) else {
+            guard let row = try Row.fetchOne(db, sql: "SELECT exerciseId, completionId, setNumber FROM loggedSet WHERE id = ?", arguments: [setId]) else {
                 throw RipitCoreError.notFound("loggedSet \(setId)")
             }
             let exerciseId: String = row["exerciseId"]
+            let completionId: String = row["completionId"]
             let setNumber: Int = row["setNumber"]
             try db.execute(sql: "DELETE FROM loggedSet WHERE id = ?", arguments: [setId])
             // One row at a time, lowest first, so the (completion, exercise, setNumber) key never collides.
             let later = try String.fetchAll(db, sql: """
-                SELECT id FROM loggedSet WHERE exerciseId = ? AND setNumber > ? ORDER BY setNumber
-                """, arguments: [exerciseId, setNumber])
+                SELECT id FROM loggedSet WHERE exerciseId = ? AND completionId = ? AND setNumber > ? ORDER BY setNumber
+                """, arguments: [exerciseId, completionId, setNumber])
             for id in later {
                 try db.execute(sql: "UPDATE loggedSet SET setNumber = setNumber - 1 WHERE id = ?", arguments: [id])
             }
@@ -226,7 +240,7 @@ public final class AppDatabase: Sendable {
 
     // MARK: - Helpers
 
-    private static func newId() -> String { UUID().uuidString.lowercased() }
+    static func newId() -> String { UUID().uuidString.lowercased() }
 
     private static func requireCompletion(_ db: Database, _ id: String) throws {
         guard try Bool.fetchOne(db, sql: "SELECT 1 FROM workoutCompletion WHERE id = ?", arguments: [id]) != nil else {
@@ -234,8 +248,8 @@ public final class AppDatabase: Sendable {
         }
     }
 
-    private static func detail(_ db: Database, _ id: String) throws -> WorkoutDetail {
-        guard let c = try Row.fetchOne(db, sql: "SELECT startedAt, completedAt FROM workoutCompletion WHERE id = ?", arguments: [id]) else {
+    static func detail(_ db: Database, _ id: String) throws -> WorkoutDetail {
+        guard let c = try Row.fetchOne(db, sql: "SELECT startedAt, completedAt, workoutId FROM workoutCompletion WHERE id = ?", arguments: [id]) else {
             throw RipitCoreError.notFound("workout \(id)")
         }
         let sets = try Row.fetchAll(db, sql: """
@@ -245,8 +259,8 @@ public final class AppDatabase: Sendable {
         let setsByExercise = Dictionary(grouping: sets) { $0["exerciseId"] as String }
         let exercises = try Row.fetchAll(db, sql: """
             SELECT id, exerciseDefinitionId, name, exerciseGroup FROM exercise
-            WHERE workoutCompletionId = ? ORDER BY "order"
-            """, arguments: [id]).map { e in
+            WHERE workoutCompletionId = ? OR (workoutId IS NOT NULL AND workoutId = ?) ORDER BY "order"
+            """, arguments: [id, c["workoutId"] as String?]).map { e in
             let exerciseId: String = e["id"]
             return ExerciseDetail(
                 id: exerciseId, definitionId: e["exerciseDefinitionId"], name: e["name"], group: e["exerciseGroup"],

@@ -19,6 +19,7 @@
 // using the session's exercise ids, and shows in slice 1's `history()` and `workout(_:)`.
 
 import Foundation
+import GRDB
 
 // MARK: - Building a program
 
@@ -267,44 +268,244 @@ public struct Prefill: Sendable, Equatable {
 
 extension AppDatabase {
     /// Saves a new, inactive program and returns its id.
-    public func createProgram(_ plan: ProgramPlan) throws -> String { throw RipitCoreError.notImplemented }
+    public func createProgram(_ plan: ProgramPlan) throws -> String {
+        let programId = Self.newId()
+        try dbQueue.write { db in
+            let now = Date()
+            try db.execute(sql: """
+                INSERT INTO program (id, name, createdAt, updatedAt, isUserCreated) VALUES (?, ?, ?, ?, 1)
+                """, arguments: [programId, plan.name, now, now])
+            for (wi, workouts) in plan.weeks.enumerated() {
+                let weekId = Self.newId()
+                try db.execute(sql: "INSERT INTO week (id, weekNumber, programId) VALUES (?, ?, ?)",
+                               arguments: [weekId, wi + 1, programId])
+                for (di, workout) in workouts.enumerated() {
+                    let workoutId = Self.newId()
+                    try db.execute(sql: "INSERT INTO workout (id, name, dayNumber, weekId) VALUES (?, ?, ?, ?)",
+                                   arguments: [workoutId, workout.name, di + 1, weekId])
+                    for (ei, exercise) in workout.exercises.enumerated() {
+                        let exerciseId = Self.newId()
+                        try db.execute(sql: """
+                            INSERT INTO exercise (id, name, exerciseDefinitionId, "order", exerciseGroup, workoutId)
+                            VALUES (?, ?, ?, ?, ?, ?)
+                            """, arguments: [exerciseId, try Self.definitionName(db, exercise.definitionId),
+                                             exercise.definitionId, ei + 1, exercise.group, workoutId])
+                        try Self.insertPrescribedSets(db, exerciseId, exercise.sets)
+                    }
+                }
+            }
+        }
+        return programId
+    }
 
-    public func program(_ id: String) throws -> ProgramDetail { throw RipitCoreError.notImplemented }
+    public func program(_ id: String) throws -> ProgramDetail {
+        try dbQueue.read { db in
+            guard let p = try Row.fetchOne(db, sql: "SELECT name, isActive, isArchived FROM program WHERE id = ?", arguments: [id]) else {
+                throw RipitCoreError.notFound("program \(id)")
+            }
+            let sets = Dictionary(grouping: try Row.fetchAll(db, sql: """
+                SELECT s.* FROM prescribedSet s
+                JOIN exercise e ON e.id = s.exerciseId JOIN workout w ON w.id = e.workoutId JOIN week k ON k.id = w.weekId
+                WHERE k.programId = ? ORDER BY s.setNumber
+                """, arguments: [id])) { $0["exerciseId"] as String }
+            let exercises = Dictionary(grouping: try Row.fetchAll(db, sql: """
+                SELECT e.* FROM exercise e JOIN workout w ON w.id = e.workoutId JOIN week k ON k.id = w.weekId
+                WHERE k.programId = ? ORDER BY e."order"
+                """, arguments: [id])) { $0["workoutId"] as String }
+            let workouts = Dictionary(grouping: try Row.fetchAll(db, sql: """
+                SELECT w.* FROM workout w JOIN week k ON k.id = w.weekId WHERE k.programId = ? ORDER BY w.dayNumber
+                """, arguments: [id])) { $0["weekId"] as String }
+            let weeks = try Row.fetchAll(db, sql: "SELECT id, weekNumber FROM week WHERE programId = ? ORDER BY weekNumber",
+                                         arguments: [id]).map { k in
+                ProgramWeek(id: k["id"], weekNumber: k["weekNumber"], workouts: (workouts[k["id"]] ?? []).map { w in
+                    ProgramWorkout(id: w["id"], name: w["name"], dayNumber: w["dayNumber"],
+                                   exercises: (exercises[w["id"]] ?? []).map { Self.programExercise($0, sets[$0["id"]] ?? []) })
+                })
+            }
+            return ProgramDetail(id: id, name: p["name"], isActive: p["isActive"], isArchived: p["isArchived"], weeks: weeks)
+        }
+    }
 
     /// Programs that are not archived, oldest first.
-    public func programs() throws -> [ProgramSummary] { throw RipitCoreError.notImplemented }
+    public func programs() throws -> [ProgramSummary] {
+        try dbQueue.read { db in
+            try Row.fetchAll(db, sql: """
+                SELECT id, name, isActive FROM program WHERE isArchived = 0 AND deletedAt IS NULL ORDER BY createdAt, rowid
+                """).map { ProgramSummary(id: $0["id"], name: $0["name"], isActive: $0["isActive"]) }
+        }
+    }
 
     /// Makes this the only active program.
-    public func activateProgram(_ id: String) throws { throw RipitCoreError.notImplemented }
+    public func activateProgram(_ id: String) throws {
+        try dbQueue.write { db in
+            try Self.requireProgram(db, id)
+            try db.execute(sql: "UPDATE program SET isActive = 0, updatedAt = ? WHERE isActive = 1", arguments: [Date()])
+            try db.execute(sql: "UPDATE program SET isActive = 1, updatedAt = ? WHERE id = ?", arguments: [Date(), id])
+        }
+    }
 
     /// Hides the program from `programs()` and deactivates it. Its logged history stays.
-    public func archiveProgram(_ id: String) throws { throw RipitCoreError.notImplemented }
+    public func archiveProgram(_ id: String) throws {
+        try dbQueue.write { db in
+            try Self.requireProgram(db, id)
+            let now = Date()
+            try db.execute(sql: """
+                UPDATE program SET isArchived = 1, archivedAt = ?, isActive = 0, updatedAt = ? WHERE id = ?
+                """, arguments: [now, now, id])
+        }
+    }
 
     /// The active program's current week number, or nil with no active program.
-    public func currentWeek() throws -> Int? { throw RipitCoreError.notImplemented }
+    public func currentWeek() throws -> Int? {
+        try dbQueue.read { db in
+            guard let id = try Self.activeProgramId(db) else { return nil }
+            // The first week with an unfinished workout, else the last week (lib/db/current-week.ts).
+            if let w = try Self.schedule(db, id).first(where: { !$0.done }) { return w.weekNumber }
+            return try Int.fetchOne(db, sql: "SELECT MAX(weekNumber) FROM week WHERE programId = ?", arguments: [id])
+        }
+    }
 
     /// The active program's next workout, or nil when there is none (no active program, or complete).
-    public func upNext() throws -> UpNext? { throw RipitCoreError.notImplemented }
+    public func upNext() throws -> UpNext? {
+        try dbQueue.read { db in
+            guard let id = try Self.activeProgramId(db), let w = try Self.schedule(db, id).first(where: { !$0.done }) else { return nil }
+            return UpNext(programId: id, workoutId: w.id, workoutName: w.name, weekNumber: w.weekNumber,
+                          dayNumber: w.dayNumber, hasDraft: try Self.draftId(db, w.id) != nil)
+        }
+    }
 
-    public func programProgress(_ id: String) throws -> ProgramProgress { throw RipitCoreError.notImplemented }
+    public func programProgress(_ id: String) throws -> ProgramProgress {
+        try dbQueue.read { db in
+            try Self.requireProgram(db, id)
+            let workouts = try Self.schedule(db, id)
+            let done = workouts.filter(\.done).count
+            return ProgramProgress(isComplete: !workouts.isEmpty && done == workouts.count, totalWorkouts: workouts.count,
+                                   doneWorkouts: done, cycleNumber: try Self.cycle(db, id))
+        }
+    }
 
     /// Starts a session of a program workout and returns the session (completion) id.
-    public func startProgramWorkout(_ workoutId: String, at date: Date) throws -> String { throw RipitCoreError.notImplemented }
+    /// An unfinished session of that workout is resumed rather than duplicated.
+    public func startProgramWorkout(_ workoutId: String, at date: Date) throws -> String {
+        try dbQueue.write { db in
+            guard let programId = try String.fetchOne(db, sql: """
+                SELECT k.programId FROM workout w JOIN week k ON k.id = w.weekId WHERE w.id = ?
+                """, arguments: [workoutId]) else {
+                throw RipitCoreError.notFound("workout \(workoutId)")
+            }
+            if let draft = try Self.draftId(db, workoutId) { return draft }
+            let id = Self.newId()
+            try db.execute(sql: """
+                INSERT INTO workoutCompletion (id, workoutId, startedAt, status, isAdHoc, cycleNumber)
+                VALUES (?, ?, ?, 'draft', 0, ?)
+                """, arguments: [id, workoutId, date, try Self.cycle(db, programId)])
+            return id
+        }
+    }
 
-    public func programSession(_ id: String) throws -> ProgramSession { throw RipitCoreError.notImplemented }
+    public func programSession(_ id: String) throws -> ProgramSession {
+        try dbQueue.read { db in
+            guard let c = try Row.fetchOne(db, sql: """
+                SELECT c.workoutId, c.cycleNumber, k.programId FROM workoutCompletion c
+                JOIN workout w ON w.id = c.workoutId JOIN week k ON k.id = w.weekId WHERE c.id = ?
+                """, arguments: [id]) else {
+                throw RipitCoreError.notFound("program session \(id)")
+            }
+            let workoutId: String = c["workoutId"]
+            let detail = try Self.detail(db, id)
+            let sets = Dictionary(grouping: try Row.fetchAll(db, sql: """
+                SELECT s.* FROM prescribedSet s JOIN exercise e ON e.id = s.exerciseId WHERE e.workoutId = ? ORDER BY s.setNumber
+                """, arguments: [workoutId])) { $0["exerciseId"] as String }
+            let exercises = detail.exercises.map { e in
+                SessionExercise(id: e.id, definitionId: e.definitionId, name: e.name, group: e.group,
+                                planned: (sets[e.id] ?? []).map(Self.setDetail), logged: e.sets)
+            }
+            return ProgramSession(id: id, programId: c["programId"], workoutId: workoutId,
+                                  cycleNumber: c["cycleNumber"], exercises: exercises)
+        }
+    }
 
     /// Prefill for the given set of a program exercise in its unfinished session.
-    public func prefill(exerciseId: String, setNumber: Int) throws -> Prefill { throw RipitCoreError.notImplemented }
+    public func prefill(exerciseId: String, setNumber: Int) throws -> Prefill {
+        try dbQueue.read { db in
+            guard let e = try Row.fetchOne(db, sql: "SELECT workoutId, exerciseDefinitionId FROM exercise WHERE id = ?", arguments: [exerciseId]),
+                  let workoutId = e["workoutId"] as String? else {
+                throw RipitCoreError.notFound("program exercise \(exerciseId)")
+            }
+            let draft = try Self.draftId(db, workoutId)
+            let setColumns = "s.setNumber, s.reps, s.weight, s.weightUnit, s.rpe, s.rir, s.isWarmup"
+            let session = try Row.fetchAll(db, sql: """
+                SELECT \(setColumns) FROM loggedSet s WHERE s.exerciseId = ? AND s.completionId = ?
+                """, arguments: [exerciseId, draft])
+            // Last time: the most recent finished workout with this exercise, program or ad-hoc,
+            // archived or not (lib/queries/exercise-history.ts).
+            let lastCompletion = try String.fetchOne(db, sql: """
+                SELECT c.id FROM workoutCompletion c
+                JOIN loggedSet s ON s.completionId = c.id JOIN exercise x ON x.id = s.exerciseId
+                WHERE x.exerciseDefinitionId = ? AND c.status = 'completed'
+                ORDER BY c.completedAt DESC LIMIT 1
+                """, arguments: [e["exerciseDefinitionId"] as String])
+            let history = try lastCompletion.map { cid in
+                try Row.fetchAll(db, sql: """
+                    SELECT \(setColumns) FROM loggedSet s JOIN exercise x ON x.id = s.exerciseId
+                    WHERE s.completionId = ? AND x.exerciseDefinitionId = ?
+                    """, arguments: [cid, e["exerciseDefinitionId"] as String])
+            } ?? []
+            if let source = Self.lastWorkingSet(session) ?? Self.lastWorkingSet(history) {
+                let unit: String = source["weightUnit"]
+                return Prefill(reps: String(source["reps"] as Int), weight: Self.jsNumber(source["weight"]),
+                               weightUnit: unit == "lbs" || unit == "kg" ? unit : nil,
+                               rpe: (source["rpe"] as Int?).map(String.init) ?? "",
+                               rir: (source["rir"] as Int?).map(String.init) ?? "")
+            }
+            let planned = try Row.fetchOne(db, sql: "SELECT reps, rpe, rir FROM prescribedSet WHERE exerciseId = ? AND setNumber = ?",
+                                           arguments: [exerciseId, setNumber])
+            return Prefill(reps: Self.parseRepsFromPrescribed(planned?["reps"]), weight: "0", weightUnit: nil,
+                           rpe: (planned?["rpe"] as Int?).map(String.init) ?? "",
+                           rir: (planned?["rir"] as Int?).map(String.init) ?? "")
+        }
+    }
 
     /// Changes a logged set in place.
-    public func updateSet(_ setId: String, reps: Int, weight: Double, unit: String) throws { throw RipitCoreError.notImplemented }
+    public func updateSet(_ setId: String, reps: Int, weight: Double, unit: String) throws {
+        try dbQueue.write { db in
+            try db.execute(sql: "UPDATE loggedSet SET reps = ?, weight = ?, weightUnit = ? WHERE id = ?",
+                           arguments: [reps, weight, unit, setId])
+            if db.changesCount == 0 { throw RipitCoreError.notFound("loggedSet \(setId)") }
+        }
+    }
 
     /// Starts the program over: week 1 is current again and the cycle number goes up.
-    public func restartProgram(_ id: String) throws { throw RipitCoreError.notImplemented }
+    public func restartProgram(_ id: String) throws {
+        try dbQueue.write { db in
+            try Self.requireProgram(db, id)
+            let next = try Self.cycle(db, id) + 1
+            // Like lib/db/program-restart.ts: the old cycle's completions are archived, not deleted.
+            try db.execute(sql: """
+                UPDATE workoutCompletion SET isArchived = 1
+                WHERE isArchived = 0 AND workoutId IN (
+                    SELECT w.id FROM workout w JOIN week k ON k.id = w.weekId WHERE k.programId = ?)
+                """, arguments: [id])
+            try db.execute(sql: "UPDATE program SET cycleNumber = ?, updatedAt = ? WHERE id = ?", arguments: [next, Date(), id])
+        }
+    }
 
     /// Renames a program exercise, in the plan and in that workout's history.
-    public func renameProgramExercise(_ exerciseId: String, to name: String) throws { throw RipitCoreError.notImplemented }
+    public func renameProgramExercise(_ exerciseId: String, to name: String) throws {
+        try dbQueue.write { db in
+            try db.execute(sql: "UPDATE exercise SET name = ? WHERE id = ? AND workoutId IS NOT NULL", arguments: [name, exerciseId])
+            if db.changesCount == 0 { throw RipitCoreError.notFound("program exercise \(exerciseId)") }
+        }
+    }
 
     /// Replaces a program exercise's prescribed sets. Logged sets are not touched.
-    public func setPrescribedSets(_ exerciseId: String, _ sets: [PlannedSet]) throws { throw RipitCoreError.notImplemented }
+    public func setPrescribedSets(_ exerciseId: String, _ sets: [PlannedSet]) throws {
+        try dbQueue.write { db in
+            guard try Bool.fetchOne(db, sql: "SELECT 1 FROM exercise WHERE id = ? AND workoutId IS NOT NULL", arguments: [exerciseId]) != nil else {
+                throw RipitCoreError.notFound("program exercise \(exerciseId)")
+            }
+            try db.execute(sql: "DELETE FROM prescribedSet WHERE exerciseId = ?", arguments: [exerciseId])
+            try Self.insertPrescribedSets(db, exerciseId, sets)
+        }
+    }
 }
