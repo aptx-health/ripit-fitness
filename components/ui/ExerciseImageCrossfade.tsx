@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useReducedMotion } from '@/lib/display'
 
 interface ExerciseImageCrossfadeProps {
   /** Image URLs in order: [start, finish]. Supports 0, 1, or 2 images. */
@@ -53,17 +54,8 @@ export default function ExerciseImageCrossfade({
   const [paused, setPaused] = useState(false)
   const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set())
   const timerRef = useRef<ReturnType<typeof setTimeout>>(null)
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => {
-    if (typeof window === 'undefined') return false
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  })
-
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches)
-    mq.addEventListener('change', handler)
-    return () => mq.removeEventListener('change', handler)
-  }, [])
+  // The OS asking for reduced motion, or E-ink display
+  const prefersReducedMotion = useReducedMotion()
 
   const resolved = imageUrls.map(resolveUrl)
   const hasAnimation = resolved.length === 2 && !prefersReducedMotion
@@ -126,7 +118,7 @@ export default function ExerciseImageCrossfade({
     )
   }
 
-  // Reduced motion — stacked layout with labels
+  // Reduced motion (or E-ink display) — stacked layout with labels
   if (prefersReducedMotion) {
     return (
       <div className="space-y-2">

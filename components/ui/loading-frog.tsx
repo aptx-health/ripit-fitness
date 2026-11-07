@@ -18,6 +18,7 @@ export function LoadingFrog({ size = 64, speed = 1 }: LoadingFrogProps) {
   return (
     <div
       className="loading-frog"
+      data-sprite=""
       style={{
         width: `${size}px`,
         height: `${size}px`,
@@ -27,6 +28,8 @@ export function LoadingFrog({ size = 64, speed = 1 }: LoadingFrogProps) {
         animation: `frog-squat ${speed}s steps(5) infinite`,
         // @ts-expect-error - CSS custom property
         '--frog-end-position': `${endPosition}px`,
+        // Kept by the e-ink theme, which drops other background images
+        '--sprite': `url(${spriteUrl})`,
       }}
     />
   );

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { applyEinkDisplay, getEinkDisplay } from '@/lib/display';
 import { applyTheme, getThemePreference, saveThemePreference } from '@/lib/theme';
 
 /**
@@ -9,7 +10,7 @@ import { applyTheme, getThemePreference, saveThemePreference } from '@/lib/theme
  * The inline <script> in app/layout.tsx is the primary theme initializer
  * (runs before paint to prevent FOUC), but Next.js App Router streaming
  * can prevent it from executing. This component is a safety net that
- * ensures the correct theme is applied once React hydrates.
+ * ensures the correct theme (and E-ink display) is applied once React hydrates.
  */
 export function ThemeInitializer() {
   useEffect(() => {
@@ -18,6 +19,7 @@ export function ThemeInitializer() {
     // Ensure cookie is populated for existing users who set theme before
     // the cookie fallback was added
     saveThemePreference(preference);
+    applyEinkDisplay(getEinkDisplay());
   }, []);
 
   return null;

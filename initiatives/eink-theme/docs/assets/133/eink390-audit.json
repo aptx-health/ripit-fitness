@@ -1,0 +1,224 @@
+{
+ "01-training": {
+  "state": {
+   "theme": "eink",
+   "mode": "light",
+   "display": "eink",
+   "dark": false
+  },
+  "motion": "0 running",
+  "hscroll": 0,
+  "audit": {
+   "low": [],
+   "lowCount": 0,
+   "coloured": [],
+   "thin": [],
+   "fx": []
+  }
+ },
+ "02-library": {
+  "state": {
+   "theme": "eink",
+   "mode": "light",
+   "display": "eink",
+   "dark": false
+  },
+  "motion": "0 running",
+  "hscroll": 0,
+  "audit": {
+   "low": [],
+   "lowCount": 0,
+   "coloured": [],
+   "thin": [],
+   "fx": []
+  }
+ },
+ "03-progress-empty": {
+  "state": {
+   "theme": "eink",
+   "mode": "light",
+   "display": "eink",
+   "dark": false
+  },
+  "motion": "0 running",
+  "hscroll": 0,
+  "audit": {
+   "low": [],
+   "lowCount": 0,
+   "coloured": [],
+   "thin": [],
+   "fx": []
+  }
+ },
+ "04-progress": {
+  "state": {
+   "theme": "eink",
+   "mode": "light",
+   "display": "eink",
+   "dark": false
+  },
+  "motion": "0 running",
+  "hscroll": 0,
+  "audit": {
+   "low": [],
+   "lowCount": 0,
+   "coloured": [],
+   "thin": [],
+   "fx": []
+  }
+ },
+ "05-progress-lifts": {
+  "state": {
+   "theme": "eink",
+   "mode": "light",
+   "display": "eink",
+   "dark": false
+  },
+  "motion": "0 running",
+  "hscroll": 0,
+  "audit": {
+   "low": [],
+   "lowCount": 0,
+   "coloured": [],
+   "thin": [],
+   "fx": []
+  }
+ },
+ "06-lift-page": {
+  "state": {
+   "theme": "eink",
+   "mode": "light",
+   "display": "eink",
+   "dark": false
+  },
+  "motion": "0 running",
+  "hscroll": 0,
+  "audit": {
+   "low": [],
+   "lowCount": 0,
+   "coloured": [],
+   "thin": [
+    "1px i.inline-block size-2.5 rounded-full borde"
+   ],
+   "fx": []
+  }
+ },
+ "07-settings": {
+  "state": {
+   "theme": "eink",
+   "mode": "light",
+   "display": "eink",
+   "dark": false
+  },
+  "motion": "0 running",
+  "hscroll": 0,
+  "audit": {
+   "low": [],
+   "lowCount": 0,
+   "coloured": [],
+   "thin": [],
+   "fx": []
+  }
+ },
+ "08-theme-menu": {
+  "state": {
+   "theme": "eink",
+   "mode": "light",
+   "display": "eink",
+   "dark": false
+  },
+  "motion": "0 running",
+  "hscroll": 0,
+  "audit": {
+   "low": [],
+   "lowCount": 0,
+   "coloured": [],
+   "thin": [],
+   "fx": []
+  }
+ },
+ "09-logger": {
+  "state": {
+   "theme": "eink",
+   "mode": "light",
+   "display": "eink",
+   "dark": false
+  },
+  "motion": "0 running",
+  "hscroll": 0,
+  "audit": {
+   "low": [
+    "3.2:1 \"1\" span.w-6 text-muted-foreground font-bold",
+    "3.2:1 \"5 reps @ 155lbs · RIR 3\" span.flex-1 text-muted-foreground",
+    "3.2:1 \"2\" span.w-6 text-muted-foreground font-bold",
+    "3.2:1 \"3\" span.w-6 text-muted-foreground font-bold",
+    "3.2:1 \"4\" span.w-6 text-muted-foreground font-bold"
+   ],
+   "lowCount": 8,
+   "coloured": [],
+   "thin": [],
+   "fx": []
+  }
+ },
+ "10-keypad": {
+  "state": {
+   "theme": "eink",
+   "mode": "light",
+   "display": "eink",
+   "dark": false
+  },
+  "motion": "0 running",
+  "hscroll": 0,
+  "audit": {
+   "low": [],
+   "lowCount": 0,
+   "coloured": [],
+   "thin": [],
+   "fx": []
+  }
+ },
+ "11-rest-timer": {
+  "state": {
+   "theme": "eink",
+   "mode": "light",
+   "display": "eink",
+   "dark": false
+  },
+  "motion": "0 running",
+  "hscroll": 0,
+  "audit": {
+   "low": [
+    "3.2:1 \"2\" span.w-6 text-muted-foreground font-bold",
+    "3.2:1 \"5 reps @ 155lbs · RIR 3\" span.flex-1 text-muted-foreground",
+    "3.2:1 \"3\" span.w-6 text-muted-foreground font-bold",
+    "3.2:1 \"4\" span.w-6 text-muted-foreground font-bold"
+   ],
+   "lowCount": 6,
+   "coloured": [],
+   "thin": [],
+   "fx": []
+  }
+ },
+ "12-plan-sheet": {
+  "state": {
+   "theme": "eink",
+   "mode": "light",
+   "display": "eink",
+   "dark": false
+  },
+  "motion": "0 running",
+  "hscroll": 0,
+  "audit": {
+   "low": [
+    "3.2:1 \"2\" span.w-6 text-muted-foreground font-bold",
+    "3.2:1 \"5 reps @ 155lbs · RIR 3\" span.flex-1 text-muted-foreground",
+    "3.2:1 \"3\" span.w-6 text-muted-foreground font-bold",
+    "3.2:1 \"4\" span.w-6 text-muted-foreground font-bold"
+   ],
+   "lowCount": 6,
+   "coloured": [],
+   "thin": [],
+   "fx": []
+  }
+ }
+}

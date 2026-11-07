@@ -1,0 +1,109 @@
+{
+ "01-training": {
+  "state": {
+   "theme": "eink",
+   "mode": "light",
+   "display": null,
+   "dark": false
+  },
+  "motion": "2 running: doom-pulse@absolute inset-0 rounded-md pointer-even, chip-gold-shine@chip-gold-shine",
+  "hscroll": 0,
+  "audit": {
+   "low": [],
+   "lowCount": 0,
+   "coloured": [],
+   "thin": [],
+   "fx": []
+  }
+ },
+ "04-progress": {
+  "state": {
+   "theme": "eink",
+   "mode": "light",
+   "display": null,
+   "dark": false
+  },
+  "motion": "2 running: doom-pulse@absolute inset-0 rounded-md pointer-even, chip-gold-shine@chip-gold-shine",
+  "hscroll": 0,
+  "audit": {
+   "low": [],
+   "lowCount": 0,
+   "coloured": [],
+   "thin": [],
+   "fx": []
+  }
+ },
+ "06-lift-page": {
+  "state": {
+   "theme": "eink",
+   "mode": "light",
+   "display": null,
+   "dark": false
+  },
+  "motion": "2 running: doom-pulse@absolute inset-0 rounded-md pointer-even, chip-gold-shine@chip-gold-shine",
+  "hscroll": 0,
+  "audit": {
+   "low": [],
+   "lowCount": 0,
+   "coloured": [],
+   "thin": [
+    "1px i.inline-block size-2.5 rounded-full borde"
+   ],
+   "fx": []
+  }
+ },
+ "07-settings": {
+  "state": {
+   "theme": "eink",
+   "mode": "light",
+   "display": null,
+   "dark": false
+  },
+  "motion": "2 running: doom-pulse@absolute inset-0 rounded-md pointer-even, chip-gold-shine@chip-gold-shine",
+  "hscroll": 0,
+  "audit": {
+   "low": [],
+   "lowCount": 0,
+   "coloured": [],
+   "thin": [],
+   "fx": []
+  }
+ },
+ "09-logger": {
+  "state": {
+   "theme": "eink",
+   "mode": "light",
+   "display": null,
+   "dark": false
+  },
+  "motion": "3 running: doom-pulse@absolute inset-0 rounded-md pointer-even, chip-gold-shine@chip-gold-shine, pulse@w-2 h-2 bg-primary rounded-full animate-",
+  "hscroll": 0,
+  "audit": {
+   "low": [
+    "3.2:1 \"4\" span.w-6 text-muted-foreground font-bold",
+    "3.2:1 \"5 reps @ 155lbs · RIR 3\" span.flex-1 text-muted-foreground"
+   ],
+   "lowCount": 2,
+   "coloured": [],
+   "thin": [],
+   "fx": []
+  }
+ },
+ "11-rest-timer": {
+  "state": {
+   "theme": "eink",
+   "mode": "light",
+   "display": null,
+   "dark": false
+  },
+  "motion": "3 running: doom-pulse@absolute inset-0 rounded-md pointer-even, chip-gold-shine@chip-gold-shine, pulse@w-2 h-2 bg-primary rounded-full animate-",
+  "hscroll": 0,
+  "audit": {
+   "low": [],
+   "lowCount": 0,
+   "coloured": [],
+   "thin": [],
+   "fx": []
+  }
+ }
+}
