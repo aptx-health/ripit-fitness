@@ -6,7 +6,7 @@ None
 Running quietly: None.
 
 ## Active
-- Coaching (initiatives/coaching): send programs and workouts to a trainee as proposals. Slice 1 (invite + link) built; review 139 running (coach-review).
+- Coaching (initiatives/coaching): slice 1 (invite + link) approved 2026-11-06; PR #1041 into dev. Next: slice 2 (send), after workout library slice 3.
 - Workout library (initiatives/workout-library): tidy saved workouts (pinned + tags), incl. where AI and coach workouts land. Slice 1 (order + Older fold) approved 2026-11-06; PR into dev.
 - Learn linked from Settings (work 135): merged to dev 2026-11-06 (#1039); next release to prod.
 - E-ink theme + display toggle (initiatives/eink-theme): merged to dev 2026-11-06 (#1038); next release to prod.
