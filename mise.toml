@@ -1,0 +1,8 @@
+# Project tasks. `mise run ios-check` is the iOS app's one check (initiative ios-app).
+
+[tasks.ios-check]
+description = "RipitCore tests (work item 153); work item 154 adds xcodegen and a simulator build"
+run = """
+set -e
+swift test --package-path ios/RipitCore
+"""
