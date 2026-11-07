@@ -87,7 +87,12 @@ export async function namedExercises(exercises: ExerciseInput[]): Promise<Exerci
   const ids = [...new Set(exercises.map((e) => e.exerciseDefinitionId))]
   const definitions = await prisma.exerciseDefinition.findMany({ where: { id: { in: ids } }, select: { id: true, name: true } })
   const names = new Map(definitions.map((d) => [d.id, d.name]))
-  return exercises.map((e) => ({ name: names.get(e.exerciseDefinitionId) ?? 'Missing exercise', notes: e.notes, sets: e.sets }))
+  return exercises.map((e) => ({
+    name: names.get(e.exerciseDefinitionId) ?? 'Missing exercise',
+    notes: e.notes,
+    exerciseGroup: e.group ?? null,
+    sets: e.sets,
+  }))
 }
 
 const storedLines = (data: SavedWorkoutData | undefined) => describeSavedExercises(Array.isArray(data) ? data : [])
