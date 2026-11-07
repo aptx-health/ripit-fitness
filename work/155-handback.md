@@ -1,4 +1,4 @@
-Report: needs decision
+Report: further handoff
 
 # 155 handback: iOS slice 1 review
 
@@ -68,7 +68,20 @@ The local app couldn't start through `dev.sh`: slot 1's overmind socket `/tmp/fi
 3. **Units:** the iOS app has a per-set lbs/kg toggle that remembers the last unit globally; web takes the unit from settings. (a) keep per-set (deliberate); (b) move to a settings-level unit like web.
 
 ## Revised review
-Pending answers. If 1 = (a), finding 2 stays must-fix; otherwise it drops to should-fix and only finding 1 blocks acceptance.
+Lead's answers (2026-11-07): Q1 = (a) fix search; Q2 = (a) remove-exercise and block empty finish now; Q3 = (a) keep the per-set unit (logged for Dustin to overrule). Fixes go to item 163 (ios-impl, findings 1-8).
+
+What changed: findings 2 and 4 are now must-fix with the rest. Finding 3's unit toggle stays as is (Q3). Findings 9-10 stay notes for slice 2 (import must not overwrite system rows' `imageUrls`).
+
+**Verdict:** accept slice 1 once 163 makes all of these true. I'll re-check each one hands-on in `ripit-155-review`:
+1. **Weight:** non-finite values ("inf", "nan") and values over a sane cap are refused in the UI *and* in `AppDatabase.logSet`. A RipitCore test covers both, and no `∞` can reach `loggedSet.weight`.
+2. **Search:** punctuation counts as a space, and there is also a compare with spaces removed. "bench-press", "BENCH-press!", "pull up" (finds every Pull-Up name that "pullup" finds), "t bar row" and "push up" all match. Existing search tests still pass, with new cases for hyphens.
+3. **Dynamic Type:** at AX-XXXL the set entry row stays usable: the unit, weight, reps and Log controls are readable and tappable, with no "…" on Log or the unit. History rows and folder tabs stay readable.
+4. **Remove exercise:** an exercise in an unfinished workout can be removed, along with its sets and any superset membership that would be left with one exercise. Finishing a workout with no logged sets is blocked, with a clear message. Both are covered by RipitCore tests.
+5. **Prefill:** tapping a prefilled weight or reps field lets you replace the value directly (select-all on focus or the like). Typing 155 over 135 logs 155.
+6. **Plural:** the resume card says "1 exercise".
+7. **Fast taps:** repeated quick taps on Log don't create unintended duplicates, or there's a deliberate guard. If 163 chooses to keep the current behaviour, say so in its packet.
+8. **Picker:** photo decoding is off the main thread, or there's a stated reason it's fine. Scrolling the full list in the simulator stays smooth, and a real-device check stays on Dustin's list.
+9. **No regressions:** `mise run ios-check` passes with 153's and 158's tests unchanged, and the 9 skeleton scenarios still pass when walked by hand.
 
 ## Could only check on a real device
 Scroll and image smoothness in the picker; decimal pad layout and the paste path for "inf"; Dynamic Type at the user's real size; free-signing install and the 7-day re-sign; data kept across a reinstall via `install.sh`; app storage size (~37 MB photos); haptics and VoiceOver reading of rows.

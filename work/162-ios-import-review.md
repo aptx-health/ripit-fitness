@@ -1,6 +1,6 @@
 ---
 id: 162
-state: ready
+state: running
 waiting_on:
 executor: ios-review
 skill: reviewer
@@ -32,3 +32,4 @@ A review packet with first line `Report: ...` and a verdict, sent to wX:p1. Repo
 ## Log
 - 2026-11-07 CST: created (waiting on 155; reuses ios-review, who didn't build the import).
 - 2026-11-07 CST: run in ~/projects/worktrees/ripit-fitness/worktree6 (detached at 4d3a414c) so ios-impl's 163 edits don't mix in.
+- 2026-11-07 12:27 MST: dispatched to ios-review (running)
