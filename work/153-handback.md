@@ -78,4 +78,5 @@ Total: 30. Cap: about 3 per rule. Over the cap: slightly for search. Each extra 
 ## Cleanup for Dustin
 - `$TMPDIR/ripitcore-*`: about 3,100 tiny test database folders, mostly from the break matrix. Each `mise run ios-check` adds about 30 more. `rm -rf "$TMPDIR"/ripitcore-*` is safe whenever no test run is going.
 - `/private/tmp/claude-501/-Users-dustin--herdr-worktrees-ripit-fitness-worktree-brave-field-c150/7797f706-e961-4bd7-bd21-9fa811a085e3/scratchpad/fake`: the scratch fake used for the break matrix (with its `.build`). Delete it once 153 and 154 are accepted.
-- Open question: the tests could put their databases in one parent folder, or clean up after themselves, so they don't pile up. That's a small test change. Unlock it if you want it.
+- `/private/tmp/claude-501/-Users-dustin--herdr-worktrees-ripit-fitness-worktree-brave-field-c150/7797f706-e961-4bd7-bd21-9fa811a085e3/scratchpad/stub`: a copy of the 86be3729 stub, used to re-check red-on-stub after 154 landed. Safe to delete.
+- The folder pile is fixed in commit `6b0ae6fa`: tests now remove their own temp databases when the test process exits.
