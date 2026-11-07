@@ -1,11 +1,12 @@
 ---
 id: 159
-state: ready
+state: running
 executor: web-review
 skill: reviewer
 from: lead (worktree-brave-field-c150)
 confirmed: 2026-11-07 Dustin (4h goal; lead runs the loops)
 updated: 2026-11-07
+waiting_on:
 ---
 # Review: web "Download my data" export
 
@@ -24,3 +25,4 @@ A review packet with first line `Report: ...` and a clear verdict, sent to wX:p1
 
 ## Log
 - 2026-11-07 CST: created (ready).
+- 2026-11-07 12:17 MST: dispatched to web-review (running)

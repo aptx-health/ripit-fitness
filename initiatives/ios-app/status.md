@@ -12,3 +12,4 @@
 - 2026-11-07: 153 accepted (6b0ae6fa: tests remove their temp DBs). Slice 3 spec written; 157 (programs tests) dispatched to ios-tests while 155 reviews.
 - 2026-11-07: 156 format + fixture ready (worktree3 575a5d05). 158 (import tests) dispatched to new agent import-tests (wX:t6), since ios-tests holds 157.
 - 2026-11-07: 156 back (a45d90c4); lead re-ran the export tests: 25/25 (needs Colima DOCKER_HOST). Lint already red on dev (81 biome / 5 eslint, not from 156): note for Dustin. 158 back; lead calls on 3 questions logged in work/158; amend in progress. Unverified for Dustin: are the bundled seed exercise ids the same as the prod ids?
+- 2026-11-07: 157 back; lead calls (follow the web on restart/rename, archive deactivates) logged in work/157; spec updated; amending.

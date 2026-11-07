@@ -38,13 +38,16 @@ Feature: iOS slice 3 - programs on the phone
     Given I finish the last workout of the last week
     Then the program shows as complete
     When I restart it
-    Then week 1 is current again, the cycle number goes up, and old history is kept
+    Then week 1 is current again and old history is kept
+    And, like the web, the old cycle's completions are archived (and the new cycle number goes up)
 
-  Scenario: Editing a program does not rewrite history
+  Scenario: Editing the plan does not change logged sets
     Given I logged workout 1
-    When I rename an exercise or change its prescribed sets
-    Then my logged history for workout 1 is unchanged
+    When I change an exercise's prescribed sets
+    Then my logged sets for workout 1 are unchanged
+    And renaming the exercise renames it in history too, as on the web
 
   Scenario: Archive a program
-    When I archive an inactive program
+    When I archive a program
     Then it leaves the program list but its history stays
+    And if it was active, no program is active afterwards

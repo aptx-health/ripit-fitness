@@ -39,3 +39,4 @@ The `handoff-test-builder` packet, first line `Report: ...`, sent to wX:p1. Don'
 ## Log
 - 2026-11-07 CST: created (ready).
 - 2026-11-07 12:05 MST: dispatched to ios-tests (running)
+- 2026-11-07 CST: back 23209e8a (38 tests, 29/29 breaks). Lead calls: red check accepted until the build; restart archives completions like the web (cycle bump kept); renames follow the web; archiving the active program deactivates it. Spec updated; sent back to amend.
