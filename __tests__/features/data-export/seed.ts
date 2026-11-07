@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@prisma/client'
+import type { Prisma, PrismaClient } from '@prisma/client'
 import type { SavedWorkoutData } from '@/types/saved-workout'
 
 /**
@@ -272,7 +272,7 @@ export async function seedTrainingData(prisma: PrismaClient, userId: string, sys
       userId,
       name: `Garage Day${label}`,
       sourceCompletionId: adHoc.id,
-      workoutData,
+      workoutData: workoutData as unknown as Prisma.InputJsonValue,
       exerciseCount: workoutData.length,
       createdAt: at('2026-10-11T17:00:00.000Z'),
     },
