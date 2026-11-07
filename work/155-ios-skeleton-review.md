@@ -1,7 +1,7 @@
 ---
 id: 155
-state: waiting
-waiting_on: 154
+state: ready
+waiting_on:
 executor: ios-review
 skill: reviewer
 from: lead (worktree-brave-field-c150)

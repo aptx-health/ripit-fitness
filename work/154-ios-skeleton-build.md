@@ -1,6 +1,6 @@
 ---
 id: 154
-state: ready
+state: running
 waiting_on:
 executor: ios-impl
 skill: handoff-implementer
@@ -46,3 +46,5 @@ The `handoff-implementer` packet, with first line `Report: complete | needs deci
 
 ## Log
 - 2026-11-07 CST: created (waiting on 153).
+- 2026-11-07 11:52 MST: dispatched to ios-impl (running)
+- 2026-11-07 CST: back (bba91de3); lead re-ran mise run ios-check: 32 passed, sim build exit 0. To review (155).

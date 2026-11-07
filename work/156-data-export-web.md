@@ -1,6 +1,6 @@
 ---
 id: 156
-state: ready
+state: running
 waiting_on:
 executor: export-web
 skill: handoff-implementer
@@ -41,3 +41,4 @@ The `handoff-implementer` packet with the first line `Report: ...`, sent to the 
 
 ## Log
 - 2026-11-07 CST: created (ready).
+- 2026-11-07 12:01 MST: dispatched to export-web (running)

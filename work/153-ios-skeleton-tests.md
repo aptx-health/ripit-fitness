@@ -48,3 +48,4 @@ The `handoff-test-builder` packet, with first line `Report: complete | needs dec
 - 2026-11-07 11:37 MST: dispatched to ios-tests (running)
 - 2026-11-07 CST: handback e039c913, check re-run (30 red on stub). Dustin decided logged weight mirrors web: Float weight + weightUnit (default lbs); prescribed weight stays free text. Spec scenario updated; sent back to ios-tests to amend the weight tests.
 - 2026-11-07 CST: amended 86be3729; lead re-ran check (32 red on stub, tests locked). State review; locked for 154.
+- 2026-11-07 CST: lead call: tests clean their own temp DBs (Support.swift only, no assertion changes); sent to ios-tests.
