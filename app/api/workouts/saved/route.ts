@@ -1,6 +1,7 @@
 import type { Prisma } from '@prisma/client'
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
+import { coachingNames } from '@/lib/coaching/names'
 import { prisma } from '@/lib/db'
 import { recordEvent } from '@/lib/events'
 import { logger } from '@/lib/logger'
@@ -22,7 +23,7 @@ interface SavePayload {
  * Library shows those under Show archived), sorted by
  * lastUsedAt DESC NULLS LAST, createdAt DESC. An unstarted agent or coach
  * workout carries who sent it, for the New group: `source`, the agent's name,
- * or `fromCoach` when a coach's proposal created it.
+ * or `fromCoach` and `coachName` when a coach's proposal created it.
  */
 export async function GET(_request: NextRequest) {
   try {
@@ -57,14 +58,25 @@ export async function GET(_request: NextRequest) {
     const proposals = sentIds.length
       ? await prisma.proposal.findMany({
           where: { userId: user.id, kind: 'saved_workout.create', status: 'applied', targetId: { in: sentIds } },
-          select: { targetId: true, coachLinkId: true, agentToken: { select: { name: true } } },
+          select: { targetId: true, coachLink: { select: { coachUserId: true } }, agentToken: { select: { name: true } } },
         })
       : []
+    const coachNames = await coachingNames(
+      prisma,
+      proposals.flatMap((p) => (p.coachLink ? [p.coachLink.coachUserId] : []))
+    )
     const sender = new Map(
-      proposals.map((p) => [p.targetId, { source: p.agentToken?.name ?? null, fromCoach: p.coachLinkId !== null }])
+      proposals.map((p) => [
+        p.targetId,
+        {
+          source: p.agentToken?.name ?? null,
+          fromCoach: p.coachLink !== null,
+          coachName: p.coachLink ? (coachNames.get(p.coachLink.coachUserId) ?? null) : null,
+        },
+      ])
     )
 
-    const saved = rows.map((r) => ({ ...r, source: null, fromCoach: false, ...sender.get(r.id) }))
+    const saved = rows.map((r) => ({ ...r, source: null, fromCoach: false, coachName: null, ...sender.get(r.id) }))
 
     return NextResponse.json({ saved })
   } catch (error) {

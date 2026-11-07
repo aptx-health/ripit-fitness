@@ -70,3 +70,14 @@ export async function endLink(db: PrismaClient, userId: string, linkId: string):
   await db.coachLink.updateMany({ where: { id: linkId, endedAt: null }, data: { endedAt: new Date(), endedBy: userId } })
   return true
 }
+
+/** The user's active links as coach, oldest first, named as Coaching shows them. */
+export async function listTrainees(db: PrismaClient, coachUserId: string): Promise<Array<{ linkId: string; name: string }>> {
+  const links = await db.coachLink.findMany({
+    where: { coachUserId, endedAt: null },
+    orderBy: { createdAt: 'asc' },
+    select: { id: true, traineeUserId: true },
+  })
+  const names = await coachingNames(db, links.map((l) => l.traineeUserId))
+  return links.map((l) => ({ linkId: l.id, name: names.get(l.traineeUserId) ?? '' }))
+}

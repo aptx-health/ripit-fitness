@@ -12,9 +12,9 @@ type Props = {
   onDismiss: () => void
 }
 
-/** Who sent it: the agent's name, or the coach. */
+/** Who sent it: the coach's or the agent's name. */
 function sourceLabel(item: SavedWorkoutListItem) {
-  if (item.origin === 'coach' || item.fromCoach) return 'From your coach'
+  if (item.origin === 'coach' || item.fromCoach) return `From ${item.coachName ?? 'your coach'}`
   return `From ${item.source ?? 'your agent'}`
 }
 

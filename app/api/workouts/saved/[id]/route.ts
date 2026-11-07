@@ -1,6 +1,7 @@
 import type { Prisma } from '@prisma/client'
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
+import { listTrainees } from '@/lib/coaching/links'
 import { prisma } from '@/lib/db'
 import { logger } from '@/lib/logger'
 import {
@@ -49,8 +50,10 @@ export async function GET(
       return NextResponse.json({ error: 'Saved workout not found' }, { status: 404 })
     }
 
+    // Who the owner can send it to (coaching slice 2), so the dialog's Send button needs no request of its own.
+    const trainees = await listTrainees(prisma, user.id)
     const { userId: _userId, ...rest } = saved
-    return NextResponse.json({ saved: rest })
+    return NextResponse.json({ saved: rest, trainees })
   } catch (error) {
     logger.error(
       { error, context: 'saved-workout-get' },

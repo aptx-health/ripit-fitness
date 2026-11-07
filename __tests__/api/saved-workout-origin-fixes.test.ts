@@ -75,6 +75,8 @@ beforeEach(async () => {
   const db = await getTestDatabase()
   await db.reset()
   prisma = db.getPrismaClient()
+  // BetterAuth's user table isn't in Prisma; coach names fall back to its email (lib/coaching/names.ts).
+  await prisma.$executeRawUnsafe('CREATE TABLE IF NOT EXISTS "user" (id text PRIMARY KEY, role text, email text)')
   user = (await createTestUser()).id
   auth.userId = user
 })

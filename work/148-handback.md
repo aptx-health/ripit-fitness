@@ -1,0 +1,5 @@
+Report: complete
+148 coaching slice 2 tests (test-builder, 2026-11-07). Locked: __tests__/features/coaching/send.steps.ts (54), __tests__/lib/coaching-send-converters.test.ts (5, fails to load until the module exists). Red: 35 fail / 19 setup pass (lead re-ran). Fake 59/59 twice; break matrix 34/34. Suite 4358 pass apart from the new files.
+Pinned in the header: SendToTrainee {kind, sourceId} loads GET /api/coaching/trainees; "Send to Sam" / "Send to…" + picker; dialog with "Note"; refusal in role alert. POST /api/coaching/send 201 {proposalId}; 400 bad body/invalid (missingExercises by name, once each, in order), 403 not_linked (incl. ended link), 404 not_found (wrong kind, deleted). 17-week program → invalid. listSent [] for ended/not coach; newest first; keys name, kind, sentAt, status; rendered as "Sent to <name>" with Program/Workout and <time>. "From Dustin" on every Training "From your coach" item and the New row.
+Not verified: 390px look; perf:tap; program page wiring is a text check (reviewer to confirm the real button).
+Outside: createSavedWorkout can't know the sender; approveProposal passes origin in the fake.
