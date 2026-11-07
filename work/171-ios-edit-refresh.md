@@ -1,11 +1,12 @@
 ---
 id: 171
-state: ready
+state: accepted
 executor: ios-impl
 skill: handoff-implementer
 from: lead (worktree-brave-field-c150)
 confirmed: 2026-11-07 Dustin (4h goal; lead runs the loops)
 updated: 2026-11-07
+waiting_on:
 ---
 # iOS: Edit program screen goes stale after a save
 
@@ -25,3 +26,5 @@ A short packet, first line `Report: ...`, sent to wX:p1. Commit your paths only.
 
 ## Log
 - 2026-11-07 CST: created from the 165 re-check.
+- 2026-11-07 13:17 MST: dispatched to ios-impl (running)
+- 2026-11-07 CST: back 197ef248; lead re-ran: 151 pass + sim build; flow checked by screenshot and DB. Accepted (tiny).
