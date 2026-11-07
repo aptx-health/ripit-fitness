@@ -1,11 +1,12 @@
 ---
 id: 167
-state: ready
+state: accepted
 executor: ios-impl
 skill: handoff-implementer
 from: lead (worktree-brave-field-c150)
 confirmed: 2026-11-07 Dustin (4h goal; lead runs the loops)
 updated: 2026-11-07
+waiting_on:
 ---
 # iOS import: survive sets the web deleted and renumbered
 
@@ -25,3 +26,5 @@ The `handoff-implementer` packet, first line `Report: ...`, sent to wX:p1. Commi
 
 ## Log
 - 2026-11-07 CST: created from the 164 re-check (should-fix).
+- 2026-11-07 12:45 MST: dispatched to ios-impl (running)
+- 2026-11-07 CST: back 84adc531; lead re-ran: everything except ios-tests' in-progress Progress suites passes. Accepted (small fix, tests mean it).
