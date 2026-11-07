@@ -10,6 +10,7 @@
 // - slice 1: logSet, finishWorkout, history(), workout(_:)
 
 import Foundation
+import GRDB
 import Testing
 @testable import RipitCore
 
@@ -169,6 +170,26 @@ struct ProgramLoggingTests {
         #expect(logged.map(\.reps) == [5, 3, 5])
         #expect(logged.map(\.weight) == [225, 100, 225])
         #expect(logged.map(\.weightUnit) == ["lbs", "kg", "lbs"])
+    }
+
+    @Test("Program session: like the web, it logs against the program's own exercises")
+    func sessionUsesProgramExercises() throws {
+        // Keeps the phone's rows the same shape as ripit.fit's, for import and a future sync:
+        // workoutCompletion.workoutId is the program workout and loggedSet.exerciseId is the
+        // program exercise.
+        let db = try TempDB().open()
+        let p = try db.activeProgram()
+        let workout = try p.weeks.at(0).workouts.at(0)
+        let session = try db.startProgramWorkout(workout.id, at: day(1))
+        let ex = try db.programSession(session).exercises
+        #expect(ex.map(\.id) == workout.exercises.map(\.id))
+        let set = try db.logSet(exerciseId: try ex.at(0).id, reps: 5, weight: 135)
+        let row = try #require(try db.read { try Row.fetchOne($0, sql: """
+            SELECT c.workoutId, s.exerciseId, s.completionId FROM loggedSet s JOIN workoutCompletion c ON s.completionId = c.id WHERE s.id = ?
+            """, arguments: [set]) })
+        #expect(row["workoutId"] as String? == workout.id)
+        #expect(row["exerciseId"] as String? == workout.exercises.first?.id)
+        #expect(row["completionId"] as String? == session)
     }
 
     @Test("Program session: the history entry is named after the workout")

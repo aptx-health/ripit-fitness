@@ -2,7 +2,8 @@
 // "Finishing a week moves me to the next week", "Finishing the program offers a restart".
 // Oracle: lib/db/current-week.ts, lib/training/home.ts, lib/db/program-completion.ts,
 // lib/db/program-restart.ts. Done = a non-archived completion with status 'completed'; a draft
-// is not done. Unlike the web (which never bumps it), restart raises the cycle number.
+// is not done. Restart archives the old cycle's completions (isArchived = 1) like the web, and
+// also raises the cycle number, which the web does not.
 //
 // API used:
 // - currentWeek(), upNext(), programProgress(_:), restartProgram(_:), startProgramWorkout(_:at:),
@@ -10,6 +11,7 @@
 // - slice 1: finishWorkout(_:at:), history(), workout(_:)
 
 import Foundation
+import GRDB
 import Testing
 @testable import RipitCore
 
@@ -68,6 +70,25 @@ struct ProgramScheduleTests {
         let p = try db.activeProgram()
         try db.makeWorkout(start: day(1), finish: day(1, hour: 10), [(benchPressId, [(5, 135)])])
         #expect(try db.upNext()?.workoutId == p.workoutId(week: 1, day: 1))
+    }
+
+    @Test("Archived: archived completions are ignored by Up Next, current week and progress")
+    func archivedCompletionsIgnored() throws {
+        // Imported files carry isArchived; set it directly with a test migration.
+        let tmp = try TempDB()
+        let db = try tmp.open()
+        let p = try db.activeProgram()
+        var sessions: [String] = []
+        for d in 1...3 { sessions.append(try db.complete(p.workoutId(week: 1, day: d), at: day(d))) }
+        try db.complete(p.workoutId(week: 2, day: 1), at: day(4))
+        let ids = sessions
+        let archived = try tmp.open(extra: [ExtraMigration("test-archive-week-1") { db in
+            for id in ids { try db.execute(sql: "UPDATE workoutCompletion SET isArchived = 1 WHERE id = ?", arguments: [id]) }
+        }])
+        #expect(try archived.currentWeek() == 1)
+        #expect(try archived.upNext()?.workoutId == p.workoutId(week: 1, day: 1))
+        #expect(try archived.programProgress(p.id).doneWorkouts == 1)
+        #expect(try archived.history().count == 4, "archived completions stay in history")
     }
 
     @Test("Up Next: no active program means no Up Next and no current week")
@@ -140,7 +161,7 @@ struct ProgramScheduleTests {
         #expect(try db.upNext()?.workoutId == p.workoutId(week: 1, day: 2))
     }
 
-    @Test("Restart: week 1 is current again, the cycle number goes up, and old history is kept")
+    @Test("Restart: week 1 is current again, old completions are archived, the cycle goes up, history is kept")
     func restart() throws {
         let tmp = try TempDB()
         let db = try tmp.open()
@@ -157,6 +178,10 @@ struct ProgramScheduleTests {
         #expect(try reopened.upNext()?.workoutId == p.workoutId(week: 1, day: 1))
         #expect(try reopened.history() == historyBefore)
         for s in sessions { #expect(try reopened.workout(s).exercises.at(0).sets.map(\.reps) == [5]) }
+        let flags = try reopened.read { db in
+            try sessions.map { try Bool.fetchOne(db, sql: "SELECT isArchived FROM workoutCompletion WHERE id = ?", arguments: [$0]) }
+        }
+        #expect(flags == Array(repeating: true, count: 6), "like lib/db/program-restart.ts")
     }
 
     @Test("Restart: a session started after restart is in the new cycle; old sessions keep theirs")

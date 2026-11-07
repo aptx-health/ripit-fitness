@@ -113,6 +113,27 @@ struct ProgramBuildTests {
         #expect(try reopened.workout(session).exercises.at(0).sets.map(\.weight) == [135])
     }
 
+    @Test("Archive: archiving the active program leaves no program active, and its history stays")
+    func archiveActive() throws {
+        let tmp = try TempDB()
+        let db = try tmp.open()
+        let p = try db.activeProgram()
+        let other = try db.createProgram(Plans.standard("Other"))
+        let session = try db.complete(p.workoutId(week: 1, day: 1), at: day(1))
+        let before = try db.history()
+
+        try db.archiveProgram(p.id)
+
+        let reopened = try tmp.open()
+        #expect(try reopened.program(p.id).isActive == false)
+        #expect(try reopened.program(p.id).isArchived == true)
+        #expect(try reopened.programs() == [ProgramSummary(id: other, name: "Other", isActive: false)])
+        #expect(try reopened.upNext() == nil)
+        #expect(try reopened.currentWeek() == nil)
+        #expect(try reopened.history() == before)
+        #expect(try reopened.workout(session).exercises.at(0).sets.map(\.weight) == [135])
+    }
+
     @Test("Archive: archiving one program leaves the active one alone")
     func archiveLeavesActive() throws {
         let db = try TempDB().open()

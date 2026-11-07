@@ -8,8 +8,12 @@
 // - Up Next: the first unfinished workout, by week then day (lib/training/home.ts).
 // - Prefill: last set this session, else the last working set of the most recent completed
 //   workout with that exercise, else the plan (lib/workout/prefill.ts).
-// - Restart archives the current completions (lib/db/program-restart.ts) and, unlike the web,
-//   the cycle number goes up.
+// - Restart archives the current completions (isArchived = 1, lib/db/program-restart.ts) and
+//   also raises the cycle number, which the web does not. Archived completions never count as done.
+// - Archiving the active program also deactivates it.
+// - Like the web, a session logs against the program's own rows: workoutCompletion.workoutId is
+//   the program workout and loggedSet.exerciseId the program exercise. So renaming a program
+//   exercise renames it in that workout's history; changing prescribed sets never touches logged sets.
 //
 // A program workout is logged with slice 1's `logSet`, `finishWorkout` and `discardWorkout`,
 // using the session's exercise ids, and shows in slice 1's `history()` and `workout(_:)`.
@@ -203,12 +207,12 @@ public struct ProgramProgress: Sendable, Equatable {
 // MARK: - Logging a program workout
 
 public struct SessionExercise: Sendable, Equatable, Identifiable {
-    /// Pass this to `logSet(exerciseId:...)` and `prefill(exerciseId:setNumber:)`.
+    /// The program exercise id. Pass it to `logSet(exerciseId:...)` and `prefill(exerciseId:setNumber:)`.
     public let id: String
     public let definitionId: String
     public let name: String
     public let group: String?
-    /// The plan when the session started.
+    /// The program exercise's prescribed sets.
     public let planned: [ProgramSetDetail]
     public let logged: [SetDetail]
 
@@ -273,7 +277,7 @@ extension AppDatabase {
     /// Makes this the only active program.
     public func activateProgram(_ id: String) throws { throw RipitCoreError.notImplemented }
 
-    /// Hides the program from `programs()`. Its logged history stays.
+    /// Hides the program from `programs()` and deactivates it. Its logged history stays.
     public func archiveProgram(_ id: String) throws { throw RipitCoreError.notImplemented }
 
     /// The active program's current week number, or nil with no active program.
@@ -289,7 +293,7 @@ extension AppDatabase {
 
     public func programSession(_ id: String) throws -> ProgramSession { throw RipitCoreError.notImplemented }
 
-    /// Prefill for the given set of a session exercise.
+    /// Prefill for the given set of a program exercise in its unfinished session.
     public func prefill(exerciseId: String, setNumber: Int) throws -> Prefill { throw RipitCoreError.notImplemented }
 
     /// Changes a logged set in place.
@@ -298,9 +302,9 @@ extension AppDatabase {
     /// Starts the program over: week 1 is current again and the cycle number goes up.
     public func restartProgram(_ id: String) throws { throw RipitCoreError.notImplemented }
 
-    /// Renames a program exercise (the plan only).
+    /// Renames a program exercise, in the plan and in that workout's history.
     public func renameProgramExercise(_ exerciseId: String, to name: String) throws { throw RipitCoreError.notImplemented }
 
-    /// Replaces a program exercise's prescribed sets (the plan only).
+    /// Replaces a program exercise's prescribed sets. Logged sets are not touched.
     public func setPrescribedSets(_ exerciseId: String, _ sets: [PlannedSet]) throws { throw RipitCoreError.notImplemented }
 }
