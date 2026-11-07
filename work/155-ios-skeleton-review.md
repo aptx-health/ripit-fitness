@@ -29,9 +29,15 @@ Reading the code is not enough. In your own simulator (not one another agent use
 - Try to break it: empty sets, a huge weight, a second workout while one is open, fast taps, rotation, Dynamic Type at its largest size.
 Take a screenshot of each screen at iPhone size and note anything slow, ugly or off-theme next to the ripit web styling. List what you could only check on a real device.
 
+Compare against the current web app, side by side at phone width (Dustin asked, 2026-11-07). Use the same flows: start an ad-hoc workout, search exercises, log sets, finish, history. Note where the iOS app looks or behaves differently, and say whether each difference seems deliberate or a gap.
+- Staging: https://staging.ripit.fit (deployed from `dev`). Only read and log test workouts there. If you need a login, ask Dustin.
+- Or locally: `DOPPLER_PROJECT=fitcsv DOPPLER_CONFIG=dev_personal ./scripts/dev.sh start -l postgres,app` in this worktree (`AGENTS.md` lists the first-run steps). Log in as dmays@test.com / password.
+- Drive it with Chrome (claude-in-chrome) or Playwright (`webapp-testing`, `docs/PLAYWRIGHT_RECIPES.md`).
+
 ## Hand back
 A review packet with first line `Report: complete | needs decision | further handoff` and a clear verdict.
 
 ## Log
 - 2026-11-07 CST: created (waiting on 154).
 - 2026-11-07 CST: Dustin asked that the reviewer test the app hands-on after the build; section added.
+- 2026-11-07 CST: Dustin asked the reviewer to compare against the web app (staging or local); section added.
