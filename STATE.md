@@ -6,9 +6,9 @@ None
 Running quietly: None.
 
 ## Active
-- Coaching (initiatives/coaching): send programs and workouts to a trainee as proposals. Slice 1 (invite + link) build 138 running in worktree1 (coach-impl).
-- Workout library (initiatives/workout-library): tidy saved workouts (pinned + tags), incl. where AI and coach workouts land. Discovery 141 running.
-- Learn linked from Settings (work 135, small): approved by Dustin 2026-11-06; PR into dev.
+- Coaching (initiatives/coaching): send programs and workouts to a trainee as proposals. Slice 1 (invite + link) built; review 139 running (coach-review).
+- Workout library (initiatives/workout-library): tidy saved workouts (pinned + tags), incl. where AI and coach workouts land. Slice 1 (order + Older fold) approved 2026-11-06; PR into dev.
+- Learn linked from Settings (work 135): merged to dev 2026-11-06 (#1039); next release to prod.
 - E-ink theme + display toggle (initiatives/eink-theme): merged to dev 2026-11-06 (#1038); next release to prod.
 - Progress tab replacing Learn (initiatives/analytics): S1–S3 in prod 2026-11-02 (release #1034, infra #136). Per-lift page (/progress/lift/[id]) in prod 2026-11-05 (release #1037, infra #137).
 - Planned sets in the workout logger (initiatives/agent-tools): in prod 2026-11-02 (release #1034, infra #136).
