@@ -234,7 +234,8 @@ const item = (id: string, name: string, pinnedAt: string | null = null): Item =>
   notes: null,
   exerciseCount: 3,
   lastUsedAt: null,
-  createdAt: '2026-10-01T12:00:00Z',
+  // work 142: relative to now, so the row stays in Recent, not the Older fold.
+  createdAt: new Date(Date.now() - 2 * 86_400_000).toISOString(),
   pinnedAt,
 })
 const PIN_AT = '2026-10-30T12:00:00.000Z'

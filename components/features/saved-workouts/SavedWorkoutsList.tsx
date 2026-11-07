@@ -1,19 +1,23 @@
 'use client'
 
-import { Loader2 } from 'lucide-react'
+import { ChevronDown, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { useToast } from '@/components/ToastProvider'
 import { startFreestyleWorkout } from '@/lib/api/adhoc-workout'
 import { clientLogger } from '@/lib/client-logger'
+import { groupSavedWorkouts } from '@/lib/saved-workouts/groups'
 import DeleteSavedWorkoutDialog from './DeleteSavedWorkoutDialog'
 import RenameSavedWorkoutDialog from './RenameSavedWorkoutDialog'
 import SavedWorkoutDetailDialog from './SavedWorkoutDetailDialog'
 import SavedWorkoutRow, { type SavedWorkoutListItem } from './SavedWorkoutRow'
 
+/** A group's label, like Pinned on Progress's lifts panel. */
+const GROUP_HEADING = 'px-4 pb-1 pt-2.5 text-xs font-bold uppercase tracking-wider text-muted-foreground'
+
 /**
  * The saved workouts, as rows for the Library's Workouts folder box (the box
- * itself is the caller's). `onCountChange` reports the number after each load,
+ * itself is the caller's): Pinned, then Recent, then a closed "Older (n)" fold. `onCountChange` reports the number after each load,
  * rename or delete, for the tab's count chip.
  */
 export default function SavedWorkoutsList({ onCountChange }: { onCountChange?: (count: number) => void } = {}) {
@@ -26,6 +30,8 @@ export default function SavedWorkoutsList({ onCountChange }: { onCountChange?: (
   const [deleteTarget, setDeleteTarget] = useState<SavedWorkoutListItem | null>(null)
   const [detailId, setDetailId] = useState<string | null>(null)
   const [startingFreestyle, setStartingFreestyle] = useState(false)
+  const [olderOpen, setOlderOpen] = useState(false)
+  const olderListId = useId()
 
   const fetchList = useCallback(async () => {
     try {
@@ -152,21 +158,58 @@ export default function SavedWorkoutsList({ onCountChange }: { onCountChange?: (
   // The live row, so a pin toggled in the dialog shows in both places.
   const detailItem = items.find((item) => item.id === detailId) ?? null
 
+  const groups = groupSavedWorkouts(items)
+  const rows = (group: SavedWorkoutListItem[], id?: string) => (
+    <ul id={id} className="divide-y divide-border border-t border-border">
+      {group.map((item) => (
+        <li key={item.id}>
+          <SavedWorkoutRow
+            item={item}
+            onOpen={() => setDetailId(item.id)}
+            onTogglePin={() => handleTogglePin(item)}
+            onRename={() => setRenameTarget(item)}
+            onDelete={() => setDeleteTarget(item)}
+          />
+        </li>
+      ))}
+    </ul>
+  )
+
   return (
     <>
-      <ul className="divide-y divide-border">
-        {items.map((item) => (
-          <li key={item.id}>
-            <SavedWorkoutRow
-              item={item}
-              onOpen={() => setDetailId(item.id)}
-              onTogglePin={() => handleTogglePin(item)}
-              onRename={() => setRenameTarget(item)}
-              onDelete={() => setDeleteTarget(item)}
-            />
-          </li>
-        ))}
-      </ul>
+      <div className="divide-y divide-border">
+        {groups.pinned.length > 0 && (
+          <section aria-label="Pinned">
+            <h3 className={GROUP_HEADING}>Pinned</h3>
+            {rows(groups.pinned)}
+          </section>
+        )}
+        {groups.recent.length > 0 && (
+          <section aria-label="Recent">
+            <h3 className={GROUP_HEADING}>Recent</h3>
+            {rows(groups.recent)}
+          </section>
+        )}
+        {groups.older.length > 0 && (
+          <section aria-label="Older">
+            <button
+              type="button"
+              aria-expanded={olderOpen}
+              aria-controls={olderListId}
+              onClick={() => setOlderOpen((open) => !open)}
+              className="doom-focus-ring flex min-h-12 w-full items-center gap-2 px-4 text-left text-sm font-bold uppercase tracking-wider text-muted-foreground hover:bg-muted"
+            >
+              <span className="flex-1">Older ({groups.older.length})</span>
+              <ChevronDown
+                size={18}
+                aria-hidden="true"
+                className={`transition-transform ${olderOpen ? 'rotate-180' : ''}`}
+              />
+            </button>
+            {olderOpen && rows(groups.older, olderListId)}
+          </section>
+        )}
+      </div>
 
       {renameTarget && (
         <RenameSavedWorkoutDialog
