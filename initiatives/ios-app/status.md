@@ -15,3 +15,4 @@
 - 2026-11-07: 157 back; lead calls (follow the web on restart/rename, archive deactivates) logged in work/157; spec updated; amending.
 - 2026-11-07: 158 accepted (0ff6e408). 160 (import build) dispatched to ios-impl.
 - 2026-11-07: 159 verdict: web export meets spec. 156 accepted by lead (unpushed, worktree3 feature/data-export). Defaults kept: soft-deleted programs and all UserSettings columns exported. Notes for Dustin: exerciseRefs may name another user's custom exercise (low risk); iOS Safari blob download untested.
+- 2026-11-07: 157 accepted (24961d2f). 161 (programs build) dispatched to new agent programs-impl in worktree5 (branch feature/ios-programs off feature/ios-skeleton), parallel to 160.

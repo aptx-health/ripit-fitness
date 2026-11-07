@@ -1,5 +1,13 @@
 Report: complete
 
+## Amendment 2 (2026-11-07, commit `24961d2f`)
+The lead's calls are applied. Restart now archives the old completions (`isArchived = 1`) like the web, and still raises the cycle number. Archived completions never count as done. A rename now shows in that workout's history, and changing prescribed sets never touches logged sets. Archiving the active program also deactivates it.
+
+There are 4 new tests: archived completions are ignored (set through a test migration), archiving the active program, rename scope, and a session logging against the program's own exercises (`loggedSet.exerciseId` is the program exercise, as on the web). That gives 42 program tests. They are red only on notImplemented, slice 1's 32 still pass, and the web-model fake passes all 74. The break matrix caught 33 out of 33, with no crashes.
+
+**Note for the implementer:** slice 1's `logSet`, `workout(_:)` and `history()` have to handle program exercises, which have no `workoutCompletionId`. The sections below predate this amendment. Their rename, snapshot and "Needs a call" items are replaced by this one.
+
+
 ## Verdict
 Checks out, with one contradiction in the handoff (see Needs a call). There are 38 new tests for `programs.feature`, against stub APIs in `Programs.swift`. All 38 fail on the stub, all pass against a scratch fake, and they catch 29 out of 29 broken fakes with no crashes. Commit `23209e8a`.
 
