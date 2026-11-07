@@ -217,6 +217,7 @@ export async function createSavedWorkout(
       workoutData: workoutData as unknown as Prisma.InputJsonValue,
       exerciseCount: workoutData.length,
       lastUsedAt: null,
+      origin: 'agent',
     },
     select: { id: true },
   })

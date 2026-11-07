@@ -6,8 +6,8 @@ None
 Running quietly: None.
 
 ## Active
-- Coaching (initiatives/coaching): slice 1 (invite + link) approved 2026-11-06; PR #1041 into dev. Next: slice 2 (send), after workout library slice 3.
-- Workout library (initiatives/workout-library): tidy saved workouts (pinned + tags), incl. where AI and coach workouts land. Slice 1 (order + Older fold) approved 2026-11-06; PR into dev.
+- Coaching (initiatives/coaching): slice 1 (invite + link) merged to dev 2026-11-07 (#1041). Slice 2 (send + Sent list) tests 148 running.
+- Workout library (initiatives/workout-library): tidy saved workouts (pinned + tags), incl. where AI and coach workouts land. Slices 1 (#1040) and 3 (origin + New + archive, approved 2026-11-07) done; slice 3 PR into dev. Later: slice 2 (tags + search), slice 4 (bulk tidy).
 - Learn linked from Settings (work 135): merged to dev 2026-11-06 (#1039); next release to prod.
 - E-ink theme + display toggle (initiatives/eink-theme): merged to dev 2026-11-06 (#1038); next release to prod.
 - Progress tab replacing Learn (initiatives/analytics): S1–S3 in prod 2026-11-02 (release #1034, infra #136). Per-lift page (/progress/lift/[id]) in prod 2026-11-05 (release #1037, infra #137).

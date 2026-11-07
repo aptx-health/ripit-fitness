@@ -10,3 +10,9 @@
 - 2026-11-06 CST: Review 139: ship after a perf:scan gate fix; no security holes; real browser flow verified. Asking Dustin about display names. Fixes 143 (allowlist, waiver gate on invite page, display names).
 - 2026-11-06 CST: Fixes 143 back (names fall back to email, waiver before invite, loading.tsx x3). Lead re-ran 82/82. Ready for Dustin's phone preview (worktree1) after the workout library preview.
 - 2026-11-06 CST: Slice 1 approved by Dustin on the phone preview. 137–139, 143 accepted. Committed on feature/coaching-invite; PR into dev. Next: slice 2 (send), after workout library slice 3 (origin + New).
+- 2026-11-07 CST: Supersets in proposals (work 140, small, features/agent-tools/proposal-supersets.feature) dispatched to coach-impl (worktree1, feature/program-supersets).
+- 2026-11-07 CST: Slice 1 merged to dev (#1041) by Dustin.
+- 2026-11-07 CST: Supersets (140) approved from the screenshot; PR #1042.
+- 2026-11-07 CST: Supersets merged to dev (#1042).
+- 2026-11-07 CST: Dustin: prod release waits until all coach features are in dev (coaching slices 2 and 3, after workout library slice 3).
+- 2026-11-07 CST: Slice 2 (send + Sent list, features/coaching/send.feature) confirmed by Dustin. Bundling custom exercises stays a follow-up after prod. Tests 148 dispatched to test-builder (worktree1, feature/coaching-send, stacked on #1043).

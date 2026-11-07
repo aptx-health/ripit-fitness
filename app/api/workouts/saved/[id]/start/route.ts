@@ -56,7 +56,9 @@ export async function POST(
       plan: workoutData,
       savedWorkoutId: saved.id,
       afterCreate: async (tx) => {
-        await tx.savedWorkout.update({ where: { id: saved.id }, data: { lastUsedAt: new Date() } })
+        // Starting an archived workout restores it, as Restore does, so it shows in Recent.
+        const restore = saved.archivedAt ? { archivedAt: null, dismissedAt: saved.dismissedAt ?? new Date() } : {}
+        await tx.savedWorkout.update({ where: { id: saved.id }, data: { lastUsedAt: new Date(), ...restore } })
       },
     })
     if (!result.ok) {

@@ -1,0 +1,6 @@
+Report: complete
+145 workout library slice 3 build (implementer, 2026-11-07). Uncommitted. SavedWorkout.origin/archivedAt/dismissedAt; migration 20261107042647_saved_workout_origin_archive with the agent backfill (targetId + userId, applied saved_workout.create). Origin on POST (session) and approve (agent). groups.ts new + archived (pinned beats New). New region, Archive in row menu (menu items 48px), Undo toast action, Show archived (Restore/Delete). MCP list_saved_workouts: includeArchived, origin, pinned, archived, app order. Training pinned, quick sheet and Library count skip archived.
+Checks: locked 58/58 unedited; suite 4230 pass; tsc clean; perf:scan nothing new. Lead re-ran workout-library 74/74, tsc clean. 9 screenshots initiatives/workout-library/docs/assets/145/.
+Decisions: Undo is client-carried (archive returns previous {pinnedAt, dismissedAt}); plain {archived:false} = Restore; archive keeps updatedAt; optimistic with rollback; coach rows "From your coach" until slice 2; agent row without a proposal "From your agent"; all-archived message. Local DB via db execute + migrate resolve (db push wanted to drop BetterAuth user).
+Not verified: Undo toast screenshot; perf:tap; migration on prod-like data.
+Preview data left in wt2 DB (removal one-liner in the packet).

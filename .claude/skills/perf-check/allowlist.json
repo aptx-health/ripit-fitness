@@ -1,1 +1,7 @@
-[]
+[
+  {
+    "check": "no-loading",
+    "file": "app/(app)/welcome/page.tsx",
+    "reason": "Client page that renders at once with nothing to load; its only fetch is a fire-and-forget POST of the chosen intent after a tap, so a loading.tsx would have nothing to cover"
+  }
+]
