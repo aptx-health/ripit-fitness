@@ -154,13 +154,17 @@ public struct ExerciseDetail: Sendable, Equatable, Identifiable {
     /// Superset group; exercises sharing a non-nil value are one superset.
     public let group: String?
     public let sets: [SetDetail]
+    /// Prescribed sets, by set number (slice 6: a workout started from a saved one, or repeated).
+    public let planned: [ProgramSetDetail]
 
-    public init(id: String, definitionId: String, name: String, group: String?, sets: [SetDetail]) {
+    public init(id: String, definitionId: String, name: String, group: String?, sets: [SetDetail],
+                planned: [ProgramSetDetail] = []) {
         self.id = id
         self.definitionId = definitionId
         self.name = name
         self.group = group
         self.sets = sets
+        self.planned = planned
     }
 }
 

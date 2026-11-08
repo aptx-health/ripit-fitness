@@ -1,0 +1,3791 @@
+{
+ "about": "One synthetic history and saved-workout list; the web's summary, saving, grouping, managing, start, repeat and Training lists for it.",
+ "generatedBy": "scripts/ios/saved-workouts.goldens.ts",
+ "now": "2026-11-07T19:00:00.000Z",
+ "timeZone": "America/Denver",
+ "file": {
+  "format": "ripit-export",
+  "version": 1,
+  "exportedAt": "2026-11-07T19:00:00.000Z",
+  "userId": "golden-user",
+  "settings": {},
+  "balanceSettings": {},
+  "customExercises": [],
+  "exerciseRefs": [
+   {
+    "id": "cmiz7vjju0000vr0m4b1o6bec",
+    "name": "Barbell Bench Press"
+   },
+   {
+    "id": "cmiz7vjpo0001vr0msv9of7ib",
+    "name": "Barbell Back Squat"
+   },
+   {
+    "id": "cmiz7vk1i0003vr0mqucd1f52",
+    "name": "Barbell Row"
+   },
+   {
+    "id": "cmiz7vkvr0008vr0m7rv3dapc",
+    "name": "Pull-Up"
+   },
+   {
+    "id": "cmiz7vjvh0002vr0mtcmhiz70",
+    "name": "Conventional Deadlift"
+   },
+   {
+    "id": "cmiz7vk780004vr0md53c57bz",
+    "name": "Overhead Press"
+   },
+   {
+    "id": "cmiz7vl1k0009vr0m306fts69",
+    "name": "Barbell Curl"
+   }
+  ],
+  "programs": [
+   {
+    "id": "p-gold",
+    "name": "Strength Block",
+    "description": null,
+    "isActive": true,
+    "createdAt": "2026-10-01T00:00:00.000Z",
+    "updatedAt": "2026-10-01T00:00:00.000Z",
+    "isUserCreated": true,
+    "programType": "strength",
+    "isArchived": false,
+    "archivedAt": null,
+    "deletedAt": null,
+    "goals": [],
+    "level": null,
+    "durationWeeks": null,
+    "durationDisplay": null,
+    "targetDaysPerWeek": null,
+    "equipmentNeeded": [],
+    "focusAreas": [],
+    "sourceCommunityProgramId": null,
+    "weeks": [
+     {
+      "id": "p-gold-w1",
+      "weekNumber": 1,
+      "name": null,
+      "description": null,
+      "workouts": [
+       {
+        "id": "p-gold-w1-d1",
+        "name": "Pull Day",
+        "dayNumber": 1,
+        "exercises": [
+         {
+          "id": "p-gold-w1-d1-row",
+          "name": "Barbell Row",
+          "exerciseDefinitionId": "cmiz7vk1i0003vr0mqucd1f52",
+          "order": 1,
+          "exerciseGroup": null,
+          "workoutId": "p-gold-w1-d1",
+          "notes": null,
+          "isOneOff": false,
+          "workoutCompletionId": null,
+          "prescribedSets": [
+           {
+            "id": "p-gold-w1-d1-row-p1",
+            "setNumber": 1,
+            "reps": "8",
+            "weight": null,
+            "rpe": null,
+            "rir": 2,
+            "isWarmup": false
+           },
+           {
+            "id": "p-gold-w1-d1-row-p2",
+            "setNumber": 2,
+            "reps": "8",
+            "weight": null,
+            "rpe": null,
+            "rir": 2,
+            "isWarmup": false
+           }
+          ]
+         },
+         {
+          "id": "p-gold-w1-d1-press",
+          "name": "Overhead Press",
+          "exerciseDefinitionId": "cmiz7vk780004vr0md53c57bz",
+          "order": 2,
+          "exerciseGroup": null,
+          "workoutId": "p-gold-w1-d1",
+          "notes": "Strict, no leg drive",
+          "isOneOff": false,
+          "workoutCompletionId": null,
+          "prescribedSets": [
+           {
+            "id": "p-gold-w1-d1-press-p1",
+            "setNumber": 1,
+            "reps": "5",
+            "weight": null,
+            "rpe": null,
+            "rir": null,
+            "isWarmup": false
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "workoutCompletions": [
+   {
+    "id": "c-old",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-09-01T01:00:00.000Z",
+    "startedAt": null,
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Legs Old",
+    "durationSeconds": null,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-old-squat",
+      "name": "Barbell Back Squat",
+      "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-old",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-old-squat-c-old-s1",
+      "setNumber": 1,
+      "reps": 3,
+      "weight": 333.5,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-old-squat",
+      "completionId": "c-old",
+      "createdAt": "2026-09-01T00:01:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-push",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-10-20T01:00:00.000Z",
+    "startedAt": "2026-10-20T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Push A",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-push-bench",
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-push",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-push-squat",
+      "name": "Barbell Back Squat",
+      "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib",
+      "order": 2,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-push",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-push-pullup",
+      "name": "Pull-Up",
+      "exerciseDefinitionId": "cmiz7vkvr0008vr0m7rv3dapc",
+      "order": 3,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-push",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-push-bench-c-push-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 185,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-push-bench",
+      "completionId": "c-push",
+      "createdAt": "2026-10-20T00:01:00.000Z"
+     },
+     {
+      "id": "c-push-bench-c-push-s2",
+      "setNumber": 2,
+      "reps": 5,
+      "weight": 185,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-push-bench",
+      "completionId": "c-push",
+      "createdAt": "2026-10-20T00:02:00.000Z"
+     },
+     {
+      "id": "c-push-bench-c-push-s3",
+      "setNumber": 3,
+      "reps": 5,
+      "weight": 185,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-push-bench",
+      "completionId": "c-push",
+      "createdAt": "2026-10-20T00:03:00.000Z"
+     },
+     {
+      "id": "c-push-squat-c-push-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-push-squat",
+      "completionId": "c-push",
+      "createdAt": "2026-10-20T00:04:00.000Z"
+     },
+     {
+      "id": "c-push-pullup-c-push-s1",
+      "setNumber": 1,
+      "reps": 10,
+      "weight": 0,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-push-pullup",
+      "completionId": "c-push",
+      "createdAt": "2026-10-20T00:05:00.000Z"
+     },
+     {
+      "id": "c-push-pullup-c-push-s2",
+      "setNumber": 2,
+      "reps": 8,
+      "weight": 0,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-push-pullup",
+      "completionId": "c-push",
+      "createdAt": "2026-10-20T00:06:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-prog",
+    "workoutId": "p-gold-w1-d1",
+    "savedWorkoutId": null,
+    "completedAt": "2026-10-25T01:00:00.000Z",
+    "startedAt": "2026-10-25T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": false,
+    "name": null,
+    "durationSeconds": 45,
+    "sessionRpe": null,
+    "exercises": [],
+    "loggedSets": [
+     {
+      "id": "p-gold-w1-d1-row-c-prog-s1",
+      "setNumber": 1,
+      "reps": 8,
+      "weight": 155,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": 2,
+      "isWarmup": false,
+      "exerciseId": "p-gold-w1-d1-row",
+      "completionId": "c-prog",
+      "createdAt": "2026-10-25T00:01:00.000Z"
+     },
+     {
+      "id": "p-gold-w1-d1-row-c-prog-s2",
+      "setNumber": 2,
+      "reps": 8,
+      "weight": 155,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": 2,
+      "isWarmup": false,
+      "exerciseId": "p-gold-w1-d1-row",
+      "completionId": "c-prog",
+      "createdAt": "2026-10-25T00:02:00.000Z"
+     },
+     {
+      "id": "p-gold-w1-d1-row-c-prog-s3",
+      "setNumber": 3,
+      "reps": 8,
+      "weight": 155,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": 2,
+      "isWarmup": false,
+      "exerciseId": "p-gold-w1-d1-row",
+      "completionId": "c-prog",
+      "createdAt": "2026-10-25T00:03:00.000Z"
+     },
+     {
+      "id": "p-gold-w1-d1-press-c-prog-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 100,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "p-gold-w1-d1-press",
+      "completionId": "c-prog",
+      "createdAt": "2026-10-25T00:04:00.000Z"
+     },
+     {
+      "id": "p-gold-w1-d1-press-c-prog-s2",
+      "setNumber": 2,
+      "reps": 5,
+      "weight": 100,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "p-gold-w1-d1-press",
+      "completionId": "c-prog",
+      "createdAt": "2026-10-25T00:05:00.000Z"
+     },
+     {
+      "id": "p-gold-w1-d1-press-c-prog-s3",
+      "setNumber": 3,
+      "reps": 5,
+      "weight": 100,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "p-gold-w1-d1-press",
+      "completionId": "c-prog",
+      "createdAt": "2026-10-25T00:06:00.000Z"
+     },
+     {
+      "id": "p-gold-w1-d1-press-c-prog-s4",
+      "setNumber": 4,
+      "reps": 5,
+      "weight": 100,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "p-gold-w1-d1-press",
+      "completionId": "c-prog",
+      "createdAt": "2026-10-25T00:07:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-arch",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-10-28T01:00:00.000Z",
+    "startedAt": "2026-10-28T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": true,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Archived Push",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-arch-bench",
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-arch",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-arch-curl",
+      "name": "Barbell Curl",
+      "exerciseDefinitionId": "cmiz7vl1k0009vr0m306fts69",
+      "order": 2,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-arch",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-arch-bench-c-arch-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 500,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-arch-bench",
+      "completionId": "c-arch",
+      "createdAt": "2026-10-28T00:01:00.000Z"
+     },
+     {
+      "id": "c-arch-curl-c-arch-s1",
+      "setNumber": 1,
+      "reps": 10,
+      "weight": 100,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-arch-curl",
+      "completionId": "c-arch",
+      "createdAt": "2026-10-28T00:02:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-edge",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-10-31T19:00:00.000Z",
+    "startedAt": "2026-10-31T18:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Arms",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-edge-curl",
+      "name": "Barbell Curl",
+      "exerciseDefinitionId": "cmiz7vl1k0009vr0m306fts69",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-edge",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-edge-curl-c-edge-s1",
+      "setNumber": 1,
+      "reps": 10,
+      "weight": 60,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-edge-curl",
+      "completionId": "c-edge",
+      "createdAt": "2026-10-31T18:01:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-bw",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-11-05T01:00:00.000Z",
+    "startedAt": "2026-11-05T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Pull-ups",
+    "durationSeconds": 303,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-bw-pullup",
+      "name": "Pull-Up",
+      "exerciseDefinitionId": "cmiz7vkvr0008vr0m7rv3dapc",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-bw",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-bw-pullup-c-bw-s1",
+      "setNumber": 1,
+      "reps": 8,
+      "weight": 0,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-bw-pullup",
+      "completionId": "c-bw",
+      "createdAt": "2026-11-05T00:01:00.000Z"
+     },
+     {
+      "id": "c-bw-pullup-c-bw-s2",
+      "setNumber": 2,
+      "reps": 8,
+      "weight": 0,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-bw-pullup",
+      "completionId": "c-bw",
+      "createdAt": "2026-11-05T00:02:00.000Z"
+     },
+     {
+      "id": "c-bw-pullup-c-bw-s3",
+      "setNumber": 3,
+      "reps": 7,
+      "weight": 0,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-bw-pullup",
+      "completionId": "c-bw",
+      "createdAt": "2026-11-05T00:03:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-min",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-11-06T15:00:00.000Z",
+    "startedAt": "2026-11-06T14:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Quick one",
+    "durationSeconds": 120,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-min-bench",
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-min",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-min-bench-c-min-s1",
+      "setNumber": 1,
+      "reps": 10,
+      "weight": 45,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": true,
+      "exerciseId": "c-min-bench",
+      "completionId": "c-min",
+      "createdAt": "2026-11-06T14:01:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-empty",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-11-07T15:00:00.000Z",
+    "startedAt": null,
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": null,
+    "durationSeconds": 0,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-empty-curl",
+      "name": "Barbell Curl",
+      "exerciseDefinitionId": "cmiz7vl1k0009vr0m306fts69",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-empty",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": []
+   },
+   {
+    "id": "c-arch-new",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-11-07T16:00:00.000Z",
+    "startedAt": "2026-11-07T15:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": true,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Archived Today",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-arch-new-deadlift",
+      "name": "Conventional Deadlift",
+      "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-arch-new",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-arch-new-deadlift-c-arch-new-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 405,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-arch-new-deadlift",
+      "completionId": "c-arch-new",
+      "createdAt": "2026-11-07T15:01:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-upper",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-11-07T18:00:00.000Z",
+    "startedAt": "2026-11-07T17:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Upper",
+    "durationSeconds": 3723,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-upper-row",
+      "name": "Barbell Row",
+      "exerciseDefinitionId": "cmiz7vk1i0003vr0mqucd1f52",
+      "order": 4,
+      "exerciseGroup": "A",
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-upper",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-upper-bench",
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": "Pause at chest",
+      "isOneOff": true,
+      "workoutCompletionId": "c-upper",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-upper-press",
+      "name": "Overhead Press",
+      "exerciseDefinitionId": "cmiz7vk780004vr0md53c57bz",
+      "order": 3,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-upper",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-upper-squat",
+      "name": "Barbell Back Squat",
+      "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib",
+      "order": 2,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-upper",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-upper-pullup",
+      "name": "Pull-Up",
+      "exerciseDefinitionId": "cmiz7vkvr0008vr0m7rv3dapc",
+      "order": 5,
+      "exerciseGroup": "A",
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-upper",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-upper-deadlift",
+      "name": "Conventional Deadlift",
+      "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70",
+      "order": 6,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-upper",
+      "prescribedSets": []
+     },
+     {
+      "id": "c-upper-curl",
+      "name": "Barbell Curl",
+      "exerciseDefinitionId": "cmiz7vl1k0009vr0m306fts69",
+      "order": 7,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-upper",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-upper-row-c-upper-s1",
+      "setNumber": 1,
+      "reps": 8,
+      "weight": 155,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-upper-row",
+      "completionId": "c-upper",
+      "createdAt": "2026-11-07T17:01:00.000Z"
+     },
+     {
+      "id": "c-upper-row-c-upper-s2",
+      "setNumber": 2,
+      "reps": 8,
+      "weight": 155,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-upper-row",
+      "completionId": "c-upper",
+      "createdAt": "2026-11-07T17:02:00.000Z"
+     },
+     {
+      "id": "c-upper-row-c-upper-s3",
+      "setNumber": 3,
+      "reps": 8,
+      "weight": 156.25,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-upper-row",
+      "completionId": "c-upper",
+      "createdAt": "2026-11-07T17:03:00.000Z"
+     },
+     {
+      "id": "c-upper-bench-c-upper-s1",
+      "setNumber": 1,
+      "reps": 8,
+      "weight": 95,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": true,
+      "exerciseId": "c-upper-bench",
+      "completionId": "c-upper",
+      "createdAt": "2026-11-07T17:04:00.000Z"
+     },
+     {
+      "id": "c-upper-bench-c-upper-s2",
+      "setNumber": 2,
+      "reps": 5,
+      "weight": 195,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-upper-bench",
+      "completionId": "c-upper",
+      "createdAt": "2026-11-07T17:05:00.000Z"
+     },
+     {
+      "id": "c-upper-bench-c-upper-s3",
+      "setNumber": 4,
+      "reps": 5,
+      "weight": 195,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-upper-bench",
+      "completionId": "c-upper",
+      "createdAt": "2026-11-07T17:06:00.000Z"
+     },
+     {
+      "id": "c-upper-bench-c-upper-s4",
+      "setNumber": 5,
+      "reps": 5,
+      "weight": 190,
+      "weightUnit": "lbs",
+      "rpe": 9,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-upper-bench",
+      "completionId": "c-upper",
+      "createdAt": "2026-11-07T17:07:00.000Z"
+     },
+     {
+      "id": "c-upper-press-c-upper-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 130,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-upper-press",
+      "completionId": "c-upper",
+      "createdAt": "2026-11-07T17:08:00.000Z"
+     },
+     {
+      "id": "c-upper-press-c-upper-s2",
+      "setNumber": 2,
+      "reps": 5,
+      "weight": 130,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-upper-press",
+      "completionId": "c-upper",
+      "createdAt": "2026-11-07T17:09:00.000Z"
+     },
+     {
+      "id": "c-upper-press-c-upper-s3",
+      "setNumber": 3,
+      "reps": 5,
+      "weight": 130,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-upper-press",
+      "completionId": "c-upper",
+      "createdAt": "2026-11-07T17:10:00.000Z"
+     },
+     {
+      "id": "c-upper-squat-c-upper-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 100,
+      "weightUnit": "kg",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-upper-squat",
+      "completionId": "c-upper",
+      "createdAt": "2026-11-07T17:11:00.000Z"
+     },
+     {
+      "id": "c-upper-squat-c-upper-s2",
+      "setNumber": 2,
+      "reps": 5,
+      "weight": 225,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-upper-squat",
+      "completionId": "c-upper",
+      "createdAt": "2026-11-07T17:12:00.000Z"
+     },
+     {
+      "id": "c-upper-pullup-c-upper-s1",
+      "setNumber": 1,
+      "reps": 12,
+      "weight": 0,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-upper-pullup",
+      "completionId": "c-upper",
+      "createdAt": "2026-11-07T17:13:00.000Z"
+     },
+     {
+      "id": "c-upper-pullup-c-upper-s2",
+      "setNumber": 2,
+      "reps": 10,
+      "weight": 0,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-upper-pullup",
+      "completionId": "c-upper",
+      "createdAt": "2026-11-07T17:14:00.000Z"
+     },
+     {
+      "id": "c-upper-deadlift-c-upper-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 135,
+      "weightUnit": "lbs",
+      "rpe": null,
+      "rir": null,
+      "isWarmup": true,
+      "exerciseId": "c-upper-deadlift",
+      "completionId": "c-upper",
+      "createdAt": "2026-11-07T17:15:00.000Z"
+     }
+    ]
+   }
+  ],
+  "savedWorkouts": [
+   {
+    "id": "s-recent",
+    "name": "Full Body",
+    "notes": "Keep rests short",
+    "sourceCompletionId": null,
+    "workoutData": [
+     {
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "notes": "Pause at chest",
+      "exerciseGroup": "A",
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "10",
+        "rir": null,
+        "rpe": null,
+        "isWarmup": true
+       },
+       {
+        "setNumber": 2,
+        "reps": "5",
+        "rir": null,
+        "rpe": 8,
+        "isWarmup": false
+       },
+       {
+        "setNumber": 3,
+        "reps": "3-5",
+        "rir": 2,
+        "rpe": null,
+        "isWarmup": false
+       }
+      ]
+     },
+     {
+      "name": "Barbell Row",
+      "exerciseDefinitionId": "cmiz7vk1i0003vr0mqucd1f52",
+      "order": 2,
+      "notes": null,
+      "exerciseGroup": "A",
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "8",
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       },
+       {
+        "setNumber": 2,
+        "reps": "8",
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       }
+      ]
+     },
+     {
+      "name": "Pull-Up",
+      "exerciseDefinitionId": "cmiz7vkvr0008vr0m7rv3dapc",
+      "order": 3,
+      "notes": null,
+      "exerciseGroup": null,
+      "sets": []
+     }
+    ],
+    "exerciseCount": 3,
+    "createdAt": "2026-10-18T19:00:00.000Z",
+    "updatedAt": "2026-10-18T19:00:00.000Z",
+    "lastUsedAt": "2026-11-05T19:00:00.000Z",
+    "pinnedAt": null,
+    "origin": "session",
+    "archivedAt": null,
+    "dismissedAt": null
+   },
+   {
+    "id": "s-recent-2",
+    "name": "Leg Day",
+    "notes": null,
+    "sourceCompletionId": null,
+    "workoutData": [
+     {
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "notes": null,
+      "exerciseGroup": null,
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "5",
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       }
+      ]
+     }
+    ],
+    "exerciseCount": 1,
+    "createdAt": "2026-10-13T19:00:00.000Z",
+    "updatedAt": "2026-10-13T19:00:00.000Z",
+    "lastUsedAt": "2026-10-28T19:00:00.000Z",
+    "pinnedAt": null,
+    "origin": "session",
+    "archivedAt": null,
+    "dismissedAt": null
+   },
+   {
+    "id": "s-edge-in",
+    "name": "Exactly 30 days",
+    "notes": null,
+    "sourceCompletionId": null,
+    "workoutData": [
+     {
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "notes": null,
+      "exerciseGroup": null,
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "5",
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       }
+      ]
+     }
+    ],
+    "exerciseCount": 1,
+    "createdAt": "2026-09-28T19:00:00.000Z",
+    "updatedAt": "2026-09-28T19:00:00.000Z",
+    "lastUsedAt": "2026-10-08T19:00:00.000Z",
+    "pinnedAt": null,
+    "origin": "session",
+    "archivedAt": null,
+    "dismissedAt": null
+   },
+   {
+    "id": "s-edge-out",
+    "name": "Just over 30 days",
+    "notes": null,
+    "sourceCompletionId": null,
+    "workoutData": [
+     {
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "notes": null,
+      "exerciseGroup": null,
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "5",
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       }
+      ]
+     }
+    ],
+    "exerciseCount": 1,
+    "createdAt": "2026-09-28T19:00:00.000Z",
+    "updatedAt": "2026-09-28T19:00:00.000Z",
+    "lastUsedAt": "2026-10-08T18:59:59.999Z",
+    "pinnedAt": null,
+    "origin": "session",
+    "archivedAt": null,
+    "dismissedAt": null
+   },
+   {
+    "id": "s-never",
+    "name": "Never started",
+    "notes": null,
+    "sourceCompletionId": null,
+    "workoutData": [
+     {
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "notes": null,
+      "exerciseGroup": null,
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "5",
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       }
+      ]
+     }
+    ],
+    "exerciseCount": 1,
+    "createdAt": "2026-09-23T19:00:00.000Z",
+    "updatedAt": "2026-09-23T19:00:00.000Z",
+    "lastUsedAt": null,
+    "pinnedAt": null,
+    "origin": "session",
+    "archivedAt": null,
+    "dismissedAt": null
+   },
+   {
+    "id": "s-old",
+    "name": "Old favourite",
+    "notes": null,
+    "sourceCompletionId": null,
+    "workoutData": [
+     {
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "notes": null,
+      "exerciseGroup": null,
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "5",
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       }
+      ]
+     }
+    ],
+    "exerciseCount": 1,
+    "createdAt": "2026-07-30T19:00:00.000Z",
+    "updatedAt": "2026-07-30T19:00:00.000Z",
+    "lastUsedAt": "2026-09-08T19:00:00.000Z",
+    "pinnedAt": null,
+    "origin": "session",
+    "archivedAt": null,
+    "dismissedAt": null
+   },
+   {
+    "id": "s-new",
+    "name": "From my agent",
+    "notes": null,
+    "sourceCompletionId": null,
+    "workoutData": [
+     {
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "notes": null,
+      "exerciseGroup": null,
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "5",
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       }
+      ]
+     }
+    ],
+    "exerciseCount": 1,
+    "createdAt": "2026-09-08T19:00:00.000Z",
+    "updatedAt": "2026-09-08T19:00:00.000Z",
+    "lastUsedAt": null,
+    "pinnedAt": null,
+    "origin": "agent",
+    "archivedAt": null,
+    "dismissedAt": null
+   },
+   {
+    "id": "s-new-2",
+    "name": "From my coach",
+    "notes": null,
+    "sourceCompletionId": null,
+    "workoutData": [
+     {
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "notes": null,
+      "exerciseGroup": null,
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "5",
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       }
+      ]
+     }
+    ],
+    "exerciseCount": 1,
+    "createdAt": "2026-11-06T19:00:00.000Z",
+    "updatedAt": "2026-11-06T19:00:00.000Z",
+    "lastUsedAt": null,
+    "pinnedAt": null,
+    "origin": "coach",
+    "archivedAt": null,
+    "dismissedAt": null
+   },
+   {
+    "id": "s-dismissed",
+    "name": "Dismissed agent one",
+    "notes": null,
+    "sourceCompletionId": null,
+    "workoutData": [
+     {
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "notes": null,
+      "exerciseGroup": null,
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "5",
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       }
+      ]
+     }
+    ],
+    "exerciseCount": 1,
+    "createdAt": "2026-11-04T19:00:00.000Z",
+    "updatedAt": "2026-11-04T19:00:00.000Z",
+    "lastUsedAt": null,
+    "pinnedAt": null,
+    "origin": "agent",
+    "archivedAt": null,
+    "dismissedAt": "2026-11-05T19:00:00.000Z"
+   },
+   {
+    "id": "s-agent-used",
+    "name": "Agent, started",
+    "notes": null,
+    "sourceCompletionId": null,
+    "workoutData": [
+     {
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "notes": null,
+      "exerciseGroup": null,
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "5",
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       }
+      ]
+     }
+    ],
+    "exerciseCount": 1,
+    "createdAt": "2026-09-18T19:00:00.000Z",
+    "updatedAt": "2026-09-18T19:00:00.000Z",
+    "lastUsedAt": "2026-11-02T19:00:00.000Z",
+    "pinnedAt": null,
+    "origin": "agent",
+    "archivedAt": null,
+    "dismissedAt": null
+   },
+   {
+    "id": "s-pin-1",
+    "name": "Pinned newest",
+    "notes": null,
+    "sourceCompletionId": null,
+    "workoutData": [
+     {
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "notes": null,
+      "exerciseGroup": null,
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "5",
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       }
+      ]
+     }
+    ],
+    "exerciseCount": 1,
+    "createdAt": "2026-08-09T19:00:00.000Z",
+    "updatedAt": "2026-08-09T19:00:00.000Z",
+    "lastUsedAt": "2026-08-09T19:00:00.000Z",
+    "pinnedAt": "2026-11-06T19:00:00.000Z",
+    "origin": "session",
+    "archivedAt": null,
+    "dismissedAt": null
+   },
+   {
+    "id": "s-pin-2",
+    "name": "Pinned agent, unstarted",
+    "notes": null,
+    "sourceCompletionId": null,
+    "workoutData": [
+     {
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "notes": null,
+      "exerciseGroup": null,
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "5",
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       }
+      ]
+     }
+    ],
+    "exerciseCount": 1,
+    "createdAt": "2026-11-03T19:00:00.000Z",
+    "updatedAt": "2026-11-03T19:00:00.000Z",
+    "lastUsedAt": null,
+    "pinnedAt": "2026-11-05T19:00:00.000Z",
+    "origin": "agent",
+    "archivedAt": null,
+    "dismissedAt": null
+   },
+   {
+    "id": "s-pin-3",
+    "name": "Pinned 3",
+    "notes": null,
+    "sourceCompletionId": null,
+    "workoutData": [
+     {
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "notes": null,
+      "exerciseGroup": null,
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "5",
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       }
+      ]
+     }
+    ],
+    "exerciseCount": 1,
+    "createdAt": "2026-10-08T19:00:00.000Z",
+    "updatedAt": "2026-10-08T19:00:00.000Z",
+    "lastUsedAt": null,
+    "pinnedAt": "2026-11-04T19:00:00.000Z",
+    "origin": "session",
+    "archivedAt": null,
+    "dismissedAt": null
+   },
+   {
+    "id": "s-pin-4",
+    "name": "Pinned 4",
+    "notes": null,
+    "sourceCompletionId": null,
+    "workoutData": [
+     {
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "notes": null,
+      "exerciseGroup": null,
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "5",
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       }
+      ]
+     }
+    ],
+    "exerciseCount": 1,
+    "createdAt": "2026-10-08T19:00:00.000Z",
+    "updatedAt": "2026-10-08T19:00:00.000Z",
+    "lastUsedAt": null,
+    "pinnedAt": "2026-11-03T19:00:00.000Z",
+    "origin": "session",
+    "archivedAt": null,
+    "dismissedAt": null
+   },
+   {
+    "id": "s-pin-5",
+    "name": "Pinned 5",
+    "notes": null,
+    "sourceCompletionId": null,
+    "workoutData": [
+     {
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "notes": null,
+      "exerciseGroup": null,
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "5",
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       }
+      ]
+     }
+    ],
+    "exerciseCount": 1,
+    "createdAt": "2026-10-08T19:00:00.000Z",
+    "updatedAt": "2026-10-08T19:00:00.000Z",
+    "lastUsedAt": null,
+    "pinnedAt": "2026-11-02T19:00:00.000Z",
+    "origin": "session",
+    "archivedAt": null,
+    "dismissedAt": null
+   },
+   {
+    "id": "s-pin-6",
+    "name": "Pinned oldest",
+    "notes": null,
+    "sourceCompletionId": null,
+    "workoutData": [
+     {
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "notes": null,
+      "exerciseGroup": null,
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "5",
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       }
+      ]
+     }
+    ],
+    "exerciseCount": 1,
+    "createdAt": "2026-10-08T19:00:00.000Z",
+    "updatedAt": "2026-10-08T19:00:00.000Z",
+    "lastUsedAt": null,
+    "pinnedAt": "2026-11-01T19:00:00.000Z",
+    "origin": "session",
+    "archivedAt": null,
+    "dismissedAt": null
+   },
+   {
+    "id": "s-arch",
+    "name": "Archived",
+    "notes": null,
+    "sourceCompletionId": null,
+    "workoutData": [
+     {
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "notes": null,
+      "exerciseGroup": null,
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "5",
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       }
+      ]
+     }
+    ],
+    "exerciseCount": 1,
+    "createdAt": "2026-10-08T19:00:00.000Z",
+    "updatedAt": "2026-10-08T19:00:00.000Z",
+    "lastUsedAt": "2026-11-06T19:00:00.000Z",
+    "pinnedAt": null,
+    "origin": "session",
+    "archivedAt": "2026-11-02T19:00:00.000Z",
+    "dismissedAt": null
+   },
+   {
+    "id": "s-arch-pinned",
+    "name": "Archived, still pinned",
+    "notes": null,
+    "sourceCompletionId": null,
+    "workoutData": [
+     {
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "notes": null,
+      "exerciseGroup": null,
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "5",
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       }
+      ]
+     }
+    ],
+    "exerciseCount": 1,
+    "createdAt": "2026-10-08T19:00:00.000Z",
+    "updatedAt": "2026-10-08T19:00:00.000Z",
+    "lastUsedAt": null,
+    "pinnedAt": "2026-11-06T19:00:00.000Z",
+    "origin": "session",
+    "archivedAt": "2026-11-05T19:00:00.000Z",
+    "dismissedAt": null
+   }
+  ],
+  "pinnedExercises": []
+ },
+ "rollups": {
+  "c-old": {
+   "rollup": {
+    "completionId": "c-old",
+    "isMinimal": false,
+    "durationSeconds": null,
+    "exerciseCount": 1,
+    "workingSetCount": 1,
+    "totalReps": 3,
+    "totalVolumeLbs": 1000.5,
+    "hasBodyweightOnlyExercises": false,
+    "lifetimeWorkoutCount": 8,
+    "workoutsLast7Days": 5,
+    "exercises": [
+     {
+      "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib",
+      "name": "Barbell Back Squat",
+      "workingSets": 1,
+      "reps": 3,
+      "volumeLbs": 1000.5,
+      "isBodyweight": false,
+      "topSet": {
+       "weight": 333.5,
+       "reps": 3
+      },
+      "vsLastTime": null
+     }
+    ],
+    "workoutName": "Legs Old",
+    "isAdHoc": true
+   },
+   "view": {
+    "workoutNumber": "#8",
+    "last7Days": "5",
+    "tiles": [
+     {
+      "label": "Volume (lbs)",
+      "value": "1,001"
+     },
+     {
+      "label": "Reps",
+      "value": "3"
+     },
+     {
+      "label": "Working Sets",
+      "value": "1"
+     },
+     {
+      "label": "Exercises",
+      "value": "1"
+     }
+    ],
+    "exercises": [
+     {
+      "name": "Barbell Back Squat",
+      "top": "top 333.5 × 3",
+      "line": "1 set · 3 reps · 1,001 lbs",
+      "trend": null
+     }
+    ],
+    "note": null,
+    "canSave": true,
+    "suggestedName": "Workout — November 7"
+   }
+  },
+  "c-push": {
+   "rollup": {
+    "completionId": "c-push",
+    "isMinimal": false,
+    "durationSeconds": 3600,
+    "exerciseCount": 3,
+    "workingSetCount": 6,
+    "totalReps": 38,
+    "totalVolumeLbs": 3775,
+    "hasBodyweightOnlyExercises": true,
+    "lifetimeWorkoutCount": 8,
+    "workoutsLast7Days": 5,
+    "exercises": [
+     {
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "name": "Barbell Bench Press",
+      "workingSets": 3,
+      "reps": 15,
+      "volumeLbs": 2775,
+      "isBodyweight": false,
+      "topSet": {
+       "weight": 185,
+       "reps": 5
+      },
+      "vsLastTime": null
+     },
+     {
+      "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib",
+      "name": "Barbell Back Squat",
+      "workingSets": 1,
+      "reps": 5,
+      "volumeLbs": 1000,
+      "isBodyweight": false,
+      "topSet": {
+       "weight": 200,
+       "reps": 5
+      },
+      "vsLastTime": {
+       "previousCompletedAt": "2026-09-01T01:00:00.000Z",
+       "previousVolumeLbs": 1000.5,
+       "previousTopSet": {
+        "weight": 333.5,
+        "reps": 3
+       }
+      }
+     },
+     {
+      "exerciseDefinitionId": "cmiz7vkvr0008vr0m7rv3dapc",
+      "name": "Pull-Up",
+      "workingSets": 2,
+      "reps": 18,
+      "volumeLbs": 0,
+      "isBodyweight": true,
+      "topSet": {
+       "weight": 0,
+       "reps": 10
+      },
+      "vsLastTime": null
+     }
+    ],
+    "workoutName": "Push A",
+    "isAdHoc": true
+   },
+   "view": {
+    "workoutNumber": "#8",
+    "last7Days": "5",
+    "tiles": [
+     {
+      "label": "Volume (lbs)",
+      "value": "3,775"
+     },
+     {
+      "label": "Reps",
+      "value": "38"
+     },
+     {
+      "label": "Working Sets",
+      "value": "6"
+     },
+     {
+      "label": "Exercises",
+      "value": "3"
+     },
+     {
+      "label": "Duration",
+      "value": "1h 0m"
+     }
+    ],
+    "exercises": [
+     {
+      "name": "Barbell Bench Press",
+      "top": "top 185 × 5",
+      "line": "3 sets · 15 reps · 2,775 lbs",
+      "trend": null
+     },
+     {
+      "name": "Barbell Back Squat",
+      "top": "top 200 × 5",
+      "line": "1 set · 5 reps · 1,000 lbs",
+      "trend": "same as last"
+     },
+     {
+      "name": "Pull-Up",
+      "top": null,
+      "line": "2 sets · 18 reps",
+      "trend": null
+     }
+    ],
+    "note": null,
+    "canSave": true,
+    "suggestedName": "Workout — November 7"
+   }
+  },
+  "c-prog": {
+   "rollup": {
+    "completionId": "c-prog",
+    "isMinimal": false,
+    "durationSeconds": 45,
+    "exerciseCount": 2,
+    "workingSetCount": 7,
+    "totalReps": 44,
+    "totalVolumeLbs": 5720,
+    "hasBodyweightOnlyExercises": false,
+    "lifetimeWorkoutCount": 8,
+    "workoutsLast7Days": 5,
+    "exercises": [
+     {
+      "exerciseDefinitionId": "cmiz7vk1i0003vr0mqucd1f52",
+      "name": "Barbell Row",
+      "workingSets": 3,
+      "reps": 24,
+      "volumeLbs": 3720,
+      "isBodyweight": false,
+      "topSet": {
+       "weight": 155,
+       "reps": 8
+      },
+      "vsLastTime": null
+     },
+     {
+      "exerciseDefinitionId": "cmiz7vk780004vr0md53c57bz",
+      "name": "Overhead Press",
+      "workingSets": 4,
+      "reps": 20,
+      "volumeLbs": 2000,
+      "isBodyweight": false,
+      "topSet": {
+       "weight": 100,
+       "reps": 5
+      },
+      "vsLastTime": null
+     }
+    ],
+    "workoutName": "Pull Day",
+    "isAdHoc": false
+   },
+   "view": {
+    "workoutNumber": "#8",
+    "last7Days": "5",
+    "tiles": [
+     {
+      "label": "Volume (lbs)",
+      "value": "5,720"
+     },
+     {
+      "label": "Reps",
+      "value": "44"
+     },
+     {
+      "label": "Working Sets",
+      "value": "7"
+     },
+     {
+      "label": "Exercises",
+      "value": "2"
+     },
+     {
+      "label": "Duration",
+      "value": "45s"
+     }
+    ],
+    "exercises": [
+     {
+      "name": "Barbell Row",
+      "top": "top 155 × 8",
+      "line": "3 sets · 24 reps · 3,720 lbs",
+      "trend": null
+     },
+     {
+      "name": "Overhead Press",
+      "top": "top 100 × 5",
+      "line": "4 sets · 20 reps · 2,000 lbs",
+      "trend": null
+     }
+    ],
+    "note": null,
+    "canSave": false,
+    "suggestedName": null
+   }
+  },
+  "c-arch": {
+   "rollup": null
+  },
+  "c-edge": {
+   "rollup": {
+    "completionId": "c-edge",
+    "isMinimal": false,
+    "durationSeconds": 3600,
+    "exerciseCount": 1,
+    "workingSetCount": 1,
+    "totalReps": 10,
+    "totalVolumeLbs": 600,
+    "hasBodyweightOnlyExercises": false,
+    "lifetimeWorkoutCount": 8,
+    "workoutsLast7Days": 5,
+    "exercises": [
+     {
+      "exerciseDefinitionId": "cmiz7vl1k0009vr0m306fts69",
+      "name": "Barbell Curl",
+      "workingSets": 1,
+      "reps": 10,
+      "volumeLbs": 600,
+      "isBodyweight": false,
+      "topSet": {
+       "weight": 60,
+       "reps": 10
+      },
+      "vsLastTime": null
+     }
+    ],
+    "workoutName": "Arms",
+    "isAdHoc": true
+   },
+   "view": {
+    "workoutNumber": "#8",
+    "last7Days": "5",
+    "tiles": [
+     {
+      "label": "Volume (lbs)",
+      "value": "600"
+     },
+     {
+      "label": "Reps",
+      "value": "10"
+     },
+     {
+      "label": "Working Sets",
+      "value": "1"
+     },
+     {
+      "label": "Exercises",
+      "value": "1"
+     },
+     {
+      "label": "Duration",
+      "value": "1h 0m"
+     }
+    ],
+    "exercises": [
+     {
+      "name": "Barbell Curl",
+      "top": "top 60 × 10",
+      "line": "1 set · 10 reps · 600 lbs",
+      "trend": null
+     }
+    ],
+    "note": null,
+    "canSave": true,
+    "suggestedName": "Workout — November 7"
+   }
+  },
+  "c-bw": {
+   "rollup": {
+    "completionId": "c-bw",
+    "isMinimal": false,
+    "durationSeconds": 303,
+    "exerciseCount": 1,
+    "workingSetCount": 3,
+    "totalReps": 23,
+    "totalVolumeLbs": 0,
+    "hasBodyweightOnlyExercises": true,
+    "lifetimeWorkoutCount": 8,
+    "workoutsLast7Days": 5,
+    "exercises": [
+     {
+      "exerciseDefinitionId": "cmiz7vkvr0008vr0m7rv3dapc",
+      "name": "Pull-Up",
+      "workingSets": 3,
+      "reps": 23,
+      "volumeLbs": 0,
+      "isBodyweight": true,
+      "topSet": {
+       "weight": 0,
+       "reps": 8
+      },
+      "vsLastTime": {
+       "previousCompletedAt": "2026-10-20T01:00:00.000Z",
+       "previousVolumeLbs": 0,
+       "previousTopSet": {
+        "weight": 0,
+        "reps": 10
+       }
+      }
+     }
+    ],
+    "workoutName": "Pull-ups",
+    "isAdHoc": true
+   },
+   "view": {
+    "workoutNumber": "#8",
+    "last7Days": "5",
+    "tiles": [
+     {
+      "label": "Total Reps",
+      "value": "23"
+     },
+     {
+      "label": "Working Sets",
+      "value": "3"
+     },
+     {
+      "label": "Exercises",
+      "value": "1"
+     },
+     {
+      "label": "Duration",
+      "value": "5m 03s"
+     }
+    ],
+    "exercises": [
+     {
+      "name": "Pull-Up",
+      "top": null,
+      "line": "3 sets · 23 reps",
+      "trend": "+13 reps vs last"
+     }
+    ],
+    "note": null,
+    "canSave": true,
+    "suggestedName": "Workout — November 7"
+   }
+  },
+  "c-min": {
+   "rollup": {
+    "completionId": "c-min",
+    "isMinimal": true,
+    "durationSeconds": 120,
+    "exerciseCount": 0,
+    "workingSetCount": 0,
+    "totalReps": 0,
+    "totalVolumeLbs": 0,
+    "hasBodyweightOnlyExercises": false,
+    "lifetimeWorkoutCount": 8,
+    "workoutsLast7Days": 5,
+    "exercises": [],
+    "workoutName": "Quick one",
+    "isAdHoc": true
+   },
+   "view": {
+    "workoutNumber": "#8",
+    "last7Days": "5",
+    "tiles": [],
+    "exercises": [],
+    "note": "Marked complete. Nice work.",
+    "canSave": false,
+    "suggestedName": null
+   }
+  },
+  "c-empty": {
+   "rollup": {
+    "completionId": "c-empty",
+    "isMinimal": true,
+    "durationSeconds": 0,
+    "exerciseCount": 0,
+    "workingSetCount": 0,
+    "totalReps": 0,
+    "totalVolumeLbs": 0,
+    "hasBodyweightOnlyExercises": false,
+    "lifetimeWorkoutCount": 8,
+    "workoutsLast7Days": 5,
+    "exercises": [],
+    "workoutName": null,
+    "isAdHoc": true
+   },
+   "view": {
+    "workoutNumber": "#8",
+    "last7Days": "5",
+    "tiles": [],
+    "exercises": [],
+    "note": "Marked complete. Nice work.",
+    "canSave": false,
+    "suggestedName": null
+   }
+  },
+  "c-arch-new": {
+   "rollup": null
+  },
+  "c-upper": {
+   "rollup": {
+    "completionId": "c-upper",
+    "isMinimal": false,
+    "durationSeconds": 3723,
+    "exerciseCount": 5,
+    "workingSetCount": 13,
+    "totalReps": 86,
+    "totalVolumeLbs": 10205,
+    "hasBodyweightOnlyExercises": true,
+    "lifetimeWorkoutCount": 8,
+    "workoutsLast7Days": 5,
+    "exercises": [
+     {
+      "exerciseDefinitionId": "cmiz7vk1i0003vr0mqucd1f52",
+      "name": "Barbell Row",
+      "workingSets": 3,
+      "reps": 24,
+      "volumeLbs": 3730,
+      "isBodyweight": false,
+      "topSet": {
+       "weight": 156.25,
+       "reps": 8
+      },
+      "vsLastTime": {
+       "previousCompletedAt": "2026-10-25T01:00:00.000Z",
+       "previousVolumeLbs": 3720,
+       "previousTopSet": {
+        "weight": 155,
+        "reps": 8
+       }
+      }
+     },
+     {
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "name": "Barbell Bench Press",
+      "workingSets": 3,
+      "reps": 15,
+      "volumeLbs": 2900,
+      "isBodyweight": false,
+      "topSet": {
+       "weight": 195,
+       "reps": 5
+      },
+      "vsLastTime": {
+       "previousCompletedAt": "2026-11-06T15:00:00.000Z",
+       "previousVolumeLbs": 0,
+       "previousTopSet": null
+      }
+     },
+     {
+      "exerciseDefinitionId": "cmiz7vk780004vr0md53c57bz",
+      "name": "Overhead Press",
+      "workingSets": 3,
+      "reps": 15,
+      "volumeLbs": 1950,
+      "isBodyweight": false,
+      "topSet": {
+       "weight": 130,
+       "reps": 5
+      },
+      "vsLastTime": {
+       "previousCompletedAt": "2026-10-25T01:00:00.000Z",
+       "previousVolumeLbs": 2000,
+       "previousTopSet": {
+        "weight": 100,
+        "reps": 5
+       }
+      }
+     },
+     {
+      "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib",
+      "name": "Barbell Back Squat",
+      "workingSets": 2,
+      "reps": 10,
+      "volumeLbs": 1625,
+      "isBodyweight": false,
+      "topSet": {
+       "weight": 225,
+       "reps": 5
+      },
+      "vsLastTime": {
+       "previousCompletedAt": "2026-10-20T01:00:00.000Z",
+       "previousVolumeLbs": 1000,
+       "previousTopSet": {
+        "weight": 200,
+        "reps": 5
+       }
+      }
+     },
+     {
+      "exerciseDefinitionId": "cmiz7vkvr0008vr0m7rv3dapc",
+      "name": "Pull-Up",
+      "workingSets": 2,
+      "reps": 22,
+      "volumeLbs": 0,
+      "isBodyweight": true,
+      "topSet": {
+       "weight": 0,
+       "reps": 12
+      },
+      "vsLastTime": {
+       "previousCompletedAt": "2026-11-05T01:00:00.000Z",
+       "previousVolumeLbs": 0,
+       "previousTopSet": {
+        "weight": 0,
+        "reps": 8
+       }
+      }
+     }
+    ],
+    "workoutName": "Upper",
+    "isAdHoc": true
+   },
+   "view": {
+    "workoutNumber": "#8",
+    "last7Days": "5",
+    "tiles": [
+     {
+      "label": "Volume (lbs)",
+      "value": "10.2k"
+     },
+     {
+      "label": "Reps",
+      "value": "86"
+     },
+     {
+      "label": "Working Sets",
+      "value": "13"
+     },
+     {
+      "label": "Exercises",
+      "value": "5"
+     },
+     {
+      "label": "Duration",
+      "value": "1h 2m"
+     }
+    ],
+    "exercises": [
+     {
+      "name": "Barbell Row",
+      "top": "top 156.3 × 8",
+      "line": "3 sets · 24 reps · 3,730 lbs",
+      "trend": "same as last"
+     },
+     {
+      "name": "Barbell Bench Press",
+      "top": "top 195 × 5",
+      "line": "3 sets · 15 reps · 2,900 lbs",
+      "trend": null
+     },
+     {
+      "name": "Overhead Press",
+      "top": "top 130 × 5",
+      "line": "3 sets · 15 reps · 1,950 lbs",
+      "trend": "-2% vs last"
+     },
+     {
+      "name": "Barbell Back Squat",
+      "top": "top 225 × 5",
+      "line": "2 sets · 10 reps · 1,625 lbs",
+      "trend": "+63% vs last"
+     },
+     {
+      "name": "Pull-Up",
+      "top": null,
+      "line": "2 sets · 22 reps",
+      "trend": "+14 reps vs last"
+     }
+    ],
+    "note": null,
+    "canSave": true,
+    "suggestedName": "Workout — November 7"
+   }
+  },
+  "c-missing": {
+   "rollup": null
+  }
+ },
+ "suggestedNames": [
+  {
+   "at": "2026-11-07T19:00:00.000Z",
+   "name": "Workout — November 7"
+  },
+  {
+   "at": "2026-11-08T05:30:00.000Z",
+   "name": "Workout — November 7"
+  },
+  {
+   "at": "2026-01-02T17:00:00.000Z",
+   "name": "Workout — January 2"
+  }
+ ],
+ "saves": {
+  "upper": {
+   "request": {
+    "sourceCompletionId": "c-upper",
+    "name": "  Upper Repeat  ",
+    "notes": "  felt strong  "
+   },
+   "status": 200,
+   "name": "Upper Repeat",
+   "notes": "felt strong",
+   "sourceCompletionId": "c-upper",
+   "workoutData": [
+    {
+     "name": "Barbell Bench Press",
+     "sets": [
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "8",
+       "isWarmup": true,
+       "setNumber": 1
+      },
+      {
+       "rir": null,
+       "rpe": 8,
+       "reps": "5",
+       "isWarmup": false,
+       "setNumber": 2
+      },
+      {
+       "rir": null,
+       "rpe": 8,
+       "reps": "5",
+       "isWarmup": false,
+       "setNumber": 4
+      },
+      {
+       "rir": null,
+       "rpe": 9,
+       "reps": "5",
+       "isWarmup": false,
+       "setNumber": 5
+      }
+     ],
+     "notes": "Pause at chest",
+     "order": 1,
+     "exerciseGroup": null,
+     "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec"
+    },
+    {
+     "name": "Barbell Back Squat",
+     "sets": [
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "5",
+       "isWarmup": false,
+       "setNumber": 1
+      },
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "5",
+       "isWarmup": false,
+       "setNumber": 2
+      }
+     ],
+     "notes": null,
+     "order": 2,
+     "exerciseGroup": null,
+     "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib"
+    },
+    {
+     "name": "Overhead Press",
+     "sets": [
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "5",
+       "isWarmup": false,
+       "setNumber": 1
+      },
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "5",
+       "isWarmup": false,
+       "setNumber": 2
+      },
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "5",
+       "isWarmup": false,
+       "setNumber": 3
+      }
+     ],
+     "notes": null,
+     "order": 3,
+     "exerciseGroup": null,
+     "exerciseDefinitionId": "cmiz7vk780004vr0md53c57bz"
+    },
+    {
+     "name": "Barbell Row",
+     "sets": [
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "8",
+       "isWarmup": false,
+       "setNumber": 1
+      },
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "8",
+       "isWarmup": false,
+       "setNumber": 2
+      },
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "8",
+       "isWarmup": false,
+       "setNumber": 3
+      }
+     ],
+     "notes": null,
+     "order": 4,
+     "exerciseGroup": "A",
+     "exerciseDefinitionId": "cmiz7vk1i0003vr0mqucd1f52"
+    },
+    {
+     "name": "Pull-Up",
+     "sets": [
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "12",
+       "isWarmup": false,
+       "setNumber": 1
+      },
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "10",
+       "isWarmup": false,
+       "setNumber": 2
+      }
+     ],
+     "notes": null,
+     "order": 5,
+     "exerciseGroup": "A",
+     "exerciseDefinitionId": "cmiz7vkvr0008vr0m7rv3dapc"
+    },
+    {
+     "name": "Conventional Deadlift",
+     "sets": [
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "5",
+       "isWarmup": true,
+       "setNumber": 1
+      }
+     ],
+     "notes": null,
+     "order": 6,
+     "exerciseGroup": null,
+     "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70"
+    },
+    {
+     "name": "Barbell Curl",
+     "sets": [],
+     "notes": null,
+     "order": 7,
+     "exerciseGroup": null,
+     "exerciseDefinitionId": "cmiz7vl1k0009vr0m306fts69"
+    }
+   ],
+   "exerciseCount": 7,
+   "lastUsedAt": "2026-11-07T18:00:00.000Z",
+   "origin": "session",
+   "pinnedAt": null,
+   "archivedAt": null,
+   "dismissedAt": null
+  },
+  "upperAgain": {
+   "request": {
+    "sourceCompletionId": "c-upper",
+    "name": "Another name",
+    "notes": null
+   },
+   "status": 200,
+   "name": "Upper Repeat",
+   "notes": "felt strong",
+   "sourceCompletionId": "c-upper",
+   "workoutData": [
+    {
+     "name": "Barbell Bench Press",
+     "sets": [
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "8",
+       "isWarmup": true,
+       "setNumber": 1
+      },
+      {
+       "rir": null,
+       "rpe": 8,
+       "reps": "5",
+       "isWarmup": false,
+       "setNumber": 2
+      },
+      {
+       "rir": null,
+       "rpe": 8,
+       "reps": "5",
+       "isWarmup": false,
+       "setNumber": 4
+      },
+      {
+       "rir": null,
+       "rpe": 9,
+       "reps": "5",
+       "isWarmup": false,
+       "setNumber": 5
+      }
+     ],
+     "notes": "Pause at chest",
+     "order": 1,
+     "exerciseGroup": null,
+     "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec"
+    },
+    {
+     "name": "Barbell Back Squat",
+     "sets": [
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "5",
+       "isWarmup": false,
+       "setNumber": 1
+      },
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "5",
+       "isWarmup": false,
+       "setNumber": 2
+      }
+     ],
+     "notes": null,
+     "order": 2,
+     "exerciseGroup": null,
+     "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib"
+    },
+    {
+     "name": "Overhead Press",
+     "sets": [
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "5",
+       "isWarmup": false,
+       "setNumber": 1
+      },
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "5",
+       "isWarmup": false,
+       "setNumber": 2
+      },
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "5",
+       "isWarmup": false,
+       "setNumber": 3
+      }
+     ],
+     "notes": null,
+     "order": 3,
+     "exerciseGroup": null,
+     "exerciseDefinitionId": "cmiz7vk780004vr0md53c57bz"
+    },
+    {
+     "name": "Barbell Row",
+     "sets": [
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "8",
+       "isWarmup": false,
+       "setNumber": 1
+      },
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "8",
+       "isWarmup": false,
+       "setNumber": 2
+      },
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "8",
+       "isWarmup": false,
+       "setNumber": 3
+      }
+     ],
+     "notes": null,
+     "order": 4,
+     "exerciseGroup": "A",
+     "exerciseDefinitionId": "cmiz7vk1i0003vr0mqucd1f52"
+    },
+    {
+     "name": "Pull-Up",
+     "sets": [
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "12",
+       "isWarmup": false,
+       "setNumber": 1
+      },
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "10",
+       "isWarmup": false,
+       "setNumber": 2
+      }
+     ],
+     "notes": null,
+     "order": 5,
+     "exerciseGroup": "A",
+     "exerciseDefinitionId": "cmiz7vkvr0008vr0m7rv3dapc"
+    },
+    {
+     "name": "Conventional Deadlift",
+     "sets": [
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "5",
+       "isWarmup": true,
+       "setNumber": 1
+      }
+     ],
+     "notes": null,
+     "order": 6,
+     "exerciseGroup": null,
+     "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70"
+    },
+    {
+     "name": "Barbell Curl",
+     "sets": [],
+     "notes": null,
+     "order": 7,
+     "exerciseGroup": null,
+     "exerciseDefinitionId": "cmiz7vl1k0009vr0m306fts69"
+    }
+   ],
+   "exerciseCount": 7,
+   "lastUsedAt": "2026-11-07T18:00:00.000Z",
+   "origin": "session",
+   "pinnedAt": null,
+   "archivedAt": null,
+   "dismissedAt": null
+  },
+  "bodyweight": {
+   "request": {
+    "sourceCompletionId": "c-bw",
+    "name": "Pull-ups",
+    "notes": "   "
+   },
+   "status": 200,
+   "name": "Pull-ups",
+   "notes": null,
+   "sourceCompletionId": "c-bw",
+   "workoutData": [
+    {
+     "name": "Pull-Up",
+     "sets": [
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "8",
+       "isWarmup": false,
+       "setNumber": 1
+      },
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "8",
+       "isWarmup": false,
+       "setNumber": 2
+      },
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "7",
+       "isWarmup": false,
+       "setNumber": 3
+      }
+     ],
+     "notes": null,
+     "order": 1,
+     "exerciseGroup": null,
+     "exerciseDefinitionId": "cmiz7vkvr0008vr0m7rv3dapc"
+    }
+   ],
+   "exerciseCount": 1,
+   "lastUsedAt": "2026-11-05T01:00:00.000Z",
+   "origin": "session",
+   "pinnedAt": null,
+   "archivedAt": null,
+   "dismissedAt": null
+  },
+  "minimal": {
+   "request": {
+    "sourceCompletionId": "c-min",
+    "name": "Quick one",
+    "notes": null
+   },
+   "status": 200,
+   "name": "Quick one",
+   "notes": null,
+   "sourceCompletionId": "c-min",
+   "workoutData": [
+    {
+     "name": "Barbell Bench Press",
+     "sets": [
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "10",
+       "isWarmup": true,
+       "setNumber": 1
+      }
+     ],
+     "notes": null,
+     "order": 1,
+     "exerciseGroup": null,
+     "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec"
+    }
+   ],
+   "exerciseCount": 1,
+   "lastUsedAt": "2026-11-06T15:00:00.000Z",
+   "origin": "session",
+   "pinnedAt": null,
+   "archivedAt": null,
+   "dismissedAt": null
+  },
+  "program": {
+   "request": {
+    "sourceCompletionId": "c-prog",
+    "name": "Pull Day",
+    "notes": null
+   },
+   "status": 400,
+   "error": "Only freestyle workouts can be saved in v1; saving from program workouts is not yet supported."
+  },
+  "blankName": {
+   "request": {
+    "sourceCompletionId": "c-push",
+    "name": "   ",
+    "notes": null
+   },
+   "status": 400,
+   "error": "name is required"
+  },
+  "longName": {
+   "request": {
+    "sourceCompletionId": "c-push",
+    "name": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "notes": null
+   },
+   "status": 400,
+   "error": "name must be 100 characters or fewer"
+  },
+  "longNotes": {
+   "request": {
+    "sourceCompletionId": "c-push",
+    "name": "Push",
+    "notes": "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"
+   },
+   "status": 400,
+   "error": "notes must be 2000 characters or fewer"
+  },
+  "emojiName": {
+   "request": {
+    "sourceCompletionId": "c-push",
+    "name": "💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪",
+    "notes": null
+   },
+   "status": 400,
+   "error": "name must be 100 characters or fewer"
+  },
+  "maxLengths": {
+   "request": {
+    "sourceCompletionId": "c-push",
+    "name": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "notes": "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"
+   },
+   "status": 200,
+   "name": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+   "notes": "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+   "sourceCompletionId": "c-push",
+   "workoutData": [
+    {
+     "name": "Barbell Bench Press",
+     "sets": [
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "5",
+       "isWarmup": false,
+       "setNumber": 1
+      },
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "5",
+       "isWarmup": false,
+       "setNumber": 2
+      },
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "5",
+       "isWarmup": false,
+       "setNumber": 3
+      }
+     ],
+     "notes": null,
+     "order": 1,
+     "exerciseGroup": null,
+     "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec"
+    },
+    {
+     "name": "Barbell Back Squat",
+     "sets": [
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "5",
+       "isWarmup": false,
+       "setNumber": 1
+      }
+     ],
+     "notes": null,
+     "order": 2,
+     "exerciseGroup": null,
+     "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib"
+    },
+    {
+     "name": "Pull-Up",
+     "sets": [
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "10",
+       "isWarmup": false,
+       "setNumber": 1
+      },
+      {
+       "rir": null,
+       "rpe": null,
+       "reps": "8",
+       "isWarmup": false,
+       "setNumber": 2
+      }
+     ],
+     "notes": null,
+     "order": 3,
+     "exerciseGroup": null,
+     "exerciseDefinitionId": "cmiz7vkvr0008vr0m7rv3dapc"
+    }
+   ],
+   "exerciseCount": 3,
+   "lastUsedAt": "2026-10-20T01:00:00.000Z",
+   "origin": "session",
+   "pinnedAt": null,
+   "archivedAt": null,
+   "dismissedAt": null
+  }
+ },
+ "groups": {
+  "new": [
+   "s-new-2",
+   "s-new"
+  ],
+  "pinned": [
+   "s-pin-1",
+   "s-pin-2",
+   "s-pin-3",
+   "s-pin-4",
+   "s-pin-5",
+   "s-pin-6"
+  ],
+  "recent": [
+   "s-recent",
+   "s-dismissed",
+   "s-agent-used",
+   "s-recent-2",
+   "s-edge-in"
+  ],
+  "older": [
+   "s-edge-out",
+   "s-never",
+   "s-old"
+  ],
+  "archived": [
+   "s-arch-pinned",
+   "s-arch"
+  ]
+ },
+ "training": {
+  "pinned": [
+   {
+    "id": "s-pin-1",
+    "name": "Pinned newest",
+    "exerciseCount": 1,
+    "pinnedAt": "2026-11-06T19:00:00.000Z"
+   },
+   {
+    "id": "s-pin-2",
+    "name": "Pinned agent, unstarted",
+    "exerciseCount": 1,
+    "pinnedAt": "2026-11-05T19:00:00.000Z"
+   },
+   {
+    "id": "s-pin-3",
+    "name": "Pinned 3",
+    "exerciseCount": 1,
+    "pinnedAt": "2026-11-04T19:00:00.000Z"
+   },
+   {
+    "id": "s-pin-4",
+    "name": "Pinned 4",
+    "exerciseCount": 1,
+    "pinnedAt": "2026-11-03T19:00:00.000Z"
+   },
+   {
+    "id": "s-pin-5",
+    "name": "Pinned 5",
+    "exerciseCount": 1,
+    "pinnedAt": "2026-11-02T19:00:00.000Z"
+   }
+  ],
+  "recent": [
+   {
+    "id": "c-upper",
+    "name": "Upper",
+    "completedAt": "2026-11-07T18:00:00.000Z",
+    "durationSeconds": 3723,
+    "canRepeat": true
+   },
+   {
+    "id": "c-empty",
+    "name": "Open Workout",
+    "completedAt": "2026-11-07T15:00:00.000Z",
+    "durationSeconds": null,
+    "canRepeat": false
+   },
+   {
+    "id": "c-min",
+    "name": "Quick one",
+    "completedAt": "2026-11-06T15:00:00.000Z",
+    "durationSeconds": 120,
+    "canRepeat": true
+   }
+  ]
+ },
+ "manage": {
+  "steps": [
+   {
+    "step": "pin",
+    "id": "s-recent",
+    "method": "PATCH",
+    "body": {
+     "pinned": true
+    },
+    "at": "2026-11-07T19:01:00.000Z",
+    "status": 200,
+    "error": null,
+    "row": {
+     "name": "Full Body",
+     "notes": "Keep rests short",
+     "lastUsedAt": "2026-11-05T19:00:00.000Z",
+     "pinnedAt": "2026-11-07T19:01:00.000Z",
+     "archivedAt": null,
+     "dismissedAt": null
+    }
+   },
+   {
+    "step": "pin again (keeps the first pin time)",
+    "id": "s-recent",
+    "method": "PATCH",
+    "body": {
+     "pinned": true
+    },
+    "at": "2026-11-07T19:02:00.000Z",
+    "status": 200,
+    "error": null,
+    "row": {
+     "name": "Full Body",
+     "notes": "Keep rests short",
+     "lastUsedAt": "2026-11-05T19:00:00.000Z",
+     "pinnedAt": "2026-11-07T19:01:00.000Z",
+     "archivedAt": null,
+     "dismissedAt": null
+    }
+   },
+   {
+    "step": "unpin",
+    "id": "s-recent",
+    "method": "PATCH",
+    "body": {
+     "pinned": false
+    },
+    "at": "2026-11-07T19:03:00.000Z",
+    "status": 200,
+    "error": null,
+    "row": {
+     "name": "Full Body",
+     "notes": "Keep rests short",
+     "lastUsedAt": "2026-11-05T19:00:00.000Z",
+     "pinnedAt": null,
+     "archivedAt": null,
+     "dismissedAt": null
+    }
+   },
+   {
+    "step": "archive a pinned one (unpins it)",
+    "id": "s-pin-1",
+    "method": "PATCH",
+    "body": {
+     "archived": true
+    },
+    "at": "2026-11-07T19:04:00.000Z",
+    "status": 200,
+    "error": null,
+    "row": {
+     "name": "Pinned newest",
+     "notes": null,
+     "lastUsedAt": "2026-08-09T19:00:00.000Z",
+     "pinnedAt": null,
+     "archivedAt": "2026-11-07T19:04:00.000Z",
+     "dismissedAt": null
+    }
+   },
+   {
+    "step": "restore (not pinned again; dismissed now)",
+    "id": "s-pin-1",
+    "method": "PATCH",
+    "body": {
+     "archived": false
+    },
+    "at": "2026-11-07T19:05:00.000Z",
+    "status": 200,
+    "error": null,
+    "row": {
+     "name": "Pinned newest",
+     "notes": null,
+     "lastUsedAt": "2026-08-09T19:00:00.000Z",
+     "pinnedAt": null,
+     "archivedAt": null,
+     "dismissedAt": "2026-11-07T19:05:00.000Z"
+    }
+   },
+   {
+    "step": "dismiss a New one",
+    "id": "s-new",
+    "method": "PATCH",
+    "body": {
+     "archived": true,
+     "dismissed": true
+    },
+    "at": "2026-11-07T19:06:00.000Z",
+    "status": 200,
+    "error": null,
+    "row": {
+     "name": "From my agent",
+     "notes": null,
+     "lastUsedAt": null,
+     "pinnedAt": null,
+     "archivedAt": "2026-11-07T19:06:00.000Z",
+     "dismissedAt": "2026-11-07T19:06:00.000Z"
+    }
+   },
+   {
+    "step": "restore it (keeps the dismiss time: Older, not New)",
+    "id": "s-new",
+    "method": "PATCH",
+    "body": {
+     "archived": false
+    },
+    "at": "2026-11-07T19:07:00.000Z",
+    "status": 200,
+    "error": null,
+    "row": {
+     "name": "From my agent",
+     "notes": null,
+     "lastUsedAt": null,
+     "pinnedAt": null,
+     "archivedAt": null,
+     "dismissedAt": "2026-11-07T19:06:00.000Z"
+    }
+   },
+   {
+    "step": "archive one already dismissed",
+    "id": "s-dismissed",
+    "method": "PATCH",
+    "body": {
+     "archived": true
+    },
+    "at": "2026-11-07T19:08:00.000Z",
+    "status": 200,
+    "error": null,
+    "row": {
+     "name": "Dismissed agent one",
+     "notes": null,
+     "lastUsedAt": null,
+     "pinnedAt": null,
+     "archivedAt": "2026-11-07T19:08:00.000Z",
+     "dismissedAt": "2026-11-05T19:00:00.000Z"
+    }
+   },
+   {
+    "step": "restore it (keeps its dismiss time)",
+    "id": "s-dismissed",
+    "method": "PATCH",
+    "body": {
+     "archived": false
+    },
+    "at": "2026-11-07T19:09:00.000Z",
+    "status": 200,
+    "error": null,
+    "row": {
+     "name": "Dismissed agent one",
+     "notes": null,
+     "lastUsedAt": null,
+     "pinnedAt": null,
+     "archivedAt": null,
+     "dismissedAt": "2026-11-05T19:00:00.000Z"
+    }
+   },
+   {
+    "step": "rename (trimmed)",
+    "id": "s-recent-2",
+    "method": "PATCH",
+    "body": {
+     "name": "  Leg Day v2  "
+    },
+    "at": "2026-11-07T19:10:00.000Z",
+    "status": 200,
+    "error": null,
+    "row": {
+     "name": "Leg Day v2",
+     "notes": null,
+     "lastUsedAt": "2026-10-28T19:00:00.000Z",
+     "pinnedAt": null,
+     "archivedAt": null,
+     "dismissedAt": null
+    }
+   },
+   {
+    "step": "rename to blank (refused)",
+    "id": "s-recent-2",
+    "method": "PATCH",
+    "body": {
+     "name": "   "
+    },
+    "at": "2026-11-07T19:11:00.000Z",
+    "status": 400,
+    "error": "name cannot be empty",
+    "row": {
+     "name": "Leg Day v2",
+     "notes": null,
+     "lastUsedAt": "2026-10-28T19:00:00.000Z",
+     "pinnedAt": null,
+     "archivedAt": null,
+     "dismissedAt": null
+    }
+   },
+   {
+    "step": "rename to 101 characters (refused)",
+    "id": "s-recent-2",
+    "method": "PATCH",
+    "body": {
+     "name": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    },
+    "at": "2026-11-07T19:12:00.000Z",
+    "status": 400,
+    "error": "name must be 100 characters or fewer",
+    "row": {
+     "name": "Leg Day v2",
+     "notes": null,
+     "lastUsedAt": "2026-10-28T19:00:00.000Z",
+     "pinnedAt": null,
+     "archivedAt": null,
+     "dismissedAt": null
+    }
+   },
+   {
+    "step": "rename to 51 emoji (102 UTF-16 units, refused)",
+    "id": "s-recent-2",
+    "method": "PATCH",
+    "body": {
+     "name": "💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪💪"
+    },
+    "at": "2026-11-07T19:13:00.000Z",
+    "status": 400,
+    "error": "name must be 100 characters or fewer",
+    "row": {
+     "name": "Leg Day v2",
+     "notes": null,
+     "lastUsedAt": "2026-10-28T19:00:00.000Z",
+     "pinnedAt": null,
+     "archivedAt": null,
+     "dismissedAt": null
+    }
+   },
+   {
+    "step": "rename an archived one",
+    "id": "s-arch",
+    "method": "PATCH",
+    "body": {
+     "name": "Archived, renamed"
+    },
+    "at": "2026-11-07T19:14:00.000Z",
+    "status": 200,
+    "error": null,
+    "row": {
+     "name": "Archived, renamed",
+     "notes": null,
+     "lastUsedAt": "2026-11-06T19:00:00.000Z",
+     "pinnedAt": null,
+     "archivedAt": "2026-11-02T19:00:00.000Z",
+     "dismissedAt": null
+    }
+   },
+   {
+    "step": "delete",
+    "id": "s-never",
+    "method": "DELETE",
+    "body": null,
+    "at": "2026-11-07T19:15:00.000Z",
+    "status": 200,
+    "error": null,
+    "row": null
+   },
+   {
+    "step": "delete again (gone)",
+    "id": "s-never",
+    "method": "DELETE",
+    "body": null,
+    "at": "2026-11-07T19:16:00.000Z",
+    "status": 404,
+    "error": "Saved workout not found",
+    "row": null
+   }
+  ],
+  "groupsAfter": {
+   "new": [
+    "s-new-2"
+   ],
+   "pinned": [
+    "s-pin-2",
+    "s-pin-3",
+    "s-pin-4",
+    "s-pin-5",
+    "s-pin-6"
+   ],
+   "recent": [
+    "s-recent",
+    "s-dismissed",
+    "s-agent-used",
+    "s-recent-2"
+   ],
+   "older": [
+    "s-edge-in",
+    "s-edge-out",
+    "s-old",
+    "s-new",
+    "s-pin-1"
+   ],
+   "archived": [
+    "s-arch-pinned",
+    "s-arch"
+   ]
+  },
+  "groupsAfterAt": "2026-11-07T19:17:00.000Z"
+ },
+ "starts": {
+  "rich": {
+   "id": "s-recent",
+   "status": 200,
+   "draft": {
+    "name": "Full Body",
+    "status": "draft",
+    "isAdHoc": true,
+    "workoutId": null,
+    "startedAt": "2026-11-07T19:00:00.000Z",
+    "savedWorkoutId": "s-recent",
+    "exercises": [
+     {
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "notes": "Pause at chest",
+      "exerciseGroup": "A",
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "10",
+        "weight": null,
+        "rir": null,
+        "rpe": null,
+        "isWarmup": true
+       },
+       {
+        "setNumber": 2,
+        "reps": "5",
+        "weight": null,
+        "rir": null,
+        "rpe": 8,
+        "isWarmup": false
+       },
+       {
+        "setNumber": 3,
+        "reps": "3-5",
+        "weight": null,
+        "rir": 2,
+        "rpe": null,
+        "isWarmup": false
+       }
+      ]
+     },
+     {
+      "name": "Barbell Row",
+      "exerciseDefinitionId": "cmiz7vk1i0003vr0mqucd1f52",
+      "order": 2,
+      "notes": null,
+      "exerciseGroup": "A",
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "8",
+        "weight": null,
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       },
+       {
+        "setNumber": 2,
+        "reps": "8",
+        "weight": null,
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       }
+      ]
+     },
+     {
+      "name": "Pull-Up",
+      "exerciseDefinitionId": "cmiz7vkvr0008vr0m7rv3dapc",
+      "order": 3,
+      "notes": null,
+      "exerciseGroup": null,
+      "sets": []
+     }
+    ]
+   },
+   "saved": {
+    "name": "Full Body",
+    "notes": "Keep rests short",
+    "lastUsedAt": "2026-11-07T19:00:00.000Z",
+    "pinnedAt": null,
+    "archivedAt": null,
+    "dismissedAt": null
+   }
+  },
+  "archived": {
+   "id": "s-arch",
+   "status": 200,
+   "draft": {
+    "name": "Archived",
+    "status": "draft",
+    "isAdHoc": true,
+    "workoutId": null,
+    "startedAt": "2026-11-07T19:00:00.000Z",
+    "savedWorkoutId": "s-arch",
+    "exercises": [
+     {
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "notes": null,
+      "exerciseGroup": null,
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "5",
+        "weight": null,
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       }
+      ]
+     }
+    ]
+   },
+   "saved": {
+    "name": "Archived",
+    "notes": null,
+    "lastUsedAt": "2026-11-07T19:00:00.000Z",
+    "pinnedAt": null,
+    "archivedAt": null,
+    "dismissedAt": "2026-11-07T19:00:00.000Z"
+   }
+  },
+  "newOne": {
+   "id": "s-new",
+   "status": 200,
+   "draft": {
+    "name": "From my agent",
+    "status": "draft",
+    "isAdHoc": true,
+    "workoutId": null,
+    "startedAt": "2026-11-07T19:00:00.000Z",
+    "savedWorkoutId": "s-new",
+    "exercises": [
+     {
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "notes": null,
+      "exerciseGroup": null,
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "5",
+        "weight": null,
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       }
+      ]
+     }
+    ]
+   },
+   "saved": {
+    "name": "From my agent",
+    "notes": null,
+    "lastUsedAt": "2026-11-07T19:00:00.000Z",
+    "pinnedAt": null,
+    "archivedAt": null,
+    "dismissedAt": null
+   }
+  }
+ },
+ "repeats": {
+  "upper": {
+   "id": "c-upper",
+   "status": 200,
+   "draft": {
+    "name": "Upper",
+    "status": "draft",
+    "isAdHoc": true,
+    "workoutId": null,
+    "startedAt": "2026-11-07T19:00:00.000Z",
+    "savedWorkoutId": null,
+    "exercises": [
+     {
+      "name": "Barbell Row",
+      "exerciseDefinitionId": "cmiz7vk1i0003vr0mqucd1f52",
+      "order": 1,
+      "notes": null,
+      "exerciseGroup": "A",
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "8",
+        "weight": null,
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       },
+       {
+        "setNumber": 2,
+        "reps": "8",
+        "weight": null,
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       },
+       {
+        "setNumber": 3,
+        "reps": "8",
+        "weight": null,
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       }
+      ]
+     },
+     {
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 2,
+      "notes": "Pause at chest",
+      "exerciseGroup": null,
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "8",
+        "weight": null,
+        "rir": null,
+        "rpe": null,
+        "isWarmup": true
+       },
+       {
+        "setNumber": 2,
+        "reps": "5",
+        "weight": null,
+        "rir": null,
+        "rpe": 8,
+        "isWarmup": false
+       },
+       {
+        "setNumber": 3,
+        "reps": "5",
+        "weight": null,
+        "rir": null,
+        "rpe": 8,
+        "isWarmup": false
+       },
+       {
+        "setNumber": 4,
+        "reps": "5",
+        "weight": null,
+        "rir": null,
+        "rpe": 9,
+        "isWarmup": false
+       }
+      ]
+     },
+     {
+      "name": "Overhead Press",
+      "exerciseDefinitionId": "cmiz7vk780004vr0md53c57bz",
+      "order": 3,
+      "notes": null,
+      "exerciseGroup": null,
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "5",
+        "weight": null,
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       },
+       {
+        "setNumber": 2,
+        "reps": "5",
+        "weight": null,
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       },
+       {
+        "setNumber": 3,
+        "reps": "5",
+        "weight": null,
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       }
+      ]
+     },
+     {
+      "name": "Barbell Back Squat",
+      "exerciseDefinitionId": "cmiz7vjpo0001vr0msv9of7ib",
+      "order": 4,
+      "notes": null,
+      "exerciseGroup": null,
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "5",
+        "weight": null,
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       },
+       {
+        "setNumber": 2,
+        "reps": "5",
+        "weight": null,
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       }
+      ]
+     },
+     {
+      "name": "Pull-Up",
+      "exerciseDefinitionId": "cmiz7vkvr0008vr0m7rv3dapc",
+      "order": 5,
+      "notes": null,
+      "exerciseGroup": "A",
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "12",
+        "weight": null,
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       },
+       {
+        "setNumber": 2,
+        "reps": "10",
+        "weight": null,
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       }
+      ]
+     },
+     {
+      "name": "Conventional Deadlift",
+      "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70",
+      "order": 6,
+      "notes": null,
+      "exerciseGroup": null,
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "5",
+        "weight": null,
+        "rir": null,
+        "rpe": null,
+        "isWarmup": true
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "program": {
+   "id": "c-prog",
+   "status": 200,
+   "draft": {
+    "name": "Pull Day",
+    "status": "draft",
+    "isAdHoc": true,
+    "workoutId": null,
+    "startedAt": "2026-11-07T19:00:00.000Z",
+    "savedWorkoutId": null,
+    "exercises": [
+     {
+      "name": "Barbell Row",
+      "exerciseDefinitionId": "cmiz7vk1i0003vr0mqucd1f52",
+      "order": 1,
+      "notes": null,
+      "exerciseGroup": null,
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "8",
+        "weight": null,
+        "rir": 2,
+        "rpe": null,
+        "isWarmup": false
+       },
+       {
+        "setNumber": 2,
+        "reps": "8",
+        "weight": null,
+        "rir": 2,
+        "rpe": null,
+        "isWarmup": false
+       },
+       {
+        "setNumber": 3,
+        "reps": "8",
+        "weight": null,
+        "rir": 2,
+        "rpe": null,
+        "isWarmup": false
+       }
+      ]
+     },
+     {
+      "name": "Overhead Press",
+      "exerciseDefinitionId": "cmiz7vk780004vr0md53c57bz",
+      "order": 2,
+      "notes": "Strict, no leg drive",
+      "exerciseGroup": null,
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "5",
+        "weight": null,
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       },
+       {
+        "setNumber": 2,
+        "reps": "5",
+        "weight": null,
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       },
+       {
+        "setNumber": 3,
+        "reps": "5",
+        "weight": null,
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       },
+       {
+        "setNumber": 4,
+        "reps": "5",
+        "weight": null,
+        "rir": null,
+        "rpe": null,
+        "isWarmup": false
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "minimal": {
+   "id": "c-min",
+   "status": 200,
+   "draft": {
+    "name": "Quick one",
+    "status": "draft",
+    "isAdHoc": true,
+    "workoutId": null,
+    "startedAt": "2026-11-07T19:00:00.000Z",
+    "savedWorkoutId": null,
+    "exercises": [
+     {
+      "name": "Barbell Bench Press",
+      "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+      "order": 1,
+      "notes": null,
+      "exerciseGroup": null,
+      "sets": [
+       {
+        "setNumber": 1,
+        "reps": "10",
+        "weight": null,
+        "rir": null,
+        "rpe": null,
+        "isWarmup": true
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "empty": {
+   "id": "c-empty",
+   "status": 422,
+   "error": "NOTHING_TO_REPEAT"
+  },
+  "archived": {
+   "id": "c-arch",
+   "status": 404,
+   "error": "Session not found"
+  }
+ }
+}
