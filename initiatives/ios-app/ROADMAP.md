@@ -26,7 +26,7 @@ Updated by the lead at each checkpoint. The full log is in `status.md`.
 | 9 | **Smart picker:** A–Z / Neglected ("+N planned") / Recovery / Anchors sorts in the workout's Add picker; Settings › Target movements; import muscle-balance targets | M | ⏳ | |
 | 10 | **Muscle balance settings:** 18 ratios, secondary credit, ignore warm-ups, live preview, reset | M | ⏳ | |
 | 11 | **Logger flow + quick actions:** the web's in-exercise logger (one exercise at a time, a drop-down list of the workout's exercises to jump between, prev/next, fixed Log bar), and the center Workout button with quick actions (continue the program's next workout, start a freeform/ad-hoc workout, resume the open one) | M | ⏳ | |
-| 12 | **Export from iOS + agent round trip:** phone writes the v1 JSON; imports proposals to approve | M | ⏳ | |
+| 12 | **Export from iOS + agent round trip:** phone writes the v1 JSON, plus CSV for a chosen date range (free for everyone); imports proposals to approve | M | ⏳ | |
 | 13 | **Leftovers:** Top set/Volume tabs, "Week N of program", skip day, complete week | S | ⏳ | |
 
 Ideas (not a plan): public release, and two tiers of AI access. See `ideas.md`. Slice 12 should treat the export format as an open spec.

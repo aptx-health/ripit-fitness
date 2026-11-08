@@ -106,6 +106,7 @@ Possible slice, after slice 12 (export): **Share with AI v0**, covering the pack
 - bundled programs and workouts
 - the Learn content
 - the RIPIT theme, in light and dark
+- **raw data export for everyone:** CSV for a chosen date range (sets, sessions), plus the full versioned export. Your data is always yours, never behind Pro.
 
 **Pro:** a one-time in-app purchase of roughly $10–20 (to decide). It unlocks:
 - **AI access:** Share with AI packets, `ripit://proposal` import and the MCP setup (Tier 1 and Tier 2)
