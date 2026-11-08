@@ -1,6 +1,6 @@
 ---
 id: 173
-state: running
+state: review
 waiting_on:
 executor: parity-disco
 skill: discovery
@@ -55,3 +55,4 @@ The discovery packet with first line `Report: complete | needs decision | furthe
 ## Log
 - 2026-11-07: created (ready). Dustin asked for the inventory with a phone-width comparison to the web.
 - 2026-11-07 18:04 MST: dispatched to parity-disco (running)
+- 2026-11-07: 173 handed back; on Hub for Dustin.
