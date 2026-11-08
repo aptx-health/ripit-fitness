@@ -183,6 +183,8 @@ private struct ExerciseLogger: View {
     /// Effort for the next set, on the current scale.
     @State private var effort: Int?
     @State private var warmup = false
+    /// Set when a warm-up was just logged, so the next prefill keeps the effort picked for working sets.
+    @State private var keepEffort = false
     @State private var help: HelpTab?
     @FocusState private var focus: Field?
     private enum Field { case weight, reps }
@@ -203,8 +205,14 @@ private struct ExerciseLogger: View {
                 }
                 .buttonStyle(.plain)
             } else {
+                // At accessibility text sizes the name gets its own line, like entryRow.
+                if showName && typeSize.isAccessibilitySize {
+                    Text(exercise.name).font(.headline).foregroundStyle(Theme.foreground)
+                }
                 HStack(spacing: 4) {
-                    if showName { Text(exercise.name).font(.headline).foregroundStyle(Theme.foreground) }
+                    if showName && !typeSize.isAccessibilitySize {
+                        Text(exercise.name).font(.headline).foregroundStyle(Theme.foreground)
+                    }
                     if let timer = store.restTimer(exerciseId: exercise.id) { RestTimerChip(timer: timer) }
                     Spacer(minLength: 0)
                     Button { help = .info } label: {
@@ -252,14 +260,9 @@ private struct ExerciseLogger: View {
                 HStack {
                     Button { edit(set) } label: { SetRow(set: set) }
                         .buttonStyle(.plain)
-                        .contextMenu {
-                            Button(set.isWarmup ? "Mark as working set" : "Mark as warm-up", systemImage: "flame") {
-                                store.setWarmup(set.id, !set.isWarmup)
-                            }
-                        }
                         .padding(.vertical, 2)
                         .background(editingSet == set.id ? Theme.muted : .clear, in: RoundedRectangle(cornerRadius: 6))
-                        .accessibilityLabel("Set \(set.setNumber), \(Format.weight(set.weight, set.weightUnit)) times \(set.reps). Tap to change")
+                        .accessibilityLabel(setLabel(set))
                     Button { store.deleteSet(set.id) } label: {
                         Image(systemName: "xmark").font(.footnote)
                     }
@@ -290,7 +293,7 @@ private struct ExerciseLogger: View {
             if isFirst, let tab = DebugHooks.string("demoHelp").flatMap({ HelpTab(rawValue: $0.capitalized) }) { help = tab }
         }
         .onChange(of: exercise.sets.count) { prefill() }
-        .onChange(of: effortKind) { effort = nil }
+        .onChange(of: effortKind) { effort = plannedEffort() }
         .sheet(item: $help) { tab in
             NavigationStack { ExerciseHelpSheet(exercise: exercise, tab: tab) }
                 .environment(store)
@@ -387,8 +390,11 @@ private struct ExerciseLogger: View {
             editingSet = nil
             prefill()
         } else {
+            // A warm-up saves no effort; the effort picked stays for the next working set.
+            let setEffort = warmup ? nil : effort
+            keepEffort = warmup
             store.logSet(exerciseId: exercise.id, reps: r, weight: w, unit: currentUnit,
-                         rpe: effortKind == .rpe ? effort : nil, rir: effortKind == .rir ? effort : nil, isWarmup: warmup)
+                         rpe: effortKind == .rpe ? setEffort : nil, rir: effortKind == .rir ? setEffort : nil, isWarmup: warmup)
             warmup = false
         }
         lastUnit = currentUnit
@@ -409,6 +415,25 @@ private struct ExerciseLogger: View {
         warmup = set.isWarmup
     }
 
+    /// The default effort for the next set on the current scale: the program prefill's (this session,
+    /// last time, then the plan), or none for an ad-hoc exercise.
+    private func plannedEffort() -> Int? {
+        guard planned != nil, let p = store.prefill(exerciseId: exercise.id, setNumber: exercise.sets.count + 1) else { return nil }
+        return Int(effortKind == .rpe ? p.rpe : p.rir)
+    }
+
+    /// "Set 2, 160 lbs times 5, RPE 9, warm-up. Tap to change".
+    private func setLabel(_ set: SetDetail) -> String {
+        var parts = ["Set \(set.setNumber)", "\(Format.weight(set.weight, set.weightUnit)) times \(set.reps)"]
+        if let rir = set.rir {
+            parts.append("RIR \(EffortSetting.label(.rir, rir))")
+        } else if let rpe = set.rpe {
+            parts.append("RPE \(rpe)")
+        }
+        if set.isWarmup { parts.append("warm-up") }
+        return parts.joined(separator: ", ") + ". Tap to change"
+    }
+
     /// Tapping "Last time": its weight, reps and unit, and its effort on the current scale.
     private func use(_ p: Prefill) {
         editingSet = nil
@@ -426,10 +451,12 @@ private struct ExerciseLogger: View {
             reps = p.reps
             if let u = p.weightUnit { unit = u }
             // A planned (or last) RPE/RIR is the default effort.
-            effort = Int(effortKind == .rpe ? p.rpe : p.rir)
+            if !keepEffort { effort = Int(effortKind == .rpe ? p.rpe : p.rir) }
+            keepEffort = false
             warmup = false
             return
         }
+        keepEffort = false
         warmup = false
         guard let last = exercise.sets.last else { return }
         weight = last.weight == 0 ? "" : last.weight.formatted(.number.precision(.fractionLength(0...2)).grouping(.never))

@@ -48,6 +48,7 @@ struct RestTimerChip: View {
                 Image(systemName: "timer").font(.caption.weight(.bold))
                 Text((try? LoggingClock.restText(seconds)) ?? "").font(.subheadline.monospacedDigit().weight(.semibold))
             }
+            .fixedSize()
             .padding(.horizontal, 10)
             .frame(minHeight: 32)
             .background(Theme.primary.opacity(0.15), in: Capsule())

@@ -130,26 +130,21 @@ private struct HistoryContent: View {
 private struct SessionCard: View {
     let session: HistorySession
     @State private var showWarmups = false
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .firstTextBaseline) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(session.workoutName).font(.headline).foregroundStyle(Theme.foreground)
-                    Text(Format.day(session.completedAt)).font(.caption).foregroundStyle(Theme.mutedForeground)
+            // At accessibility text sizes the PR and e1RM go under the name instead of beside it.
+            if typeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 6) {
+                    title
+                    HStack(spacing: 8) { badges }
                 }
-                Spacer()
-                if session.isPR {
-                    Text("PR")
-                        .font(.caption.weight(.bold))
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(Theme.accent, in: RoundedRectangle(cornerRadius: 4))
-                        .foregroundStyle(Theme.foreground)
-                }
-                if let e1rm = session.e1rm {
-                    Text("e1RM \(Int(e1rm.rounded())) lbs").font(.subheadline.monospacedDigit().weight(.semibold))
-                        .foregroundStyle(Theme.foreground)
+            } else {
+                HStack(alignment: .firstTextBaseline) {
+                    title
+                    Spacer()
+                    badges
                 }
             }
             ForEach(session.workingSets, id: \.setNumber) { HistorySetRow(set: $0) }
@@ -174,6 +169,28 @@ private struct SessionCard: View {
         .padding(12)
         .background(Theme.card, in: RoundedRectangle(cornerRadius: 8))
         .overlay(RoundedRectangle(cornerRadius: 8).stroke(session.isPR ? Theme.accent : Theme.border, lineWidth: 1))
+    }
+
+    private var title: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(session.workoutName).font(.headline).foregroundStyle(Theme.foreground)
+            Text(Format.day(session.completedAt)).font(.caption).foregroundStyle(Theme.mutedForeground)
+        }
+    }
+
+    @ViewBuilder private var badges: some View {
+        if session.isPR {
+            Text("PR")
+                .font(.caption.weight(.bold))
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .background(Theme.accent, in: RoundedRectangle(cornerRadius: 4))
+                .foregroundStyle(Theme.foreground)
+        }
+        if let e1rm = session.e1rm {
+            Text("e1RM \(Int(e1rm.rounded())) lbs").font(.subheadline.monospacedDigit().weight(.semibold))
+                .foregroundStyle(Theme.foreground)
+        }
     }
 }
 
