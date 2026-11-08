@@ -1,6 +1,6 @@
 ---
 id: 189
-state: ready
+state: running
 waiting_on:
 executor: ios-tests
 skill: handoff-test-builder
@@ -48,3 +48,4 @@ The test-builder packet, plus the hands-on list.
 
 ## Log
 - 2026-11-08: created (ready).
+- 2026-11-08 07:44 MST: dispatched to ios-tests (running; context 17%, cleared)
