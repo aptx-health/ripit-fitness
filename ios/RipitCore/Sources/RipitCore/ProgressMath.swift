@@ -39,9 +39,9 @@ struct ProgressWorkout {
 
 // MARK: - Units and effort
 
-private func toLbs(_ weight: Double, _ unit: String) -> Double { unit == "kg" ? weight * lbsPerKg : weight }
+func toLbs(_ weight: Double, _ unit: String) -> Double { unit == "kg" ? weight * lbsPerKg : weight }
 private func fromLbs(_ lbs: Double, _ unit: WeightUnit) -> Double { unit == .kg ? lbs / lbsPerKg : lbs }
-private func epley(_ lbs: Double, _ reps: Int) -> Double { reps == 1 ? lbs : lbs * (1 + Double(reps) / 30) }
+func epley(_ lbs: Double, _ reps: Int) -> Double { reps == 1 ? lbs : lbs * (1 + Double(reps) / 30) }
 
 /// The set's weight in the display unit, untouched when it was logged in that unit.
 private func inUnit(_ s: ProgressSet, _ unit: WeightUnit) -> Double {

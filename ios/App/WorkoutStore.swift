@@ -84,12 +84,14 @@ final class WorkoutStore {
         write { _ = try $0.addExercise(definitionId: definitionId, to: w) }
     }
 
-    func logSet(exerciseId: String, reps: Int, weight: Double, unit: String) {
+    func logSet(exerciseId: String, reps: Int, weight: Double, unit: String,
+                rpe: Int? = nil, rir: Int? = nil, isWarmup: Bool = false) {
         // Fast repeated taps on Log make one set, not several.
         let now = Date()
         if let last = lastLog, last.exerciseId == exerciseId, now.timeIntervalSince(last.at) < 0.6 { return }
         lastLog = (exerciseId, now)
-        write { _ = try $0.logSet(exerciseId: exerciseId, reps: reps, weight: weight, unit: unit) }
+        write { _ = try $0.logSet(exerciseId: exerciseId, reps: reps, weight: weight, unit: unit,
+                                  rpe: rpe, rir: rir, isWarmup: isWarmup, at: now) }
     }
 
     func deleteSet(_ setId: String) {

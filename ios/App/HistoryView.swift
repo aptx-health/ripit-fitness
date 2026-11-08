@@ -192,6 +192,7 @@ struct SetRow: View {
             Text(Format.weight(set.weight, set.weightUnit))
             Text("×").foregroundStyle(Theme.mutedForeground)
             Text("\(set.reps)")
+            SetTags(rpe: set.rpe, rir: set.rir, isWarmup: set.isWarmup)
             Spacer()
         }
         .font(.body.monospacedDigit())

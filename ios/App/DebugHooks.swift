@@ -29,6 +29,12 @@
 //   -demoEditFlow YES   with -demoScreen edit (work item 171): open the first exercise, remove its
 //                       first set and save; reopen it (shows the saved plan), change a rep and save
 //   -demoCancelBuilder YES  with -demoScreen builder, tap Cancel (shows the discard prompt)
+// Slice 5 (work item 175):
+//   -demoEffort YES     with -demoHistory: a finished bench workout 12 hours ago with a warm-up and
+//                       3 sets @ RPE 8; with -demoWorkout: the open workout's bench sets get a warm-up and RPE
+//   -demoHelp <tab>     open the workout in progress and the first exercise's info | notes | history
+//                       sheet; "none" just opens the workout (e.g. after a relaunch, no reseeding)
+//   -demoUseLastTime YES  tap the first exercise's "Last time" line
 
 import Foundation
 import RipitCore
@@ -38,6 +44,15 @@ enum DebugHooks {
     static var pickerQuery: String? {
         #if DEBUG
         return UserDefaults.standard.string(forKey: "demoPicker")
+        #else
+        return nil
+        #endif
+    }
+
+    /// A String launch argument, always nil in Release.
+    static func string(_ key: String) -> String? {
+        #if DEBUG
+        return UserDefaults.standard.string(forKey: key)
         #else
         return nil
         #endif
@@ -70,6 +85,7 @@ enum DebugHooks {
             Task { await store.importFile(at: URL(fileURLWithPath: path)) }
         }
         applyProgramDemo(store: store)
+        if d.string(forKey: "demoHelp") != nil { store.resumeWorkout() }
         guard d.bool(forKey: "demoHistory") || d.bool(forKey: "demoWorkout") || d.bool(forKey: "demoEmptyWorkout"),
               let db = try? AppDatabase.open(path: WorkoutStore.databaseURL.path) else { return }
         let bench = "cmiz7vjju0000vr0m4b1o6bec", row = "cmiz7vk1i0003vr0mqucd1f52", squat = "cmiz7vjpo0001vr0msv9of7ib"
@@ -83,11 +99,20 @@ enum DebugHooks {
                 }
             }
         }
+        let effort = d.bool(forKey: "demoEffort")
+        if effort && d.bool(forKey: "demoHistory") {
+            let start = Date().addingTimeInterval(-day / 2)
+            if let w = try? db.startWorkout(at: start), let e = try? db.addExercise(definitionId: bench, to: w) {
+                _ = try? db.logSet(exerciseId: e, reps: 8, weight: 95, isWarmup: true, at: start)
+                for i in 1...3 { _ = try? db.logSet(exerciseId: e, reps: 5, weight: 160, rpe: 8, at: start.addingTimeInterval(Double(i) * 180)) }
+                try? db.finishWorkout(w, at: start.addingTimeInterval(3000))
+            }
+        }
         if d.bool(forKey: "demoWorkout"), let w = try? db.startWorkout(at: Date().addingTimeInterval(-1200)) {
             let ids = [bench, row, squat].compactMap { try? db.addExercise(definitionId: $0, to: w) }
             if ids.count == 3 {
-                _ = try? db.logSet(exerciseId: ids[0], reps: 8, weight: 135)
-                _ = try? db.logSet(exerciseId: ids[0], reps: 5, weight: 155)
+                _ = try? db.logSet(exerciseId: ids[0], reps: 8, weight: 135, isWarmup: effort, at: Date().addingTimeInterval(-200))
+                _ = try? db.logSet(exerciseId: ids[0], reps: 5, weight: 155, rpe: effort ? 8 : nil, at: Date().addingTimeInterval(-95))
                 _ = try? db.logSet(exerciseId: ids[1], reps: 10, weight: 62.5, unit: "kg")
                 try? db.groupAsSuperset([ids[0], ids[1]])
             }

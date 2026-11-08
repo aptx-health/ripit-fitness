@@ -12,14 +12,23 @@ struct WorkoutView: View {
     @State private var selected: Set<String> = []
     @State private var confirmingDiscard = false
     @State private var finishBlocked = false
+    @State private var confirmingFinish = false
 
     var body: some View {
         @Bindable var store = store
         ScrollView {
             if let w = store.current {
                 VStack(alignment: .leading, spacing: 20) {
-                    Text([sessionLabel, "Started \(Format.time(w.startedAt))"].compactMap { $0 }.joined(separator: " · "))
-                        .foregroundStyle(Theme.mutedForeground)
+                    HStack(spacing: 12) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            WorkoutClock(startedAt: w.startedAt)
+                            Text([sessionLabel, "Started \(Format.time(w.startedAt))"].compactMap { $0 }.joined(separator: " · "))
+                                .font(.subheadline)
+                                .foregroundStyle(Theme.mutedForeground)
+                        }
+                        Spacer(minLength: 0)
+                        EffortKindToggle()
+                    }
 
                     if w.exercises.isEmpty {
                         Text("Add an exercise to start logging sets.")
@@ -104,6 +113,13 @@ struct WorkoutView: View {
         } message: {
             Text("Its exercises and sets are deleted. History is not changed.")
         }
+        .alert("Finish this workout?", isPresented: $confirmingFinish) {
+            Button("Cancel", role: .cancel) {}
+            Button("Finish") { store.finishWorkout() }
+        } message: {
+            let sets = store.current?.exercises.reduce(0) { $0 + $1.sets.count } ?? 0
+            Text("\(sets) \(sets == 1 ? "set" : "sets") logged. It goes into history.")
+        }
         .alert("Log a set first, or discard", isPresented: $finishBlocked) {
             Button("OK", role: .cancel) {}
         } message: {
@@ -116,12 +132,12 @@ struct WorkoutView: View {
         }
     }
 
-    /// An empty workout doesn't go into history: log a set first, or discard it.
+    /// An empty workout doesn't go into history: log a set first, or discard it. Otherwise ask first.
     private func finish(_ w: WorkoutDetail) {
         if w.exercises.allSatisfy({ $0.sets.isEmpty }) {
             finishBlocked = true
         } else {
-            store.finishWorkout()
+            confirmingFinish = true
         }
     }
 }
@@ -163,6 +179,11 @@ private struct ExerciseLogger: View {
     /// A logged set being changed in place.
     @State private var editingSet: String?
     @State private var confirmingRemove = false
+    @AppStorage(EffortSetting.key) private var effortKind: EffortKind = .rpe
+    /// Effort for the next set, on the current scale.
+    @State private var effort: Int?
+    @State private var warmup = false
+    @State private var help: HelpTab?
     @FocusState private var focus: Field?
     private enum Field { case weight, reps }
     @Environment(\.dynamicTypeSize) private var typeSize
@@ -181,25 +202,48 @@ private struct ExerciseLogger: View {
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-            } else if planned != nil {
-                // A program exercise belongs to the plan; change it in the program editor.
-                if showName { Text(exercise.name).font(.headline).foregroundStyle(Theme.foreground) }
             } else {
-                HStack(alignment: .top) {
+                HStack(spacing: 4) {
                     if showName { Text(exercise.name).font(.headline).foregroundStyle(Theme.foreground) }
+                    if let timer = store.restTimer(exerciseId: exercise.id) { RestTimerChip(timer: timer) }
                     Spacer(minLength: 0)
-                    Menu {
-                        Button("Remove exercise", systemImage: "trash", role: .destructive) { confirmingRemove = true }
-                    } label: {
-                        Image(systemName: "ellipsis")
+                    Button { help = .info } label: {
+                        Image(systemName: "info.circle")
                             .frame(width: Theme.touch, height: Theme.touch)
                             .contentShape(Rectangle())
                     }
                     .foregroundStyle(Theme.mutedForeground)
-                    .accessibilityLabel("\(exercise.name) options")
+                    .accessibilityLabel("\(exercise.name) info, notes and history")
+                    // A program exercise belongs to the plan; change it in the program editor.
+                    if planned == nil {
+                        Menu {
+                            Button("Remove exercise", systemImage: "trash", role: .destructive) { confirmingRemove = true }
+                        } label: {
+                            Image(systemName: "ellipsis")
+                                .frame(width: Theme.touch, height: Theme.touch)
+                                .contentShape(Rectangle())
+                        }
+                        .foregroundStyle(Theme.mutedForeground)
+                        .accessibilityLabel("\(exercise.name) options")
+                    }
                 }
-                .padding(.top, -12)
-                .padding(.bottom, showName ? 0 : -24)
+                .padding(.vertical, -8)
+
+                if let notes = store.exerciseNotes(exerciseId: exercise.id) {
+                    Button { help = .notes } label: {
+                        HStack(alignment: .top, spacing: 6) {
+                            Image(systemName: "note.text")
+                            Text(notes).lineLimit(2).multilineTextAlignment(.leading)
+                            Spacer(minLength: 0)
+                        }
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.mutedForeground)
+                        .frame(minHeight: Theme.touch)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Notes: \(notes)")
+                }
             }
 
             if let planned, !planned.isEmpty, !selecting { PlanStrip(planned: planned, logged: exercise.sets.count) }
@@ -208,6 +252,11 @@ private struct ExerciseLogger: View {
                 HStack {
                     Button { edit(set) } label: { SetRow(set: set) }
                         .buttonStyle(.plain)
+                        .contextMenu {
+                            Button(set.isWarmup ? "Mark as working set" : "Mark as warm-up", systemImage: "flame") {
+                                store.setWarmup(set.id, !set.isWarmup)
+                            }
+                        }
                         .padding(.vertical, 2)
                         .background(editingSet == set.id ? Theme.muted : .clear, in: RoundedRectangle(cornerRadius: 6))
                         .accessibilityLabel("Set \(set.setNumber), \(Format.weight(set.weight, set.weightUnit)) times \(set.reps). Tap to change")
@@ -220,15 +269,32 @@ private struct ExerciseLogger: View {
                 }
             }
 
-            if !selecting { entryRow }
+            if !selecting {
+                if editingSet == nil, let last = store.lastTime(definitionId: exercise.definitionId) {
+                    LastTimeLine(last: last, fill: use)
+                }
+                entryRow
+                HStack(spacing: 8) {
+                    if editingSet == nil { EffortMenu(kind: effortKind, value: $effort) }
+                    WarmupToggle(isOn: $warmup)
+                    Spacer(minLength: 0)
+                }
+            }
         }
         .padding(16)
         .onAppear {
             prefill()
             if isFirst && DebugHooks.flag("demoFocusWeight") { focus = .weight }
             if isFirst && DebugHooks.flag("demoRemove") { confirmingRemove = true }
+            if isFirst && DebugHooks.flag("demoUseLastTime"), let f = store.lastTime(definitionId: exercise.definitionId)?.fill { use(f) }
+            if isFirst, let tab = DebugHooks.string("demoHelp").flatMap({ HelpTab(rawValue: $0.capitalized) }) { help = tab }
         }
         .onChange(of: exercise.sets.count) { prefill() }
+        .onChange(of: effortKind) { effort = nil }
+        .sheet(item: $help) { tab in
+            NavigationStack { ExerciseHelpSheet(exercise: exercise, tab: tab) }
+                .environment(store)
+        }
         .onChange(of: focus) { _, field in
             // Like the web keypad, typing replaces a prefilled value instead of appending to it.
             guard field != nil else { return }
@@ -317,10 +383,13 @@ private struct ExerciseLogger: View {
         guard canLog, let w = parsedWeight, let r = Int(reps) else { return }
         if let id = editingSet {
             store.updateSet(id, reps: r, weight: w, unit: currentUnit)
+            if exercise.sets.first(where: { $0.id == id })?.isWarmup != warmup { store.setWarmup(id, warmup) }
             editingSet = nil
             prefill()
         } else {
-            store.logSet(exerciseId: exercise.id, reps: r, weight: w, unit: currentUnit)
+            store.logSet(exerciseId: exercise.id, reps: r, weight: w, unit: currentUnit,
+                         rpe: effortKind == .rpe ? effort : nil, rir: effortKind == .rir ? effort : nil, isWarmup: warmup)
+            warmup = false
         }
         lastUnit = currentUnit
         focus = nil
@@ -337,6 +406,16 @@ private struct ExerciseLogger: View {
         weight = set.weight == 0 ? "" : set.weight.formatted(.number.precision(.fractionLength(0...2)).grouping(.never))
         reps = "\(set.reps)"
         unit = set.weightUnit
+        warmup = set.isWarmup
+    }
+
+    /// Tapping "Last time": its weight, reps and unit, and its effort on the current scale.
+    private func use(_ p: Prefill) {
+        editingSet = nil
+        weight = p.weight == "0" ? "" : p.weight
+        reps = p.reps
+        if let u = p.weightUnit { unit = u }
+        effort = Int(effortKind == .rpe ? p.rpe : p.rir)
     }
 
     /// Start the next set: a program exercise prefills like the web (this session, then last time,
@@ -346,8 +425,12 @@ private struct ExerciseLogger: View {
             weight = p.weight == "0" ? "" : p.weight
             reps = p.reps
             if let u = p.weightUnit { unit = u }
+            // A planned (or last) RPE/RIR is the default effort.
+            effort = Int(effortKind == .rpe ? p.rpe : p.rir)
+            warmup = false
             return
         }
+        warmup = false
         guard let last = exercise.sets.last else { return }
         weight = last.weight == 0 ? "" : last.weight.formatted(.number.precision(.fractionLength(0...2)).grouping(.never))
         reps = "\(last.reps)"
