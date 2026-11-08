@@ -49,3 +49,4 @@
 - 2026-11-07: 181 review: all 7 scenarios pass by real taps (incl. dark, largest text); accept after fix 1. Lead took fixes 1–4 into 182 (incl. showing the workout name while open). 182 dispatched to ios-impl (context 27%, kept: same slice).
 - 2026-11-07: 182 handed back complete; lead re-ran ios-check (exit 0, 208), committed fd5dcfdf. 183 re-check dispatched to parity-disco (context 24%, kept: re-check of its own findings).
 - 2026-11-07: 183 re-check: accept. Lead accepted slice 6 (ios-check exit 0, 208). Hub page ios-slice6-saved-workouts published. Slice 7 waits on Dustin's steer for the look.
+- 2026-11-07: Dustin's steer for slice 7: match the web's look closely; all 13 themes. Spec written; 184–186 confirmed; pause after slice 7 (3 slices then await Dustin).
