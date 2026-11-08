@@ -51,3 +51,4 @@
 - 2026-11-07: 183 re-check: accept. Lead accepted slice 6 (ios-check exit 0, 208). Hub page ios-slice6-saved-workouts published. Slice 7 waits on Dustin's steer for the look.
 - 2026-11-07: Dustin's steer for slice 7: match the web's look closely; all 13 themes. Spec written; 184–186 confirmed; pause after slice 7 (3 slices then await Dustin).
 - 2026-11-07: 184 accepted (241 tests, 145 issues all stubs, 41/42 breaks; survivor unobservable). Decisions: new install RIPIT dark; Settings' default rating type used; missing accent-active copied from web. 185 dispatched to ios-impl with --clear.
+- 2026-11-07: 185 handed back (needs decision: feedback email, asked Dustin, non-blocking). Lead re-ran ios-check (exit 0, 241), committed. 186 dispatched to parity-disco with --clear.

@@ -1,7 +1,7 @@
 ---
 id: 186
-state: waiting
-waiting_on: 185
+state: running
+waiting_on:
 executor: parity-disco
 skill: reviewer
 from: lead (worktree-brave-field-c150)
@@ -30,6 +30,12 @@ An independent verdict: does slice 7 meet `features/ios-app/settings-look.featur
 - Check the largest text size on every screen.
 - Screenshots go in `initiatives/ios-app/handoff/slice7-assets/`, as web/iOS pairs.
 
+## Worth extra attention
+- iOS Reduce Motion: the build checked only the code path. Toggle the OS setting.
+- Live theme switching rebuilds the tab view: scroll position and folder-tab picks reset. Say whether that feels wrong.
+- The feedback address is a placeholder (`feedback@ripit.fit`) waiting on Dustin. Don't flag it.
+- Run `perf-check` style checks on theme switching and on first launch with the fonts.
+
 ## Don't touch
 - No code edits. `work/`, `STATE.md`, `status.md`, the roadmap. Staging is read only. Don't `rm`.
 
@@ -38,3 +44,5 @@ A review packet with first line `Report: …` and a clear verdict.
 
 ## Log
 - 2026-11-07: created (waiting on 185).
+- 2026-11-07: 185 done; ready for review.
+- 2026-11-07 22:40 MST: dispatched to parity-disco (running; context 28%, cleared)
