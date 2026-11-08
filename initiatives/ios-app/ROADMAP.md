@@ -28,6 +28,7 @@ Updated by the lead at each checkpoint. The full log is in `status.md`.
 | 11 | **Leftovers:** Top set/Volume tabs, "Week N of program", skip day, complete week | S | ⏳ | |
 
 Later (not planned): E-ink display parity beyond the basic theme (Dustin, 2026-11-08).
+Discovery running (192): the web's add-exercise modal — Neglected / Recovery / Anchors sorts, muscle balance, target movements and equipment settings. It will propose a slice.
 Later: balance/FAU, target movements, equipment; bundled curated programs; cardio; follow-along mode.
 Left out for now: coaching, community publishing, accounts, admin.
 
