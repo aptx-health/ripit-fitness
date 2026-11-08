@@ -3,7 +3,7 @@
 A native iPhone version of Ripit. Data lives on the phone; the web app stays as it is.
 Updated by the lead at each checkpoint. The full log is in `status.md`.
 
-**Now:** slice 7 — built (241 tests green). 186 review running (parity-disco, cleared: side by side with the web in 4 themes). Pausing after slice 7.
+**Now:** slice 7 — review: 8 of 10 scenarios pass and iOS looks close to the web; 187 fixes running (ios-impl: status bar on dark themes, leaving E-INK, E-INK black text). Then a re-check, then pause for Dustin.
 
 ## Done (first sweep, 2026-11-07)
 
@@ -21,11 +21,12 @@ Updated by the lead at each checkpoint. The full log is in `status.md`.
 |---|---|---|---|---|
 | 5 | **Logging help:** rest timer, workout clock, "Last time" line, RPE/RIR, warm-up sets, Info / Notes / History per exercise, confirm before Finish | M | ✅ accepted (Dustin to try on phone) | 174–178 |
 | 6 | **Finish summary + saved workouts:** summary at the end, save to repeat, Library › Workouts, Pinned/Repeat on Training | M | ✅ accepted (Dustin to try on phone) | 179–183 |
-| 7 | **Settings + look:** Settings tab, all 13 web themes, E-ink display, workout defaults; web font, square corners, offset shadows, switching folder tabs; largest text everywhere | L | 🔍 in review (186) | 184 tests · 185 build · 186 review |
+| 7 | **Settings + look:** Settings tab, all 13 web themes, E-ink display, workout defaults; web font, square corners, offset shadows, switching folder tabs; largest text everywhere | L | 🔨 fixes (187) | 184 tests · 185 build · 186 review |
 | 8 | **Picker + custom exercises:** filters, pick several, create your own | S–M | ⏳ | |
 | 9 | **Export from iOS + agent round trip:** phone writes the v1 JSON; imports proposals to approve | M | ⏳ | |
 | 10 | **Leftovers:** Top set/Volume tabs, "Week N of program", skip day, complete week | S | ⏳ | |
 
+Later (not planned): E-ink display parity beyond the basic theme (Dustin, 2026-11-08).
 Later: balance/FAU, target movements, equipment; bundled curated programs; cardio; follow-along mode.
 Left out for now: coaching, community publishing, accounts, admin.
 
