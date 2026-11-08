@@ -29,6 +29,7 @@ Updated by the lead at each checkpoint. The full log is in `status.md`.
 | 12 | **Export from iOS + agent round trip:** phone writes the v1 JSON; imports proposals to approve | M | ⏳ | |
 | 13 | **Leftovers:** Top set/Volume tabs, "Week N of program", skip day, complete week | S | ⏳ | |
 
+Ideas (not a plan): public release, and two tiers of AI access. See `ideas.md`. Slice 12 should treat the export format as an open spec.
 Later (not planned): E-ink display parity beyond the basic theme (Dustin, 2026-11-08).
 Not planned (Dustin, 2026-11-08): Recovery's heavy/comeback terms (need a server job); the Equipment checklist (no phone consumer). Target movements stay phone-only until the export carries them.
 Later:; bundled curated programs; cardio; follow-along mode.
