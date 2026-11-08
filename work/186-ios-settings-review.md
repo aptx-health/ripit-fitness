@@ -1,6 +1,6 @@
 ---
 id: 186
-state: review
+state: accepted
 waiting_on:
 executor: parity-disco
 skill: reviewer
@@ -47,3 +47,4 @@ A review packet with first line `Report: …` and a clear verdict.
 - 2026-11-07: 185 done; ready for review.
 - 2026-11-07 22:40 MST: dispatched to parity-disco (running; context 28%, cleared)
 - 2026-11-08: verdict: accept after fixes 1–2. Dustin: no E-ink parity beyond the basic theme (motion dropped); E-INK black text/borders yes. Fixes in 187; parity-disco re-checks.
+- 2026-11-08: closed by 188.

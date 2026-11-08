@@ -42,3 +42,9 @@ rm -f "${TMPDIR:-/tmp}"/ioscheck{5,6,7,8}.log
 # Slice 6 run (items 179-181)
 rm -rf "$SP/-Users-dustin--herdr-worktrees-ripit-fitness-worktree-brave-field-c150/"{3b341d8a-5281-42dc-ab51-6e6f0dbe963e,e707016a-8e70-425e-b299-c1acfaf8cd6c}
 rm -f /var/folders/h9/x7jsdhy915scf8vf47smkshc0000gn/check181.log "${TMPDIR:-/tmp}"/ioscheck9.log
+
+# Slice 7 run (items 184-188)
+for id in E5D3C467-6F9A-4DE0-BFBF-E31F8E268D92; do xcrun simctl shutdown "$id" 2>/dev/null; xcrun simctl delete "$id"; done
+xcrun simctl delete ripit-185-impl ripit-180-impl 2>/dev/null
+rm -rf "$SP/-Users-dustin--herdr-worktrees-ripit-fitness-worktree-brave-field-c150/"{d54f3816-2aa9-4269-9f06-dbd9cd779fbb,690bd726-172a-46d9-a380-7c6304e3b4c4,79a9abe2-03cb-4a79-97c9-4f587c871889}
+rm -f "${TMPDIR:-/tmp}"/ioscheck1{0,1,2}.log

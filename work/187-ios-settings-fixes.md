@@ -1,6 +1,6 @@
 ---
 id: 187
-state: review
+state: accepted
 waiting_on:
 executor: ios-impl
 skill: handoff-implementer
@@ -42,3 +42,4 @@ The implementer packet.
 - 2026-11-08: created from review 186 and Dustin's E-ink answers.
 - 2026-11-08 06:47 MST: dispatched to ios-impl (running; context 2%, kept)
 - 2026-11-08: handed back complete; lead re-ran ios-check (exit 0, 241), fixed the stale feedback-email comment, committed. Re-check in 188.
+- 2026-11-08: accepted after re-check 188.

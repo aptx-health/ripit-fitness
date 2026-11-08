@@ -3,7 +3,7 @@
 A native iPhone version of Ripit. Data lives on the phone; the web app stays as it is.
 Updated by the lead at each checkpoint. The full log is in `status.md`.
 
-**Now:** slice 7 — fixes in (241 tests green). 188 re-check running (parity-disco). Then pause for Dustin's review of slices 5–7.
+**Now:** ⏸ paused for Dustin's review of slices 5–7 (Hub pages `ios-slice5-logging-help`, `ios-slice6-saved-workouts`, `ios-slice7-settings-look`). Next up after that: slice 8, picker + custom exercises.
 
 ## Done (first sweep, 2026-11-07)
 
@@ -21,7 +21,7 @@ Updated by the lead at each checkpoint. The full log is in `status.md`.
 |---|---|---|---|---|
 | 5 | **Logging help:** rest timer, workout clock, "Last time" line, RPE/RIR, warm-up sets, Info / Notes / History per exercise, confirm before Finish | M | ✅ accepted (Dustin to try on phone) | 174–178 |
 | 6 | **Finish summary + saved workouts:** summary at the end, save to repeat, Library › Workouts, Pinned/Repeat on Training | M | ✅ accepted (Dustin to try on phone) | 179–183 |
-| 7 | **Settings + look:** Settings tab, all 13 web themes, E-ink display, workout defaults; web font, square corners, offset shadows, switching folder tabs; largest text everywhere | L | 🔍 re-check (188) | 184 tests · 185 build · 186 review |
+| 7 | **Settings + look:** Settings tab, all 13 web themes, E-ink display, workout defaults; web font, square corners, offset shadows, switching folder tabs; largest text everywhere | L | ✅ accepted (Dustin to try on phone) | 184–188 |
 | 8 | **Picker + custom exercises:** filters, pick several, create your own | S–M | ⏳ | |
 | 9 | **Export from iOS + agent round trip:** phone writes the v1 JSON; imports proposals to approve | M | ⏳ | |
 | 10 | **Leftovers:** Top set/Volume tabs, "Week N of program", skip day, complete week | S | ⏳ | |
@@ -44,11 +44,12 @@ Left out for now: coaching, community publishing, accounts, admin.
 - Web and iOS: the workout summary adds kg volume as if it were lbs, and bodyweight "vs last" compares today's total reps with last time's top set. Kept for parity in slice 6; fix both apps together (179).
 - Web: "Start a freestyle workout" fails with a generic error while a freestyle draft is open, and Training shows no way back to the draft (181; related to 176's note).
 - iOS: Library rows show dates ("Nov 7"), where the web says "Today" (181).
+- iOS E-INK: charts and tints still drawn in color; the web draws them solid (188; out of scope per Dustin's E-ink call).
 
 ## Waiting on Dustin
 
 
-- Try slices 5 and 6 on your phone (`scripts/ios/install.sh`) and overrule any calls on their Hub pages (`ios-slice5-logging-help`, `ios-slice6-saved-workouts`).
+- Try slices 5–7 on your phone (`scripts/ios/install.sh`) and overrule any calls on their Hub pages (`ios-slice5-logging-help`, `ios-slice6-saved-workouts`, `ios-slice7-settings-look`).
 
 - Open PRs into `dev` for `feature/ios-skeleton` and `feature/data-export`? (The web export must reach prod before you can import your real history.)
 - Run `initiatives/ios-app/handoff/cleanup.sh` when convenient.

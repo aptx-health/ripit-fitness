@@ -55,3 +55,4 @@
 - 2026-11-07: Dustin confirmed feedback@ripit.fit for Settings › Help (for now).
 - 2026-11-08: 186 review: code sound, iOS close to the web; accept after fixes 1–2 (status bar on dark-in-light themes; leaving E-INK restores mode). Dustin: no E-ink parity beyond the basic theme; E-INK black text/borders yes. 187 dispatched to ios-impl (context 2%, kept).
 - 2026-11-08: 187 handed back complete; lead re-ran ios-check (exit 0, 241), fixed a stale comment, committed 8152ced8. 188 re-check dispatched to parity-disco (context 2%, kept).
+- 2026-11-08: 188 re-check: accept. Lead accepted slice 7 (ios-check exit 0, 241). Hub page ios-slice7-settings-look published. PAUSED: slices 5–7 await Dustin's review (pacing rule).
