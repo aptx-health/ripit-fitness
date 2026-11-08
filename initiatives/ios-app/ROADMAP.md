@@ -3,7 +3,7 @@
 A native iPhone version of Ripit. Data lives on the phone; the web app stays as it is.
 Updated by the lead at each checkpoint. The full log is in `status.md`.
 
-**Now:** slice 6 — built (205 tests green). 181 review running (parity-disco, cleared: hands-on + web compare).
+**Now:** slice 6 — review passed all 7 scenarios by real taps; 182 fixes running (ios-impl: blank rename, show the workout name while open, small items). Then a re-check by parity-disco.
 
 ## Done (first sweep, 2026-11-07)
 
@@ -20,7 +20,7 @@ Updated by the lead at each checkpoint. The full log is in `status.md`.
 | # | Slice | Size | State | Items |
 |---|---|---|---|---|
 | 5 | **Logging help:** rest timer, workout clock, "Last time" line, RPE/RIR, warm-up sets, Info / Notes / History per exercise, confirm before Finish | M | ✅ accepted (Dustin to try on phone) | 174–178 |
-| 6 | **Finish summary + saved workouts:** summary at the end, save to repeat, Library › Workouts, Pinned/Repeat on Training | M | 🔍 in review (181) | 179 tests · 180 build · 181 review |
+| 6 | **Finish summary + saved workouts:** summary at the end, save to repeat, Library › Workouts, Pinned/Repeat on Training | M | 🔨 fixes (182) | 179 tests · 180 build · 181 review |
 | 7 | **Settings + look:** Settings tab, themes (incl. e-ink), effort defaults, web font/corners/folder tabs | M | ⏳ | |
 | 8 | **Picker + custom exercises:** filters, pick several, create your own | S–M | ⏳ | |
 | 9 | **Export from iOS + agent round trip:** phone writes the v1 JSON; imports proposals to approve | M | ⏳ | |
@@ -41,6 +41,8 @@ Left out for now: coaching, community publishing, accounts, admin.
 
 - iOS: program screen title breaks mid-word and the superset badge clips at the largest text size (178); fold into slice 7.
 - Web and iOS: the workout summary adds kg volume as if it were lbs, and bodyweight "vs last" compares today's total reps with last time's top set. Kept for parity in slice 6; fix both apps together (179).
+- Web: "Start a freestyle workout" fails with a generic error while a freestyle draft is open, and Training shows no way back to the draft (181; related to 176's note).
+- iOS: Library rows show dates ("Nov 7"), where the web says "Today" (181).
 
 ## Waiting on Dustin
 

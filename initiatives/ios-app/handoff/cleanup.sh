@@ -38,3 +38,7 @@ for id in 06CEC7E3-537B-4866-8153-F71E8CC87FA1 AC0A4C20-488B-4434-B0C3-0B1B31447
 done
 rm -rf "$SP/-Users-dustin--herdr-worktrees-ripit-fitness-worktree-brave-field-c150/"{dc0702dd-f34d-46ac-8b2a-ec5acf33b91b,44afb9af-41a6-40d7-89a7-85bb6d797219,ba850211-9970-4a09-8ca1-a87a94c21da7}
 rm -f "${TMPDIR:-/tmp}"/ioscheck{5,6,7,8}.log
+
+# Slice 6 run (items 179-181)
+rm -rf "$SP/-Users-dustin--herdr-worktrees-ripit-fitness-worktree-brave-field-c150/"{3b341d8a-5281-42dc-ab51-6e6f0dbe963e,e707016a-8e70-425e-b299-c1acfaf8cd6c}
+rm -f /var/folders/h9/x7jsdhy915scf8vf47smkshc0000gn/check181.log "${TMPDIR:-/tmp}"/ioscheck9.log
