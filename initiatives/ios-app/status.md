@@ -40,3 +40,4 @@
 - 2026-11-07: 175 handed back complete; lead re-ran ios-check (exit 0, 178 pass) and committed 4e3fb7e4. 176 dispatched to parity-disco with extra attention on real taps, a 2-minute lock, and Info's muscles/equipment.
 - 2026-11-07: 176 review: all 10 scenarios pass by real taps (incl. a 2-minute device lock); accept after 2 fixes. Lead answers: remove long-press warm-up, warm-ups save no effort, effort editing later. 177 dispatched to ios-impl. Web/seed findings added to the roadmap backlog.
 - 2026-11-07: 177 handed back complete; lead re-ran ios-check (exit 0, 181 pass), committed a9d3a8ef. Follow-up item 7 (set rows break at the largest text size, pre-existing from slice 1) sent to ios-impl before the re-check.
+- 2026-11-07: 177 follow-up 2 (largest-text sweep: Last time, effort/warm-up controls, FolderBlock title cap) handed back; lead re-ran ios-check (exit 0, 181), committed 706316b7. 178 re-check dispatched to parity-disco.

@@ -3,7 +3,7 @@
 A native iPhone version of Ripit. Data lives on the phone; the web app stays as it is.
 Updated by the lead at each checkpoint. The full log is in `status.md`.
 
-**Now:** slice 5 — review fixes in (181 tests green). One more small fix running (set rows at the largest text size), then a re-check by parity-disco.
+**Now:** slice 5 — all fixes in (181 tests green, largest-text sweep done). 178 final re-check running (parity-disco).
 
 ## Done (first sweep, 2026-11-07)
 
@@ -19,7 +19,7 @@ Updated by the lead at each checkpoint. The full log is in `status.md`.
 
 | # | Slice | Size | State | Items |
 |---|---|---|---|---|
-| 5 | **Logging help:** rest timer, workout clock, "Last time" line, RPE/RIR, warm-up sets, Info / Notes / History per exercise, confirm before Finish | M | 🔨 fixes (177) | 174 tests · 175 build · 176 review |
+| 5 | **Logging help:** rest timer, workout clock, "Last time" line, RPE/RIR, warm-up sets, Info / Notes / History per exercise, confirm before Finish | M | 🔍 re-check (178) | 174 tests · 175 build · 176 review |
 | 6 | **Finish summary + saved workouts:** summary at the end, save to repeat, Library › Workouts, Pinned/Repeat on Training | M | ⏳ | |
 | 7 | **Settings + look:** Settings tab, themes (incl. e-ink), effort defaults, web font/corners/folder tabs | M | ⏳ | |
 | 8 | **Picker + custom exercises:** filters, pick several, create your own | S–M | ⏳ | |
