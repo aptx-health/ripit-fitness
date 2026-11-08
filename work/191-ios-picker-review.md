@@ -1,0 +1,41 @@
+---
+id: 191
+state: waiting
+waiting_on: 190
+executor: parity-disco
+skill: reviewer
+from: lead (worktree-brave-field-c150)
+confirmed: 2026-11-08 Dustin ("Go for it" on slice 8; same autonomy)
+updated: 2026-11-08
+---
+# iOS slice 8: picker filters and custom exercises, review
+
+## Goal
+An independent verdict: does slice 8 meet `features/ios-app/picker-custom.feature`, does it match the web, and is the code sound?
+
+## Read first
+- The spec, `work/189-handback.md` (hands-on list), the diff of `ios/` since slice 7's acceptance commit `c0a7869e`. Don't read `work/190-handback.md` before your first pass.
+
+## Do
+- Same method as before: run `ios-check`, do an unaided first pass, ask up to 3 questions, then give a revised verdict.
+- **Real taps:**
+  - search
+  - each filter, and filters with search
+  - pick several at once
+  - create a custom exercise (including a duplicate name)
+  - edit it; try to edit a built-in exercise
+  - use the custom exercise in a workout, a saved workout and a program, then check History, Last time and Progress
+  - relaunch
+  - re-import the fixture
+- Check the largest text size and dark mode.
+- **Compare with the local web at phone width:** run the same searches and filters on both and compare the result lists, then compare the create flow.
+- Screenshots go in `initiatives/ios-app/handoff/slice8-assets/`.
+
+## Don't touch
+- No code edits. `work/`, `STATE.md`, `status.md`, the roadmap. Staging read only. Don't `rm`.
+
+## Hand back
+A review packet with first line `Report: …` and a clear verdict.
+
+## Log
+- 2026-11-08: created (waiting on 190).

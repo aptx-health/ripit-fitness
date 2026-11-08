@@ -57,3 +57,4 @@
 - 2026-11-08: 187 handed back complete; lead re-ran ios-check (exit 0, 241), fixed a stale comment, committed 8152ced8. 188 re-check dispatched to parity-disco (context 2%, kept).
 - 2026-11-08: 188 re-check: accept. Lead accepted slice 7 (ios-check exit 0, 241). Hub page ios-slice7-settings-look published. PAUSED: slices 5–7 await Dustin's review (pacing rule).
 - 2026-11-08: Dustin approved slices 5–7. Lead installed the build (c0a7869e) on Dustin's iPhone via scripts/ios/install.sh, at his request.
+- 2026-11-08: Dustin: go on slice 8. Spec features/ios-app/picker-custom.feature; 189–191 created (same team and autonomy as slices 5–7; confirmed by his go-ahead). 189 dispatched to ios-tests with --clear.
