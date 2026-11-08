@@ -40,3 +40,7 @@ The implementer packet.
 ## Log
 - 2026-11-07: created from review 176 (lead answered Q1 remove, Q2 yes, Q3 later).
 - 2026-11-07 19:53 MST: dispatched to ios-impl (running)
+- 2026-11-07: handed back complete; lead re-ran ios-check (exit 0, 181 pass); committed. First packet kept as `177-handback-1.md`.
+
+## Follow-up (2026-11-07, lead)
+7. **Logged set rows at the largest text size:** `SetRow` (logger) and `HistorySetRow` (history) wrap "135 lbs" one digit per line. Stack weight × reps above the tags at accessibility sizes, so the numbers never break. Screenshot both at default and at the largest size. Then hand back again to `work/177-handback.md` and ping the lead.
