@@ -15,7 +15,7 @@ Updated by the lead at each checkpoint. The full log is in `status.md`.
 | 4 | Progress: weekly report, records, pinned lifts, lift page | ✅ |
 | – | Parity inventory against the web (`parity-inventory.md`) | ✅ |
 
-## Next (order you approved: 5 → 6 → 7)
+## Next (order you approved: 5 → 6 → 7; slice 9 added by Dustin 2026-11-08)
 
 | # | Slice | Size | State | Items |
 |---|---|---|---|---|
@@ -23,8 +23,9 @@ Updated by the lead at each checkpoint. The full log is in `status.md`.
 | 6 | **Finish summary + saved workouts:** summary at the end, save to repeat, Library › Workouts, Pinned/Repeat on Training | M | ✅ approved, on phone | 179–183 |
 | 7 | **Settings + look:** Settings tab, all 13 web themes, E-ink display, workout defaults; web font, square corners, offset shadows, switching folder tabs; largest text everywhere | L | ✅ approved, on phone | 184–188 |
 | 8 | **Picker + custom exercises:** filters, pick several, create your own | S–M | 🔨 tests (189) | 189 tests · 190 build · 191 review |
-| 9 | **Export from iOS + agent round trip:** phone writes the v1 JSON; imports proposals to approve | M | ⏳ | |
-| 10 | **Leftovers:** Top set/Volume tabs, "Week N of program", skip day, complete week | S | ⏳ | |
+| 9 | **Logger flow + quick actions:** the web's in-exercise logger (one exercise at a time, a drop-down list of the workout's exercises to jump between, prev/next, fixed Log bar), and the center Workout button with quick actions (continue the program's next workout, start a freeform/ad-hoc workout, resume the open one) | M | ⏳ | |
+| 10 | **Export from iOS + agent round trip:** phone writes the v1 JSON; imports proposals to approve | M | ⏳ | |
+| 11 | **Leftovers:** Top set/Volume tabs, "Week N of program", skip day, complete week | S | ⏳ | |
 
 Later (not planned): E-ink display parity beyond the basic theme (Dustin, 2026-11-08).
 Later: balance/FAU, target movements, equipment; bundled curated programs; cardio; follow-along mode.
