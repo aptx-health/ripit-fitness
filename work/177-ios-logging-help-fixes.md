@@ -44,3 +44,7 @@ The implementer packet.
 
 ## Follow-up (2026-11-07, lead)
 7. **Logged set rows at the largest text size:** `SetRow` (logger) and `HistorySetRow` (history) wrap "135 lbs" one digit per line. Stack weight × reps above the tags at accessibility sizes, so the numbers never break. Screenshot both at default and at the largest size. Then hand back again to `work/177-handback.md` and ping the lead.
+- 2026-11-07: follow-up 7 handed back complete (`177-handback-2.md`); lead re-ran ios-check (exit 0, 181); committed.
+
+## Follow-up 2 (2026-11-07, lead)
+8. **Largest text size sweep, once:** fix `LastTimeLine` (stack label and date; "Use" under the summary). Then walk **every** screen the logger reaches (logger rows, Last time, effort menu, Warm-up toggle, Info/Notes/History sheet, Finish alert, finished-workout detail) at the largest size and fix anything that breaks mid-word, so the re-check doesn't find another. Screenshot each. Hand back to `work/177-handback.md` and ping the lead.
