@@ -35,6 +35,17 @@
 //   -demoHelp <tab>     open the workout in progress and the first exercise's info | notes | history
 //                       sheet; "none" just opens the workout (e.g. after a relaunch, no reseeding)
 //   -demoUseLastTime YES  tap the first exercise's "Last time" line
+// Slice 6 (work item 180):
+//   -demoSummary YES    open the summary of the newest finished workout (as after Finish)
+//   -demoSave YES       with it, open Save
+//   -demoSaveNow YES    with both, tap Save with the suggested name (shows "Saved to your workouts")
+//   -demoFinishNow YES  finish the open workout without the confirmation (the summary follows)
+//   -demoSaved YES      with -demoHistory: save the newest workout, pin it, and save and archive the oldest
+//   -demoLibraryTab YES start on Library › Workouts
+//   -demoLibrary <s>    there, open older | archived | both | detail (the first row's plan) | delete;
+//                       "bottom" opens both folds and scrolls to the end
+//   -demoStartPinned YES  tap Start on Training's first pinned workout
+//   -demoRepeat YES     tap Repeat on Training's first recent workout
 
 import Foundation
 import RipitCore
@@ -120,11 +131,57 @@ enum DebugHooks {
         if d.bool(forKey: "demoEmptyWorkout"), let w = try? db.startWorkout(at: Date().addingTimeInterval(-300)) {
             _ = try? db.addExercise(definitionId: bench, to: w)
         }
+        if d.bool(forKey: "demoSaved") && d.bool(forKey: "demoHistory"), let done = try? db.history(), done.count >= 2 {
+            let now = Date()
+            if let newest = try? db.saveWorkout(fromCompletion: done[0].id, name: "Bench day", notes: "Pause the first rep", at: now) {
+                try? db.pinSavedWorkout(newest, at: now)
+            }
+            if let oldest = try? db.saveWorkout(fromCompletion: done[done.count - 1].id, name: "Light bench", notes: nil, at: now) {
+                try? db.archiveSavedWorkout(oldest, at: now)
+            }
+        }
         store.reload()
         if d.bool(forKey: "demoEmptyWorkout") { store.resumeWorkout() }
         if d.bool(forKey: "demoWorkout") && !d.bool(forKey: "demoStayHome") { store.resumeWorkout() }
         #endif
     }
+
+    /// Slice 6's launch actions, run once the store has loaded (an import finishes after launch).
+    @MainActor
+    static func applySavedDemo(store: WorkoutStore) {
+        #if DEBUG
+        guard !appliedSaved else { return }
+        appliedSaved = true
+        let d = UserDefaults.standard
+        if d.bool(forKey: "demoSummary"), let newest = store.history.first { store.summary = FinishedWorkout(id: newest.id) }
+        if d.bool(forKey: "demoStartPinned"), let w = store.pinnedWorkouts.first { store.startSavedWorkout(w.id, name: w.name) }
+        if d.bool(forKey: "demoRepeat"), let w = store.recentWorkouts.first(where: \.canRepeat) { store.repeatWorkout(w.id, name: w.name) }
+        #endif
+    }
+
+    @MainActor private static var appliedSaved = false
+
+    /// -demoLibrary: opens a fold, the first row's plan, or the delete prompt, once.
+    @MainActor
+    static func openLibrary(store: WorkoutStore, older: inout Bool, archived: inout Bool,
+                            detail: inout SavedWorkoutSummary?, deleting: inout SavedWorkoutSummary?) {
+        #if DEBUG
+        guard !openedLibrary, let screen = UserDefaults.standard.string(forKey: "demoLibrary") else { return }
+        openedLibrary = true
+        let g = store.savedGroups
+        let first = (g.new + g.pinned + g.recent + g.older).first
+        switch screen {
+        case "older": older = true
+        case "archived": archived = true
+        case "both", "bottom": (older, archived) = (true, true)
+        case "detail": detail = first
+        case "delete": deleting = first
+        default: break
+        }
+        #endif
+    }
+
+    @MainActor private static var openedLibrary = false
 
     @MainActor
     private static func applyProgramDemo(store: WorkoutStore) {

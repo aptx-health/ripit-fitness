@@ -274,6 +274,14 @@ public final class AppDatabase: Sendable {
             WHERE completionId = ? ORDER BY setNumber
             """, arguments: [id])
         let setsByExercise = Dictionary(grouping: sets) { $0["exerciseId"] as String }
+        // The workout's own plan (slice 6). A program session's plan is read from the program, so its
+        // exercises leave this empty and a plan edit doesn't change the session.
+        let planned = try Row.fetchAll(db, sql: """
+            SELECT p.id, p.exerciseId, p.setNumber, p.reps, p.weight, p.rpe, p.rir, p.isWarmup FROM prescribedSet p
+            JOIN exercise e ON e.id = p.exerciseId
+            WHERE e.workoutCompletionId = ? ORDER BY p.setNumber
+            """, arguments: [id])
+        let plannedByExercise = Dictionary(grouping: planned) { $0["exerciseId"] as String }
         let exercises = try Row.fetchAll(db, sql: """
             SELECT id, exerciseDefinitionId, name, exerciseGroup FROM exercise
             WHERE workoutCompletionId = ? OR (workoutId IS NOT NULL AND workoutId = ?) ORDER BY "order"
@@ -285,6 +293,10 @@ public final class AppDatabase: Sendable {
                     SetDetail(id: $0["id"], setNumber: $0["setNumber"], reps: $0["reps"],
                               weight: $0["weight"], weightUnit: $0["weightUnit"],
                               rpe: $0["rpe"], rir: $0["rir"], isWarmup: $0["isWarmup"])
+                },
+                planned: (plannedByExercise[exerciseId] ?? []).map {
+                    ProgramSetDetail(id: $0["id"], setNumber: $0["setNumber"], reps: $0["reps"], weight: $0["weight"],
+                                     rpe: $0["rpe"], rir: $0["rir"], isWarmup: $0["isWarmup"])
                 })
         }
         return WorkoutDetail(id: id, startedAt: c["startedAt"] ?? Date(timeIntervalSince1970: 0),

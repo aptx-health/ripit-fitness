@@ -38,6 +38,14 @@ final class WorkoutStore {
     @ObservationIgnored private var lastLog: (exerciseId: String, at: Date)?
     /// The outcome of the last import, shown as an alert.
     var importResult: ImportResult?
+    // Saved workouts (slice 6); loaded by reloadSaved() in WorkoutStore+Saved.swift.
+    var savedGroups = SavedWorkoutGroups(new: [], pinned: [], recent: [], older: [], archived: [])
+    var pinnedWorkouts: [PinnedWorkout] = []
+    var recentWorkouts: [RecentWorkout] = []
+    /// The workout just finished; its summary opens once the workout screen has closed.
+    var justFinished: String?
+    /// The finished workout whose summary is showing.
+    var summary: FinishedWorkout?
 
     init(databaseURL: URL) {
         do {
@@ -57,6 +65,7 @@ final class WorkoutStore {
             current = try db.inProgressWorkout()
         }
         reloadPrograms()
+        reloadSaved()
     }
 
     func detail(_ id: String) -> WorkoutDetail? {
@@ -109,6 +118,7 @@ final class WorkoutStore {
     func finishWorkout() {
         guard let w = current?.id else { return }
         write { try $0.finishWorkout(w, at: Date()) }
+        if current?.id != w { justFinished = w }
         showingWorkout = false
     }
 
@@ -152,4 +162,9 @@ final class WorkoutStore {
     func attempt(_ body: () throws -> Void) {
         do { try body() } catch { lastError = "\(error)" }
     }
+}
+
+/// A finished workout whose summary is showing (slice 6).
+struct FinishedWorkout: Identifiable, Equatable {
+    let id: String
 }

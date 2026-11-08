@@ -1,5 +1,6 @@
 // Public API for slice 6, finish summary and saved workouts (features/ios-app/saved-workouts.feature).
-// Shapes were fixed by work item 179; every body is a stub that throws `RipitCoreError.notImplemented`.
+// Shapes were fixed by work item 179; work item 180 filled in the bodies (the database side is in
+// SavedWorkoutsStore.swift, the summary's wording in RollupFormat.swift).
 // The tests in Tests/RipitCoreTests/SavedWorkouts*Tests.swift are the contract, and
 // Tests/Fixtures/saved-workouts/saved.json holds the web's answers (scripts/ios/saved-workouts.goldens.ts).
 // Change the bodies, not the shapes: property names match the golden's JSON field names.
@@ -135,7 +136,7 @@ public struct WorkoutRollup: Sendable, Equatable, Codable {
 
     /// The summary as the web words it.
     public func text() throws -> RollupText {
-        throw RipitCoreError.notImplemented
+        RollupFormat.text(self)
     }
 }
 
@@ -191,7 +192,11 @@ public struct RollupText: Sendable, Equatable, Codable {
 public enum SavedWorkoutNaming {
     /// "Workout — November 7": the date in `timeZone` at `date`.
     public static func suggestedName(at date: Date, timeZone: TimeZone) throws -> String {
-        throw RipitCoreError.notImplemented
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.timeZone = timeZone
+        f.dateFormat = "MMMM d"
+        return "Workout — \(f.string(from: date))"
     }
 }
 
@@ -327,82 +332,5 @@ public struct RecentWorkout: Sendable, Equatable, Codable, Identifiable {
         self.completedAt = completedAt
         self.durationSeconds = durationSeconds
         self.canRepeat = canRepeat
-    }
-}
-
-// MARK: - Database
-
-extension AppDatabase {
-    /// The summary of a finished, non-archived workout; nil for any other id.
-    public func workoutRollup(_ completionId: String, now: Date) throws -> WorkoutRollup? {
-        throw RipitCoreError.notImplemented
-    }
-
-    /// Saves a finished ad-hoc workout to repeat and returns the saved workout's id.
-    public func saveWorkout(fromCompletion completionId: String, name: String, notes: String?, at date: Date) throws -> String {
-        throw RipitCoreError.notImplemented
-    }
-
-    /// nil once deleted.
-    public func savedWorkout(_ id: String) throws -> SavedWorkoutSummary? {
-        throw RipitCoreError.notImplemented
-    }
-
-    /// The saved workout's exercises and planned sets (its workoutData).
-    public func savedWorkoutPlan(_ id: String) throws -> [SavedExercise] {
-        throw RipitCoreError.notImplemented
-    }
-
-    public func savedWorkoutGroups(now: Date) throws -> SavedWorkoutGroups {
-        throw RipitCoreError.notImplemented
-    }
-
-    public func pinSavedWorkout(_ id: String, at date: Date) throws {
-        throw RipitCoreError.notImplemented
-    }
-
-    public func unpinSavedWorkout(_ id: String) throws {
-        throw RipitCoreError.notImplemented
-    }
-
-    /// Trimmed; refused like saving (`nameRequired`, `nameTooLong`).
-    public func renameSavedWorkout(_ id: String, to name: String) throws {
-        throw RipitCoreError.notImplemented
-    }
-
-    public func archiveSavedWorkout(_ id: String, at date: Date) throws {
-        throw RipitCoreError.notImplemented
-    }
-
-    /// Dismiss, from New: archive and mark dismissed.
-    public func dismissSavedWorkout(_ id: String, at date: Date) throws {
-        throw RipitCoreError.notImplemented
-    }
-
-    public func restoreSavedWorkout(_ id: String, at date: Date) throws {
-        throw RipitCoreError.notImplemented
-    }
-
-    /// Past workouts started from it are kept.
-    public func deleteSavedWorkout(_ id: String) throws {
-        throw RipitCoreError.notImplemented
-    }
-
-    /// Starts an ad-hoc workout from a saved workout and returns the new workout's id.
-    public func startSavedWorkout(_ id: String, at date: Date) throws -> String {
-        throw RipitCoreError.notImplemented
-    }
-
-    /// Starts an ad-hoc workout with a finished workout's exercises and returns the new workout's id.
-    public func repeatWorkout(_ completionId: String, at date: Date) throws -> String {
-        throw RipitCoreError.notImplemented
-    }
-
-    public func trainingPinned() throws -> [PinnedWorkout] {
-        throw RipitCoreError.notImplemented
-    }
-
-    public func trainingRecent() throws -> [RecentWorkout] {
-        throw RipitCoreError.notImplemented
     }
 }

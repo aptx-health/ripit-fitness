@@ -1,5 +1,6 @@
 // Training home (slice 3): Up Next and the current week of the active program, like the web's
-// /training. Ad-hoc workouts still start from here and from History.
+// /training. Ad-hoc workouts still start from here and from History. Slice 6 (work item 180) adds
+// pinned saved workouts with one-tap Start and recent finished workouts with Repeat.
 
 import RipitCore
 import SwiftUI
@@ -41,6 +42,9 @@ struct TrainingView: View {
                         .padding(16)
                     }
                 }
+
+                if !store.pinnedWorkouts.isEmpty { pinnedBlock }
+                if !store.recentWorkouts.isEmpty { recentBlock }
 
                 if let program = store.activeProgram {
                     upNextBlock(program)
@@ -97,6 +101,30 @@ struct TrainingView: View {
         .onAppear {
             store.reload()
             DebugHooks.openTrainingRoute(store: store, path: &path, building: &building)
+            DebugHooks.applySavedDemo(store: store)
+        }
+    }
+
+    private var pinnedBlock: some View {
+        FolderBlock(title: "Pinned workouts") {
+            ForEach(Array(store.pinnedWorkouts.enumerated()), id: \.element.id) { i, w in
+                if i > 0 { RowDivider() }
+                QuickRow(title: w.name, subtitle: "\(w.exerciseCount) \(w.exerciseCount == 1 ? "exercise" : "exercises")",
+                         action: "Start", icon: "play.fill") { store.startSavedWorkout(w.id, name: w.name) }
+            }
+        }
+    }
+
+    private var recentBlock: some View {
+        FolderBlock(title: "Recent") {
+            ForEach(Array(store.recentWorkouts.enumerated()), id: \.element.id) { i, w in
+                if i > 0 { RowDivider() }
+                let subtitle = ([SavedFormat.short(w.completedAt)] + [w.durationSeconds.map(Format.minutes)].compactMap { $0 })
+                    .joined(separator: " · ")
+                QuickRow(title: w.name, subtitle: subtitle, action: w.canRepeat ? "Repeat" : nil, icon: "arrow.counterclockwise") {
+                    store.repeatWorkout(w.id, name: w.name)
+                }
+            }
         }
     }
 
@@ -176,6 +204,37 @@ struct WorkoutRow: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Start day \(workout.dayNumber), \(workout.name)\(done ? ", done" : "")")
+    }
+}
+
+/// A pinned or recent workout: name, subtitle, and one button (Start, Repeat) when there is one.
+struct QuickRow: View {
+    let title: String
+    let subtitle: String
+    let action: String?
+    let icon: String
+    let perform: () -> Void
+    @Environment(\.dynamicTypeSize) private var typeSize
+
+    var body: some View {
+        let layout = typeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8)) : AnyLayout(HStackLayout(spacing: 12))
+        layout {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.headline).foregroundStyle(Theme.foreground)
+                Text(subtitle).font(.subheadline).foregroundStyle(Theme.mutedForeground)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            if let action {
+                Button(action: perform) { Label(action, systemImage: icon) }
+                    .buttonStyle(OutlineButtonStyle())
+                    .frame(maxWidth: typeSize.isAccessibilitySize ? .infinity : 140)
+                    .accessibilityLabel("\(action) \(title)")
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .frame(minHeight: 60)
     }
 }
 

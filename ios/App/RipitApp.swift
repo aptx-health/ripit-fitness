@@ -1,5 +1,6 @@
 // Ripit for iPhone, slice 1 (work item 154): log an ad-hoc workout into a local SQLite database.
-// Slice 3 (work item 161) adds a Training tab for programs beside History; slice 4 (168) adds Progress.
+// Slice 3 (work item 161) adds a Training tab for programs beside History; slice 4 (168) adds Progress;
+// slice 6 (180) adds Library › Workouts and the summary after Finish.
 // No account, no network. Logic lives in RipitCore; this target is the SwiftUI layer.
 
 import SwiftUI
@@ -29,7 +30,8 @@ struct RootView: View {
     @State private var path: [String] = []
     @State private var trainingPath: [TrainingRoute] = []
     @State private var progressPath: [String] = []
-    @State private var tab = DebugHooks.flag("demoHistoryTab") ? 1 : DebugHooks.flag("demoProgressTab") ? 2 : 0
+    @State private var tab = DebugHooks.flag("demoHistoryTab") ? 1 : DebugHooks.flag("demoProgressTab") ? 2
+        : DebugHooks.flag("demoLibraryTab") ? 3 : 0
 
     var body: some View {
         @Bindable var store = store
@@ -42,6 +44,9 @@ struct RootView: View {
                     NavigationStack(path: $trainingPath) { TrainingView(path: $trainingPath) }
                         .tabItem { Label("Training", systemImage: "figure.strengthtraining.traditional") }
                         .tag(0)
+                    NavigationStack { LibraryView() }
+                        .tabItem { Label("Library", systemImage: "square.grid.2x2") }
+                        .tag(3)
                     NavigationStack(path: $path) { HistoryView(path: $path) }
                         .tabItem { Label("History", systemImage: "clock") }
                         .tag(1)
@@ -64,9 +69,22 @@ struct RootView: View {
                     .alert(item: $store.importResult) { result in
                         Alert(title: Text(result.title), message: Text(result.message), dismissButton: .default(Text("OK")))
                     }
-                    .fullScreenCover(isPresented: $store.showingWorkout) {
+                    .fullScreenCover(isPresented: $store.showingWorkout, onDismiss: {
+                        // The summary opens once the workout screen has gone (it replaces going straight back).
+                        if let id = store.justFinished { store.summary = FinishedWorkout(id: id) }
+                        store.justFinished = nil
+                    }) {
                         NavigationStack { WorkoutView() }
                             .environment(store)
+                    }
+                    .sheet(item: $store.summary) { finished in
+                        NavigationStack {
+                            SummaryView(completionId: finished.id) {
+                                store.summary = nil
+                                tab = 3
+                            }
+                        }
+                        .environment(store)
                     }
             }
         }

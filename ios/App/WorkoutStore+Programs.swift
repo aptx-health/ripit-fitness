@@ -41,7 +41,7 @@ extension WorkoutStore {
             write { _ = try $0.startProgramWorkout(workoutId, at: Date()) }
             showingWorkout = current != nil
         } else {
-            pendingStart = PendingStart(workoutId: workoutId, name: programWorkoutTitle(workoutId) ?? "this workout")
+            pendingStart = PendingStart(kind: .program(workoutId), name: programWorkoutTitle(workoutId) ?? "this workout")
         }
     }
 
@@ -50,7 +50,11 @@ extension WorkoutStore {
         guard let pending = pendingStart else { return }
         pendingStart = nil
         discardWorkout()
-        startProgramWorkout(pending.workoutId)
+        switch pending.kind {
+        case .program(let id): startProgramWorkout(id)
+        case .saved(let id): startSavedWorkout(id, name: pending.name)
+        case .repeatWorkout(let id): repeatWorkout(id, name: pending.name)
+        }
     }
 
     /// "Strength Block · W2 · Pull" for a program workout.

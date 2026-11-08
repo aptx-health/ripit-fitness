@@ -39,7 +39,9 @@ struct WorkoutView: View {
                         FolderBlock(title: run.title, tone: run.group == nil ? .exercise : .superset) {
                             ForEach(Array(run.exercises.enumerated()), id: \.element.id) { i, ex in
                                 if i > 0 { RowDivider() }
-                                ExerciseLogger(exercise: ex, planned: store.session?.exercises.first { $0.id == ex.id }?.planned,
+                                let programPlan = store.session?.exercises.first { $0.id == ex.id }?.planned
+                                ExerciseLogger(exercise: ex, planned: programPlan ?? (ex.planned.isEmpty ? nil : ex.planned),
+                                               isProgram: programPlan != nil,
                                                showName: run.group != nil,
                                                selecting: selecting, selected: selected.contains(ex.id),
                                                isFirst: ex.id == w.exercises.first?.id) {
@@ -98,6 +100,7 @@ struct WorkoutView: View {
             if DebugHooks.pickerQuery != nil { picking = true }
             if DebugHooks.flag("demoDiscard") { confirmingDiscard = true }
             if DebugHooks.flag("demoFinish"), let w = store.current { finish(w) }
+            if DebugHooks.flag("demoFinishNow") { store.finishWorkout() }
         }
         .sheet(isPresented: $picking) {
             NavigationStack {
@@ -162,8 +165,10 @@ extension WorkoutView {
 private struct ExerciseLogger: View {
     @Environment(WorkoutStore.self) private var store
     let exercise: ExerciseDetail
-    /// The prescribed sets, for a program exercise.
+    /// The prescribed sets: a program exercise's, or a started or repeated workout's (slice 6).
     let planned: [ProgramSetDetail]?
+    /// A program exercise: it belongs to the plan and prefills like the web's program logger.
+    let isProgram: Bool
     let showName: Bool
     let selecting: Bool
     let selected: Bool
@@ -223,7 +228,7 @@ private struct ExerciseLogger: View {
                     .foregroundStyle(Theme.mutedForeground)
                     .accessibilityLabel("\(exercise.name) info, notes and history")
                     // A program exercise belongs to the plan; change it in the program editor.
-                    if planned == nil {
+                    if !isProgram {
                         Menu {
                             Button("Remove exercise", systemImage: "trash", role: .destructive) { confirmingRemove = true }
                         } label: {
@@ -421,7 +426,7 @@ private struct ExerciseLogger: View {
     /// The default effort for the next set on the current scale: the program prefill's (this session,
     /// last time, then the plan), or none for an ad-hoc exercise.
     private func plannedEffort() -> Int? {
-        guard planned != nil, let p = store.prefill(exerciseId: exercise.id, setNumber: exercise.sets.count + 1) else { return nil }
+        guard isProgram, let p = store.prefill(exerciseId: exercise.id, setNumber: exercise.sets.count + 1) else { return nil }
         return Int(effortKind == .rpe ? p.rpe : p.rir)
     }
 
@@ -447,9 +452,9 @@ private struct ExerciseLogger: View {
     }
 
     /// Start the next set: a program exercise prefills like the web (this session, then last time,
-    /// then the plan); an ad-hoc one from the last set logged.
+    /// then the plan); an ad-hoc one from the last set logged, else from its plan's next set.
     private func prefill() {
-        if planned != nil, let p = store.prefill(exerciseId: exercise.id, setNumber: exercise.sets.count + 1) {
+        if isProgram, let p = store.prefill(exerciseId: exercise.id, setNumber: exercise.sets.count + 1) {
             weight = p.weight == "0" ? "" : p.weight
             reps = p.reps
             if let u = p.weightUnit { unit = u }
@@ -461,14 +466,19 @@ private struct ExerciseLogger: View {
         }
         keepEffort = false
         warmup = false
+        // A planned "3-5" leaves reps to the person.
+        let next = planned?.first { $0.setNumber > exercise.sets.count }
+        let plannedReps = next.flatMap { Int($0.reps) }
+        warmup = next?.isWarmup ?? false
+        if let plannedReps { reps = "\(plannedReps)" }
         guard let last = exercise.sets.last else { return }
         weight = last.weight == 0 ? "" : last.weight.formatted(.number.precision(.fractionLength(0...2)).grouping(.never))
-        reps = "\(last.reps)"
+        reps = plannedReps.map { "\($0)" } ?? "\(last.reps)"
         unit = last.weightUnit
     }
 }
 
-/// The plan for a program exercise, one chip per prescribed set; logged ones are ticked.
+/// The plan for an exercise, one chip per prescribed set; logged ones are ticked.
 private struct PlanStrip: View {
     let planned: [ProgramSetDetail]
     let logged: Int

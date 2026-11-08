@@ -168,6 +168,12 @@ enum Format {
     static func time(_ d: Date) -> String {
         d.formatted(date: .omitted, time: .shortened)
     }
+
+    /// "45 min" or "1h 05m", like the web's lib/format/duration.ts.
+    static func minutes(_ seconds: Int) -> String {
+        let total = max(1, Int((Double(seconds) / 60 + 0.5).rounded(.down)))
+        return total < 60 ? "\(total) min" : "\(total / 60)h \(String(format: "%02d", total % 60))m"
+    }
 }
 
 /// Selects a text field's contents when it gets focus, so typing replaces a value (work item 170).
