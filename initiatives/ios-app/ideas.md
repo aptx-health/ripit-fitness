@@ -40,3 +40,37 @@ The goal is the least server you need to run that still lets anyone's own AI wor
 - Does Tier 1 need user accounts, or would a device token plus OAuth be enough?
 - Could the shared snapshot be generated on the phone, so the server never sees raw history?
 - Is the self-hosted server the current Next.js app, or a small standalone MCP server that reads the export format?
+
+## Recommended direction (2026-11-08, Dustin agrees: build Tier 1 and Tier 2; paid only if it becomes a thing)
+
+The phone is the only place data lives. The servers forget quickly. Advanced users move data through files they control.
+
+### Tier 1: a stateless MCP server as a middleman
+
+**The core problem:** an MCP tool can't call the iPhone app. Nothing can reach a suspended iOS app. So the phone starts every exchange, and does all the reading and reshaping of data itself.
+
+**Flow:**
+1. **The phone builds the context.** In the app, the user taps **Ask AI** and picks what to share, for example this week, the active program, a lift's history, or their goals. The app turns that into a compact snapshot.
+2. **Handing it over:**
+   - **v0, no server:** the share sheet opens ChatGPT or Claude with a prompt and the snapshot as text.
+   - **v1, short-lived relay:** the app encrypts the snapshot and uploads it with a time limit of about an hour. It copies a short code, with the key in the code, into the prompt. The agent calls `ripit_context(code)`. The server decrypts the snapshot in memory, returns it and keeps nothing readable.
+3. **The agent plans** with the MCP tools for the catalog, Learn content, and building and checking proposals.
+4. **The proposal comes back as a link,** `ripit://proposal/…`. The plan is compressed into the link, or held for 24 hours by code if it's too big. The user taps it, the app opens, and they approve.
+
+**Infrastructure:** one serverless function, plus an expiring key-value store from v1 on. There are no accounts and no database of history.
+
+### Tier 2: a folder as the go-between, with no infrastructure on Dustin's side
+
+1. The phone writes the full export into a folder the user controls, such as iCloud Drive.
+2. An open-source Ripit MCP server runs on the user's own computer, and Claude Desktop or Claude Code loads it. It reads the folder, which gives all the read tools Dustin has today.
+3. Proposals are written back to the folder as files, and the phone imports them.
+
+### Paid, only if asked for
+
+- **Encrypted backup** that only the phone can decrypt.
+- **Hosted full MCP:** needs readable history, so the phone sends snapshots that expire rather than a permanent copy.
+
+### What it asks of the app
+
+- **Export format and proposal format:** versioned, open specs (slice 12). These are the whole interface.
+- **An "Ask AI" screen:** pick a scope, build the snapshot and share it, then handle `ripit://proposal` links. This could be its own slice after slice 12.
