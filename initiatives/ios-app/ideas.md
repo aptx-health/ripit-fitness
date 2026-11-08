@@ -74,3 +74,25 @@ The phone is the only place data lives. The servers forget quickly. Advanced use
 
 - **Export format and proposal format:** versioned, open specs (slice 12). These are the whole interface.
 - **An "Ask AI" screen:** pick a scope, build the snapshot and share it, then handle `ripit://proposal` links. This could be its own slice after slice 12.
+
+## Share with AI: packets (2026-11-08, Dustin)
+
+This is a simple extract-and-format job on the phone. The share sheet hands Markdown, with CSV attached for tables, to ChatGPT or Claude (in a chat, or as files in a project). Then the agent uses the stateless MCP server's tools to build workouts and programs.
+
+**Presets, plus a custom picker for any mix of sections:**
+
+| Packet | Contents | Format |
+|---|---|---|
+| **Starter** (for a new project) | profile and goals, settings and units, anchors (target movements), muscle-balance targets, active program, saved workouts, recent summary | Markdown |
+| **Settings refresh** | the same settings sections, rebuilt in full | Markdown |
+| **Recent history** | the last N days (default 30): sessions, sets, effort; records and trends summarised | Markdown summary plus `sets.csv` |
+| **Program check-in** | the active program, what's done and what's planned, adherence | Markdown |
+| **Custom** | any sections, any date range | Markdown, plus CSV where it's tabular |
+
+**Rules:**
+- **Rebuild, don't diff.** Every packet is complete for its sections, which is safer and easier than diffing. Each one starts with a header: packet type, the date it was made, the app version and the export schema version. Its first line tells the agent to replace any older packet of the same type.
+- **Agent notes in every packet:** use the catalog ids, call Ripit's MCP propose tools, and return the `ripit://proposal` link.
+- **The phone remembers when each packet was last shared,** so it can say something like "Settings changed since your last Starter (Oct 3)". This is a nudge, not a diff.
+- **No health data beyond training,** unless the user picks a custom section that includes it.
+
+Possible slice, after slice 12 (export): **Share with AI v0**, covering the packets above plus `ripit://proposal` import. It needs the stateless MCP server's propose tools to exist, or as a first step the agent writes proposal JSON that the app imports from the share sheet or a file.
