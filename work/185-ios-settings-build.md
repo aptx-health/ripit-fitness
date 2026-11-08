@@ -51,3 +51,4 @@ The implementer packet, with screenshots.
 - 2026-11-07: 184 accepted; ready.
 - 2026-11-07 22:17 MST: dispatched to ios-impl (running; context 31%, cleared)
 - 2026-11-07: handed back needs decision (feedback email; placeholder feedback@ripit.fit, not found anywhere else; asked Dustin, not blocking). Lead re-ran ios-check: exit 0, 241 pass. Committed. Goes to review 186.
+- 2026-11-07: Dustin: feedback@ripit.fit is fine for now.

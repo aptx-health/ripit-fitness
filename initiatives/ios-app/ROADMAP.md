@@ -46,7 +46,6 @@ Left out for now: coaching, community publishing, accounts, admin.
 
 ## Waiting on Dustin
 
-- The feedback email address for Settings › Help. The build uses `feedback@ripit.fit` as a placeholder (185).
 
 - Try slices 5 and 6 on your phone (`scripts/ios/install.sh`) and overrule any calls on their Hub pages (`ios-slice5-logging-help`, `ios-slice6-saved-workouts`).
 
