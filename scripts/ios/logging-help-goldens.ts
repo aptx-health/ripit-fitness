@@ -154,9 +154,11 @@ function build() {
         setNumber: si + 1, reps: s.reps, weight: s.weight, weightUnit: s.unit ?? 'lbs',
         rpe: s.rpe ?? null, rir: s.rir ?? null, isWarmup: s.warmup ?? false,
       }))
-      sets.forEach((s, si) => loggedSets.push({
-        id: `${eid}-s${si + 1}`, ...s, exerciseId: eid, completionId: cid, createdAt: completedAt.toISOString(),
-      }))
+      sets.forEach((s, si) => {
+        loggedSets.push({
+          id: `${eid}-s${si + 1}`, ...s, exerciseId: eid, completionId: cid, createdAt: completedAt.toISOString(),
+        })
+      })
       lifts.set(key, sets)
     })
     completions.push({

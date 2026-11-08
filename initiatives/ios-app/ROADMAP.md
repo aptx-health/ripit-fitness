@@ -3,7 +3,7 @@
 A native iPhone version of Ripit. Data lives on the phone; the web app stays as it is.
 Updated by the lead at each checkpoint. The full log is in `status.md`.
 
-**Now:** slice 5, logging help — 174 tests being written (ios-tests). Then 175 build (ios-impl), 176 review (parity-disco).
+**Now:** slice 5, logging help — tests done (178, 46 waiting on the build). 175 build running (ios-impl). Then 176 review (parity-disco).
 
 ## Done (first sweep, 2026-11-07)
 
@@ -19,7 +19,7 @@ Updated by the lead at each checkpoint. The full log is in `status.md`.
 
 | # | Slice | Size | State | Items |
 |---|---|---|---|---|
-| 5 | **Logging help:** rest timer, workout clock, "Last time" line, RPE/RIR, warm-up sets, Info / Notes / History per exercise, confirm before Finish | M | 🔨 tests (174) | 174 tests · 175 build · 176 review |
+| 5 | **Logging help:** rest timer, workout clock, "Last time" line, RPE/RIR, warm-up sets, Info / Notes / History per exercise, confirm before Finish | M | 🔨 building (175) | 174 tests · 175 build · 176 review |
 | 6 | **Finish summary + saved workouts:** summary at the end, save to repeat, Library › Workouts, Pinned/Repeat on Training | M | ⏳ | |
 | 7 | **Settings + look:** Settings tab, themes (incl. e-ink), effort defaults, web font/corners/folder tabs | M | ⏳ | |
 | 8 | **Picker + custom exercises:** filters, pick several, create your own | S–M | ⏳ | |
@@ -28,6 +28,11 @@ Updated by the lead at each checkpoint. The full log is in `status.md`.
 
 Later: balance/FAU, target movements, equipment; bundled curated programs; cardio; follow-along mode.
 Left out for now: coaching, community publishing, accounts, admin.
+
+## Backlog found along the way
+
+- Web: half-step RPE presets (6.5, 7.5…) don't fit the `Int` RPE column; the ad-hoc logger truncates them (found in 174).
+- Web: `/library?type=programs&tab=browse` may open My Programs instead of Browse (173, unverified).
 
 ## Waiting on Dustin
 

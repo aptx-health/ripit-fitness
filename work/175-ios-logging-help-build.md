@@ -1,8 +1,8 @@
 ---
 id: 175
-state: ready
+state: running
 waiting_on:
-executor:
+executor: ios-impl
 skill: handoff-implementer
 from: lead (worktree-brave-field-c150)
 confirmed: 2026-11-07 Dustin (slice 5 as written, autonomous)
@@ -55,3 +55,4 @@ The implementer packet, with screenshots.
 ## Log
 - 2026-11-07: created (waiting on 174).
 - 2026-11-07: 174 done (178 tests, 46 notImplemented, re-run by the lead). Ready.
+- 2026-11-07 18:57 MST: dispatched to ios-impl (running)
