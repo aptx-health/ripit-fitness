@@ -1,0 +1,50 @@
+---
+id: 175
+state: waiting
+waiting_on: 174
+executor:
+skill: handoff-implementer
+from: lead (worktree-brave-field-c150)
+confirmed: 2026-11-07 Dustin (slice 5 as written, autonomous)
+updated: 2026-11-07
+---
+# iOS slice 5: logging help, build
+
+## Goal
+Make 174's tests pass and build the screens, so every scenario in `features/ios-app/logging-help.feature` works on the phone.
+
+## Read first
+- `features/ios-app/logging-help.feature`, `work/174-handback.md` (contract and hands-on list).
+- The parity screenshots `initiatives/ios-app/handoff/parity-assets/web-workout*.png` show how the web logger looks.
+- Web: the oracle files listed in the spec header.
+
+## Do
+- Implement the `RipitCore` stubs, then the UI in `ios/App/`:
+  - a rest timer and workout clock on the logger
+  - a "Last time" line that fills the next set when tapped
+  - RPE/RIR and warm-up controls per set
+  - Info / Notes / History per exercise (a sheet or tabs)
+  - a confirm before Finish
+- The effort type (RPE or RIR) has no Settings screen yet, so default it to RPE with a small toggle in the logger; slice 7 moves it to Settings.
+- Keep touch targets at 44pt or larger.
+- Run it in your **own** simulator and screenshot each new screen.
+
+## Done when
+- `mise run ios-check` exits 0, with all of 174's tests passing and none removed or weakened.
+- Every scenario works when you try it by hand in your simulator.
+
+## Decide alone
+- Layout details: sheet vs tabs for Info/Notes/History, and where the timers sit.
+
+## Escalate to Dustin when
+- A scenario can't be met as written.
+
+## Don't touch
+- 174's tests (if one is wrong, say so in the packet). `work/`, `STATE.md`, `status.md`, the roadmap.
+- Don't `rm`; list temp files under Cleanup for Dustin.
+
+## Hand back
+The implementer packet, with screenshots.
+
+## Log
+- 2026-11-07: created (waiting on 174).

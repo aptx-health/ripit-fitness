@@ -1,6 +1,6 @@
 ---
 id: 173
-state: review
+state: accepted
 waiting_on:
 executor: parity-disco
 skill: discovery
