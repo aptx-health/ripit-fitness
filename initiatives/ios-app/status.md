@@ -48,3 +48,4 @@
 - 2026-11-07: 180 handed back complete; lead re-ran ios-check (exit 0, 205 pass), committed 41c6d5f2. 181 dispatched to parity-disco with --clear (was 2%).
 - 2026-11-07: 181 review: all 7 scenarios pass by real taps (incl. dark, largest text); accept after fix 1. Lead took fixes 1–4 into 182 (incl. showing the workout name while open). 182 dispatched to ios-impl (context 27%, kept: same slice).
 - 2026-11-07: 182 handed back complete; lead re-ran ios-check (exit 0, 208), committed fd5dcfdf. 183 re-check dispatched to parity-disco (context 24%, kept: re-check of its own findings).
+- 2026-11-07: 183 re-check: accept. Lead accepted slice 6 (ios-check exit 0, 208). Hub page ios-slice6-saved-workouts published. Slice 7 waits on Dustin's steer for the look.

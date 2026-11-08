@@ -1,6 +1,6 @@
 ---
 id: 180
-state: review
+state: accepted
 waiting_on:
 executor: ios-impl
 skill: handoff-implementer
@@ -53,3 +53,4 @@ The implementer packet, with screenshots.
 - 2026-11-07: 179 accepted; ready.
 - 2026-11-07 21:05 MST: dispatched to ios-impl (running; context 28%, cleared)
 - 2026-11-07: handed back complete. Lead re-ran ios-check: exit 0, 205 pass. Committed. Goes to review 181.
+- 2026-11-07: accepted with slice 6.

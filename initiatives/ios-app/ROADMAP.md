@@ -3,7 +3,7 @@
 A native iPhone version of Ripit. Data lives on the phone; the web app stays as it is.
 Updated by the lead at each checkpoint. The full log is in `status.md`.
 
-**Now:** slice 6 — fixes in (208 tests green). 183 re-check running (parity-disco).
+**Now:** slices 5 and 6 done and on the Hub for Dustin. Slice 7 (Settings + look) next: needs Dustin's steer on the look before the spec.
 
 ## Done (first sweep, 2026-11-07)
 
@@ -20,7 +20,7 @@ Updated by the lead at each checkpoint. The full log is in `status.md`.
 | # | Slice | Size | State | Items |
 |---|---|---|---|---|
 | 5 | **Logging help:** rest timer, workout clock, "Last time" line, RPE/RIR, warm-up sets, Info / Notes / History per exercise, confirm before Finish | M | ✅ accepted (Dustin to try on phone) | 174–178 |
-| 6 | **Finish summary + saved workouts:** summary at the end, save to repeat, Library › Workouts, Pinned/Repeat on Training | M | 🔍 re-check (183) | 179 tests · 180 build · 181 review |
+| 6 | **Finish summary + saved workouts:** summary at the end, save to repeat, Library › Workouts, Pinned/Repeat on Training | M | ✅ accepted (Dustin to try on phone) | 179–183 |
 | 7 | **Settings + look:** Settings tab, themes (incl. e-ink), effort defaults, web font/corners/folder tabs | M | ⏳ | |
 | 8 | **Picker + custom exercises:** filters, pick several, create your own | S–M | ⏳ | |
 | 9 | **Export from iOS + agent round trip:** phone writes the v1 JSON; imports proposals to approve | M | ⏳ | |
@@ -46,7 +46,7 @@ Left out for now: coaching, community publishing, accounts, admin.
 
 ## Waiting on Dustin
 
-- Try slice 5 on your phone (`scripts/ios/install.sh`) and overrule any calls on its Hub page.
+- Try slices 5 and 6 on your phone (`scripts/ios/install.sh`) and overrule any calls on their Hub pages (`ios-slice5-logging-help`, `ios-slice6-saved-workouts`).
 
 - Open PRs into `dev` for `feature/ios-skeleton` and `feature/data-export`? (The web export must reach prod before you can import your real history.)
 - Run `initiatives/ios-app/handoff/cleanup.sh` when convenient.

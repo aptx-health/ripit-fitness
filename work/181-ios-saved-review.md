@@ -1,6 +1,6 @@
 ---
 id: 181
-state: review
+state: accepted
 waiting_on:
 executor: parity-disco
 skill: reviewer
@@ -39,3 +39,4 @@ A review packet with first line `Report: …` and a clear verdict.
 - 2026-11-07: 180 done; ready for review.
 - 2026-11-07 21:22 MST: dispatched to parity-disco (running; context 2%, cleared)
 - 2026-11-07: verdict: accept after fix 1 (blank rename); fix 2 (name while open) recommended. Lead took both, plus the delete anchor and AX spacing, into 182. parity-disco re-checks.
+- 2026-11-07: closed by 183.

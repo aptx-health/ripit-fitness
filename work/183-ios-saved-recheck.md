@@ -1,6 +1,6 @@
 ---
 id: 183
-state: running
+state: accepted
 waiting_on:
 executor: parity-disco
 skill: reviewer
@@ -35,3 +35,4 @@ A short review packet: first line `Report: …`, verdict `accept` or the remaini
 ## Log
 - 2026-11-07: created after 182 (lead re-ran ios-check: exit 0, 208 pass).
 - 2026-11-07 21:54 MST: dispatched to parity-disco (running; context 24%, kept)
+- 2026-11-07: verdict accept; lead accepts slice 6; Hub page ios-slice6-saved-workouts.
