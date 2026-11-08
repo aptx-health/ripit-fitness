@@ -1,7 +1,7 @@
 ---
 id: 180
-state: waiting
-waiting_on: 179
+state: running
+waiting_on:
 executor: ios-impl
 skill: handoff-implementer
 from: lead (worktree-brave-field-c150)
@@ -26,6 +26,11 @@ Make 179's tests pass and build the screens, so every scenario in `features/ios-
 - Follow the slice 5 lesson: check every new screen at the largest text size before handing back.
 - Run it in your own simulator and screenshot each new screen.
 
+## Lead decisions from 179
+- Keep web parity on the two summary quirks (kg volume summed as lbs; bodyweight "vs last" compares total reps with last time's top set). Both go on the backlog, to fix in the web and the phone together.
+- Fill `ExerciseDetail.planned` in `AppDatabase.detail`, as 179 noted.
+- 179's test files and `saved.json` are mode 444. Don't unlock them.
+
 ## Done when
 - `mise run ios-check` exits 0, with all of 179's tests passing and none removed or weakened.
 - Every scenario works when you try it by hand in your simulator.
@@ -45,3 +50,5 @@ The implementer packet, with screenshots.
 
 ## Log
 - 2026-11-07: created (waiting on 179).
+- 2026-11-07: 179 accepted; ready.
+- 2026-11-07 21:05 MST: dispatched to ios-impl (running; context 28%, cleared)

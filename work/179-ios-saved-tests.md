@@ -1,6 +1,6 @@
 ---
 id: 179
-state: running
+state: accepted
 waiting_on:
 executor: ios-tests
 skill: handoff-test-builder
@@ -47,3 +47,4 @@ The test-builder packet, plus the hands-on list.
 ## Log
 - 2026-11-07: created (ready).
 - 2026-11-07 20:41 MST: dispatched to ios-tests (running)
+- 2026-11-07: needs decision (kg volume summed as lbs; bodyweight vs-last compares total reps with top set). Lead: keep web parity, fix web and phone together later (backlog). Re-ran swift test: 48 issues, all from the stubs. Accepted.
