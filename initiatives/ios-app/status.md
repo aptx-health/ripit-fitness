@@ -47,3 +47,4 @@
 - 2026-11-07: 179 accepted (205 tests, 48 issues all from stubs, 57/57 breaks). Decision: keep web parity on kg-as-lbs volume and bodyweight vs-last; both to backlog. 180 dispatched to ios-impl with --clear (was 28%).
 - 2026-11-07: 180 handed back complete; lead re-ran ios-check (exit 0, 205 pass), committed 41c6d5f2. 181 dispatched to parity-disco with --clear (was 2%).
 - 2026-11-07: 181 review: all 7 scenarios pass by real taps (incl. dark, largest text); accept after fix 1. Lead took fixes 1–4 into 182 (incl. showing the workout name while open). 182 dispatched to ios-impl (context 27%, kept: same slice).
+- 2026-11-07: 182 handed back complete; lead re-ran ios-check (exit 0, 208), committed fd5dcfdf. 183 re-check dispatched to parity-disco (context 24%, kept: re-check of its own findings).

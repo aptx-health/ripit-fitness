@@ -1,6 +1,6 @@
 ---
 id: 182
-state: running
+state: review
 waiting_on:
 executor: ios-impl
 skill: handoff-implementer
@@ -38,3 +38,4 @@ The implementer packet.
 ## Log
 - 2026-11-07: created from review 181 (lead: name-while-open now, as reviewer and builder both suggested).
 - 2026-11-07 21:48 MST: dispatched to ios-impl (running; context 27%, kept)
+- 2026-11-07: handed back complete; lead re-ran ios-check (exit 0, 208 pass); committed. Re-check in 183.
