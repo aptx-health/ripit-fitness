@@ -3,7 +3,7 @@
 A native iPhone version of Ripit. Data lives on the phone; the web app stays as it is.
 Updated by the lead at each checkpoint. The full log is in `status.md`.
 
-**Now:** slice 5 — review passed all 10 scenarios by real taps; 177 fixes running (ios-impl: largest text size, planned effort on scale switch, small items). Then a quick re-check by parity-disco.
+**Now:** slice 5 — review fixes in (181 tests green). One more small fix running (set rows at the largest text size), then a re-check by parity-disco.
 
 ## Done (first sweep, 2026-11-07)
 
