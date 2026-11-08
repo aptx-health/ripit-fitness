@@ -161,7 +161,7 @@ struct TrainingView: View {
     @ViewBuilder
     private func upNext(_ program: ProgramDetail) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(program.name).font(.ripit(.subheadline, .bold)).display(1).foregroundStyle(Theme.primary)
+            Text(program.name).font(.ripit(.subheadline, .bold)).display(1).foregroundStyle(Theme.text(Theme.primary))
             if let next = store.upNext {
                 Text("Week \(next.weekNumber) · Day \(next.dayNumber)")
                     .font(.ripit(.subheadline, .semibold)).foregroundStyle(Theme.mutedForeground)
@@ -231,7 +231,7 @@ struct WorkoutRow: View {
             HStack(spacing: 12) {
                 Image(systemName: done ? "checkmark.circle.fill" : isNext ? "arrow.right.circle" : "circle")
                     .font(.ripit(.title3))
-                    .foregroundStyle(done ? Theme.primary : isNext ? Theme.accent : Theme.border)
+                    .foregroundStyle(done ? Theme.text(Theme.primary) : isNext ? Theme.text(Theme.accent) : Theme.border)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(Format.dayTitle(workout.dayNumber, workout.name))
                         .font(.ripit(.headline)).foregroundStyle(Theme.foreground)

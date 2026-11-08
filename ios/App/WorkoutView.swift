@@ -199,7 +199,7 @@ private struct ExerciseLogger: View {
                 Button(action: toggle) {
                     HStack {
                         Image(systemName: selected ? "checkmark.square.fill" : "square")
-                            .foregroundStyle(selected ? Theme.primary : Theme.mutedForeground)
+                            .foregroundStyle(selected ? Theme.text(Theme.primary) : Theme.mutedForeground)
                         Text(exercise.name).font(.ripit(.headline)).foregroundStyle(Theme.foreground)
                         Spacer()
                     }
@@ -333,7 +333,7 @@ private struct ExerciseLogger: View {
         if weightOutOfRange {
             Text("Weight must be 0 to \(Int(LoggedWeight.max)).")
                 .font(.ripit(.footnote))
-                .foregroundStyle(Theme.error)
+                .foregroundStyle(Theme.text(Theme.error))
         }
     }
 
@@ -505,7 +505,7 @@ private struct PlanStrip: View {
                         .padding(.horizontal, 8)
                         .frame(minHeight: 28)
                         .background(done ? Theme.primary.opacity(0.15) : Theme.muted, in: Rectangle())
-                        .foregroundStyle(done ? Theme.primary : Theme.foreground)
+                        .foregroundStyle(done ? Theme.text(Theme.primary) : Theme.foreground)
                     }
                 }
             }

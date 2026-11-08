@@ -176,7 +176,7 @@ private struct SessionCard: View {
         }
         .padding(12)
         .background(Theme.card, in: Rectangle())
-        .overlay(Rectangle().stroke(session.isPR ? Theme.accent : Theme.border, lineWidth: 1))
+        .overlay(Rectangle().stroke(session.isPR ? Theme.edge(Theme.accent) : Theme.border, lineWidth: 1))
     }
 
     private var title: some View {

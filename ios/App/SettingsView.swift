@@ -12,7 +12,12 @@ final class SettingsModel {
     private(set) var settings: AppSettings
     var error: String?
 
+    private let defaults: UserDefaults
+    /// The mode before a light-only theme (E-INK), restored on leaving it (the web's pickTheme).
+    private static let modeBeforeKey = "themeModeBeforeLightOnly"
+
     init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
         store = SettingsStore(defaults: defaults)
         let fallback = AppSettings(theme: ThemePreference(themeName: .ripit, mode: .dark), einkDisplay: false,
                                    intensityEnabled: false, defaultIntensityRating: .rir, defaultWeightUnit: .lbs,
@@ -35,11 +40,34 @@ final class SettingsModel {
             self.error = "Couldn't save settings: \(error.localizedDescription)"
         }
     }
+
+    /// Picks a theme from the list. Picking E-INK (light only) remembers the mode you had; leaving it
+    /// restores that mode, or the device's own when none was kept (hooks/useThemePreference.ts
+    /// pickTheme). Unlike the web, it doesn't turn E-ink display on.
+    func pickTheme(_ theme: ThemeName) {
+        let lightOnly = { (name: ThemeName) in (try? name.isLightOnly()) ?? false }
+        let current = settings.theme
+        var mode = current.mode
+        if !lightOnly(current.themeName) && lightOnly(theme) {
+            defaults.set(current.mode.rawValue, forKey: Self.modeBeforeKey)
+        }
+        if lightOnly(current.themeName) && !lightOnly(theme) {
+            mode = defaults.string(forKey: Self.modeBeforeKey).flatMap(ThemeMode.init(rawValue:)) ?? Self.deviceMode
+            defaults.removeObject(forKey: Self.modeBeforeKey)
+        }
+        update { $0.theme = ThemePreference(themeName: theme, mode: mode) }
+    }
+
+    /// The device's light or dark appearance, ignoring the app's own.
+    private static var deviceMode: ThemeMode {
+        let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene
+        return scene?.screen.traitCollection.userInterfaceStyle == .dark ? .dark : .light
+    }
 }
 
 enum HelpLinks {
     static let learn = URL(string: "https://ripit.fit/learn")!
-    // Not confirmed by Dustin (work item 185 handback): the web sends feedback through a form, not email.
+    // Dustin confirmed this address for now (2026-11-07); the web sends feedback through a form, not email.
     static let feedbackEmail = "feedback@ripit.fit"
 
     static var feedback: URL {
@@ -110,7 +138,7 @@ struct SettingsView: View {
             .accessibilityHint(lightOnly ? "" : "Switches to \(dark ? "light" : "dark")")
             RowDivider()
             SettingsToggle(icon: "book", label: "E-ink display",
-                           hint: "Turns off animation and makes text bolder for e-ink screens",
+                           hint: "Makes text bolder for e-ink screens",
                            isOn: Binding(get: { settings.einkDisplay }, set: { on in model.update { $0.einkDisplay = on } }))
         }
     }
@@ -338,21 +366,26 @@ struct ThemePickerView: View {
     @Environment(SettingsModel.self) private var model
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                FolderBlock(title: "Theme", tone: .plain, icon: "paintpalette") {
-                    ForEach(Array(ThemeName.allCases.enumerated()), id: \.element) { i, theme in
-                        if i > 0 { RowDivider() }
-                        ThemeRow(theme: theme, mode: model.settings.theme.mode,
-                                 selected: model.settings.theme.themeName == theme) {
-                            model.update { $0.theme.themeName = theme }
+        ScrollViewReader { scroller in
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    FolderBlock(title: "Theme", tone: .plain, icon: "paintpalette") {
+                        ForEach(Array(ThemeName.allCases.enumerated()), id: \.element) { i, theme in
+                            if i > 0 { RowDivider() }
+                            ThemeRow(theme: theme, mode: model.settings.theme.mode,
+                                     selected: model.settings.theme.themeName == theme) {
+                                model.pickTheme(theme)
+                            }
+                            .id(theme)
                         }
                     }
+                    Text("E-INK has no dark mode; it always shows light.")
+                        .font(.ripit(.subheadline)).foregroundStyle(Theme.mutedForeground)
                 }
-                Text("E-INK has no dark mode; it always shows light.")
-                    .font(.ripit(.subheadline)).foregroundStyle(Theme.mutedForeground)
+                .padding(16)
             }
-            .padding(16)
+            // A pick rebuilds the tabs (a new look), so the list comes back at its selected row.
+            .onAppear { scroller.scrollTo(model.settings.theme.themeName, anchor: .center) }
         }
         .background(Theme.background)
         .navigationTitle("THEME")
@@ -386,7 +419,7 @@ private struct ThemeRow: View {
                     .foregroundStyle(Theme.foreground)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 if selected {
-                    Image(systemName: "checkmark").font(.ripit(.headline, .bold)).foregroundStyle(Theme.primary)
+                    Image(systemName: "checkmark").font(.ripit(.headline, .bold)).foregroundStyle(Theme.text(Theme.primary))
                 }
             }
             .padding(.horizontal, 16)

@@ -139,7 +139,7 @@ private struct ExerciseSummaryRow: View {
                     let up = trend.hasPrefix("+")
                     Label(trend.uppercased(), systemImage: up ? "chart.line.uptrend.xyaxis" : trend.hasPrefix("-") ? "chart.line.downtrend.xyaxis" : "equal")
                         .font(.ripit(.footnote, .bold))
-                        .foregroundStyle(up ? Theme.primary : Theme.mutedForeground)
+                        .foregroundStyle(up ? Theme.text(Theme.primary) : Theme.mutedForeground)
                 }
             }
         }
@@ -180,7 +180,7 @@ struct SaveWorkoutView: View {
             VStack(alignment: .leading, spacing: 16) {
                 if savedId != nil {
                     Label("Saved to your workouts", systemImage: "bookmark.fill")
-                        .font(.ripit(.title3, .bold)).foregroundStyle(Theme.primary)
+                        .font(.ripit(.title3, .bold)).foregroundStyle(Theme.text(Theme.primary))
                     Text("Start it again from Library › Workouts, or pin it to see it on Training.")
                         .foregroundStyle(Theme.mutedForeground)
                     Button("Open Library › Workouts") { openLibrary() }

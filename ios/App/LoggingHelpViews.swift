@@ -50,7 +50,7 @@ struct RestTimerChip: View {
             .padding(.horizontal, 10)
             .frame(minHeight: 32)
             .background(Theme.primary.opacity(0.15), in: Rectangle())
-            .foregroundStyle(Theme.primary)
+            .foregroundStyle(Theme.text(Theme.primary))
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Rest \(seconds / 60) minutes \(seconds % 60) seconds")
         }
@@ -100,7 +100,7 @@ struct LastTimeLine: View {
         .accessibilityHint(last.fill == nil ? "" : "Fills the next set")
     }
 
-    private var icon: some View { Image(systemName: "clock.arrow.circlepath").foregroundStyle(Theme.primary) }
+    private var icon: some View { Image(systemName: "clock.arrow.circlepath").foregroundStyle(Theme.text(Theme.primary)) }
     private var label: some View {
         Text("LAST TIME").font(.ripit(.caption2, .bold)).tracking(1).foregroundStyle(Theme.mutedForeground)
     }
@@ -110,7 +110,7 @@ struct LastTimeLine: View {
             .font(.ripit(.subheadline, .semibold).monospacedDigit())
             .foregroundStyle(last.summary == nil ? Theme.mutedForeground : Theme.foreground)
     }
-    private var use: some View { Text("Use").font(.ripit(.caption, .bold)).foregroundStyle(Theme.primary) }
+    private var use: some View { Text("Use").font(.ripit(.caption, .bold)).foregroundStyle(Theme.text(Theme.primary)) }
 }
 
 /// Pick an effort from the web's presets, or none.

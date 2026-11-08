@@ -343,7 +343,7 @@ struct PinButton: View {
                 .frame(minWidth: Theme.touch, minHeight: Theme.touch)
                 .contentShape(Rectangle())
         }
-        .foregroundStyle(pinned ? Theme.secondary : Theme.mutedForeground)
+        .foregroundStyle(pinned ? Theme.text(Theme.secondary) : Theme.mutedForeground)
         .accessibilityLabel(pinned ? "Unpin \(name)" : "Pin \(name)")
     }
 }

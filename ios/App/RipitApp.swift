@@ -33,6 +33,7 @@ struct RootView: View {
     @Environment(WorkoutStore.self) private var store
     @Environment(SettingsModel.self) private var settings
     @Environment(\.accessibilityReduceMotion) private var osReduceMotion
+    @Environment(\.dynamicTypeSize) private var typeSize
     @State private var path: [String] = []
     @State private var trainingPath: [TrainingRoute] = []
     @State private var progressPath: [String] = []
@@ -102,10 +103,11 @@ struct RootView: View {
                     }
             }
         }
-        .tint(Theme.primary)
+        .tint(Theme.text(Theme.primary))
         .background(Theme.background)
         .font(.ripit(.body))
-        .preferredColorScheme(settings.settings.theme.mode == .dark && !Look.isPaper ? .dark : .light)
+        // From the theme's background, not the mode: some themes stay dark in "light" mode.
+        .preferredColorScheme(lookIsDark ? .dark : .light)
         // Motion is off with E-ink display on or the OS's Reduce Motion (lib/display.ts).
         .transaction { t in
             if (try? DisplayRules.reducedMotion(einkDisplay: settings.settings.einkDisplay, osReduceMotion: osReduceMotion)) == true {
@@ -116,8 +118,15 @@ struct RootView: View {
     }
 
     /// Read from the observed settings, so a change re-renders RootView after `Look` has the new values.
+    /// A new text size also rescales the native bars' titles, which only new bars pick up.
     private var lookKey: String {
         _ = settings.settings
+        Look.setTextSize(UIContentSizeCategory(typeSize))
         return Look.key
+    }
+
+    private var lookIsDark: Bool {
+        _ = settings.settings
+        return Look.isDark
     }
 }

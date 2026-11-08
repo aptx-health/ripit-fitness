@@ -193,7 +193,7 @@ private struct ReportCard: View {
                 if let change = hasNormal ? Words.percentChange(Double(current.workingSets), normal.workingSets) : nil {
                     Text(Words.signed(Double(change)) { "\(Int($0))%" })
                         .font(.ripit(.subheadline, .bold))
-                        .foregroundStyle(change > 0 ? Theme.primary : Theme.foreground)
+                        .foregroundStyle(change > 0 ? Theme.text(Theme.primary) : Theme.foreground)
                     Muted("normal \(WebRounding.round(normal.workingSets))")
                 } else {
                     Muted("–")
@@ -205,7 +205,7 @@ private struct ReportCard: View {
                     let change = (Double(current.durationSeconds) - normal.durationSeconds) / 60
                     Text(Words.signed(change, Words.minutes))
                         .font(.ripit(.subheadline, .bold))
-                        .foregroundStyle(WebRounding.round(change) > 0 ? Theme.primary : Theme.foreground)
+                        .foregroundStyle(WebRounding.round(change) > 0 ? Theme.text(Theme.primary) : Theme.foreground)
                 } else {
                     Muted("–")
                 }
@@ -233,7 +233,7 @@ private struct ReportCard: View {
                             Rectangle()
                                 .fill(i < min(report.streak, 8) ? Theme.primary : Theme.muted)
                                 .frame(width: 10, height: 14)
-                                .overlay(Rectangle().stroke(i < min(report.streak, 8) ? Theme.primary : Theme.border))
+                                .overlay(Rectangle().stroke(i < min(report.streak, 8) ? Theme.edge(Theme.primary) : Theme.border))
                         }
                     }
                     .accessibilityHidden(true)
@@ -287,7 +287,7 @@ struct LiftRow: View {
                 if let change {
                     Text(Words.signed(change) { "\(WebRounding.round($0))" })
                         .font(.ripit(.subheadline, .bold))
-                        .foregroundStyle(WebRounding.round(change) > 0 ? Theme.primary : Theme.foreground)
+                        .foregroundStyle(WebRounding.round(change) > 0 ? Theme.text(Theme.primary) : Theme.foreground)
                         .accessibilityLabel("e1RM change since the last session")
                 }
             }

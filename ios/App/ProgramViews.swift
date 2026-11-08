@@ -128,7 +128,7 @@ struct ProgramDetailView: View {
                             FolderBlock(title: Format.dayTitle(workout.dayNumber, workout.name),
                                         tone: done.contains(workout.id) ? .active : .exercise, trailing: {
                                 if done.contains(workout.id) {
-                                    Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.primary)
+                                    Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.text(Theme.primary))
                                 }
                             }) {
                                 ForEach(Array(workout.exercises.enumerated()), id: \.element.id) { i, ex in

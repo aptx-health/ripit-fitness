@@ -13,9 +13,21 @@ enum Look {
     private(set) static var preference = (try? ThemePreference.webDefault()) ?? ThemePreference(themeName: .ripit, mode: .dark)
     private(set) static var einkDisplay = false
     private(set) static var palette = Palette(preference)
+    /// The text size the native bars' titles are scaled for.
+    private(set) static var textSize = UIContentSizeCategory.large
 
     /// Changes in identity whenever the look changes; RootView uses it to rebuild its tabs.
-    static var key: String { "\(preference.themeName.rawValue)-\(preference.mode.rawValue)-\(einkDisplay)" }
+    static var key: String {
+        "\(preference.themeName.rawValue)-\(preference.mode.rawValue)-\(einkDisplay)-\(textSize.rawValue)"
+    }
+
+    /// A dark background, whatever the mode: DOOM, CYBER, SYNTHWAVE '84 and DRACULA stay dark in
+    /// "light" mode, as on the web. The status bar, tab bar, switches and alerts follow this.
+    static var isDark: Bool {
+        let hex = palette.hex("background")
+        let channel = { (shift: UInt32) in Double((hex >> shift) & 0xFF) / 255 }
+        return 0.2126 * channel(16) + 0.7152 * channel(8) + 0.0722 * channel(0) < 0.5
+    }
 
     /// The E-ink theme: paper, so no shadows and heavier borders (globals.css [data-theme="eink"]).
     static var isPaper: Bool { preference.themeName == .eink }
@@ -27,6 +39,13 @@ enum Look {
         applyUIKitAppearance()
     }
 
+    /// Rescales the native bars' titles when the text size changes.
+    static func setTextSize(_ size: UIContentSizeCategory) {
+        guard size != textSize else { return }
+        textSize = size
+        applyUIKitAppearance()
+    }
+
     /// Native bars keep their native shape, in the theme's colors and Rajdhani.
     private static func applyUIKitAppearance() {
         let foreground = UIColor(hex: palette.hex("foreground"))
@@ -34,8 +53,14 @@ enum Look {
         nav.configureWithOpaqueBackground()
         nav.backgroundColor = UIColor(hex: palette.hex("background"))
         nav.shadowColor = UIColor(hex: palette.hex("border"))
-        nav.titleTextAttributes = [.foregroundColor: foreground, .font: RipitFont.ui(17, .bold), .kern: 1.2]
-        nav.largeTitleTextAttributes = [.foregroundColor: foreground, .font: RipitFont.ui(34, .bold), .kern: 2]
+        // Titles grow with the text size, capped so a title still fits the bar.
+        let traits = UITraitCollection(preferredContentSizeCategory: textSize)
+        let title = UIFontMetrics(forTextStyle: .headline)
+            .scaledFont(for: RipitFont.ui(17, .bold), maximumPointSize: 30, compatibleWith: traits)
+        let largeTitle = UIFontMetrics(forTextStyle: .largeTitle)
+            .scaledFont(for: RipitFont.ui(34, .bold), maximumPointSize: 52, compatibleWith: traits)
+        nav.titleTextAttributes = [.foregroundColor: foreground, .font: title, .kern: 1.2]
+        nav.largeTitleTextAttributes = [.foregroundColor: foreground, .font: largeTitle, .kern: 2]
         let buttons = UIBarButtonItemAppearance()
         buttons.normal.titleTextAttributes = [.font: RipitFont.ui(17, .semibold)]
         nav.buttonAppearance = buttons
@@ -88,6 +113,12 @@ enum Theme {
     static let touch: CGFloat = 48
     /// Hairline borders, heavier on the E-ink theme (globals.css: "solid black, never hairline").
     static var line: CGFloat { Look.isPaper ? 2 : 1 }
+
+    /// Colored text and icons. The E-ink theme draws them black and keeps color for fills
+    /// (globals.css: "Colour is for fills only").
+    static func text(_ color: Color) -> Color { Look.isPaper ? foreground : color }
+    /// Colored borders, black on the E-ink theme like the web's border utilities.
+    static func edge(_ color: Color) -> Color { Look.isPaper ? border : color }
     /// A folder box's border, in its tab's color.
     static let folderLine: CGFloat = 2
 }
@@ -201,8 +232,8 @@ enum TabTone {
         }
     }
 
-    /// The box under the tab is bordered in the tab's color, like the web's folders.
-    var edge: Color { self == .plain ? Theme.border : fill }
+    /// The box under the tab is bordered in the tab's color, like the web's folders (black on E-ink).
+    var edge: Color { self == .plain ? Theme.border : Theme.edge(fill) }
 }
 
 /// The web's folder tab: square on the left, a slanted right edge.
@@ -367,7 +398,7 @@ struct OutlineButtonStyle: ButtonStyle {
             .font(.ripit(.headline, .semibold))
             .display(1.2)
             .frame(maxWidth: .infinity, minHeight: Theme.touch)
-            .foregroundStyle(tint)
+            .foregroundStyle(Theme.text(tint))
             .background(configuration.isPressed ? Theme.muted : Theme.card)
             .overlay(Rectangle().strokeBorder(Theme.border, lineWidth: Theme.line))
     }
