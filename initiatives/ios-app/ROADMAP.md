@@ -3,7 +3,7 @@
 A native iPhone version of Ripit. Data lives on the phone; the web app stays as it is.
 Updated by the lead at each checkpoint. The full log is in `status.md`.
 
-**Now:** slice 5, logging help — built (178 tests green). 176 review running (parity-disco: hands-on + web compare).
+**Now:** slice 5 — review passed all 10 scenarios by real taps; 177 fixes running (ios-impl: largest text size, planned effort on scale switch, small items). Then a quick re-check by parity-disco.
 
 ## Done (first sweep, 2026-11-07)
 
@@ -19,7 +19,7 @@ Updated by the lead at each checkpoint. The full log is in `status.md`.
 
 | # | Slice | Size | State | Items |
 |---|---|---|---|---|
-| 5 | **Logging help:** rest timer, workout clock, "Last time" line, RPE/RIR, warm-up sets, Info / Notes / History per exercise, confirm before Finish | M | 🔍 in review (176) | 174 tests · 175 build · 176 review |
+| 5 | **Logging help:** rest timer, workout clock, "Last time" line, RPE/RIR, warm-up sets, Info / Notes / History per exercise, confirm before Finish | M | 🔨 fixes (177) | 174 tests · 175 build · 176 review |
 | 6 | **Finish summary + saved workouts:** summary at the end, save to repeat, Library › Workouts, Pinned/Repeat on Training | M | ⏳ | |
 | 7 | **Settings + look:** Settings tab, themes (incl. e-ink), effort defaults, web font/corners/folder tabs | M | ⏳ | |
 | 8 | **Picker + custom exercises:** filters, pick several, create your own | S–M | ⏳ | |
@@ -33,6 +33,11 @@ Left out for now: coaching, community publishing, accounts, admin.
 
 - Web: half-step RPE presets (6.5, 7.5…) don't fit the `Int` RPE column; the ad-hoc logger truncates them (found in 174).
 - Web: `/library?type=programs&tab=browse` may open My Programs instead of Browse (173, unverified).
+
+- Web: Start Workout silently does nothing while a freestyle draft is open; only Quick actions explains why (176).
+- Seed data: Barbell Bench Press has decline-bench instructions (`cmiz7vjju0000vr0m4b1o6bec`), shown in both apps (176).
+- iOS: effort can't be changed when editing a logged set; Last time lacks the relative date and per-set "last:" hints (176, after slice 7).
+- iOS and web: a planned weight ("275lbs") isn't prefilled, so a set logged untouched saves as bodyweight on iOS (176; the web prefills 0 the same way).
 
 ## Waiting on Dustin
 

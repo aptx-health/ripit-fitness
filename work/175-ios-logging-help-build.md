@@ -1,6 +1,6 @@
 ---
 id: 175
-state: running
+state: review
 waiting_on:
 executor: ios-impl
 skill: handoff-implementer
@@ -56,3 +56,4 @@ The implementer packet, with screenshots.
 - 2026-11-07: created (waiting on 174).
 - 2026-11-07: 174 done (178 tests, 46 notImplemented, re-run by the lead). Ready.
 - 2026-11-07 18:57 MST: dispatched to ios-impl (running)
+- 2026-11-07: handed back complete. Lead re-ran ios-check: exit 0, 178 pass. Committed. Goes to review 176.
