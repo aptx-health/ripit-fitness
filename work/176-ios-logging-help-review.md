@@ -1,6 +1,6 @@
 ---
 id: 176
-state: review
+state: accepted
 waiting_on:
 executor: parity-disco
 skill: reviewer
@@ -49,3 +49,4 @@ A review packet with first line `Report: complete | needs decision | further han
 - 2026-11-07: 175 done; ready for review.
 - 2026-11-07 19:06 MST: dispatched to parity-disco (running)
 - 2026-11-07: verdict accept after fixes 1–2. Lead: Q1 remove long-press, Q2 warm-ups save no effort, Q3 effort editing later; plus VoiceOver tags and an ExerciseInfo test. Fixes in 177; parity-disco re-checks them.
+- 2026-11-07: closed by 178.

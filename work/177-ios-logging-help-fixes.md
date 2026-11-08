@@ -1,6 +1,6 @@
 ---
 id: 177
-state: review
+state: accepted
 waiting_on:
 executor: ios-impl
 skill: handoff-implementer
@@ -49,3 +49,4 @@ The implementer packet.
 ## Follow-up 2 (2026-11-07, lead)
 8. **Largest text size sweep, once:** fix `LastTimeLine` (stack label and date; "Use" under the summary). Then walk **every** screen the logger reaches (logger rows, Last time, effort menu, Warm-up toggle, Info/Notes/History sheet, Finish alert, finished-workout detail) at the largest size and fix anything that breaks mid-word, so the re-check doesn't find another. Screenshot each. Hand back to `work/177-handback.md` and ping the lead.
 - 2026-11-07: follow-up 2 handed back complete (`177-handback-3.md`; agent slipped one `rm` of its own scratch shots). Lead re-ran ios-check (exit 0, 181); committed. Re-check in 178.
+- 2026-11-07: accepted after re-check 178.

@@ -31,3 +31,10 @@ rm -rf ~/.herdr/worktrees/ripit-fitness/worktree-brave-field-c150/ios/build
 # Worktrees used only for this run (branches are kept): worktree5 = feature/ios-programs (merged), worktree6 = detached review copy
 git -C ~/projects/ripit-fitness worktree remove ~/projects/worktrees/ripit-fitness/worktree6
 git -C ~/projects/ripit-fitness worktree remove ~/projects/worktrees/ripit-fitness/worktree5
+
+# Slice 5 run (items 173-178)
+for id in 06CEC7E3-537B-4866-8153-F71E8CC87FA1 AC0A4C20-488B-4434-B0C3-0B1B31447959; do
+  xcrun simctl shutdown "$id" 2>/dev/null; xcrun simctl delete "$id"
+done
+rm -rf "$SP/-Users-dustin--herdr-worktrees-ripit-fitness-worktree-brave-field-c150/"{dc0702dd-f34d-46ac-8b2a-ec5acf33b91b,44afb9af-41a6-40d7-89a7-85bb6d797219,ba850211-9970-4a09-8ca1-a87a94c21da7}
+rm -f "${TMPDIR:-/tmp}"/ioscheck{5,6,7,8}.log

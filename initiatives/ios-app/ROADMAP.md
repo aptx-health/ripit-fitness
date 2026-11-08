@@ -3,7 +3,7 @@
 A native iPhone version of Ripit. Data lives on the phone; the web app stays as it is.
 Updated by the lead at each checkpoint. The full log is in `status.md`.
 
-**Now:** slice 5 — all fixes in (181 tests green, largest-text sweep done). 178 final re-check running (parity-disco).
+**Now:** slice 5 done and on the Hub for Dustin (`ios-slice5-logging-help`). Slice 6 next: spec to write, then confirm.
 
 ## Done (first sweep, 2026-11-07)
 
@@ -19,7 +19,7 @@ Updated by the lead at each checkpoint. The full log is in `status.md`.
 
 | # | Slice | Size | State | Items |
 |---|---|---|---|---|
-| 5 | **Logging help:** rest timer, workout clock, "Last time" line, RPE/RIR, warm-up sets, Info / Notes / History per exercise, confirm before Finish | M | 🔍 re-check (178) | 174 tests · 175 build · 176 review |
+| 5 | **Logging help:** rest timer, workout clock, "Last time" line, RPE/RIR, warm-up sets, Info / Notes / History per exercise, confirm before Finish | M | ✅ accepted (Dustin to try on phone) | 174–178 |
 | 6 | **Finish summary + saved workouts:** summary at the end, save to repeat, Library › Workouts, Pinned/Repeat on Training | M | ⏳ | |
 | 7 | **Settings + look:** Settings tab, themes (incl. e-ink), effort defaults, web font/corners/folder tabs | M | ⏳ | |
 | 8 | **Picker + custom exercises:** filters, pick several, create your own | S–M | ⏳ | |
@@ -39,7 +39,11 @@ Left out for now: coaching, community publishing, accounts, admin.
 - iOS: effort can't be changed when editing a logged set; Last time lacks the relative date and per-set "last:" hints (176, after slice 7).
 - iOS and web: a planned weight ("275lbs") isn't prefilled, so a set logged untouched saves as bodyweight on iOS (176; the web prefills 0 the same way).
 
+- iOS: program screen title breaks mid-word and the superset badge clips at the largest text size (178); fold into slice 7.
+
 ## Waiting on Dustin
+
+- Try slice 5 on your phone (`scripts/ios/install.sh`) and overrule any calls on its Hub page.
 
 - Open PRs into `dev` for `feature/ios-skeleton` and `feature/data-export`? (The web export must reach prod before you can import your real history.)
 - Run `initiatives/ios-app/handoff/cleanup.sh` when convenient.
