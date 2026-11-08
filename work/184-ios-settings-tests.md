@@ -1,6 +1,6 @@
 ---
 id: 184
-state: ready
+state: running
 waiting_on:
 executor: ios-tests
 skill: handoff-test-builder
@@ -42,3 +42,4 @@ The test-builder packet, plus the hands-on list.
 
 ## Log
 - 2026-11-07: created (ready). Dustin: match the web closely; all 13 themes.
+- 2026-11-07 22:07 MST: dispatched to ios-tests (running; context 2%, cleared)
