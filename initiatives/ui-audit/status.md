@@ -90,3 +90,5 @@
 - 2026-11-01 21:15 CDT: Dustin merged L3 (#1027) into dev. Workout screen L1–L3 complete; L3 waits for the next prod release.
 - 2026-11-01 23:40 CDT: L3 in prod (release #1029, infra #135).
 - 2026-11-07 CST: Theme page (149) approved by Dustin on the phone preview; PR into dev.
+- 2026-11-08 CST: Bug: delete from the Workout plan sheet freezes the logger (prod). Fix 156 dispatched to implementer (worktree2, fix/plan-delete-freeze). Small; test-builder skipped.
+- 2026-11-08 CST: 156 back: confirm drawn behind the plan sheet (z 60 < 90) but still modal. Fixed (z-95) with a regression test; PR into dev.

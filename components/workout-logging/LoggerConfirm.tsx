@@ -73,9 +73,11 @@ export default function LoggerConfirm({
       }}
     >
       <AlertDialog.Portal>
-        <AlertDialog.Overlay className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm" />
+        {/* z-[95]: above the Workout plan sheet (z-[90]), whose row menus confirm here; under
+            the menus and toasts (z-[100]). Behind the sheet it was hidden but still modal. */}
+        <AlertDialog.Overlay className="fixed inset-0 z-[95] bg-black/50 backdrop-blur-sm" />
         <AlertDialog.Content
-          className="fixed left-1/2 top-1/2 z-[60] w-[min(92vw,26rem)] -translate-x-1/2 -translate-y-1/2"
+          className="fixed left-1/2 top-1/2 z-[95] w-[min(92vw,26rem)] -translate-x-1/2 -translate-y-1/2"
           onCloseAutoFocus={(event) => {
             event.preventDefault()
             returnFocus()
