@@ -1,7 +1,7 @@
 ---
 id: 185
-state: waiting
-waiting_on: 184
+state: running
+waiting_on:
 executor: ios-impl
 skill: handoff-implementer
 from: lead (worktree-brave-field-c150)
@@ -24,6 +24,12 @@ Make 184's tests pass, add the Settings tab and all 13 themes, and restyle the a
 - Fix the largest-text backlog: the program title, the superset badge, and the logger's ⓘ and ···.
 - Check every screen at default and at the largest text size, in light and dark, and in at least 3 themes including E-ink. Take screenshots.
 
+## Lead decisions from 184
+- A new install starts RIPIT dark, as the tests say.
+- The logger uses Settings' default rating type when tracking is on; a planned RPE/RIR still prefills, as today.
+- Themes that don't define `accent-active` on the web don't get one on the phone.
+- 184's test files and `tokens.json` are read-only. Don't unlock them.
+
 ## Done when
 - `mise run ios-check` exits 0, with all of 184's tests passing unchanged.
 - Every scenario works when you try it by hand in your simulator.
@@ -42,3 +48,5 @@ The implementer packet, with screenshots.
 
 ## Log
 - 2026-11-07: created (waiting on 184).
+- 2026-11-07: 184 accepted; ready.
+- 2026-11-07 22:17 MST: dispatched to ios-impl (running; context 31%, cleared)

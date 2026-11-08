@@ -3,7 +3,7 @@
 A native iPhone version of Ripit. Data lives on the phone; the web app stays as it is.
 Updated by the lead at each checkpoint. The full log is in `status.md`.
 
-**Now:** slice 7, Settings + look — 184 tests being written (ios-tests, cleared). Then 185 build, 186 review. Pausing after slice 7 for Dustin's review of 5–7.
+**Now:** slice 7 — tests done (241; 145 waiting on the build). 185 build running (ios-impl, cleared). Then 186 review. Pausing after slice 7.
 
 ## Done (first sweep, 2026-11-07)
 
@@ -21,7 +21,7 @@ Updated by the lead at each checkpoint. The full log is in `status.md`.
 |---|---|---|---|---|
 | 5 | **Logging help:** rest timer, workout clock, "Last time" line, RPE/RIR, warm-up sets, Info / Notes / History per exercise, confirm before Finish | M | ✅ accepted (Dustin to try on phone) | 174–178 |
 | 6 | **Finish summary + saved workouts:** summary at the end, save to repeat, Library › Workouts, Pinned/Repeat on Training | M | ✅ accepted (Dustin to try on phone) | 179–183 |
-| 7 | **Settings + look:** Settings tab, all 13 web themes, E-ink display, workout defaults; web font, square corners, offset shadows, switching folder tabs; largest text everywhere | L | 🔨 tests (184) | 184 tests · 185 build · 186 review |
+| 7 | **Settings + look:** Settings tab, all 13 web themes, E-ink display, workout defaults; web font, square corners, offset shadows, switching folder tabs; largest text everywhere | L | 🔨 building (185) | 184 tests · 185 build · 186 review |
 | 8 | **Picker + custom exercises:** filters, pick several, create your own | S–M | ⏳ | |
 | 9 | **Export from iOS + agent round trip:** phone writes the v1 JSON; imports proposals to approve | M | ⏳ | |
 | 10 | **Leftovers:** Top set/Volume tabs, "Week N of program", skip day, complete week | S | ⏳ | |

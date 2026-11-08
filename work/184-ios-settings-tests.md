@@ -1,6 +1,6 @@
 ---
 id: 184
-state: running
+state: accepted
 waiting_on:
 executor: ios-tests
 skill: handoff-test-builder
@@ -43,3 +43,4 @@ The test-builder packet, plus the hands-on list.
 ## Log
 - 2026-11-07: created (ready). Dustin: match the web closely; all 13 themes.
 - 2026-11-07 22:07 MST: dispatched to ios-tests (running; context 2%, cleared)
+- 2026-11-07: needs decision. Lead: new install stays RIPIT dark (spec; web follows the OS until picked); keep the default rating type from Settings (web never reads it), a planned value still prefills; themes missing accent-active stay missing (copy web). Re-ran swift test: 145 issues, all from stubs. Accepted.
