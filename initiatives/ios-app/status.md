@@ -42,3 +42,4 @@
 - 2026-11-07: 177 handed back complete; lead re-ran ios-check (exit 0, 181 pass), committed a9d3a8ef. Follow-up item 7 (set rows break at the largest text size, pre-existing from slice 1) sent to ios-impl before the re-check.
 - 2026-11-07: 177 follow-up 2 (largest-text sweep: Last time, effort/warm-up controls, FolderBlock title cap) handed back; lead re-ran ios-check (exit 0, 181), committed 706316b7. 178 re-check dispatched to parity-disco.
 - 2026-11-07: 178 re-check: accept (all 176 findings closed, 10 scenarios pass by real taps, largest text clean in the logger). Lead accepted slice 5 (ios-check exit 0, 181). Hub page ios-slice5-logging-help published. Cleanup for 173–178 appended to cleanup.sh.
+- 2026-11-07: Slice 6 (finish summary + saved workouts) spec written; 179–181 confirmed (autonomous; post-workout rating left out). 179 dispatched to ios-tests.
