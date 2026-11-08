@@ -198,15 +198,7 @@ private struct HistorySetRow: View {
     let set: HistorySet
 
     var body: some View {
-        HStack {
-            Text("\(set.setNumber)").font(.subheadline.weight(.bold)).foregroundStyle(Theme.mutedForeground).frame(minWidth: 24, alignment: .leading)
-            Text(Format.weight(set.weight, set.weightUnit))
-            Text("×").foregroundStyle(Theme.mutedForeground)
-            Text("\(set.reps)")
-            SetTags(rpe: set.rpe, rir: set.rir, isWarmup: set.isWarmup)
-            Spacer()
-        }
-        .font(.body.monospacedDigit())
-        .foregroundStyle(Theme.foreground)
+        SetLine(setNumber: set.setNumber, weight: set.weight, unit: set.weightUnit, reps: set.reps,
+                rpe: set.rpe, rir: set.rir, isWarmup: set.isWarmup)
     }
 }

@@ -181,22 +181,57 @@ struct WorkoutDetailView: View {
 
 struct SetRow: View {
     let set: SetDetail
-    @ScaledMetric(relativeTo: .subheadline) private var numberWidth: CGFloat = 28
 
     var body: some View {
-        HStack {
-            Text("\(set.setNumber)")
-                .font(.subheadline.weight(.bold))
-                .foregroundStyle(Theme.mutedForeground)
-                .frame(minWidth: numberWidth, alignment: .leading)
-            Text(Format.weight(set.weight, set.weightUnit))
-            Text("×").foregroundStyle(Theme.mutedForeground)
-            Text("\(set.reps)")
-            SetTags(rpe: set.rpe, rir: set.rir, isWarmup: set.isWarmup)
-            Spacer()
+        SetLine(setNumber: set.setNumber, weight: set.weight, unit: set.weightUnit, reps: set.reps,
+                rpe: set.rpe, rir: set.rir, isWarmup: set.isWarmup)
+    }
+}
+
+/// One logged set: "1  135 lbs × 8  @ RPE 8  W". At accessibility text sizes the weight and reps are
+/// one wrapping line (so a number never breaks) with the tags under it (work item 177).
+struct SetLine: View {
+    let setNumber: Int
+    let weight: Double
+    let unit: String
+    let reps: Int
+    let rpe: Int?
+    let rir: Int?
+    let isWarmup: Bool
+    @ScaledMetric(relativeTo: .subheadline) private var numberWidth: CGFloat = 28
+    @Environment(\.dynamicTypeSize) private var typeSize
+
+    var body: some View {
+        Group {
+            if typeSize.isAccessibilitySize {
+                HStack(alignment: .firstTextBaseline) {
+                    number
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("\(Format.weight(weight, unit)) \(Text("×").foregroundStyle(Theme.mutedForeground)) \(reps)")
+                        SetTags(rpe: rpe, rir: rir, isWarmup: isWarmup)
+                    }
+                    Spacer(minLength: 0)
+                }
+            } else {
+                HStack {
+                    number
+                    Text(Format.weight(weight, unit))
+                    Text("×").foregroundStyle(Theme.mutedForeground)
+                    Text("\(reps)")
+                    SetTags(rpe: rpe, rir: rir, isWarmup: isWarmup)
+                    Spacer()
+                }
+            }
         }
         .font(.body.monospacedDigit())
         .foregroundStyle(Theme.foreground)
+    }
+
+    private var number: some View {
+        Text("\(setNumber)")
+            .font(.subheadline.weight(.bold))
+            .foregroundStyle(Theme.mutedForeground)
+            .frame(minWidth: numberWidth, alignment: .leading)
     }
 }
 
