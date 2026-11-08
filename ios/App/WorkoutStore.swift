@@ -160,7 +160,9 @@ final class WorkoutStore {
     }
 
     func attempt(_ body: () throws -> Void) {
-        do { try body() } catch { lastError = "\(error)" }
+        do { try body() } catch let saved as SavedWorkoutError {
+            lastError = saved.message
+        } catch { lastError = "\(error)" }
     }
 }
 

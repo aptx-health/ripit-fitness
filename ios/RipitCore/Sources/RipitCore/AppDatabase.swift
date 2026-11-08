@@ -266,7 +266,7 @@ public final class AppDatabase: Sendable {
     }
 
     static func detail(_ db: Database, _ id: String) throws -> WorkoutDetail {
-        guard let c = try Row.fetchOne(db, sql: "SELECT startedAt, completedAt, workoutId FROM workoutCompletion WHERE id = ?", arguments: [id]) else {
+        guard let c = try Row.fetchOne(db, sql: "SELECT startedAt, completedAt, workoutId, name FROM workoutCompletion WHERE id = ?", arguments: [id]) else {
             throw RipitCoreError.notFound("workout \(id)")
         }
         let sets = try Row.fetchAll(db, sql: """
@@ -300,6 +300,6 @@ public final class AppDatabase: Sendable {
                 })
         }
         return WorkoutDetail(id: id, startedAt: c["startedAt"] ?? Date(timeIntervalSince1970: 0),
-                             completedAt: c["completedAt"], exercises: exercises)
+                             completedAt: c["completedAt"], exercises: exercises, name: c["name"])
     }
 }

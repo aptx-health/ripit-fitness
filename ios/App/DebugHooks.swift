@@ -42,7 +42,10 @@
 //   -demoFinishNow YES  finish the open workout without the confirmation (the summary follows)
 //   -demoSaved YES      with -demoHistory: save the newest workout, pin it, and save and archive the oldest
 //   -demoLibraryTab YES start on Library › Workouts
-//   -demoLibrary <s>    there, open older | archived | both | detail (the first row's plan) | delete;
+//   -demoLibrary <s>    there, open older | archived | both | detail (the first row's plan) |
+//                       delete (the first Older row's prompt, else the first row's; 182);
+//                       rename (the first row's Rename, cleared); renameError (a blank rename sent anyway);
+//                       pinned (scrolls to the Pinned group);
 //                       "bottom" opens both folds and scrolls to the end
 //   -demoStartPinned YES  tap Start on Training's first pinned workout
 //   -demoRepeat YES     tap Repeat on Training's first recent workout
@@ -164,7 +167,7 @@ enum DebugHooks {
     /// -demoLibrary: opens a fold, the first row's plan, or the delete prompt, once.
     @MainActor
     static func openLibrary(store: WorkoutStore, older: inout Bool, archived: inout Bool,
-                            detail: inout SavedWorkoutSummary?, deleting: inout SavedWorkoutSummary?) {
+                            detail: inout SavedWorkoutSummary?, deleting: inout String?) {
         #if DEBUG
         guard !openedLibrary, let screen = UserDefaults.standard.string(forKey: "demoLibrary") else { return }
         openedLibrary = true
@@ -175,13 +178,35 @@ enum DebugHooks {
         case "archived": archived = true
         case "both", "bottom": (older, archived) = (true, true)
         case "detail": detail = first
-        case "delete": deleting = first
+        case "delete":
+            older = true
+            deleting = (g.older.first ?? first)?.id
         default: break
         }
         #endif
     }
 
     @MainActor private static var openedLibrary = false
+
+    /// -demoLibrary rename: the row whose Rename alert opens, cleared. renameError instead sends a
+    /// blank rename past the alert, to show the error message (work item 182).
+    @MainActor
+    static func libraryRename(store: WorkoutStore) -> SavedWorkoutSummary? {
+        #if DEBUG
+        let screen = UserDefaults.standard.string(forKey: "demoLibrary")
+        guard !openedRename, screen == "rename" || screen == "renameError", let first = store.savedGroups.all.first else { return nil }
+        openedRename = true
+        if screen == "renameError" {
+            store.renameSavedWorkout(first.id, to: "  ")
+            return nil
+        }
+        return first
+        #else
+        return nil
+        #endif
+    }
+
+    @MainActor private static var openedRename = false
 
     @MainActor
     private static func applyProgramDemo(store: WorkoutStore) {

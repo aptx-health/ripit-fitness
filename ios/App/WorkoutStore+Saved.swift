@@ -61,3 +61,18 @@ extension WorkoutStore {
         showingWorkout = current != nil
     }
 }
+
+extension SavedWorkoutError {
+    /// What to tell the person, in plain English (work item 182).
+    var message: String {
+        switch self {
+        case .nameRequired: "Give the workout a name."
+        case .nameTooLong: "Keep the name to 100 characters or fewer."
+        case .notesTooLong: "Keep the notes to 2,000 characters or fewer."
+        case .notFinished: "Finish the workout before saving it."
+        case .notAdHoc: "Only ad-hoc workouts can be saved. Program workouts stay in their program."
+        case .workoutOpen: "Finish or discard the workout in progress first."
+        case .nothingToRepeat: "This workout has no logged sets to repeat."
+        }
+    }
+}

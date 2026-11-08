@@ -78,7 +78,7 @@ struct WorkoutView: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .background(Theme.background)
-        .navigationTitle(sessionName ?? "Workout")
+        .navigationTitle(sessionName ?? store.current?.name ?? "Workout")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {

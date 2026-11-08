@@ -65,9 +65,10 @@ extension WorkoutStore {
         return Format.sessionTitle(program: p.name, week: week.weekNumber, workout: w.name)
     }
 
-    /// What the workout in progress is called: its program workout, else "Ad-hoc workout".
+    /// What the workout in progress is called: its program workout, else its own name (a started saved
+    /// workout or a repeat, work item 182), else "Ad-hoc workout".
     var currentTitle: String {
-        session.flatMap { programWorkoutTitle($0.workoutId) } ?? "Ad-hoc workout"
+        session.flatMap { programWorkoutTitle($0.workoutId) } ?? current?.name ?? "Ad-hoc workout"
     }
 
     @discardableResult

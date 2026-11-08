@@ -175,12 +175,16 @@ public struct WorkoutDetail: Sendable, Equatable, Identifiable {
     public let completedAt: Date?
     /// In the order they were added.
     public let exercises: [ExerciseDetail]
+    /// The workout's own name (work item 182): a started saved workout's or a repeated workout's.
+    /// nil for a plain ad-hoc workout or a program session, which is named after its program workout.
+    public let name: String?
 
-    public init(id: String, startedAt: Date, completedAt: Date?, exercises: [ExerciseDetail]) {
+    public init(id: String, startedAt: Date, completedAt: Date?, exercises: [ExerciseDetail], name: String? = nil) {
         self.id = id
         self.startedAt = startedAt
         self.completedAt = completedAt
         self.exercises = exercises
+        self.name = name
     }
 }
 

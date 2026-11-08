@@ -12,7 +12,8 @@ struct LibraryView: View {
     @State private var detail: SavedWorkoutSummary?
     @State private var renaming: SavedWorkoutSummary?
     @State private var newName = ""
-    @State private var deleting: SavedWorkoutSummary?
+    /// -demoLibrary delete: the row whose delete prompt opens at launch.
+    @State private var demoDeleteId: String?
     /// Started from the detail sheet; starts once the sheet has closed.
     @State private var startAfterDetail: SavedWorkoutSummary?
 
@@ -49,7 +50,7 @@ struct LibraryView: View {
                         section("Recent", g.recent) { row($0) }
                         fold("Older", g.older, isOpen: $showOlder) { row($0) }
                         fold("Show archived", g.archived, isOpen: $showArchived) { item in
-                            ArchivedRow(item: item, open: { detail = $0 }, delete: { deleting = $0 })
+                            ArchivedRow(item: item, open: { detail = $0 }, demoDelete: item.id == demoDeleteId)
                         }
                     }
                 }
@@ -60,6 +61,9 @@ struct LibraryView: View {
         .onAppear {
             if DebugHooks.string("demoLibrary") == "bottom" {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { proxy.scrollTo("end", anchor: .bottom) }
+            }
+            if DebugHooks.string("demoLibrary") == "pinned" {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { proxy.scrollTo("Pinned", anchor: .top) }
             }
         }
         }
@@ -85,16 +89,8 @@ struct LibraryView: View {
                 if let item = renaming { store.renameSavedWorkout(item.id, to: newName) }
                 renaming = nil
             }
-        }
-        .confirmationDialog("Delete \(deleting?.name ?? "")?", isPresented: Binding(get: { deleting != nil }, set: { if !$0 { deleting = nil } }),
-                            titleVisibility: .visible, presenting: deleting) { item in
-            Button("Delete", role: .destructive) {
-                store.deleteSavedWorkout(item.id)
-                deleting = nil
-            }
-            Button("Cancel", role: .cancel) { deleting = nil }
-        } message: { _ in
-            Text("It's removed from your saved workouts. Workouts you did from it stay in history.")
+            // Like Save: a blank name can't be sent.
+            .disabled(newName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
         }
         .alert("Something went wrong", isPresented: Binding(get: { store.lastError != nil && !store.showingWorkout },
                                                             set: { if !$0 { store.lastError = nil } })) {
@@ -104,7 +100,11 @@ struct LibraryView: View {
         }
         .onAppear {
             store.reload()
-            DebugHooks.openLibrary(store: store, older: &showOlder, archived: &showArchived, detail: &detail, deleting: &deleting)
+            DebugHooks.openLibrary(store: store, older: &showOlder, archived: &showArchived, detail: &detail, deleting: &demoDeleteId)
+            if let first = DebugHooks.libraryRename(store: store) {
+                newName = ""
+                renaming = first
+            }
         }
     }
 
@@ -112,13 +112,13 @@ struct LibraryView: View {
         SavedRow(item: item, open: { detail = $0 }, rename: {
             newName = $0.name
             renaming = $0
-        }, delete: { deleting = $0 })
+        }, demoDelete: item.id == demoDeleteId)
     }
 
     @ViewBuilder
     private func section<Row: View>(_ title: String, _ items: [SavedWorkoutSummary], @ViewBuilder row: @escaping (SavedWorkoutSummary) -> Row) -> some View {
         if !items.isEmpty {
-            GroupHeading(title: title)
+            GroupHeading(title: title).id(title)
             ForEach(items) { item in
                 RowDivider()
                 row(item)
@@ -204,31 +204,54 @@ private struct RowTitle: View {
     }
 }
 
-/// A Pinned, Recent or Older row: pin toggle and a menu with Rename, Archive and Delete.
+/// A Pinned, Recent or Older row: pin toggle and a menu with Rename, Archive and Delete. At
+/// accessibility text sizes the two buttons sit under the name, spaced apart.
 private struct SavedRow: View {
     @Environment(WorkoutStore.self) private var store
+    @Environment(\.dynamicTypeSize) private var typeSize
     let item: SavedWorkoutSummary
     let open: (SavedWorkoutSummary) -> Void
     let rename: (SavedWorkoutSummary) -> Void
-    let delete: (SavedWorkoutSummary) -> Void
+    var demoDelete = false
+    @State private var confirmingDelete = false
 
     var body: some View {
-        HStack(spacing: 0) {
-            RowTitle(item: item, open: open)
-            PinButton(name: item.name, pinned: item.pinnedAt != nil) { store.pinSavedWorkout(item.id, $0) }
-            Menu {
-                Button("Rename", systemImage: "pencil") { rename(item) }
-                Button("Archive", systemImage: "archivebox") { store.archiveSavedWorkout(item.id) }
-                Button("Delete", systemImage: "trash", role: .destructive) { delete(item) }
-            } label: {
-                Image(systemName: "ellipsis")
-                    .frame(width: Theme.touch, height: Theme.touch)
-                    .contentShape(Rectangle())
+        if typeSize.isAccessibilitySize {
+            VStack(alignment: .leading, spacing: 4) {
+                RowTitle(item: item, open: open)
+                HStack(spacing: 24) { pin; menu }
+                    .padding(.leading, 8)
+                    .padding(.bottom, 8)
             }
-            .foregroundStyle(Theme.mutedForeground)
-            .accessibilityLabel("Actions for \(item.name)")
+        } else {
+            HStack(spacing: 0) {
+                RowTitle(item: item, open: open)
+                pin
+                menu
+            }
+            .padding(.trailing, 4)
         }
-        .padding(.trailing, 4)
+    }
+
+    private var pin: some View {
+        PinButton(name: item.name, pinned: item.pinnedAt != nil) { store.pinSavedWorkout(item.id, $0) }
+    }
+
+    private var menu: some View {
+        Menu {
+            Button("Rename", systemImage: "pencil") { rename(item) }
+            Button("Archive", systemImage: "archivebox") { store.archiveSavedWorkout(item.id) }
+            Button("Delete", systemImage: "trash", role: .destructive) { confirmingDelete = true }
+        } label: {
+            Image(systemName: "ellipsis")
+                .frame(minWidth: Theme.touch, minHeight: Theme.touch)
+                .contentShape(Rectangle())
+        }
+        .foregroundStyle(Theme.mutedForeground)
+        .accessibilityLabel("Actions for \(item.name)")
+        // On the row's own button, so the prompt points at the workout being deleted.
+        .deleteConfirmation(item, isPresented: $confirmingDelete)
+        .onAppear { if demoDelete { confirmingDelete = true } }
     }
 }
 
@@ -258,7 +281,8 @@ private struct ArchivedRow: View {
     @Environment(WorkoutStore.self) private var store
     let item: SavedWorkoutSummary
     let open: (SavedWorkoutSummary) -> Void
-    let delete: (SavedWorkoutSummary) -> Void
+    var demoDelete = false
+    @State private var confirmingDelete = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -267,10 +291,34 @@ private struct ArchivedRow: View {
                 Button("Restore") { store.restoreSavedWorkout(item.id) }
                     .buttonStyle(OutlineButtonStyle())
                     .accessibilityLabel("Restore \(item.name)")
-                Button("Delete") { delete(item) }
+                Button("Delete") { confirmingDelete = true }
                     .buttonStyle(OutlineButtonStyle(tint: Theme.error))
                     .accessibilityLabel("Delete \(item.name)")
+                    .deleteConfirmation(item, isPresented: $confirmingDelete)
             }
+        }
+        .onAppear { if demoDelete { confirmingDelete = true } }
+    }
+}
+
+private extension View {
+    /// Delete asks first, anchored to the view it's attached to.
+    func deleteConfirmation(_ item: SavedWorkoutSummary, isPresented: Binding<Bool>) -> some View {
+        modifier(DeleteConfirmation(item: item, isPresented: isPresented))
+    }
+}
+
+private struct DeleteConfirmation: ViewModifier {
+    @Environment(WorkoutStore.self) private var store
+    let item: SavedWorkoutSummary
+    @Binding var isPresented: Bool
+
+    func body(content: Content) -> some View {
+        content.confirmationDialog("Delete \(item.name)?", isPresented: $isPresented, titleVisibility: .visible) {
+            Button("Delete", role: .destructive) { store.deleteSavedWorkout(item.id) }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("It's removed from your saved workouts. Workouts you did from it stay in history.")
         }
     }
 }
@@ -295,7 +343,7 @@ struct PinButton: View {
     var body: some View {
         Button { toggle(!pinned) } label: {
             Image(systemName: pinned ? "pin.fill" : "pin")
-                .frame(width: Theme.touch, height: Theme.touch)
+                .frame(minWidth: Theme.touch, minHeight: Theme.touch)
                 .contentShape(Rectangle())
         }
         .foregroundStyle(pinned ? Theme.secondary : Theme.mutedForeground)
