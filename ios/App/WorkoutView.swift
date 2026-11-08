@@ -277,10 +277,13 @@ private struct ExerciseLogger: View {
                     LastTimeLine(last: last, fill: use)
                 }
                 entryRow
-                HStack(spacing: 8) {
+                // Side by side normally; stacked at accessibility text sizes, like entryRow.
+                let extras = typeSize.isAccessibilitySize
+                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8)) : AnyLayout(HStackLayout(spacing: 8))
+                extras {
                     if editingSet == nil { EffortMenu(kind: effortKind, value: $effort) }
                     WarmupToggle(isOn: $warmup)
-                    Spacer(minLength: 0)
+                    if !typeSize.isAccessibilitySize { Spacer(minLength: 0) }
                 }
             }
         }

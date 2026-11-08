@@ -74,10 +74,14 @@ struct FolderBlock<Content: View, Trailing: View>: View {
                     .tracking(1)
                     .foregroundStyle(tone.label)
                     .fixedSize(horizontal: false, vertical: true)
+                    // Capped so one long word ("CONVENTIONAL") still fits the width instead of hyphenating.
+                    .dynamicTypeSize(...DynamicTypeSize.accessibility2)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 7)
                     .background(tone.fill, in: UnevenRoundedRectangle(topLeadingRadius: 8, topTrailingRadius: 8))
-                Spacer()
+                    // The title gets the width first, so a long name at large text sizes wraps between words.
+                    .layoutPriority(1)
+                Spacer(minLength: 0)
                 trailing()
             }
             VStack(alignment: .leading, spacing: 0, content: content)

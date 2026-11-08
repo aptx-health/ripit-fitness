@@ -78,23 +78,30 @@ struct EffortKindToggle: View {
 struct LastTimeLine: View {
     let last: LastTime
     let fill: (Prefill) -> Void
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         Button { if let f = last.fill { fill(f) } } label: {
-            HStack(spacing: 8) {
-                Image(systemName: "clock.arrow.circlepath").foregroundStyle(Theme.primary)
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack(spacing: 6) {
-                        Text("LAST TIME").font(.caption2.weight(.bold)).tracking(1).foregroundStyle(Theme.mutedForeground)
-                        Text(Format.day(last.completedAt)).font(.caption2).foregroundStyle(Theme.mutedForeground)
+            Group {
+                // At accessibility text sizes everything stacks: label, date, summary, then "Use".
+                if typeSize.isAccessibilitySize {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 6) { icon; label }
+                        date
+                        summary
+                        if last.fill != nil { use }
                     }
-                    Text(last.summary ?? "Warm-ups only")
-                        .font(.subheadline.monospacedDigit().weight(.semibold))
-                        .foregroundStyle(last.summary == nil ? Theme.mutedForeground : Theme.foreground)
-                }
-                Spacer(minLength: 0)
-                if last.fill != nil {
-                    Text("Use").font(.caption.weight(.bold)).foregroundStyle(Theme.primary)
+                    .padding(.vertical, 8)
+                } else {
+                    HStack(spacing: 8) {
+                        icon
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack(spacing: 6) { label; date }
+                            summary
+                        }
+                        Spacer(minLength: 0)
+                        if last.fill != nil { use }
+                    }
                 }
             }
             .padding(.horizontal, 12)
@@ -109,12 +116,25 @@ struct LastTimeLine: View {
         .accessibilityLabel("Last time, \(Format.day(last.completedAt)): \(last.summary ?? "warm-ups only")")
         .accessibilityHint(last.fill == nil ? "" : "Fills the next set")
     }
+
+    private var icon: some View { Image(systemName: "clock.arrow.circlepath").foregroundStyle(Theme.primary) }
+    private var label: some View {
+        Text("LAST TIME").font(.caption2.weight(.bold)).tracking(1).foregroundStyle(Theme.mutedForeground)
+    }
+    private var date: some View { Text(Format.day(last.completedAt)).font(.caption2).foregroundStyle(Theme.mutedForeground) }
+    private var summary: some View {
+        Text(last.summary ?? "Warm-ups only")
+            .font(.subheadline.monospacedDigit().weight(.semibold))
+            .foregroundStyle(last.summary == nil ? Theme.mutedForeground : Theme.foreground)
+    }
+    private var use: some View { Text("Use").font(.caption.weight(.bold)).foregroundStyle(Theme.primary) }
 }
 
 /// Pick an effort from the web's presets, or none.
 struct EffortMenu: View {
     let kind: EffortKind
     @Binding var value: Int?
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         Menu {
@@ -135,7 +155,9 @@ struct EffortMenu: View {
             }
             .font(.subheadline.weight(.semibold))
             .padding(.horizontal, 12)
-            .frame(minWidth: 88, minHeight: Theme.touch)
+            // Full width on its own line at accessibility text sizes (see ExerciseLogger).
+            .frame(minWidth: 88, maxWidth: typeSize.isAccessibilitySize ? .infinity : nil, minHeight: Theme.touch,
+                   alignment: .leading)
             .background(Theme.muted, in: RoundedRectangle(cornerRadius: 8))
             .foregroundStyle(Theme.foreground)
         }
@@ -146,6 +168,7 @@ struct EffortMenu: View {
 /// Marks the next set (or the set being changed) as a warm-up.
 struct WarmupToggle: View {
     @Binding var isOn: Bool
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         Button { isOn.toggle() } label: {
@@ -155,7 +178,7 @@ struct WarmupToggle: View {
             }
             .font(.subheadline.weight(.semibold))
             .padding(.horizontal, 12)
-            .frame(minHeight: Theme.touch)
+            .frame(maxWidth: typeSize.isAccessibilitySize ? .infinity : nil, minHeight: Theme.touch, alignment: .leading)
             .background(isOn ? Theme.accent.opacity(0.2) : Theme.muted, in: RoundedRectangle(cornerRadius: 8))
             .foregroundStyle(isOn ? Theme.foreground : Theme.mutedForeground)
         }
