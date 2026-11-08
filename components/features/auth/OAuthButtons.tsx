@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { trackEvent } from '@/lib/analytics'
+import { currentReturnPath, withReturnPath } from '@/lib/auth/return-path'
 import { signIn } from '@/lib/auth-client'
 import {
   getAttribution,
@@ -46,10 +47,12 @@ export function OAuthButtons({ intent = 'login' }: OAuthButtonsProps = {}) {
     }
 
     try {
+      // Onboarding sends an onboarded user on to the return path (a coach invite, say).
+      const next = currentReturnPath()
       await signIn.social({
         provider,
-        callbackURL: '/onboarding',
-        errorCallbackURL: '/login',
+        callbackURL: withReturnPath('/onboarding', next),
+        errorCallbackURL: withReturnPath('/login', next),
       })
     } catch {
       setError(`Could not connect to ${provider === 'google' ? 'Google' : 'Discord'}. Please try again or sign in with email.`)

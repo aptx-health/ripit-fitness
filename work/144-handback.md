@@ -1,0 +1,7 @@
+Report: needs decision → resolved by lead
+144 workout library slice 3 tests (test-builder, 2026-11-07). Locked: __tests__/features/workout-library/origin-new-archive.steps.ts (33), __tests__/lib/saved-workout-groups-new.test.ts (8). 40 red for the right reasons (no origin/archivedAt, no backfill, no new/archived groups, no New region/Archive/Show archived, MCP fields). Fake 74/74 twice; break matrix 34/34. Suite 4190 pass apart from the new ones.
+Pinned in the header: PATCH /api/workouts/saved/[id] {archived: boolean} (400 non-boolean, 404 other user), archive response carries what Undo needs (exact old pinnedAt); Undo is an action on the real toast; labels "From <agent token name>", Start…, Dismiss…, Archive, "Show archived (n)" last with Restore…/Delete…; every list/menu button 48px (Rename/Delete need min-h-12); quick sheet counts unarchived only.
+Not verified: 390px look; perf:tap; backfill status='applied' filter not observable.
+Needs a call: (1) restore vs Undo-after-Dismiss needs another field (rec dismissedAt); (2) pinned beats New; (3) MCP order ignores pins.
+Outside: revertProposal on an archived agent workout.
+Lead decisions: (1) add `dismissedAt`: Dismiss sets archivedAt + dismissedAt; Undo clears both; Restore clears archivedAt and sets dismissedAt if unset, so it never lands in New. (2) pinned beats New: yes. (3) MCP order ignores pins: yes, `pinned` is in each row. Revert: archiving is not an edit, so revert still deletes an unstarted archived agent workout.

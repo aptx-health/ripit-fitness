@@ -3,6 +3,7 @@
 import { Bookmark, BookOpen, Compass, ListChecks } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
+import type { Trainee } from '@/components/coaching/SendToTrainee'
 import CommunityProgramsView from '@/components/community/CommunityProgramsView'
 import SavedWorkoutsList from '@/components/features/saved-workouts/SavedWorkoutsList'
 import MyProgramsList from '@/components/programs/MyProgramsList'
@@ -55,6 +56,8 @@ type Props = {
   customProgramLimitBypass: boolean
   /** Saved workouts, for the Workouts tab's chip; kept current by the list once it loads. */
   savedWorkoutCount?: number
+  /** The user's trainees, for Send on program and workout panels (none: no Send). */
+  trainees?: Trainee[]
 }
 
 /** The tab ids PaperTabs reports, checked before they reach the state. */
@@ -76,6 +79,7 @@ export default function LibraryView({
   isAdmin,
   customProgramLimitBypass,
   savedWorkoutCount,
+  trainees = [],
 }: Props) {
   const [savedCount, setSavedCount] = useState(savedWorkoutCount)
   // A new server count (after router.refresh()) replaces whatever the list last reported.
@@ -331,7 +335,7 @@ export default function LibraryView({
               <>
                 {/* The tab names the box; the heading stays for screen-reader navigation. */}
                 <h2 className="sr-only">My workouts</h2>
-                <SavedWorkoutsList onCountChange={setSavedCount} />
+                <SavedWorkoutsList onCountChange={setSavedCount} trainees={trainees} />
               </>
             )}
           </div>
@@ -383,6 +387,7 @@ export default function LibraryView({
                           hasAccess={hasAccess}
                           bypassLimit={bypassLimit}
                           maxPrograms={maxPrograms}
+                          trainees={trainees}
                         />
                       ) : (
                         <CommunityProgramsView

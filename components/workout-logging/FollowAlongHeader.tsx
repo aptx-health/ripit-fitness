@@ -23,15 +23,8 @@ function ProgressIndicator({ current, total }: { current: number; total: number 
         return (
           <div
             key={exerciseIndex}
-            className="h-[5px] flex-1 transition-colors"
-            style={{
-              backgroundColor: exerciseIndex <= current
-                ? 'var(--primary)'
-                : 'rgba(0,0,0,0.25)',
-              boxShadow: exerciseIndex <= current
-                ? undefined
-                : 'inset 0 1px 0 rgba(0,0,0,0.20)',
-            }}
+            data-done={exerciseIndex <= current ? '' : undefined}
+            className="fa-segment h-[5px] flex-1 transition-colors"
           />
         )
       })}

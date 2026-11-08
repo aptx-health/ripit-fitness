@@ -126,14 +126,19 @@ function SuggestionsSection({ count, items }: { count: number; items: Suggestion
               {suggestionKindLabel(newest.kind)}
             </span>
             <h3 className="mt-1.5 text-xl font-bold leading-tight text-foreground break-words">{newest.title}</h3>
+            <p className="text-sm font-semibold text-foreground break-words">From {newest.from}</p>
             <p className="text-sm text-muted-foreground">
               {newest.exerciseCount != null && `${pluralize(newest.exerciseCount, 'exercise')} · `}
               suggested <SuggestedDay date={newest.createdAt} />
             </p>
-            {/* Quote marks in CSS, so the text is the rationale exactly. */}
-            <blockquote className="my-3 border-l-[3px] border-accent pl-2.5 text-sm text-muted-foreground line-clamp-2 break-words before:content-['“'] after:content-['”']">
-              {newest.rationale}
-            </blockquote>
+            {/* Quote marks in CSS, so the text is the rationale exactly. A coach's send may have no note. */}
+            {newest.rationale ? (
+              <blockquote className="my-3 border-l-[3px] border-accent pl-2.5 text-sm text-muted-foreground line-clamp-2 break-words before:content-['“'] after:content-['”']">
+                {newest.rationale}
+              </blockquote>
+            ) : (
+              <div className="h-3" />
+            )}
             <Link
               href={`/suggestions/${newest.id}`}
               className="flex w-full items-center justify-center px-4 py-3 bg-accent text-accent-foreground hover:bg-accent-hover doom-focus-ring font-bold uppercase tracking-wider text-sm"
@@ -159,7 +164,10 @@ function SuggestionsSection({ count, items }: { count: number; items: Suggestion
                   <span className="w-16 shrink-0 text-[10px] font-bold uppercase tracking-wider text-accent-text">
                     {suggestionKindShortLabel(item.kind)}
                   </span>
-                  <span className="flex-1 min-w-0 truncate">{item.title}</span>
+                  <span className="flex-1 min-w-0">
+                    <span className="block truncate">{item.title}</span>
+                    <span className="block truncate text-xs text-muted-foreground">From {item.from}</span>
+                  </span>
                   <ChevronRight size={16} className="shrink-0 text-muted-foreground" aria-hidden="true" />
                 </Link>
               </li>

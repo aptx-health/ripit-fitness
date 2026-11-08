@@ -12,7 +12,7 @@
 
 import { clientLogger } from '@/lib/client-logger';
 
-export type ThemeName = 'doom' | 'cyber' | 'forest' | 'synthwave' | 'dracula' | 'github' | 'ripit' | 'catppuccin' | 'clyde' | 'ninety' | 'blossom' | 'okabe';
+export type ThemeName = 'doom' | 'cyber' | 'forest' | 'synthwave' | 'dracula' | 'github' | 'ripit' | 'catppuccin' | 'clyde' | 'ninety' | 'blossom' | 'okabe' | 'eink';
 export type ThemeMode = 'light' | 'dark';
 
 export interface ThemePreference {
@@ -26,7 +26,7 @@ export interface ThemePreference {
 
 // NOTE: These lists are duplicated in the inline scripts in app/layout.tsx and app/(auth)/layout.tsx.
 // Inline scripts can't import modules, so keep all three in sync when adding/removing themes.
-export const THEMES: ThemeName[] = ['ripit', 'doom', 'catppuccin', 'cyber', 'forest', 'synthwave', 'dracula', 'github', 'clyde', 'ninety', 'blossom', 'okabe'];
+export const THEMES: ThemeName[] = ['ripit', 'doom', 'catppuccin', 'cyber', 'forest', 'synthwave', 'dracula', 'github', 'clyde', 'ninety', 'blossom', 'okabe', 'eink'];
 export const MODES: ThemeMode[] = ['light', 'dark'];
 
 export const DEFAULT_THEME: ThemePreference = {
@@ -47,7 +47,22 @@ export const THEME_LABELS: Record<ThemeName, string> = {
   ninety: '90s KID',
   blossom: 'BLOSSOM',
   okabe: 'OKABE',
+  eink: 'E-INK',
 };
+
+/** Themes with no dark mode: a stored dark preference is read as light. */
+export const LIGHT_ONLY_THEMES: ThemeName[] = ['eink'];
+
+export function isLightOnly(themeName: ThemeName): boolean {
+  return LIGHT_ONLY_THEMES.includes(themeName);
+}
+
+/** The preference as it can be shown: light-only themes are always light. */
+export function normalizePreference(preference: ThemePreference): ThemePreference {
+  return isLightOnly(preference.themeName) && preference.mode !== 'light'
+    ? { ...preference, mode: 'light' }
+    : preference;
+}
 
 const STORAGE_KEY = 'themePreference';
 const OLD_STORAGE_KEY = 'darkMode';
@@ -83,7 +98,7 @@ function getFromCookie(): ThemePreference | null {
     if (name === COOKIE_KEY && val) {
       const [themeName, mode] = val.split(':') as [ThemeName, ThemeMode];
       if (THEMES.includes(themeName) && MODES.includes(mode)) {
-        return { themeName, mode };
+        return normalizePreference({ themeName, mode });
       }
     }
   }
@@ -97,10 +112,10 @@ function getFromCookie(): ThemePreference | null {
 /**
  * Gets the system's preferred color scheme
  */
-function getSystemPreference(): ThemeMode {
+export function getSystemPreference(): ThemeMode {
   if (typeof window === 'undefined') return 'dark';
 
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
+  return window.matchMedia?.('(prefers-color-scheme: dark)').matches
     ? 'dark'
     : 'light';
 }
@@ -112,7 +127,13 @@ function getSystemPreference(): ThemeMode {
 function migrateOldFormat(): ThemePreference | null {
   if (typeof window === 'undefined') return null;
 
-  const oldValue = localStorage.getItem(OLD_STORAGE_KEY);
+  let oldValue: string | null = null;
+  try {
+    oldValue = localStorage.getItem(OLD_STORAGE_KEY);
+  } catch {
+    // Storage blocked: nothing to migrate.
+    return null;
+  }
   if (oldValue === null) return null;
 
   // Migrate: darkMode='true' → {themeName: 'doom', mode: 'dark'}
@@ -123,11 +144,15 @@ function migrateOldFormat(): ThemePreference | null {
     mode,
   };
 
-  // Save in new format
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(preference));
+  try {
+    // Save in new format
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(preference));
 
-  // Remove old key
-  localStorage.removeItem(OLD_STORAGE_KEY);
+    // Remove old key
+    localStorage.removeItem(OLD_STORAGE_KEY);
+  } catch {
+    // Storage blocked: the migrated preference still applies this time.
+  }
 
   return preference;
 }
@@ -155,7 +180,7 @@ export function getThemePreference(): ThemePreference {
         THEMES.includes(parsed.themeName) &&
         MODES.includes(parsed.mode)
       ) {
-        return parsed;
+        return normalizePreference(parsed);
       }
     }
   } catch (error) {

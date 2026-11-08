@@ -17,6 +17,11 @@ Rate limiting is enforced at the API-route layer using [`rate-limiter-flexible`]
 | T7 — heavy reads | `progressReadLimiter` | 60 / 60s | userId | `GET /api/progress/week` (nine weeks of sets per request), an exception to the read-endpoint policy below |
 | T8 — pinned lifts | `progressPinsLimiter` | 30 / 60s | userId | `PUT /api/progress/pins` (replaces the user's pinned lifts; one call per pin, unpin or editor save) |
 | T9 — lift history | `progressLiftLimiter` | 30 / 60s | userId | `GET /api/progress/lift/[id]` (every working set of one lift per request; the per-lift page and its pinned-lift chips), an exception to the read-endpoint policy below |
+| T10 — coaching invites | `coachInviteLimiter` | 10 / 3600s | userId | `POST /api/coaching/invites` (coaching: make an invite link) |
+| T10 — coaching accept | `coachAcceptLimiter` | 10 / 60s | userId **and** IP | `POST /api/coaching/invites/accept` (coaching: accept an invite; each key checked on its own) |
+| T10 — coaching links | `coachLinkLimiter` | 20 / 60s | userId | `DELETE /api/coaching/invites/[id]` and `DELETE /api/coaching/links/[id]` (coaching: revoke an invite, end a link) |
+| T10 — coaching send | `coachSendLimiter` | 30 / 3600s | userId | `POST /api/coaching/send` (coaching: send a program or saved workout to a trainee) |
+| T10 — coaching trainees | `coachTraineesLimiter` | 60 / 60s | userId | `GET /api/coaching/trainees` (coaching: the Send button's trainee list) |
 
 BetterAuth handles its own rate limiting on everything under `/api/auth/[...all]` (sign-in, sign-up, password reset, etc.). The `RELAXED_RATE_LIMITS` env var should be unset (or `false`) in production — it's only enabled in staging for load testing. This is **not** a place to add `lib/rate-limit.ts` limiters; don't double-wrap.
 

@@ -1,6 +1,9 @@
+'use client'
+
 import { History, Trophy } from 'lucide-react'
 import type { ReactNode } from 'react'
 import PaperTabTitle from '@/components/ui/PaperTabTitle'
+import { useReducedMotion } from '@/lib/display'
 
 /**
  * The lift page while it loads: the same back link, title, chips, chart
@@ -8,12 +11,16 @@ import PaperTabTitle from '@/components/ui/PaperTabTitle'
  * LiftView, at the same heights, with pulsing placeholders for the numbers.
  * Shown by the route's loading.tsx (at once on a tap), its Suspense fallback
  * and LiftView's own loading state (a chip switch). The pulse stops with
- * reduced motion. Readers hear "Loading…" (and LiftView's back link) only.
+ * reduced motion, and E-ink display drops it altogether (still outlined
+ * blocks, see [data-lift-skeleton] in globals.css). Readers hear "Loading…"
+ * (and LiftView's back link) only.
  */
 
-const BAR = 'block bg-muted motion-safe:animate-pulse'
+const PULSE = 'block bg-muted motion-safe:animate-pulse'
+const STILL = 'block bg-muted'
 
 export default function LiftSkeleton({ back }: { back?: ReactNode }) {
+  const BAR = useReducedMotion() ? STILL : PULSE
   return (
     <div data-lift-skeleton="" aria-busy="true" className="space-y-5">
       <p role="status" className="sr-only">

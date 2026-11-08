@@ -80,7 +80,7 @@ export default async function ProposalDetailPage({ params }: { params: Promise<{
         </div>
         <h1 className="text-xl font-bold text-foreground break-words">{proposal.summary}</h1>
         <p className="text-xs text-muted-foreground">
-          From {proposal.agentToken.name} · proposed {proposal.createdAt.toLocaleString('en-US', DATE_FORMAT)}
+          From {proposal.agentToken?.name ?? 'Coach'} · proposed {proposal.createdAt.toLocaleString('en-US', DATE_FORMAT)}
           {proposal.decidedAt && ` · decided ${proposal.decidedAt.toLocaleString('en-US', DATE_FORMAT)}`}
         </p>
       </div>

@@ -1,6 +1,7 @@
 import type { Prisma } from '@prisma/client'
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
+import { coachingNames } from '@/lib/coaching/names'
 import { prisma } from '@/lib/db'
 import { recordEvent } from '@/lib/events'
 import { logger } from '@/lib/logger'
@@ -18,8 +19,11 @@ interface SavePayload {
 
 /**
  * GET /api/workouts/saved
- * Lists the current user's saved workouts, sorted by
- * lastUsedAt DESC NULLS LAST, createdAt DESC.
+ * Lists the current user's saved workouts, archived ones included (the
+ * Library shows those under Show archived), sorted by
+ * lastUsedAt DESC NULLS LAST, createdAt DESC. An unstarted agent or coach
+ * workout carries who sent it, for the New group: `source`, the agent's name,
+ * or `fromCoach` and `coachName` when a coach's proposal created it.
  */
 export async function GET(_request: NextRequest) {
   try {
@@ -29,7 +33,7 @@ export async function GET(_request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const saved = await prisma.savedWorkout.findMany({
+    const rows = await prisma.savedWorkout.findMany({
       where: { userId: user.id },
       orderBy: [
         { lastUsedAt: { sort: 'desc', nulls: 'last' } },
@@ -43,8 +47,36 @@ export async function GET(_request: NextRequest) {
         lastUsedAt: true,
         pinnedAt: true,
         createdAt: true,
+        origin: true,
+        archivedAt: true,
+        dismissedAt: true,
       },
     })
+
+    // One query for every unstarted agent or coach workout's sender, however many.
+    const sentIds = rows.filter((r) => (r.origin === 'agent' || r.origin === 'coach') && !r.lastUsedAt).map((r) => r.id)
+    const proposals = sentIds.length
+      ? await prisma.proposal.findMany({
+          where: { userId: user.id, kind: 'saved_workout.create', status: 'applied', targetId: { in: sentIds } },
+          select: { targetId: true, coachLink: { select: { coachUserId: true } }, agentToken: { select: { name: true } } },
+        })
+      : []
+    const coachNames = await coachingNames(
+      prisma,
+      proposals.flatMap((p) => (p.coachLink ? [p.coachLink.coachUserId] : []))
+    )
+    const sender = new Map(
+      proposals.map((p) => [
+        p.targetId,
+        {
+          source: p.agentToken?.name ?? null,
+          fromCoach: p.coachLink !== null,
+          coachName: p.coachLink ? (coachNames.get(p.coachLink.coachUserId) ?? null) : null,
+        },
+      ])
+    )
+
+    const saved = rows.map((r) => ({ ...r, source: null, fromCoach: false, coachName: null, ...sender.get(r.id) }))
 
     return NextResponse.json({ saved })
   } catch (error) {
@@ -183,6 +215,7 @@ export async function POST(request: NextRequest) {
         workoutData: workoutData as unknown as Prisma.InputJsonValue,
         exerciseCount,
         lastUsedAt: completion.completedAt,
+        origin: 'session',
       },
     })
 

@@ -156,14 +156,16 @@ const schemas = {
     rationale,
     feedbackId,
   }),
-  list_saved_workouts: z.object({}),
+  list_saved_workouts: z.object({
+    includeArchived: z.boolean().optional().describe('Include workouts the user archived (default false)'),
+  }),
   get_saved_workout: z.object({ id: z.string().min(1) }),
   get_active_draft: z.object({}),
   propose_workout_create: z.object({
     name: workoutName,
     notes: workoutNotes.optional(),
     exercises: workoutExercises.describe(
-      'In order. Each { exerciseDefinitionId, notes?, sets: [{ reps, rir?, rpe?, isWarmup? }] }; no weight, put load guidance in notes'
+      'In order. Each { exerciseDefinitionId, notes?, group?, sets: [{ reps, rir?, rpe?, isWarmup? }] }; no weight, put load guidance in notes. Same group label = superset'
     ),
     rationale,
     feedbackId,
@@ -218,16 +220,16 @@ const descriptions: Record<ToolName, string> = {
   propose_exercise_update:
     'Propose changes to an existing exercise definition. Nothing changes until the user approves it.',
   propose_program_create:
-    'Propose a new program (weeks > workouts > exercises > prescribed sets). Week, day, order and set numbers come from array position. Nothing is created until the user approves it; it is created inactive.',
+    'Propose a new program (weeks > workouts > exercises > prescribed sets). Week, day, order and set numbers come from array position. Optional group on an exercise (1–3 letters, e.g. "A") makes a superset: give the same group to two or more exercises next to each other in one workout. Nothing is created until the user approves it; it is created inactive.',
   list_saved_workouts:
-    "List the user's saved workouts (templates started from My saved workouts), newest created first.",
+    "List the user's saved workouts (templates started from My saved workouts), last used first (never-used ones by when they were saved), with origin (session | agent | coach), pinned and archived. Archived ones are left out unless includeArchived is true.",
   get_saved_workout: "Get one of the user's saved workouts with its exercises and planned sets.",
   get_active_draft:
     "The user's live workout session (status draft), newest first, with each exercise's logged set count; null if none. Read only: agents never change a live session.",
   propose_workout_create:
-    'Propose a new saved workout: exercises with planned sets (reps, RIR, RPE, warm-up). Order and set numbers come from array position. Nothing is created until the user approves it; it is never started for them.',
+    'Propose a new saved workout: exercises with planned sets (reps, RIR, RPE, warm-up). Order and set numbers come from array position. Optional group on an exercise (1–3 letters, e.g. "A") makes a superset: give the same group to two or more exercises next to each other. Nothing is created until the user approves it; it is never started for them.',
   propose_workout_update:
-    "Propose changes to one of the user's saved workouts: name, notes (null clears) and/or the whole exercise list. Nothing changes until the user approves it.",
+    "Propose changes to one of the user's saved workouts: name, notes (null clears) and/or the whole exercise list. Exercises take the same optional group as propose_workout_create (superset; send it again to keep an existing superset). Nothing changes until the user approves it.",
   list_proposals: "List the user's proposals and their status.",
   list_feedback:
     "List the user's app feedback, newest first (status defaults to new). Pass a feedback id as feedbackId on a propose tool to link the proposal; approving it resolves the feedback.",
@@ -638,12 +640,16 @@ const handlers: { [N in ToolName]: Handler<N> } = {
     return { proposalId: id, status, summary }
   },
 
-  async list_saved_workouts(prisma, ctx) {
-    const savedWorkouts = await prisma.savedWorkout.findMany({
-      where: { userId: ctx.userId },
-      orderBy: { createdAt: 'desc' },
-      select: savedWorkoutSummary,
+  async list_saved_workouts(prisma, ctx, { includeArchived }) {
+    const rows = await prisma.savedWorkout.findMany({
+      where: { userId: ctx.userId, ...(!includeArchived && { archivedAt: null }) },
+      select: { ...savedWorkoutSummary, origin: true, pinnedAt: true, archivedAt: true },
     })
+    // The app's order: last used, else when saved, newest first. Pins don't lift a row here.
+    const activity = (r: (typeof rows)[number]) => (r.lastUsedAt ?? r.createdAt).getTime()
+    const savedWorkouts = rows
+      .sort((a, b) => activity(b) - activity(a))
+      .map(({ pinnedAt, archivedAt, ...r }) => ({ ...r, pinned: pinnedAt !== null, archived: archivedAt !== null }))
     return { savedWorkouts }
   },
 

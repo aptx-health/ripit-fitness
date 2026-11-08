@@ -7,7 +7,9 @@ import { AuthPageHeader } from '@/components/features/auth/AuthPageHeader'
 import { OAuthButtons } from '@/components/features/auth/OAuthButtons'
 import { OrDivider } from '@/components/features/auth/OrDivider'
 import { Button } from '@/components/ui/Button'
+import { useMounted } from '@/hooks/useMounted'
 import { flushEvents, trackEvent } from '@/lib/analytics'
+import { currentReturnPath, withReturnPath } from '@/lib/auth/return-path'
 import { signUp } from '@/lib/auth-client'
 import {
   getAttribution,
@@ -24,6 +26,10 @@ export default function SignupPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  // Where to go after onboarding (a coach invite, say). Read in the browser so
+  // the page needs no Suspense boundary for useSearchParams.
+  const mounted = useMounted()
+  const next = mounted ? currentReturnPath() : null
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -81,7 +87,7 @@ export default function SignupPage() {
       trackEvent('signup_completed', completedProps)
       // Don't clear attribution here — onboarding reads mode from it
       await flushEvents(true)
-      window.location.href = '/onboarding'
+      window.location.href = withReturnPath('/onboarding', currentReturnPath())
     } catch {
       setError('An unexpected error occurred')
       setLoading(false)
@@ -189,7 +195,7 @@ export default function SignupPage() {
         <div className="border-t border-border pt-4">
           <p className="text-center text-[15px] text-muted-foreground">
             Already have an account?{' '}
-            <Link href="/login" className="font-semibold text-primary hover:text-primary-hover">
+            <Link href={withReturnPath('/login', next)} className="font-semibold text-primary hover:text-primary-hover">
               Sign in &rarr;
             </Link>
           </p>

@@ -1,0 +1,7 @@
+# 133 handback (reviewer, 2026-11-04)
+Report: complete. Verdict: fix first. Other themes untouched; scripts, hooks, toggle, storage precedence, first paint, perf (tap 44 ms, still skeleton) all hold live. 55 screenshots + grey + audit JSON in `initiatives/eink-theme/docs/assets/133/`.
+Findings: 1 (med-high) `--input: #FFFFFF` makes every `border-input` field invisible (sign-in; 27 uses). 2 (med) `opacity-*` not neutralised: planned set rows 3.2:1 (SetList.tsx:217 opacity-55); 184 uses incl. disabled. 3 (med) blocked storage: the pre-existing unguarded `localStorage.getItem` in both inline scripts (layout.tsx:86, (auth)/layout.tsx:17) throws before the cookie fallback; ThemeInitializer throws too. 4 (low) follow-along progress segments colour-only (FollowAlongHeader.tsx:26). 5 (low) semibold floor only covers `.text-xs`, not `text-[11px]` etc. 6 (low) auth hard-coded greys (#6B6B6B placeholder 5.3:1, Google button border). 7 (low) leaving E-INK always lands in light. 8 (low) stale comment LiftSkeleton.tsx:15.
+Handbacks 131/132 hold except findings 1–2.
+Outside: perf:tap needs `--storage key=value`; serwist registration unguarded without service workers; switching to Follow Along turns intensity off and back doesn't restore it.
+Data restored (40 tables match; Push A untouched).
+Lead (2026-11-04): fix all 8 in 134. #7: remember the mode from before E-INK and restore it when leaving. Outside items → ROADMAP.

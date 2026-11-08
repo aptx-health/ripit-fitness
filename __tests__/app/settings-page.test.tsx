@@ -238,7 +238,8 @@ describe('Theme and mode show their current value', () => {
   it('Ripit in dark mode: the Theme row shows Ripit and the Mode row shows Dark', async () => {
     await open()
     const look = region('Look')
-    expect(within(look).getByRole('button', { name: /theme/i }).textContent).toMatch(/ripit/i)
+    // work 149: the Theme row is a link to /settings/theme
+    expect(within(look).getByRole('link', { name: /theme/i }).textContent).toMatch(/ripit/i)
     const mode = within(look).getByRole('button', { name: /mode/i })
     expect(mode.textContent).toMatch(/dark/i)
     expect(mode.textContent).not.toMatch(/light/i)
@@ -248,7 +249,8 @@ describe('Theme and mode show their current value', () => {
     h.pref = { themeName: 'dracula', mode: 'light' }
     await open()
     const look = region('Look')
-    expect(within(look).getByRole('button', { name: /theme/i }).textContent).toMatch(/dracula/i)
+    // work 149: the Theme row is a link to /settings/theme
+    expect(within(look).getByRole('link', { name: /theme/i }).textContent).toMatch(/dracula/i)
     const mode = within(look).getByRole('button', { name: /mode/i })
     expect(mode.textContent).toMatch(/light/i)
     expect(mode.textContent).not.toMatch(/dark/i)

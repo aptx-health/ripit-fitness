@@ -4,7 +4,9 @@ import { ChevronDown, ChevronRight, Copy, Eye, Lock, Pencil, Plus, Star, Trash2 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import SendToTrainee, { type Trainee } from '@/components/coaching/SendToTrainee'
 import { useToast } from '@/components/ToastProvider'
+import { panelButton, ROW_PANEL, ROW_PANEL_BUTTONS } from '@/components/ui/rowPanel'
 import { clientLogger } from '@/lib/client-logger'
 import { programDetailHref } from '@/lib/training/program-href'
 import ActivationConfirmModal from './ActivationConfirmModal'
@@ -33,6 +35,8 @@ type Props = {
   hasAccess: boolean
   bypassLimit: boolean
   maxPrograms: number
+  /** The user's trainees (coaching slice 2); with any, each panel has Send. */
+  trainees?: Trainee[]
 }
 
 const INITIAL_SHOW = 5
@@ -48,6 +52,7 @@ export default function MyProgramsList({
   hasAccess,
   bypassLimit,
   maxPrograms,
+  trainees = [],
 }: Props) {
   const router = useRouter()
   const toast = useToast()
@@ -158,6 +163,7 @@ export default function MyProgramsList({
                 type="button"
                 onClick={() => setExpandedId(isExpanded ? null : program.id)}
                 disabled={isCloning}
+                aria-expanded={isExpanded}
                 className="w-full text-left px-4 py-3 flex items-center gap-3 transition-colors hover:bg-muted/50 active:bg-muted/70 disabled:opacity-60"
               >
                 <div className="flex-1 min-w-0">
@@ -207,17 +213,16 @@ export default function MyProgramsList({
 
               {/* Expanded details */}
               {isExpanded && !isCloning && (
-                <div className="px-4 pb-4 border-t border-border/50 bg-muted/20">
+                <div className={ROW_PANEL}>
                   {program.description && (
                     <p className="text-sm text-muted-foreground py-3 leading-relaxed">
                       {program.description}
                     </p>
                   )}
-                  <div className="flex flex-wrap gap-2 pt-2">
+                  <div className={ROW_PANEL_BUTTONS}>
                     <Link
                       href={programDetailHref(program.id)}
-                      className="flex min-h-12 items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground text-sm font-semibold uppercase tracking-wider doom-focus-ring"
-                      style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -2px 0 rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.40)' }}
+                      {...panelButton('primary')}
                     >
                       <Eye size={14} />
                       VIEW
@@ -227,8 +232,7 @@ export default function MyProgramsList({
                         type="button"
                         onClick={() => handleActivate(program.id, program.name)}
                         disabled={isLoading}
-                        className="flex min-h-12 items-center gap-1.5 px-3 py-2 border border-border text-foreground text-sm font-semibold uppercase tracking-wider hover:bg-muted transition-colors doom-focus-ring disabled:opacity-50"
-                        style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.20), 0 1px 0 rgba(0,0,0,0.30)' }}
+                        {...panelButton('default')}
                       >
                         <Star size={14} />
                         ACTIVATE
@@ -236,8 +240,7 @@ export default function MyProgramsList({
                     )}
                     <Link
                       href={`/programs/${program.id}/edit`}
-                      className="flex min-h-12 items-center gap-1.5 px-3 py-2 border border-border text-foreground text-sm font-semibold uppercase tracking-wider hover:bg-muted transition-colors doom-focus-ring"
-                      style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.20), 0 1px 0 rgba(0,0,0,0.30)' }}
+                      {...panelButton('default')}
                     >
                       <Pencil size={14} />
                       EDIT
@@ -246,8 +249,7 @@ export default function MyProgramsList({
                       type="button"
                       onClick={() => handleDuplicate(program.id)}
                       disabled={isLoading}
-                      className="flex min-h-12 items-center gap-1.5 px-3 py-2 border border-border text-foreground text-sm font-semibold uppercase tracking-wider hover:bg-muted transition-colors doom-focus-ring disabled:opacity-50"
-                      style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.20), 0 1px 0 rgba(0,0,0,0.30)' }}
+                      {...panelButton('default')}
                     >
                       {duplicating === program.id ? (
                         <div className="w-4 h-4 border-2 border-foreground border-t-transparent rounded-full animate-spin" />
@@ -261,8 +263,7 @@ export default function MyProgramsList({
                         type="button"
                         onClick={() => setDeleteTarget({ id: program.id, name: program.name })}
                         disabled={isLoading}
-                        className="flex min-h-12 items-center gap-1.5 px-3 py-2 border border-error/50 text-error text-sm font-semibold uppercase tracking-wider hover:bg-error/10 transition-colors doom-focus-ring disabled:opacity-50"
-                        style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.20), 0 1px 0 rgba(0,0,0,0.30)' }}
+                        {...panelButton('danger')}
                       >
                         {deleting === program.id ? (
                           <div className="w-4 h-4 border-2 border-error border-t-transparent rounded-full animate-spin" />
@@ -272,6 +273,7 @@ export default function MyProgramsList({
                         DELETE
                       </button>
                     )}
+                    <SendToTrainee kind="program" sourceId={program.id} trainees={trainees} button={panelButton()} />
                   </div>
                 </div>
               )}

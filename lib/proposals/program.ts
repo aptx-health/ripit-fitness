@@ -2,10 +2,12 @@ import type { Prisma, PrismaClient } from '@prisma/client'
 import { z } from 'zod'
 import { pluralize } from '@/lib/format/pluralize'
 import { visibleTo } from './exercise-definition'
+import { exerciseGroup, withGroupRules } from './groups'
 
 /**
  * `program.create` proposals: an agent drafts a whole new program. Week, day,
- * exercise order and set numbers come from array position, starting at 1.
+ * exercise order and set numbers come from array position, starting at 1. An
+ * exercise's optional `group` makes a superset (see ./groups).
  */
 
 export const prescribedSet = z
@@ -22,6 +24,7 @@ const programExercise = z
   .object({
     exerciseDefinitionId: z.string().min(1),
     notes: z.string().trim().max(500).optional(),
+    group: exerciseGroup.optional(),
     prescribedSets: z.array(prescribedSet).min(1).max(10),
   })
   .strict()
@@ -29,7 +32,7 @@ const programExercise = z
 const programWorkout = z
   .object({
     name: z.string().trim().min(1).max(100),
-    exercises: z.array(programExercise).min(1).max(15),
+    exercises: withGroupRules(z.array(programExercise).min(1).max(15)),
   })
   .strict()
 
@@ -131,6 +134,7 @@ export async function createProgram(
                   exerciseDefinitionId: exercise.exerciseDefinitionId,
                   name: definitionNames.get(exercise.exerciseDefinitionId) ?? '',
                   notes: orNull(exercise.notes),
+                  exerciseGroup: exercise.group ?? null,
                   userId,
                   prescribedSets: {
                     createMany: {
@@ -171,6 +175,7 @@ export const programTreeSelect = {
           exerciseDefinitionId: true,
           name: true,
           notes: true,
+          exerciseGroup: true,
           prescribedSets: {
             orderBy: { setNumber: 'asc' },
             select: { setNumber: true, reps: true, weight: true, rpe: true, rir: true, isWarmup: true },

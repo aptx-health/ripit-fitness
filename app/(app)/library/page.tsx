@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import LibraryView from '@/components/library/LibraryView'
 import { getCurrentUser } from '@/lib/auth/server'
+import { listTrainees } from '@/lib/coaching/links'
 import { prisma } from '@/lib/db'
 
 // Cache page for 30 seconds to improve navigation performance
@@ -14,7 +15,7 @@ export default async function LibraryPage() {
     redirect('/login')
   }
 
-  const [strengthPrograms, communityPrograms, activeWeekInfo, programCount, userSettings, savedWorkoutCount] = await Promise.all([
+  const [strengthPrograms, communityPrograms, activeWeekInfo, programCount, userSettings, savedWorkoutCount, trainees] = await Promise.all([
     prisma.program.findMany({
       where: {
         userId: user.id,
@@ -119,7 +120,9 @@ export default async function LibraryPage() {
       select: { customProgramLimitBypass: true },
     }),
     // For the Workouts tab's count chip
-    prisma.savedWorkout.count({ where: { userId: user.id } }),
+    prisma.savedWorkout.count({ where: { userId: user.id, archivedAt: null } }),
+    // Send on the program and workout panels, for coaches (coaching slice 2)
+    listTrainees(prisma, user.id),
   ])
 
   const currentWeek = activeWeekInfo.length > 0
@@ -136,6 +139,7 @@ export default async function LibraryPage() {
       isAdmin={user.role === 'admin'}
       customProgramLimitBypass={userSettings?.customProgramLimitBypass ?? false}
       savedWorkoutCount={savedWorkoutCount}
+      trainees={trainees}
     />
   )
 }

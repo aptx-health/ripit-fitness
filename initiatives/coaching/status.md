@@ -1,0 +1,24 @@
+# Coaching: status
+
+- 2026-11-06 CST: Started. Dustin: "a coaching interface: my friend is new to lifting; I'd like to create programs and workouts for them on my side and send them as proposals." Size: standard. Lead: lead-ripit-mcp. Dustin's answers: connect by invite link (either side can end it); the coach sees only what he sent (approved / declined / started), not the trainee's logs or Progress; programs and workouts arrive as proposals on the existing review screen, labelled with the coach's name, and approving adds the trainee's own copy. First step: discovery 136 (new agent `coach-disco`, worktree1 detached at origin/dev).
+- 2026-11-06 CST: Discovery 136 back (docs/136-discovery.md): reuse Proposal with nullable token + coachLinkId; slices schema → invite/link → send → coach view. Asking Dustin: custom exercises, ending a link, supersets.
+- 2026-11-06 CST: Dustin: (1) refuse sends with custom exercises, naming them; (2) ending a link leaves pending items (trainee can still decide; no withdrawn status); (3) carry supersets (exerciseGroup) in programInput, own small item. Lead: coach sees pending/accepted/declined only, no "started".
+- 2026-11-06 CST: Slice 1 spec (features/coaching/invite-link.feature) confirmed by Dustin. Tests 137 dispatched to new agent test-builder (worktree1, feature/coaching-invite). Supersets in programInput queued as small item 140 after 135.
+- 2026-11-06 CST: Dustin wants custom exercises bundled on send as a follow-up after slice 2 (ROADMAP). Slice 2 still refuses for now.
+- 2026-11-06 CST: Tests 137 back (74 tests, 47 red; break matrix 39/39). Lead decided: invite link copyable only at creation (hash-only); Coaching row in Account. Spec amended. Build 138 dispatched to new agent coach-impl (worktree1).
+- 2026-11-06 CST: Build 138 back (round 2: copy + waiver dotless-host redirect fixed). Lead re-ran 84/84. Review 139 dispatched to new agent coach-review.
+- 2026-11-06 CST: Review 139: ship after a perf:scan gate fix; no security holes; real browser flow verified. Asking Dustin about display names. Fixes 143 (allowlist, waiver gate on invite page, display names).
+- 2026-11-06 CST: Fixes 143 back (names fall back to email, waiver before invite, loading.tsx x3). Lead re-ran 82/82. Ready for Dustin's phone preview (worktree1) after the workout library preview.
+- 2026-11-06 CST: Slice 1 approved by Dustin on the phone preview. 137–139, 143 accepted. Committed on feature/coaching-invite; PR into dev. Next: slice 2 (send), after workout library slice 3 (origin + New).
+- 2026-11-07 CST: Supersets in proposals (work 140, small, features/agent-tools/proposal-supersets.feature) dispatched to coach-impl (worktree1, feature/program-supersets).
+- 2026-11-07 CST: Slice 1 merged to dev (#1041) by Dustin.
+- 2026-11-07 CST: Supersets (140) approved from the screenshot; PR #1042.
+- 2026-11-07 CST: Supersets merged to dev (#1042).
+- 2026-11-07 CST: Dustin: prod release waits until all coach features are in dev (coaching slices 2 and 3, after workout library slice 3).
+- 2026-11-07 CST: Slice 2 (send + Sent list, features/coaching/send.feature) confirmed by Dustin. Bundling custom exercises stays a follow-up after prod. Tests 148 dispatched to test-builder (worktree1, feature/coaching-send, stacked on #1043).
+- 2026-11-07 CST: Tests 148 back (59 tests, break matrix 34/34); lead re-ran (35 red). Build 150 dispatched to coach-impl.
+- 2026-11-07 CST: Build 150 back (suite 4398 pass); lead re-ran 130/130. Review 151 dispatched to coach-review.
+- 2026-11-07 CST: Review 151: ship. Fixes 152 (send reasons + normalising rest days and labels, lookup error handling, duplicate sends, trainee fetch) dispatched to coach-impl.
+- 2026-11-07 CST: Fixes 152 back; lead amended two locked steps for the duplicate guard; 143/143. Slice 2 ready for Dustin's phone preview (after the theme page).
+- 2026-11-07 CST: #1043 merged; coaching-send rebased onto dev. Phone preview started for Dustin.
+- 2026-11-07 CST: Slice 2 approved by Dustin on the preview; 148, 150–152 accepted. PR into dev. Follow-up from him: quick Send actions on rows, and workout rows that expand like programs.

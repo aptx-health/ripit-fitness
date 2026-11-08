@@ -2,6 +2,7 @@
 
 import { ChevronDown, CircleCheck } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
+import { useReducedMotion } from '@/lib/display'
 import { type PlannedSet, summarizePlan, workingSets } from '@/lib/workout-logging/plan-summary'
 import type { LoggedSet } from '@/types/workout'
 
@@ -10,7 +11,7 @@ import type { LoggedSet } from '@/types/workout'
  * summary line ("Target 3 × 8 @ RPE 8 · set 2 next") that expands to the
  * planned sets, each marked done (with what was logged) or next. Nothing for
  * an exercise without a plan. A finished plan shows a check; the set that
- * finishes it also flashes the line once (not with reduced motion).
+ * finishes it also flashes the line once (not with reduced motion or E-ink display).
  */
 
 const STORAGE_KEY = 'ripit:logger-plan-expanded'
@@ -37,10 +38,6 @@ export function usePlanExpanded(): [boolean, () => void] {
     }
   }, [expanded])
   return [expanded, toggle]
-}
-
-function prefersReducedMotion(): boolean {
-  return typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true
 }
 
 /**
@@ -94,13 +91,14 @@ export default function PlanLine({
   // A set that failed to save doesn't finish the plan.
   const saved = working.filter((s) => s._syncStatus !== 'error').length
   const finishes = useFinishes(exerciseId, saved, plan.length)
+  const reducedMotion = useReducedMotion()
   const summary = summarizePlan(prescribedSets, working.length)
   if (summary == null) return null
   const finished = saved >= plan.length
 
   return (
     <div className="relative border-2 border-border bg-muted/40">
-      {finishes > 0 && !prefersReducedMotion() && (
+      {finishes > 0 && !reducedMotion && (
         <span key={finishes} data-plan-flash aria-hidden="true" className="doom-set-logged pointer-events-none absolute inset-0" />
       )}
       <button

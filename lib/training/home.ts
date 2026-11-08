@@ -105,7 +105,7 @@ export async function getTrainingHome(userId: string): Promise<TrainingHomeData>
       },
     }),
     prisma.savedWorkout.findMany({
-      where: { userId, pinnedAt: { not: null } },
+      where: { userId, pinnedAt: { not: null }, archivedAt: null },
       orderBy: { pinnedAt: 'desc' },
       take: PINNED_LIMIT,
       select: { id: true, name: true, exerciseCount: true, pinnedAt: true },
