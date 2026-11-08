@@ -96,3 +96,31 @@ This is a simple extract-and-format job on the phone. The share sheet hands Mark
 - **No health data beyond training,** unless the user picks a custom section that includes it.
 
 Possible slice, after slice 12 (export): **Share with AI v0**, covering the packets above plus `ripit://proposal` import. It needs the stateless MCP server's propose tools to exist, or as a first step the agent writes proposal JSON that the app imports from the share sheet or a file.
+
+## Pricing (2026-11-08, Dustin's pick: free with a one-time Pro unlock)
+
+**Goal:** get some money back without chasing scale, and no subscriptions. "Pay once, no subscription, ever" is part of the pitch.
+
+**Free:** a genuinely helpful app on its own, with:
+- the full workout loop, programs, saved workouts and Progress basics
+- bundled programs and workouts
+- the Learn content
+- the RIPIT theme, in light and dark
+
+**Pro:** a one-time in-app purchase of roughly $10–20 (to decide). It unlocks:
+- **AI access:** Share with AI packets, `ripit://proposal` import and the MCP setup (Tier 1 and Tier 2)
+- **More themes:** the other 12
+- **Advanced filtering:** the smart picker (Neglected, Recovery, Anchors) and the muscle balance settings
+- possibly the deeper Progress views (to decide)
+
+**Notes:**
+- **Apple's cut is 15%** under the Small Business Program, as long as revenue stays under $1M a year.
+- **What the code needs:**
+  - one non-consumable purchase through StoreKit 2
+  - a restore-purchases button
+  - Family Sharing turned on
+  - a single `isPro` check behind which the Pro features sit
+- **Gating has to stay simple.** Nothing a user has entered is ever locked away. If Pro is missing, Pro screens show what they do and offer the unlock.
+- **Hosted backup or MCP:** only if people ask for it. It would be an optional one-time or yearly prepaid pack, never a subscription the app needs to work.
+- **Before launch:** a TestFlight beta with a few lifters, to check what they value.
+- **Before App Store release:** a paid Apple Developer account ($99/yr).
