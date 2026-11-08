@@ -247,7 +247,7 @@ public struct ProgramSession: Sendable, Equatable, Identifiable {
 
 /// Form values for the next set, as strings, exactly as the web app's `computePrefillValues`
 /// returns them ("225", "102.5", "0"; "" for no value).
-public struct Prefill: Sendable, Equatable {
+public struct Prefill: Sendable, Equatable, Codable {
     public let reps: String
     public let weight: String
     /// nil means "keep the unit currently selected".

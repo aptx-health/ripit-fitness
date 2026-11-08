@@ -129,13 +129,21 @@ public struct SetDetail: Sendable, Equatable, Identifiable {
     public let weight: Double
     /// "lbs" or "kg"; defaults to "lbs".
     public let weightUnit: String
+    /// Effort logged on the set (slice 5); nil when none.
+    public let rpe: Int?
+    public let rir: Int?
+    public let isWarmup: Bool
 
-    public init(id: String, setNumber: Int, reps: Int, weight: Double, weightUnit: String) {
+    public init(id: String, setNumber: Int, reps: Int, weight: Double, weightUnit: String,
+                rpe: Int? = nil, rir: Int? = nil, isWarmup: Bool = false) {
         self.id = id
         self.setNumber = setNumber
         self.reps = reps
         self.weight = weight
         self.weightUnit = weightUnit
+        self.rpe = rpe
+        self.rir = rir
+        self.isWarmup = isWarmup
     }
 }
 

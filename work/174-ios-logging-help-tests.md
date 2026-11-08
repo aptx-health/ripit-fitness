@@ -1,6 +1,6 @@
 ---
 id: 174
-state: running
+state: accepted
 waiting_on:
 executor: ios-tests
 skill: handoff-test-builder
@@ -51,3 +51,4 @@ The test-builder packet, plus the hands-on list for the reviewer.
 ## Log
 - 2026-11-07: created (ready).
 - 2026-11-07 18:46 MST: dispatched to ios-tests (running)
+- 2026-11-07: handed back needs decision (half-step RPE). Lead: whole RPE only on the phone; web bug is backlog. Re-ran swift test: 46 issues, all notImplemented. Accepted.

@@ -1,7 +1,7 @@
 ---
 id: 175
-state: waiting
-waiting_on: 174
+state: ready
+waiting_on:
 executor:
 skill: handoff-implementer
 from: lead (worktree-brave-field-c150)
@@ -29,6 +29,12 @@ Make 174's tests pass and build the screens, so every scenario in `features/ios-
 - Keep touch targets at 44pt or larger.
 - Run it in your **own** simulator and screenshot each new screen.
 
+## Lead decisions from 174
+- RPE: whole numbers only on the phone (6–10). `rpe` stays `Int?`. The web's half-step bug is a separate item for later.
+- The quirks 174 lists as copied from the web stay as they are (single set reads "× 1", mixed units, archived workouts count).
+- Read the `SetDetail` rpe/rir/isWarmup fields in `AppDatabase.detail`, as 174 noted.
+- The test files and `history.json` are mode 444. Don't unlock them; if a test looks wrong, raise it in your packet.
+
 ## Done when
 - `mise run ios-check` exits 0, with all of 174's tests passing and none removed or weakened.
 - Every scenario works when you try it by hand in your simulator.
@@ -48,3 +54,4 @@ The implementer packet, with screenshots.
 
 ## Log
 - 2026-11-07: created (waiting on 174).
+- 2026-11-07: 174 done (178 tests, 46 notImplemented, re-run by the lead). Ready.
