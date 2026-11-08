@@ -12,7 +12,7 @@ let package = Package(
     ],
     targets: [
         .target(name: "RipitCore", dependencies: [.product(name: "GRDB", package: "GRDB.swift")],
-                resources: [.copy("Resources/catalog.json")]),
+                resources: [.copy("Resources/catalog.json"), .copy("Resources/theme-tokens.json")]),
         .testTarget(name: "RipitCoreTests", dependencies: ["RipitCore", .product(name: "GRDB", package: "GRDB.swift")]),
     ]
 )

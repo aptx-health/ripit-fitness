@@ -6,44 +6,30 @@ import Charts
 import RipitCore
 import SwiftUI
 
-/// Display settings for Progress until a settings slice exists.
-enum ProgressSettings {
-    static let unitKey = "progressUnit"
-    static let targetKey = "weeklyWorkoutTarget"
-}
-
 struct ProgressTabView: View {
     @Environment(WorkoutStore.self) private var store
     @Binding var path: [String]
-    @AppStorage(ProgressSettings.unitKey) private var unitRaw = WeightUnit.lbs.rawValue
-    @AppStorage(ProgressSettings.targetKey) private var target = 3
+    /// The weight unit and weekly target come from Settings (slice 7 moved them from a Progress sheet).
+    @Environment(SettingsModel.self) private var settings
     @State private var weekStart: String?
     @State private var report: WeeklyReport?
-    @State private var showingSettings = false
     @State private var pinning = false
+    @State private var folder: ProgressFolder = DebugHooks.string("demoTab") == "lifts" ? .lifts : .records
 
-    private var unit: WeightUnit { WeightUnit(rawValue: unitRaw) ?? .lbs }
+    enum ProgressFolder { case records, lifts }
+
+    private var unit: WeightUnit { settings.settings.defaultWeightUnit }
+    private var target: Int { settings.settings.weeklyWorkoutTarget }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                HStack(alignment: .firstTextBaseline) {
-                    Text("PROGRESS")
-                        .font(.system(size: 40, weight: .black))
-                        .tracking(2)
-                        .foregroundStyle(Theme.foreground)
-                    Spacer()
-                    Button { showingSettings = true } label: {
-                        Image(systemName: "slider.horizontal.3").frame(width: Theme.touch, height: Theme.touch)
-                    }
-                    .accessibilityLabel("Progress settings")
-                }
+                PageTitle("PROGRESS")
                 if let report {
                     weekSwitcher(report)
                     ReportCard(report: report)
-                    recordsBlock(report)
+                    recordsAndLifts(report)
                     pinnedBlock(report)
-                    liftsBlock(report)
                     lastEightWeeks(report)
                 }
             }
@@ -53,12 +39,11 @@ struct ProgressTabView: View {
         .toolbar(.hidden, for: .navigationBar)
         .navigationDestination(for: String.self) { LiftPageView(exerciseDefinitionId: $0) }
         .onAppear(perform: load)
-        .onChange(of: unitRaw) { load() }
+        .onChange(of: unit) { load() }
         // Any write (a logged set, an import, a pin) re-reads the report while it is on screen.
         .onChange(of: store.revision) { load() }
         .onChange(of: target) { load() }
         .onChange(of: weekStart) { load() }
-        .sheet(isPresented: $showingSettings) { ProgressSettingsSheet().presentationDetents([.medium]) }
         .sheet(isPresented: $pinning, onDismiss: load) {
             NavigationStack {
                 ExercisePickerView { id in
@@ -88,7 +73,7 @@ struct ProgressTabView: View {
             .accessibilityLabel("Previous week")
             Spacer()
             Text(report.isCurrentWeek ? "This week" : "Week of \(Format.civilDay(report.weekStart))")
-                .font(.headline)
+                .font(.ripit(.headline))
                 .foregroundStyle(Theme.foreground)
             Spacer()
             Button { weekStart = store.addWeeks(report.weekStart, 1) } label: {
@@ -97,22 +82,33 @@ struct ProgressTabView: View {
             .disabled(report.isCurrentWeek)
             .accessibilityLabel("Next week")
         }
-        .background(Theme.card, in: RoundedRectangle(cornerRadius: 8))
-        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.border, lineWidth: 1))
+        .background(Theme.card, in: Rectangle())
+        .overlay(Rectangle().stroke(Theme.border, lineWidth: 1))
     }
 
     // MARK: Records, pins, lifts
 
-    private func recordsBlock(_ report: WeeklyReport) -> some View {
-        FolderBlock(title: "Records", tone: .superset) {
-            if report.records.isEmpty {
-                EmptyRow("No records this week")
-            } else {
-                ForEach(Array(report.records.enumerated()), id: \.element.exerciseDefinitionId) { i, r in
-                    if i > 0 { RowDivider() }
-                    ProgressRow(name: r.name, detail: Words.record(r, report.weightUnit)) {
-                        Chip(r.kind == "e1rm" ? "PR" : "Rep PR", fill: Theme.accent, text: Color(hex: 0x1A1108))
-                    }
+    /// Records | Lifts, folder tabs that switch in place like the web's RecordsLifts.
+    private func recordsAndLifts(_ report: WeeklyReport) -> some View {
+        FolderTabs(items: [FolderTabItem(tab: ProgressFolder.records, title: "Records", icon: "trophy", tone: .superset),
+                           FolderTabItem(tab: .lifts, title: "Lifts", icon: "dumbbell")],
+                   selection: $folder) { tab in
+            switch tab {
+            case .records: records(report)
+            case .lifts: lifts(report)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func records(_ report: WeeklyReport) -> some View {
+        if report.records.isEmpty {
+            EmptyRow("No records this week")
+        } else {
+            ForEach(Array(report.records.enumerated()), id: \.element.exerciseDefinitionId) { i, r in
+                if i > 0 { RowDivider() }
+                ProgressRow(name: r.name, detail: Words.record(r, report.weightUnit)) {
+                    Chip(r.kind == "e1rm" ? "PR" : "Rep PR", fill: Theme.accent, text: Theme.accentForeground)
                 }
             }
         }
@@ -121,7 +117,7 @@ struct ProgressTabView: View {
     private func pinnedBlock(_ report: WeeklyReport) -> some View {
         FolderBlock(title: "Pinned lifts", trailing: {
             Button { pinning = true } label: { Label("Pin", systemImage: "pin") }
-                .font(.subheadline.weight(.semibold))
+                .font(.ripit(.subheadline, .semibold))
                 .frame(minHeight: Theme.touch)
         }) {
             if report.pinned.isEmpty {
@@ -142,16 +138,15 @@ struct ProgressTabView: View {
         }
     }
 
-    private func liftsBlock(_ report: WeeklyReport) -> some View {
-        FolderBlock(title: "Lifts") {
-            if report.lifts.isEmpty {
-                EmptyRow("No lifts this week")
-            } else {
-                ForEach(Array(report.lifts.enumerated()), id: \.element.exerciseDefinitionId) { i, lift in
-                    if i > 0 { RowDivider() }
-                    NavigationLink(value: lift.exerciseDefinitionId) { LiftRow(lift: lift) }
-                        .buttonStyle(.plain)
-                }
+    @ViewBuilder
+    private func lifts(_ report: WeeklyReport) -> some View {
+        if report.lifts.isEmpty {
+            EmptyRow("No lifts this week")
+        } else {
+            ForEach(Array(report.lifts.enumerated()), id: \.element.exerciseDefinitionId) { i, lift in
+                if i > 0 { RowDivider() }
+                NavigationLink(value: lift.exerciseDefinitionId) { LiftRow(lift: lift) }
+                    .buttonStyle(.plain)
             }
         }
     }
@@ -171,7 +166,7 @@ struct ProgressTabView: View {
                 .accessibilityLabel("Working sets per week")
                 if let trend = report.trend {
                     Text(Words.trend(trend))
-                        .font(.subheadline)
+                        .font(.ripit(.subheadline))
                         .foregroundStyle(Theme.mutedForeground)
                 }
             }
@@ -190,14 +185,14 @@ private struct ReportCard: View {
         let hasNormal = report.normalWeeks != 0
         FolderBlock(title: "Report card", tone: .active) {
             CardRow(label: "Workouts", value: "\(current.workouts) of \(report.target)") {
-                if current.workouts >= report.target { Chip("Done", fill: Theme.primary, text: .white) }
+                if current.workouts >= report.target { Chip("Done", fill: Theme.primary, text: Theme.primaryForeground) }
                 Muted(hasNormal && normal.workouts > 0 ? "normal \(WebRounding.toFixed(normal.workouts, 1))" : "–")
             }
             RowDivider()
             CardRow(label: "Working sets", value: "\(current.workingSets)") {
                 if let change = hasNormal ? Words.percentChange(Double(current.workingSets), normal.workingSets) : nil {
                     Text(Words.signed(Double(change)) { "\(Int($0))%" })
-                        .font(.subheadline.bold())
+                        .font(.ripit(.subheadline, .bold))
                         .foregroundStyle(change > 0 ? Theme.primary : Theme.foreground)
                     Muted("normal \(WebRounding.round(normal.workingSets))")
                 } else {
@@ -209,7 +204,7 @@ private struct ReportCard: View {
                 if hasNormal && normal.durationSeconds > 0 {
                     let change = (Double(current.durationSeconds) - normal.durationSeconds) / 60
                     Text(Words.signed(change, Words.minutes))
-                        .font(.subheadline.bold())
+                        .font(.ripit(.subheadline, .bold))
                         .foregroundStyle(WebRounding.round(change) > 0 ? Theme.primary : Theme.foreground)
                 } else {
                     Muted("–")
@@ -222,7 +217,7 @@ private struct ReportCard: View {
                 if let effort = current.effort {
                     if hasNormal, let n = normal.avgRpe {
                         Text(Words.signed(effort.avgRpe - n) { WebRounding.toFixed($0, 1) })
-                            .font(.subheadline.bold())
+                            .font(.ripit(.subheadline, .bold))
                             .foregroundStyle(Theme.foreground)
                         Muted("normal \(Words.rpe(n))")
                     } else {
@@ -262,10 +257,10 @@ private struct CardRow<Aside: View>: View {
         layout {
             VStack(alignment: .leading, spacing: 2) {
                 // Whole words only: shrink a long label rather than break it mid-word.
-                Text(label.uppercased()).font(.caption.bold()).tracking(1).foregroundStyle(Theme.mutedForeground)
+                Text(label.uppercased()).font(.ripit(.caption, .bold)).tracking(1).foregroundStyle(Theme.mutedForeground)
                     .lineLimit(1).minimumScaleFactor(0.5)
-                Text(value).font(.title2.bold().monospacedDigit()).foregroundStyle(Theme.foreground)
-                if let detail { Text(detail).font(.subheadline).foregroundStyle(Theme.mutedForeground) }
+                Text(value).font(.ripit(.title2, .bold).monospacedDigit()).foregroundStyle(Theme.foreground)
+                if let detail { Text(detail).font(.ripit(.subheadline)).foregroundStyle(Theme.mutedForeground) }
             }
             if !stacked { Spacer(minLength: 8) }
             VStack(alignment: stacked ? .leading : .trailing, spacing: 2, content: aside)
@@ -291,7 +286,7 @@ struct LiftRow: View {
                 if flat { Chip("Flat", fill: Theme.muted, text: Theme.mutedForeground) }
                 if let change {
                     Text(Words.signed(change) { "\(WebRounding.round($0))" })
-                        .font(.subheadline.bold())
+                        .font(.ripit(.subheadline, .bold))
                         .foregroundStyle(WebRounding.round(change) > 0 ? Theme.primary : Theme.foreground)
                         .accessibilityLabel("e1RM change since the last session")
                 }
@@ -308,8 +303,8 @@ struct ProgressRow<Aside: View>: View {
     var body: some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
-                Text(name).font(.headline).foregroundStyle(Theme.foreground)
-                Text(detail).font(.subheadline.monospacedDigit()).foregroundStyle(Theme.mutedForeground)
+                Text(name).font(.ripit(.headline)).foregroundStyle(Theme.foreground)
+                Text(detail).font(.ripit(.subheadline).monospacedDigit()).foregroundStyle(Theme.mutedForeground)
             }
             Spacer(minLength: 8)
             aside()
@@ -334,7 +329,7 @@ struct Chip: View {
 
     var body: some View {
         Text(text.uppercased())
-            .font(.caption.bold())
+            .font(.ripit(.caption, .bold))
             .tracking(1)
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
@@ -347,47 +342,16 @@ struct EmptyRow: View {
     let text: String
     init(_ text: String) { self.text = text }
     var body: some View {
-        Text(text).font(.subheadline).foregroundStyle(Theme.mutedForeground).padding(16)
+        Text(text).font(.ripit(.subheadline)).foregroundStyle(Theme.mutedForeground).padding(16)
     }
 }
 
 private struct Muted: View {
     let text: String
     init(_ text: String) { self.text = text }
-    var body: some View { Text(text).font(.subheadline).foregroundStyle(Theme.mutedForeground) }
+    var body: some View { Text(text).font(.ripit(.subheadline)).foregroundStyle(Theme.mutedForeground) }
 }
 
-// MARK: - Settings
-
-private struct ProgressSettingsSheet: View {
-    @AppStorage(ProgressSettings.unitKey) private var unitRaw = WeightUnit.lbs.rawValue
-    @AppStorage(ProgressSettings.targetKey) private var target = 3
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            Form {
-                Section("Show weights in") {
-                    Picker("Unit", selection: $unitRaw) {
-                        Text("lbs").tag(WeightUnit.lbs.rawValue)
-                        Text("kg").tag(WeightUnit.kg.rawValue)
-                    }
-                    .pickerStyle(.segmented)
-                }
-                Section {
-                    Stepper("\(Words.plural(target, "workout")) a week", value: $target, in: 1...14)
-                } header: {
-                    Text("Weekly target")
-                } footer: {
-                    Text("The report card and streak count weeks that reach it.")
-                }
-            }
-            .navigationTitle("Progress settings")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
-        }
-    }
-}
 
 // MARK: - Wording (components/features/progress/format.ts, rows.tsx, RecordsLifts.tsx)
 

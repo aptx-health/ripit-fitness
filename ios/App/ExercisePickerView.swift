@@ -38,7 +38,7 @@ struct ExercisePickerView: View {
         .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search exercises")
         .autocorrectionDisabled()
         .textInputAutocapitalization(.never)
-        .navigationTitle("Add exercise")
+        .navigationTitle("ADD EXERCISE")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
@@ -61,9 +61,9 @@ private struct ExerciseRow: View {
                 }
             }
             VStack(alignment: .leading, spacing: 2) {
-                Text(exercise.name).font(.headline).foregroundStyle(Theme.foreground)
+                Text(exercise.name).font(.ripit(.headline)).foregroundStyle(Theme.foreground)
                 if let detail = [exercise.category, exercise.equipment.first].compactMap({ $0 }).joined(separator: " · ").nonEmpty {
-                    Text(detail.replacingOccurrences(of: "_", with: " ").capitalized).font(.caption).foregroundStyle(Theme.mutedForeground)
+                    Text(detail.replacingOccurrences(of: "_", with: " ").capitalized).font(.ripit(.caption)).foregroundStyle(Theme.mutedForeground)
                 }
             }
             Spacer(minLength: 0)
@@ -96,7 +96,7 @@ struct ExercisePhoto: View {
             }
         }
         .frame(width: size.width, height: size.height)
-        .clipShape(RoundedRectangle(cornerRadius: 6))
+        .clipShape(Rectangle())
         .task(id: name) {
             guard let name else { image = nil; return }
             image = PhotoCache.cached(name)

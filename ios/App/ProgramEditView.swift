@@ -21,11 +21,11 @@ struct ProgramEditView: View {
                 let shown = week ?? p.weeks.first?.weekNumber
                 VStack(alignment: .leading, spacing: 20) {
                     TextField("Program name", text: $name)
-                        .font(.title3.weight(.semibold))
+                        .font(.ripit(.title3, .semibold))
                         .padding(.horizontal, 12)
                         .frame(minHeight: Theme.touch)
-                        .background(Theme.card, in: RoundedRectangle(cornerRadius: 8))
-                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.border, lineWidth: 1))
+                        .background(Theme.card, in: Rectangle())
+                        .overlay(Rectangle().stroke(Theme.border, lineWidth: 1))
                         .onSubmit { saveName(p) }
 
                     HStack {
@@ -35,7 +35,7 @@ struct ProgramEditView: View {
                             week = (p.weeks.last?.weekNumber ?? 0) + 1
                         } label: { Image(systemName: "plus") }
                             .frame(width: Theme.touch, height: 40)
-                            .background(Theme.muted, in: RoundedRectangle(cornerRadius: 8))
+                            .background(Theme.muted, in: Rectangle())
                             .accessibilityLabel("Add week (copies the last week)")
                     }
 
@@ -56,7 +56,7 @@ struct ProgramEditView: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .background(Theme.background)
-        .navigationTitle("Edit program")
+        .navigationTitle("EDIT PROGRAM")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: Binding(get: { addingTo != nil }, set: { if !$0 { addingTo = nil } })) {
             NavigationStack {
@@ -101,7 +101,7 @@ private struct WorkoutEditBlock: View {
         FolderBlock(title: "Day \(workout.dayNumber)") {
             VStack(alignment: .leading, spacing: 0) {
                 TextField("Workout name", text: $name)
-                    .font(.headline)
+                    .font(.ripit(.headline))
                     .padding(.horizontal, 16)
                     .frame(minHeight: Theme.touch)
                     .onSubmit(save)
@@ -154,18 +154,18 @@ private struct ExerciseEditSheet: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Name").font(.caption.weight(.semibold)).foregroundStyle(Theme.mutedForeground)
+                    Text("Name").font(.ripit(.caption, .semibold)).foregroundStyle(Theme.mutedForeground)
                     TextField("Exercise name", text: $name)
-                        .font(.headline)
+                        .font(.ripit(.headline))
                         .padding(.horizontal, 12)
                         .frame(minHeight: Theme.touch)
-                        .background(Theme.card, in: RoundedRectangle(cornerRadius: 8))
-                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.border, lineWidth: 1))
+                        .background(Theme.card, in: Rectangle())
+                        .overlay(Rectangle().stroke(Theme.border, lineWidth: 1))
                     Text("A new name also shows in this workout's history.")
-                        .font(.caption).foregroundStyle(Theme.mutedForeground)
+                        .font(.ripit(.caption)).foregroundStyle(Theme.mutedForeground)
                 }
                 HStack {
-                    Text("Superset").font(.headline).foregroundStyle(Theme.foreground)
+                    Text("Superset").font(.ripit(.headline)).foregroundStyle(Theme.foreground)
                     Spacer()
                     GroupMenu(group: $group)
                 }
@@ -173,7 +173,7 @@ private struct ExerciseEditSheet: View {
                     SetsEditor(sets: $sets).padding(16)
                 }
                 Text("Changing the plan never changes sets you already logged.")
-                    .font(.caption).foregroundStyle(Theme.mutedForeground)
+                    .font(.ripit(.caption)).foregroundStyle(Theme.mutedForeground)
                 Button("Remove exercise") { confirmingRemove = true }
                     .buttonStyle(OutlineButtonStyle(tint: Theme.error))
             }
@@ -181,7 +181,7 @@ private struct ExerciseEditSheet: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .background(Theme.background)
-        .navigationTitle(exercise.name)
+        .navigationTitle(exercise.name.uppercased())
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {

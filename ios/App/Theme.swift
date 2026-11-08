@@ -1,30 +1,95 @@
-// The web app's RIPIT default theme (app/globals.css, [data-theme="ripit"]), light and dark,
-// plus the folder-block pieces from docs/STYLING.md: a paper tab over a bordered box.
+// The web app's look (app/globals.css): its 13 themes' color tokens, the Rajdhani display type,
+// square corners, the hard offset shadow on primary buttons, and the folder blocks and folder tabs
+// from docs/STYLING.md. Slice 7 (work item 185) puts all of it here, so screens change in one place.
+// The colors follow Settings: `Look` holds the current theme, and RootView rebuilds the tabs when
+// it changes, so every `Theme.x` reads the new value.
 
 import RipitCore
 import SwiftUI
 import UIKit
 
+/// The look Settings chose: the theme (from RipitCore's token table) and E-ink display.
+enum Look {
+    private(set) static var preference = (try? ThemePreference.webDefault()) ?? ThemePreference(themeName: .ripit, mode: .dark)
+    private(set) static var einkDisplay = false
+    private(set) static var palette = Palette(preference)
+
+    /// Changes in identity whenever the look changes; RootView uses it to rebuild its tabs.
+    static var key: String { "\(preference.themeName.rawValue)-\(preference.mode.rawValue)-\(einkDisplay)" }
+
+    /// The E-ink theme: paper, so no shadows and heavier borders (globals.css [data-theme="eink"]).
+    static var isPaper: Bool { preference.themeName == .eink }
+
+    static func apply(_ settings: AppSettings) {
+        preference = (try? settings.theme.normalized()) ?? settings.theme
+        einkDisplay = settings.einkDisplay
+        palette = Palette(preference)
+        applyUIKitAppearance()
+    }
+
+    /// Native bars keep their native shape, in the theme's colors and Rajdhani.
+    private static func applyUIKitAppearance() {
+        let foreground = UIColor(hex: palette.hex("foreground"))
+        let nav = UINavigationBarAppearance()
+        nav.configureWithOpaqueBackground()
+        nav.backgroundColor = UIColor(hex: palette.hex("background"))
+        nav.shadowColor = UIColor(hex: palette.hex("border"))
+        nav.titleTextAttributes = [.foregroundColor: foreground, .font: RipitFont.ui(17, .bold), .kern: 1.2]
+        nav.largeTitleTextAttributes = [.foregroundColor: foreground, .font: RipitFont.ui(34, .bold), .kern: 2]
+        let buttons = UIBarButtonItemAppearance()
+        buttons.normal.titleTextAttributes = [.font: RipitFont.ui(17, .semibold)]
+        nav.buttonAppearance = buttons
+        nav.doneButtonAppearance = buttons
+        UINavigationBar.appearance().standardAppearance = nav
+        UINavigationBar.appearance().scrollEdgeAppearance = nav
+        UINavigationBar.appearance().compactAppearance = nav
+        let item = UITabBarItem.appearance()
+        item.setTitleTextAttributes([.font: RipitFont.ui(11, .semibold)], for: .normal)
+        item.setTitleTextAttributes([.font: RipitFont.ui(11, .bold)], for: .selected)
+        UISegmentedControl.appearance().setTitleTextAttributes([.font: RipitFont.ui(15, .semibold)], for: .normal)
+    }
+}
+
+/// One theme and mode's tokens as colors. A token the theme doesn't define reads as `fallback`.
+struct Palette {
+    private let hexes: [String: UInt32]
+
+    init(_ preference: ThemePreference) {
+        let tokens = (try? ThemeTable.tokens(preference)) ?? ThemeTokens(values: [:])
+        var hexes: [String: UInt32] = [:]
+        for name in tokens.values.keys { hexes[name] = (try? tokens.color(name)) ?? nil }
+        self.hexes = hexes
+    }
+
+    func hex(_ name: String, fallback: UInt32 = 0x808080) -> UInt32 { hexes[name] ?? fallback }
+    func color(_ name: String) -> Color { Color(hex: hex(name)) }
+}
+
 enum Theme {
-    static let background = dynamic(light: 0xFBF8F3, dark: 0x1A1108)
-    static let foreground = dynamic(light: 0x3A2817, dark: 0xFEF3C7)
-    static let card = dynamic(light: 0xFFFCF7, dark: 0x251A0F)
-    static let muted = dynamic(light: 0xF5EFE6, dark: 0x3A2817)
-    static let mutedForeground = dynamic(light: 0x78573B, dark: 0xD4C4B0)
-    static let border = dynamic(light: 0xD4C4B0, dark: 0x4A3420)
-    static let primary = Color(hex: 0x10B981)
-    static let primaryForeground = Color.white
-    static let secondary = Color(hex: 0x92400E)
-    static let secondaryForeground = Color(hex: 0xFEF3C7)
-    static let accent = dynamic(light: 0xD4930A, dark: 0xFBBF24)
-    static let error = dynamic(light: 0xDC2626, dark: 0xEF4444)
+    static var background: Color { Look.palette.color("background") }
+    static var foreground: Color { Look.palette.color("foreground") }
+    static var card: Color { Look.palette.color("card") }
+    static var muted: Color { Look.palette.color("muted") }
+    static var mutedForeground: Color { Look.palette.color("muted-foreground") }
+    static var border: Color { Look.palette.color("border") }
+    static var input: Color { Look.palette.color("input") }
+    static var primary: Color { Look.palette.color("primary") }
+    static var primaryActive: Color { Look.palette.color("primary-active") }
+    static var primaryForeground: Color { Look.palette.color("primary-foreground") }
+    static var primaryMuted: Color { Look.palette.color("primary-muted") }
+    static var secondary: Color { Look.palette.color("secondary") }
+    static var secondaryForeground: Color { Look.palette.color("secondary-foreground") }
+    static var accent: Color { Look.palette.color("accent") }
+    static var accentForeground: Color { Look.palette.color("accent-foreground") }
+    static var error: Color { Look.palette.color("error") }
+    static var errorForeground: Color { Look.palette.color("error-foreground") }
 
     /// The web app's 48px minimum touch target.
     static let touch: CGFloat = 48
-
-    private static func dynamic(light: UInt32, dark: UInt32) -> Color {
-        Color(UIColor { $0.userInterfaceStyle == .dark ? UIColor(hex: dark) : UIColor(hex: light) })
-    }
+    /// Hairline borders, heavier on the E-ink theme (globals.css: "solid black, never hairline").
+    static var line: CGFloat { Look.isPaper ? 2 : 1 }
+    /// A folder box's border, in its tab's color.
+    static let folderLine: CGFloat = 2
 }
 
 extension UIColor {
@@ -38,24 +103,158 @@ extension Color {
     init(hex: UInt32) { self.init(uiColor: UIColor(hex: hex)) }
 }
 
-/// Paper tab colours, like the web's PaperTabs tones.
+// MARK: - Type
+
+/// Rajdhani (SIL OFL, Fonts/OFL.txt), the web's font for everything (globals.css body, app/layout.tsx
+/// weights 500/600/700). It runs small next to SF, so sizes are scaled up to read the same.
+enum RipitFont {
+    static let scale: CGFloat = 1.12
+
+    /// The SF size of each text style at the default type size.
+    static func baseSize(_ style: Font.TextStyle) -> CGFloat {
+        switch style {
+        case .largeTitle: 34
+        case .title: 28
+        case .title2: 22
+        case .title3: 20
+        case .headline, .body: 17
+        case .callout: 16
+        case .subheadline: 15
+        case .footnote: 13
+        case .caption: 12
+        case .caption2: 11
+        @unknown default: 17
+        }
+    }
+
+    /// Medium, SemiBold or Bold; E-ink display makes text one step bolder, like the web.
+    static func name(_ weight: Font.Weight) -> String {
+        let heavy: [Font.Weight] = [.bold, .heavy, .black]
+        var step = heavy.contains(weight) ? 2 : weight == .semibold ? 1 : 0
+        if Look.einkDisplay { step = min(step + 1, 2) }
+        return ["Rajdhani-Medium", "Rajdhani-SemiBold", "Rajdhani-Bold"][step]
+    }
+
+    static func ui(_ size: CGFloat, _ weight: Font.Weight) -> UIFont {
+        UIFont(name: name(weight), size: size * scale) ?? .systemFont(ofSize: size)
+    }
+}
+
+extension Font {
+    /// The web's font at a text style's size, scaling with Dynamic Type.
+    static func ripit(_ style: Font.TextStyle, _ weight: Font.Weight? = nil) -> Font {
+        let weight = weight ?? (style == .headline ? .semibold : .medium)
+        return .custom(RipitFont.name(weight), size: RipitFont.baseSize(style) * RipitFont.scale, relativeTo: style)
+    }
+
+    /// A fixed-size display font that still scales with Dynamic Type (page titles).
+    static func ripitDisplay(_ size: CGFloat, relativeTo style: Font.TextStyle = .largeTitle) -> Font {
+        .custom(RipitFont.name(.bold), size: size, relativeTo: style)
+    }
+}
+
+extension View {
+    /// The web's display treatment for labels, buttons, tab titles and headings: uppercase, tracked
+    /// (.doom-label 0.05em, .doom-heading 0.08em, .doom-title 0.1em).
+    func display(_ tracking: CGFloat = 1) -> some View {
+        textCase(.uppercase).tracking(tracking)
+    }
+}
+
+/// A page title like the web's .doom-title: "TRAINING". Wraps between words at large sizes.
+struct PageTitle: View {
+    let text: String
+    init(_ text: String) { self.text = text }
+
+    var body: some View {
+        Text(text.uppercased())
+            .font(.ripitDisplay(44))
+            .tracking(4)
+            .foregroundStyle(Theme.foreground)
+            .lineLimit(2)
+            .minimumScaleFactor(0.5)
+            .accessibilityAddTraits(.isHeader)
+    }
+}
+
+// MARK: - Folder blocks
+
+/// Paper tab colours, like the web's PaperTabs tones. `.plain` is a Settings block's muted tab.
 enum TabTone {
-    case exercise, superset, active
+    case exercise, superset, active, plain
 
     var fill: Color {
         switch self {
         case .exercise: Theme.secondary
         case .superset: Theme.accent
         case .active: Theme.primary
+        case .plain: Theme.muted
         }
     }
 
     var label: Color {
         switch self {
         case .exercise: Theme.secondaryForeground
-        case .superset: Color(hex: 0x1A1108)
+        case .superset: Theme.accentForeground
         case .active: Theme.primaryForeground
+        case .plain: Theme.mutedForeground
         }
+    }
+
+    /// The box under the tab is bordered in the tab's color, like the web's folders.
+    var edge: Color { self == .plain ? Theme.border : fill }
+}
+
+/// The web's folder tab: square on the left, a slanted right edge.
+struct FolderTabShape: Shape {
+    var slant: CGFloat = 18
+
+    func path(in rect: CGRect) -> Path {
+        Path { p in
+            p.move(to: CGPoint(x: rect.minX, y: rect.maxY))
+            p.addLine(to: CGPoint(x: rect.minX, y: rect.minY))
+            p.addLine(to: CGPoint(x: rect.maxX - slant, y: rect.minY))
+            p.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+            p.closeSubpath()
+        }
+    }
+}
+
+/// One folder tab label. An unselected tab is muted, with a border, like the web's inactive tabs.
+struct FolderTab: View {
+    let title: String
+    var icon: String?
+    var tone: TabTone = .exercise
+    var selected = true
+
+    var body: some View {
+        HStack(spacing: 6) {
+            if let icon { Image(systemName: icon).font(.ripit(.footnote, .bold)) }
+            Text(title)
+                .font(.ripit(.subheadline, .bold))
+                .display(1.2)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .foregroundStyle(selected ? tone.label : Theme.mutedForeground)
+        // Capped so one long word ("CONVENTIONAL") still fits the width instead of hyphenating.
+        .dynamicTypeSize(...DynamicTypeSize.accessibility2)
+        .padding(.leading, 14)
+        .padding(.trailing, 28)
+        .padding(.vertical, 8)
+        .background(selected ? tone.fill : Theme.muted, in: FolderTabShape())
+        .overlay(selected && tone != .plain ? nil : FolderTabShape().stroke(Theme.border, lineWidth: Theme.line))
+    }
+}
+
+/// The bordered box under a folder tab.
+private struct FolderBox: ViewModifier {
+    let edge: Color
+
+    func body(content: Content) -> some View {
+        content
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Theme.card)
+            .overlay(Rectangle().strokeBorder(edge, lineWidth: Theme.folderLine))
     }
 }
 
@@ -63,74 +262,120 @@ enum TabTone {
 struct FolderBlock<Content: View, Trailing: View>: View {
     let title: String
     var tone: TabTone = .exercise
+    var icon: String?
     @ViewBuilder var trailing: () -> Trailing
     @ViewBuilder var content: () -> Content
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .bottom) {
-                Text(title.uppercased())
-                    .font(.footnote.weight(.bold))
-                    .tracking(1)
-                    .foregroundStyle(tone.label)
-                    .fixedSize(horizontal: false, vertical: true)
-                    // Capped so one long word ("CONVENTIONAL") still fits the width instead of hyphenating.
-                    .dynamicTypeSize(...DynamicTypeSize.accessibility2)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 7)
-                    .background(tone.fill, in: UnevenRoundedRectangle(topLeadingRadius: 8, topTrailingRadius: 8))
+                FolderTab(title: title, icon: icon, tone: tone)
                     // The title gets the width first, so a long name at large text sizes wraps between words.
                     .layoutPriority(1)
                 Spacer(minLength: 0)
                 trailing()
             }
             VStack(alignment: .leading, spacing: 0, content: content)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Theme.card)
-                .clipShape(UnevenRoundedRectangle(bottomLeadingRadius: 8, bottomTrailingRadius: 8, topTrailingRadius: 8))
-                .overlay(UnevenRoundedRectangle(bottomLeadingRadius: 8, bottomTrailingRadius: 8, topTrailingRadius: 8)
-                    .stroke(Theme.border, lineWidth: 1))
+                .modifier(FolderBox(edge: tone.edge))
         }
     }
 }
 
 extension FolderBlock where Trailing == EmptyView {
-    init(title: String, tone: TabTone = .exercise, @ViewBuilder content: @escaping () -> Content) {
-        self.init(title: title, tone: tone, trailing: { EmptyView() }, content: content)
+    init(title: String, tone: TabTone = .exercise, icon: String? = nil, @ViewBuilder content: @escaping () -> Content) {
+        self.init(title: title, tone: tone, icon: icon, trailing: { EmptyView() }, content: content)
     }
 }
 
-/// A full-width filled button at least 48pt tall.
+/// One tab of a `FolderTabs`.
+struct FolderTabItem<Tab: Hashable>: Identifiable {
+    let tab: Tab
+    let title: String
+    var icon: String?
+    var tone: TabTone = .exercise
+    var id: Tab { tab }
+}
+
+/// Folder tabs that switch in place, like the web's tabbed folders (Pinned | Recent, Records | Lifts).
+/// Side by side; stacked when they don't fit at large text sizes.
+struct FolderTabs<Tab: Hashable, Content: View>: View {
+    let items: [FolderTabItem<Tab>]
+    @Binding var selection: Tab
+    @ViewBuilder var content: (Tab) -> Content
+    @Environment(\.dynamicTypeSize) private var typeSize
+
+    var body: some View {
+        let current = items.first { $0.tab == selection } ?? items[0]
+        VStack(alignment: .leading, spacing: 0) {
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .bottom, spacing: -10) { tabs }
+                VStack(alignment: .leading, spacing: 2) { tabs }
+            }
+            VStack(alignment: .leading, spacing: 0) { content(current.tab) }
+                .modifier(FolderBox(edge: current.tone.edge))
+        }
+    }
+
+    private var tabs: some View {
+        ForEach(items) { item in
+            Button { selection = item.tab } label: {
+                FolderTab(title: item.title, icon: item.icon, tone: item.tone, selected: item.tab == selection)
+                    .frame(minHeight: 44, alignment: .bottom)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .zIndex(item.tab == selection ? 1 : 0)
+            .accessibilityAddTraits(item.tab == selection ? [.isSelected] : [])
+        }
+    }
+}
+
+// MARK: - Buttons and fields
+
+/// A full-width filled button at least 48pt tall, square, with the web's hard offset shadow
+/// (.doom-button-3d: 4px of the darker shade under it) on primary buttons.
 struct FilledButtonStyle: ButtonStyle {
     var fill: Color = Theme.primary
     var foreground: Color = Theme.primaryForeground
+    /// The hard shadow's color; nil for none.
+    var shadow: Color? = Theme.primaryActive
 
     func makeBody(configuration: Configuration) -> some View {
+        let depth: CGFloat = shadow == nil || Look.isPaper ? 0 : 4
+        let pressed = configuration.isPressed
         configuration.label
-            .font(.headline)
+            .font(.ripit(.headline, .bold))
+            .display(1.5)
             .frame(maxWidth: .infinity, minHeight: Theme.touch)
             .foregroundStyle(foreground)
-            .background(fill.opacity(configuration.isPressed ? 0.8 : 1), in: RoundedRectangle(cornerRadius: 8))
+            .background(fill.opacity(pressed ? 0.9 : 1))
+            .overlay(Look.isPaper ? Rectangle().strokeBorder(Theme.border, lineWidth: 2) : nil)
+            .offset(y: pressed ? depth : 0)
+            .background(alignment: .bottom) {
+                if let shadow, depth > 0 { Rectangle().fill(shadow).offset(y: depth) }
+            }
+            .padding(.bottom, depth)
     }
 }
 
-/// An outlined button at least 48pt tall.
+/// An outlined button at least 48pt tall, square.
 struct OutlineButtonStyle: ButtonStyle {
     var tint: Color = Theme.foreground
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.headline)
+            .font(.ripit(.headline, .semibold))
+            .display(1.2)
             .frame(maxWidth: .infinity, minHeight: Theme.touch)
             .foregroundStyle(tint)
-            .background(configuration.isPressed ? Theme.muted : Theme.card, in: RoundedRectangle(cornerRadius: 8))
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.border, lineWidth: 1))
+            .background(configuration.isPressed ? Theme.muted : Theme.card)
+            .overlay(Rectangle().strokeBorder(Theme.border, lineWidth: Theme.line))
     }
 }
 
 /// Plain divided rows inside a folder box.
 struct RowDivider: View {
-    var body: some View { Rectangle().fill(Theme.border).frame(height: 1) }
+    var body: some View { Rectangle().fill(Theme.border).frame(height: Theme.line) }
 }
 
 enum Format {

@@ -23,11 +23,10 @@ struct WorkoutView: View {
                         VStack(alignment: .leading, spacing: 2) {
                             WorkoutClock(startedAt: w.startedAt)
                             Text([sessionLabel, "Started \(Format.time(w.startedAt))"].compactMap { $0 }.joined(separator: " · "))
-                                .font(.subheadline)
+                                .font(.ripit(.subheadline))
                                 .foregroundStyle(Theme.mutedForeground)
                         }
                         Spacer(minLength: 0)
-                        EffortKindToggle()
                     }
 
                     if w.exercises.isEmpty {
@@ -57,7 +56,7 @@ struct WorkoutView: View {
                             selected = []
                             selecting = false
                         }
-                        .buttonStyle(FilledButtonStyle(fill: Theme.accent, foreground: Theme.foreground))
+                        .buttonStyle(FilledButtonStyle(fill: Theme.accent, foreground: Theme.accentForeground, shadow: nil))
                         .disabled(selected.count < 2)
                         .opacity(selected.count < 2 ? 0.5 : 1)
                     } else {
@@ -78,7 +77,7 @@ struct WorkoutView: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .background(Theme.background)
-        .navigationTitle(sessionName ?? store.current?.name ?? "Workout")
+        .navigationTitle((sessionName ?? store.current?.name ?? "Workout").uppercased())
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
@@ -176,15 +175,14 @@ private struct ExerciseLogger: View {
     let isFirst: Bool
     let toggle: () -> Void
 
-    /// The unit last logged anywhere, the default for an exercise with no sets yet.
-    @AppStorage("weightUnit") private var lastUnit = "lbs"
+    /// Settings: the effort picker (none when tracking is off) and the unit a new exercise starts in.
+    @Environment(SettingsModel.self) private var settings
     @State private var unit: String?
     @State private var weight = ""
     @State private var reps = ""
     /// A logged set being changed in place.
     @State private var editingSet: String?
     @State private var confirmingRemove = false
-    @AppStorage(EffortSetting.key) private var effortKind: EffortKind = .rpe
     /// Effort for the next set, on the current scale.
     @State private var effort: Int?
     @State private var warmup = false
@@ -202,7 +200,7 @@ private struct ExerciseLogger: View {
                     HStack {
                         Image(systemName: selected ? "checkmark.square.fill" : "square")
                             .foregroundStyle(selected ? Theme.primary : Theme.mutedForeground)
-                        Text(exercise.name).font(.headline).foregroundStyle(Theme.foreground)
+                        Text(exercise.name).font(.ripit(.headline)).foregroundStyle(Theme.foreground)
                         Spacer()
                     }
                     .frame(minHeight: Theme.touch)
@@ -212,17 +210,18 @@ private struct ExerciseLogger: View {
             } else {
                 // At accessibility text sizes the name gets its own line, like entryRow.
                 if showName && typeSize.isAccessibilitySize {
-                    Text(exercise.name).font(.headline).foregroundStyle(Theme.foreground)
+                    Text(exercise.name).font(.ripit(.headline)).foregroundStyle(Theme.foreground)
                 }
-                HStack(spacing: 4) {
+                // The ⓘ and ··· grow with the text, so at accessibility sizes they get room between them.
+                HStack(spacing: typeSize.isAccessibilitySize ? 16 : 4) {
                     if showName && !typeSize.isAccessibilitySize {
-                        Text(exercise.name).font(.headline).foregroundStyle(Theme.foreground)
+                        Text(exercise.name).font(.ripit(.headline)).foregroundStyle(Theme.foreground)
                     }
                     if let timer = store.restTimer(exerciseId: exercise.id) { RestTimerChip(timer: timer) }
                     Spacer(minLength: 0)
                     Button { help = .info } label: {
                         Image(systemName: "info.circle")
-                            .frame(width: Theme.touch, height: Theme.touch)
+                            .frame(minWidth: Theme.touch, minHeight: Theme.touch)
                             .contentShape(Rectangle())
                     }
                     .foregroundStyle(Theme.mutedForeground)
@@ -233,7 +232,7 @@ private struct ExerciseLogger: View {
                             Button("Remove exercise", systemImage: "trash", role: .destructive) { confirmingRemove = true }
                         } label: {
                             Image(systemName: "ellipsis")
-                                .frame(width: Theme.touch, height: Theme.touch)
+                                .frame(minWidth: Theme.touch, minHeight: Theme.touch)
                                 .contentShape(Rectangle())
                         }
                         .foregroundStyle(Theme.mutedForeground)
@@ -249,7 +248,7 @@ private struct ExerciseLogger: View {
                             Text(notes).lineLimit(2).multilineTextAlignment(.leading)
                             Spacer(minLength: 0)
                         }
-                        .font(.subheadline)
+                        .font(.ripit(.subheadline))
                         .foregroundStyle(Theme.mutedForeground)
                         .frame(minHeight: Theme.touch)
                         .contentShape(Rectangle())
@@ -266,10 +265,10 @@ private struct ExerciseLogger: View {
                     Button { edit(set) } label: { SetRow(set: set) }
                         .buttonStyle(.plain)
                         .padding(.vertical, 2)
-                        .background(editingSet == set.id ? Theme.muted : .clear, in: RoundedRectangle(cornerRadius: 6))
+                        .background(editingSet == set.id ? Theme.muted : .clear, in: Rectangle())
                         .accessibilityLabel(setLabel(set))
                     Button { store.deleteSet(set.id) } label: {
-                        Image(systemName: "xmark").font(.footnote)
+                        Image(systemName: "xmark").font(.ripit(.footnote))
                     }
                     .frame(width: Theme.touch, height: 36)
                     .foregroundStyle(Theme.mutedForeground)
@@ -286,7 +285,7 @@ private struct ExerciseLogger: View {
                 let extras = typeSize.isAccessibilitySize
                     ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8)) : AnyLayout(HStackLayout(spacing: 8))
                 extras {
-                    if editingSet == nil { EffortMenu(kind: effortKind, value: $effort) }
+                    if editingSet == nil, let kind = effortPicker { EffortMenu(kind: kind, value: $effort) }
                     WarmupToggle(isOn: $warmup)
                     if !typeSize.isAccessibilitySize { Spacer(minLength: 0) }
                 }
@@ -333,7 +332,7 @@ private struct ExerciseLogger: View {
         }
         if weightOutOfRange {
             Text("Weight must be 0 to \(Int(LoggedWeight.max)).")
-                .font(.footnote)
+                .font(.ripit(.footnote))
                 .foregroundStyle(Theme.error)
         }
     }
@@ -354,27 +353,37 @@ private struct ExerciseLogger: View {
 
     private var unitButton: some View {
         Button(currentUnit) { unit = currentUnit == "lbs" ? "kg" : "lbs" }
-            .font(.subheadline.weight(.semibold))
+            .font(.ripit(.subheadline, .semibold))
             .fixedSize()
             .padding(.horizontal, 12)
             .frame(minWidth: 52, minHeight: Theme.touch)
-            .background(Theme.muted, in: RoundedRectangle(cornerRadius: 8))
+            .background(Theme.muted, in: Rectangle())
             .foregroundStyle(Theme.foreground)
             .accessibilityLabel("Unit \(currentUnit), tap to switch")
     }
 
     private var logButton: some View {
         Button(editingSet == nil ? "Log" : "Save") { log() }
-            .font(.headline)
+            .font(.ripit(.headline, .bold))
+            .display(1.2)
             .fixedSize()
             .padding(.horizontal, 16)
             .frame(minWidth: 64, maxWidth: typeSize.isAccessibilitySize ? .infinity : nil, minHeight: Theme.touch)
-            .background(Theme.primary.opacity(canLog ? 1 : 0.4), in: RoundedRectangle(cornerRadius: 8))
+            .background(Theme.primary.opacity(canLog ? 1 : 0.4), in: Rectangle())
             .foregroundStyle(Theme.primaryForeground)
             .disabled(!canLog)
     }
 
-    private var currentUnit: String { unit ?? lastUnit }
+    private var effortPicker: EffortKind? { try? LoggerRules.effortPicker(settings.settings) }
+
+    /// The scale efforts are read and saved on; with tracking off nothing is saved.
+    private var effortKind: EffortKind { settings.settings.defaultIntensityRating }
+
+    /// The unit picked for this set, else the set before it in this exercise, else Settings' default.
+    private var currentUnit: String {
+        unit ?? (try? LoggerRules.newSetUnit(previousSetUnit: exercise.sets.last.flatMap { WeightUnit(rawValue: $0.weightUnit) },
+                                             settings.settings).rawValue) ?? WeightUnit.lbs.rawValue
+    }
 
     private var parsedWeight: Double? {
         weight.isEmpty ? 0 : Double(weight.replacingOccurrences(of: ",", with: "."))
@@ -399,13 +408,12 @@ private struct ExerciseLogger: View {
             prefill()
         } else {
             // A warm-up saves no effort; the effort picked stays for the next working set.
-            let setEffort = warmup ? nil : effort
+            let setEffort = warmup || effortPicker == nil ? nil : effort
             keepEffort = warmup
             store.logSet(exerciseId: exercise.id, reps: r, weight: w, unit: currentUnit,
                          rpe: effortKind == .rpe ? setEffort : nil, rir: effortKind == .rir ? setEffort : nil, isWarmup: warmup)
             warmup = false
         }
-        lastUnit = currentUnit
         focus = nil
     }
 
@@ -485,18 +493,18 @@ private struct PlanStrip: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("PLAN").font(.caption2.weight(.bold)).tracking(1).foregroundStyle(Theme.mutedForeground)
+            Text("PLAN").font(.ripit(.caption2, .bold)).tracking(1).foregroundStyle(Theme.mutedForeground)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 6) {
                     ForEach(planned) { s in
                         let done = s.setNumber <= logged
                         HStack(spacing: 4) {
-                            if done { Image(systemName: "checkmark").font(.caption2.weight(.bold)) }
-                            Text(PlanFormat.label(s)).font(.caption.monospacedDigit().weight(.semibold))
+                            if done { Image(systemName: "checkmark").font(.ripit(.caption2, .bold)) }
+                            Text(PlanFormat.label(s)).font(.ripit(.caption, .semibold).monospacedDigit())
                         }
                         .padding(.horizontal, 8)
                         .frame(minHeight: 28)
-                        .background(done ? Theme.primary.opacity(0.15) : Theme.muted, in: RoundedRectangle(cornerRadius: 6))
+                        .background(done ? Theme.primary.opacity(0.15) : Theme.muted, in: Rectangle())
                         .foregroundStyle(done ? Theme.primary : Theme.foreground)
                     }
                 }
@@ -510,11 +518,11 @@ private struct PlanStrip: View {
 private extension View {
     func fieldStyle() -> some View {
         self
-            .font(.body.monospacedDigit())
+            .font(.ripit(.body).monospacedDigit())
             .multilineTextAlignment(.center)
             .frame(maxWidth: .infinity, minHeight: Theme.touch)
-            .background(Theme.muted, in: RoundedRectangle(cornerRadius: 8))
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.border, lineWidth: 1))
+            .background(Theme.muted, in: Rectangle())
+            .overlay(Rectangle().stroke(Theme.border, lineWidth: 1))
             .foregroundStyle(Theme.foreground)
     }
 }

@@ -19,11 +19,11 @@ struct SummaryView: View {
             if let rollup = store.rollup(completionId), let text = try? rollup.text() {
                 VStack(alignment: .leading, spacing: 20) {
                     if let name = rollup.workoutName {
-                        Text(name).font(.title2.weight(.bold)).foregroundStyle(Theme.foreground)
+                        Text(name).font(.ripit(.title2, .bold)).foregroundStyle(Theme.foreground)
                     }
                     meta(text)
                     if let note = text.note {
-                        Text(note).font(.headline).foregroundStyle(Theme.mutedForeground)
+                        Text(note).font(.ripit(.headline)).foregroundStyle(Theme.mutedForeground)
                     }
                     tiles(text.tiles)
                     if !text.exercises.isEmpty {
@@ -50,7 +50,7 @@ struct SummaryView: View {
             }
         }
         .background(Theme.background)
-        .navigationTitle("Workout complete")
+        .navigationTitle("WORKOUT COMPLETE")
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(isPresented: $saving) {
             SaveWorkoutView(completionId: completionId, openLibrary: openLibrary)
@@ -76,8 +76,8 @@ struct SummaryView: View {
 
     private func metaItem(_ label: String, _ value: String) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 6) {
-            Text(label.uppercased()).font(.caption.weight(.semibold)).tracking(1).foregroundStyle(Theme.mutedForeground)
-            Text(value).font(.headline.monospacedDigit()).foregroundStyle(Theme.foreground)
+            Text(label.uppercased()).font(.ripit(.caption, .semibold)).tracking(1).foregroundStyle(Theme.mutedForeground)
+            Text(value).font(.ripit(.headline).monospacedDigit()).foregroundStyle(Theme.foreground)
         }
     }
 
@@ -103,17 +103,17 @@ private struct StatTile: View {
     var body: some View {
         VStack(spacing: 4) {
             Text(tile.value)
-                .font(.system(hero ? .largeTitle : .title2, weight: .black).monospacedDigit())
+                .font(.ripit(hero ? .largeTitle : .title2, .bold).monospacedDigit())
                 .foregroundStyle(Theme.foreground)
             Text(tile.label.uppercased())
-                .font(.caption.weight(.semibold)).tracking(1)
+                .font(.ripit(.caption, .semibold)).tracking(1)
                 .foregroundStyle(Theme.mutedForeground)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
         .padding(hero ? 16 : 12)
-        .background(Theme.muted, in: RoundedRectangle(cornerRadius: 8))
-        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.border, lineWidth: 1))
+        .background(Theme.muted, in: Rectangle())
+        .overlay(Rectangle().stroke(Theme.border, lineWidth: 1))
         .accessibilityElement(children: .combine)
     }
 }
@@ -126,19 +126,19 @@ private struct ExerciseSummaryRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             pair {
-                Text(exercise.name).font(.headline).foregroundStyle(Theme.foreground)
+                Text(exercise.name).font(.ripit(.headline)).foregroundStyle(Theme.foreground)
             } trailing: {
                 if let top = exercise.top {
-                    Text(top).font(.subheadline.monospacedDigit()).foregroundStyle(Theme.mutedForeground)
+                    Text(top).font(.ripit(.subheadline).monospacedDigit()).foregroundStyle(Theme.mutedForeground)
                 }
             }
             pair {
-                Text(exercise.line).font(.subheadline.monospacedDigit()).foregroundStyle(Theme.mutedForeground)
+                Text(exercise.line).font(.ripit(.subheadline).monospacedDigit()).foregroundStyle(Theme.mutedForeground)
             } trailing: {
                 if let trend = exercise.trend {
                     let up = trend.hasPrefix("+")
                     Label(trend.uppercased(), systemImage: up ? "chart.line.uptrend.xyaxis" : trend.hasPrefix("-") ? "chart.line.downtrend.xyaxis" : "equal")
-                        .font(.footnote.weight(.bold))
+                        .font(.ripit(.footnote, .bold))
                         .foregroundStyle(up ? Theme.primary : Theme.mutedForeground)
                 }
             }
@@ -180,7 +180,7 @@ struct SaveWorkoutView: View {
             VStack(alignment: .leading, spacing: 16) {
                 if savedId != nil {
                     Label("Saved to your workouts", systemImage: "bookmark.fill")
-                        .font(.title3.weight(.bold)).foregroundStyle(Theme.primary)
+                        .font(.ripit(.title3, .bold)).foregroundStyle(Theme.primary)
                     Text("Start it again from Library › Workouts, or pin it to see it on Training.")
                         .foregroundStyle(Theme.mutedForeground)
                     Button("Open Library › Workouts") { openLibrary() }
@@ -208,7 +208,7 @@ struct SaveWorkoutView: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .background(Theme.background)
-        .navigationTitle("Save workout")
+        .navigationTitle("SAVE WORKOUT")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             if name.isEmpty, savedId == nil {
@@ -224,8 +224,8 @@ struct SaveWorkoutView: View {
 
     private func field(_ label: String, count: Int, max: Int, @ViewBuilder input: () -> some View) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            let title = Text(label.uppercased()).font(.caption.weight(.bold)).tracking(1)
-            let counter = Text("\(count)/\(max)").font(.caption.monospacedDigit())
+            let title = Text(label.uppercased()).font(.ripit(.caption, .bold)).tracking(1)
+            let counter = Text("\(count)/\(max)").font(.ripit(.caption).monospacedDigit())
             ViewThatFits(in: .horizontal) {
                 HStack { title.fixedSize(); Spacer(); counter.fixedSize() }
                 VStack(alignment: .leading, spacing: 2) { title; counter }
@@ -234,8 +234,8 @@ struct SaveWorkoutView: View {
             input()
                 .padding(12)
                 .frame(minHeight: Theme.touch)
-                .background(Theme.card, in: RoundedRectangle(cornerRadius: 8))
-                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.border, lineWidth: 1))
+                .background(Theme.card, in: Rectangle())
+                .overlay(Rectangle().stroke(Theme.border, lineWidth: 1))
                 .foregroundStyle(Theme.foreground)
         }
     }

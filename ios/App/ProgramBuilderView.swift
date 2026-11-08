@@ -98,17 +98,17 @@ struct ProgramBuilderView: View {
             VStack(alignment: .leading, spacing: 20) {
                 TextField("Program name", text: $draft.name)
                     .selectAllOnFocus()
-                    .font(.title3.weight(.semibold))
+                    .font(.ripit(.title3, .semibold))
                     .padding(.horizontal, 12)
                     .frame(minHeight: Theme.touch)
-                    .background(Theme.card, in: RoundedRectangle(cornerRadius: 8))
-                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.border, lineWidth: 1))
+                    .background(Theme.card, in: Rectangle())
+                    .overlay(Rectangle().stroke(Theme.border, lineWidth: 1))
 
                 HStack {
                     WeekPicker(weeks: Array(1...draft.weeks.count), selected: week + 1) { week = $0 - 1 }
                     Button { draft.addWeek(); week = draft.weeks.count - 1 } label: { Image(systemName: "plus") }
                         .frame(width: Theme.touch, height: 40)
-                        .background(Theme.muted, in: RoundedRectangle(cornerRadius: 8))
+                        .background(Theme.muted, in: Rectangle())
                         .accessibilityLabel("Add week (copies the last week)")
                 }
 
@@ -135,7 +135,7 @@ struct ProgramBuilderView: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .background(Theme.background)
-        .navigationTitle("New program")
+        .navigationTitle("NEW PROGRAM")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
@@ -185,7 +185,7 @@ private struct WorkoutDraftBlock: View {
 
     var body: some View {
         FolderBlock(title: workout.name.isEmpty ? "Workout" : workout.name, trailing: {
-            Button(action: onRemove) { Image(systemName: "trash").font(.footnote) }
+            Button(action: onRemove) { Image(systemName: "trash").font(.ripit(.footnote)) }
                 .frame(width: 40, height: 32)
                 .foregroundStyle(Theme.mutedForeground)
                 .accessibilityLabel("Remove workout")
@@ -193,17 +193,17 @@ private struct WorkoutDraftBlock: View {
             VStack(alignment: .leading, spacing: 0) {
                 TextField("Workout name", text: $workout.name)
                     .selectAllOnFocus()
-                    .font(.headline)
+                    .font(.ripit(.headline))
                     .padding(.horizontal, 16)
                     .frame(minHeight: Theme.touch)
                 ForEach($workout.exercises) { $ex in
                     RowDivider()
                     VStack(alignment: .leading, spacing: 10) {
                         HStack {
-                            Text(ex.name).font(.headline).foregroundStyle(Theme.foreground)
+                            Text(ex.name).font(.ripit(.headline)).foregroundStyle(Theme.foreground)
                             Spacer()
                             GroupMenu(group: $ex.group)
-                            Button { workout.exercises.removeAll { $0.id == ex.id } } label: { Image(systemName: "xmark").font(.footnote) }
+                            Button { workout.exercises.removeAll { $0.id == ex.id } } label: { Image(systemName: "xmark").font(.ripit(.footnote)) }
                                 .frame(width: 40, height: 36)
                                 .foregroundStyle(Theme.mutedForeground)
                                 .accessibilityLabel("Remove \(ex.name)")
@@ -231,11 +231,11 @@ struct GroupMenu: View {
             ForEach(SupersetLabel.all.prefix(6), id: \.self) { g in Button("Superset \(g)") { group = g } }
         } label: {
             Text(group.map { "Superset \($0)" } ?? "Superset")
-                .font(.caption.weight(.semibold))
+                .font(.ripit(.caption, .semibold))
                 .padding(.horizontal, 10)
                 .frame(minHeight: 32)
-                .background(group == nil ? Theme.muted : Theme.accent, in: RoundedRectangle(cornerRadius: 6))
-                .foregroundStyle(group == nil ? Theme.mutedForeground : Color(hex: 0x1A1108))
+                .background(group == nil ? Theme.muted : Theme.accent, in: Rectangle())
+                .foregroundStyle(group == nil ? Theme.mutedForeground : Theme.accentForeground)
         }
         .accessibilityLabel(group.map { "Superset \($0), change" } ?? "Add to a superset")
     }
@@ -253,11 +253,11 @@ struct SetsEditor: View {
                 Text("Weight").frame(maxWidth: .infinity)
                 Color.clear.frame(width: 36, height: 1)
             }
-            .font(.caption.weight(.semibold))
+            .font(.ripit(.caption, .semibold))
             .foregroundStyle(Theme.mutedForeground)
             ForEach(Array($sets.enumerated()), id: \.element.id) { i, $set in
                 HStack(spacing: 8) {
-                    Text("\(i + 1)").font(.subheadline.weight(.bold)).foregroundStyle(Theme.mutedForeground)
+                    Text("\(i + 1)").font(.ripit(.subheadline, .bold)).foregroundStyle(Theme.mutedForeground)
                         .frame(width: 28, alignment: .leading)
                     TextField("5", text: $set.reps).planField()
                     TextField("e.g. 65%", text: $set.weight).planField()
@@ -270,7 +270,7 @@ struct SetsEditor: View {
             Button {
                 sets.append(sets.last.map { EditableSet(reps: $0.reps, weight: $0.weight, rpe: $0.rpe, rir: $0.rir) }
                     ?? EditableSet(reps: "5", weight: ""))
-            } label: { Label("Add set", systemImage: "plus").font(.subheadline.weight(.semibold)) }
+            } label: { Label("Add set", systemImage: "plus").font(.ripit(.subheadline, .semibold)) }
                 .frame(minHeight: 40)
         }
     }
@@ -280,13 +280,13 @@ private extension View {
     func planField() -> some View {
         self
             .selectAllOnFocus()
-            .font(.body.monospacedDigit())
+            .font(.ripit(.body).monospacedDigit())
             .multilineTextAlignment(.center)
             .autocorrectionDisabled()
             .textInputAutocapitalization(.never)
             .frame(maxWidth: .infinity, minHeight: 40)
-            .background(Theme.muted, in: RoundedRectangle(cornerRadius: 8))
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.border, lineWidth: 1))
+            .background(Theme.muted, in: Rectangle())
+            .overlay(Rectangle().stroke(Theme.border, lineWidth: 1))
             .foregroundStyle(Theme.foreground)
     }
 }

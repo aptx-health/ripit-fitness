@@ -49,6 +49,12 @@
 //                       "bottom" opens both folds and scrolls to the end
 //   -demoStartPinned YES  tap Start on Training's first pinned workout
 //   -demoRepeat YES     tap Repeat on Training's first recent workout
+// Slice 7 (work item 185):
+//   -demoSettingsTab YES  start on Settings; -demoThemePicker YES also opens the theme list
+//   -demoTab <s>        open a folder tab: recent | program (Training), lifts (Progress)
+//   Settings themselves come from UserDefaults, so launch arguments set them for a run (not saved):
+//   -settings.v1.stored YES -settings.v1.themeName dracula -settings.v1.themeMode light
+//   -settings.v1.einkDisplay YES -settings.v1.intensityEnabled YES -settings.v1.defaultIntensityRating rpe
 
 import Foundation
 import RipitCore

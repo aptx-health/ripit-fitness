@@ -34,6 +34,8 @@ targets:
       properties:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        # Rajdhani, the web's font (SIL OFL, App/Fonts/OFL.txt), bundled for slice 7 (work item 185).
+        UIAppFonts: [Rajdhani-Medium.ttf, Rajdhani-SemiBold.ttf, Rajdhani-Bold.ttf]
         UIFileSharingEnabled: true
         LSSupportsOpeningDocumentsInPlace: true
     dependencies:

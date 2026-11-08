@@ -7,6 +7,14 @@ import SwiftUI
 enum HelpTab: String, CaseIterable, Identifiable {
     case info = "Info", notes = "Notes", history = "History"
     var id: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .info: "info.circle"
+        case .notes: "note.text"
+        case .history: "clock"
+        }
+    }
 }
 
 struct ExerciseHelpSheet: View {
@@ -19,23 +27,23 @@ struct ExerciseHelpSheet: View {
         let notes = store.exerciseNotes(exerciseId: exercise.id)
         let tabs = HelpTab.allCases.filter { $0 != .notes || notes != nil }
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                Picker("Section", selection: $tab) {
-                    ForEach(tabs) { Text($0.rawValue).tag($0) }
+            // Info | Notes | History, folder tabs that switch in place like the web's ExerciseDisplayTabs.
+            FolderTabs(items: tabs.map { FolderTabItem(tab: $0, title: $0.rawValue, icon: $0.icon, tone: $0 == .info ? .active : .exercise) },
+                       selection: $tab) { tab in
+                Group {
+                    switch tab {
+                    case .info: InfoContent(definitionId: exercise.definitionId)
+                    case .notes: Text(notes ?? "").foregroundStyle(Theme.foreground)
+                    case .history: HistoryContent(definitionId: exercise.definitionId)
+                    }
                 }
-                .pickerStyle(.segmented)
-                .frame(minHeight: Theme.touch)
-
-                switch tab {
-                case .info: InfoContent(definitionId: exercise.definitionId)
-                case .notes: Text(notes ?? "").foregroundStyle(Theme.foreground)
-                case .history: HistoryContent(definitionId: exercise.definitionId)
-                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(16)
             }
             .padding(16)
         }
         .background(Theme.background)
-        .navigationTitle(exercise.name)
+        .navigationTitle(exercise.name.uppercased())
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -48,7 +56,7 @@ struct ExerciseHelpSheet: View {
 private struct SectionLabel: View {
     let text: String
     var body: some View {
-        Text(text.uppercased()).font(.caption.weight(.bold)).tracking(1).foregroundStyle(Theme.mutedForeground)
+        Text(text.uppercased()).font(.ripit(.caption, .bold)).tracking(1).foregroundStyle(Theme.mutedForeground)
     }
 }
 
@@ -103,10 +111,10 @@ private struct FlowRow: View {
 
     private func chip(_ text: String) -> some View {
         Text(text)
-            .font(.subheadline.weight(.semibold))
+            .font(.ripit(.subheadline, .semibold))
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
-            .background(Theme.muted, in: RoundedRectangle(cornerRadius: 6))
+            .background(Theme.muted, in: Rectangle())
             .foregroundStyle(Theme.foreground)
     }
 }
@@ -153,11 +161,11 @@ private struct SessionCard: View {
                     showWarmups.toggle()
                 } label: {
                     HStack {
-                        Image(systemName: showWarmups ? "chevron.down" : "chevron.right").font(.caption)
+                        Image(systemName: showWarmups ? "chevron.down" : "chevron.right").font(.ripit(.caption))
                         Text("\(session.warmupSets.count) warm-up \(session.warmupSets.count == 1 ? "set" : "sets")")
                         Spacer()
                     }
-                    .font(.subheadline)
+                    .font(.ripit(.subheadline))
                     .foregroundStyle(Theme.mutedForeground)
                     .frame(minHeight: Theme.touch)
                     .contentShape(Rectangle())
@@ -167,28 +175,28 @@ private struct SessionCard: View {
             }
         }
         .padding(12)
-        .background(Theme.card, in: RoundedRectangle(cornerRadius: 8))
-        .overlay(RoundedRectangle(cornerRadius: 8).stroke(session.isPR ? Theme.accent : Theme.border, lineWidth: 1))
+        .background(Theme.card, in: Rectangle())
+        .overlay(Rectangle().stroke(session.isPR ? Theme.accent : Theme.border, lineWidth: 1))
     }
 
     private var title: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(session.workoutName).font(.headline).foregroundStyle(Theme.foreground)
-            Text(Format.day(session.completedAt)).font(.caption).foregroundStyle(Theme.mutedForeground)
+            Text(session.workoutName).font(.ripit(.headline)).foregroundStyle(Theme.foreground)
+            Text(Format.day(session.completedAt)).font(.ripit(.caption)).foregroundStyle(Theme.mutedForeground)
         }
     }
 
     @ViewBuilder private var badges: some View {
         if session.isPR {
             Text("PR")
-                .font(.caption.weight(.bold))
+                .font(.ripit(.caption, .bold))
                 .padding(.horizontal, 6)
                 .padding(.vertical, 2)
-                .background(Theme.accent, in: RoundedRectangle(cornerRadius: 4))
+                .background(Theme.accent, in: Rectangle())
                 .foregroundStyle(Theme.foreground)
         }
         if let e1rm = session.e1rm {
-            Text("e1RM \(Int(e1rm.rounded())) lbs").font(.subheadline.monospacedDigit().weight(.semibold))
+            Text("e1RM \(Int(e1rm.rounded())) lbs").font(.ripit(.subheadline, .semibold).monospacedDigit())
                 .foregroundStyle(Theme.foreground)
         }
     }

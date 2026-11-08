@@ -25,7 +25,7 @@ struct ProgramListView: View {
                             NavigationLink(value: TrainingRoute.program(p.id)) {
                                 HStack {
                                     VStack(alignment: .leading, spacing: 4) {
-                                        Text(p.name).font(.headline).foregroundStyle(Theme.foreground)
+                                        Text(p.name).font(.ripit(.headline)).foregroundStyle(Theme.foreground)
                                         if p.isActive { ActiveBadge() }
                                     }
                                     Spacer()
@@ -53,7 +53,7 @@ struct ProgramListView: View {
             .padding(16)
         }
         .background(Theme.background)
-        .navigationTitle("Programs")
+        .navigationTitle("PROGRAMS")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $building) {
             NavigationStack { ProgramBuilderView() }.environment(store)
@@ -73,9 +73,9 @@ struct ProgramListView: View {
 struct ActiveBadge: View {
     var body: some View {
         Text("ACTIVE")
-            .font(.caption2.weight(.bold)).tracking(1)
+            .font(.ripit(.caption2, .bold)).tracking(1)
             .padding(.horizontal, 8).padding(.vertical, 3)
-            .background(Theme.primary, in: Capsule())
+            .background(Theme.primary, in: Rectangle())
             .foregroundStyle(Theme.primaryForeground)
     }
 }
@@ -83,6 +83,7 @@ struct ActiveBadge: View {
 struct ProgramDetailView: View {
     @Environment(WorkoutStore.self) private var store
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var typeSize
     let programId: String
     @Binding var path: [TrainingRoute]
     @State private var week: Int?
@@ -97,8 +98,15 @@ struct ProgramDetailView: View {
                 let shown = week ?? (p.isActive ? store.currentWeek : nil) ?? p.weeks.first?.weekNumber
                 VStack(alignment: .leading, spacing: 20) {
                     VStack(alignment: .leading, spacing: 6) {
-                        HStack {
-                            Text(p.name).font(.title.weight(.black)).foregroundStyle(Theme.foreground)
+                        // The badge goes under the title at accessibility sizes, so the name keeps the width
+                        // and wraps between words.
+                        let layout = typeSize.isAccessibilitySize
+                            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8)) : AnyLayout(HStackLayout())
+                        layout {
+                            Text(p.name).font(.ripit(.title, .bold)).display(1.5).foregroundStyle(Theme.foreground)
+                                .fixedSize(horizontal: false, vertical: true)
+                                // Capped like the folder tabs, so one long word still fits the width.
+                                .dynamicTypeSize(...DynamicTypeSize.accessibility2)
                             if p.isActive { ActiveBadge() }
                         }
                         Text("\(progress.doneWorkouts) of \(progress.totalWorkouts) workouts done · cycle \(progress.cycleNumber)")
@@ -147,7 +155,7 @@ struct ProgramDetailView: View {
             }
         }
         .background(Theme.background)
-        .navigationTitle("Program")
+        .navigationTitle("PROGRAM")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -176,10 +184,10 @@ struct WeekPicker: View {
             HStack(spacing: 8) {
                 ForEach(weeks, id: \.self) { n in
                     Button("Week \(n)") { pick(n) }
-                        .font(.subheadline.weight(.semibold))
+                        .font(.ripit(.subheadline, .semibold))
                         .padding(.horizontal, 14)
                         .frame(minHeight: 40)
-                        .background(n == selected ? Theme.secondary : Theme.muted, in: RoundedRectangle(cornerRadius: 8))
+                        .background(n == selected ? Theme.secondary : Theme.muted, in: Rectangle())
                         .foregroundStyle(n == selected ? Theme.secondaryForeground : Theme.foreground)
                 }
             }
@@ -194,15 +202,18 @@ struct PlannedExerciseRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
             if let g = exercise.group {
-                Text(g).font(.caption.weight(.bold))
-                    .frame(width: 24, height: 24)
-                    .background(Theme.accent, in: RoundedRectangle(cornerRadius: 6))
-                    .foregroundStyle(Color(hex: 0x1A1108))
+                // Grows with the text instead of clipping the letter.
+                Text(g).font(.ripit(.caption, .bold))
+                    .fixedSize()
+                    .frame(minWidth: 24, minHeight: 24)
+                    .padding(.horizontal, 2)
+                    .background(Theme.accent, in: Rectangle())
+                    .foregroundStyle(Theme.accentForeground)
             }
             VStack(alignment: .leading, spacing: 2) {
-                Text(exercise.name).font(.headline).foregroundStyle(Theme.foreground)
+                Text(exercise.name).font(.ripit(.headline)).foregroundStyle(Theme.foreground)
                 Text(exercise.sets.isEmpty ? "No sets" : PlanFormat.summary(exercise.sets))
-                    .font(.subheadline.monospacedDigit()).foregroundStyle(Theme.mutedForeground)
+                    .font(.ripit(.subheadline).monospacedDigit()).foregroundStyle(Theme.mutedForeground)
             }
             Spacer(minLength: 0)
         }

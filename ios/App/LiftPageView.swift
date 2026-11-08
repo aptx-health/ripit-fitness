@@ -8,21 +8,22 @@ import SwiftUI
 struct LiftPageView: View {
     @Environment(WorkoutStore.self) private var store
     let exerciseDefinitionId: String
-    @AppStorage(ProgressSettings.unitKey) private var unitRaw = WeightUnit.lbs.rawValue
+    @Environment(SettingsModel.self) private var settings
     @State private var range: ChartRange = .threeMonths
     @State private var history: LiftHistory?
     @State private var chart: ChartSeries?
     @State private var pinned = false
     @State private var loaded = false
 
-    private var unit: WeightUnit { WeightUnit(rawValue: unitRaw) ?? .lbs }
+    private var unit: WeightUnit { settings.settings.defaultWeightUnit }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 if let history {
                     Text(history.name.uppercased())
-                        .font(.system(size: 28, weight: .black))
+                        .font(.ripitDisplay(30, relativeTo: .title))
+                        .tracking(2)
                         .foregroundStyle(Theme.foreground)
                     if history.sessions.isEmpty {
                         EmptyRow("No sessions yet")
@@ -38,7 +39,7 @@ struct LiftPageView: View {
             .padding(16)
         }
         .background(Theme.background)
-        .navigationTitle("Lift")
+        .navigationTitle("LIFT")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -88,10 +89,10 @@ struct LiftPageView: View {
                     .accessibilityLabel(history.isBodyweight ? "Most reps per session" : "Estimated one-rep max over time")
 
                     Text(summary(chart, history))
-                        .font(.subheadline.monospacedDigit())
+                        .font(.ripit(.subheadline).monospacedDigit())
                         .foregroundStyle(Theme.mutedForeground)
                 } else {
-                    Text("No sessions in this range").font(.subheadline).foregroundStyle(Theme.mutedForeground)
+                    Text("No sessions in this range").font(.ripit(.subheadline)).foregroundStyle(Theme.mutedForeground)
                 }
             }
             .padding(16)
@@ -125,7 +126,7 @@ struct LiftPageView: View {
                 if i > 0 { RowDivider() }
                 ProgressRow(name: history.isBodyweight ? "Most reps" : "\(Words.plural(r.reps, "rep"))",
                             detail: "\(Words.set(r.weight, r.reps)) · \(Format.day(r.date))") {
-                    if r.isNew { Chip("New", fill: Theme.accent, text: Color(hex: 0x1A1108)) }
+                    if r.isNew { Chip("New", fill: Theme.accent, text: Theme.accentForeground) }
                 }
             }
         }
@@ -138,8 +139,8 @@ struct LiftPageView: View {
                 ProgressRow(name: Format.day(s.date),
                             detail: s.sets.map { Words.set($0.weight, $0.reps) }.joined(separator: ", ")) {
                     VStack(alignment: .trailing, spacing: 2) {
-                        if let e = s.e1rm { Text("e1RM \(WebRounding.round(e))").font(.subheadline.bold()).foregroundStyle(Theme.foreground) }
-                        if let rpe = s.avgRpe { Text("RPE \(Words.rpe(rpe))").font(.caption).foregroundStyle(Theme.mutedForeground) }
+                        if let e = s.e1rm { Text("e1RM \(WebRounding.round(e))").font(.ripit(.subheadline, .bold)).foregroundStyle(Theme.foreground) }
+                        if let rpe = s.avgRpe { Text("RPE \(Words.rpe(rpe))").font(.ripit(.caption)).foregroundStyle(Theme.mutedForeground) }
                     }
                 }
             }

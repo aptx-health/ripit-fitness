@@ -23,10 +23,7 @@ struct LibraryView: View {
         ScrollViewReader { proxy in
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                Text("LIBRARY")
-                    .font(.system(size: 40, weight: .black))
-                    .tracking(2)
-                    .foregroundStyle(Theme.foreground)
+                PageTitle("LIBRARY")
 
                 FolderBlock(title: "Workouts") {
                     if active + g.archived.count == 0 {
@@ -133,9 +130,9 @@ struct LibraryView: View {
         if !items.isEmpty {
             Button { isOpen.wrappedValue.toggle() } label: {
                 HStack {
-                    Text("\(title) (\(items.count))").font(.subheadline.weight(.bold))
+                    Text("\(title) (\(items.count))").font(.ripit(.subheadline, .bold))
                     Spacer()
-                    Image(systemName: isOpen.wrappedValue ? "chevron.up" : "chevron.down").font(.footnote.weight(.bold))
+                    Image(systemName: isOpen.wrappedValue ? "chevron.up" : "chevron.down").font(.ripit(.footnote, .bold))
                 }
                 .foregroundStyle(Theme.mutedForeground)
                 .padding(.horizontal, 16)
@@ -160,7 +157,7 @@ private struct GroupHeading: View {
 
     var body: some View {
         Text(title.uppercased())
-            .font(.caption.weight(.bold)).tracking(1)
+            .font(.ripit(.caption, .bold)).tracking(1)
             .foregroundStyle(Theme.mutedForeground)
             .padding(.horizontal, 16)
             .padding(.top, 14)
@@ -190,8 +187,8 @@ private struct RowTitle: View {
     var body: some View {
         Button { open(item) } label: {
             VStack(alignment: .leading, spacing: 2) {
-                Text(item.name).font(.headline).foregroundStyle(Theme.foreground).multilineTextAlignment(.leading)
-                Text(SavedFormat.subtitle(item)).font(.subheadline).foregroundStyle(Theme.mutedForeground)
+                Text(item.name).font(.ripit(.headline)).foregroundStyle(Theme.foreground).multilineTextAlignment(.leading)
+                Text(SavedFormat.subtitle(item)).font(.ripit(.subheadline)).foregroundStyle(Theme.mutedForeground)
             }
             .frame(maxWidth: .infinity, minHeight: Theme.touch, alignment: .leading)
             .padding(.leading, 16)
@@ -365,8 +362,8 @@ struct SavedWorkoutDetailView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     HStack(alignment: .top) {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(item.name).font(.title2.weight(.bold)).foregroundStyle(Theme.foreground)
-                            Text(SavedFormat.subtitle(item)).font(.subheadline).foregroundStyle(Theme.mutedForeground)
+                            Text(item.name).font(.ripit(.title2, .bold)).foregroundStyle(Theme.foreground)
+                            Text(SavedFormat.subtitle(item)).font(.ripit(.subheadline)).foregroundStyle(Theme.mutedForeground)
                         }
                         Spacer(minLength: 0)
                         PinButton(name: item.name, pinned: item.pinnedAt != nil) { store.pinSavedWorkout(item.id, $0) }
@@ -379,19 +376,15 @@ struct SavedWorkoutDetailView: View {
                         ForEach(Array(plan.enumerated()), id: \.offset) { i, ex in
                             if i > 0 { RowDivider() }
                             VStack(alignment: .leading, spacing: 4) {
-                                HStack(spacing: 6) {
-                                    Text(ex.name).font(.headline).foregroundStyle(Theme.foreground)
-                                    if let group = ex.exerciseGroup {
-                                        Text("SUPERSET \(group)").font(.caption2.weight(.bold))
-                                            .padding(.horizontal, 6).padding(.vertical, 2)
-                                            .background(Theme.accent, in: RoundedRectangle(cornerRadius: 4))
-                                            .foregroundStyle(Color(hex: 0x1A1108))
-                                    }
+                                // The superset badge goes under the name when both don't fit on one line.
+                                ViewThatFits(in: .horizontal) {
+                                    HStack(spacing: 6) { exerciseName(ex.name); supersetBadge(ex.exerciseGroup) }
+                                    VStack(alignment: .leading, spacing: 4) { exerciseName(ex.name); supersetBadge(ex.exerciseGroup) }
                                 }
                                 Text(ex.sets.isEmpty ? "No sets" : PlanFormat.summary(ex.sets.map(\.planned)))
-                                    .font(.subheadline).foregroundStyle(Theme.mutedForeground)
+                                    .font(.ripit(.subheadline)).foregroundStyle(Theme.mutedForeground)
                                 if let notes = ex.notes {
-                                    Text(notes).font(.footnote).foregroundStyle(Theme.mutedForeground)
+                                    Text(notes).font(.ripit(.footnote)).foregroundStyle(Theme.mutedForeground)
                                 }
                             }
                             .padding(16)
@@ -412,6 +405,21 @@ struct SavedWorkoutDetailView: View {
                 Button("Close") { dismiss() }
                     .frame(minHeight: Theme.touch)
             }
+        }
+    }
+
+    private func exerciseName(_ name: String) -> some View {
+        Text(name).font(.ripit(.headline)).foregroundStyle(Theme.foreground)
+    }
+
+    @ViewBuilder
+    private func supersetBadge(_ group: String?) -> some View {
+        if let group {
+            Text("SUPERSET \(group)").font(.ripit(.caption2, .bold))
+                .fixedSize()
+                .padding(.horizontal, 6).padding(.vertical, 2)
+                .background(Theme.accent, in: Rectangle())
+                .foregroundStyle(Theme.accentForeground)
         }
     }
 }

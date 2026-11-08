@@ -6,10 +6,8 @@
 import RipitCore
 import SwiftUI
 
-/// RPE or RIR. There is no Settings screen yet (slice 7 moves it there), so the logger has a toggle.
+/// RPE or RIR presets and labels. Which one the logger shows comes from Settings (slice 7).
 enum EffortSetting {
-    static let key = "effortKind"
-
     /// The choices the phone offers. RPE is whole numbers only (6 to 10); the web's half steps don't
     /// fit LoggedSet.rpe, an integer (lead decision on work item 174).
     static func presets(_ kind: EffortKind) -> [IntensityPreset] {
@@ -30,7 +28,7 @@ struct WorkoutClock: View {
         TimelineView(.periodic(from: .now, by: 1)) { context in
             let seconds = (try? LoggingClock.elapsedSeconds(from: startedAt, to: context.date)) ?? 0
             Text((try? LoggingClock.workoutText(seconds)) ?? "")
-                .font(.headline.monospacedDigit())
+                .font(.ripit(.headline).monospacedDigit())
                 .foregroundStyle(Theme.foreground)
                 .accessibilityLabel("Workout time \(Duration.seconds(seconds).formatted(.units(allowed: [.hours, .minutes, .seconds])))")
         }
@@ -45,32 +43,17 @@ struct RestTimerChip: View {
         TimelineView(.periodic(from: .now, by: 1)) { context in
             let seconds = (try? LoggingClock.elapsedSeconds(from: timer.startedAt, to: context.date)) ?? 0
             HStack(spacing: 4) {
-                Image(systemName: "timer").font(.caption.weight(.bold))
-                Text((try? LoggingClock.restText(seconds)) ?? "").font(.subheadline.monospacedDigit().weight(.semibold))
+                Image(systemName: "timer").font(.ripit(.caption, .bold))
+                Text((try? LoggingClock.restText(seconds)) ?? "").font(.ripit(.subheadline, .semibold).monospacedDigit())
             }
             .fixedSize()
             .padding(.horizontal, 10)
             .frame(minHeight: 32)
-            .background(Theme.primary.opacity(0.15), in: Capsule())
+            .background(Theme.primary.opacity(0.15), in: Rectangle())
             .foregroundStyle(Theme.primary)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Rest \(seconds / 60) minutes \(seconds % 60) seconds")
         }
-    }
-}
-
-/// RPE or RIR for the logger; a small segmented switch.
-struct EffortKindToggle: View {
-    @AppStorage(EffortSetting.key) private var kind: EffortKind = .rpe
-
-    var body: some View {
-        Picker("Effort", selection: $kind) {
-            Text("RPE").tag(EffortKind.rpe)
-            Text("RIR").tag(EffortKind.rir)
-        }
-        .pickerStyle(.segmented)
-        .frame(width: 120, height: Theme.touch)
-        .accessibilityLabel("Effort scale")
     }
 }
 
@@ -106,9 +89,9 @@ struct LastTimeLine: View {
             }
             .padding(.horizontal, 12)
             .frame(maxWidth: .infinity, minHeight: Theme.touch, alignment: .leading)
-            .background(Theme.primary.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
+            .background(Theme.primary.opacity(0.08), in: Rectangle())
             .overlay(alignment: .leading) { Rectangle().fill(Theme.primary).frame(width: 3) }
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .clipShape(Rectangle())
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -119,15 +102,15 @@ struct LastTimeLine: View {
 
     private var icon: some View { Image(systemName: "clock.arrow.circlepath").foregroundStyle(Theme.primary) }
     private var label: some View {
-        Text("LAST TIME").font(.caption2.weight(.bold)).tracking(1).foregroundStyle(Theme.mutedForeground)
+        Text("LAST TIME").font(.ripit(.caption2, .bold)).tracking(1).foregroundStyle(Theme.mutedForeground)
     }
-    private var date: some View { Text(Format.day(last.completedAt)).font(.caption2).foregroundStyle(Theme.mutedForeground) }
+    private var date: some View { Text(Format.day(last.completedAt)).font(.ripit(.caption2)).foregroundStyle(Theme.mutedForeground) }
     private var summary: some View {
         Text(last.summary ?? "Warm-ups only")
-            .font(.subheadline.monospacedDigit().weight(.semibold))
+            .font(.ripit(.subheadline, .semibold).monospacedDigit())
             .foregroundStyle(last.summary == nil ? Theme.mutedForeground : Theme.foreground)
     }
-    private var use: some View { Text("Use").font(.caption.weight(.bold)).foregroundStyle(Theme.primary) }
+    private var use: some View { Text("Use").font(.ripit(.caption, .bold)).foregroundStyle(Theme.primary) }
 }
 
 /// Pick an effort from the web's presets, or none.
@@ -151,14 +134,14 @@ struct EffortMenu: View {
             HStack(spacing: 4) {
                 Text(kind.rawValue.uppercased()).foregroundStyle(Theme.mutedForeground)
                 Text(value.map { EffortSetting.label(kind, $0) } ?? "–").monospacedDigit()
-                Image(systemName: "chevron.up.chevron.down").font(.caption2).foregroundStyle(Theme.mutedForeground)
+                Image(systemName: "chevron.up.chevron.down").font(.ripit(.caption2)).foregroundStyle(Theme.mutedForeground)
             }
-            .font(.subheadline.weight(.semibold))
+            .font(.ripit(.subheadline, .semibold))
             .padding(.horizontal, 12)
             // Full width on its own line at accessibility text sizes (see ExerciseLogger).
             .frame(minWidth: 88, maxWidth: typeSize.isAccessibilitySize ? .infinity : nil, minHeight: Theme.touch,
                    alignment: .leading)
-            .background(Theme.muted, in: RoundedRectangle(cornerRadius: 8))
+            .background(Theme.muted, in: Rectangle())
             .foregroundStyle(Theme.foreground)
         }
         .accessibilityLabel("\(kind.rawValue.uppercased()) \(value.map { EffortSetting.label(kind, $0) } ?? "none")")
@@ -176,10 +159,10 @@ struct WarmupToggle: View {
                 Image(systemName: isOn ? "checkmark.square.fill" : "square")
                 Text("Warm-up")
             }
-            .font(.subheadline.weight(.semibold))
+            .font(.ripit(.subheadline, .semibold))
             .padding(.horizontal, 12)
             .frame(maxWidth: typeSize.isAccessibilitySize ? .infinity : nil, minHeight: Theme.touch, alignment: .leading)
-            .background(isOn ? Theme.accent.opacity(0.2) : Theme.muted, in: RoundedRectangle(cornerRadius: 8))
+            .background(isOn ? Theme.accent.opacity(0.2) : Theme.muted, in: Rectangle())
             .foregroundStyle(isOn ? Theme.foreground : Theme.mutedForeground)
         }
         .buttonStyle(.plain)
@@ -203,14 +186,14 @@ struct SetTags: View {
             }
             if isWarmup {
                 Text("W")
-                    .font(.caption.weight(.bold))
+                    .font(.ripit(.caption, .bold))
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
-                    .background(Theme.accent.opacity(0.25), in: RoundedRectangle(cornerRadius: 4))
+                    .background(Theme.accent.opacity(0.25), in: Rectangle())
                     .accessibilityLabel("Warm-up")
             }
         }
-        .font(.subheadline.monospacedDigit())
+        .font(.ripit(.subheadline).monospacedDigit())
         .foregroundStyle(Theme.mutedForeground)
     }
 }

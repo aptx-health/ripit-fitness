@@ -12,10 +12,7 @@ struct HistoryView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                Text("RIPIT")
-                    .font(.system(size: 40, weight: .black))
-                    .tracking(2)
-                    .foregroundStyle(Theme.foreground)
+                PageTitle("RIPIT")
 
                 if let current = store.current {
                     ResumeCard(workout: current)
@@ -32,7 +29,7 @@ struct HistoryView: View {
                             Text("No workouts yet. Start one and it will show up here.")
                                 .foregroundStyle(Theme.mutedForeground)
                             Text("Used Ripit on the web? Download my data in ripit.fit Settings, then import the file.")
-                                .font(.subheadline)
+                                .font(.ripit(.subheadline))
                                 .foregroundStyle(Theme.mutedForeground)
                             importButton
                         }
@@ -55,7 +52,7 @@ struct HistoryView: View {
             if store.importing {
                 ProgressView("Importing…")
                     .padding(24)
-                    .background(Theme.card, in: RoundedRectangle(cornerRadius: 12))
+                    .background(Theme.card, in: Rectangle())
             }
         }
         .fileImporter(isPresented: $pickingFile, allowedContentTypes: [.json]) { result in
@@ -90,7 +87,7 @@ private struct ResumeCard: View {
             VStack(alignment: .leading, spacing: 12) {
                 let sets = workout.exercises.reduce(0) { $0 + $1.sets.count }
                 Text("Started \(Format.day(workout.startedAt)), \(Format.time(workout.startedAt))")
-                    .font(.headline)
+                    .font(.ripit(.headline))
                     .foregroundStyle(Theme.foreground)
                 Text(Format.counts(exercises: workout.exercises.count, sets: sets))
                     .foregroundStyle(Theme.mutedForeground)
@@ -115,21 +112,21 @@ private struct HistoryRow: View {
             layout {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(Format.historyTitle(entry))
-                        .font(.headline)
+                        .font(.ripit(.headline))
                         .foregroundStyle(Theme.foreground)
                     Text(Format.counts(exercises: entry.exerciseCount, sets: entry.setCount))
-                        .font(.subheadline)
+                        .font(.ripit(.subheadline))
                         .foregroundStyle(Theme.mutedForeground)
                 }
                 if !typeSize.isAccessibilitySize { Spacer() }
                 VStack(alignment: typeSize.isAccessibilitySize ? .leading : .trailing, spacing: 4) {
-                    Text(Format.day(entry.completedAt)).font(.subheadline.weight(.semibold))
-                    Text(Format.time(entry.completedAt)).font(.caption)
+                    Text(Format.day(entry.completedAt)).font(.ripit(.subheadline, .semibold))
+                    Text(Format.time(entry.completedAt)).font(.ripit(.caption))
                 }
                 .foregroundStyle(Theme.mutedForeground)
             }
             if typeSize.isAccessibilitySize { Spacer(minLength: 0) }
-            Image(systemName: "chevron.right").font(.caption).foregroundStyle(Theme.border)
+            Image(systemName: "chevron.right").font(.ripit(.caption)).foregroundStyle(Theme.border)
         }
         .padding(.vertical, typeSize.isAccessibilitySize ? 12 : 0)
         .padding(.horizontal, 16)
@@ -149,7 +146,7 @@ struct WorkoutDetailView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     if let entry = store.history.first(where: { $0.id == workoutId }) {
                         Text(Format.historyTitle(entry))
-                            .font(.title2.weight(.bold))
+                            .font(.ripit(.title2, .bold))
                             .foregroundStyle(Theme.foreground)
                     }
                     if let done = w.completedAt {
@@ -162,7 +159,7 @@ struct WorkoutDetailView: View {
                             ForEach(Array(run.exercises.enumerated()), id: \.element.id) { i, ex in
                                 if i > 0 { RowDivider() }
                                 VStack(alignment: .leading, spacing: 8) {
-                                    if run.group != nil { Text(ex.name).font(.headline).foregroundStyle(Theme.foreground) }
+                                    if run.group != nil { Text(ex.name).font(.ripit(.headline)).foregroundStyle(Theme.foreground) }
                                     ForEach(ex.sets) { SetRow(set: $0) }
                                 }
                                 .padding(16)
@@ -174,7 +171,7 @@ struct WorkoutDetailView: View {
             }
         }
         .background(Theme.background)
-        .navigationTitle("Workout")
+        .navigationTitle("WORKOUT")
         .navigationBarTitleDisplayMode(.inline)
     }
 }
@@ -223,13 +220,13 @@ struct SetLine: View {
                 }
             }
         }
-        .font(.body.monospacedDigit())
+        .font(.ripit(.body).monospacedDigit())
         .foregroundStyle(Theme.foreground)
     }
 
     private var number: some View {
         Text("\(setNumber)")
-            .font(.subheadline.weight(.bold))
+            .font(.ripit(.subheadline, .bold))
             .foregroundStyle(Theme.mutedForeground)
             .frame(minWidth: numberWidth, alignment: .leading)
     }
