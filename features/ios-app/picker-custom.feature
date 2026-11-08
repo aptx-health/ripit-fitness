@@ -14,8 +14,8 @@ Feature: iOS slice 8 - Exercise picker filters and custom exercises
     Then only exercises with it as a primary muscle show, as on the web, and I can clear it
 
   Scenario: Filter by equipment
-    When I pick one or more equipment types
-    Then only exercises using any of them show, and "Other" matches every specialized type, as on the web
+    When I pick an equipment type (one at a time, as on the web)
+    Then only exercises using it show, and "Other" matches every specialized type, as on the web
 
   Scenario: Search and filters together
     When I search and filter at once

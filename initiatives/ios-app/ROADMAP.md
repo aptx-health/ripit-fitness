@@ -15,7 +15,7 @@ Updated by the lead at each checkpoint. The full log is in `status.md`.
 | 4 | Progress: weekly report, records, pinned lifts, lift page | ✅ |
 | – | Parity inventory against the web (`parity-inventory.md`) | ✅ |
 
-## Next (order you approved: 5 → 6 → 7; slice 9 added by Dustin 2026-11-08)
+## Next (order you approved: 5 → 6 → 7; slices 9–11 added by Dustin 2026-11-08)
 
 | # | Slice | Size | State | Items |
 |---|---|---|---|---|
@@ -23,13 +23,15 @@ Updated by the lead at each checkpoint. The full log is in `status.md`.
 | 6 | **Finish summary + saved workouts:** summary at the end, save to repeat, Library › Workouts, Pinned/Repeat on Training | M | ✅ approved, on phone | 179–183 |
 | 7 | **Settings + look:** Settings tab, all 13 web themes, E-ink display, workout defaults; web font, square corners, offset shadows, switching folder tabs; largest text everywhere | L | ✅ approved, on phone | 184–188 |
 | 8 | **Picker + custom exercises:** filters, pick several, create your own | S–M | 🔨 tests (189) | 189 tests · 190 build · 191 review |
-| 9 | **Logger flow + quick actions:** the web's in-exercise logger (one exercise at a time, a drop-down list of the workout's exercises to jump between, prev/next, fixed Log bar), and the center Workout button with quick actions (continue the program's next workout, start a freeform/ad-hoc workout, resume the open one) | M | ⏳ | |
-| 10 | **Export from iOS + agent round trip:** phone writes the v1 JSON; imports proposals to approve | M | ⏳ | |
-| 11 | **Leftovers:** Top set/Volume tabs, "Week N of program", skip day, complete week | S | ⏳ | |
+| 9 | **Smart picker:** A–Z / Neglected ("+N planned") / Recovery / Anchors sorts in the workout's Add picker; Settings › Target movements; import muscle-balance targets | M | ⏳ | |
+| 10 | **Muscle balance settings:** 18 ratios, secondary credit, ignore warm-ups, live preview, reset | M | ⏳ | |
+| 11 | **Logger flow + quick actions:** the web's in-exercise logger (one exercise at a time, a drop-down list of the workout's exercises to jump between, prev/next, fixed Log bar), and the center Workout button with quick actions (continue the program's next workout, start a freeform/ad-hoc workout, resume the open one) | M | ⏳ | |
+| 12 | **Export from iOS + agent round trip:** phone writes the v1 JSON; imports proposals to approve | M | ⏳ | |
+| 13 | **Leftovers:** Top set/Volume tabs, "Week N of program", skip day, complete week | S | ⏳ | |
 
 Later (not planned): E-ink display parity beyond the basic theme (Dustin, 2026-11-08).
-Discovery running (192): the web's add-exercise modal — Neglected / Recovery / Anchors sorts, muscle balance, target movements and equipment settings. It will propose a slice.
-Later: balance/FAU, target movements, equipment; bundled curated programs; cardio; follow-along mode.
+Not planned (Dustin, 2026-11-08): Recovery's heavy/comeback terms (need a server job); the Equipment checklist (no phone consumer). Target movements stay phone-only until the export carries them.
+Later:; bundled curated programs; cardio; follow-along mode.
 Left out for now: coaching, community publishing, accounts, admin.
 
 ## Backlog found along the way
@@ -47,6 +49,8 @@ Left out for now: coaching, community publishing, accounts, admin.
 - Web: "Start a freestyle workout" fails with a generic error while a freestyle draft is open, and Training shows no way back to the draft (181; related to 176's note).
 - iOS: Library rows show dates ("Nov 7"), where the web says "Today" (181).
 - iOS E-INK: charts and tints still drawn in color; the web draws them solid (188; out of scope per Dustin's E-ink call).
+- Web: Settings › Muscle balance "Completed workouts" field has no effect; the window is a fixed 14 days (192). Phone fixes it at 14.
+- Web: equipment filter is single-choice; slice 8 spec corrected to match (192).
 
 ## Waiting on Dustin
 

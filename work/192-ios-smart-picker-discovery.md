@@ -1,6 +1,6 @@
 ---
 id: 192
-state: running
+state: accepted
 waiting_on:
 executor: parity-disco
 skill: discovery
@@ -58,3 +58,4 @@ The discovery packet with first line `Report: …`, the note's path, and the pro
 ## Log
 - 2026-11-08: created (ready). Runs while slice 8 is in tests/build; parity-disco is cleared again before review 191.
 - 2026-11-08 07:49 MST: dispatched to parity-disco (running; context 13%, cleared)
+- 2026-11-08: handed back with 4 decisions. Dustin: accept all 4 recommendations; slices A (smart picker) and B (muscle balance settings) go after slice 8, before the logger flow. Lead corrected slice 8's equipment scenario to single-choice and told ios-tests.
