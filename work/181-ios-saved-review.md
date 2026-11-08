@@ -1,7 +1,7 @@
 ---
 id: 181
-state: waiting
-waiting_on: 180
+state: running
+waiting_on:
 executor: parity-disco
 skill: reviewer
 from: lead (worktree-brave-field-c150)
@@ -23,6 +23,11 @@ An independent verdict: does slice 6 meet `features/ios-app/saved-workouts.featu
 - Compare with the local web at phone width: the rollup after Finish, Library › Workouts, and Training's Pinned/Recent. Do the same flows on both and note any differences.
 - Screenshots go in `initiatives/ios-app/handoff/slice6-assets/`.
 
+## Worth extra attention
+- Real taps on flows the build only drove through debug hooks: Rename (alert with a text field), Discard-and-start from the Resume/Discard prompt (for a saved workout and for a repeat), opening Library › Workouts after Save, Dismiss on a New row, Restore.
+- Dark mode (not checked by the build).
+- A workout started from a saved one still reads "Ad-hoc workout" / "Workout". Say whether you think that's a gap worth fixing now.
+
 ## Don't touch
 - No code edits. `work/`, `STATE.md`, `status.md`, the roadmap. Staging is read only. Don't `rm`.
 
@@ -31,3 +36,5 @@ A review packet with first line `Report: …` and a clear verdict.
 
 ## Log
 - 2026-11-07: created (waiting on 180).
+- 2026-11-07: 180 done; ready for review.
+- 2026-11-07 21:22 MST: dispatched to parity-disco (running; context 2%, cleared)
