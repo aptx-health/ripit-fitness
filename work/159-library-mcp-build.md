@@ -28,6 +28,9 @@ Spec: `features/agent-tools/library-management.feature` (builds on `features/age
 ## Do
 Make 158's tests pass and cover every scenario. Reuse the Proposal table and Admin → Proposals page for applied direct changes (status applied, revertable) and for delete/merge (pending). Merge runs in one transaction and re-checks usage at approval. Tool descriptions tell the agent to search first and to propose a merge when delete is refused.
 
+## Keep in step with 157 (other branch, may merge first)
+Work 157 makes an admin rename also rename every `Exercise` row still carrying the old name (same transaction), and raises the instructions limit to 4000. `library_exercise_update` should do the same rename; rebase on dev if 157 has merged, otherwise match that behaviour.
+
 ## Done when
 158's tests pass unchanged (or each change explained); full suite and `npx tsc --noEmit` pass; a short manual MCP run against the local dev stack (create, update, propose delete, propose merge, approve, revert) with output in the handback.
 
