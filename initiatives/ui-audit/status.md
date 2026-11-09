@@ -92,3 +92,5 @@
 - 2026-11-07 CST: Theme page (149) approved by Dustin on the phone preview; PR into dev.
 - 2026-11-08 CST: Bug: delete from the Workout plan sheet freezes the logger (prod). Fix 156 dispatched to implementer (worktree2, fix/plan-delete-freeze). Small; test-builder skipped.
 - 2026-11-08 CST: 156 back: confirm drawn behind the plan sheet (z 60 < 90) but still modal. Fixed (z-95) with a regression test; PR into dev.
+- 2026-11-08 156 accepted; plan-sheet freeze fix in prod (release #1049, infra #139).
+- 2026-11-09 157 (admin: edit exercise definition from the logger Edit menu) confirmed and dispatched to implementer wE:p7; branch feature/logger-admin-edit.

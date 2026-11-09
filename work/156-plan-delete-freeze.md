@@ -1,6 +1,6 @@
 ---
 id: 156
-state: review
+state: accepted
 waiting_on:
 executor: implementer
 from: lead (lead-ripit-mcp)
@@ -33,3 +33,4 @@ Use `handoff-implementer`. First line `Report: complete | needs decision | furth
 - 2026-11-08 CST: created from Dustin's bug report; dispatched to implementer (wE:p7).
 - 2026-11-08 CST: Dustin: the freeze was in a freestyle session; implementer told.
 - 2026-11-08 CST: back complete. Root cause: LoggerConfirm (z-60) opened behind the plan sheet (z-90) while modal; fix z-95. Lead re-ran the regression test (2/2) and tsc; screenshots checked. PR into dev.
+- 2026-11-08 Accepted by Dustin (merged #1048). In prod via release #1049, infra #139.
