@@ -122,3 +122,4 @@ Append-only. Newest at the bottom.
 - 2026-11-09 CST: 159 back complete (85/85 steps, suite 4578); lead re-ran 922 agent-tools tests + tsc. 160 review dispatched to coach-review.
 - 2026-11-09 CST: 160 review: solid, bans gap + small items. 161 (fix all) dispatched to coach-impl.
 - 2026-11-09 CST: 161 back complete; lead re-ran 98 library tests + tsc. Note: worktree1 dev server (3100) ran with live Discord webhooks; likely 3 test posts in #proposals; stopped. Phone preview next.
+- 2026-11-09 CST: Dustin accepted 158–161 on the preview. PR into dev; prod release (with #1050) after merge.

@@ -1,6 +1,6 @@
 ---
 id: 158
-state: review
+state: accepted
 waiting_on:
 executor: test-builder
 from: lead (lead-ripit-mcp)
@@ -40,3 +40,4 @@ Use `handoff-test-builder`. First line `Report: complete | needs decision | furt
 ## Log
 - 2026-11-09 CST: created; plan confirmed by Dustin; dispatched to test-builder (wE:p9).
 - 2026-11-09 CST: back complete: 32 step tests for 17 scenarios in __tests__/features/agent-tools/library-management.steps.ts; red only on missing tools; break matrix 32/32. Lead calls: pins/preferences count as use (per spec); merge also moves anchors and any other relation; contract header goes into initiatives/agent-tools/docs/spec.md (159).
+- 2026-11-09 CST: Dustin on the phone preview: "It seems to work fine". Accepted.
