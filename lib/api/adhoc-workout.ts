@@ -13,6 +13,7 @@ type AdHocExercisePayload = {
   name: string
   notes: string | null
   exerciseDefinition: {
+    id: string
     primaryFAUs: string[]
     secondaryFAUs: string[]
     equipment: string[]

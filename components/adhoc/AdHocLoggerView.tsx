@@ -16,6 +16,7 @@ import LoggerBottomBar, { pendingSetDetail } from '@/components/workout-logging/
 import SetLoggingForm, {
   type ExpandedInput,
 } from '@/components/workout-logging/SetLoggingForm'
+import { useAdminDefinitionEdit } from '@/components/workout-logging/useAdminDefinitionEdit'
 import WorkoutPlanEditor, { elapsedSince } from '@/components/workout-logging/WorkoutPlanEditor'
 import { useIntensityAccess } from '@/hooks/useIntensityAccess'
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
@@ -43,6 +44,7 @@ import {
   AdHocExercisePickerModal,
   type PickerMode,
 } from './AdHocExercisePickerModal'
+import { applySavedDefinition } from './applySavedDefinition'
 import PlanLine, { usePlanExpanded } from './PlanLine'
 
 export type AdHocExercise = {
@@ -52,6 +54,8 @@ export type AdHocExercise = {
   /** The plan copied from a saved or generated workout; missing or [] for none. */
   prescribedSets?: PlannedSet[]
   exerciseDefinition: {
+    /** For the admin definition edit; the item is hidden without it. */
+    id?: string
     primaryFAUs: string[]
     secondaryFAUs: string[]
     equipment: string[]
@@ -95,6 +99,8 @@ type Props = {
   recoveryRanking?: FauNeed[]
   /** Curated anchor movements + staleness (#976) for the picker's Anchors view. */
   anchors?: AnchorStalenessRow[]
+  /** Editor or admin: the Edit menu offers "Edit exercise definition (Admin)". */
+  isEditorRole?: boolean
 }
 
 const EMPTY_SET = {
@@ -121,6 +127,7 @@ export default function AdHocLoggerView({
   muscleBalanceSnapshot,
   recoveryRanking,
   anchors,
+  isEditorRole = false,
 }: Props) {
   const router = useRouter()
   const toast = useToast()
@@ -183,6 +190,12 @@ export default function AdHocLoggerView({
   const prefilledFromHistoryIds = useRef<Set<string>>(new Set())
 
   const currentExercise = exercises[currentIndex] ?? null
+
+  const adminDefinitionEdit = useAdminDefinitionEdit({
+    enabled: isEditorRole,
+    definitionId: currentExercise?.exerciseDefinition.id,
+    onSaved: (definition, previousName) => setExercises((prev) => applySavedDefinition(prev, definition, previousName)),
+  })
   const currentExerciseSets = currentExercise
     ? loggedSets.filter((s) => s.exerciseId === currentExercise.id)
     : []
@@ -310,6 +323,7 @@ export default function AdHocLoggerView({
           name: e.name,
           notes: e.notes ?? null,
           exerciseDefinition: {
+            id: e.exerciseDefinition.id,
             primaryFAUs: e.exerciseDefinition.primaryFAUs,
             secondaryFAUs: e.exerciseDefinition.secondaryFAUs,
             equipment: e.exerciseDefinition.equipment,
@@ -362,6 +376,7 @@ export default function AdHocLoggerView({
                   ...ex,
                   name: updated.name,
                   exerciseDefinition: {
+                    id: updated.exerciseDefinition.id,
                     primaryFAUs: updated.exerciseDefinition.primaryFAUs,
                     secondaryFAUs: updated.exerciseDefinition.secondaryFAUs,
                     equipment: updated.exerciseDefinition.equipment,
@@ -877,6 +892,7 @@ export default function AdHocLoggerView({
                   onClick: () =>
                     setPickerMode({ kind: 'swap', replacingName: currentExercise.name }),
                 },
+                ...adminDefinitionEdit.actions,
                 {
                   label: 'Delete this exercise',
                   icon: Trash2,
@@ -959,6 +975,7 @@ export default function AdHocLoggerView({
           onConfirm={handleCompleteWorkout}
         />
       )}
+      {adminDefinitionEdit.sheet}
       <WorkoutRollupModal
         open={showRollup}
         rollup={rollup}

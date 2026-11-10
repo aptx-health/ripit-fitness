@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
 import AdHocLoggerView, { type AdHocExercise } from '@/components/adhoc/AdHocLoggerView'
 import { RestoringWorkoutSpinner } from '@/components/ui/RestoringWorkoutSpinner'
+import { isEditorRole } from '@/lib/auth/roles'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { getMuscleBalanceSnapshot } from '@/lib/muscle-balance'
@@ -68,6 +69,7 @@ async function AdHocLoggerLoader({ completionId }: { completionId: string }) {
             },
             exerciseDefinition: {
               select: {
+                id: true,
                 primaryFAUs: true,
                 secondaryFAUs: true,
                 equipment: true,
@@ -131,6 +133,7 @@ async function AdHocLoggerLoader({ completionId }: { completionId: string }) {
     notes: e.notes,
     prescribedSets: e.prescribedSets,
     exerciseDefinition: {
+      id: e.exerciseDefinition.id,
       primaryFAUs: e.exerciseDefinition.primaryFAUs,
       secondaryFAUs: e.exerciseDefinition.secondaryFAUs,
       equipment: e.exerciseDefinition.equipment,
@@ -149,6 +152,7 @@ async function AdHocLoggerLoader({ completionId }: { completionId: string }) {
       muscleBalanceSnapshot={muscleBalanceSnapshot}
       recoveryRanking={recoveryRanking ?? undefined}
       anchors={anchors}
+      isEditorRole={isEditorRole(user.role)}
     />
   )
 }

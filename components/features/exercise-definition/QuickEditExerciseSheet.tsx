@@ -6,6 +6,8 @@ import { createPortal } from 'react-dom'
 import { clientLogger } from '@/lib/client-logger'
 import { EQUIPMENT_LABELS } from '@/lib/constants/program-metadata'
 import { FAU_DISPLAY_NAMES } from '@/lib/fau-volume'
+import { MAX_INSTRUCTIONS_LENGTH } from '@/lib/validators/exercise-definition'
+import { DiscardChangesConfirm, FULL_EDITOR_Z, QUICK_EDIT_Z, SaveForEveryoneConfirm } from './DefinitionEditConfirms'
 import ExerciseDefinitionEditorModal from './ExerciseDefinitionEditorModal'
 
 type QuickEditData = {
@@ -17,24 +19,43 @@ type QuickEditData = {
   equipment: string[]
 }
 
+/** The definition as saved, so a caller (the logger) can show it without reloading. */
+export type SavedDefinition = {
+  id: string
+  name: string
+  instructions?: string | null
+  primaryFAUs: string[]
+  secondaryFAUs: string[]
+  equipment: string[]
+  imageUrls?: string[]
+}
+
 type Props = {
   isOpen: boolean
   onClose: () => void
   exerciseId: string
   /** 'workout' shows "Save & Return to Workout" and calls onSaved to hand control back to the caller. */
   context: 'workout' | 'admin'
-  onSaved?: () => void
+  /** `previousName` is the name before the save: workouts still using it were renamed. */
+  onSaved?: (definition: SavedDefinition, previousName: string) => void
 }
 
 export default function QuickEditExerciseSheet({ isOpen, onClose, exerciseId, context, onSaved }: Props) {
   const [data, setData] = useState<QuickEditData | null>(null)
+  // As loaded, to tell whether anything changed.
+  const [loaded, setLoaded] = useState<QuickEditData | null>(null)
+  const [usageCount, setUsageCount] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [confirmingSave, setConfirmingSave] = useState(false)
+  const [confirmingDiscard, setConfirmingDiscard] = useState(false)
   const [showFullEditor, setShowFullEditor] = useState(false)
 
   useEffect(() => {
     if (!isOpen) {
       setData(null)
+      setLoaded(null)
       setShowFullEditor(false)
       return
     }
@@ -43,14 +64,17 @@ export default function QuickEditExerciseSheet({ isOpen, onClose, exerciseId, co
       .then((res) => res.json())
       .then((json) => {
         if (json.success && json.data) {
-          setData({
+          const next = {
             name: json.data.name,
             instructions: json.data.instructions ?? '',
             notes: json.data.notes ?? '',
             primaryFAUs: json.data.primaryFAUs ?? [],
             secondaryFAUs: json.data.secondaryFAUs ?? [],
             equipment: json.data.equipment ?? [],
-          })
+          }
+          setData(next)
+          setLoaded(next)
+          setUsageCount(json.data.usageCount ?? 0)
         }
       })
       .catch((err) => clientLogger.error('Failed to load exercise for quick edit', err))
@@ -59,20 +83,41 @@ export default function QuickEditExerciseSheet({ isOpen, onClose, exerciseId, co
 
   if (!isOpen) return null
 
+  const isDirty =
+    !!data && !!loaded &&
+    (data.name !== loaded.name || data.instructions !== loaded.instructions || data.notes !== loaded.notes)
+
+  const requestClose = () => {
+    if (isDirty) setConfirmingDiscard(true)
+    else onClose()
+  }
+
+  // Edits apply for every user, so Save asks first (SaveForEveryoneConfirm) and this runs on confirm.
   const handleSave = async () => {
     if (!data) return
     setIsSaving(true)
+    setSaveError(null)
     try {
       const res = await fetch(`/api/admin/exercise-definitions/${exerciseId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ instructions: data.instructions, notes: data.notes }),
+        body: JSON.stringify({ name: data.name.trim(), instructions: data.instructions, notes: data.notes }),
       })
-      if (!res.ok) throw new Error(`Save failed: ${res.status}`)
-      onSaved?.()
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        // Validation names the field ("Notes must be 400 characters or less").
+        const details: Array<{ message: string }> = json.details ?? []
+        setSaveError(details.map((d) => d.message).join(' ') || json.error || 'Could not save. Try again.')
+        setConfirmingSave(false)
+        return
+      }
+      setConfirmingSave(false)
+      onSaved?.(json.data, loaded?.name ?? json.data.name)
       onClose()
     } catch (err) {
       clientLogger.error('Failed to save quick edit', err)
+      setSaveError('Could not save. Check your connection and try again.')
+      setConfirmingSave(false)
     } finally {
       setIsSaving(false)
     }
@@ -85,11 +130,11 @@ export default function QuickEditExerciseSheet({ isOpen, onClose, exerciseId, co
   ] : []
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-end justify-center">
+    <div className="fixed inset-0 flex items-end justify-center" style={{ zIndex: QUICK_EDIT_Z }}>
       <button
         type="button"
         aria-label="Close quick edit"
-        onClick={onClose}
+        onClick={requestClose}
         className="absolute inset-0"
         style={{ background: 'rgba(58,40,23,0.55)' }}
       />
@@ -106,7 +151,7 @@ export default function QuickEditExerciseSheet({ isOpen, onClose, exerciseId, co
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={requestClose}
             aria-label="Close"
             className="w-[34px] h-[34px] flex items-center justify-center text-muted-foreground hover:text-foreground"
           >
@@ -122,6 +167,20 @@ export default function QuickEditExerciseSheet({ isOpen, onClose, exerciseId, co
           ) : (
             <>
               <div>
+                <label htmlFor="quick-edit-name" className="block doom-label text-foreground mb-1.5">
+                  Name
+                </label>
+                <input
+                  id="quick-edit-name"
+                  type="text"
+                  value={data.name}
+                  onChange={(e) => setData({ ...data, name: e.target.value })}
+                  maxLength={100}
+                  className="w-full px-3 py-2 border-2 border-border bg-background text-foreground focus:outline-none focus:border-primary"
+                />
+              </div>
+
+              <div>
                 <label htmlFor="quick-edit-description" className="block doom-label text-foreground mb-1.5">
                   Description
                 </label>
@@ -129,7 +188,7 @@ export default function QuickEditExerciseSheet({ isOpen, onClose, exerciseId, co
                   id="quick-edit-description"
                   value={data.instructions}
                   onChange={(e) => setData({ ...data, instructions: e.target.value })}
-                  maxLength={1000}
+                  maxLength={MAX_INSTRUCTIONS_LENGTH}
                   className="w-full min-h-[84px] px-3 py-2 border-2 border-primary bg-background text-foreground focus:outline-none"
                   placeholder="How to perform this exercise..."
                 />
@@ -174,17 +233,22 @@ export default function QuickEditExerciseSheet({ isOpen, onClose, exerciseId, co
         </div>
 
         <div className="px-4 pb-4 pt-2 border-t-2 border-border space-y-2">
+          {saveError && (
+            <p role="alert" className="text-sm font-semibold text-error">
+              {saveError}
+            </p>
+          )}
           <button
             type="button"
-            onClick={handleSave}
-            disabled={!data || isSaving}
+            onClick={() => setConfirmingSave(true)}
+            disabled={!data?.name.trim() || isSaving}
             className="doom-button-3d w-full h-[54px] bg-primary text-primary-foreground font-bold uppercase tracking-wider disabled:opacity-50"
           >
             {isSaving ? 'Saving…' : context === 'workout' ? 'Save & Return to Workout' : 'Save'}
           </button>
           <button
             type="button"
-            onClick={onClose}
+            onClick={requestClose}
             className="w-full h-[46px] text-sm font-semibold uppercase tracking-wide text-muted-foreground"
           >
             Cancel
@@ -200,13 +264,33 @@ export default function QuickEditExerciseSheet({ isOpen, onClose, exerciseId, co
           exerciseId={exerciseId}
           apiBasePath="/api/admin/exercise-definitions"
           showImages
-          onSuccess={() => {
+          confirmForEveryone
+          zIndex={FULL_EDITOR_Z}
+          onSuccess={(definition) => {
             setShowFullEditor(false)
-            onSaved?.()
+            onSaved?.(definition, loaded?.name ?? definition.name)
             onClose()
           }}
         />
       )}
+
+      <SaveForEveryoneConfirm
+        open={confirmingSave}
+        name={data?.name.trim() ?? ''}
+        previousName={loaded?.name}
+        usageCount={usageCount}
+        saving={isSaving}
+        onConfirm={handleSave}
+        onKeepEditing={() => setConfirmingSave(false)}
+      />
+      <DiscardChangesConfirm
+        open={confirmingDiscard}
+        onDiscard={() => {
+          setConfirmingDiscard(false)
+          onClose()
+        }}
+        onKeepEditing={() => setConfirmingDiscard(false)}
+      />
     </div>,
     document.body
   )

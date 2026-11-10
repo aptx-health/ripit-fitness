@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { requireEditor } from '@/lib/admin/auth'
 import { prisma } from '@/lib/db'
+import { updateExerciseDefinition } from '@/lib/exercises/update-definition'
 import { pluralize } from '@/lib/format/pluralize'
 import { logger } from '@/lib/logger'
 import {
@@ -175,30 +176,17 @@ export async function PATCH(
     if (input.notes !== undefined) updateData.notes = input.notes
     if (input.imageUrls !== undefined) updateData.imageUrls = input.imageUrls
 
-    // Update exercise definition
-    const updated = await prisma.exerciseDefinition.update({
-      where: { id },
+    // Update the definition; a rename carries over to workouts still using the old name
+    const { updated, renamedExercises } = await updateExerciseDefinition(prisma, {
+      id,
+      oldName: existing.name,
       data: updateData,
-      select: {
-        id: true,
-        name: true,
-        normalizedName: true,
-        equipment: true,
-        primaryFAUs: true,
-        secondaryFAUs: true,
-        category: true,
-        aliases: true,
-        instructions: true,
-        notes: true,
-        imageUrls: true,
-        isSystem: true,
-        createdBy: true,
-        createdAt: true,
-        updatedAt: true,
-      },
     })
 
-    logger.info({ exerciseId: id, name: updated.name }, 'Admin exercise definition updated')
+    logger.info(
+      { exerciseId: id, name: updated.name, renamedExercises },
+      'Admin exercise definition updated'
+    )
 
     return NextResponse.json({
       success: true,
