@@ -1,7 +1,7 @@
 ---
 id: 159
-state: waiting
-waiting_on: 158
+state: running
+waiting_on:
 executor: coach-impl
 from: lead (lead-ripit-mcp)
 confirmed: 2026-11-09 Dustin (plan: 158 tests → 159 build → 160 review)
@@ -31,6 +31,13 @@ Make 158's tests pass and cover every scenario. Reuse the Proposal table and Adm
 ## Keep in step with 157 (other branch, may merge first)
 Work 157 makes an admin rename also rename every `Exercise` row still carrying the old name (same transaction), and raises the instructions limit to 4000. `library_exercise_update` should do the same rename; rebase on dev if 157 has merged, otherwise match that behaviour.
 
+## Lead calls on 158's questions
+- Tests: `__tests__/features/agent-tools/library-management.steps.ts` (read-only; contract in its header). Packet: `work/158-handback.md`.
+- Pins and preferences count as use, so delete is refused for them (merge instead).
+- Merge moves every relation to the old definition, including anchors (and anything else found in the schema).
+- Copy the test header's contract into `initiatives/agent-tools/docs/spec.md` as a library section.
+- Branch is rebased on dev and already contains 157 (`lib/exercises/update-definition.ts` renames matching `Exercise` rows): `library_exercise_update` should use it.
+
 ## Done when
 158's tests pass unchanged (or each change explained); full suite and `npx tsc --noEmit` pass; a short manual MCP run against the local dev stack (create, update, propose delete, propose merge, approve, revert) with output in the handback.
 
@@ -42,3 +49,4 @@ Use `handoff-implementer`. First line `Report: complete | needs decision | furth
 
 ## Log
 - 2026-11-09 CST: created; waits on 158.
+- 2026-11-09 CST: 158 done; branch rebased on dev (has 157). Dispatched to coach-impl (wE:pA).
