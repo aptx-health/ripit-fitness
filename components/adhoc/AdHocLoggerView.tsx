@@ -44,6 +44,7 @@ import {
   AdHocExercisePickerModal,
   type PickerMode,
 } from './AdHocExercisePickerModal'
+import { applySavedDefinition } from './applySavedDefinition'
 import PlanLine, { usePlanExpanded } from './PlanLine'
 
 export type AdHocExercise = {
@@ -190,29 +191,10 @@ export default function AdHocLoggerView({
 
   const currentExercise = exercises[currentIndex] ?? null
 
-  // Shows a saved definition in place: same exercise, same logged sets and inputs.
   const adminDefinitionEdit = useAdminDefinitionEdit({
     enabled: isEditorRole,
     definitionId: currentExercise?.exerciseDefinition.id,
-    onSaved: (definition, previousName) =>
-      setExercises((prev) =>
-        prev.map((ex) =>
-          ex.exerciseDefinition.id === definition.id
-            ? {
-                ...ex,
-                name: ex.name === previousName ? definition.name : ex.name,
-                exerciseDefinition: {
-                  ...ex.exerciseDefinition,
-                  primaryFAUs: definition.primaryFAUs,
-                  secondaryFAUs: definition.secondaryFAUs,
-                  equipment: definition.equipment,
-                  instructions: definition.instructions ?? undefined,
-                  imageUrls: definition.imageUrls ?? ex.exerciseDefinition.imageUrls,
-                },
-              }
-            : ex
-        )
-      ),
+    onSaved: (definition, previousName) => setExercises((prev) => applySavedDefinition(prev, definition, previousName)),
   })
   const currentExerciseSets = currentExercise
     ? loggedSets.filter((s) => s.exerciseId === currentExercise.id)
