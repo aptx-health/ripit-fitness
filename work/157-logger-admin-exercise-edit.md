@@ -1,6 +1,6 @@
 ---
 id: 157
-state: running
+state: accepted
 waiting_on:
 executor: implementer
 from: lead (lead-ripit-mcp)
@@ -39,3 +39,6 @@ Use `handoff-implementer`. First line `Report: complete | needs decision | furth
 
 ## Log
 - 2026-11-09 CST: created from Dustin's report; plan confirmed; dispatched to implementer (wE:p7).
+- 2026-11-09 CST: back needs-decision. Lead re-ran the 22 tests and tsc (pass). Dustin: rename matching Exercise copies on save; raise instructions limit to 4000. Sent back to implementer.
+- 2026-11-09 CST: back complete (rename matching Exercise rows in one transaction; limit 4000; suite 4488). Lead re-ran the 3 changed test files (56 pass) and tsc; screenshots checked. Phone preview started for Dustin.
+- 2026-11-09 CST: Dustin on the phone preview: "Checks out!" Accepted. PR into dev.

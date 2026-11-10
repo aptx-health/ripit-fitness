@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/Button';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { clientLogger } from '@/lib/client-logger';
 import { pluralize } from '@/lib/format/pluralize';
+import { MAX_INSTRUCTIONS_LENGTH } from '@/lib/validators/exercise-definition';
+import { DiscardChangesConfirm, SaveForEveryoneConfirm } from './DefinitionEditConfirms';
 import EquipmentSelector from './EquipmentSelector';
 import ExerciseInfoPreview from './ExerciseInfoPreview';
 import FAUSelector from './FAUSelector';
@@ -40,6 +42,14 @@ export interface ExerciseDefinitionEditorModalProps {
    * opt in via the admin editor.
    */
   showImages?: boolean;
+  /**
+   * For editing a shared (admin) definition: Save first asks "Save for
+   * everyone?" with the usage count, and closing with unsaved changes asks
+   * to discard them.
+   */
+  confirmForEveryone?: boolean;
+  /** Stacks the editor above a higher layer than the default (the workout logger's sheets). */
+  zIndex?: number;
 }
 
 export default function ExerciseDefinitionEditorModal({
@@ -51,6 +61,8 @@ export default function ExerciseDefinitionEditorModal({
   onSuccess,
   apiBasePath = '/api/exercise-definitions',
   showImages = false,
+  confirmForEveryone = false,
+  zIndex = 80,
 }: ExerciseDefinitionEditorModalProps) {
   const toast = useToast();
   const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
@@ -70,6 +82,10 @@ export default function ExerciseDefinitionEditorModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [usageCount, setUsageCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  // The form as loaded in edit mode, to tell whether anything changed.
+  const [loadedForm, setLoadedForm] = useState<typeof formData | null>(null);
+  const [confirmingSave, setConfirmingSave] = useState(false);
+  const [confirmingDiscard, setConfirmingDiscard] = useState(false);
 
   // Load exercise data for edit mode
   useEffect(() => {
@@ -82,7 +98,7 @@ export default function ExerciseDefinitionEditorModal({
         .then((data) => {
           if (data.success && data.data) {
             const exercise = data.data;
-            setFormData({
+            const loaded = {
               name: exercise.name,
               equipment: exercise.equipment || [],
               primaryFAUs: exercise.primaryFAUs || [],
@@ -92,7 +108,9 @@ export default function ExerciseDefinitionEditorModal({
               instructions: exercise.instructions || '',
               notes: exercise.notes || '',
               imageUrls: exercise.imageUrls || [],
-            });
+            };
+            setFormData(loaded);
+            setLoadedForm(loaded);
             setUsageCount(exercise.usageCount || 0);
           }
         })
@@ -149,6 +167,7 @@ export default function ExerciseDefinitionEditorModal({
   const handleSubmit = useCallback(async () => {
     setIsSubmitting(true);
     setErrors({});
+    setConfirmingSave(false);
 
     try {
       const endpoint =
@@ -223,9 +242,23 @@ export default function ExerciseDefinitionEditorModal({
     setErrors({});
     setIsDuplicateName(false);
     setUsageCount(0);
+    setLoadedForm(null);
+    setConfirmingDiscard(false);
     setActiveTab('edit');
     onClose();
   }, [onClose]);
+
+  const isDirty = loadedForm !== null && JSON.stringify(formData) !== JSON.stringify(loadedForm);
+
+  const requestClose = useCallback(() => {
+    if (confirmForEveryone && isDirty) setConfirmingDiscard(true);
+    else handleClose();
+  }, [confirmForEveryone, isDirty, handleClose]);
+
+  const requestSave = () => {
+    if (confirmForEveryone && mode === 'edit') setConfirmingSave(true);
+    else handleSubmit();
+  };
 
   const canSubmit =
     !isDuplicateName &&
@@ -235,15 +268,15 @@ export default function ExerciseDefinitionEditorModal({
     formData.primaryFAUs.length > 0;
 
   return (
-    <DialogPrimitive.Root open={isOpen} onOpenChange={(o) => { if (!o) handleClose() }}>
+    <DialogPrimitive.Root open={isOpen} onOpenChange={(o) => { if (!o) requestClose() }}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay
-          style={{ position: 'fixed', inset: 0, zIndex: 80 }}
+          style={{ position: 'fixed', inset: 0, zIndex }}
           className="backdrop-blur-md bg-background/80"
         />
         <DialogPrimitive.Content
           onOpenAutoFocus={(e) => e.preventDefault()}
-          style={{ position: 'fixed', inset: 0, zIndex: 81, display: 'flex', alignItems: 'center', justifyContent: 'center', overflowY: 'auto' }}
+          style={{ position: 'fixed', inset: 0, zIndex: zIndex + 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflowY: 'auto' }}
           className="p-0 sm:p-4"
         >
           <DialogPrimitive.Title className="sr-only">
@@ -404,13 +437,13 @@ export default function ExerciseDefinitionEditorModal({
                   <label htmlFor="exercise-instructions" className="block text-sm font-semibold text-foreground uppercase tracking-wide">
                     Instructions
                   </label>
-                  <span className="text-xs text-muted-foreground">{formData.instructions.length} / 1000</span>
+                  <span className="text-xs text-muted-foreground">{formData.instructions.length} / {MAX_INSTRUCTIONS_LENGTH}</span>
                 </div>
                 <textarea
                   id="exercise-instructions"
                   value={formData.instructions}
                   onChange={(e) => setFormData({ ...formData, instructions: e.target.value })}
-                  maxLength={1000}
+                  maxLength={MAX_INSTRUCTIONS_LENGTH}
                   rows={4}
                   className={`w-full px-3 py-2 border-2 rounded bg-background text-foreground ${
                     errors.instructions ? 'border-error' : 'border-border focus:border-primary'
@@ -531,12 +564,12 @@ export default function ExerciseDefinitionEditorModal({
 
         {/* Footer */}
         <div className="flex justify-end gap-3 px-4 sm:px-6 py-4 border-t-2 border-border bg-muted/30">
-          <Button variant="secondary" onClick={handleClose} disabled={isSubmitting} doom>
+          <Button variant="secondary" onClick={requestClose} disabled={isSubmitting} doom>
             Cancel
           </Button>
           <Button
             variant="primary"
-            onClick={handleSubmit}
+            onClick={requestSave}
             disabled={!canSubmit || isLoading}
             loading={isSubmitting}
             doom
@@ -547,6 +580,24 @@ export default function ExerciseDefinitionEditorModal({
       </div>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
+      {confirmForEveryone && (
+        <>
+          <SaveForEveryoneConfirm
+            open={confirmingSave}
+            name={formData.name.trim()}
+            previousName={loadedForm?.name}
+            usageCount={usageCount}
+            saving={isSubmitting}
+            onConfirm={handleSubmit}
+            onKeepEditing={() => setConfirmingSave(false)}
+          />
+          <DiscardChangesConfirm
+            open={confirmingDiscard}
+            onDiscard={handleClose}
+            onKeepEditing={() => setConfirmingDiscard(false)}
+          />
+        </>
+      )}
     </DialogPrimitive.Root>
   );
 }

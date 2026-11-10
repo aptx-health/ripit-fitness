@@ -94,3 +94,6 @@
 - 2026-11-08 CST: 156 back: confirm drawn behind the plan sheet (z 60 < 90) but still modal. Fixed (z-95) with a regression test; PR into dev.
 - 2026-11-08 156 accepted; plan-sheet freeze fix in prod (release #1049, infra #139).
 - 2026-11-09 157 (admin: edit exercise definition from the logger Edit menu) confirmed and dispatched to implementer wE:p7; branch feature/logger-admin-edit.
+- 2026-11-09 CST: 157 back (22 tests, suite 4476). Dustin: renames update matching workout copies; instructions limit 1000→4000. Follow-up sent to implementer.
+- 2026-11-09 CST: 157 round 2 back complete; checks re-run; phone preview for Dustin.
+- 2026-11-09 CST: 157 accepted by Dustin on the preview; PR into dev.

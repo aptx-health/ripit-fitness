@@ -33,6 +33,7 @@ export default function LoggerConfirm({
   busy = false,
   secondaryDisabled = false,
   tone,
+  zIndex,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -49,6 +50,8 @@ export default function LoggerConfirm({
   /** Disables the secondary, e.g. Exit's Discard while the discard is in flight. */
   secondaryDisabled?: boolean
   tone?: PaperTabTitleTone
+  /** Raises the dialog above a layer higher than the logger's sheets (the exercise editor). */
+  zIndex?: number
 }) {
   // What had focus when the dialog opened; captured before Radix moves focus in.
   const opener = useRef<HTMLElement | null>(null)
@@ -75,9 +78,10 @@ export default function LoggerConfirm({
       <AlertDialog.Portal>
         {/* z-[95]: above the Workout plan sheet (z-[90]), whose row menus confirm here; under
             the menus and toasts (z-[100]). Behind the sheet it was hidden but still modal. */}
-        <AlertDialog.Overlay className="fixed inset-0 z-[95] bg-black/50 backdrop-blur-sm" />
+        <AlertDialog.Overlay className="fixed inset-0 z-[95] bg-black/50 backdrop-blur-sm" style={zIndex ? { zIndex } : undefined} />
         <AlertDialog.Content
           className="fixed left-1/2 top-1/2 z-[95] w-[min(92vw,26rem)] -translate-x-1/2 -translate-y-1/2"
+          style={zIndex ? { zIndex } : undefined}
           onCloseAutoFocus={(event) => {
             event.preventDefault()
             returnFocus()
