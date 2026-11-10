@@ -8,8 +8,9 @@ import SavedWorkoutOutline from '@/components/suggestions/SavedWorkoutOutline'
 import { isAdminRole } from '@/lib/admin/auth'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { LIBRARY_KINDS, type LibraryUsage, usageText } from '@/lib/proposals/library'
 import type { WorkoutCreateInput } from '@/lib/proposals/saved-workout'
-import { PROPOSAL_KIND_LABELS, type ProposalKind } from '@/lib/proposals/service'
+import { IRREVERSIBLE_KINDS, PROPOSAL_KIND_LABELS, type ProposalKind } from '@/lib/proposals/service'
 import { balanceRows, namedExercises, programDetail, same, savedWorkoutRows } from '@/lib/suggestions/bodies'
 
 export const revalidate = 0
@@ -36,7 +37,9 @@ export default async function ProposalDetailPage({ params }: { params: Promise<{
   if (!proposal) notFound()
 
   const isProgram = proposal.kind === 'program.create'
-  const isCreate = proposal.kind === 'exercise_definition.create'
+  const isCreate = proposal.kind === 'exercise_definition.create' || proposal.kind === LIBRARY_KINDS.create
+  const isDelete = proposal.kind === LIBRARY_KINDS.delete
+  const isMerge = proposal.kind === LIBRARY_KINDS.merge
   const isBalance = proposal.kind === 'anchors.update' || proposal.kind === 'balance_targets.update'
   const isSavedCreate = proposal.kind === 'saved_workout.create'
   const isSavedUpdate = proposal.kind === 'saved_workout.update'
@@ -44,12 +47,22 @@ export default async function ProposalDetailPage({ params }: { params: Promise<{
   const savedWorkout = isSavedCreate ? (proposal.payload as unknown as WorkoutCreateInput) : null
   const savedExercises = savedWorkout ? await namedExercises(savedWorkout.exercises) : []
   const current =
-    proposal.targetId && !isProgram && !isBalance && !isSavedCreate && !isSavedUpdate
+    proposal.targetId && !isProgram && !isBalance && !isSavedCreate && !isSavedUpdate && !isDelete && !isMerge
       ? await prisma.exerciseDefinition.findUnique({ where: { id: proposal.targetId } })
       : null
 
   let rows: DiffRow[] = []
-  if (isCreate) {
+  if (isDelete || isMerge) {
+    // Usage as counted when proposed; approve counts it again.
+    const p = proposal.payload as unknown as { name?: string; fromName?: string; intoName?: string; usage: LibraryUsage }
+    rows = isDelete
+      ? [{ field: 'delete', after: p.name }]
+      : [
+          { field: 'merge (goes away)', after: p.fromName },
+          { field: 'into (keeps every use)', after: p.intoName },
+        ]
+    rows.push({ field: isDelete ? 'usage' : 'usage that moves', after: usageText(p.usage) })
+  } else if (isCreate) {
     const definition = proposal.payload as Record<string, unknown>
     rows = Object.entries(definition).map(([field, after]) => ({ field, after }))
   } else if (isBalance) {
@@ -146,13 +159,22 @@ export default async function ProposalDetailPage({ params }: { params: Promise<{
         </section>
       ) : (
         <section className="space-y-1.5">
-          <h2 className="doom-label text-secondary">{isCreate ? 'Proposed definition' : 'Changes'}</h2>
-          <FieldDiff rows={rows} mode={isCreate ? 'create' : 'update'} />
+          <h2 className="doom-label text-secondary">
+            {isCreate ? 'Proposed definition' : isDelete || isMerge ? 'Proposed' : 'Changes'}
+          </h2>
+          <FieldDiff rows={rows} mode={isCreate || isDelete || isMerge ? 'create' : 'update'} />
         </section>
       )}
 
-      {/* Program proposals can't be reverted; the program is deleted from Programs instead. */}
-      <ProposalActions id={proposal.id} status={proposal.status} canRevert={!isProgram} />
+      {/* Programs, deletes and merges can't be reverted (a program is deleted from Programs instead). */}
+      <ProposalActions
+        id={proposal.id}
+        status={proposal.status}
+        canRevert={!IRREVERSIBLE_KINDS.has(proposal.kind)}
+        {...((isDelete || isMerge) && {
+          approveWarning: `This ${isDelete ? 'delete' : 'merge'} can't be undone once approved.`,
+        })}
+      />
     </div>
   )
 }

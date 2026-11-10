@@ -119,3 +119,4 @@ Append-only. Newest at the bottom.
 - 2026-11-02 CST: Dustin merged ripit-infra #136; in prod at 1dadb94e (release #1034).
 - 2026-11-09 CST: New: admin agents manage the shared exercise library (spec features/agent-tools/library-management.feature). Dustin: create/update direct, delete/merge reviewed; delete unused only, merge otherwise; creates default to shared. Size standard. Plan 158 tests (test-builder) → 159 build (coach-impl) → 160 review (coach-review) in worktree1, branch feature/library-mcp. 158 dispatched.
 - 2026-11-09 CST: Dustin merged #1050 (work 157) into dev; prod release waits for this library MCP work. 159 to rebase on dev before building.
+- 2026-11-09 CST: 159 back complete (85/85 steps, suite 4578); lead re-ran 922 agent-tools tests + tsc. 160 review dispatched to coach-review.

@@ -25,24 +25,30 @@ export const adminExerciseDefinitionSelect = {
  */
 export async function updateExerciseDefinition(
   prisma: PrismaClient,
+  input: { id: string; oldName: string; data: Prisma.ExerciseDefinitionUpdateInput }
+) {
+  return prisma.$transaction((tx) => applyDefinitionUpdate(tx, input))
+}
+
+/** updateExerciseDefinition inside a caller's transaction. */
+export async function applyDefinitionUpdate(
+  tx: Prisma.TransactionClient,
   { id, oldName, data }: { id: string; oldName: string; data: Prisma.ExerciseDefinitionUpdateInput }
 ) {
-  return prisma.$transaction(async (tx) => {
-    const updated = await tx.exerciseDefinition.update({
-      where: { id },
-      data,
-      select: adminExerciseDefinitionSelect,
-    })
-
-    let renamedExercises = 0
-    if (updated.name !== oldName) {
-      const result = await tx.exercise.updateMany({
-        where: { exerciseDefinitionId: id, name: oldName },
-        data: { name: updated.name },
-      })
-      renamedExercises = result.count
-    }
-
-    return { updated, renamedExercises }
+  const updated = await tx.exerciseDefinition.update({
+    where: { id },
+    data,
+    select: adminExerciseDefinitionSelect,
   })
+
+  let renamedExercises = 0
+  if (updated.name !== oldName) {
+    const result = await tx.exercise.updateMany({
+      where: { exerciseDefinitionId: id, name: oldName },
+      data: { name: updated.name },
+    })
+    renamedExercises = result.count
+  }
+
+  return { updated, renamedExercises }
 }

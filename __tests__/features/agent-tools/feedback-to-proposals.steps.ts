@@ -287,7 +287,9 @@ describeFeature(feature, ({ Background, Rule }) => {
       })
       And('it sees no tool that updates, resolves or deletes feedback', () => {
         expect(s.tools.filter((n) => /feedback/i.test(n))).toEqual(['list_feedback'])
-        expect(s.tools.filter((n) => /resolve|dismiss|close|delete|remove/i.test(n))).toEqual([])
+        // propose_exercise_delete (admin library, work 159) proposes deleting an exercise, not feedback.
+        const others = s.tools.filter((n) => n !== 'propose_exercise_delete')
+        expect(others.filter((n) => /resolve|dismiss|close|delete|remove/i.test(n))).toEqual([])
       })
     })
   })

@@ -280,3 +280,37 @@ The saved-workout detail dialog (`SavedWorkoutDetailDialog`) shows each exercise
 
 ### MCP annotations
 Every read tool (`search_exercises`, `get_*`, `list_*`, `export_training_data`) declares `annotations: { readOnlyHint: true }` in `tools/list`. Propose tools declare `{ readOnlyHint: false, destructiveHint: false }`.
+
+## Shared exercise library (added 2026-11-09 for items 158–160)
+
+Admin agents (a token owned by an admin) manage the shared exercise library. Create and update apply at once; delete and merge are proposals Dustin approves. Feature: `features/agent-tools/library-management.feature`; tests: `__tests__/features/agent-tools/library-management.steps.ts` (its header pins this contract). Code: `lib/proposals/library.ts`, tools in `lib/mcp/tools.ts`.
+
+### Tools (admin only)
+A non-admin doesn't see them in `tools/list`, and calling one returns `{ code: 'forbidden' }` before arguments are checked.
+- `library_exercise_search({ query, limit? })` → `{ exercises: [{ id, name, aliases, equipment, primaryFAUs, secondaryFAUs, isSystem, ownerId, usage }] }`. Searches every definition (shared and anyone's custom) by name or alias. `ownerId` is the owner's user id for a custom one, `null` for shared. Read only.
+- `library_exercise_create({ definition, scope?: 'shared' | 'mine', rationale? })` applies at once. `shared` (default) makes `isSystem: true`; `mine` makes the admin's custom exercise (`isSystem: false`, `userId` = admin). A duplicate name (names are unique library-wide) is refused with the existing name and `existingId`.
+- `library_exercise_update({ id, changes, rationale? })` applies at once to any definition and returns `usage`. A rename also renames every `Exercise` row still carrying the old name, in the same transaction (as the admin edit does, `lib/exercises/update-definition.ts`).
+- `propose_exercise_delete({ id, rationale })` makes a pending proposal. Refused with `usage` and a hint to propose a merge when anything uses the exercise.
+- `propose_exercise_merge({ fromId, intoId, rationale })` makes a pending proposal. Refused for a merge into itself, a missing exercise, or into a custom exercise unless `from` is a custom exercise of the same owner.
+- Invalid fields are refused with `field` and the reason, and nothing changes.
+
+`usage` = `{ users, loggedSets, programExercises, savedWorkoutExercises, oneOffExercises, pins, preferences, anchors, communityPrograms }`. `users`: distinct users with a logged set of it; `loggedSets`: `LoggedSet` rows; `programExercises`: `Exercise` rows with a `workoutId`; `savedWorkoutExercises`: `SavedWorkout.workoutData` entries; `oneOffExercises`: `Exercise` rows without a workout; `anchors`: users whose `targetMovements` list it; `communityPrograms`: `CommunityProgram.programData` that mention it. "Unused" means every count is 0, so pins and preferences block a delete too.
+
+### Proposals
+Kinds and labels: `exercise_definition.library_create` "New library exercise", `exercise_definition.library_update` "Library exercise edit", `exercise_definition.delete` "Delete exercise", `exercise_definition.merge` "Merge exercises".
+- Direct changes write a `Proposal` with status `applied`, `decidedAt` set, `userId` = admin, `agentTokenId` = the token, `targetId` = the exercise id, `before` (update) = the old definition, and an `inverse`. The admin Discord notification says "applied".
+- Delete and merge proposals keep `usage` in `payload` (as counted when proposed).
+
+**Approve (one transaction)**
+- Delete: re-count usage; if anything now uses it, refuse with why (`in_use`), mark the proposal `conflict` with the error, delete nothing.
+- Merge: re-check the refusals, then move every use of `from` to `into`: `Exercise` rows (and so their logged sets; rows still named like `from` take `into`'s name), pins and preferences (where a user has both, `into`'s row is kept), `SavedWorkout.workoutData` entries, anchors in `UserTrainingProfile.targetMovements` (deduped), and `CommunityProgram.programData` references. Add `from`'s name (lower case) to `into`'s aliases, then delete `from`. Any failure rolls everything back and records the error on the proposal.
+
+**Revert**
+- Direct create: deletes the exercise unless anything uses it (`in_use`, proposal stays `applied`).
+- Direct update: restores the changed fields (and renames `Exercise` rows back) unless the definition was edited since (`conflict`).
+- Approved delete or merge: refused; Admin shows no Revert button, and Approve asks to confirm that it can't be undone.
+
+### Guard rails
+- Rate limits: every tool call goes through the route's per-token `agentMcpLimiter`, the same limit as the other proposal tools.
+- Logs: every library write and refusal logs `{ tokenId, userId, tool, exerciseId, outcome }` (`applied`, `proposed`, `refused`, `error`).
+- Annotations: `library_exercise_search` is `readOnlyHint: true`; create and update are `{ readOnlyHint: false, destructiveHint: true }`; the two propose tools are `{ readOnlyHint: false, destructiveHint: false }`.
