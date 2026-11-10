@@ -51,3 +51,4 @@
 - 2026-11-04 CST: Images for 6899ff97 built. Infra agent asked for the prod tag-bump PR.
 - 2026-11-04 CST: infra PR ripit-infra #137 (tags to 6899ff97) open; waiting on Dustin's merge.
 - 2026-11-05 CST: Per-lift page and perf-check in prod (release #1037, infra #137 merged by Dustin).
+- 2026-11-10 CST: 162 Progress follows RPE/RIR setting. Dustin: RIR labels, harder still up; session RPE follows too. Spec features/analytics/effort-scale.feature. Dispatched to implementer wE:p7 (worktree2, feature/progress-rir).
