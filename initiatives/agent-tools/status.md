@@ -117,3 +117,9 @@ Append-only. Newest at the bottom.
 - 2026-11-02 CST: Dustin: 'really nice. Perfect.' 120–124 accepted. Preview stopped; temp saved workout and its draft deleted from the wt2 DB. Committing and opening the PR into dev.
 - 2026-11-02 CST: Dustin merged #1033. Release PR dev→main opened.
 - 2026-11-02 CST: Dustin merged ripit-infra #136; in prod at 1dadb94e (release #1034).
+- 2026-11-09 CST: New: admin agents manage the shared exercise library (spec features/agent-tools/library-management.feature). Dustin: create/update direct, delete/merge reviewed; delete unused only, merge otherwise; creates default to shared. Size standard. Plan 158 tests (test-builder) → 159 build (coach-impl) → 160 review (coach-review) in worktree1, branch feature/library-mcp. 158 dispatched.
+- 2026-11-09 CST: Dustin merged #1050 (work 157) into dev; prod release waits for this library MCP work. 159 to rebase on dev before building.
+- 2026-11-09 CST: 159 back complete (85/85 steps, suite 4578); lead re-ran 922 agent-tools tests + tsc. 160 review dispatched to coach-review.
+- 2026-11-09 CST: 160 review: solid, bans gap + small items. 161 (fix all) dispatched to coach-impl.
+- 2026-11-09 CST: 161 back complete; lead re-ran 98 library tests + tsc. Note: worktree1 dev server (3100) ran with live Discord webhooks; likely 3 test posts in #proposals; stopped. Phone preview next.
+- 2026-11-09 CST: Dustin accepted 158–161 on the preview. PR into dev; prod release (with #1050) after merge.

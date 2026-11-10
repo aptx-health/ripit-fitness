@@ -14,8 +14,18 @@ import { computeEffortSummary, EFFORT_SESSION_STATUSES, WEEK_MS } from '@/lib/in
 import { decodeCursor, EXPORT_COLUMNS, encodeCursor, fetchExportRows, parseRange } from '@/lib/insights/export'
 import { computeStallSignals, STALL_SESSION_STATUSES } from '@/lib/insights/stall'
 import { logger } from '@/lib/logger'
+import { logLibrary } from '@/lib/mcp/library-log'
 import type { Notify } from '@/lib/notify'
 import { visibleTo } from '@/lib/proposals/exercise-definition'
+import {
+  createLibraryExercise,
+  type LibraryFailure,
+  libraryUsage,
+  proposeExerciseDelete,
+  proposeExerciseMerge,
+  searchLibraryIds,
+  updateLibraryExercise,
+} from '@/lib/proposals/library'
 import { issueField, programInput, programTreeSelect } from '@/lib/proposals/program'
 import {
   fieldPath,
@@ -44,7 +54,23 @@ export interface ToolContext {
 }
 
 /** Exercise-library proposals are reviewed in admin only, so only admins may make them. */
-const ADMIN_ONLY_TOOLS: ReadonlySet<string> = new Set(['propose_exercise_create', 'propose_exercise_update'])
+const ADMIN_ONLY_TOOLS: ReadonlySet<string> = new Set([
+  'propose_exercise_create',
+  'propose_exercise_update',
+  'library_exercise_search',
+  'library_exercise_create',
+  'library_exercise_update',
+  'propose_exercise_delete',
+  'propose_exercise_merge',
+])
+
+/** Library writes: each call and refusal is logged with token, tool, exercise id and outcome. */
+const LIBRARY_WRITE_TOOLS: ReadonlySet<string> = new Set([
+  'library_exercise_create',
+  'library_exercise_update',
+  'propose_exercise_delete',
+  'propose_exercise_merge',
+])
 
 const FORBIDDEN = { error: 'Exercise library changes are admin-only.', code: 'forbidden' } as const
 
@@ -180,6 +206,26 @@ const schemas = {
       feedbackId,
     })
     .refine((a) => a.name !== undefined || a.notes !== undefined || a.exercises !== undefined, WORKOUT_CHANGES_REQUIRED),
+  library_exercise_search: z.object({
+    query: z.string().min(1).max(100),
+    limit: z.number().int().min(1).max(50).optional(),
+  }),
+  library_exercise_create: z.object({
+    definition: z.object(definitionFields).strict(),
+    scope: z.enum(['shared', 'mine']).optional().describe('shared (default): in the library for every user; mine: your own custom exercise'),
+    rationale: rationale.optional(),
+  }),
+  library_exercise_update: z.object({
+    id: z.string().min(1),
+    changes: z.object(definitionFields).partial().strict(),
+    rationale: rationale.optional(),
+  }),
+  propose_exercise_delete: z.object({ id: z.string().min(1), rationale }),
+  propose_exercise_merge: z.object({
+    fromId: z.string().min(1).describe('The exercise that goes away'),
+    intoId: z.string().min(1).describe('The exercise that keeps every use'),
+    rationale,
+  }),
   list_proposals: z.object({ status: z.enum(PROPOSAL_STATUSES).optional() }),
   list_feedback: z.object({
     status: z.enum(VALID_STATUSES).optional().describe('Defaults to new'),
@@ -230,6 +276,16 @@ const descriptions: Record<ToolName, string> = {
     'Propose a new saved workout: exercises with planned sets (reps, RIR, RPE, warm-up). Order and set numbers come from array position. Optional group on an exercise (1–3 letters, e.g. "A") makes a superset: give the same group to two or more exercises next to each other. Nothing is created until the user approves it; it is never started for them.',
   propose_workout_update:
     "Propose changes to one of the user's saved workouts: name, notes (null clears) and/or the whole exercise list. Exercises take the same optional group as propose_workout_create (superset; send it again to keep an existing superset). Nothing changes until the user approves it.",
+  library_exercise_search:
+    'Search every exercise definition (shared and any user\'s custom) by name or alias, with usage counts: users who logged it, logged sets, program exercises, saved workout exercises, one-off exercises, pins, preferences, anchors, community programs. Search before creating, updating, deleting or merging.',
+  library_exercise_create:
+    'Create an exercise definition. Applies at once, shared with every user unless scope is "mine". Search first: a duplicate name is refused with the existing id. Recorded in Admin as applied, where it can be reverted.',
+  library_exercise_update:
+    'Change any exercise definition. Applies at once for every user (a rename also renames workout exercises still showing the old name). Returns usage counts. Recorded in Admin as applied, where it can be reverted.',
+  propose_exercise_delete:
+    'Propose deleting an exercise nothing uses. Refused with usage counts if anything uses it (logged sets, programs, saved workouts, pins, preferences, anchors): propose a merge instead. Nothing is deleted until approved; an approved delete cannot be undone.',
+  propose_exercise_merge:
+    'Propose merging a duplicate (fromId) into the exercise that stays (intoId): every use moves to intoId, the old name becomes an alias, and fromId is deleted. Nothing changes until approved; an approved merge cannot be undone.',
   list_proposals: "List the user's proposals and their status.",
   list_feedback:
     "List the user's app feedback, newest first (status defaults to new). Pass a feedback id as feedbackId on a propose tool to link the proposal; approving it resolves the feedback.",
@@ -247,10 +303,14 @@ const savedWorkoutSummary = {
 class ToolError extends Error {
   constructor(
     message: string,
-    readonly extra: { field?: string; existingId?: string } = {}
+    readonly extra: { field?: string; existingId?: string; usage?: unknown } = {}
   ) {
     super(message)
   }
+}
+
+function libraryError(result: LibraryFailure): ToolError {
+  return new ToolError(result.error, { field: result.field, existingId: result.existingId, usage: result.usage })
 }
 
 type Handler<N extends ToolName> = (prisma: PrismaClient, ctx: ToolContext, args: Args<N>) => Promise<unknown>
@@ -745,6 +805,70 @@ const handlers: { [N in ToolName]: Handler<N> } = {
     return { proposalId: id, status, summary }
   },
 
+  async library_exercise_search(prisma, _ctx, { query, limit }) {
+    const rows = await prisma.exerciseDefinition.findMany({
+      where: { id: { in: await searchLibraryIds(prisma, query, limit ?? 20) } },
+      select: {
+        id: true,
+        name: true,
+        aliases: true,
+        equipment: true,
+        primaryFAUs: true,
+        secondaryFAUs: true,
+        isSystem: true,
+        userId: true,
+      },
+      orderBy: { name: 'asc' },
+    })
+    const usage = await libraryUsage(
+      prisma,
+      rows.map((r) => r.id)
+    )
+    return {
+      exercises: rows.map(({ userId, ...r }) => ({ ...r, ownerId: r.isSystem ? null : userId, usage: usage.get(r.id) })),
+    }
+  },
+
+  async library_exercise_create(prisma, ctx, { definition, scope, rationale }) {
+    const result = await createLibraryExercise(
+      prisma,
+      { userId: ctx.userId, agentTokenId: ctx.tokenId, definition, scope: scope ?? 'shared', rationale: rationale ?? '' },
+      notifyFor(ctx)
+    )
+    if (!result.ok) throw libraryError(result)
+    const { exercise, proposal } = result
+    return { exerciseId: exercise.id, name: exercise.name, isSystem: exercise.isSystem, proposalId: proposal.id, status: proposal.status }
+  },
+
+  async library_exercise_update(prisma, ctx, { id, changes, rationale }) {
+    const result = await updateLibraryExercise(
+      prisma,
+      { userId: ctx.userId, agentTokenId: ctx.tokenId, id, changes, rationale: rationale ?? '' },
+      notifyFor(ctx)
+    )
+    if (!result.ok) throw libraryError(result)
+    const { exercise, renamedExercises, usage, proposal } = result
+    return { exerciseId: exercise.id, exercise, renamedExercises, usage, proposalId: proposal.id, status: proposal.status }
+  },
+
+  async propose_exercise_delete(prisma, ctx, { id, rationale }) {
+    const result = await proposeExerciseDelete(prisma, { userId: ctx.userId, agentTokenId: ctx.tokenId, id, rationale }, notifyFor(ctx))
+    if (!result.ok) throw libraryError(result)
+    const { proposal, usage } = result
+    return { exerciseId: id, proposalId: proposal.id, status: proposal.status, summary: proposal.summary, usage }
+  },
+
+  async propose_exercise_merge(prisma, ctx, { fromId, intoId, rationale }) {
+    const result = await proposeExerciseMerge(
+      prisma,
+      { userId: ctx.userId, agentTokenId: ctx.tokenId, fromId, intoId, rationale },
+      notifyFor(ctx)
+    )
+    if (!result.ok) throw libraryError(result)
+    const { proposal, usage } = result
+    return { exerciseId: fromId, proposalId: proposal.id, status: proposal.status, summary: proposal.summary, usage }
+  },
+
   async list_proposals(prisma, ctx, { status }) {
     const proposals = await prisma.proposal.findMany({
       where: { userId: ctx.userId, ...(status && { status }) },
@@ -790,8 +914,12 @@ const handlers: { [N in ToolName]: Handler<N> } = {
 // the older tools report the leaf key.
 const FULL_PATH_TOOLS = new Set<ToolName>(['propose_workout_create', 'propose_workout_update'])
 
-// Every tool reads, except the propose tools, which only record a pending proposal.
+// Every tool reads, except the propose tools, which only record a pending proposal,
+// and the library create/update tools, which apply at once (revertable in Admin).
 function annotationsFor(name: ToolName): ToolDescriptor['annotations'] {
+  if (name === 'library_exercise_create' || name === 'library_exercise_update') {
+    return { readOnlyHint: false, destructiveHint: true }
+  }
   return name.startsWith('propose_') ? { readOnlyHint: false, destructiveHint: false } : { readOnlyHint: true }
 }
 
@@ -822,7 +950,11 @@ export async function callTool(
 ): Promise<CallToolResult> {
   if (!isToolName(name)) return text({ error: `unknown tool: ${name}` }, true)
   // Before argument checks, so a non-admin learns nothing about the tool.
-  if (ADMIN_ONLY_TOOLS.has(name) && !isAdminCtx(ctx)) return text(FORBIDDEN, true)
+  const isLibraryWrite = LIBRARY_WRITE_TOOLS.has(name)
+  if (ADMIN_ONLY_TOOLS.has(name) && !isAdminCtx(ctx)) {
+    if (isLibraryWrite) logLibrary(ctx, name, undefined, 'refused', { reason: 'forbidden' })
+    return text(FORBIDDEN, true)
+  }
 
   const parsed = schemas[name].safeParse(args ?? {})
   if (!parsed.success) {
@@ -830,6 +962,7 @@ export async function callTool(
     // Older tools report the field itself, not its container (definition.primaryFAUs -> primaryFAUs,
     // program.weeks.0.workouts -> workouts).
     const field = FULL_PATH_TOOLS.has(name) ? fieldPath(issue.path) : issueField(issue.path)
+    if (isLibraryWrite) logLibrary(ctx, name, args, 'refused', { reason: issue.message, field })
     return text({ error: issue.message, ...(field && { field }) }, true)
   }
 
@@ -837,9 +970,17 @@ export async function callTool(
     const handler = handlers[name] as Handler<ToolName>
     const data = await handler(prisma, ctx, parsed.data)
     logger.debug({ tool: name, userId: ctx.userId, tokenId: ctx.tokenId }, 'MCP tool called')
+    if (isLibraryWrite) {
+      const { exerciseId, proposalId, status } = data as { exerciseId?: string; proposalId?: string; status?: string }
+      logLibrary(ctx, name, parsed.data, status === 'applied' ? 'applied' : 'proposed', { exerciseId, proposalId })
+    }
     return text(data)
   } catch (error) {
-    if (error instanceof ToolError) return text({ error: error.message, ...error.extra }, true)
+    if (error instanceof ToolError) {
+      if (isLibraryWrite) logLibrary(ctx, name, parsed.data, 'refused', { reason: error.message, field: error.extra.field })
+      return text({ error: error.message, ...error.extra }, true)
+    }
+    if (isLibraryWrite) logLibrary(ctx, name, parsed.data, 'error')
     logger.error({ error, tool: name, userId: ctx.userId }, 'MCP tool failed')
     return text({ error: 'internal error' }, true)
   }
