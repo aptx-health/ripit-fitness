@@ -28,6 +28,7 @@ import {
   updateData,
   visibleTo,
 } from './exercise-definition'
+import { applyDelete, applyMerge, LIBRARY_KINDS, LibraryRefusal, revertLibraryCreate, revertLibraryUpdate } from './library'
 import { checkProgram, createProgram, programSummary } from './program'
 import {
   applySavedWorkoutUpdate,
@@ -53,6 +54,10 @@ export const PROPOSAL_KINDS = [
   'balance_targets.update',
   'saved_workout.create',
   'saved_workout.update',
+  LIBRARY_KINDS.create,
+  LIBRARY_KINDS.update,
+  LIBRARY_KINDS.delete,
+  LIBRARY_KINDS.merge,
 ] as const
 export type ProposalKind = (typeof PROPOSAL_KINDS)[number]
 
@@ -64,7 +69,14 @@ export const PROPOSAL_KIND_LABELS: Record<ProposalKind, string> = {
   'balance_targets.update': 'Target change',
   'saved_workout.create': 'New saved workout',
   'saved_workout.update': 'Saved workout change',
+  [LIBRARY_KINDS.create]: 'New library exercise',
+  [LIBRARY_KINDS.update]: 'Library exercise edit',
+  [LIBRARY_KINDS.delete]: 'Delete exercise',
+  [LIBRARY_KINDS.merge]: 'Merge exercises',
 }
+
+/** Applied deletes and merges can't be undone (Admin hides Revert and warns before approve). */
+export const IRREVERSIBLE_KINDS: ReadonlySet<string> = new Set(['program.create', LIBRARY_KINDS.delete, LIBRARY_KINDS.merge])
 
 export const PROPOSAL_STATUSES = ['pending', 'applied', 'rejected', 'reverted', 'conflict'] as const
 export type ProposalStatus = (typeof PROPOSAL_STATUSES)[number]
@@ -179,6 +191,16 @@ async function asConflict(write: () => Promise<void>): Promise<void> {
     await write()
   } catch (error) {
     if (error instanceof SavedWorkoutConflict) throw new Refusal('conflict', error.message)
+    throw error
+  }
+}
+
+/** Run a library write, turning its refusal into the service's. */
+async function asLibraryRefusal<T>(write: () => Promise<T>): Promise<T> {
+  try {
+    return await write()
+  } catch (error) {
+    if (error instanceof LibraryRefusal) throw new Refusal(error.code, error.message)
     throw error
   }
 }
@@ -393,6 +415,17 @@ export async function approveProposal(
         })
       }
 
+      if (existing.kind === LIBRARY_KINDS.delete || existing.kind === LIBRARY_KINDS.merge) {
+        // Both re-check usage and visibility now; one transaction, so a failure changes nothing.
+        const payload = existing.payload as { id: string; fromId: string; intoId: string }
+        await asLibraryRefusal(async () => {
+          if (existing.kind === LIBRARY_KINDS.delete) await applyDelete(tx, payload)
+          else await applyMerge(tx, payload)
+        })
+        await resolveLinkedFeedback(tx, existing, userId)
+        return tx.proposal.update({ where: { id: proposalId }, data: { error: null } })
+      }
+
       if (existing.kind === 'program.create') {
         const check = await checkProgram(tx, existing.payload, userId)
         if (!check.ok) throw new Refusal('invalid', check.error)
@@ -500,6 +533,14 @@ export async function approveProposal(
     return { ok: true, proposal }
   } catch (error) {
     if (error instanceof Refusal) return refuseApproval(prisma, proposalId, error.code, error.message)
+    // A delete or merge that failed part-way (e.g. a constraint): the transaction rolled back.
+    if (
+      (existing.kind === LIBRARY_KINDS.delete || existing.kind === LIBRARY_KINDS.merge) &&
+      (error instanceof Prisma.PrismaClientKnownRequestError || error instanceof Prisma.PrismaClientUnknownRequestError)
+    ) {
+      logger.error({ error, proposalId, kind: existing.kind }, 'Library proposal failed to apply')
+      return refuseApproval(prisma, proposalId, 'invalid', 'applying it failed, so nothing was changed; see the server log')
+    }
     // Settings or the profile row was created by someone else while approving.
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -523,14 +564,14 @@ export async function approveProposal(
 }
 
 // The transaction rolled back. Record why on the proposal; a conflict is
-// terminal, a validation failure leaves it pending.
+// terminal (so is a delete whose exercise came into use), a validation failure leaves it pending.
 async function refuseApproval(
   prisma: PrismaClient,
   proposalId: string,
   code: DecisionCode,
   error: string
 ): Promise<DecisionResult> {
-  if (code === 'conflict') {
+  if (code === 'conflict' || code === 'in_use') {
     await prisma.proposal.updateMany({
       where: { id: proposalId, status: 'pending' },
       data: { status: 'conflict', decidedAt: new Date(), error },
@@ -567,7 +608,9 @@ export async function rejectProposal(
  * A saved workout create deletes it unless Dustin started or edited it; a
  * saved workout change restores the touched fields unless one moved since
  * approve. A program create can't be reverted; the program is deleted from
- * Programs like any other.
+ * Programs like any other. A direct library create or update reverts like an
+ * exercise proposal (an update also renames Exercise rows back); an approved
+ * delete or merge can't be reverted.
  */
 export async function revertProposal(
   prisma: PrismaClient,
@@ -585,6 +628,9 @@ export async function revertProposal(
       code: 'invalid',
       error: "program proposals can't be reverted; delete the program from Programs instead",
     }
+  }
+  if (existing.kind === LIBRARY_KINDS.delete || existing.kind === LIBRARY_KINDS.merge) {
+    return { ok: false, code: 'invalid', error: "approved deletes and merges can't be reverted" }
   }
   if (!existing.inverse) return { ok: false, code: 'not_applied', error: 'proposal is not applied' }
 
@@ -624,6 +670,14 @@ export async function revertProposal(
         const { savedWorkoutId, changes } = existing.payload as unknown as SavedWorkoutUpdatePayload
         await asConflict(() =>
           restoreSavedWorkout(tx, userId, savedWorkoutId, changes, existing.inverse as unknown as WorkoutFields)
+        )
+        return tx.proposal.findUniqueOrThrow({ where: { id: proposalId } })
+      }
+
+      if (existing.kind === LIBRARY_KINDS.create || existing.kind === LIBRARY_KINDS.update) {
+        const inverse = existing.inverse as unknown as CreateInverse | UpdateInverse
+        await asLibraryRefusal(() =>
+          inverse.op === 'delete' ? revertLibraryCreate(tx, inverse.id) : revertLibraryUpdate(tx, inverse)
         )
         return tx.proposal.findUniqueOrThrow({ where: { id: proposalId } })
       }

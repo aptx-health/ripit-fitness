@@ -778,8 +778,11 @@ describeFeature(feature, ({ Background, Rule }) => {
 // Plain tests, each against a fresh database.
 // ---------------------------------------------------------------------------
 function isReadTool(name: string) {
-  return /^(get_|list_)/.test(name) || name === 'search_exercises' || name === 'export_training_data'
+  return /^(get_|list_)/.test(name) || ['search_exercises', 'library_exercise_search', 'export_training_data'].includes(name)
 }
+
+// Admin library tools that apply at once (work 159); revertable in Admin, so marked destructive.
+const DIRECT_WRITE_TOOLS = ['library_exercise_create', 'library_exercise_update']
 
 describe('saved workout tools: registration', () => {
   beforeEach(async () => {
@@ -810,8 +813,10 @@ describe('saved workout tools: registration', () => {
     expect(proposes.length).toBeGreaterThanOrEqual(7)
     for (const t of reads) expect(t.annotations, t.name).toMatchObject({ readOnlyHint: true })
     for (const t of proposes) expect(t.annotations, t.name).toMatchObject({ readOnlyHint: false, destructiveHint: false })
-    // Every tool is one or the other, so none is left unmarked.
-    for (const t of list.filter((x) => !isReadTool(x.name) && !x.name.startsWith('propose_'))) {
+    const direct = list.filter((t) => DIRECT_WRITE_TOOLS.includes(t.name))
+    for (const t of direct) expect(t.annotations, t.name).toMatchObject({ readOnlyHint: false, destructiveHint: true })
+    // Every tool is one of these, so none is left unmarked.
+    for (const t of list.filter((x) => !isReadTool(x.name) && !x.name.startsWith('propose_') && !DIRECT_WRITE_TOOLS.includes(x.name))) {
       expect.fail(`unclassified tool ${t.name}`)
     }
   })

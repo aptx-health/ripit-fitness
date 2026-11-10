@@ -73,7 +73,22 @@ export interface UseProgressiveExercisesResult {
   currentHistoryState: LoadState
   hasHistoryForCurrentExercise: boolean
   refreshExercises: () => void
+  /**
+   * Shows an edited definition (muscles, ...) on the loaded exercises that use it, without
+   * refetching. Exercises still named `previousName` take the new name, as the server renames them.
+   */
+  applyDefinition: (definition: DefinitionUpdate, previousName: string) => void
   allExercisesLoaded: boolean
+}
+
+export type DefinitionUpdate = {
+  id: string
+  name: string
+  instructions?: string | null
+  primaryFAUs: string[]
+  secondaryFAUs: string[]
+  equipment: string[]
+  imageUrls?: string[]
 }
 
 interface ExerciseApiResponse {
@@ -321,6 +336,29 @@ export function useProgressiveExercises(
     prefetchSequentially(currentIndex)
   }, [currentIndex, prefetchSequentially])
 
+  const applyDefinition = useCallback((definition: DefinitionUpdate, previousName: string) => {
+    setLoadedExercises((prev) => {
+      const next = new Map(prev)
+      for (const [order, exercise] of prev) {
+        if (exercise.exerciseDefinitionId !== definition.id && exercise.exerciseDefinition?.id !== definition.id) continue
+        next.set(order, {
+          ...exercise,
+          name: exercise.name === previousName ? definition.name : exercise.name,
+          exerciseDefinition: exercise.exerciseDefinition && {
+            ...exercise.exerciseDefinition,
+            name: definition.name,
+            primaryFAUs: definition.primaryFAUs,
+            secondaryFAUs: definition.secondaryFAUs,
+            equipment: definition.equipment,
+            instructions: definition.instructions ?? undefined,
+            imageUrls: definition.imageUrls ?? exercise.exerciseDefinition.imageUrls,
+          },
+        })
+      }
+      return next
+    })
+  }, [])
+
   const currentExercise = loadedExercises.get(currentIndex) || null
   const currentExerciseState = exerciseLoadStates.get(currentIndex) || 'pending'
 
@@ -354,6 +392,7 @@ export function useProgressiveExercises(
     currentHistoryState,
     hasHistoryForCurrentExercise,
     refreshExercises,
+    applyDefinition,
     allExercisesLoaded,
   }
 }

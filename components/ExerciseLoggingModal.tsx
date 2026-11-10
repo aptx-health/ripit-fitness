@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle, Check, Info, Pencil, Plus, RefreshCw, Trash2, Wrench, X } from 'lucide-react'
+import { AlertTriangle, Check, Info, Pencil, Plus, RefreshCw, Trash2, X } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useToast } from '@/components/ToastProvider'
@@ -22,7 +22,6 @@ import { formatPrescribedSummary } from '@/lib/format/prescribed-summary'
 import { type ApplicableSet, appliedSetToForm, type PrefillFormState, resolvePrefill } from '@/lib/workout/prefill'
 import type { LoggedSet } from '@/types/workout'
 import ExerciseDefinitionEditorModal from './features/exercise-definition/ExerciseDefinitionEditorModal'
-import QuickEditExerciseSheet from './features/exercise-definition/QuickEditExerciseSheet'
 import CompleteWorkoutConfirm from './workout-logging/CompleteWorkoutConfirm'
 import DeleteSetConfirm from './workout-logging/DeleteSetConfirm'
 import ExerciseDisplayTabs from './workout-logging/ExerciseDisplayTabs'
@@ -33,6 +32,7 @@ import FollowAlongHeader from './workout-logging/FollowAlongHeader'
 import FollowAlongTabs from './workout-logging/FollowAlongTabs'
 import LoggerBottomBar, { pendingSetDetail } from './workout-logging/LoggerBottomBar'
 import SetLoggingForm, { type ExpandedInput } from './workout-logging/SetLoggingForm'
+import { useAdminDefinitionEdit } from './workout-logging/useAdminDefinitionEdit'
 import WorkoutPlanEditor from './workout-logging/WorkoutPlanEditor'
 import { AddExerciseWizard } from './workout-logging/wizards/AddExerciseWizard'
 import { DeleteExerciseWizard } from './workout-logging/wizards/DeleteExerciseWizard'
@@ -61,7 +61,7 @@ type Props = {
   loggingMode?: 'full' | 'follow_along'
   onComplete: (result?: { completionId: string; rollup: import('@/lib/stats/workout-rollup').WorkoutRollup | null }) => Promise<void>
   onRefresh?: () => Promise<void>
-  /** Gates the "Quick Edit" action, which can edit system exercises unlike the owner-only edit wizard. */
+  /** Gates "Edit exercise definition (Admin)", which can edit system exercises unlike the owner-only edit wizard. */
   isEditorRole?: boolean
 }
 
@@ -156,7 +156,6 @@ export default function ExerciseLoggingModal({
   const [wizardTarget, setWizardTarget] = useState<{ id: string; name: string } | null>(null)
   const [navigateToLastExercise, setNavigateToLastExercise] = useState(false)
   const [editingExerciseDefinitionId, setEditingExerciseDefinitionId] = useState<string | null>(null)
-  const [quickEditExerciseId, setQuickEditExerciseId] = useState<string | null>(null)
 
   // Progressive loading of exercises
   const {
@@ -173,6 +172,7 @@ export default function ExerciseLoggingModal({
     currentHistoryState,
     hasHistoryForCurrentExercise,
     refreshExercises,
+    applyDefinition,
   } = useProgressiveExercises(workoutId, exerciseCount, workoutCompletionId, {
     initialExercise: initialExercise ?? undefined,
     initialHistory: initialHistory ?? undefined,
@@ -493,11 +493,11 @@ export default function ExerciseLoggingModal({
     }
   }
 
-  const handleQuickEditExercise = () => {
-    if (currentExercise?.exerciseDefinition) {
-      setQuickEditExerciseId(currentExercise.exerciseDefinition.id)
-    }
-  }
+  const adminDefinitionEdit = useAdminDefinitionEdit({
+    enabled: isEditorRole,
+    definitionId: currentExercise?.exerciseDefinition?.id,
+    onSaved: applyDefinition,
+  })
 
   const handleExitWorkout = () => setShowExitConfirm(true)
 
@@ -770,9 +770,7 @@ export default function ExerciseLoggingModal({
                   prescribedSummary={prescribedSummary}
                   menuActions={[
                     { label: 'Edit this exercise', icon: Pencil, onClick: handleEditExercise },
-                    ...(isEditorRole && currentExercise?.exerciseDefinition
-                      ? [{ label: 'Quick Edit (Admin)', icon: Wrench, onClick: handleQuickEditExercise }]
-                      : []),
+                    ...adminDefinitionEdit.actions,
                     { label: 'Add an exercise', icon: Plus, onClick: handleAddExercise },
                     { label: 'Swap this exercise', icon: RefreshCw, onClick: handleReplaceExercise },
                     {
@@ -886,16 +884,8 @@ export default function ExerciseLoggingModal({
         }}
       />
 
-      {/* Quick Edit sheet (editor role only) */}
-      {quickEditExerciseId && (
-        <QuickEditExerciseSheet
-          isOpen={true}
-          onClose={() => setQuickEditExerciseId(null)}
-          exerciseId={quickEditExerciseId}
-          context="workout"
-          onSaved={() => onRefresh?.()}
-        />
-      )}
+      {/* Edit exercise definition (Admin): quick editor, editor role only */}
+      {adminDefinitionEdit.sheet}
 
       {/* Workout plan editor */}
       <WorkoutPlanEditor

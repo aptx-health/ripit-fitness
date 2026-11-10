@@ -200,7 +200,16 @@ const callPayload = (r: Awaited<ReturnType<typeof mcp>>) => {
     return { raw: text } as Json
   }
 }
-const EXERCISE_TOOLS = ['propose_exercise_create', 'propose_exercise_update']
+const EXERCISE_TOOLS = [
+  'propose_exercise_create',
+  'propose_exercise_update',
+  // Admin library tools (work 159).
+  'library_exercise_search',
+  'library_exercise_create',
+  'library_exercise_update',
+  'propose_exercise_delete',
+  'propose_exercise_merge',
+]
 const WORKOUT_ARGS = () => ({
   name: 'Push day',
   exercises: [{ exerciseDefinitionId: s.bench.id, sets: [{ reps: '8' }] }],
@@ -739,7 +748,7 @@ describe('agent tokens: tools by role', () => {
     }
   }
 
-  it('listTools hides the two exercise tools from a regular user and shows them to an admin', async () => {
+  it('listTools hides the exercise tools from a regular user and shows them to an admin', async () => {
     const { listTools } = await tools()
     const user = listTools('user').map((t) => t.name)
     const admin = listTools('admin').map((t) => t.name)
