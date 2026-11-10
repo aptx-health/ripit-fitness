@@ -23,6 +23,7 @@ import {
   libraryUsage,
   proposeExerciseDelete,
   proposeExerciseMerge,
+  searchLibraryIds,
   updateLibraryExercise,
 } from '@/lib/proposals/library'
 import { issueField, programInput, programTreeSelect } from '@/lib/proposals/program'
@@ -805,11 +806,8 @@ const handlers: { [N in ToolName]: Handler<N> } = {
   },
 
   async library_exercise_search(prisma, _ctx, { query, limit }) {
-    const term = query.trim()
     const rows = await prisma.exerciseDefinition.findMany({
-      where: {
-        OR: [{ name: { contains: term, mode: 'insensitive' } }, { aliases: { has: term.toLowerCase() } }],
-      },
+      where: { id: { in: await searchLibraryIds(prisma, query, limit ?? 20) } },
       select: {
         id: true,
         name: true,
@@ -821,7 +819,6 @@ const handlers: { [N in ToolName]: Handler<N> } = {
         userId: true,
       },
       orderBy: { name: 'asc' },
-      take: limit ?? 20,
     })
     const usage = await libraryUsage(
       prisma,

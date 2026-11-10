@@ -26,7 +26,7 @@ export const LIBRARY_KINDS = {
   merge: 'exercise_definition.merge',
 } as const
 
-/** Where a definition is used. Any non-zero count blocks a delete. */
+/** Where a definition is used. Any non-zero count except `bans` blocks a delete. */
 export interface LibraryUsage {
   /** Distinct users with a logged set of it. */
   users: number
@@ -42,6 +42,8 @@ export interface LibraryUsage {
   /** Users whose anchors include it. */
   anchors: number
   communityPrograms: number
+  /** Users who banned it (UserTrainingProfile.bannedExerciseIds). Doesn't block a delete; the ban is dropped. */
+  bans: number
 }
 
 const USAGE_LABELS: Record<keyof LibraryUsage, [string, string?]> = {
@@ -54,6 +56,7 @@ const USAGE_LABELS: Record<keyof LibraryUsage, [string, string?]> = {
   preferences: ['preference'],
   anchors: ['anchor'],
   communityPrograms: ['community program'],
+  bans: ['ban'],
 }
 
 const emptyUsage = (): LibraryUsage => ({
@@ -66,9 +69,10 @@ const emptyUsage = (): LibraryUsage => ({
   preferences: 0,
   anchors: 0,
   communityPrograms: 0,
+  bans: 0,
 })
 
-export const inUse = (u: LibraryUsage) => Object.values(u).some((n) => n > 0)
+export const inUse = ({ bans: _bans, ...uses }: LibraryUsage) => Object.values(uses).some((n) => n > 0)
 
 export function usageText(u: LibraryUsage): string {
   const parts = (Object.keys(USAGE_LABELS) as Array<keyof LibraryUsage>)
@@ -83,7 +87,7 @@ export async function libraryUsage(db: Db, ids: string[]): Promise<Map<string, L
   if (ids.length === 0) return out
   const list = Prisma.join(ids)
 
-  const [sets, exercises, saved, pins, prefs, anchors, community] = await Promise.all([
+  const [sets, exercises, saved, pins, prefs, anchors, community, bans] = await Promise.all([
     db.$queryRaw<Array<{ id: string; sets: number; users: number }>>`
       SELECT e."exerciseDefinitionId" AS id, COUNT(*)::int AS sets, COUNT(DISTINCT ls."userId")::int AS users
       FROM "LoggedSet" ls JOIN "Exercise" e ON e.id = ls."exerciseId"
@@ -122,6 +126,11 @@ export async function libraryUsage(db: Db, ids: string[]): Promise<Map<string, L
       FROM unnest(ARRAY[${list}]::text[]) i
       JOIN "CommunityProgram" cp ON cp."programData"::text LIKE '%' || i || '%'
       GROUP BY 1`,
+    db.$queryRaw<Array<{ id: string; n: number }>>`
+      SELECT b AS id, COUNT(DISTINCT utp."userId")::int AS n
+      FROM "UserTrainingProfile" utp CROSS JOIN LATERAL unnest(utp."bannedExerciseIds") b
+      WHERE b IN (${list})
+      GROUP BY 1`,
   ])
 
   const at = (id: string) => out.get(id) as LibraryUsage
@@ -132,7 +141,18 @@ export async function libraryUsage(db: Db, ids: string[]): Promise<Map<string, L
   for (const r of prefs) at(r.exerciseDefinitionId).preferences = r._count
   for (const r of anchors) if (out.has(r.id)) at(r.id).anchors = r.n
   for (const r of community) at(r.id).communityPrograms = r.n
+  for (const r of bans) at(r.id).bans = r.n
   return out
+}
+
+/** Ids of definitions whose name or any alias contains `query` (case-insensitive), by name. */
+export async function searchLibraryIds(db: Db, query: string, take: number): Promise<string[]> {
+  const pattern = `%${query.trim().replace(/[\\%_]/g, (c) => `\\${c}`)}%`
+  const rows = await db.$queryRaw<Array<{ id: string }>>`
+    SELECT id FROM "ExerciseDefinition"
+    WHERE name ILIKE ${pattern} OR EXISTS (SELECT 1 FROM unnest(aliases) a WHERE a ILIKE ${pattern})
+    ORDER BY name LIMIT ${take}`
+  return rows.map((r) => r.id)
 }
 
 async function usageOf(db: Db, id: string): Promise<LibraryUsage> {
@@ -313,9 +333,13 @@ export async function updateLibraryExercise(
 
 /** Revert a direct create: delete it unless something uses it. */
 export async function revertLibraryCreate(tx: Prisma.TransactionClient, id: string) {
+  if (!(await lockDefinitions(tx, [id]))) {
+    throw new LibraryRefusal('not_found', 'the exercise no longer exists (it was deleted or merged away), so there is nothing to revert')
+  }
   const usage = await usageOf(tx, id)
   if (inUse(usage)) throw new LibraryRefusal('in_use', `exercise is in use (${usageText(usage)}), so it can't be removed`)
-  await tx.exerciseDefinition.deleteMany({ where: { id } })
+  await dropBans(tx, id)
+  await tx.exerciseDefinition.delete({ where: { id } })
 }
 
 /** Revert a direct update: restore the changed fields unless it was edited since (renames Exercise rows back too). */
@@ -410,8 +434,28 @@ export async function proposeExerciseMerge(
   return { ok: true as const, proposal, usage }
 }
 
+/**
+ * Lock definition rows for the rest of the transaction, in id order. A new pin,
+ * preference or exercise referencing a locked row waits for us, so the usage
+ * re-check stays true until the delete. Returns whether every row exists.
+ */
+async function lockDefinitions(tx: Prisma.TransactionClient, ids: string[]): Promise<boolean> {
+  const sorted = [...new Set(ids)].sort()
+  const rows = await tx.$queryRaw<Array<{ id: string }>>`
+    SELECT id FROM "ExerciseDefinition" WHERE id IN (${Prisma.join(sorted)}) ORDER BY id FOR UPDATE`
+  return rows.length === sorted.length
+}
+
+/** Remove a definition id from every user's bans. */
+async function dropBans(tx: Prisma.TransactionClient, id: string) {
+  await tx.$executeRaw`
+    UPDATE "UserTrainingProfile" SET "bannedExerciseIds" = array_remove("bannedExerciseIds", ${id})
+    WHERE ${id} = ANY("bannedExerciseIds")`
+}
+
 /** Approve a delete: re-checks usage, since someone may have used it while pending. */
 export async function applyDelete(tx: Prisma.TransactionClient, payload: { id: string }) {
+  await lockDefinitions(tx, [payload.id])
   const current = await tx.exerciseDefinition.findUnique({ where: { id: payload.id }, select: { id: true, name: true } })
   if (!current) throw new LibraryRefusal('invalid', 'exercise no longer exists')
   const usage = await usageOf(tx, current.id)
@@ -421,18 +465,32 @@ export async function applyDelete(tx: Prisma.TransactionClient, payload: { id: s
       `"${current.name}" is now in use (${usageText(usage)}); nothing was deleted. Merge it instead.`
     )
   }
+  await dropBans(tx, current.id)
   await tx.exerciseDefinition.delete({ where: { id: current.id } })
 }
 
-/** Replace `from` with `into` in a JSON tree (exerciseDefinitionId keys and nested exerciseDefinition.id). */
-function replaceIds(node: unknown, from: string, into: string): unknown {
+type Named = { id: string; name: string; aliases: string[] }
+
+/**
+ * Replace `from` with `into` in a JSON tree: exerciseDefinitionId keys (a sibling
+ * `name` still showing from's name takes into's) and nested exerciseDefinition
+ * objects (id, name, and aliases when present).
+ */
+export function replaceIds(node: unknown, from: Named, into: Named): unknown {
   if (Array.isArray(node)) return node.map((v) => replaceIds(v, from, into))
   if (!node || typeof node !== 'object') return node
+  const source = node as Record<string, unknown>
   const out: Record<string, unknown> = {}
-  for (const [k, v] of Object.entries(node)) {
-    if (k === 'exerciseDefinitionId' && v === from) out[k] = into
-    else if (k === 'exerciseDefinition' && v && typeof v === 'object' && (v as { id?: unknown }).id === from) {
-      out[k] = { ...(replaceIds(v, from, into) as object), id: into }
+  for (const [k, v] of Object.entries(source)) {
+    if (k === 'exerciseDefinitionId' && v === from.id) out[k] = into.id
+    else if (k === 'name' && v === from.name && source.exerciseDefinitionId === from.id) out[k] = into.name
+    else if (k === 'exerciseDefinition' && v && typeof v === 'object' && (v as { id?: unknown }).id === from.id) {
+      out[k] = {
+        ...(replaceIds(v, from, into) as object),
+        id: into.id,
+        name: into.name,
+        ...('aliases' in v && { aliases: into.aliases }),
+      }
     } else out[k] = replaceIds(v, from, into)
   }
   return out
@@ -444,9 +502,15 @@ function replaceIds(node: unknown, from: string, into: string): unknown {
  * already pins or rates both, into's row is kept.
  */
 export async function applyMerge(tx: Prisma.TransactionClient, payload: { fromId: string; intoId: string }) {
+  await lockDefinitions(tx, [payload.fromId, payload.intoId])
   const check = await checkMerge(tx, payload.fromId, payload.intoId)
   if (!check.ok) throw new LibraryRefusal(check.code, check.error)
-  const { from, into } = check
+  const { from } = check
+  // into as it will be after the merge, for the JSON copies of it.
+  const alias = from.name.toLowerCase()
+  const into = check.into.aliases.some((a) => a.toLowerCase() === alias)
+    ? check.into
+    : { ...check.into, aliases: [...check.into.aliases, alias] }
   const moved = await usageOf(tx, from.id)
   const like = `%${from.id}%`
 
@@ -489,18 +553,26 @@ export async function applyMerge(tx: Prisma.TransactionClient, payload: { fromId
     await tx.userTrainingProfile.update({ where: { id: row.id }, data: { targetMovements: next as Prisma.InputJsonObject } })
   }
 
+  const banned = await tx.userTrainingProfile.findMany({
+    where: { bannedExerciseIds: { has: from.id } },
+    select: { id: true, bannedExerciseIds: true },
+  })
+  for (const row of banned) {
+    const bannedExerciseIds = [...new Set(row.bannedExerciseIds.map((id) => (id === from.id ? into.id : id)))]
+    await tx.userTrainingProfile.update({ where: { id: row.id }, data: { bannedExerciseIds } })
+  }
+
   const community = await tx.$queryRaw<Array<{ id: string; programData: unknown }>>`
     SELECT id, "programData" FROM "CommunityProgram" WHERE "programData"::text LIKE ${like}`
   for (const row of community) {
     await tx.communityProgram.update({
       where: { id: row.id },
-      data: { programData: replaceIds(row.programData, from.id, into.id) as Prisma.InputJsonValue },
+      data: { programData: replaceIds(row.programData, from, into) as Prisma.InputJsonValue },
     })
   }
 
-  const alias = from.name.toLowerCase()
-  if (!into.aliases.some((a) => a.toLowerCase() === alias)) {
-    await tx.exerciseDefinition.update({ where: { id: into.id }, data: { aliases: [...into.aliases, alias] } })
+  if (into !== check.into) {
+    await tx.exerciseDefinition.update({ where: { id: into.id }, data: { aliases: into.aliases } })
   }
   await tx.exerciseDefinition.delete({ where: { id: from.id } })
   return moved

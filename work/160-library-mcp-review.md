@@ -1,6 +1,6 @@
 ---
 id: 160
-state: running
+state: review
 waiting_on:
 executor: coach-review
 from: lead (lead-ripit-mcp)
@@ -19,3 +19,4 @@ Verdict, findings ranked, Not verified. First line `Report: complete | needs dec
 ## Log
 - 2026-11-09 CST: created; waits on 159.
 - 2026-11-09 CST: 159 back; dispatched to coach-review (wE:pB).
+- 2026-11-09 CST: review back: solid; 1 medium (bans not moved on merge) + 4 low + 1 nit. Lead: fix all on this branch (161).

@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { clientLogger } from '@/lib/client-logger'
 
@@ -39,6 +39,12 @@ export default function ProposalActions({
   const [busy, setBusy] = useState<Action | null>(null)
   const [outcome, setOutcome] = useState<Outcome | null>(null)
   const [confirming, setConfirming] = useState(false)
+  const buttonsRef = useRef<HTMLDivElement>(null)
+
+  // Keep the confirm buttons clear of the bottom nav once the warning pushes them down.
+  useEffect(() => {
+    if (confirming) buttonsRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+  }, [confirming])
 
   const run = async (action: Action) => {
     setBusy(action)
@@ -63,7 +69,18 @@ export default function ProposalActions({
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap gap-2">
+      {/* Above the buttons, so it shows where the thumb is rather than under the bottom nav. */}
+      {confirming && approveWarning && (
+        <p
+          role="alert"
+          data-testid="approve-warning"
+          className="border-2 border-warning-border bg-warning-muted text-warning-text p-3 text-sm"
+        >
+          {approveWarning}
+        </p>
+      )}
+
+      <div ref={buttonsRef} className="flex flex-wrap gap-2 scroll-mb-28">
         {status === 'pending' && (
           <>
             <Button
@@ -75,9 +92,15 @@ export default function ProposalActions({
             >
               {confirming ? 'Confirm approve' : 'Approve'}
             </Button>
-            <Button variant="secondary" doom loading={busy === 'reject'} disabled={!!busy} onClick={() => run('reject')}>
-              Reject
-            </Button>
+            {confirming ? (
+              <Button variant="secondary" doom disabled={!!busy} onClick={() => setConfirming(false)}>
+                Cancel
+              </Button>
+            ) : (
+              <Button variant="secondary" doom loading={busy === 'reject'} disabled={!!busy} onClick={() => run('reject')}>
+                Reject
+              </Button>
+            )}
           </>
         )}
         {status === 'applied' && canRevert && (
@@ -86,12 +109,6 @@ export default function ProposalActions({
           </Button>
         )}
       </div>
-
-      {confirming && approveWarning && (
-        <p role="alert" data-testid="approve-warning" className="border-2 border-warning-border bg-warning-muted text-warning-text p-3 text-sm">
-          {approveWarning}
-        </p>
-      )}
 
       {outcome && (
         <div

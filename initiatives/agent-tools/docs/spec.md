@@ -287,14 +287,14 @@ Admin agents (a token owned by an admin) manage the shared exercise library. Cre
 
 ### Tools (admin only)
 A non-admin doesn't see them in `tools/list`, and calling one returns `{ code: 'forbidden' }` before arguments are checked.
-- `library_exercise_search({ query, limit? })` → `{ exercises: [{ id, name, aliases, equipment, primaryFAUs, secondaryFAUs, isSystem, ownerId, usage }] }`. Searches every definition (shared and anyone's custom) by name or alias. `ownerId` is the owner's user id for a custom one, `null` for shared. Read only.
+- `library_exercise_search({ query, limit? })` → `{ exercises: [{ id, name, aliases, equipment, primaryFAUs, secondaryFAUs, isSystem, ownerId, usage }] }`. Searches every definition (shared and anyone's custom): the name or any alias contains the query, ignoring case. `ownerId` is the owner's user id for a custom one, `null` for shared. Read only.
 - `library_exercise_create({ definition, scope?: 'shared' | 'mine', rationale? })` applies at once. `shared` (default) makes `isSystem: true`; `mine` makes the admin's custom exercise (`isSystem: false`, `userId` = admin). A duplicate name (names are unique library-wide) is refused with the existing name and `existingId`.
 - `library_exercise_update({ id, changes, rationale? })` applies at once to any definition and returns `usage`. A rename also renames every `Exercise` row still carrying the old name, in the same transaction (as the admin edit does, `lib/exercises/update-definition.ts`).
 - `propose_exercise_delete({ id, rationale })` makes a pending proposal. Refused with `usage` and a hint to propose a merge when anything uses the exercise.
 - `propose_exercise_merge({ fromId, intoId, rationale })` makes a pending proposal. Refused for a merge into itself, a missing exercise, or into a custom exercise unless `from` is a custom exercise of the same owner.
 - Invalid fields are refused with `field` and the reason, and nothing changes.
 
-`usage` = `{ users, loggedSets, programExercises, savedWorkoutExercises, oneOffExercises, pins, preferences, anchors, communityPrograms }`. `users`: distinct users with a logged set of it; `loggedSets`: `LoggedSet` rows; `programExercises`: `Exercise` rows with a `workoutId`; `savedWorkoutExercises`: `SavedWorkout.workoutData` entries; `oneOffExercises`: `Exercise` rows without a workout; `anchors`: users whose `targetMovements` list it; `communityPrograms`: `CommunityProgram.programData` that mention it. "Unused" means every count is 0, so pins and preferences block a delete too.
+`usage` = `{ users, loggedSets, programExercises, savedWorkoutExercises, oneOffExercises, pins, preferences, anchors, communityPrograms, bans }`. `users`: distinct users with a logged set of it; `loggedSets`: `LoggedSet` rows; `programExercises`: `Exercise` rows with a `workoutId`; `savedWorkoutExercises`: `SavedWorkout.workoutData` entries; `oneOffExercises`: `Exercise` rows without a workout; `anchors`: users whose `targetMovements` list it; `communityPrograms`: `CommunityProgram.programData` that mention it; `bans`: users with it in `UserTrainingProfile.bannedExerciseIds`. "Unused" means every count except `bans` is 0, so pins and preferences block a delete too; an approved delete drops the id from everyone's bans.
 
 ### Proposals
 Kinds and labels: `exercise_definition.library_create` "New library exercise", `exercise_definition.library_update` "Library exercise edit", `exercise_definition.delete` "Delete exercise", `exercise_definition.merge` "Merge exercises".
@@ -302,11 +302,12 @@ Kinds and labels: `exercise_definition.library_create` "New library exercise", `
 - Delete and merge proposals keep `usage` in `payload` (as counted when proposed).
 
 **Approve (one transaction)**
+- Delete and merge first lock the definition row(s) (`SELECT ... FOR UPDATE`), so nothing can start using them between the usage re-check and the delete.
 - Delete: re-count usage; if anything now uses it, refuse with why (`in_use`), mark the proposal `conflict` with the error, delete nothing.
-- Merge: re-check the refusals, then move every use of `from` to `into`: `Exercise` rows (and so their logged sets; rows still named like `from` take `into`'s name), pins and preferences (where a user has both, `into`'s row is kept), `SavedWorkout.workoutData` entries, anchors in `UserTrainingProfile.targetMovements` (deduped), and `CommunityProgram.programData` references. Add `from`'s name (lower case) to `into`'s aliases, then delete `from`. Any failure rolls everything back and records the error on the proposal.
+- Merge: re-check the refusals, then move every use of `from` to `into`: `Exercise` rows (and so their logged sets; rows still named like `from` take `into`'s name), pins and preferences (where a user has both, `into`'s row is kept), `SavedWorkout.workoutData` entries, anchors in `UserTrainingProfile.targetMovements` and bans in `bannedExerciseIds` (both deduped), and `CommunityProgram.programData` references (a sibling `name` still showing from's name takes into's; a nested `exerciseDefinition` takes into's id, name and aliases). Add `from`'s name (lower case) to `into`'s aliases, then delete `from`. Any failure rolls everything back and records the error on the proposal.
 
 **Revert**
-- Direct create: deletes the exercise unless anything uses it (`in_use`, proposal stays `applied`).
+- Direct create: deletes the exercise unless anything uses it (`in_use`), or refuses with `not_found` if it is already gone (deleted or merged away). Either way the proposal stays `applied`.
 - Direct update: restores the changed fields (and renames `Exercise` rows back) unless the definition was edited since (`conflict`).
 - Approved delete or merge: refused; Admin shows no Revert button, and Approve asks to confirm that it can't be undone.
 
