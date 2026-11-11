@@ -129,6 +129,12 @@ export const progressPinsLimiter = lazyLimiter({ keyPrefix: 'progress-pins', poi
 export const progressLiftLimiter = lazyLimiter({ keyPrefix: 'progress-lift', points: 30, duration: 60 })
 
 /**
+ * Similar exercises for the swap picker (one request per picker open)
+ * Opening and closing the picker quickly: 30 req / 60s per user
+ */
+export const exerciseSimilarLimiter = lazyLimiter({ keyPrefix: 'exercise-similar', points: 30, duration: 60 })
+
+/**
  * Admin endpoints: 30 req / 60s per user
  */
 export const adminLimiter = lazyLimiter({ keyPrefix: 'admin', points: 60, duration: 60 })

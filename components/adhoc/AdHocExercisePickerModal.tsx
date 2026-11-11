@@ -27,7 +27,7 @@ const HYPOTHETICAL_SETS_PER_EXERCISE = 3
 
 export type PickerMode =
   | { kind: 'add' }
-  | { kind: 'swap'; replacingName: string; targetId?: string }
+  | { kind: 'swap'; replacingName: string; targetId?: string; currentDefinitionId: string }
 
 export function AdHocEmptyState() {
   return (
@@ -134,6 +134,7 @@ export function AdHocExercisePickerModal({
             onExerciseSelect={isAdd ? handleAddToggle : handleSwapSelect}
             selectedIds={isAdd ? selectedIds : undefined}
             preloadExercises
+            similarToDefinitionId={mode.kind === 'swap' ? mode.currentDefinitionId || undefined : undefined}
             muscleBalanceSnapshot={isAdd ? muscleBalanceSnapshot : undefined}
             recoveryRanking={isAdd ? recoveryRanking : undefined}
             anchors={isAdd ? anchors : undefined}

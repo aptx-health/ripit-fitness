@@ -57,6 +57,12 @@ interface ExerciseSearchInterfaceProps {
    * selection via onExerciseSelect rather than emitting once and closing.
    */
   selectedIds?: Set<string>
+  /**
+   * Swap pickers: the definition being replaced. Before anything is typed, a
+   * "Similar" list (GET /api/exercises/similar) shows above the results; tapping
+   * one selects it. No list when the API returns none (e.g. untagged exercise).
+   */
+  similarToDefinitionId?: string
 }
 
 const EQUIPMENT_TYPES = [
@@ -95,6 +101,7 @@ export function ExerciseSearchInterface({
   anchors,
   plannedFAUVolume = {},
   selectedIds,
+  similarToDefinitionId,
 }: ExerciseSearchInterfaceProps) {
   const isMultiSelect = selectedIds !== undefined
   const [searchQuery, setSearchQuery] = useState(initialQuery)
@@ -110,6 +117,8 @@ export function ExerciseSearchInterface({
   // Anchors view (#976): which curated movement is filtering the list, if any.
   const [selectedAnchorPattern, setSelectedAnchorPattern] = useState<string | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
+  const [similar, setSimilar] = useState<ExerciseDefinition[]>([])
+  const showSimilar = similar.length > 0 && !searchQuery.trim()
 
   const balanceByFau = useMemo(() => {
     if (!muscleBalanceSnapshot) return new Map<FAUKey, MuscleBalanceSnapshot['items'][number]>()
@@ -265,6 +274,29 @@ export function ExerciseSearchInterface({
       searchInputRef.current?.focus()
     }
   }, [])
+
+  useEffect(() => {
+    setSimilar([])
+    if (!similarToDefinitionId) return
+    let cancelled = false
+    const loadSimilar = async () => {
+      try {
+        const response = await fetch(
+          `/api/exercises/similar?definitionId=${encodeURIComponent(similarToDefinitionId)}`
+        )
+        if (!response.ok) throw new Error(`Similar exercises request failed (${response.status})`)
+        const body = (await response.json()) as { similar: ExerciseDefinition[] }
+        if (!cancelled) setSimilar(body.similar)
+      } catch (error) {
+        // The picker still works without the list; normal search stays.
+        clientLogger.error('Error loading similar exercises:', error)
+      }
+    }
+    loadSimilar()
+    return () => {
+      cancelled = true
+    }
+  }, [similarToDefinitionId])
 
   const searchExercises = useCallback(async () => {
     setIsLoading(true)
@@ -454,6 +486,34 @@ export function ExerciseSearchInterface({
 
       {/* Results */}
       <div className="flex-1 overflow-auto px-4 sm:px-6 py-4 min-h-0">
+        {showSimilar && (
+          <section className="mb-5">
+            <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-2">Similar</h3>
+            <ul aria-label="Similar" className="grid gap-2">
+              {similar.map((exercise) => (
+                <li key={exercise.id}>
+                  <button
+                    type="button"
+                    onClick={() => onExerciseSelect(exercise)}
+                    className="w-full min-h-12 border-2 border-border bg-card px-4 py-2 text-left transition-colors hover:border-primary doom-focus-ring"
+                  >
+                    <span className="block font-bold text-foreground uppercase tracking-wide">{exercise.name}</span>
+                    <span className="block text-sm text-muted-foreground">
+                      {[
+                        exercise.primaryFAUs.map((fau) => FAU_DISPLAY_NAMES[fau] || fau).join(', '),
+                        exercise.equipment.map((eq) => EQUIPMENT_LABELS[eq] || eq.replace(/_/g, ' ')).join(', '),
+                      ]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <h3 className="mt-5 text-sm font-bold text-muted-foreground uppercase tracking-wider">All exercises</h3>
+          </section>
+        )}
+
         {error && (
           <div className="bg-error-muted border-2 border-error p-4 mb-4">
             <div className="text-error font-bold">{error}</div>
