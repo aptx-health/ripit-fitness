@@ -409,10 +409,11 @@ extension AppDatabase {
                 return exerciseId
             }
             // A program exercise: today gets its own copy with the plan and today's sets; the program row is hidden.
+            // The copy is in no superset, so a partner left alone loses its badge today (Dustin 2026-11-11).
             let newId = Self.newId()
             try db.execute(sql: """
-                INSERT INTO exercise (id, name, exerciseDefinitionId, "order", exerciseGroup, isOneOff, workoutCompletionId)
-                SELECT ?, ?, ?, "order", exerciseGroup, 1, ? FROM exercise WHERE id = ?
+                INSERT INTO exercise (id, name, exerciseDefinitionId, "order", isOneOff, workoutCompletionId)
+                SELECT ?, ?, ?, "order", 1, ? FROM exercise WHERE id = ?
                 """, arguments: [newId, name, definitionId, workoutId, exerciseId])
             for planned in try Row.fetchAll(db, sql: "SELECT setNumber, reps, weight, rpe, rir, isWarmup FROM prescribedSet WHERE exerciseId = ?",
                                             arguments: [exerciseId]) {
@@ -496,12 +497,16 @@ extension AppDatabase {
     }
 
     /// Fixes today's order; positions run 1, 2, … so an exercise added later (order = max + 1) goes last.
+    /// The workout's own exercises take the same order, so a saved workout keeps it (saveWorkout reads "order").
     static func writeSessionOrder(_ db: Database, _ completionId: String, _ ids: [String]) throws {
         for (i, id) in ids.enumerated() {
             try db.execute(sql: """
                 INSERT INTO sessionExercise (completionId, exerciseId, position, hidden) VALUES (?, ?, ?, 0)
                 ON CONFLICT (completionId, exerciseId) DO UPDATE SET position = excluded.position, hidden = 0
                 """, arguments: [completionId, id, i + 1])
+            try db.execute(sql: """
+                UPDATE exercise SET "order" = ? WHERE id = ? AND workoutCompletionId = ?
+                """, arguments: [i + 1, id, completionId])
         }
     }
 

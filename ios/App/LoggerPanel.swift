@@ -1,7 +1,9 @@
 // One exercise in the logger (slice 9b; web ExerciseDisplayTabs.tsx, SetLoggingForm.tsx, SetList.tsx):
 // Log / Info / Notes / History paper tabs over a box whose panel scrolls on its own. The Log panel holds
-// Last time, the reps stepper, weight and effort, the warm-up toggle and the sets with the rest stopwatch.
-// An open keypad takes the place of the inputs and sets. Logging itself is the bottom bar's (WorkoutView).
+// Last time and the sets with the rest stopwatch at the top, and the reps stepper, weight and effort and the
+// warm-up toggle at the bottom, by the thumb and the bar (Dustin 2026-11-11; the web keeps them at the top).
+// An open keypad takes the place of the inputs and sets, also at the bottom. After the planned sets the
+// inputs give way to "All planned sets logged" until + Extra set. Logging itself is the bottom bar's (WorkoutView).
 
 import RipitCore
 import SwiftUI
@@ -42,6 +44,8 @@ struct LoggerPanel: View {
     @Binding var form: EntryForm
     @Binding var pad: OpenPad?
     @Binding var tab: LoggerTab
+    /// "+ Extra set" was tapped: the inputs come back after the planned sets.
+    let extraSet: Bool
     /// The rest stopwatch was closed at this many sets; it comes back with the next set.
     @Binding var restClosedAt: Int?
 
@@ -51,20 +55,38 @@ struct LoggerPanel: View {
         let tabs: [LoggerTab] = [.log, .info] + (notes == nil ? [] : [.notes]) + [.history]
         VStack(alignment: .leading, spacing: 0) {
             tabRow(tabs, historyCount: historyCount)
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    title
-                    switch tab {
-                    case .log: logPanel
-                    case .info: InfoContent(definitionId: exercise.definitionId)
-                    case .notes: Text(notes ?? "").foregroundStyle(Theme.foreground)
-                    case .history: HistoryContent(definitionId: exercise.definitionId)
+            // The Log inputs (or a keypad) are pinned under the part that scrolls, so they stay by the thumb.
+            // At the accessibility sizes they would leave no room, so they scroll with the rest, still last.
+            let pinned = tab == .log && !typeSize.isAccessibilitySize
+            VStack(spacing: 0) {
+                GeometryReader { box in
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 16) {
+                            title
+                            switch tab {
+                            case .log:
+                                logTop
+                                if !pinned {
+                                    Spacer(minLength: 0)
+                                    logBottom
+                                }
+                            case .info: InfoContent(definitionId: exercise.definitionId)
+                            case .notes: Text(notes ?? "").foregroundStyle(Theme.foreground)
+                            case .history: HistoryContent(definitionId: exercise.definitionId)
+                            }
+                        }
+                        // At least the panel's height, so unpinned inputs still sit at its bottom.
+                        .frame(maxWidth: .infinity, minHeight: max(box.size.height - 32, 0), alignment: .topLeading)
+                        .padding(16)
                     }
+                    .scrollBounceBehavior(.basedOnSize)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(16)
+                if pinned {
+                    VStack(alignment: .leading, spacing: 16) { logBottom }
+                        .padding([.horizontal, .bottom], 16)
+                        .padding(.top, 8)
+                }
             }
-            .scrollBounceBehavior(.basedOnSize)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Theme.card)
             .overlay(Rectangle().strokeBorder(Theme.edge(Theme.secondary), lineWidth: Theme.folderLine))
@@ -96,11 +118,18 @@ struct LoggerPanel: View {
         .dynamicTypeSize(...DynamicTypeSize.xxLarge)
     }
 
-    /// The name, "SET 2 OF 4", the superset badge and the next planned set.
+    /// The planned working sets are all logged and no extra set was asked for (ExerciseLoggingModal.tsx).
+    private var allPlannedLogged: Bool {
+        let working = planned.filter { !$0.isWarmup }.count
+        return working > 0 && exercise.sets.filter { !$0.isWarmup }.count >= working && !extraSet && form.editingSet == nil
+    }
+
+    /// The name, "SET 2 OF 4" (or "4 OF 4 DONE"), the superset badge and the next planned set.
     private var title: some View {
         let working = planned.filter { !$0.isWarmup }
         let next = exercise.sets.filter { !$0.isWarmup }.count + 1
-        let setText = working.isEmpty || next > working.count ? "SET \(exercise.sets.count + 1)" : "SET \(next) OF \(working.count)"
+        let setText = allPlannedLogged ? "\(working.count) OF \(working.count) DONE"
+            : working.isEmpty || next > working.count ? "SET \(exercise.sets.count + 1)" : "SET \(next) OF \(working.count)"
         let nextPlanned = planned.first { $0.setNumber > exercise.sets.count }
         return VStack(alignment: .leading, spacing: 6) {
             ViewThatFits(in: .horizontal) {
@@ -121,7 +150,7 @@ struct LoggerPanel: View {
                     .background(Theme.accent)
                     .foregroundStyle(Theme.accentForeground)
             }
-            if tab == .log, let nextPlanned {
+            if tab == .log, !allPlannedLogged, let nextPlanned {
                 Text("Prescribed: \(Text(PlanFormat.label(nextPlanned)).foregroundStyle(Theme.foreground))")
                     .font(.ripit(.subheadline))
                     .foregroundStyle(Theme.mutedForeground)
@@ -143,7 +172,21 @@ struct LoggerPanel: View {
 
     // MARK: Log
 
-    @ViewBuilder private var logPanel: some View {
+    /// Last time, "All planned sets logged" and the sets; nothing while a keypad is open.
+    @ViewBuilder private var logTop: some View {
+        if pad == nil {
+            if form.editingSet == nil, let last = store.lastTime(definitionId: exercise.definitionId) {
+                LastTimeLine(last: last, fill: use)
+            }
+            if allPlannedLogged {
+                allLoggedBanner
+            }
+            setList
+        }
+    }
+
+    /// The inputs, or the open keypad in their place; none after the planned sets.
+    @ViewBuilder private var logBottom: some View {
         switch pad {
         case .reps(let keypad):
             NumberPadView(pad: Binding(get: { keypad }, set: { pad = .reps($0) }), title: "Reps", unit: nil,
@@ -154,43 +197,48 @@ struct LoggerPanel: View {
         case .effort(let kind):
             EffortGrid(kind: kind, value: form.effort, pick: { form.effort = $0; pad = nil }, cancel: { pad = nil })
         case nil:
-            inputs
-            setList
+            if !allPlannedLogged { inputs }
         }
     }
 
+    /// "✓ ALL PLANNED SETS LOGGED" in place of the inputs, as the web does.
+    private var allLoggedBanner: some View {
+        Label("All planned sets logged", systemImage: "checkmark")
+            .font(.ripit(.subheadline, .bold)).display(1.2)
+            .foregroundStyle(Theme.text(Theme.success))
+            .padding(.horizontal, 12)
+            .frame(maxWidth: .infinity, minHeight: Theme.touch, alignment: .leading)
+            .background(Theme.success.opacity(0.12))
+            .overlay(alignment: .leading) { Rectangle().fill(Theme.success).frame(width: 4) }
+    }
+
     @ViewBuilder private var inputs: some View {
-        if form.editingSet == nil, let last = store.lastTime(definitionId: exercise.definitionId) {
-            LastTimeLine(last: last, fill: use)
-        }
         VStack(alignment: .leading, spacing: 6) {
             fieldLabel("Reps", icon: "number")
             RepsStepperView(reps: form.reps, set: { form.reps = $0 }, openPad: { pad = .reps(NumberKeypad(opening: form.reps)) })
         }
-        let row = typeSize.isAccessibilitySize
-            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12)) : AnyLayout(HStackLayout(alignment: .top, spacing: 12))
-        row {
+        let effortKind = form.editingSet == nil ? try? LoggerRules.effortPicker(settings.settings) : nil
+        if typeSize.isAccessibilitySize {
             VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 6) {
-                    fieldLabel("Weight", icon: "scalemass")
-                    Button { form.unit = unit == "lbs" ? "kg" : "lbs" } label: {
-                        Text("(\(unit.uppercased()))").font(.ripit(.subheadline, .bold)).underline()
-                            .frame(minHeight: 32).contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(Theme.text(Theme.primary))
-                    .accessibilityLabel("Unit \(unit), tap to switch")
-                }
-                readout(form.weight, unit: unit, label: "Weight") {
-                    pad = .weight(NumberKeypad(opening: form.weight, decimal: true))
+                weightLabel
+                weightBox
+            }
+            if let effortKind {
+                VStack(alignment: .leading, spacing: 6) {
+                    fieldLabel(effortKind.rawValue, icon: "gauge.with.dots.needle.33percent")
+                    effortBox(effortKind)
                 }
             }
-            if form.editingSet == nil, let kind = try? LoggerRules.effortPicker(settings.settings) {
-                VStack(alignment: .leading, spacing: 6) {
-                    fieldLabel(kind.rawValue, icon: nil)
-                    readout(form.effort.map { EffortSetting.label(kind, $0) } ?? "", unit: nil, label: kind.rawValue.uppercased()) {
-                        pad = .effort(kind)
-                    }
+        } else {
+            // One grid, so the labels share a baseline and the boxes a row.
+            Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 6) {
+                GridRow(alignment: .lastTextBaseline) {
+                    weightLabel
+                    if let effortKind { fieldLabel(effortKind.rawValue, icon: "gauge.with.dots.needle.33percent") }
+                }
+                GridRow {
+                    weightBox
+                    if let effortKind { effortBox(effortKind) }
                 }
             }
         }
@@ -202,13 +250,38 @@ struct LoggerPanel: View {
         }
     }
 
+    private var weightLabel: some View {
+        HStack(alignment: .lastTextBaseline, spacing: 6) {
+            fieldLabel("Weight", icon: "scalemass")
+            Button { form.unit = unit == "lbs" ? "kg" : "lbs" } label: {
+                Text("(\(unit.uppercased()))").font(.ripit(.subheadline, .bold)).underline()
+                    .contentShape(Rectangle().inset(by: -12))
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(Theme.text(Theme.primary))
+            .accessibilityLabel("Unit \(unit), tap to switch")
+        }
+    }
+
+    private var weightBox: some View {
+        readout(form.weight, unit: unit, label: "Weight") {
+            pad = .weight(NumberKeypad(opening: form.weight, decimal: true))
+        }
+    }
+
+    private func effortBox(_ kind: EffortKind) -> some View {
+        readout(form.effort.map { EffortSetting.label(kind, $0) } ?? "", unit: nil, label: kind.rawValue.uppercased()) {
+            pad = .effort(kind)
+        }
+    }
+
     private var weightOutOfRange: Bool {
         guard !form.weight.isEmpty else { return false }
         return !(Double(form.weight).map(LoggedWeight.isValid) ?? false)
     }
 
     private func fieldLabel(_ text: String, icon: String?) -> some View {
-        HStack(spacing: 6) {
+        HStack(alignment: .lastTextBaseline, spacing: 6) {
             if let icon { Image(systemName: icon).font(.ripit(.footnote, .bold)) }
             Text(text.uppercased()).font(.ripit(.subheadline, .bold)).display(1.2)
         }

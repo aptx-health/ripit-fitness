@@ -288,15 +288,21 @@ public final class AppDatabase: Sendable {
             WHERE e.workoutCompletionId = ? ORDER BY p.setNumber
             """, arguments: [id])
         let plannedByExercise = Dictionary(grouping: planned) { $0["exerciseId"] as String }
-        let exercises = try Row.fetchAll(db, sql: """
+        let rows = try Row.fetchAll(db, sql: """
             SELECT e.id, e.exerciseDefinitionId, e.name, e.exerciseGroup FROM exercise e
             LEFT JOIN sessionExercise s ON s.exerciseId = e.id AND s.completionId = ?1
             WHERE (e.workoutCompletionId = ?1 OR (e.workoutId IS NOT NULL AND e.workoutId = ?2)) AND COALESCE(s.hidden, 0) = 0
             ORDER BY COALESCE(s.position, e."order")
-            """, arguments: [id, c["workoutId"] as String?]).map { e in
+            """, arguments: [id, c["workoutId"] as String?])
+        // A superset with one exercise left today (its partner deleted or swapped in a program session) is
+        // no superset today; the program keeps it.
+        let groupSizes = Dictionary(grouping: rows.compactMap { $0["exerciseGroup"] as String? }) { $0 }.mapValues(\.count)
+        let exercises = rows.map { e in
             let exerciseId: String = e["id"]
+            let group: String? = e["exerciseGroup"]
             return ExerciseDetail(
-                id: exerciseId, definitionId: e["exerciseDefinitionId"], name: e["name"], group: e["exerciseGroup"],
+                id: exerciseId, definitionId: e["exerciseDefinitionId"], name: e["name"],
+                group: group.flatMap { groupSizes[$0] ?? 0 > 1 ? $0 : nil },
                 sets: (setsByExercise[exerciseId] ?? []).map {
                     SetDetail(id: $0["id"], setNumber: $0["setNumber"], reps: $0["reps"],
                               weight: $0["weight"], weightUnit: $0["weightUnit"],

@@ -84,3 +84,4 @@
 - 2026-11-11 13:12 MST: Dustin asked to install 9b before review; installed (commit 32a0a244). Review 205 continues; fixes will be reinstalled.
 - 2026-11-11 13:18 MST: Dustin's phone notes on 9b saved to work/205-dustin-notes.md (4 layout/colour points); held until 205 review, then one combined fix item.
 - 2026-11-11 14:29 MST: 205 review complete: 3 fixes (saved order bug, after-planned panel, AX5 bar). Dustin: tabs dim ~80%, lone superset ends today, empty exit unchanged. Merged with his 4 phone notes into 206 (ios-impl, context kept); 207 re-check waits.
+- 2026-11-11 15:01 MST: 206 complete; lead ios-check exit 0, 351 tests, locked tests unchanged (4 new allowed). Committed; installed on Dustin's phone; 207 re-check to parity-disco (context kept).

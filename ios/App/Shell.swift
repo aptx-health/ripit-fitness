@@ -78,7 +78,8 @@ extension ShellTab {
 
 /// Training · Library · WORKOUT · Progress · Settings: a 56pt row on the muted background with a 2pt
 /// top border. The active tab is "lit" (Dustin 2026-11-11, option B): an accent-muted block with a 3pt
-/// accent top edge slides under it, its label is in the accent color, and the other tabs dim to 60%.
+/// accent top edge slides under it, its label is in the accent color, and the other tabs dim to 80% (60% was
+/// too faint to read in the light themes).
 /// E-ink keeps its bold underlined label. Each tab change gives a light selection haptic.
 struct RipitTabBar: View {
     @Environment(Shell.self) private var shell
@@ -151,7 +152,7 @@ private struct TabButton: View {
                     .lineLimit(1)
             }
             .foregroundStyle(selected ? Theme.text(Theme.accent) : Theme.mutedForeground)
-            .opacity(selected ? 1 : 0.6)
+            .opacity(selected ? 1 : 0.8)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .frame(minWidth: Theme.touch, minHeight: Theme.touch)
             .contentShape(Rectangle())

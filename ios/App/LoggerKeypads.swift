@@ -63,8 +63,9 @@ struct NumberPadView: View {
             }
             HStack(spacing: 8) {
                 Button("Cancel", action: cancel).buttonStyle(OutlineButtonStyle())
+                // Confirms in the logger use the accent (Dustin 2026-11-11; the web's is green).
                 Button("Done") { done((try? pad.done()) ?? pad.value) }
-                    .buttonStyle(FilledButtonStyle(fill: Theme.success, foreground: Theme.successForeground, shadow: nil))
+                    .buttonStyle(FilledButtonStyle(fill: Theme.accent, foreground: Theme.accentForeground, shadow: nil))
             }
             .lineLimit(1)
             .padding(.top, 10)
@@ -126,14 +127,14 @@ struct EffortGrid: View {
                     Button { pick(Int(p.value)) } label: {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("\(kind.rawValue.uppercased()) \(p.label)").font(.ripit(.headline, .bold))
-                            Text(p.description).font(.ripit(.caption)).foregroundStyle(on ? Theme.primaryForeground : Theme.mutedForeground)
+                            Text(p.description).font(.ripit(.caption)).foregroundStyle(on ? Theme.accentForeground : Theme.mutedForeground)
                                 .multilineTextAlignment(.leading)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                         .frame(maxWidth: .infinity, minHeight: 56, alignment: .leading)
                         .padding(.horizontal, 10).padding(.vertical, 6)
-                        .background(on ? Theme.primary : Theme.muted)
-                        .foregroundStyle(on ? Theme.primaryForeground : Theme.foreground)
+                        .background(on ? Theme.accent : Theme.muted)
+                        .foregroundStyle(on ? Theme.accentForeground : Theme.foreground)
                         .overlay(Rectangle().strokeBorder(Theme.border, lineWidth: Theme.line))
                         .contentShape(Rectangle())
                     }

@@ -91,7 +91,7 @@ struct WorkoutView: View {
             header(exercises: exercises, index: index, exercise: exercise)
             if let exercise {
                 LoggerPanel(exercise: exercise, planned: store.plannedSets(exercise), unit: unit(exercise),
-                            form: formBinding(exercise), pad: $pad, tab: $tab,
+                            form: formBinding(exercise), pad: $pad, tab: $tab, extraSet: extraSets.contains(exercise.id),
                             restClosedAt: Binding(get: { restClosed[exercise.id] }, set: { restClosed[exercise.id] = $0 }))
                     .id(exercise.id)
                     .padding(.horizontal, 12)
@@ -107,10 +107,11 @@ struct WorkoutView: View {
         }
     }
 
-    /// Exit, Finish and error dialogs.
+    /// Exit, Finish and error dialogs; their confirm buttons take the accent, like the logger's others.
     private func dialogs(_ content: some View) -> some View {
         let exercises = store.current?.exercises ?? []
         return content
+        .tint(Theme.text(Theme.accent))
         .confirmationDialog("Leave this workout?", isPresented: $confirmingExit, titleVisibility: .visible) {
             Button("Discard workout", role: .destructive) { store.discardWorkout() }
             Button("Keep as draft") { store.keepAsDraft() }
@@ -156,7 +157,7 @@ struct WorkoutView: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Plan, exercise \(index + 1) of \(exercises.count)")
+            .accessibilityLabel(exercises.isEmpty ? "Plan, no exercises" : "Plan, exercise \(index + 1) of \(exercises.count)")
             .layoutPriority(1)
             Spacer(minLength: 4)
             if let w = store.current { WorkoutClock(startedAt: w.startedAt, color: Theme.secondaryForeground).lineLimit(1) }
@@ -460,7 +461,7 @@ struct LoggerBarView: View {
                 case .finish: filled("Finish", action: finish)
                 case .addExercise:
                     Button(action: add) { Label("Add exercise", systemImage: "plus") }
-                        .buttonStyle(FilledButtonStyle(fill: Theme.success, foreground: Theme.successForeground, shadow: nil))
+                        .buttonStyle(FilledButtonStyle(fill: Theme.accent, foreground: Theme.accentForeground, shadow: nil))
                 }
             }
             switch bar.next {
@@ -472,17 +473,17 @@ struct LoggerBarView: View {
         }
         .lineLimit(1)
         .minimumScaleFactor(0.7)
-        // The bar keeps one row; at the largest sizes its labels shrink rather than wrap.
-        .dynamicTypeSize(...DynamicTypeSize.accessibility2)
+        // Capped like the header, so the bar keeps one row and "+ Extra set · Next exercise" fit whole.
+        .dynamicTypeSize(...DynamicTypeSize.xxLarge)
     }
 
     private var logButton: some View {
         let enabled = editing ? canLog : { if case .logSet(let on) = bar.main { on } else { false } }()
         return Button(action: log) {
+            // Centred with or without the second line; the button's minimum height keeps the bar's.
             VStack(spacing: 2) {
                 Text(editing ? "SAVE SET" : "LOG SET").font(.ripit(.headline, .bold)).display(1.5)
-                // Always laid out, so the bar keeps its height with no second line.
-                Text(detail ?? " ").font(.ripit(.caption).monospacedDigit())
+                if let detail { Text(detail).font(.ripit(.caption).monospacedDigit()) }
             }
             .accessibilityElement(children: .ignore)
             .frame(maxWidth: .infinity, minHeight: side)
@@ -497,17 +498,19 @@ struct LoggerBarView: View {
         .accessibilityValue(detail ?? "")
     }
 
+    /// Finish stays green; Next exercise is a confirm and takes the accent (Dustin 2026-11-11).
     private func filled(_ title: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
+        let finish = title == "Finish"
+        return Button(action: action) {
             Text(title.uppercased()).font(.ripit(.headline, .bold)).display(1.5)
                 .frame(maxWidth: .infinity, minHeight: side)
-                .background(Theme.success)
-                .foregroundStyle(Theme.successForeground)
+                .background(finish ? Theme.success : Theme.accent)
+                .foregroundStyle(finish ? Theme.successForeground : Theme.accentForeground)
                 .overlay(Rectangle().strokeBorder(Look.isPaper ? Theme.border : .clear, lineWidth: 2))
                 .contentShape(Rectangle())
         }
         .buttonStyle(PressStyle())
-        .accessibilityLabel(title == "Finish" ? "Finish workout" : title)
+        .accessibilityLabel(finish ? "Finish workout" : title)
     }
 
     private func labelled(_ title: String, action: @escaping () -> Void) -> some View {

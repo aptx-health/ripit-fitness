@@ -1,9 +1,9 @@
 ---
 id: 207
-state: waiting
+state: ready
 executor: parity-disco
 skill: reviewer (method from 200)
-waiting_on: 206
+waiting_on:
 from: lead (worktree-brave-field-c150)
 confirmed: 2026-11-11 Dustin (install after independent review)
 updated: 2026-11-11

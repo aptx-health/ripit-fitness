@@ -216,7 +216,7 @@ struct PlanSheet: View {
                 }
                 if !reordering {
                     Button(action: add) { Label("Add exercise", systemImage: "plus") }
-                        .buttonStyle(FilledButtonStyle(fill: Theme.success, foreground: Theme.successForeground, shadow: nil))
+                        .buttonStyle(FilledButtonStyle(fill: Theme.accent, foreground: Theme.accentForeground, shadow: nil))
                 }
             }
         }
