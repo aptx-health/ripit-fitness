@@ -14,6 +14,7 @@ type ReplaceExerciseRequest = {
     reps: string
     intensityType: 'RIR' | 'RPE' | 'NONE'
     intensityValue?: number
+    weight?: string | null
   }>
   notes?: string
 }
@@ -125,6 +126,7 @@ export async function POST(
               reps: set.reps,
               rpe: set.intensityType === 'RPE' ? set.intensityValue : null,
               rir: set.intensityType === 'RIR' ? set.intensityValue : null,
+              weight: set.weight ?? null,
               exerciseId,
               userId: user.id
             }))
@@ -196,6 +198,7 @@ export async function POST(
                 reps: set.reps,
                 rpe: set.intensityType === 'RPE' ? set.intensityValue : null,
                 rir: set.intensityType === 'RIR' ? set.intensityValue : null,
+                weight: set.weight ?? null,
                 exerciseId,
                 userId: user.id
               }))

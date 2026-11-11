@@ -58,9 +58,10 @@ interface ExerciseSearchInterfaceProps {
    */
   selectedIds?: Set<string>
   /**
-   * Swap pickers: the definition being replaced. Before anything is typed, a
-   * "Similar" list (GET /api/exercises/similar) shows above the results; tapping
-   * one selects it. No list when the API returns none (e.g. untagged exercise).
+   * Swap pickers: the definition being replaced. Before anything is typed or
+   * filtered, a "Similar" list (GET /api/exercises/similar) shows above the
+   * results; tapping one selects it. No list when the API returns none (e.g.
+   * untagged exercise).
    */
   similarToDefinitionId?: string
 }
@@ -118,7 +119,6 @@ export function ExerciseSearchInterface({
   const [selectedAnchorPattern, setSelectedAnchorPattern] = useState<string | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const [similar, setSimilar] = useState<ExerciseDefinition[]>([])
-  const showSimilar = similar.length > 0 && !searchQuery.trim()
 
   const balanceByFau = useMemo(() => {
     if (!muscleBalanceSnapshot) return new Map<FAUKey, MuscleBalanceSnapshot['items'][number]>()
@@ -152,6 +152,10 @@ export function ExerciseSearchInterface({
         ? 'alphabetical'
         : fauSort
   const inAnchorsView = effectiveSort === 'anchors'
+  // Similar shows only before the user narrows the list: typing, a filter or the
+  // Anchors view all switch to normal results until cleared.
+  const showSimilar =
+    similar.length > 0 && !searchQuery.trim() && !selectedFAU && !selectedEquipment && !inAnchorsView
 
   const sortModes = useMemo(
     () =>

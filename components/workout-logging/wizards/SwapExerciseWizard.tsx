@@ -91,6 +91,8 @@ export function SwapExerciseWizard({
       sets: currentPrescribedSets.map((set) => ({
         setNumber: set.setNumber,
         reps: set.reps,
+        // Kept as prescribed; the editor has no weight column.
+        weight: set.weight ?? null,
         intensityValue:
           intensityType === 'RPE' ? set.rpe ?? undefined
           : intensityType === 'RIR' ? set.rir ?? undefined
