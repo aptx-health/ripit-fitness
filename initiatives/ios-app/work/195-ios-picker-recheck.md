@@ -1,6 +1,6 @@
 ---
 id: 195
-state: ready
+state: review
 executor: parity-disco
 skill: reviewer (method from 191)
 waiting_on:
@@ -21,3 +21,4 @@ Check that 194 fixed your 191 findings and the two extra changes, without breaki
 
 ## Hand back
 Accept or fix list, with screenshots in `initiatives/ios-app/handoff/slice8-assets/` (prefix `recheck-`). Don't `rm`.
+- 2026-11-10 19:37 MST: dispatched to parity-disco (running; context 25%, kept)

@@ -68,3 +68,4 @@
 - 2026-11-10 191 review: accept; fixes recommended (editor errors on open, duplicate warning scrolls away). Lead calls: instructions limit 4000 (web parity), imported unknown web exercises stored as built-in (reviewer's recommendation; Dustin can overrule). Items 193 (tests, ios-tests), 194 (fixes, ios-impl), 195 (re-check, parity-disco). Dispatching 193.
 - 2026-11-10 193 complete: lead re-ran swift test, 263 tests, 14 issues all in the changed/new cases (old 1000 limit, old unknown-ref rule). Committed. Dispatching 194 to ios-impl (kept, same slice).
 - 2026-11-10 194 complete: lead re-ran ios-check, exit 0, 263 pass, tests untouched. Committed. Dispatching 195 re-check to parity-disco (kept; re-check of its own findings).
+- 2026-11-10 195 re-check: accept. Slice 8 done by lead; Hub page ios-slice8-picker published; awaiting Dustin (1 slice waiting). Next: slice 9 specs.
