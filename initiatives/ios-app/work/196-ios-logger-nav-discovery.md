@@ -1,6 +1,6 @@
 ---
 id: 196
-state: ready
+state: running
 waiting_on:
 executor: parity-disco
 skill: discovery
@@ -53,3 +53,7 @@ Dustin finds the phone's logger and navigation very different from the web's, an
 
 ## Hand back
 The discovery packet with first line `Report: …`, the note's path, and the proposed slice(s) in 3 lines.
+- 2026-11-10 22:21 MST: dispatched to parity-disco (running; context 27%, cleared)
+
+## Added 2026-11-10 (lead)
+Dustin found that the picker's bottom bar doesn't reach the screen's bottom edge; rows scroll beneath it (item 197 fixes it). In the tab bar section, cover how the custom bar and the logger's fixed bar fill the home-indicator area.

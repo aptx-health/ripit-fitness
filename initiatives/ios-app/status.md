@@ -70,3 +70,5 @@
 - 2026-11-10 194 complete: lead re-ran ios-check, exit 0, 263 pass, tests untouched. Committed. Dispatching 195 re-check to parity-disco (kept; re-check of its own findings).
 - 2026-11-10 195 re-check: accept. Slice 8 done by lead; Hub page ios-slice8-picker published; awaiting Dustin (1 slice waiting). Next: slice 9 specs.
 - 2026-11-10 Slice 8 installed on Dustin's phone (asked). Dustin: logger and navigation before the smart picker; custom bottom bar like the web, Settings as a tab. New slice 9 (old 11 folded in); smart picker → 10, muscle balance → 11. Dustin approved: run it through, install on his phone after the independent review. Dispatching 196 discovery to parity-disco (cleared, new slice).
+- 2026-11-10 Dustin bug from his phone: the picker's bottom bar floats above the home-indicator area, with rows scrolling under it. 197 (fix + sweep + shared pattern) to ios-impl, kept since it's the same slice; noted for 196.
+- 2026-11-10 197 complete: lead re-ran ios-check (exit 0, 263), read the diff (shared View.bottomBar modifier in Theme.swift), checked the after screenshot. No other pinned bottom bars. Committed; installing on Dustin's phone (approved).

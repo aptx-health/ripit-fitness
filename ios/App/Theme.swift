@@ -361,6 +361,27 @@ struct FolderTabs<Tab: Hashable, Content: View>: View {
     }
 }
 
+// MARK: - Bottom bar
+
+extension View {
+    /// Pins a bar to the bottom of the screen, above the scrolling content. The bar's controls stay above
+    /// the home indicator, while its background runs down to the screen's edge so nothing scrolls beneath it.
+    /// Use this for every fixed bottom bar (the picker's Create / Add, the logger's ‹ Log › bar, a custom tab bar).
+    func bottomBar<Bar: View>(@ViewBuilder _ bar: () -> Bar) -> some View {
+        safeAreaInset(edge: .bottom, spacing: 0) {
+            bar()
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .frame(maxWidth: .infinity)
+                .background {
+                    Theme.background
+                        .ignoresSafeArea(edges: .bottom)
+                        .overlay(alignment: .top) { RowDivider() }
+                }
+        }
+    }
+}
+
 // MARK: - Buttons and fields
 
 /// A full-width filled button at least 48pt tall, square, with the web's hard offset shadow

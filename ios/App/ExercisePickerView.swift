@@ -81,7 +81,7 @@ struct ExercisePickerView: View {
                 Button("Cancel") { dismiss() }.frame(minHeight: Theme.touch)
             }
         }
-        .safeAreaInset(edge: .bottom) { bottomBar }
+        .bottomBar { bottomBar }
         .task(id: SearchKey(search: search, revision: store.revision)) {
             let found = await store.searchExercises(search)
             guard !Task.isCancelled else { return }
@@ -121,9 +121,6 @@ struct ExercisePickerView: View {
                     .opacity(picks.ids.isEmpty ? 0.5 : 1)
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .background(Theme.background.overlay(alignment: .top) { RowDivider() })
     }
 
     private func tap(_ id: String) {
