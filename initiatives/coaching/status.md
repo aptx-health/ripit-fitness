@@ -22,3 +22,4 @@
 - 2026-11-07 CST: Fixes 152 back; lead amended two locked steps for the duplicate guard; 143/143. Slice 2 ready for Dustin's phone preview (after the theme page).
 - 2026-11-07 CST: #1043 merged; coaching-send rebased onto dev. Phone preview started for Dustin.
 - 2026-11-07 CST: Slice 2 approved by Dustin on the preview; 148, 150–152 accepted. PR into dev. Follow-up from him: quick Send actions on rows, and workout rows that expand like programs.
+- 2026-11-10 CST: New: coach sends carry custom exercises (spec features/coaching/custom-exercises.feature; replaces the refusal). Dustin: copy named "<name> (from <coach>)"; trainee chooses per exercise: add a copy or use one of mine. Plan 163 tests → 164 build → 165 review, worktree1 feature/coach-bundle-custom. 163 dispatched.
