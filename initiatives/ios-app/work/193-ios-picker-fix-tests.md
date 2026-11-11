@@ -1,6 +1,6 @@
 ---
 id: 193
-state: ready
+state: done
 executor: ios-tests
 skill: handoff-test-builder
 waiting_on:
@@ -28,3 +28,4 @@ Update 189's tests for two changes that came out of review 191, before ios-impl 
 
 ## Don't touch
 `initiatives/ios-app/work/`, `STATE.md`, `status.md`, the roadmap, app code. Don't `rm`; list temp files.
+- 2026-11-10 19:25 MST: dispatched to ios-tests (running; context 13%, kept)

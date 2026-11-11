@@ -6,7 +6,9 @@
 // 1. by id against the catalog, then
 // 2. by normalized name against the catalog (normalizeExerciseName in lib/validators/exercise-definition.ts:
 //    lowercase, trim, drop all but a-z 0-9 whitespace and '-', collapse spaces), mapping to the catalog row,
-// 3. else it is kept under its own id as a non-system definition named from exerciseRefs.
+// 3. else it is kept under its own id, named from exerciseRefs, as a built-in (system) definition:
+//    a web built-in newer than the phone's catalog (lead, work item 193). Only the export's own
+//    customExercises are the person's (not system).
 
 import Foundation
 import GRDB
@@ -24,9 +26,9 @@ struct ImportExerciseTests {
         try db.importExport(data: ExportFixture.withCatalogIds())
         let squat = try #require(try db.row("exercise", FileIds.w1Squat))
         #expect(squat["exerciseDefinitionId"] as String == "cmiz7vjpo0001vr0msv9of7ib")
-        #expect(try db.systemExerciseIds().count == catalogSize)
+        #expect(try db.systemExerciseIds().count == catalogSize + 1, "the catalog plus the unknown ref")
         #expect(try db.row("exerciseDefinition", benchPressId)?.description == before?.description)
-        // The catalog, Sled Push (custom) and the one unknown ref.
+        // The catalog, Sled Push (custom) and the one unknown ref (built-in, not copied from the catalog).
         #expect(try db.count("exerciseDefinition") == catalogSize + 2)
     }
 
@@ -41,7 +43,7 @@ struct ImportExerciseTests {
         }
         let def = try #require(try db.row("exerciseDefinition", FileIds.refRow))
         #expect(def["name"] as String == "Barbell Bent-Over Row")
-        #expect(def["isSystem"] as Bool == false)
+        #expect(def["isSystem"] as Bool == true, "a web built-in the phone's catalog doesn't have yet")
         let sets = try db.read {
             try Row.fetchAll($0, sql: "SELECT reps, weight FROM loggedSet WHERE exerciseId = ? ORDER BY setNumber", arguments: [FileIds.w1Row])
         }
@@ -62,9 +64,9 @@ struct ImportExerciseTests {
         #expect(pullUp.sets.map(\.reps) == [8, 6])
         let squat = try #require(try db.row("exercise", FileIds.w1Squat))
         #expect(squat["exerciseDefinitionId"] as String? == catalog[FileIds.refSquat])
-        // Only Sled Push (custom) and the Bent-Over Row (no catalog name) are non-system.
-        #expect(try db.ids("exerciseDefinition", where: "isSystem = 0") == [FileIds.sledPush, FileIds.refRow])
-        #expect(try db.systemExerciseIds().count == catalogSize)
+        // Only Sled Push (the export's custom) is non-system; the Bent-Over Row (no catalog name) is built-in.
+        #expect(try db.ids("exerciseDefinition", where: "isSystem = 0") == [FileIds.sledPush])
+        #expect(try db.systemExerciseIds().count == catalogSize + 1)
         #expect(try db.foreignKeyProblems().isEmpty)
     }
 
@@ -83,7 +85,7 @@ struct ImportExerciseTests {
         #expect(try db.row("exerciseDefinition", FileIds.refDeadlift) == nil)
     }
 
-    @Test("Unknown id: a ref with a name the catalog doesn't have stays its own non-system row")
+    @Test("Unknown id: a ref with a name the catalog doesn't have stays its own built-in row")
     func uniqueNameKeptAsOwnRow() throws {
         let db = try TempDB().open()
         try db.importExport(data: ExportFixture.editing { file in
@@ -103,7 +105,7 @@ struct ImportExerciseTests {
         })
         let def = try #require(try db.row("exerciseDefinition", "ref-landmine"))
         #expect(def["name"] as String == "Landmine Press")
-        #expect(def["isSystem"] as Bool == false)
+        #expect(def["isSystem"] as Bool == true)
         let ex = try #require(try db.workout(FileIds.adHoc).exercises.last)
         #expect(ex.definitionId == "ref-landmine")
         #expect(ex.sets.map(\.weight) == [25])

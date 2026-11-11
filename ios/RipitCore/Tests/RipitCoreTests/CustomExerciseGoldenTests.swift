@@ -5,10 +5,11 @@
 // and a name with no letter or digit is refused ("Name must include a letter or number").
 //
 // The golden covers:
-// - create: minimal, every field, spaces around the name (stored trimmed), the 100 and 1000
-//   limits (the name counted once trimmed), specialized equipment; each problem alone (no name,
+// - create: minimal, every field, spaces around the name (stored trimmed), the 100 and 4000
+//   limits (the name counted once trimmed), 1001 instructions (the web's old limit was 1000),
+//   specialized equipment; each problem alone (no name,
 //   blank, 101, no or unknown
-//   equipment, no or unknown primary, unknown secondary, 1001 instructions), all at once, and a
+//   equipment, no or unknown primary, unknown secondary, 4001 instructions), all at once, and a
 //   problem beating a duplicate; duplicates of a built-in (case, punctuation, spaces, hyphen), of
 //   a custom, of one just made; not duplicates (hyphen for a space; "Farmer's Walk", whose
 //   built-in is stored with its apostrophe); a punctuation-only name (alone, with spaces, with
@@ -36,7 +37,7 @@ struct CustomExerciseGoldenTests {
     @Test("Golden: picker.json has the create, duplicate and edit cases")
     func goldenLoads() throws {
         let file = try PickerGolden.load()
-        #expect(file.creates.count == 32)
+        #expect(file.creates.count == 33)
         #expect(file.duplicates.count == 10)
         #expect(file.edits.count == 12)
     }

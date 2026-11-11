@@ -1,7 +1,8 @@
 // Scenarios: "Pick several at once", "Create a custom exercise" (saved, found, added right away,
 // marked as mine), "Edit a custom exercise" (shows in search, logger and history; built-in
 // refused), "Custom exercises everywhere" (logger, Last time, History, Progress, saved workouts,
-// programs, relaunch, re-import).
+// programs, relaunch, re-import). Import: an exercise the phone's catalog doesn't know is built-in
+// (work item 193); the export's own custom exercises are mine.
 // Expected values follow the spec; the web's validation and duplicate rules are in
 // CustomExerciseGoldenTests. All data is synthetic.
 //
@@ -176,6 +177,35 @@ struct CustomExerciseTests {
         _ = try db.importExport(data: try ExportFixture.withCatalogIds())
         #expect(try db.customExercise(Self.fileSled) == edited)
         #expect(try db.customIds() == customs)
+    }
+
+    static let fileRow = FileIds.refRow   // "Barbell Bent-Over Row": a web built-in the phone's catalog doesn't have
+
+    @Test("Import: an exercise the phone's catalog doesn't know is built-in: not mine, and the editor refuses it")
+    func importedUnknownIsBuiltIn() throws {
+        let db = try AppDatabase.inMemory()
+        _ = try db.importExport(data: try ExportFixture.withCatalogIds())
+        let row = try #require(try db.searchExercises(ExerciseSearch(query: "bent-over row")).first { $0.id == Self.fileRow })
+        #expect(row.name == "Barbell Bent-Over Row")
+        #expect(!row.isCustom, "no MINE flag")
+        #expect(!(try db.customIds().contains(Self.fileRow)))
+        #expect(try db.customExercise(Self.fileRow) == nil, "the editor doesn't open it")
+        let before = try PickerGolden.stored(db, Self.fileRow)
+        #expect(throws: CustomExerciseError.builtIn) {
+            try db.updateCustomExercise(Self.fileRow, CustomExerciseDraft(name: "My Row", equipment: ["barbell"], primaryMuscles: ["mid-back"]))
+        }
+        #expect(try PickerGolden.stored(db, Self.fileRow) == before)
+
+        // The export's own custom exercise stays mine.
+        let sled = try #require(try db.searchExercises(ExerciseSearch(query: "sled push")).first)
+        #expect(sled.id == Self.fileSled)
+        #expect(sled.isCustom)
+        #expect(try db.customExercise(Self.fileSled) != nil)
+
+        // A re-import changes neither.
+        _ = try db.importExport(data: try ExportFixture.withCatalogIds())
+        #expect(try db.searchExercises(ExerciseSearch(query: "bent-over row")).first { $0.id == Self.fileRow }?.isCustom == false)
+        #expect(try db.customIds() == [Self.fileSled])
     }
 
     // ---- Multi-pick

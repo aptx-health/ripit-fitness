@@ -26,7 +26,7 @@
 //   trimmed; PHONE: else, with no letter or digit (\p{L} or \p{N}), "Name must include a letter
 //   or number"), equipment (at least one; each a key of `ExerciseChoices.equipment` or "bench" or
 //   "pull_up_bar"), primary muscles (at least one; each known), secondary muscles (each known),
-//   instructions (at most 1000). The messages are the web's.
+//   instructions (at most 4000; the web raised it from 1000 on 2026-11-09). The messages are the web's.
 // - Then a duplicate: another exercise, built-in or custom, whose normalizedName equals
 //   normalizeExerciseName(name).
 // - PHONE: the name is stored trimmed (the web stores it as typed); everything above uses the
