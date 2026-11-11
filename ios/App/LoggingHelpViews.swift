@@ -23,13 +23,14 @@ enum EffortSetting {
 /// How long the workout has been running: "05:30", then "1:02:03".
 struct WorkoutClock: View {
     let startedAt: Date
+    var color = Theme.foreground
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 1)) { context in
             let seconds = (try? LoggingClock.elapsedSeconds(from: startedAt, to: context.date)) ?? 0
             Text((try? LoggingClock.workoutText(seconds)) ?? "")
                 .font(.ripit(.headline).monospacedDigit())
-                .foregroundStyle(Theme.foreground)
+                .foregroundStyle(color)
                 .accessibilityLabel("Workout time \(Duration.seconds(seconds).formatted(.units(allowed: [.hours, .minutes, .seconds])))")
         }
     }

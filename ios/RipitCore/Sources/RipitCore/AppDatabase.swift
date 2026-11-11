@@ -142,8 +142,11 @@ public final class AppDatabase: Sendable {
         guard let name = try String.fetchOne(db, sql: "SELECT name FROM exerciseDefinition WHERE id = ?", arguments: [definitionId]) else {
             throw RipitCoreError.notFound("exerciseDefinition \(definitionId)")
         }
+        // After today's last, plan rows included (a program session, work item 204).
         let order = try Int.fetchOne(db, sql: """
-            SELECT COALESCE(MAX("order"), 0) + 1 FROM exercise WHERE workoutCompletionId = ?
+            SELECT COALESCE(MAX(COALESCE(s.position, e."order")), 0) + 1 FROM exercise e
+            LEFT JOIN sessionExercise s ON s.exerciseId = e.id AND s.completionId = ?1
+            WHERE e.workoutCompletionId = ?1 OR e.workoutId = (SELECT workoutId FROM workoutCompletion WHERE id = ?1)
             """, arguments: [workoutId]) ?? 1
         try db.execute(sql: """
             INSERT INTO exercise (id, name, exerciseDefinitionId, "order", isOneOff, workoutCompletionId)
@@ -286,8 +289,10 @@ public final class AppDatabase: Sendable {
             """, arguments: [id])
         let plannedByExercise = Dictionary(grouping: planned) { $0["exerciseId"] as String }
         let exercises = try Row.fetchAll(db, sql: """
-            SELECT id, exerciseDefinitionId, name, exerciseGroup FROM exercise
-            WHERE workoutCompletionId = ? OR (workoutId IS NOT NULL AND workoutId = ?) ORDER BY "order"
+            SELECT e.id, e.exerciseDefinitionId, e.name, e.exerciseGroup FROM exercise e
+            LEFT JOIN sessionExercise s ON s.exerciseId = e.id AND s.completionId = ?1
+            WHERE (e.workoutCompletionId = ?1 OR (e.workoutId IS NOT NULL AND e.workoutId = ?2)) AND COALESCE(s.hidden, 0) = 0
+            ORDER BY COALESCE(s.position, e."order")
             """, arguments: [id, c["workoutId"] as String?]).map { e in
             let exerciseId: String = e["id"]
             return ExerciseDetail(

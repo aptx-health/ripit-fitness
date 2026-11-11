@@ -39,6 +39,7 @@ struct RootView: View {
     @State private var keyboard = KeyboardState()
     /// The summary was closed by "Open Library › Workouts" after a save.
     @State private var summaryToLibrary = false
+    @State private var pageNudge: CGFloat = 0
 
     var body: some View {
         @Bindable var store = store
@@ -67,6 +68,10 @@ struct RootView: View {
                     // A new theme or E-ink display rebuilds the tabs, so every Theme color and font is
                     // read again; the selected tab and each tab's navigation path are kept.
                     .id(lookKey)
+                    // A tab change nudges the page in 14pt from the side moved toward, fading in over 0.2 s
+                    // (Dustin 2026-11-11, option B); none with Reduce Motion or E-ink.
+                    .offset(x: pageNudge)
+                    .opacity(pageNudge == 0 ? 1 : 0)
                     // The keyboard covers the bar, as it covers Apple's, instead of lifting it.
                     // Opaque: the web blurs what scrolls under its 95% fill, and nothing scrolls under this one.
                     .bottomBar(fill: Theme.muted, padded: false, edge: 2) {
@@ -113,6 +118,15 @@ struct RootView: View {
             }
         }
         .environment(shell)
+        .onChange(of: shell.tab) { from, to in
+            guard (try? DisplayRules.reducedMotion(einkDisplay: settings.settings.einkDisplay, osReduceMotion: osReduceMotion)) != true,
+                  let order = try? NavShell.barItems().compactMap({ if case .tab(let t) = $0 { t } else { nil } }),
+                  let a = order.firstIndex(of: from), let b = order.firstIndex(of: to) else { return }
+            var start = Transaction()
+            start.disablesAnimations = true
+            withTransaction(start) { pageNudge = b > a ? 14 : -14 }
+            withAnimation(.easeOut(duration: 0.2)) { pageNudge = 0 }
+        }
         .tint(Theme.text(Theme.primary))
         .background(Theme.background)
         .font(.ripit(.body))

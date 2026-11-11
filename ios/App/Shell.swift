@@ -77,8 +77,9 @@ extension ShellTab {
 // MARK: - The bar
 
 /// Training · Library · WORKOUT · Progress · Settings: a 56pt row on the muted background with a 2pt
-/// top border. The active tab is in the accent color, with the Ripit theme's gold underline and the
-/// E-ink theme's bold underlined label.
+/// top border. The active tab is "lit" (Dustin 2026-11-11, option B): an accent-muted block with a 3pt
+/// accent top edge slides under it, its label is in the accent color, and the other tabs dim to 60%.
+/// E-ink keeps its bold underlined label. Each tab change gives a light selection haptic.
 struct RipitTabBar: View {
     @Environment(Shell.self) private var shell
     @Environment(WorkoutStore.self) private var store
@@ -86,16 +87,36 @@ struct RipitTabBar: View {
     @Environment(\.accessibilityReduceMotion) private var osReduceMotion
 
     var body: some View {
+        let items = (try? NavShell.barItems()) ?? []
         HStack(spacing: 0) {
-            ForEach(Array(((try? NavShell.barItems()) ?? []).enumerated()), id: \.offset) { _, item in
+            ForEach(Array(items.enumerated()), id: \.offset) { _, item in
                 switch item {
-                case .tab(let t): TabButton(tab: t, selected: shell.tab == t) { shell.tap(t) }
+                case .tab(let t):
+                    TabButton(tab: t, selected: shell.tab == t) {
+                        // The marker slides (RootView turns motion off with Reduce Motion or E-ink).
+                        withAnimation(.easeOut(duration: 0.22)) { shell.tap(t) }
+                    }
                 case .workout:
                     WorkoutChip(state: chipState) { shell.showingQuickActions = true }
                 }
             }
         }
         .frame(height: Self.rowHeight)
+        .background(alignment: .topLeading) {
+            // Every slot is the same width, so the marker sits at the selected slot's offset. It runs up over
+            // the bar's 2pt top border.
+            GeometryReader { geo in
+                let slot = geo.size.width / CGFloat(max(items.count, 1))
+                let index = items.firstIndex { if case .tab(let t) = $0 { t == shell.tab } else { false } } ?? 0
+                Rectangle()
+                    .fill(Theme.accentMuted)
+                    .overlay(alignment: .top) { Rectangle().fill(Theme.edge(Theme.accent)).frame(height: 3) }
+                    .frame(width: slot, height: geo.size.height + 4)
+                    .offset(x: slot * CGFloat(index), y: -2)
+            }
+            .accessibilityHidden(true)
+        }
+        .sensoryFeedback(.selection, trigger: shell.tab)
         // Apple's bar keeps its labels small at every text size; this one does too, and a long press
         // shows the label large instead.
         .dynamicTypeSize(...DynamicTypeSize.large)
@@ -125,19 +146,14 @@ private struct TabButton: View {
             VStack(spacing: 2) {
                 Image(systemName: tab.icon).font(.system(size: 20))
                 Text(label)
-                    .font(.custom(RipitFont.name(selected && Look.isPaper ? .bold : .semibold), fixedSize: 11))
+                    .font(.custom(RipitFont.name(selected ? .bold : .semibold), fixedSize: 11))
                     .underline(selected && Look.isPaper, pattern: .solid)
                     .lineLimit(1)
             }
             .foregroundStyle(selected ? Theme.text(Theme.accent) : Theme.mutedForeground)
+            .opacity(selected ? 1 : 0.6)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .frame(minWidth: Theme.touch, minHeight: Theme.touch)
-            .overlay(alignment: .bottom) {
-                // globals.css [data-theme="ripit"] [aria-current="page"]: a 3px gold underline.
-                if selected && Look.preference.themeName == .ripit {
-                    Rectangle().fill(Color(hex: 0xFBBF24)).frame(height: 3)
-                }
-            }
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

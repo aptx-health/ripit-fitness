@@ -9,10 +9,10 @@
 //   -demoImportPicker YES  open the Files picker for import
 //   -demoEmptyWorkout YES  open a workout with one exercise and no sets
 //   -demoFinish YES     tap Finish on the open workout
-//   -demoRemove YES     show the remove confirmation for the first exercise
-//   -demoFocusWeight YES  focus the first exercise's weight field (shows select-all)
+//   -demoRemove YES     open the logger's plan list (slice 9b: remove is in its row menus)
+//   -demoFocusWeight YES  open the weight keypad on the first exercise (slice 9b)
 //   -demoDetail YES     open the newest finished workout (Training › History)
-//   -demoDiscard YES    show the discard confirmation over the workout
+//   -demoDiscard YES    show Exit's Discard / Keep as draft choice over the workout
 // Slice 3 (work item 161):
 //   -demoProgram YES    add an active 2-week sample program (synthetic), plus a second inactive one
 //   -demoDone <n>       finish the first n workouts of the sample program
@@ -32,8 +32,8 @@
 // Slice 5 (work item 175):
 //   -demoEffort YES     with -demoHistory: a finished bench workout 12 hours ago with a warm-up and
 //                       3 sets @ RPE 8; with -demoWorkout: the open workout's bench sets get a warm-up and RPE
-//   -demoHelp <tab>     open the workout in progress and the first exercise's info | notes | history
-//                       sheet; "none" just opens the workout (e.g. after a relaunch, no reseeding)
+//   -demoHelp <tab>     open the workout in progress on the logger's info | notes | history tab (slice 9b);
+//                       "none" just opens the workout (e.g. after a relaunch, no reseeding)
 //   -demoUseLastTime YES  tap the first exercise's "Last time" line
 // Slice 6 (work item 180):
 //   -demoSummary YES    open the summary of the newest finished workout (as after Finish)

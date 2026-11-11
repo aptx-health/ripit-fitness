@@ -80,3 +80,4 @@
 - 2026-11-11 202 re-check: accept. Slice 9a done by lead; installed on Dustin's phone (approved); Hub page ios-slice9a-nav. Awaiting Dustin: slices 8, 9a. Items 203–205 (9b). Dispatching 203 to ios-tests.
 - 2026-11-11 203 handed back (needs calls): 168 issues, 166 notImplemented + 2 from a real bug (program add order). Dustin: decimal key with a 2000 cap, program swap/delete today only, Superset button into the Plan list, tab look B + slide + haptic (added to 204). Follow-up 1 to ios-tests.
 - 2026-11-11 203 follow-up complete: lead re-ran swift test, 347 tests, 206 issues: notImplemented plus the known program-add-order bug. Committed. Dispatching 204 to ios-impl (cleared, new part).
+- 2026-11-11 13:02 MST: 204 handed back complete. Lead: tests untouched, ios-check exit 0 (347 passed). Committed. 205 ready; dispatching to parity-disco (cleared, new review).

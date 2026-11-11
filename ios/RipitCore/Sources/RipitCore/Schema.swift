@@ -20,6 +20,7 @@ enum Schema {
         ("v3-program-cycle", v3ProgramCycle),
         ("v4-import-hash", v4ImportHash),
         ("v5-pinned-exercise", v5PinnedExercise),
+        ("v6-session-exercise", v6SessionExercise),
     ]
 
     static func v1ExerciseCatalog(_ db: Database) throws {
@@ -197,6 +198,20 @@ enum Schema {
             CREATE TABLE pinnedExercise (
                 exerciseDefinitionId TEXT PRIMARY KEY NOT NULL REFERENCES exerciseDefinition(id) ON DELETE CASCADE,
                 position INTEGER NOT NULL
+            )
+            """)
+    }
+
+    /// Today's order and the program exercises hidden today (slice 9b): a program session is reordered,
+    /// swapped and trimmed here, never in the program. The web has no such table; it edits the template.
+    static func v6SessionExercise(_ db: Database) throws {
+        try db.execute(sql: """
+            CREATE TABLE sessionExercise (
+                completionId TEXT NOT NULL REFERENCES workoutCompletion(id) ON DELETE CASCADE,
+                exerciseId TEXT NOT NULL REFERENCES exercise(id) ON DELETE CASCADE,
+                position INTEGER NOT NULL,
+                hidden BOOLEAN NOT NULL DEFAULT 0,
+                PRIMARY KEY (completionId, exerciseId)
             )
             """)
     }

@@ -418,7 +418,7 @@ extension AppDatabase {
                 """, arguments: [workoutId])) { $0["exerciseId"] as String }
             let exercises = detail.exercises.map { e in
                 SessionExercise(id: e.id, definitionId: e.definitionId, name: e.name, group: e.group,
-                                planned: (sets[e.id] ?? []).map(Self.setDetail), logged: e.sets)
+                                planned: sets[e.id]?.map(Self.setDetail) ?? e.planned, logged: e.sets)
             }
             return ProgramSession(id: id, programId: c["programId"], workoutId: workoutId,
                                   cycleNumber: c["cycleNumber"], exercises: exercises)

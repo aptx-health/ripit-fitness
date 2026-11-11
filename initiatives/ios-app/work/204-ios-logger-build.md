@@ -1,6 +1,6 @@
 ---
 id: 204
-state: ready
+state: review
 executor: ios-impl
 skill: handoff-implementer
 waiting_on:
@@ -42,3 +42,5 @@ Tests, `initiatives/ios-app/work/`, `STATE.md`, `status.md`, the roadmap. Don't 
 ## Also in this item (Dustin, 2026-11-11)
 - **Bottom bar, option B "Lit block":** the active tab gets a dark amber block (`accent-muted`) with a 3 px gold (`accent`) top edge, and the other tabs dim to about 60%. A marker slides between tabs (about 0.22 s). The page nudges in about 14 pt from the side you moved toward, with a fade of about 0.2 s. Each tab change gives a light selection haptic. With Reduce Motion or E-ink on, there is no slide or nudge. Mock-up: https://claude.ai/artifact/6QWYWeY2PkUbJFkJPGmrSF (option B, "Sliding marker + content nudge"). Make it work in every theme through the tokens.
 - **Superset button:** it moves into the Plan list (see 203's follow-up).
+- 2026-11-11 11:04 MST: dispatched to ios-impl (running; context 2%, cleared)
+- 2026-11-11 13:02 MST: handed back (complete); lead verified ios-check exit 0, 347 passed; committed. State review (205).

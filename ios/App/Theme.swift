@@ -104,8 +104,12 @@ enum Theme {
     static var primaryMuted: Color { Look.palette.color("primary-muted") }
     static var secondary: Color { Look.palette.color("secondary") }
     static var secondaryForeground: Color { Look.palette.color("secondary-foreground") }
+    static var secondaryActive: Color { Look.palette.color("secondary-active") }
     static var accent: Color { Look.palette.color("accent") }
     static var accentForeground: Color { Look.palette.color("accent-foreground") }
+    static var accentMuted: Color { Look.palette.color("accent-muted") }
+    static var success: Color { Look.palette.color("success") }
+    static var successForeground: Color { Look.palette.color("success-foreground") }
     static var error: Color { Look.palette.color("error") }
     static var errorForeground: Color { Look.palette.color("error-foreground") }
 

@@ -1,57 +1,8 @@
-// An exercise's Info / Notes / History while logging (slice 5; web ExerciseDisplayTabs.tsx,
-// ExerciseInfoContent.tsx, ExerciseHistoryPanel.tsx). Notes only appear when the plan has some.
+// An exercise's Info and History while logging (slice 5; web ExerciseInfoContent.tsx, ExerciseHistoryPanel.tsx),
+// shown in the logger's Info and History tabs (slice 9b, LoggerPanel.swift).
 
 import RipitCore
 import SwiftUI
-
-enum HelpTab: String, CaseIterable, Identifiable {
-    case info = "Info", notes = "Notes", history = "History"
-    var id: String { rawValue }
-
-    var icon: String {
-        switch self {
-        case .info: "info.circle"
-        case .notes: "note.text"
-        case .history: "clock"
-        }
-    }
-}
-
-struct ExerciseHelpSheet: View {
-    @Environment(WorkoutStore.self) private var store
-    @Environment(\.dismiss) private var dismiss
-    let exercise: ExerciseDetail
-    @State var tab: HelpTab
-
-    var body: some View {
-        let notes = store.exerciseNotes(exerciseId: exercise.id)
-        let tabs = HelpTab.allCases.filter { $0 != .notes || notes != nil }
-        ScrollView {
-            // Info | Notes | History, folder tabs that switch in place like the web's ExerciseDisplayTabs.
-            FolderTabs(items: tabs.map { FolderTabItem(tab: $0, title: $0.rawValue, icon: $0.icon, tone: $0 == .info ? .active : .exercise) },
-                       selection: $tab) { tab in
-                Group {
-                    switch tab {
-                    case .info: InfoContent(definitionId: exercise.definitionId)
-                    case .notes: Text(notes ?? "").foregroundStyle(Theme.foreground)
-                    case .history: HistoryContent(definitionId: exercise.definitionId)
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(16)
-            }
-            .padding(16)
-        }
-        .background(Theme.background)
-        .navigationTitle(exercise.name.uppercased())
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Done") { dismiss() }.frame(minHeight: Theme.touch)
-            }
-        }
-    }
-}
 
 private struct SectionLabel: View {
     let text: String
@@ -61,7 +12,7 @@ private struct SectionLabel: View {
 }
 
 /// Photos, instructions, muscles and equipment.
-private struct InfoContent: View {
+struct InfoContent: View {
     @Environment(WorkoutStore.self) private var store
     let definitionId: String
 
@@ -120,7 +71,7 @@ private struct FlowRow: View {
 }
 
 /// The last 4 finished workouts with this exercise, newest first.
-private struct HistoryContent: View {
+struct HistoryContent: View {
     @Environment(WorkoutStore.self) private var store
     let definitionId: String
 
