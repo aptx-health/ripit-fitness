@@ -1,6 +1,6 @@
 ---
 id: 190
-state: running
+state: done
 waiting_on:
 executor: ios-impl
 skill: handoff-implementer

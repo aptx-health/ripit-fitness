@@ -1,12 +1,12 @@
 ---
 id: 191
-state: waiting
-waiting_on: 190
+state: done
+waiting_on:
 executor: parity-disco
 skill: reviewer
 from: lead (worktree-brave-field-c150)
 confirmed: 2026-11-08 Dustin ("Go for it" on slice 8; same autonomy)
-updated: 2026-11-08
+updated: 2026-11-10
 ---
 # iOS slice 8: picker filters and custom exercises, review
 
@@ -43,3 +43,4 @@ A review packet with first line `Report: …` and a clear verdict.
 ## Known before review (lead, 2026-11-10)
 - The web raised the instructions limit from 1000 to 4000 on 2026-11-09 (`lib/validators/exercise-definition.ts`). The phone still uses 1000; a follow-up will move it to 4000. Don't report it again.
 - A saved workout keeps a renamed custom exercise's old name, as on the web (it stores a copy). Kept for parity.
+- 2026-11-10 18:40 MST: dispatched to parity-disco (running; context 20%, cleared)

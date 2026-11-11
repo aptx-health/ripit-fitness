@@ -1,6 +1,6 @@
 ---
 id: 189
-state: running
+state: done
 waiting_on:
 executor: ios-tests
 skill: handoff-test-builder
