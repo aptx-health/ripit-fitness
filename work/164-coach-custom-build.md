@@ -1,6 +1,6 @@
 ---
 id: 164
-state: running
+state: review
 waiting_on:
 executor: coach-impl
 from: lead (lead-ripit-mcp)
@@ -40,3 +40,4 @@ Use `handoff-implementer`. First line `Report: complete | needs decision | furth
 ## Log
 - 2026-11-10 CST: created; waits on 163.
 - 2026-11-10 CST: 163 done; dispatched to coach-impl (wE:pA).
+- 2026-11-10 CST: back complete (suite 4649). Lead re-ran 190 coaching tests + tsc; screenshots checked. Committed; 165 review dispatched.

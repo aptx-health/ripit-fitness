@@ -36,6 +36,15 @@ export interface SuggestionItem {
   from: string
 }
 
+/** One of a pending coach send's custom exercises, offered as a choice on accept. */
+export interface BundledExercise {
+  sourceId: string
+  /** The name at send time. */
+  name: string
+  /** The trainee's copy from an earlier send, which "Add a copy" reuses. */
+  earlierCopy: string | null
+}
+
 export interface SuggestionDetail extends SuggestionItem {
   kindLabel: string
   status: string
@@ -43,4 +52,6 @@ export interface SuggestionDetail extends SuggestionItem {
   /** The program an accepted program suggestion created. */
   programId: string | null
   body: SuggestionBody
+  /** A pending coach send's custom exercises; empty otherwise. */
+  customExercises: BundledExercise[]
 }

@@ -259,7 +259,7 @@ export function ExerciseSearchInterface({
   // but NOT on touch devices, where focusing pops up the on-screen keyboard
   // and obscures the page. Touch users tap the field to bring it up.
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    if (typeof window === 'undefined' || !window.matchMedia) return
     const prefersKeyboard = window.matchMedia('(hover: hover) and (pointer: fine)').matches
     if (prefersKeyboard) {
       searchInputRef.current?.focus()
@@ -546,6 +546,7 @@ export function ExerciseSearchInterface({
                     <button type="button"
                       onClick={(e) => { e.stopPropagation(); onExerciseSelect(exercise) }}
                       aria-pressed={isMultiSelect ? !!isSelected : undefined}
+                      aria-label={isMultiSelect ? undefined : `Select ${exercise.name}`}
                       className={
                         isSelected
                           ? 'px-4 py-2 bg-primary text-primary-foreground font-bold uppercase tracking-wider text-sm border-2 border-primary-active flex items-center gap-1.5'

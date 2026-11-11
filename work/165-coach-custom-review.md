@@ -1,7 +1,7 @@
 ---
 id: 165
-state: waiting
-waiting_on: 164
+state: running
+waiting_on:
 executor: coach-review
 from: lead (lead-ripit-mcp)
 confirmed: 2026-11-10 Dustin (plan 163 → 164 → 165)
@@ -16,3 +16,4 @@ Verdict, findings ranked, Not verified. First line `Report: complete | needs dec
 
 ## Log
 - 2026-11-10 CST: created; waits on 164.
+- 2026-11-10 CST: dispatched to coach-review (wE:pB).
