@@ -1,6 +1,6 @@
 ---
 id: 196
-state: running
+state: accepted
 waiting_on:
 executor: parity-disco
 skill: discovery
