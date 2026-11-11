@@ -87,3 +87,4 @@
 - 2026-11-11 15:01 MST: 206 complete; lead ios-check exit 0, 351 tests, locked tests unchanged (4 new allowed). Committed; installed on Dustin's phone; 207 re-check to parity-disco (context kept).
 - 2026-11-11 15:19 MST: Dustin on the 206 install: looks great; soften the active-tab highlight. 208 to ios-impl (context kept); its result folds into 207's re-check.
 - 2026-11-11 15:21 MST: 208 complete; lead ios-check exit 0 (351). Committed, installed; 208 added to 207 re-check.
+- 2026-11-11 15:26 MST: Dustin: drop the top line on the active tab. Lead removed the pill (tiny, done inline); ios-check exit 0; committed, installed; parity-disco told.
