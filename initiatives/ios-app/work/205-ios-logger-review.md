@@ -14,7 +14,7 @@ updated: 2026-11-11
 An independent review of slice 9b against `features/ios-app/one-exercise-logger.feature` and the web.
 
 ## Read first
-The spec, `initiatives/ios-app/work/203-handback.md` (the hands-on list), and the `ios/` diff since 9b's tests commit. Don't read `204-handback.md` before your first pass.
+The spec, `initiatives/ios-app/work/203-handback-1.md` and `-2.md` (the hands-on list), and the `ios/` diff since 9b's tests commit. Don't read `204-handback.md` before your first pass.
 
 ## Do
 - **Every scenario by real taps** on `ripit-review` (reuse it), in RIPIT dark and light and at AX5, for a program workout and a freestyle workout.

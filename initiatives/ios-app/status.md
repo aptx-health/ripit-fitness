@@ -78,3 +78,5 @@
 - 2026-11-11 200 review: fix 2 then accept (bar covers list ends on every tab; see-through fill). Dustin: remove Training's Programs and Ad-hoc buttons. 201 fixes (ios-impl, kept), 202 re-check (parity-disco, kept). 9b items renumbered to 203–205.
 - 2026-11-11 201 complete: lead re-ran ios-check, exit 0, 286 pass, tests untouched. Committed. Dispatching 202 re-check (parity-disco, kept).
 - 2026-11-11 202 re-check: accept. Slice 9a done by lead; installed on Dustin's phone (approved); Hub page ios-slice9a-nav. Awaiting Dustin: slices 8, 9a. Items 203–205 (9b). Dispatching 203 to ios-tests.
+- 2026-11-11 203 handed back (needs calls): 168 issues, 166 notImplemented + 2 from a real bug (program add order). Dustin: decimal key with a 2000 cap, program swap/delete today only, Superset button into the Plan list, tab look B + slide + haptic (added to 204). Follow-up 1 to ios-tests.
+- 2026-11-11 203 follow-up complete: lead re-ran swift test, 347 tests, 206 issues: notImplemented plus the known program-add-order bug. Committed. Dispatching 204 to ios-impl (cleared, new part).

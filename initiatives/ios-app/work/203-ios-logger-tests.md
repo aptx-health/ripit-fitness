@@ -1,6 +1,6 @@
 ---
 id: 203
-state: ready
+state: done
 executor: ios-tests
 skill: handoff-test-builder
 waiting_on:
@@ -43,7 +43,7 @@ Tests and a hands-on list for `features/ios-app/one-exercise-logger.feature`, be
   - Exit
   - regressions in every slice 5–8 feature
   - AX5
-- **Risk:** this replaces . Check which existing tests or debug hooks assume the old all-exercises layout, and say so.
+- **Risk:** this replaces `WorkoutView.swift`. Check which existing tests or debug hooks assume the old all-exercises layout, and say so.
 - Run the break matrix as before.
 
 ## Done when
@@ -52,3 +52,10 @@ Tests and a hands-on list for `features/ios-app/one-exercise-logger.feature`, be
 
 ## Don't touch
 App code (apart from contract stubs in RipitCore), `initiatives/ios-app/work/`, `STATE.md`, `status.md`, the roadmap. Don't `rm`.
+- 2026-11-11 07:18 MST: dispatched to ios-tests (running; context 13%, kept)
+
+## Follow-up 1 (2026-11-11, Dustin's calls on the handback)
+1. **Weight keypad:** the web's pad plus a decimal key, capped at 2000. One "." at most. Pick a sensible rule for digits after the point, matching what the phone stores today, and cite it. Update the keypad golden or tests and say which cases depart from the web.
+2. **Program swap and delete change today's workout only,** like reorder. The program's plan for this day, other weeks and finished workouts stay the same. Add or adjust store tests.
+3. **Supersets:** the freestyle "Superset" button stays, but moves into the Plan list (group or ungroup from there). The logger shows the badge. Add a hands-on item; add a store test if grouping logic changes.
+Keep the known add bug test as it is. Re-run the break matrix for the changed rules only, relock, and hand back `Report: complete` in a short packet.
