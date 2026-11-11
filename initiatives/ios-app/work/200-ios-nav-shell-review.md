@@ -1,6 +1,6 @@
 ---
 id: 200
-state: waiting
+state: ready
 executor: parity-disco
 skill: reviewer (method from 191)
 waiting_on:
@@ -14,7 +14,7 @@ updated: 2026-11-10
 An independent review of slice 9a against `features/ios-app/nav-shell.feature` and the web.
 
 ## Read first
-The spec, `initiatives/ios-app/work/198-handback.md` (hands-on list), and the `ios/` diff since 9a's tests commit. Don't read `199-handback.md` before your first pass.
+The spec, `initiatives/ios-app/work/198-handback.md` (hands-on list), and the `ios/` diff since 9a's tests commit `18dae944`. Don't read `199-handback.md` before your first pass.
 
 ## Do
 - **Every scenario by real taps,** on `ripit-review` (reuse it), in RIPIT dark and light and at AX5, with VoiceOver spot checks.

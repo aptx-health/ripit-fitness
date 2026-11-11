@@ -1,60 +1,55 @@
 // The program list (activate, archive, new) and one program by week, like the web's /programs
-// and /programs/[id].
+// and /programs/[id]. Since slice 9a (work item 199) the list is Library › Programs.
 
 import RipitCore
 import SwiftUI
 
+/// Library › Programs: the rows of a folder box, then New program.
 struct ProgramListView: View {
     @Environment(WorkoutStore.self) private var store
-    @Binding var path: [TrainingRoute]
+    @Binding var path: [LibraryRoute]
     @State private var building = false
     @State private var archiving: ProgramSummary?
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                FolderBlock(title: "Programs") {
-                    if store.programs.isEmpty {
-                        Text("No programs yet. Build one to follow it week by week.")
-                            .foregroundStyle(Theme.mutedForeground)
-                            .padding(16)
-                    }
-                    ForEach(Array(store.programs.enumerated()), id: \.element.id) { i, p in
-                        if i > 0 { RowDivider() }
-                        HStack(spacing: 8) {
-                            NavigationLink(value: TrainingRoute.program(p.id)) {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(p.name).font(.ripit(.headline)).foregroundStyle(Theme.foreground)
-                                        if p.isActive { ActiveBadge() }
-                                    }
-                                    Spacer()
-                                }
-                                .contentShape(Rectangle())
-                            }
-                            .buttonStyle(.plain)
-                            Menu {
-                                if !p.isActive { Button("Make active") { store.activateProgram(p.id) } }
-                                Button("Edit") { path.append(.edit(p.id)) }
-                                Button("Archive", role: .destructive) { archiving = p }
-                            } label: {
-                                Image(systemName: "ellipsis").frame(width: Theme.touch, height: Theme.touch)
-                            }
-                            .foregroundStyle(Theme.mutedForeground)
-                            .accessibilityLabel("Actions for \(p.name)")
-                        }
-                        .padding(.leading, 16)
-                        .frame(minHeight: 64)
-                    }
-                }
-                Button { building = true } label: { Label("New program", systemImage: "plus") }
-                    .buttonStyle(FilledButtonStyle())
+        VStack(alignment: .leading, spacing: 0) {
+            if store.programs.isEmpty {
+                Text("No programs yet. Build one to follow it week by week.")
+                    .foregroundStyle(Theme.mutedForeground)
+                    .padding(16)
             }
-            .padding(16)
+            ForEach(Array(store.programs.enumerated()), id: \.element.id) { i, p in
+                if i > 0 { RowDivider() }
+                HStack(spacing: 8) {
+                    NavigationLink(value: LibraryRoute.program(p.id)) {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(p.name).font(.ripit(.headline)).foregroundStyle(Theme.foreground)
+                                if p.isActive { ActiveBadge() }
+                            }
+                            Spacer()
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    Menu {
+                        if !p.isActive { Button("Make active") { store.activateProgram(p.id) } }
+                        Button("Edit") { path.append(.edit(p.id)) }
+                        Button("Archive", role: .destructive) { archiving = p }
+                    } label: {
+                        Image(systemName: "ellipsis").frame(width: Theme.touch, height: Theme.touch)
+                    }
+                    .foregroundStyle(Theme.mutedForeground)
+                    .accessibilityLabel("Actions for \(p.name)")
+                }
+                .padding(.leading, 16)
+                .frame(minHeight: 64)
+            }
+            RowDivider()
+            Button { building = true } label: { Label("New program", systemImage: "plus") }
+                .buttonStyle(OutlineButtonStyle())
+                .padding(16)
         }
-        .background(Theme.background)
-        .navigationTitle("PROGRAMS")
-        .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $building) {
             NavigationStack { ProgramBuilderView() }.environment(store)
         }
@@ -85,7 +80,7 @@ struct ProgramDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.dynamicTypeSize) private var typeSize
     let programId: String
-    @Binding var path: [TrainingRoute]
+    @Binding var path: [LibraryRoute]
     @State private var week: Int?
     @State private var archiving = false
 
@@ -159,7 +154,7 @@ struct ProgramDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                NavigationLink("Edit", value: TrainingRoute.edit(programId)).frame(minHeight: Theme.touch)
+                NavigationLink("Edit", value: LibraryRoute.edit(programId)).frame(minHeight: Theme.touch)
             }
         }
         .confirmationDialog("Archive this program?", isPresented: $archiving, titleVisibility: .visible) {

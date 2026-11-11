@@ -83,7 +83,7 @@ struct WorkoutView: View {
             ToolbarItem(placement: .topBarLeading) {
                 Button { store.showingWorkout = false } label: { Image(systemName: "chevron.down") }
                     .frame(minWidth: Theme.touch, minHeight: Theme.touch)
-                    .accessibilityLabel("Back to history")
+                    .accessibilityLabel("Minimize workout")
             }
             ToolbarItem(placement: .topBarTrailing) {
                 if store.session == nil && (store.current?.exercises.count ?? 0) >= 2 {

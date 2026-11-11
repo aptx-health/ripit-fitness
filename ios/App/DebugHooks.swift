@@ -11,7 +11,7 @@
 //   -demoFinish YES     tap Finish on the open workout
 //   -demoRemove YES     show the remove confirmation for the first exercise
 //   -demoFocusWeight YES  focus the first exercise's weight field (shows select-all)
-//   -demoDetail YES     open the newest finished workout
+//   -demoDetail YES     open the newest finished workout (Training › History)
 //   -demoDiscard YES    show the discard confirmation over the workout
 // Slice 3 (work item 161):
 //   -demoProgram YES    add an active 2-week sample program (synthetic), plus a second inactive one
@@ -19,9 +19,9 @@
 //   -demoSession YES    start Up Next and log one set, and open it
 //   -demoProgressTab YES  open on the Progress tab
 //   -demoLiftPage YES   with it, open the first lift of the week
-//   -demoScreen <s>     open programs | program | edit | builder from Training
+//   -demoScreen <s>     open programs | program | edit (Library › Programs) | builder (Training)
 //   -demoEditExercise YES  on the edit screen, open the first exercise's sheet
-//   -demoHistoryTab YES start on the History tab
+//   -demoHistoryTab YES start on the history list (Training › Recent › See all; slice 9a)
 // Work item 170:
 //   -demoStayHome YES   with -demoSession too, stay on Training (shows the resume card)
 //   -demoArchiveActive YES  archive the sample program after starting its session
@@ -55,6 +55,9 @@
 //   Settings themselves come from UserDefaults, so launch arguments set them for a run (not saved):
 //   -settings.v1.stored YES -settings.v1.themeName dracula -settings.v1.themeMode light
 //   -settings.v1.einkDisplay YES -settings.v1.intensityEnabled YES -settings.v1.defaultIntensityRating rpe
+// Slice 9a (work item 199):
+//   -demoQuickActions YES  open the Quick Actions card at launch
+//   -demoLibraryPrograms YES  with -demoLibraryTab, open Library › Programs
 
 import Foundation
 import RipitCore
@@ -294,17 +297,30 @@ enum DebugHooks {
 
     @MainActor static var editFlowExerciseId: String?
 
-    /// Opens the screen named by -demoScreen once, from the Training home.
+    /// The tab and screens to start on.
     @MainActor
-    static func openTrainingRoute(store: WorkoutStore, path: inout [TrainingRoute], building: inout Bool) {
+    static func shell() -> Shell {
+        let shell = Shell(tab: flag("demoProgressTab") ? .progress : flag("demoLibraryTab") ? .library
+            : flag("demoSettingsTab") ? .settings : .training)
+        if flag("demoThemePicker") { shell.settingsPath = [.theme] }
+        if flag("demoHistoryTab") { shell.trainingPath = [.history] }
+        if flag("demoLibraryPrograms") { shell.librarySection = .programs }
+        if flag("demoQuickActions") { shell.showingQuickActions = true }
+        return shell
+    }
+
+    /// Opens the screen named by -demoScreen (and -demoDetail) once, from the Training home.
+    @MainActor
+    static func openDemoScreen(store: WorkoutStore, shell: Shell, building: inout Bool) {
         #if DEBUG
-        guard path.isEmpty, !openedScreen, let screen = UserDefaults.standard.string(forKey: "demoScreen") else { return }
+        guard !openedScreen else { return }
         openedScreen = true
+        if flag("demoDetail"), let first = store.history.first { shell.trainingPath = [.history, .finished(first.id)] }
         let id = store.activeProgram?.id ?? store.programs.first?.id
-        switch screen {
-        case "programs": path = [.programs]
-        case "program": if let id { path = [.programs, .program(id)] }
-        case "edit": if let id { path = [.programs, .program(id), .edit(id)] }
+        switch UserDefaults.standard.string(forKey: "demoScreen") {
+        case "programs": shell.showPrograms()
+        case "program": if let id { shell.showPrograms([.program(id)]) }
+        case "edit": if let id { shell.showPrograms([.program(id), .edit(id)]) }
         case "builder": building = true
         default: break
         }

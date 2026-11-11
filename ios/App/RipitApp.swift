@@ -1,7 +1,8 @@
 // Ripit for iPhone, slice 1 (work item 154): log an ad-hoc workout into a local SQLite database.
 // Slice 3 (work item 161) adds a Training tab for programs beside History; slice 4 (168) adds Progress;
 // slice 6 (180) adds Library › Workouts and the summary after Finish; slice 7 (185) adds Settings and
-// the web's themes, applied live: the tabs are rebuilt whenever the look changes.
+// the web's themes, applied live: the tabs are rebuilt whenever the look changes. Slice 9a (199) swaps
+// Apple's tab bar for the web's (Shell.swift): History moves under Training › Recent, programs into Library.
 // No account, no network. Logic lives in RipitCore; this target is the SwiftUI layer.
 
 import RipitCore
@@ -34,12 +35,10 @@ struct RootView: View {
     @Environment(SettingsModel.self) private var settings
     @Environment(\.accessibilityReduceMotion) private var osReduceMotion
     @Environment(\.dynamicTypeSize) private var typeSize
-    @State private var path: [String] = []
-    @State private var trainingPath: [TrainingRoute] = []
-    @State private var progressPath: [String] = []
-    @State private var settingsPath: [SettingsRoute] = DebugHooks.flag("demoThemePicker") ? [.theme] : []
-    @State private var tab = DebugHooks.flag("demoHistoryTab") ? 1 : DebugHooks.flag("demoProgressTab") ? 2
-        : DebugHooks.flag("demoLibraryTab") ? 3 : DebugHooks.flag("demoSettingsTab") ? 4 : 0
+    @State private var shell = DebugHooks.shell()
+    @State private var keyboard = KeyboardState()
+    /// The summary was closed by "Open Library › Workouts" after a save.
+    @State private var summaryToLibrary = false
 
     var body: some View {
         @Bindable var store = store
@@ -48,26 +47,31 @@ struct RootView: View {
                 ContentUnavailableView("Can't open your data", systemImage: "exclamationmark.triangle",
                                        description: Text(error))
             } else {
-                TabView(selection: $tab) {
-                    NavigationStack(path: $trainingPath) { TrainingView(path: $trainingPath) }
-                        .tabItem { Label("Training", systemImage: "figure.strengthtraining.traditional") }
-                        .tag(0)
-                    NavigationStack { LibraryView() }
-                        .tabItem { Label("Library", systemImage: "square.grid.2x2") }
-                        .tag(3)
-                    NavigationStack(path: $path) { HistoryView(path: $path) }
-                        .tabItem { Label("History", systemImage: "clock") }
-                        .tag(1)
-                    NavigationStack(path: $progressPath) { ProgressTabView(path: $progressPath) }
-                        .tabItem { Label("Progress", systemImage: "chart.line.uptrend.xyaxis") }
-                        .tag(2)
-                    NavigationStack(path: $settingsPath) { SettingsView(path: $settingsPath) }
-                        .tabItem { Label("Settings", systemImage: "gearshape") }
-                        .tag(4)
+                @Bindable var shell = shell
+                // One NavigationStack per tab keeps each tab's place; Apple's bar is hidden on each and
+                // the web's is drawn under them all.
+                TabView(selection: $shell.tab) {
+                    NavigationStack(path: $shell.trainingPath) { TrainingView(path: $shell.trainingPath) }
+                        .toolbar(.hidden, for: .tabBar)
+                        .tag(ShellTab.training)
+                    NavigationStack(path: $shell.libraryPath) { LibraryView(path: $shell.libraryPath) }
+                        .toolbar(.hidden, for: .tabBar)
+                        .tag(ShellTab.library)
+                    NavigationStack(path: $shell.progressPath) { ProgressTabView(path: $shell.progressPath) }
+                        .toolbar(.hidden, for: .tabBar)
+                        .tag(ShellTab.progress)
+                    NavigationStack(path: $shell.settingsPath) { SettingsView(path: $shell.settingsPath) }
+                        .toolbar(.hidden, for: .tabBar)
+                        .tag(ShellTab.settings)
                 }
                     // A new theme or E-ink display rebuilds the tabs, so every Theme color and font is
                     // read again; the selected tab and each tab's navigation path are kept.
                     .id(lookKey)
+                    // The keyboard covers the bar, as it covers Apple's, instead of lifting it.
+                    .bottomBar(fill: Theme.muted.opacity(0.95), padded: false, edge: 2) {
+                        if !keyboard.isUp { RipitTabBar() }
+                    }
+                    .overlay { QuickActionsOverlay() }
                     .confirmationDialog("\(store.currentTitle) is in progress",
                                         isPresented: Binding(get: { store.pendingStart != nil }, set: { if !$0 { store.pendingStart = nil } }),
                                         titleVisibility: .visible, presenting: store.pendingStart) { pending in
@@ -92,17 +96,22 @@ struct RootView: View {
                             .environment(store)
                             .environment(settings)
                     }
-                    .sheet(item: $store.summary) { finished in
+                    // Closing the summary lands on Training, or on Library › Workouts after a save.
+                    .sheet(item: $store.summary, onDismiss: {
+                        if summaryToLibrary { shell.showSavedWorkouts() } else { shell.afterSummary() }
+                        summaryToLibrary = false
+                    }) { finished in
                         NavigationStack {
                             SummaryView(completionId: finished.id) {
+                                summaryToLibrary = true
                                 store.summary = nil
-                                tab = 3
                             }
                         }
                         .environment(store)
                     }
             }
         }
+        .environment(shell)
         .tint(Theme.text(Theme.primary))
         .background(Theme.background)
         .font(.ripit(.body))

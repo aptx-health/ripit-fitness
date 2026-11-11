@@ -1,12 +1,15 @@
 // Library › Workouts (slice 6, work item 180), like the web's SavedWorkoutsList: New, Pinned, Recent,
 // an Older fold and Show archived, grouped by RipitCore exactly as the web groups them. Each row
 // opens the workout's plan, with Start; pin, rename, archive, restore and delete are on the rows.
+// Slice 9a (work item 199): Workouts | Programs, as on the web; programs open here.
 
 import RipitCore
 import SwiftUI
 
 struct LibraryView: View {
     @Environment(WorkoutStore.self) private var store
+    @Environment(Shell.self) private var shell
+    @Binding var path: [LibraryRoute]
     @State private var showOlder = false
     @State private var showArchived = false
     @State private var detail: SavedWorkoutSummary?
@@ -18,6 +21,7 @@ struct LibraryView: View {
     @State private var startAfterDetail: SavedWorkoutSummary?
 
     var body: some View {
+        @Bindable var shell = shell
         let g = store.savedGroups
         let active = g.new.count + g.pinned.count + g.recent.count + g.older.count
         ScrollViewReader { proxy in
@@ -25,30 +29,12 @@ struct LibraryView: View {
             VStack(alignment: .leading, spacing: 24) {
                 PageTitle("LIBRARY")
 
-                FolderBlock(title: "Workouts") {
-                    if active + g.archived.count == 0 {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("You haven't saved any workouts yet. Finish an ad-hoc workout and tap Save.")
-                                .foregroundStyle(Theme.mutedForeground)
-                            if store.current == nil {
-                                Button("Start an ad-hoc workout") { store.startWorkout() }
-                                    .buttonStyle(OutlineButtonStyle())
-                            }
-                        }
-                        .padding(16)
-                    } else {
-                        if active == 0 {
-                            Text("All your saved workouts are archived.")
-                                .foregroundStyle(Theme.mutedForeground)
-                                .padding(16)
-                        }
-                        section("New", g.new) { NewRow(item: $0, open: { detail = $0 }) }
-                        section("Pinned", g.pinned) { row($0) }
-                        section("Recent", g.recent) { row($0) }
-                        fold("Older", g.older, isOpen: $showOlder) { row($0) }
-                        fold("Show archived", g.archived, isOpen: $showArchived) { item in
-                            ArchivedRow(item: item, open: { detail = $0 }, demoDelete: item.id == demoDeleteId)
-                        }
+                FolderTabs(items: [FolderTabItem(tab: LibrarySection.workouts, title: active > 0 ? "Workouts (\(active))" : "Workouts", icon: "bookmark"),
+                                   FolderTabItem(tab: .programs, title: "Programs", icon: "book", tone: .active)],
+                           selection: $shell.librarySection) { section in
+                    switch section {
+                    case .workouts: workouts
+                    case .programs: ProgramListView(path: $path)
                     }
                 }
                 Color.clear.frame(height: 1).id("end")
@@ -66,6 +52,12 @@ struct LibraryView: View {
         }
         .background(Theme.background)
         .toolbar(.hidden, for: .navigationBar)
+        .navigationDestination(for: LibraryRoute.self) { route in
+            switch route {
+            case .program(let id): ProgramDetailView(programId: id, path: $path)
+            case .edit(let id): ProgramEditView(programId: id)
+            }
+        }
         .sheet(item: $detail, onDismiss: {
             if let item = startAfterDetail { store.startSavedWorkout(item.id, name: item.name) }
             startAfterDetail = nil
@@ -101,6 +93,37 @@ struct LibraryView: View {
             if let first = DebugHooks.libraryRename(store: store) {
                 newName = ""
                 renaming = first
+            }
+        }
+    }
+
+    /// Library › Workouts: the saved workouts, grouped as on the web.
+    @ViewBuilder
+    private var workouts: some View {
+        let g = store.savedGroups
+        let active = g.new.count + g.pinned.count + g.recent.count + g.older.count
+        if active + g.archived.count == 0 {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("You haven't saved any workouts yet. Finish an ad-hoc workout and tap Save.")
+                    .foregroundStyle(Theme.mutedForeground)
+                if store.current == nil {
+                    Button("Start an ad-hoc workout") { store.startWorkout() }
+                        .buttonStyle(OutlineButtonStyle())
+                }
+            }
+            .padding(16)
+        } else {
+            if active == 0 {
+                Text("All your saved workouts are archived.")
+                    .foregroundStyle(Theme.mutedForeground)
+                    .padding(16)
+            }
+            section("New", g.new) { NewRow(item: $0, open: { detail = $0 }) }
+            section("Pinned", g.pinned) { row($0) }
+            section("Recent", g.recent) { row($0) }
+            fold("Older", g.older, isOpen: $showOlder) { row($0) }
+            fold("Show archived", g.archived, isOpen: $showArchived) { item in
+                ArchivedRow(item: item, open: { detail = $0 }, demoDelete: item.id == demoDeleteId)
             }
         }
     }

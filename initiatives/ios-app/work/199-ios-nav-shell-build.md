@@ -1,6 +1,6 @@
 ---
 id: 199
-state: ready
+state: done
 executor: ios-impl
 skill: handoff-implementer
 waiting_on:
@@ -38,3 +38,4 @@ Make 198's tests pass and build `features/ios-app/nav-shell.feature`.
 
 ## Don't touch
 Tests, `initiatives/ios-app/work/`, `STATE.md`, `status.md`, the roadmap. Don't `rm`.
+- 2026-11-10 22:45 MST: dispatched to ios-impl (running; context 10%, cleared)

@@ -1,4 +1,5 @@
-// Home: start or resume a workout, and the finished workouts, newest first.
+// The finished workouts, newest first, and the import from ripit.fit. Since slice 9a (work item 199)
+// it opens from Training › Recent › See all; the workout in progress shows on Training.
 
 import RipitCore
 import SwiftUI
@@ -6,23 +7,11 @@ import UniformTypeIdentifiers
 
 struct HistoryView: View {
     @Environment(WorkoutStore.self) private var store
-    @Binding var path: [String]
     @State private var pickingFile = false
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                PageTitle("RIPIT")
-
-                if let current = store.current {
-                    ResumeCard(workout: current)
-                } else {
-                    Button { store.startWorkout() } label: {
-                        Label("Start workout", systemImage: "plus")
-                    }
-                    .buttonStyle(FilledButtonStyle())
-                }
-
                 FolderBlock(title: "History") {
                     if store.history.isEmpty {
                         VStack(alignment: .leading, spacing: 12) {
@@ -37,7 +26,7 @@ struct HistoryView: View {
                     } else {
                         ForEach(Array(store.history.enumerated()), id: \.element.id) { i, entry in
                             if i > 0 { RowDivider() }
-                            NavigationLink(value: entry.id) { HistoryRow(entry: entry) }
+                            NavigationLink(value: TrainingRoute.finished(entry.id)) { HistoryRow(entry: entry) }
                                 .buttonStyle(.plain)
                         }
                     }
@@ -58,12 +47,11 @@ struct HistoryView: View {
         .fileImporter(isPresented: $pickingFile, allowedContentTypes: [.json]) { result in
             if case .success(let url) = result { Task { await store.importFile(at: url) } }
         }
-        .navigationDestination(for: String.self) { WorkoutDetailView(workoutId: $0) }
-        .toolbar(.hidden, for: .navigationBar)
+        .navigationTitle("HISTORY")
+        .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             store.reload()
             if DebugHooks.flag("demoImportPicker") { pickingFile = true }
-            if DebugHooks.flag("demoDetail"), let first = store.history.first, path.isEmpty { path = [first.id] }
         }
     }
 }
@@ -75,27 +63,6 @@ extension HistoryView {
         }
         .buttonStyle(OutlineButtonStyle())
         .disabled(store.importing)
-    }
-}
-
-private struct ResumeCard: View {
-    @Environment(WorkoutStore.self) private var store
-    let workout: WorkoutDetail
-
-    var body: some View {
-        FolderBlock(title: "In progress", tone: .active) {
-            VStack(alignment: .leading, spacing: 12) {
-                let sets = workout.exercises.reduce(0) { $0 + $1.sets.count }
-                Text("Started \(Format.day(workout.startedAt)), \(Format.time(workout.startedAt))")
-                    .font(.ripit(.headline))
-                    .foregroundStyle(Theme.foreground)
-                Text(Format.counts(exercises: workout.exercises.count, sets: sets))
-                    .foregroundStyle(Theme.mutedForeground)
-                Button("Resume workout") { store.resumeWorkout() }
-                    .buttonStyle(FilledButtonStyle())
-            }
-            .padding(16)
-        }
     }
 }
 

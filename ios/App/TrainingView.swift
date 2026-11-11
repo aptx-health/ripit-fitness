@@ -1,18 +1,21 @@
 // Training home (slice 3): Up Next and the current week of the active program, like the web's
 // /training. Ad-hoc workouts still start from here and from History. Slice 6 (work item 180) adds
-// pinned saved workouts with one-tap Start and recent finished workouts with Repeat.
+// pinned saved workouts with one-tap Start and recent finished workouts with Repeat. Slice 9a (199):
+// History lives here, under Recent › See all; the program screens are Library's.
 
 import RipitCore
 import SwiftUI
 
 enum TrainingRoute: Hashable {
-    case programs
-    case program(String)
-    case edit(String)
+    /// The full history list.
+    case history
+    /// One finished workout.
+    case finished(String)
 }
 
 struct TrainingView: View {
     @Environment(WorkoutStore.self) private var store
+    @Environment(Shell.self) private var shell
     @Binding var path: [TrainingRoute]
     @State private var building = false
     @State private var confirmingDiscard = false
@@ -45,7 +48,9 @@ struct TrainingView: View {
                     }
                 }
 
-                if !store.pinnedWorkouts.isEmpty || !store.recentWorkouts.isEmpty { quickBlock }
+                // Always shown (the web hides it when both are empty), so See all and the history's
+                // import button can be reached before the first workout.
+                quickBlock
 
                 if let program = store.activeProgram {
                     programBlock(program)
@@ -60,7 +65,7 @@ struct TrainingView: View {
                                 Button { building = true } label: { Label("New program", systemImage: "plus") }
                                     .buttonStyle(FilledButtonStyle())
                             } else {
-                                Button("Choose a program") { path.append(.programs) }
+                                Button("Choose a program") { shell.showPrograms() }
                                     .buttonStyle(FilledButtonStyle())
                             }
                         }
@@ -69,7 +74,7 @@ struct TrainingView: View {
                 }
 
                 VStack(spacing: 12) {
-                    Button { path.append(.programs) } label: { Label("Programs", systemImage: "list.bullet") }
+                    Button { shell.showPrograms() } label: { Label("Programs", systemImage: "list.bullet") }
                         .buttonStyle(OutlineButtonStyle())
                     if store.current == nil {
                         Button { store.startWorkout() } label: { Label("Ad-hoc workout", systemImage: "plus") }
@@ -83,9 +88,8 @@ struct TrainingView: View {
         .toolbar(.hidden, for: .navigationBar)
         .navigationDestination(for: TrainingRoute.self) { route in
             switch route {
-            case .programs: ProgramListView(path: $path)
-            case .program(let id): ProgramDetailView(programId: id, path: $path)
-            case .edit(let id): ProgramEditView(programId: id)
+            case .history: HistoryView()
+            case .finished(let id): WorkoutDetailView(workoutId: id)
             }
         }
         .sheet(isPresented: $building) {
@@ -98,7 +102,7 @@ struct TrainingView: View {
         }
         .onAppear {
             store.reload()
-            DebugHooks.openTrainingRoute(store: store, path: &path, building: &building)
+            DebugHooks.openDemoScreen(store: store, shell: shell, building: &building)
             DebugHooks.applySavedDemo(store: store)
         }
     }
@@ -144,6 +148,20 @@ struct TrainingView: View {
                 store.repeatWorkout(w.id, name: w.name)
             }
         }
+        RowDivider()
+        NavigationLink(value: TrainingRoute.history) {
+            HStack {
+                Text("See all").font(.ripit(.subheadline, .bold)).display(1.2)
+                Spacer()
+                Image(systemName: "chevron.right").font(.ripit(.footnote, .bold))
+            }
+            .foregroundStyle(Theme.text(Theme.primary))
+            .padding(.horizontal, 16)
+            .frame(minHeight: Theme.touch)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("See all workout history")
     }
 
     /// Up Next | Active Program, like the web's: the next workout, or the program and its current week.
@@ -181,7 +199,7 @@ struct TrainingView: View {
                     .buttonStyle(FilledButtonStyle())
             } else {
                 Text("This program has no workouts yet.").foregroundStyle(Theme.mutedForeground)
-                NavigationLink("Edit program", value: TrainingRoute.edit(program.id))
+                Button("Edit program") { shell.showPrograms([.program(program.id), .edit(program.id)]) }
                     .buttonStyle(OutlineButtonStyle())
             }
         }
@@ -190,7 +208,8 @@ struct TrainingView: View {
 
     @ViewBuilder
     private func activeProgram(_ program: ProgramDetail) -> some View {
-        NavigationLink(value: TrainingRoute.program(program.id)) {
+        // The program opens in Library, as on the web (/library/programs/<id>).
+        Button { shell.showPrograms([.program(program.id)]) } label: {
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(program.name).font(.ripit(.title3, .bold)).display(1).foregroundStyle(Theme.foreground)

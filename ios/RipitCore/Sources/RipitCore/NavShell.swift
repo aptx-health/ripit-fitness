@@ -1,7 +1,6 @@
 // Public API for slice 9a, the web's bottom bar and quick actions (features/ios-app/nav-shell.feature).
-// Shapes were fixed by work item 198. Every body is a stub that throws `RipitCoreError.notImplemented`;
-// the slice 9a implementer (work item 199) replaces them. The tests in
-// Tests/RipitCoreTests/NavShellTests.swift are the contract: change the bodies, not the shapes.
+// Shapes were fixed by work item 198 and built by work item 199. The tests in
+// Tests/RipitCoreTests/NavShellTests.swift are the contract.
 //
 // The rules are the web's (initiatives/ios-app/logger-nav-discovery.md §3-5):
 // - The bar (components/BottomNav.tsx): Training · Library · Workout · Progress · Settings. The Workout
@@ -95,30 +94,47 @@ public struct OpenWorkout: Sendable, Equatable {
 public enum NavShell {
     /// The bar's items, left to right.
     public static func barItems() throws -> [ShellBarItem] {
-        throw RipitCoreError.notImplemented
+        [.tab(.training), .tab(.library), .workout, .tab(.progress), .tab(.settings)]
     }
 
     /// A tab's label: "Training", "Library", "Progress", "Settings".
     public static func label(_ tab: ShellTab) throws -> String {
-        throw RipitCoreError.notImplemented
+        switch tab {
+        case .training: "Training"
+        case .library: "Library"
+        case .progress: "Progress"
+        case .settings: "Settings"
+        }
     }
 
     public static func tap(_ tab: ShellTab, selected: ShellTab) throws -> TabTap {
-        throw RipitCoreError.notImplemented
+        tab == selected ? .popToRoot(tab) : .switchTo(tab)
     }
 
     /// The tab a screen belongs to.
     public static func tab(for destination: ShellDestination) throws -> ShellTab {
-        throw RipitCoreError.notImplemented
+        switch destination {
+        case .trainingHome, .historyList, .finishedWorkout: .training
+        case .libraryWorkouts, .libraryPrograms, .programDetail, .programEdit, .programBuilder: .library
+        case .progressHome, .liftPage: .progress
+        case .settingsHome, .themePicker: .settings
+        }
     }
 
     /// Where the phone lands when the summary after Finish closes.
     public static func tabAfterSummary() throws -> ShellTab {
-        throw RipitCoreError.notImplemented
+        .training
+    }
+
+    /// The open workout's name as the web shows it: its own, else "Open Workout".
+    static func displayName(_ open: OpenWorkout) -> String {
+        open.name ?? "Open Workout"
     }
 
     public static func workoutButton(open: OpenWorkout?, einkDisplay: Bool, osReduceMotion: Bool) throws -> WorkoutButtonState {
-        throw RipitCoreError.notImplemented
+        guard let open else { return WorkoutButtonState(accessibilityLabel: "Quick actions", pulses: false) }
+        let reduced = try DisplayRules.reducedMotion(einkDisplay: einkDisplay, osReduceMotion: osReduceMotion)
+        return WorkoutButtonState(accessibilityLabel: "Resume draft workout: \(displayName(open))", pulses: !reduced)
     }
 }
 
@@ -172,7 +188,25 @@ public enum QuickActions {
     /// What the card offers. `next` is the active program's next workout (nil with no active program);
     /// `savedCount` counts saved workouts that aren't archived.
     public static func menu(open: OpenWorkout?, next: UpNext?, savedCount: Int) throws -> QuickActionsMenu {
-        throw RipitCoreError.notImplemented
+        if let open {
+            let title = open.isFreestyle ? "Freestyle workout" : NavShell.displayName(open)
+            return QuickActionsMenu(
+                rows: [QuickActionRow(kind: .resume, title: title, subtitle: "In progress · tap to resume", target: .resumeOpenWorkout)],
+                showsDiscard: true, footer: "Continue or discard your draft to unlock other actions")
+        }
+        var rows: [QuickActionRow] = []
+        if let next {
+            rows.append(QuickActionRow(kind: .continueProgram, title: "Continue your program",
+                                       subtitle: "Week \(next.weekNumber) · Day \(next.dayNumber) · \(next.workoutName)",
+                                       target: .startProgramWorkout(programId: next.programId, workoutId: next.workoutId)))
+        } else {
+            rows.append(QuickActionRow(kind: .continueProgram, title: "Continue your program", subtitle: "No active program", target: nil))
+        }
+        rows.append(QuickActionRow(kind: .freestyle, title: "Freestyle workout", subtitle: "Log sets as you go", target: .startFreestyle))
+        if savedCount > 0 {
+            rows.append(QuickActionRow(kind: .savedWorkouts, title: "My saved workouts", subtitle: "\(savedCount) saved", target: .savedWorkouts))
+        }
+        return QuickActionsMenu(rows: rows, showsDiscard: false, footer: nil)
     }
 }
 
@@ -187,16 +221,22 @@ public struct DiscardConfirm: Sendable, Equatable {
 
     /// A tap at `now`. Returns true when this tap discards; otherwise the button is now armed.
     public mutating func tap(at now: Date) throws -> Bool {
-        throw RipitCoreError.notImplemented
+        if try isArmed(at: now) {
+            armedAt = nil
+            return true
+        }
+        armedAt = now
+        return false
     }
 
     /// Armed, so the button shows "Confirm" in red.
     public func isArmed(at now: Date) throws -> Bool {
-        throw RipitCoreError.notImplemented
+        guard let armedAt else { return false }
+        return now.timeIntervalSince(armedAt) < Self.window
     }
 
     /// The card closed or the workout changed.
     public mutating func reset() throws {
-        throw RipitCoreError.notImplemented
+        armedAt = nil
     }
 }

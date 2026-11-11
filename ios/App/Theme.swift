@@ -366,17 +366,19 @@ struct FolderTabs<Tab: Hashable, Content: View>: View {
 extension View {
     /// Pins a bar to the bottom of the screen, above the scrolling content. The bar's controls stay above
     /// the home indicator, while its background runs down to the screen's edge so nothing scrolls beneath it.
-    /// Use this for every fixed bottom bar (the picker's Create / Add, the logger's ‹ Log › bar, a custom tab bar).
-    func bottomBar<Bar: View>(@ViewBuilder _ bar: () -> Bar) -> some View {
+    /// Use this for every fixed bottom bar (the picker's Create / Add, the logger's ‹ Log › bar, the tab bar).
+    /// The tab bar passes its own fill, no padding and the web nav's 2px top border.
+    func bottomBar<Bar: View>(fill: Color = Theme.background, padded: Bool = true, edge: CGFloat = Theme.line,
+                              @ViewBuilder _ bar: () -> Bar) -> some View {
         safeAreaInset(edge: .bottom, spacing: 0) {
             bar()
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
+                .padding(.horizontal, padded ? 16 : 0)
+                .padding(.vertical, padded ? 10 : 0)
                 .frame(maxWidth: .infinity)
                 .background {
-                    Theme.background
+                    fill
                         .ignoresSafeArea(edges: .bottom)
-                        .overlay(alignment: .top) { RowDivider() }
+                        .overlay(alignment: .top) { Rectangle().fill(Theme.border).frame(height: edge) }
                 }
         }
     }
