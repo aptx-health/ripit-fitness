@@ -69,3 +69,4 @@
 - 2026-11-10 193 complete: lead re-ran swift test, 263 tests, 14 issues all in the changed/new cases (old 1000 limit, old unknown-ref rule). Committed. Dispatching 194 to ios-impl (kept, same slice).
 - 2026-11-10 194 complete: lead re-ran ios-check, exit 0, 263 pass, tests untouched. Committed. Dispatching 195 re-check to parity-disco (kept; re-check of its own findings).
 - 2026-11-10 195 re-check: accept. Slice 8 done by lead; Hub page ios-slice8-picker published; awaiting Dustin (1 slice waiting). Next: slice 9 specs.
+- 2026-11-10 Slice 8 installed on Dustin's phone (asked). Dustin: logger and navigation before the smart picker; custom bottom bar like the web, Settings as a tab. New slice 9 (old 11 folded in); smart picker → 10, muscle balance → 11. Dustin approved: run it through, install on his phone after the independent review. Dispatching 196 discovery to parity-disco (cleared, new slice).
