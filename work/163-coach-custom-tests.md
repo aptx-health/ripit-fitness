@@ -1,6 +1,6 @@
 ---
 id: 163
-state: running
+state: review
 waiting_on:
 executor: test-builder
 from: lead (lead-ripit-mcp)
@@ -33,3 +33,4 @@ Use `handoff-test-builder`. First line `Report: complete | needs decision | furt
 
 ## Log
 - 2026-11-10 CST: created; plan confirmed; dispatched to test-builder (wE:p9).
+- 2026-11-10 CST: back complete; lead re-ran coaching steps: 31 new fail for the right reason (send refusal), 139 pass. Scratch worktree removed. Lead call: over-long copy names trim the base name with "…".

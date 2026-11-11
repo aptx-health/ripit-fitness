@@ -1,7 +1,7 @@
 ---
 id: 164
-state: waiting
-waiting_on: 163
+state: running
+waiting_on:
 executor: coach-impl
 from: lead (lead-ripit-mcp)
 confirmed: 2026-11-10 Dustin (plan 163 → 164 → 165)
@@ -25,6 +25,9 @@ Spec: `features/coaching/custom-exercises.feature` (replaces "Custom exercises a
 ## Do
 Make 163's tests pass and cover every scenario. Accept is one transaction (copies + proposal apply). The review screen choice fits at 390px; "Use one of mine" uses the existing exercise picker. Screenshots to `initiatives/coaching/docs/assets/164/`.
 
+## From 163
+Tests: `__tests__/features/coaching/custom-exercises.steps.ts` and `send.steps.ts` (read-only; contract in the header). Packet: `work/163-handback.md`. Lead call: when "<name> (from X)" would exceed the 100-character name limit, trim the base name with "…" so the whole fits; add a test. Also reject choices for exercises not in the send (400).
+
 ## Done when
 163's tests pass unchanged (or each change explained); full suite and `npx tsc --noEmit` pass; screenshots.
 
@@ -36,3 +39,4 @@ Use `handoff-implementer`. First line `Report: complete | needs decision | furth
 
 ## Log
 - 2026-11-10 CST: created; waits on 163.
+- 2026-11-10 CST: 163 done; dispatched to coach-impl (wE:pA).

@@ -13,8 +13,10 @@
  *       The existing check* run as the trainee. Never calls notify (Discord, Bark).
  *       not_linked: no active link with this user as its coach. not_found: not
  *       the coach's own (or a deleted) program or saved workout. invalid: the
- *       snapshot fails the proposal schema, or uses exercises the trainee can't
- *       see; then missingExercises names them (definition names, in order of use).
+ *       snapshot fails the proposal schema, or uses exercises that are neither
+ *       shared, the trainee's nor the coach's; then missingExercises names them
+ *       (definition names, in order of use). The coach's own exercises travel
+ *       with the send since work 163 (custom-exercises.steps.ts).
  *     listSent(db, coachUserId, linkId) -> [{ name, kind, sentAt, status }], newest
  *       first, only those keys. kind 'program' | 'saved_workout'; status
  *       'pending' | 'accepted' | 'declined'. [] for an ended link and for a link
@@ -289,11 +291,6 @@ async function tree(programId: string) {
   })
   return p
 }
-async function customExercise(name: string) {
-  const d = await createTestExerciseDefinition(s.prisma, { name, isSystem: false, userId: s.dustin })
-  s.defs[name] = d.id
-  return d.id
-}
 
 // --- routes -------------------------------------------------------------------
 type Handler = (r: NextRequest, c?: unknown) => Promise<Response>
@@ -545,28 +542,6 @@ describeFeature(feature, ({ Background, Scenario }) => {
       expect(screen.queryByRole('button', { name: /^send to/i })).toBeNull()
       const { body } = await result(await (await traineesRoute()).GET(req('/api/coaching/trainees', 'GET')))
       expect(body.trainees).toEqual([])
-    })
-  })
-
-  Scenario('Custom exercises are refused', ({ Given, When, Then }) => {
-    Given('the program uses "Dustin\'s Cable Fly", an exercise Dustin made', async () => {
-      const fly = await customExercise("Dustin's Cable Fly")
-      s.program = await makeProgram(s.dustin, 'Fly Day', [s.defs['Barbell Bench Press'], fly, fly])
-    })
-    When('he tries to send it', async () => {
-      const r = await send()
-      expect(r).toMatchObject({ ok: false, code: 'invalid', missingExercises: ["Dustin's Cable Fly"] })
-    })
-    Then('it is refused with "Sam doesn\'t have these exercises: Dustin\'s Cable Fly" and nothing is sent', async () => {
-      await renderSend('program', s.program)
-      await tapSend(await openSheet())
-      const alert = await screen.findByRole('alert')
-      expect(alert.textContent).toContain("Sam doesn't have these exercises: Dustin's Cable Fly")
-      expect(await proposals(s.sam)).toHaveLength(0)
-      const { status, body } = await postSend({ linkId: s.linkSam, kind: 'program', sourceId: s.program })
-      expect(status).toBe(400)
-      expect(body).toMatchObject({ code: 'invalid', missingExercises: ["Dustin's Cable Fly"] })
-      expect(await proposals(s.sam)).toHaveLength(0)
     })
   })
 
@@ -879,24 +854,13 @@ describe('send edges', () => {
     expect(p?.rationale).toBe('')
   })
 
-  it('names every exercise Sam lacks, in order of use, once each', async () => {
-    const fly = await customExercise("Dustin's Cable Fly")
-    const hack = await customExercise("Dustin's Hack Squat")
+  // work 163: Dustin's own exercises travel with the send (custom-exercises.steps.ts);
+  // one that is neither shared, Sam's nor Dustin's is still refused by name.
+  it("names every exercise that is neither shared, Sam's nor Dustin's, in order of use, once each", async () => {
+    const fly = (await createTestExerciseDefinition(s.prisma, { name: "Alex's Cable Fly", isSystem: false, userId: s.alex })).id
+    const hack = (await createTestExerciseDefinition(s.prisma, { name: "Alex's Hack Squat", isSystem: false, userId: s.alex })).id
     s.program = await makeProgram(s.dustin, 'Custom Day', [hack, fly, fly])
-    expect(await send()).toMatchObject({ ok: false, code: 'invalid', missingExercises: ["Dustin's Hack Squat", "Dustin's Cable Fly"] })
-  })
-
-  it('a custom exercise in a saved workout is refused too', async () => {
-    const fly = await customExercise("Dustin's Cable Fly")
-    const row = await s.prisma.savedWorkout.findUnique({ where: { id: s.saved } })
-    const data = row?.workoutData as Json[]
-    data[2] = { ...data[2], exerciseDefinitionId: fly, name: "Dustin's Cable Fly" }
-    await s.prisma.savedWorkout.update({ where: { id: s.saved }, data: { workoutData: data as never } })
-    expect(await send({ kind: 'saved_workout', sourceId: s.saved })).toMatchObject({
-      ok: false,
-      code: 'invalid',
-      missingExercises: ["Dustin's Cable Fly"],
-    })
+    expect(await send()).toMatchObject({ ok: false, code: 'invalid', missingExercises: ["Alex's Hack Squat", "Alex's Cable Fly"] })
     expect(await proposals(s.sam)).toHaveLength(0)
   })
 
