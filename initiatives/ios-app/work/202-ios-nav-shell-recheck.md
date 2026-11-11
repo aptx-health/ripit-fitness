@@ -1,6 +1,6 @@
 ---
 id: 202
-state: waiting
+state: ready
 executor: parity-disco
 skill: reviewer (method from 200)
 waiting_on:

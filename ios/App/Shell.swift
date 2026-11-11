@@ -95,12 +95,17 @@ struct RipitTabBar: View {
                 }
             }
         }
-        .frame(height: 56)
+        .frame(height: Self.rowHeight)
         // Apple's bar keeps its labels small at every text size; this one does too, and a long press
         // shows the label large instead.
         .dynamicTypeSize(...DynamicTypeSize.large)
         .padding(.bottom, 2)
     }
+
+    /// The web's 56px row.
+    static let rowHeight: CGFloat = 56
+    /// The bar's height above the home indicator: the row, its 2pt bottom padding.
+    static let height: CGFloat = rowHeight + 2
 
     private var chipState: WorkoutButtonState {
         (try? NavShell.workoutButton(open: store.openWorkout, einkDisplay: settings.settings.einkDisplay,
@@ -386,6 +391,16 @@ private struct ActionRow: View {
             .background(chip ? Look.palette.color("success") : .clear)
             .foregroundStyle(chip ? Look.palette.color("success-foreground") : Theme.foreground)
             .accessibilityHidden(true)
+    }
+}
+
+extension View {
+    /// One tab's stack: Apple's bar hidden, and every scroll view in it (pushed screens too) given a bottom
+    /// margin of the web bar's height, so a list's last row scrolls clear of it. Neither the TabView's
+    /// safe-area inset nor one on the stack reaches the scroll views; content margins pass down the environment.
+    func tabBarInset(keyboardUp: Bool) -> some View {
+        toolbar(.hidden, for: .tabBar)
+            .contentMargins(.bottom, keyboardUp ? 0 : RipitTabBar.height, for: .automatic)
     }
 }
 

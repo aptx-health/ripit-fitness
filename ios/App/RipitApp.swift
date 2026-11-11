@@ -52,23 +52,24 @@ struct RootView: View {
                 // the web's is drawn under them all.
                 TabView(selection: $shell.tab) {
                     NavigationStack(path: $shell.trainingPath) { TrainingView(path: $shell.trainingPath) }
-                        .toolbar(.hidden, for: .tabBar)
+                        .tabBarInset(keyboardUp: keyboard.isUp)
                         .tag(ShellTab.training)
                     NavigationStack(path: $shell.libraryPath) { LibraryView(path: $shell.libraryPath) }
-                        .toolbar(.hidden, for: .tabBar)
+                        .tabBarInset(keyboardUp: keyboard.isUp)
                         .tag(ShellTab.library)
                     NavigationStack(path: $shell.progressPath) { ProgressTabView(path: $shell.progressPath) }
-                        .toolbar(.hidden, for: .tabBar)
+                        .tabBarInset(keyboardUp: keyboard.isUp)
                         .tag(ShellTab.progress)
                     NavigationStack(path: $shell.settingsPath) { SettingsView(path: $shell.settingsPath) }
-                        .toolbar(.hidden, for: .tabBar)
+                        .tabBarInset(keyboardUp: keyboard.isUp)
                         .tag(ShellTab.settings)
                 }
                     // A new theme or E-ink display rebuilds the tabs, so every Theme color and font is
                     // read again; the selected tab and each tab's navigation path are kept.
                     .id(lookKey)
                     // The keyboard covers the bar, as it covers Apple's, instead of lifting it.
-                    .bottomBar(fill: Theme.muted.opacity(0.95), padded: false, edge: 2) {
+                    // Opaque: the web blurs what scrolls under its 95% fill, and nothing scrolls under this one.
+                    .bottomBar(fill: Theme.muted, padded: false, edge: 2) {
                         if !keyboard.isUp { RipitTabBar() }
                     }
                     .overlay { QuickActionsOverlay() }

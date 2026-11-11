@@ -1,5 +1,5 @@
 // Training home (slice 3): Up Next and the current week of the active program, like the web's
-// /training. Ad-hoc workouts still start from here and from History. Slice 6 (work item 180) adds
+// /training. Ad-hoc workouts start from Quick Actions (slice 9a). Slice 6 (work item 180) adds
 // pinned saved workouts with one-tap Start and recent finished workouts with Repeat. Slice 9a (199):
 // History lives here, under Recent › See all; the program screens are Library's.
 
@@ -73,14 +73,6 @@ struct TrainingView: View {
                     }
                 }
 
-                VStack(spacing: 12) {
-                    Button { shell.showPrograms() } label: { Label("Programs", systemImage: "list.bullet") }
-                        .buttonStyle(OutlineButtonStyle())
-                    if store.current == nil {
-                        Button { store.startWorkout() } label: { Label("Ad-hoc workout", systemImage: "plus") }
-                            .buttonStyle(OutlineButtonStyle())
-                    }
-                }
             }
             .padding(16)
         }

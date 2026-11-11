@@ -76,3 +76,4 @@
 - 2026-11-10 198 complete: lead re-ran swift test, 286 tests, 55 issues all notImplemented. Committed. Dispatching 199 to ios-impl (cleared, new slice). 9b tests (201) wait until 199 is done, since uncommitted stubs would turn ios-impl's check red.
 - 2026-11-10 199 complete: lead re-ran ios-check, exit 0, 286 pass, tests untouched. Committed. Open: Training's Programs/Ad-hoc buttons now redundant (for Dustin's page). Dispatching 200 review to parity-disco (cleared).
 - 2026-11-11 200 review: fix 2 then accept (bar covers list ends on every tab; see-through fill). Dustin: remove Training's Programs and Ad-hoc buttons. 201 fixes (ios-impl, kept), 202 re-check (parity-disco, kept). 9b items renumbered to 203–205.
+- 2026-11-11 201 complete: lead re-ran ios-check, exit 0, 286 pass, tests untouched. Committed. Dispatching 202 re-check (parity-disco, kept).
