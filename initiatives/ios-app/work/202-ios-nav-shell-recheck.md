@@ -1,6 +1,6 @@
 ---
 id: 202
-state: ready
+state: review
 executor: parity-disco
 skill: reviewer (method from 200)
 waiting_on:
@@ -17,3 +17,4 @@ updated: 2026-11-11
 
 ## Hand back
 Accept or a fix list, with shots prefixed `recheck9a-`. Don't `rm`.
+- 2026-11-11 07:04 MST: dispatched to parity-disco (running; context 26%, kept)
