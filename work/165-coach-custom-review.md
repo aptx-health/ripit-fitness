@@ -1,6 +1,6 @@
 ---
 id: 165
-state: running
+state: review
 waiting_on:
 executor: coach-review
 from: lead (lead-ripit-mcp)
@@ -17,3 +17,4 @@ Verdict, findings ranked, Not verified. First line `Report: complete | needs dec
 ## Log
 - 2026-11-10 CST: created; waits on 164.
 - 2026-11-10 CST: dispatched to coach-review (wE:pB).
+- 2026-11-10 CST: back: ship, 5 low findings; 1–4 to polish item 166; 5 (admin page live names) to Later.

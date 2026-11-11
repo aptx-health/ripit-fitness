@@ -1,4 +1,4 @@
-import type { Prisma, PrismaClient } from '@prisma/client'
+import { Prisma, type PrismaClient } from '@prisma/client'
 import { z } from 'zod'
 import { visibleTo } from '@/lib/proposals/exercise-definition'
 import { normalizeExerciseName } from '@/lib/validators/exercise-definition'
@@ -169,6 +169,39 @@ async function freeNames(db: Db, wanted: Array<{ sourceId: string; name: string 
 }
 
 /**
+ * What "Add a copy" would name each exercise right now (the review screen's
+ * hint); null when no name is free. Accept picks again, so a name taken in
+ * between moves on to the next number.
+ */
+export async function previewCopyNames(
+  db: Db,
+  wanted: Array<{ sourceId: string; name: string }>,
+  first: string
+): Promise<Map<string, string>> {
+  if (wanted.length === 0) return new Map()
+  try {
+    return await freeNames(db, wanted, first)
+  } catch (error) {
+    if (error instanceof ChoiceRefusal) return new Map()
+    throw error
+  }
+}
+
+const COPY_NAME_TAKEN = "Couldn't name the copy because that name was just taken. Try again."
+
+/** Create the copies; a unique-name race with another insert becomes a refusal the trainee can retry. */
+async function createCopies(tx: Prisma.TransactionClient, data: Prisma.ExerciseDefinitionCreateManyInput[]) {
+  try {
+    return await tx.exerciseDefinition.createManyAndReturn({ data, select: { id: true, normalizedName: true } })
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      throw new ChoiceRefusal(COPY_NAME_TAKEN)
+    }
+    throw error
+  }
+}
+
+/**
  * Apply the trainee's choices inside the accept transaction: check each
  * "mine" pick, reuse or create the copies, and return the source -> chosen
  * definition map plus the bundle with copy ids recorded.
@@ -216,8 +249,9 @@ export async function resolveBundle(
   for (const p of picks) chosen.set(p.entry.sourceId, p.id)
   for (const [sourceId, copy] of reused) chosen.set(sourceId, copy.id)
   const created = toCreate.length
-    ? await tx.exerciseDefinition.createManyAndReturn({
-        data: toCreate.map((c) => {
+    ? await createCopies(
+        tx,
+        toCreate.map((c) => {
           const name = names.get(c.sourceId) as string
           return {
             name,
@@ -234,9 +268,8 @@ export async function resolveBundle(
             createdBy: coachUserId,
             userId,
           }
-        }),
-        select: { id: true, normalizedName: true },
-      })
+        })
+      )
     : []
   const createdIds = new Map(created.map((d) => [d.normalizedName, d.id]))
   for (const c of toCreate) {

@@ -174,7 +174,7 @@ export default function SuggestionReview({ suggestion }: { suggestion: Suggestio
       {pending && stage.name === 'deciding' && bundled.length > 0 && (
         <BundledExerciseChoices
           exercises={bundled}
-          coachName={suggestion.from}
+          coachName={suggestion.coachFirstName ?? suggestion.from}
           choices={choices}
           onChange={(sourceId, choice) => setChoices((prev) => ({ ...prev, [sourceId]: choice }))}
           disabled={working}

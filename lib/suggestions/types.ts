@@ -43,6 +43,8 @@ export interface BundledExercise {
   name: string
   /** The trainee's copy from an earlier send, which "Add a copy" reuses. */
   earlierCopy: string | null
+  /** What a new copy would be named now; null when reusing or no name is free. */
+  copyName: string | null
 }
 
 export interface SuggestionDetail extends SuggestionItem {
@@ -54,4 +56,6 @@ export interface SuggestionDetail extends SuggestionItem {
   body: SuggestionBody
   /** A pending coach send's custom exercises; empty otherwise. */
   customExercises: BundledExercise[]
+  /** The coach's first name, as the copies are named; null without custom exercises. */
+  coachFirstName: string | null
 }

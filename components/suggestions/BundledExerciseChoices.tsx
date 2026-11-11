@@ -73,8 +73,14 @@ export default function BundledExerciseChoices({
           const group = `bundled-${exercise.sourceId}`
           return (
             <fieldset key={exercise.sourceId} className="border-2 border-border bg-card p-3 space-y-2 min-w-0">
-              <legend className="px-1 text-sm font-bold text-foreground break-words">{exercise.name}</legend>
-              <p className="text-xs text-muted-foreground break-words">{coachName}&apos;s exercise</p>
+              {/* The legend names the group for screen readers; a long name in a legend straddles the border. */}
+              <legend className="sr-only">{exercise.name}</legend>
+              <div>
+                <p aria-hidden="true" className="text-sm font-bold text-foreground break-words">
+                  {exercise.name}
+                </p>
+                <p className="text-xs text-muted-foreground break-words">{coachName}&apos;s exercise</p>
+              </div>
               <label className="flex items-start gap-3 min-h-11 py-1 cursor-pointer">
                 <input
                   type="radio"
@@ -90,7 +96,9 @@ export default function BundledExerciseChoices({
                   <span id={`${group}-copy`} className="block text-xs text-muted-foreground break-words">
                     {exercise.earlierCopy
                       ? `You have this from an earlier send: ${exercise.earlierCopy}`
-                      : 'Saved to your exercises; you can rename it later.'}
+                      : exercise.copyName
+                        ? `Adds "${exercise.copyName}" to your exercises; you can rename it.`
+                        : 'Adds a copy to your exercises; you can rename it.'}
                   </span>
                 </span>
               </label>

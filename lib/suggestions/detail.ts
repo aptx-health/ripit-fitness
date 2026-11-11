@@ -1,4 +1,4 @@
-import { earlierCopies, splitBundle } from '@/lib/coaching/custom-exercises'
+import { coachFirstName, earlierCopies, previewCopyNames, splitBundle } from '@/lib/coaching/custom-exercises'
 import { coachingNames } from '@/lib/coaching/names'
 import { prisma } from '@/lib/db'
 import { suggestionBody } from './bodies'
@@ -87,12 +87,32 @@ export function countPendingSuggestions(userId: string): Promise<number> {
   return prisma.proposal.count({ where: { userId, status: 'pending', kind: allowedKinds } })
 }
 
-/** A pending coach send's custom exercises, each with the trainee's earlier copy if any. */
-async function bundledFor(userId: string, proposal: { id: string; status: string; payload: unknown }): Promise<BundledExercise[]> {
+type BundleSource = { id: string; status: string; payload: unknown; coachLink: { coachUserId: string } | null }
+
+/**
+ * A pending coach send's custom exercises, each with the trainee's earlier
+ * copy if any, else the name a new copy would get; and the coach's first name.
+ */
+async function bundledFor(
+  userId: string,
+  proposal: BundleSource
+): Promise<{ exercises: BundledExercise[]; coachFirstName: string | null }> {
   const { bundle } = splitBundle(proposal.payload)
-  if (proposal.status !== 'pending' || bundle.length === 0) return []
-  const copies = await earlierCopies(prisma, userId, bundle.map((b) => b.sourceId), proposal.id)
-  return bundle.map((b) => ({ sourceId: b.sourceId, name: b.name, earlierCopy: copies.get(b.sourceId)?.name ?? null }))
+  if (proposal.status !== 'pending' || bundle.length === 0 || !proposal.coachLink) {
+    return { exercises: [], coachFirstName: null }
+  }
+  const [copies, first] = await Promise.all([
+    earlierCopies(prisma, userId, bundle.map((b) => b.sourceId), proposal.id),
+    coachFirstName(prisma, proposal.coachLink.coachUserId),
+  ])
+  const names = await previewCopyNames(prisma, bundle.filter((b) => !copies.has(b.sourceId)), first)
+  const exercises = bundle.map((b) => ({
+    sourceId: b.sourceId,
+    name: b.name,
+    earlierCopy: copies.get(b.sourceId)?.name ?? null,
+    copyName: names.get(b.sourceId) ?? null,
+  }))
+  return { exercises, coachFirstName: first }
 }
 
 /** Everything the review screen shows, for any status; null is a 404. */
@@ -100,7 +120,7 @@ export async function getSuggestionDetail(userId: string, id: string): Promise<S
   const proposal = await findSuggestion(userId, id)
   if (!proposal) return null
   const kindLabel = suggestionKindLabel(proposal.kind)
-  const [body, [title], [from], customExercises] = await Promise.all([
+  const [body, [title], [from], bundled] = await Promise.all([
     suggestionBody(proposal, userId),
     titlesFor(userId, [proposal]),
     sendersFor([proposal]),
@@ -121,6 +141,7 @@ export async function getSuggestionDetail(userId: string, id: string): Promise<S
     from,
     programId: proposal.kind === 'program.create' && proposal.status === 'applied' ? proposal.targetId : null,
     body,
-    customExercises,
+    customExercises: bundled.exercises,
+    coachFirstName: bundled.coachFirstName,
   }
 }
