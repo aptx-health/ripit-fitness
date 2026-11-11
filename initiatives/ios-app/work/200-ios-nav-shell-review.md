@@ -1,6 +1,6 @@
 ---
 id: 200
-state: ready
+state: done
 executor: parity-disco
 skill: reviewer (method from 191)
 waiting_on:
@@ -24,3 +24,4 @@ The spec, `initiatives/ios-app/work/198-handback.md` (hands-on list), and the `i
 
 ## Hand back
 Accept or a fix list, then a revised review after reading `199-handback.md`. Don't `rm`.
+- 2026-11-10 23:15 MST: dispatched to parity-disco (running; context 17%, cleared)
