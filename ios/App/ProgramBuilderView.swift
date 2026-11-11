@@ -153,13 +153,13 @@ struct ProgramBuilderView: View {
         }
         .sheet(isPresented: Binding(get: { picking != nil }, set: { if !$0 { picking = nil } })) {
             NavigationStack {
-                ExercisePickerView { id in
+                ExercisePickerView(onAdd: { ids in
                     if let target = picking, let i = draft.weeks[week].firstIndex(where: { $0.id == target }) {
-                        draft.weeks[week][i].exercises.append(PlanDraft.Exercise(
-                            definitionId: id, name: store.exercise(id)?.name ?? id, sets: PlanDraft.defaultSets.map(EditableSet.init)))
+                        draft.weeks[week][i].exercises += ids.map { id in PlanDraft.Exercise(
+                            definitionId: id, name: store.exerciseName(id) ?? id, sets: PlanDraft.defaultSets.map(EditableSet.init)) }
                     }
                     picking = nil
-                }
+                })
             }
             .environment(store)
         }

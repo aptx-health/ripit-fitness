@@ -162,6 +162,12 @@ final class WorkoutStore {
     func attempt(_ body: () throws -> Void) {
         do { try body() } catch let saved as SavedWorkoutError {
             lastError = saved.message
+        } catch let custom as CustomExerciseError {
+            lastError = switch custom {
+            case .invalid(let problems): problems.map(\.message).joined(separator: "\n")
+            case .duplicateName: "An exercise with this name already exists"
+            case .builtIn: "Built-in exercises can't be edited."
+            }
         } catch { lastError = "\(error)" }
     }
 }

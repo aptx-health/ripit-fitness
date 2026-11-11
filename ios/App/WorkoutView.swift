@@ -103,10 +103,10 @@ struct WorkoutView: View {
         }
         .sheet(isPresented: $picking) {
             NavigationStack {
-                ExercisePickerView(query: DebugHooks.pickerQuery ?? "") { id in
-                    store.addExercise(id)
+                ExercisePickerView(query: DebugHooks.pickerQuery ?? "", onAdd: { ids in
+                    store.addExercises(ids)
                     picking = false
-                }
+                })
             }
             .environment(store)
         }

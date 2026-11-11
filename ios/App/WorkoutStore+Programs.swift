@@ -92,8 +92,11 @@ extension WorkoutStore {
     func setPrescribedSets(_ id: String, _ sets: [PlannedSet]) { write { try $0.setPrescribedSets(id, sets) } }
     func setProgramExerciseGroup(_ id: String, _ group: String?) { write { try $0.setProgramExerciseGroup(id, group) } }
 
-    func addProgramExercise(workoutId: String, definitionId: String) {
-        write { try $0.addProgramExercise(workoutId: workoutId, definitionId: definitionId, sets: PlanDraft.defaultSets) }
+    /// Adds several exercises to a program workout, in the order picked.
+    func addProgramExercises(workoutId: String, definitionIds: [String]) {
+        write { db in
+            for id in definitionIds { try db.addProgramExercise(workoutId: workoutId, definitionId: id, sets: PlanDraft.defaultSets) }
+        }
     }
 
     func removeProgramExercise(_ id: String) {

@@ -3,7 +3,7 @@
 A native iPhone version of Ripit. Data lives on the phone; the web app stays as it is.
 Updated by the lead at each checkpoint. The full log is in `status.md`.
 
-**Now:** slice 8, picker + custom exercises: tests done (189, with your three calls); 190 build (ios-impl). Then 191 review (parity-disco). Work items now live in `initiatives/ios-app/work/`.
+**Now:** slice 8, picker + custom exercises: tests done (189, with your three calls); 190 built (262 tests pass); 191 review (parity-disco). Work items now live in `initiatives/ios-app/work/`.
 
 ## Done (first sweep, 2026-11-07)
 
@@ -22,7 +22,7 @@ Updated by the lead at each checkpoint. The full log is in `status.md`.
 | 5 | **Logging help:** rest timer, workout clock, "Last time" line, RPE/RIR, warm-up sets, Info / Notes / History per exercise, confirm before Finish | M | ✅ approved, on phone | 174–178 |
 | 6 | **Finish summary + saved workouts:** summary at the end, save to repeat, Library › Workouts, Pinned/Repeat on Training | M | ✅ approved, on phone | 179–183 |
 | 7 | **Settings + look:** Settings tab, all 13 web themes, E-ink display, workout defaults; web font, square corners, offset shadows, switching folder tabs; largest text everywhere | L | ✅ approved, on phone | 184–188 |
-| 8 | **Picker + custom exercises:** filters, pick several, create your own | S–M | 🔨 build (190) | 189 tests · 190 build · 191 review |
+| 8 | **Picker + custom exercises:** filters, pick several, create your own | S–M | 🔍 review (191) | 189 tests · 190 build · 191 review |
 | 9 | **Smart picker:** A–Z / Neglected ("+N planned") / Recovery / Anchors sorts in the workout's Add picker; Settings › Target movements; import muscle-balance targets | M | ⏳ | |
 | 10 | **Muscle balance settings:** 18 ratios, secondary credit, ignore warm-ups, live preview, reset | M | ⏳ | |
 | 11 | **Logger flow + quick actions:** the web's in-exercise logger (one exercise at a time, a drop-down list of the workout's exercises to jump between, prev/next, fixed Log bar), and the center Workout button with quick actions (continue the program's next workout, start a freeform/ad-hoc workout, resume the open one) | M | ⏳ | |

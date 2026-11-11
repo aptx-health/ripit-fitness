@@ -1,12 +1,12 @@
 ---
 id: 190
-state: waiting
-waiting_on: 189
+state: running
+waiting_on:
 executor: ios-impl
 skill: handoff-implementer
 from: lead (worktree-brave-field-c150)
 confirmed: 2026-11-08 Dustin ("Go for it" on slice 8; same autonomy)
-updated: 2026-11-08
+updated: 2026-11-10
 ---
 # iOS slice 8: picker filters and custom exercises, build
 
@@ -42,3 +42,4 @@ The implementer packet, with screenshots.
 
 ## Log
 - 2026-11-08: created (waiting on 189).
+- 2026-11-10 17:19 MST: dispatched to ios-impl (running; context 14%, cleared)

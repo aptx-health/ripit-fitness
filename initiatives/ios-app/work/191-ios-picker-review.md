@@ -39,3 +39,7 @@ A review packet with first line `Report: …` and a clear verdict.
 
 ## Log
 - 2026-11-08: created (waiting on 190).
+
+## Known before review (lead, 2026-11-10)
+- The web raised the instructions limit from 1000 to 4000 on 2026-11-09 (`lib/validators/exercise-definition.ts`). The phone still uses 1000; a follow-up will move it to 4000. Don't report it again.
+- A saved workout keeps a renamed custom exercise's old name, as on the web (it stores a copy). Kept for parity.

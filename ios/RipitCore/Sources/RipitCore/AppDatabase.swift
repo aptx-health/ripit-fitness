@@ -132,20 +132,23 @@ public final class AppDatabase: Sendable {
 
     /// Adds a catalog exercise to a workout and returns the new exercise id.
     public func addExercise(definitionId: String, to workoutId: String) throws -> String {
-        let id = Self.newId()
-        try dbQueue.write { db in
-            try Self.requireCompletion(db, workoutId)
-            guard let name = try String.fetchOne(db, sql: "SELECT name FROM exerciseDefinition WHERE id = ?", arguments: [definitionId]) else {
-                throw RipitCoreError.notFound("exerciseDefinition \(definitionId)")
-            }
-            let order = try Int.fetchOne(db, sql: """
-                SELECT COALESCE(MAX("order"), 0) + 1 FROM exercise WHERE workoutCompletionId = ?
-                """, arguments: [workoutId]) ?? 1
-            try db.execute(sql: """
-                INSERT INTO exercise (id, name, exerciseDefinitionId, "order", isOneOff, workoutCompletionId)
-                VALUES (?, ?, ?, ?, 1, ?)
-                """, arguments: [id, name, definitionId, order, workoutId])
+        try dbQueue.write { try Self.insertOneOff($0, definitionId: definitionId, workoutId: workoutId) }
+    }
+
+    /// Inserts one ad-hoc exercise after the workout's last one and returns its id.
+    static func insertOneOff(_ db: Database, definitionId: String, workoutId: String) throws -> String {
+        let id = newId()
+        try requireCompletion(db, workoutId)
+        guard let name = try String.fetchOne(db, sql: "SELECT name FROM exerciseDefinition WHERE id = ?", arguments: [definitionId]) else {
+            throw RipitCoreError.notFound("exerciseDefinition \(definitionId)")
         }
+        let order = try Int.fetchOne(db, sql: """
+            SELECT COALESCE(MAX("order"), 0) + 1 FROM exercise WHERE workoutCompletionId = ?
+            """, arguments: [workoutId]) ?? 1
+        try db.execute(sql: """
+            INSERT INTO exercise (id, name, exerciseDefinitionId, "order", isOneOff, workoutCompletionId)
+            VALUES (?, ?, ?, ?, 1, ?)
+            """, arguments: [id, name, definitionId, order, workoutId])
         return id
     }
 

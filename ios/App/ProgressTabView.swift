@@ -46,10 +46,10 @@ struct ProgressTabView: View {
         .onChange(of: weekStart) { load() }
         .sheet(isPresented: $pinning, onDismiss: load) {
             NavigationStack {
-                ExercisePickerView { id in
+                ExercisePickerView(onPick: { id in
                     store.pinLift(id)
                     pinning = false
-                }
+                })
             }
             .environment(store)
         }

@@ -60,10 +60,10 @@ struct ProgramEditView: View {
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: Binding(get: { addingTo != nil }, set: { if !$0 { addingTo = nil } })) {
             NavigationStack {
-                ExercisePickerView { id in
-                    if let w = addingTo { store.addProgramExercise(workoutId: w, definitionId: id) }
+                ExercisePickerView(onAdd: { ids in
+                    if let w = addingTo { store.addProgramExercises(workoutId: w, definitionIds: ids) }
                     addingTo = nil
-                }
+                })
             }
             .environment(store)
         }
