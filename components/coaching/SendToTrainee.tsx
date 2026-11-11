@@ -2,7 +2,7 @@
 
 import * as Dialog from '@radix-ui/react-dialog'
 import { Send, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { type CSSProperties, useEffect, useState } from 'react'
 import { useToast } from '@/components/ToastProvider'
 import { clientLogger } from '@/lib/client-logger'
 
@@ -19,6 +19,8 @@ type Props = {
    * component asks GET /api/coaching/trainees itself.
    */
   trainees?: Trainee[]
+  /** Replaces the Send button's look, e.g. a Library row panel's panelButton(). */
+  button?: { className: string; style?: CSSProperties }
 }
 
 const BUTTON =
@@ -44,7 +46,7 @@ function refusalText(name: string, body: { code?: string; missingExercises?: str
  * trainees, "Send to…" asks which one first. The sheet takes an optional note
  * (the trainee's "Why") and sends a copy for them to accept or decline.
  */
-export default function SendToTrainee({ kind, sourceId, className = '', trainees: given }: Props) {
+export default function SendToTrainee({ kind, sourceId, className = '', trainees: given, button }: Props) {
   const toast = useToast()
   const [loaded, setLoaded] = useState<Trainee[]>([])
   const trainees = given ?? loaded
@@ -111,8 +113,13 @@ export default function SendToTrainee({ kind, sourceId, className = '', trainees
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
-      <button type="button" onClick={openSheet} className={`${BUTTON} ${className}`}>
-        <Send size={16} aria-hidden="true" />
+      <button
+        type="button"
+        onClick={openSheet}
+        className={button ? button.className : `${BUTTON} ${className}`}
+        style={button?.style}
+      >
+        <Send size={button ? 14 : 16} aria-hidden="true" />
         {only ? `Send to ${only.name}` : 'Send to…'}
       </button>
       <Dialog.Portal>

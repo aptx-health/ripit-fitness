@@ -73,15 +73,26 @@ afterEach(() => {
 })
 
 const group = (name: string) => screen.queryByRole('region', { name })
+// work 153: View moved into each row's panel, so rows are found by their name.
 const namesIn = (region: HTMLElement) =>
   within(region)
-    .getAllByRole('button', { name: /^View / })
-    .map((b) => b.getAttribute('aria-label')?.replace(/^View /, ''))
+    .getAllByRole('listitem')
+    .map((li) => items.map((x) => x.name).find((n) => within(li).queryByText(n, { exact: true })))
+const rowOf = (name: string, scope: HTMLElement = document.body) =>
+  within(scope).getByText(name, { exact: true }).closest('li') as HTMLElement
+// work 153: tap the row to open its panel (Pin/Unpin is there now).
+const openRow = (row: HTMLElement) => {
+  const header = within(row)
+    .getAllByRole('button')
+    .find((b) => b.hasAttribute('aria-expanded')) as HTMLElement
+  if (header.getAttribute('aria-expanded') !== 'true') fireEvent.click(header)
+  return row
+}
 const fold = () => screen.getByRole('button', { name: /^older \(\d+\)/i })
 
 async function renderList() {
   render(<SavedWorkoutsList />)
-  await screen.findAllByRole('button', { name: /^View / })
+  await screen.findAllByRole('listitem') // work 153
 }
 
 describe('Library → Workouts groups', () => {
@@ -117,10 +128,10 @@ describe('Library → Workouts groups', () => {
 
   it('the Older fold is closed by default, shows its count and is a 48px button', async () => {
     await renderList()
-    expect(fold().textContent).toMatch(/older \(2\)/i)
+    expect(fold().getAttribute('aria-label')).toBe('Older (2)') // work 154: the count is a chip; the name says it
     expect(fold().getAttribute('aria-expanded')).toBe('false')
     expect(fold().className).toContain('min-h-12')
-    expect(screen.queryByRole('button', { name: 'View Old Pull' })).toBeNull()
+    expect(screen.queryByText('Old Pull')).toBeNull() // work 153
   })
 
   it('opening the fold shows the older workouts, last used first', async () => {
@@ -134,15 +145,13 @@ describe('Library → Workouts groups', () => {
     await renderList()
     fireEvent.click(fold())
     const older = group('Older') as HTMLElement
-    const oldPull = screen.getByRole('button', { name: 'View Old Pull' }).closest('li') as HTMLElement
+    const oldPull = openRow(rowOf('Old Pull')) // work 153
     fireEvent.click(within(oldPull).getByRole('button', { name: /^pin\b/i }))
     await waitFor(() => expect(namesIn(group('Pinned') as HTMLElement)).toContain('Old Pull'))
     expect(namesIn(older)).toEqual(['Older Arms'])
-    expect(fold().textContent).toMatch(/older \(1\)/i)
+    expect(fold().getAttribute('aria-label')).toBe('Older (1)') // work 154: the count is a chip; the name says it
 
-    const pinnedRow = within(group('Pinned') as HTMLElement)
-      .getByRole('button', { name: 'View Old Pull' })
-      .closest('li') as HTMLElement
+    const pinnedRow = openRow(rowOf('Old Pull', group('Pinned') as HTMLElement)) // work 153
     fireEvent.click(within(pinnedRow).getByRole('button', { name: /^unpin\b/i }))
     await waitFor(() => expect(namesIn(group('Older') as HTMLElement)).toEqual(['Old Pull', 'Older Arms']))
     expect(namesIn(group('Pinned') as HTMLElement)).toEqual(['Upper A'])

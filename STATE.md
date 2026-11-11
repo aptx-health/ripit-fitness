@@ -1,14 +1,13 @@
 # STATE
 
 ## Needs Dustin
-- **Review the iOS first sweep and install on your phone** (initiatives/ios-app)
-  Why now: all 4 slices are built; nothing has been on a real device. Hub page: ripit-fitness/ios-first-sweep. Then: open PRs into dev? Recommend yes, two PRs (iOS, web export).
+- **iOS PRs into dev:** #1055 (iOS app, slices 1-7) and #1054 (web export, ships first so real history can be imported). Review and merge when ready.
 
 Running quietly: None.
 
 ## Active
-- iOS app (initiatives/ios-app): slices 1-4 built and accepted by the lead on feature/ios-skeleton (iOS) and feature/data-export in worktree3 (web export); unpushed. Awaiting Dustin: Hub page ripit-fitness/ios-first-sweep, phone install, PRs.
-- Coaching (initiatives/coaching): slice 1 (invite + link) merged to dev 2026-11-07 (#1041). Slice 2 (send + Sent list) approved 2026-11-07; PR into dev. Next: quick Send actions + expandable workout rows.
+- iOS app (initiatives/ios-app, items in initiatives/ios-app/work/): slices 1-7 approved; slice 8 in progress. PRs into dev: #1055 (iOS), #1054 (web export). Roadmap: initiatives/ios-app/ROADMAP.md.
+- Coaching (initiatives/coaching): slice 1 (invite + link) merged to dev 2026-11-07 (#1041). Slice 2 (send + Sent list) approved 2026-11-07; PR into dev. Row panel + quick Send + section headers (153–155) accepted; PR stacked on #1045.
 - Workout library (initiatives/workout-library): tidy saved workouts (pinned + tags), incl. where AI and coach workouts land. Slices 1 (#1040) and 3 (origin + New + archive, approved 2026-11-07) done; slice 3 PR into dev. Later: slice 2 (tags + search), slice 4 (bulk tidy).
 - Theme page with light/dark previews (work 149, small; fixes the theme menu running off screen): approved 2026-11-07; PR into dev.
 - Coaching (initiatives/coaching): slice 1 (invite + link) merged to dev 2026-11-07 (#1041). Slice 2 (send + Sent list) fixed; Dustin's phone preview next.

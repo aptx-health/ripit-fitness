@@ -13,3 +13,10 @@
 - 2026-11-07 CST: Dustin: hold the prod release until slice 3 is merged; then release everything on dev together.
 - 2026-11-07 CST: Dustin: prod release waits until all coach features are in dev (coaching slices 2 and 3, after workout library slice 3).
 - 2026-11-07 CST: Slice 3 approved by Dustin on the phone preview. 144–147 accepted. Committed; PR into dev. Next: coaching slice 2 (send).
+- 2026-11-07 CST: Row panel + quick Send (work 153, small, features/workout-library/row-panel.feature) confirmed by Dustin; dispatched to coach-impl on feature/workout-row-panel (stacked on #1045). Test-builder skipped: small UI item, implementer writes tests first.
+- 2026-11-07 CST: 153 back; Keep dropped (spec error). Lead re-ran affected suites (786 pass). Ready for Dustin's phone preview.
+- 2026-11-07 CST: Dustin on the 153 preview: group headers blend in; make each group a distinct box with a coloured tab header and count. Fixes 154 dispatched to coach-impl (same branch).
+- 2026-11-07 CST: Dustin: prod release waits for the row panel (153/154). Send stays on community-copied programs.
+- 2026-11-07 CST: 154 back; lead re-ran 674/674. Preview restarted for Dustin.
+- 2026-11-07 CST: Dustin picked section-rule headers (mockup F, assets/154/tab-ideas.png). 155 dispatched to coach-impl; 154 superseded.
+- 2026-11-07 CST: Dustin waived his review of 155 ("move forward"); 153 and 155 accepted; PR stacked on #1045.

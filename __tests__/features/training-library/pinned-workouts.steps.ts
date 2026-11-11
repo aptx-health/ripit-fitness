@@ -228,9 +228,17 @@ async function renderHome() {
   render(createElement(mod.default, { home }))
   return home
 }
-const rowOf = (name: string) => screen.getByRole('button', { name: `View ${name}` }).closest('li') as HTMLElement
-const pinButton = (name: string) => within(rowOf(name)).getByRole('button', { name: /^pin\b/i })
-const unpinButton = (name: string) => within(rowOf(name)).getByRole('button', { name: /^unpin\b/i })
+// work 153: rows are found by name; Pin/Unpin is in the row's panel, opened by tapping the row.
+const rowOf = (name: string) => screen.getByText(name, { exact: true }).closest('li') as HTMLElement
+const openRow = (name: string) => {
+  const header = within(rowOf(name))
+    .getAllByRole('button')
+    .find((b) => b.hasAttribute('aria-expanded')) as HTMLElement
+  if (header.getAttribute('aria-expanded') !== 'true') fireEvent.click(header)
+  return rowOf(name)
+}
+const pinButton = (name: string) => within(openRow(name)).getByRole('button', { name: /^pin\b/i })
+const unpinButton = (name: string) => within(openRow(name)).getByRole('button', { name: /^unpin\b/i })
 const pinnedRowOf = (name: string) => screen.getByText(name).closest('li') as HTMLElement
 
 beforeEach(() => {
@@ -256,13 +264,13 @@ describeFeature(feature, ({ Background, Rule }) => {
     RuleScenario('Pinning a workout', ({ When, Then, And }) => {
       When('the user pins "Upper Body" in My Workouts', async () => {
         await renderList()
-        await screen.findByRole('button', { name: 'View Upper Body' })
+        await screen.findByText('Upper Body') // work 153
         fireEvent.click(pinButton('Upper Body'))
         await waitFor(async () => expect(await pinnedAtOf(s.saved['Upper Body'].id)).not.toBeNull())
       })
       Then('"Upper Body" is marked as pinned', async () => {
         await renderList()
-        await screen.findByRole('button', { name: 'View Upper Body' })
+        await screen.findByText('Upper Body') // work 153
         expect(unpinButton('Upper Body').getAttribute('aria-pressed')).toBe('true')
         expect(within(rowOf('Upper Body')).getByText(/^pinned$/i)).toBeTruthy()
         expect(within(rowOf('Mobility')).queryByText(/^pinned$/i)).toBeNull()
@@ -282,13 +290,13 @@ describeFeature(feature, ({ Background, Rule }) => {
       })
       When('the user unpins "Upper Body"', async () => {
         await renderList()
-        await screen.findByRole('button', { name: 'View Upper Body' })
+        await screen.findByText('Upper Body') // work 153
         fireEvent.click(unpinButton('Upper Body'))
         await waitFor(async () => expect(await pinnedAtOf(s.saved['Upper Body'].id)).toBeNull())
       })
       Then('it is no longer marked as pinned', async () => {
         await renderList()
-        await screen.findByRole('button', { name: 'View Upper Body' })
+        await screen.findByText('Upper Body') // work 153
         expect(pinButton('Upper Body').getAttribute('aria-pressed')).toBe('false')
         expect(within(rowOf('Upper Body')).queryByText(/^pinned$/i)).toBeNull()
       })

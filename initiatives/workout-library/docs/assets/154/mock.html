@@ -1,0 +1,53 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#1A1108;--fg:#FEF3C7;--card:#251A0F;--muted:#3A2817;--mfg:#D4C4B0;--border:#4A3420;--primary:#10B981;--secondary:#92400E;--accent:#FBBF24;--accfg:#1A1108}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font-family:Rajdhani,sans-serif;padding:24px;display:grid;grid-template-columns:repeat(3,390px);gap:32px}
+.v{display:flex;flex-direction:column}.title{font-size:22px;font-weight:700;margin-bottom:4px}.sub{font-size:15px;color:var(--mfg);margin-bottom:12px;min-height:40px}
+.folder{border:2px solid var(--secondary);padding:14px;display:flex;flex-direction:column;gap:18px;position:relative;margin-top:36px}
+.folder:before{content:"WORKOUTS 4";position:absolute;top:-36px;left:-2px;height:36px;padding:0 34px 0 14px;background:var(--secondary);font-weight:700;letter-spacing:.12em;display:flex;align-items:center;clip-path:polygon(0 0,88% 0,100% 100%,0 100%)}
+.row{padding:14px 16px;display:flex;justify-content:space-between;align-items:center;background:var(--card)}
+.row b{font-size:19px}.row small{display:block;color:var(--mfg);font-size:15px;margin-top:2px}
+.chev{color:var(--mfg);font-size:20px}
+.lbl{font-weight:700;letter-spacing:.14em;font-size:13px;text-transform:uppercase}
+.n{font-weight:700;font-size:13px}
+/* A: side stripe */
+.A .g{border:1px solid var(--border);border-left:6px solid var(--c)}
+.A .h{display:flex;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--border);color:var(--c)}
+/* B: header band */
+.B .g{border:2px solid var(--c)}
+.B .h{display:flex;justify-content:space-between;padding:6px 14px;background:var(--c);color:var(--cf)}
+/* C: legend on border */
+.C .g{border:2px solid var(--c);position:relative;padding-top:6px}
+.C .h{position:absolute;top:-11px;left:12px;background:var(--bg);padding:0 8px;color:var(--c);display:flex;gap:8px}
+.C .folder{background:var(--bg)}
+/* D: thick top rule */
+.D .g{border:1px solid var(--border);border-top:5px solid var(--c)}
+.D .h{display:flex;align-items:center;gap:10px;padding:8px 14px;color:var(--c)}
+.D .h .n{border:1.5px solid var(--c);padding:0 7px}
+/* E: square corner tag */
+.E .g{border:2px solid var(--c)}
+.E .h{display:inline-flex;gap:8px;padding:3px 10px;background:var(--c);color:var(--cf)}
+/* F: count block + rule */
+.F .h{display:flex;align-items:center;gap:10px;margin-bottom:6px;color:var(--c)}
+.F .h .n{background:var(--c);color:var(--cf);min-width:24px;height:24px;display:flex;align-items:center;justify-content:center}
+.F .h:after{content:"";flex:1;height:2px;background:var(--c);opacity:.6}
+.F .g .body{border:1px solid var(--border)}
+.new{--c:var(--accent);--cf:var(--accfg)}.pin{--c:#C2671C;--cf:var(--fg)}.rec{--c:var(--primary);--cf:#fff}.old{--c:var(--mfg);--cf:var(--bg)}
+.today{grid-column:1/-1;font-size:15px;color:var(--mfg)}
+</style></head><body>
+<script>
+const groups=[['new','New',1,'Machine Upper','From your agent · 6 exercises'],['pin','Pinned',1,'Upper Body A','5 exercises · Thu'],['rec','Recent',1,'Arms Finisher','3 exercises · Tue'],['old','Older',1,null]]
+const V=[['A','A · Side stripe','Coloured bar down the left edge; header is coloured text, no fill.'],
+['B','B · Header band','Full-width coloured strip across the top of each box. Reads as a card, not a tab.'],
+['C','C · Label on the border','Label sits in a gap in the box\'s top line, like a form fieldset.'],
+['D','D · Thick top rule','Thick coloured top edge, coloured title, outlined count.'],
+['E','E · Square corner tag','Small square block inside the corner. No slant, so it can\'t be mistaken for the folder tabs.'],
+['F','F · Section rule','No box tab at all: count block, title, coloured line, then the rows.']]
+for(const [k,t,s] of V){const d=document.createElement('div');d.className='v '+k;let h=`<div class=title>${t}</div><div class=sub>${s}</div><div class=folder>`
+for(const [c,name,n,w,m] of groups){const head=`<div class=h><span class=lbl>${name}</span>${k=='F'?'':''}<span class=n>${n}${c=='old'?' ⌄':''}</span></div>`
+const headF=`<div class=h><span class=n>${n}</span><span class=lbl>${name}${c=='old'?' ⌄':''}</span></div>`
+const row=w?`<div class=row><div><b>${w}</b><small>${m}</small></div><span class=chev>›</span></div>`:''
+h+= k=='F'?`<div class="g ${c}">${headF}${row?`<div class=body>${row}</div>`:''}</div>`:`<div class="g ${c}">${head}${row}</div>`}
+d.innerHTML=h+'</div>';document.body.appendChild(d)}
+</script></body></html>

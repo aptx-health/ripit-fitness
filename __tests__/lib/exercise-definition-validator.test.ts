@@ -154,13 +154,24 @@ describe('Exercise Definition Validation', () => {
         name: 'Bench Press',
         equipment: ['barbell'],
         primaryFAUs: ['chest'],
-        instructions: 'a'.repeat(1001),
+        instructions: 'a'.repeat(4001),
       };
       const errors = validateExerciseDefinition(input, false);
       expect(errors).toContainEqual({
         field: 'instructions',
-        message: 'Instructions must be 1000 characters or less',
+        message: 'Instructions must be 4000 characters or less',
       });
+    });
+
+    it('should accept instructions of exactly 4000 characters', () => {
+      const input: CreateExerciseDefinitionInput = {
+        name: 'Bench Press',
+        equipment: ['barbell'],
+        primaryFAUs: ['chest'],
+        instructions: 'a'.repeat(4000),
+      };
+      const errors = validateExerciseDefinition(input, false);
+      expect(errors.find((e) => e.field === 'instructions')).toBeUndefined();
     });
 
     it('should enforce max notes length', () => {
