@@ -81,3 +81,6 @@
 - 2026-11-11 203 handed back (needs calls): 168 issues, 166 notImplemented + 2 from a real bug (program add order). Dustin: decimal key with a 2000 cap, program swap/delete today only, Superset button into the Plan list, tab look B + slide + haptic (added to 204). Follow-up 1 to ios-tests.
 - 2026-11-11 203 follow-up complete: lead re-ran swift test, 347 tests, 206 issues: notImplemented plus the known program-add-order bug. Committed. Dispatching 204 to ios-impl (cleared, new part).
 - 2026-11-11 13:02 MST: 204 handed back complete. Lead: tests untouched, ios-check exit 0 (347 passed). Committed. 205 ready; dispatching to parity-disco (cleared, new review).
+- 2026-11-11 13:12 MST: Dustin asked to install 9b before review; installed (commit 32a0a244). Review 205 continues; fixes will be reinstalled.
+- 2026-11-11 13:18 MST: Dustin's phone notes on 9b saved to work/205-dustin-notes.md (4 layout/colour points); held until 205 review, then one combined fix item.
+- 2026-11-11 14:29 MST: 205 review complete: 3 fixes (saved order bug, after-planned panel, AX5 bar). Dustin: tabs dim ~80%, lone superset ends today, empty exit unchanged. Merged with his 4 phone notes into 206 (ios-impl, context kept); 207 re-check waits.
