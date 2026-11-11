@@ -1,6 +1,6 @@
 ---
 id: 199
-state: waiting
+state: ready
 executor: ios-impl
 skill: handoff-implementer
 waiting_on:

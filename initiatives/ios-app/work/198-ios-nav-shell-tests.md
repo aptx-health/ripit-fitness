@@ -1,6 +1,6 @@
 ---
 id: 198
-state: ready
+state: done
 executor: ios-tests
 skill: handoff-test-builder
 waiting_on:
@@ -30,3 +30,4 @@ Tests and a hands-on list for `features/ios-app/nav-shell.feature`, before the b
 
 ## Don't touch
 App code (apart from contract stubs in RipitCore), `initiatives/ios-app/work/`, `STATE.md`, `status.md`, the roadmap. Don't `rm`.
+- 2026-11-10 22:39 MST: dispatched to ios-tests (running; context 16%, cleared)
