@@ -49,3 +49,11 @@ The test-builder packet, plus the hands-on list.
 ## Log
 - 2026-11-08: created (ready).
 - 2026-11-08 07:44 MST: dispatched to ios-tests (running; context 17%, cleared)
+
+## Follow-up 1 (2026-11-08, Dustin's calls on the handback)
+Change the tests, the golden expectations and the `Picker.swift` rules header so the phone departs from the web on these three points. Keep everything else as on the web.
+1. **Trim names:** leading and trailing spaces are removed on save (create and edit). Duplicate checks use the trimmed name.
+2. **Sort, then cut:** search scores and orders all matches first, then applies the 50-row limit.
+3. **A letter or digit is required:** a name with no letter or digit (for example "!!!") is refused, with its own validation reason. A search query with no letter or digit acts like an empty query.
+Keep as on the web: aliases match exact words only, and "Other" includes resistance bands.
+Re-run the break matrix for the changed rules only (add a break for each new rule), relock the files and hand back a short packet as `Report: complete`.
