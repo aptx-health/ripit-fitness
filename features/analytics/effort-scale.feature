@@ -17,6 +17,9 @@ Feature: Progress follows the user's effort scale (RPE or RIR)
     Given I logged some sets with RPE 8 and some with RIR 2
     Then with RPE chosen they average RPE 8, and with RIR chosen RIR 2
 
+  # 2026-11-10 (lead, work 162): Progress shows no bucket list or session
+  # rating today; these two hold for the formatters only, ready for when a
+  # surface shows them.
   Scenario: Distribution buckets in RIR
     Given my effort scale is RIR
     Then the effort buckets read RIR 4+, 3, 2, 1, 0 (the same sets as RPE ≤6, 7, 8, 9, 10)

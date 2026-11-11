@@ -1,9 +1,11 @@
+import type { EffortScale } from '@/lib/insights/effort-scale'
 import type { WeekStats } from '@/lib/insights/progress'
-import { formatRpe, weekOfLabel } from './format'
+import { effortLabel, formatEffort, weekOfLabel } from './format'
 
 /**
  * "Last 8 weeks": working sets per week as bars, oldest first, with each
- * week's average RPE beneath its bar ("–" when effort isn't tracked enough).
+ * week's average effort beneath its bar, in the user's scale (RPE or RIR; "–"
+ * when effort isn't tracked enough). Hard weeks (RPE 9+, RIR 1 or less) are red.
  * The selected week's bar is the highlighted one. Hand-drawn SVG bars in
  * theme tokens (no chart library), so it follows light and dark. Each week is
  * one labelled image; the gridlines and axis text are hidden from readers.
@@ -16,12 +18,15 @@ export default function WeeklySetsChart({
   weeks,
   selected,
   isCurrentWeek,
+  effortScale = 'rpe',
 }: {
   weeks: WeekStats[]
   selected: string
   /** The selected week is this week: its label reads "This wk". */
   isCurrentWeek: boolean
+  effortScale?: EffortScale
 }) {
+  const label = effortLabel(effortScale)
   const max = Math.max(20, Math.ceil(Math.max(...weeks.map((w) => w.workingSets)) / 20) * 20)
   const labelled = new Set([0, Math.floor((weeks.length - 1) / 2), weeks.length - 1])
 
@@ -34,7 +39,7 @@ export default function WeeklySetsChart({
           <span>0</span>
         </div>
         <div className="h-5" />
-        <div className={`flex h-5 items-end justify-end ${MUTED}`}>RPE</div>
+        <div className={`flex h-5 items-end justify-end ${MUTED}`}>{label}</div>
       </div>
 
       <div className="relative min-w-0 flex-1">
@@ -51,7 +56,7 @@ export default function WeeklySetsChart({
         <div className="relative flex gap-1.5">
           {weeks.map((w, i) => {
             const isSelected = w.weekStart === selected
-            const rpe = formatRpe(w.effort?.avgRpe ?? null)
+            const effort = formatEffort(w.effort?.avgRpe ?? null, effortScale)
             const height = (w.workingSets / max) * 100
             return (
               <div
@@ -59,7 +64,7 @@ export default function WeeklySetsChart({
                 data-week={w.weekStart}
                 data-selected={isSelected ? 'true' : undefined}
                 role="img"
-                aria-label={`Week of ${weekOfLabel(w.weekStart)}: ${w.workingSets} sets, RPE ${rpe}`}
+                aria-label={`Week of ${weekOfLabel(w.weekStart)}: ${w.workingSets} sets, ${label} ${effort}`}
                 className="flex min-w-0 flex-1 flex-col items-center"
               >
                 <svg aria-hidden="true" viewBox="0 0 10 100" preserveAspectRatio="none" className="h-28 w-full">
@@ -73,7 +78,7 @@ export default function WeeklySetsChart({
                     (w.effort?.avgRpe ?? 0) >= 9 ? 'text-error-text' : isSelected ? 'text-foreground' : 'text-muted-foreground'
                   }`}
                 >
-                  {rpe}
+                  {effort}
                 </span>
               </div>
             )

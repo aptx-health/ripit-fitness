@@ -1,5 +1,6 @@
 import { Prisma, type PrismaClient } from '@prisma/client'
 import { setEffort } from '@/lib/aggregates/compute'
+import { type EffortScale, effortScaleOf } from '@/lib/insights/effort-scale'
 import { loadPinned, type PinnedLift, resolvePins } from '@/lib/insights/pinned-lifts'
 import {
   computeTrendNote,
@@ -78,6 +79,8 @@ export interface WeeklyReport {
   weeks: WeekStats[]
   /** The user's unit; every weight in records and lifts is in it. */
   weightUnit: WeightUnit
+  /** The user's effort scale for display; every effort here stays RPE. Optional: older reports read in RPE. */
+  effortScale?: EffortScale
   /** Personal records set in the selected week (S2). */
   records: WeekRecord[]
   /** Every exercise done in the selected week (S2). */
@@ -301,7 +304,7 @@ export async function getWeeklyReport(
   const rangeEnd = weekBounds(weekStart, timeZone).end
 
   const [settings, first, completions, cardio, pins] = await Promise.all([
-    db.userSettings.findUnique({ where: { userId }, select: { weeklyWorkoutTarget: true, defaultWeightUnit: true } }),
+    db.userSettings.findUnique({ where: { userId }, select: { weeklyWorkoutTarget: true, defaultWeightUnit: true, defaultIntensityRating: true } }),
     db.workoutCompletion.findFirst({
       where: { userId, ...COUNTED },
       select: { completedAt: true },
@@ -379,6 +382,7 @@ export async function getWeeklyReport(
     streak: computeStreak(counts, target, now < rangeEnd),
     weeks,
     weightUnit,
+    effortScale: effortScaleOf(settings?.defaultIntensityRating),
     records: computeWeekRecords(history, shownStart, rangeEnd, weightUnit),
     lifts,
     trend: computeTrendNote(weeks, sinceFirst, { openWeek: now < rangeEnd }),

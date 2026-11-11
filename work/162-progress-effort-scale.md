@@ -1,6 +1,6 @@
 ---
 id: 162
-state: running
+state: accepted
 waiting_on:
 executor: implementer
 from: lead (lead-ripit-mcp)
@@ -29,3 +29,5 @@ Use `handoff-implementer`. First line `Report: complete | needs decision | furth
 
 ## Log
 - 2026-11-10 CST: created; dispatched to implementer (wE:p7).
+- 2026-11-10 CST: back needs-decision; lead re-ran 20 new tests + tsc, checked screenshots. Lead calls: (1) buckets/session scenarios kept at formatter level (no Progress surface), noted in the .feature; (2) bare RPE notes vs labelled RIR notes OK; (3) change-from-normal "+" = harder in both scales OK. Phone preview.
+- 2026-11-10 CST: Dustin on the preview: "Looks good". Accepted. PR into dev.
