@@ -107,11 +107,10 @@ struct WorkoutView: View {
         }
     }
 
-    /// Exit, Finish and error dialogs; their confirm buttons take the accent, like the logger's others.
+    /// Exit, Finish and error dialogs; their confirm buttons take the accent from the root tint (RipitApp).
     private func dialogs(_ content: some View) -> some View {
         let exercises = store.current?.exercises ?? []
         return content
-        .tint(Theme.text(Theme.accent))
         .confirmationDialog("Leave this workout?", isPresented: $confirmingExit, titleVisibility: .visible) {
             Button("Discard workout", role: .destructive) { store.discardWorkout() }
             Button("Keep as draft") { store.keepAsDraft() }

@@ -29,6 +29,25 @@ struct SessionOrderSaveTests {
         #expect(try db.workout(again).exercises.map(\.definitionId) == [squatId, benchPressId, rowId])
     }
 
+    @Test("The finish summary lists the exercises in today's order, not the order they were logged in (209)")
+    func summaryOrder() throws {
+        let db = try TempDB().open()
+        let w = try db.startWorkout(at: t0)
+        let e = try db.addExercises(definitionIds: [benchPressId, rowId, squatId], to: w)
+        for id in e { _ = try db.logSet(exerciseId: id, reps: 5, weight: 100) }
+        try db.moveExercise(e[2], to: 0, inWorkout: w)
+        try db.finishWorkout(w, at: t0.addingTimeInterval(1800))
+        let rollup = try #require(try db.workoutRollup(w, now: t0.addingTimeInterval(1900)))
+        #expect(rollup.exercises.map(\.exerciseDefinitionId) == [squatId, benchPressId, rowId])
+
+        let plain = try db.startWorkout(at: t0.addingTimeInterval(3600))
+        let f = try db.addExercises(definitionIds: [benchPressId, rowId], to: plain)
+        for id in f.reversed() { _ = try db.logSet(exerciseId: id, reps: 5, weight: 100) }
+        try db.finishWorkout(plain, at: t0.addingTimeInterval(5400))
+        let logged = try #require(try db.workoutRollup(plain, now: t0.addingTimeInterval(5500)))
+        #expect(logged.exercises.map(\.exerciseDefinitionId) == [rowId, benchPressId], "no reorder: as logged, like the web")
+    }
+
     @Test("Program: deleting one half of a superset ends it today only")
     func deleteEndsToday() throws {
         let db = try TempDB().open()

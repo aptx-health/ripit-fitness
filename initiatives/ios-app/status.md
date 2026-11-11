@@ -89,3 +89,4 @@
 - 2026-11-11 15:21 MST: 208 complete; lead ios-check exit 0 (351). Committed, installed; 208 added to 207 re-check.
 - 2026-11-11 15:26 MST: Dustin: drop the top line on the active tab. Lead removed the pill (tiny, done inline); ios-check exit 0; committed, installed; parity-disco told.
 - 2026-11-11 16:45 MST: 207 re-check: 9/11 pass, 208 pass; 2 fixes. Dustin: confirms = accent; strengthen faint themes' muted text; E-ink tab underline only. 209 to ios-impl (kept), 210 re-check waits.
+- 2026-11-11 16:59 MST: 209 complete (swap idle wait not reproduced). Lead ios-check exit 0, 352. Committed, installed; 210 to parity-disco (kept).

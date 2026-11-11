@@ -83,8 +83,20 @@ struct Palette {
         let tokens = (try? ThemeTable.tokens(preference)) ?? ThemeTokens(values: [:])
         var hexes: [String: UInt32] = [:]
         for name in tokens.values.keys { hexes[name] = (try? tokens.color(name)) ?? nil }
+        if let raised = Palette.mutedForeground[preference.themeName.rawValue + "-" + preference.mode.rawValue] {
+            hexes["muted-foreground"] = raised
+        }
         self.hexes = hexes
     }
+
+    /// iOS only: muted-foreground raised, in the same hue, so the bar's inactive tab labels (80% over `muted`)
+    /// reach 3:1 (Dustin 2026-11-11). The web's were #6272A4 (Dracula, both modes), #6B7F73 and #5C5F77.
+    private static let mutedForeground: [String: UInt32] = [
+        "dracula-light": 0x9EA8C7,
+        "dracula-dark": 0x7986B1,
+        "forest-light": 0x5C6D63,
+        "catppuccin-light": 0x585A71,
+    ]
 
     func hex(_ name: String, fallback: UInt32 = 0x808080) -> UInt32 { hexes[name] ?? fallback }
     func color(_ name: String) -> Color { Color(hex: hex(name)) }

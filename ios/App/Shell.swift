@@ -106,19 +106,21 @@ struct RipitTabBar: View {
         .background(alignment: .topLeading) {
             // Every slot is the same width, so the marker sits at the selected slot's offset. Softened (Dustin
             // 2026-11-11): the block is inset and rounded like the WORKOUT button, its fill fades out toward the
-            // bottom. No accent edge on top (Dustin 2026-11-11).
-            GeometryReader { geo in
-                let slot = geo.size.width / CGFloat(max(items.count, 1))
-                let index = items.firstIndex { if case .tab(let t) = $0 { t == shell.tab } else { false } } ?? 0
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(LinearGradient(colors: [Theme.accentMuted, Theme.accentMuted.opacity(0)],
-                                         startPoint: .top, endPoint: .bottom))
-                    .padding(.horizontal, 4)
-                    .padding(.top, 4)
-                    .frame(width: slot, height: geo.size.height)
-                    .offset(x: slot * CGFloat(index))
+            // bottom. No accent edge on top (Dustin 2026-11-11). E-ink shows only its bold underline.
+            if !Look.isPaper {
+                GeometryReader { geo in
+                    let slot = geo.size.width / CGFloat(max(items.count, 1))
+                    let index = items.firstIndex { if case .tab(let t) = $0 { t == shell.tab } else { false } } ?? 0
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(LinearGradient(colors: [Theme.accentMuted, Theme.accentMuted.opacity(0)],
+                                             startPoint: .top, endPoint: .bottom))
+                        .padding(.horizontal, 4)
+                        .padding(.top, 4)
+                        .frame(width: slot, height: geo.size.height)
+                        .offset(x: slot * CGFloat(index))
+                }
+                .accessibilityHidden(true)
             }
-            .accessibilityHidden(true)
         }
         .sensoryFeedback(.selection, trigger: shell.tab)
         // Apple's bar keeps its labels small at every text size; this one does too, and a long press

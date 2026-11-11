@@ -344,6 +344,22 @@ extension AppDatabase {
             }
         }
 
+        // The web lists them as their first sets were logged. After a reorder today (sessionExercise has rows),
+        // they follow today's order instead, as the logger and the saved workout do (work item 209).
+        let today = try Row.fetchAll(db, sql: """
+            SELECT e.exerciseDefinitionId, MIN(COALESCE(s.position, e."order")) AS position FROM exercise e
+            LEFT JOIN sessionExercise s ON s.exerciseId = e.id AND s.completionId = ?1
+            WHERE (e.workoutCompletionId = ?1 OR e.workoutId = (SELECT workoutId FROM workoutCompletion WHERE id = ?1))
+              AND COALESCE(s.hidden, 0) = 0 AND EXISTS (SELECT 1 FROM sessionExercise WHERE completionId = ?1)
+            GROUP BY e.exerciseDefinitionId
+            """, arguments: [completionId])
+        if !today.isEmpty {
+            let position = Dictionary(uniqueKeysWithValues: today.map { ($0["exerciseDefinitionId"] as String, $0["position"] as Int) })
+            aggs = aggs.enumerated().sorted {
+                (position[$0.element.definitionId] ?? .max, $0.offset) < (position[$1.element.definitionId] ?? .max, $1.offset)
+            }.map(\.element)
+        }
+
         let previous = try previousSets(db, aggs.map(\.definitionId), before: completedAt)
         var exercises: [RollupExercise] = []
         var totalReps = 0, totalVolume = 0.0, hasBodyweight = false

@@ -127,7 +127,9 @@ struct RootView: View {
             withTransaction(start) { pageNudge = b > a ? 14 : -14 }
             withAnimation(.easeOut(duration: 0.2)) { pageNudge = 0 }
         }
-        .tint(Theme.text(Theme.primary))
+        // System dialogs take the window's tint, not a presenting view's: while the logger is up its
+        // confirms (Keep as draft, Finish) take the accent, like DONE (Dustin 2026-11-11).
+        .tint(Theme.text(store.showingWorkout ? Theme.accent : Theme.primary))
         .background(Theme.background)
         .font(.ripit(.body))
         // From the theme's background, not the mode: some themes stay dark in "light" mode.

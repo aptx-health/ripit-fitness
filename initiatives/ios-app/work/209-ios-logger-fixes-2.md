@@ -1,6 +1,6 @@
 ---
 id: 209
-state: ready
+state: running
 executor: ios-impl
 skill: handoff-implementer
 waiting_on:
@@ -32,3 +32,4 @@ A short packet, first line `Report: complete`.
 
 ## Log
 - 2026-11-11: created (ready).
+- 2026-11-11 16:46 MST: dispatched to ios-impl (running; context 2%, kept)

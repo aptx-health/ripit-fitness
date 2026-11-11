@@ -60,26 +60,32 @@ struct LoggerPanel: View {
             let pinned = tab == .log && !typeSize.isAccessibilitySize
             VStack(spacing: 0) {
                 GeometryReader { box in
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 16) {
-                            title
-                            switch tab {
-                            case .log:
-                                logTop
-                                if !pinned {
-                                    Spacer(minLength: 0)
-                                    logBottom
+                    ScrollViewReader { reader in
+                        ScrollView {
+                            VStack(alignment: .leading, spacing: 16) {
+                                title
+                                switch tab {
+                                case .log:
+                                    logTop
+                                    if !pinned {
+                                        Spacer(minLength: 0)
+                                        logBottom
+                                    }
+                                case .info: InfoContent(definitionId: exercise.definitionId)
+                                case .notes: Text(notes ?? "").foregroundStyle(Theme.foreground)
+                                case .history: HistoryContent(definitionId: exercise.definitionId)
                                 }
-                            case .info: InfoContent(definitionId: exercise.definitionId)
-                            case .notes: Text(notes ?? "").foregroundStyle(Theme.foreground)
-                            case .history: HistoryContent(definitionId: exercise.definitionId)
                             }
+                            // At least the panel's height, so unpinned inputs still sit at its bottom.
+                            .frame(maxWidth: .infinity, minHeight: max(box.size.height - 32, 0), alignment: .topLeading)
+                            .padding(16)
                         }
-                        // At least the panel's height, so unpinned inputs still sit at its bottom.
-                        .frame(maxWidth: .infinity, minHeight: max(box.size.height - 32, 0), alignment: .topLeading)
-                        .padding(16)
+                        .scrollBounceBehavior(.basedOnSize)
+                        // At the accessibility sizes the banner is last; the last Log set leaves it out of view.
+                        .onChange(of: allPlannedLogged) {
+                            if allPlannedLogged && !pinned { withAnimation { reader.scrollTo(Self.bannerId, anchor: .bottom) } }
+                        }
                     }
-                    .scrollBounceBehavior(.basedOnSize)
                 }
                 if pinned {
                     VStack(alignment: .leading, spacing: 16) { logBottom }
@@ -178,14 +184,15 @@ struct LoggerPanel: View {
             if form.editingSet == nil, let last = store.lastTime(definitionId: exercise.definitionId) {
                 LastTimeLine(last: last, fill: use)
             }
-            if allPlannedLogged {
+            if allPlannedLogged && !typeSize.isAccessibilitySize {
                 allLoggedBanner
             }
             setList
         }
     }
 
-    /// The inputs, or the open keypad in their place; none after the planned sets.
+    /// The inputs, or the open keypad in their place; none after the planned sets. At the accessibility sizes
+    /// the banner takes the inputs' place: the panel stays scrolled to its end, so one above would be out of view.
     @ViewBuilder private var logBottom: some View {
         switch pad {
         case .reps(let keypad):
@@ -197,9 +204,11 @@ struct LoggerPanel: View {
         case .effort(let kind):
             EffortGrid(kind: kind, value: form.effort, pick: { form.effort = $0; pad = nil }, cancel: { pad = nil })
         case nil:
-            if !allPlannedLogged { inputs }
+            if !allPlannedLogged { inputs } else if typeSize.isAccessibilitySize { allLoggedBanner.id(Self.bannerId) }
         }
     }
+
+    private static let bannerId = "all-planned-logged"
 
     /// "✓ ALL PLANNED SETS LOGGED" in place of the inputs, as the web does.
     private var allLoggedBanner: some View {
