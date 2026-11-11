@@ -14,7 +14,7 @@ updated: 2026-11-08
 An independent verdict: does slice 8 meet `features/ios-app/picker-custom.feature`, does it match the web, and is the code sound?
 
 ## Read first
-- The spec, `work/189-handback.md` (hands-on list), the diff of `ios/` since slice 7's acceptance commit `c0a7869e`. Don't read `work/190-handback.md` before your first pass.
+- The spec, `initiatives/ios-app/work/189-handback-1.md` (hands-on list), the diff of `ios/` since slice 7's acceptance commit `c0a7869e`. Don't read `initiatives/ios-app/work/190-handback.md` before your first pass. Reuse one simulator named `ripit-review` (create it only if missing); disk space is tight.
 
 ## Do
 - Same method as before: run `ios-check`, do an unaided first pass, ask up to 3 questions, then give a revised verdict.

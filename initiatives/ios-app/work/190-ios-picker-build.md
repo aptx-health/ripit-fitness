@@ -14,7 +14,7 @@ updated: 2026-11-08
 Make 189's tests pass and build the picker filters, multi-pick, and the custom exercise editor, so every scenario in `features/ios-app/picker-custom.feature` works.
 
 ## Read first
-- The spec, `work/189-handback.md` (contract and hands-on list).
+- The spec, `initiatives/ios-app/work/189-handback-1.md` and `-2.md` (contract, hands-on list, and Dustin's three calls: trim names, sort then cut to 50, a letter or digit required).
 - Web look: `initiatives/ios-app/handoff/parity-assets/web-picker*.png`. Use slice 7's shared styles in `Theme.swift`.
 
 ## Do
@@ -26,7 +26,7 @@ Make 189's tests pass and build the picker filters, multi-pick, and the custom e
 
 ## Done when
 - `mise run ios-check` exits 0, with 189's tests passing unchanged.
-- Every scenario works when you try it by real taps in your simulator.
+- Every scenario works when you try it by real taps in your simulator. Reuse one simulator named `ripit-impl` (create it only if missing); disk space is tight, so don't make per-item simulators.
 
 ## Decide alone
 - Layout details.
@@ -35,7 +35,7 @@ Make 189's tests pass and build the picker filters, multi-pick, and the custom e
 - A scenario can't be met as written.
 
 ## Don't touch
-- 189's tests. `work/`, `STATE.md`, `status.md`, the roadmap. Don't `rm`.
+- 189's tests. `initiatives/ios-app/work/`, `STATE.md`, `status.md`, the roadmap. Don't `rm`.
 
 ## Hand back
 The implementer packet, with screenshots.
