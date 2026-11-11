@@ -77,9 +77,9 @@ extension ShellTab {
 // MARK: - The bar
 
 /// Training · Library · WORKOUT · Progress · Settings: a 56pt row on the muted background with a 2pt
-/// top border. The active tab is "lit" (Dustin 2026-11-11, option B): an accent-muted block with a 3pt
-/// accent top edge slides under it, its label is in the accent color, and the other tabs dim to 80% (60% was
-/// too faint to read in the light themes).
+/// top border. The active tab is "lit" (Dustin 2026-11-11, option B): a rounded accent-muted block that fades
+/// downward, with a short accent pill on top, slides under it; its label is in the accent color, and the
+/// other tabs dim to 80% (60% was too faint to read in the light themes).
 /// E-ink keeps its bold underlined label. Each tab change gives a light selection haptic.
 struct RipitTabBar: View {
     @Environment(Shell.self) private var shell
@@ -104,16 +104,22 @@ struct RipitTabBar: View {
         }
         .frame(height: Self.rowHeight)
         .background(alignment: .topLeading) {
-            // Every slot is the same width, so the marker sits at the selected slot's offset. It runs up over
-            // the bar's 2pt top border.
+            // Every slot is the same width, so the marker sits at the selected slot's offset. Softened (Dustin
+            // 2026-11-11): the block is inset and rounded like the WORKOUT button, its fill fades out toward the
+            // bottom, and the accent edge is a short pill over the tab's middle. Block and pill slide together.
             GeometryReader { geo in
                 let slot = geo.size.width / CGFloat(max(items.count, 1))
                 let index = items.firstIndex { if case .tab(let t) = $0 { t == shell.tab } else { false } } ?? 0
-                Rectangle()
-                    .fill(Theme.accentMuted)
-                    .overlay(alignment: .top) { Rectangle().fill(Theme.edge(Theme.accent)).frame(height: 3) }
-                    .frame(width: slot, height: geo.size.height + 4)
-                    .offset(x: slot * CGFloat(index), y: -2)
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(LinearGradient(colors: [Theme.accentMuted, Theme.accentMuted.opacity(0)],
+                                         startPoint: .top, endPoint: .bottom))
+                    .overlay(alignment: .top) {
+                        Capsule().fill(Theme.edge(Theme.accent)).frame(width: slot / 2, height: 3)
+                    }
+                    .padding(.horizontal, 4)
+                    .padding(.top, 4)
+                    .frame(width: slot, height: geo.size.height)
+                    .offset(x: slot * CGFloat(index))
             }
             .accessibilityHidden(true)
         }

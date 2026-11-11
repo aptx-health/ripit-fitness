@@ -1,6 +1,6 @@
 ---
 id: 207
-state: ready
+state: running
 executor: parity-disco
 skill: reviewer (method from 200)
 waiting_on:
@@ -21,3 +21,7 @@ Accept, or a short fix list. Don't `rm`.
 
 ## Log
 - 2026-11-11: created (waiting on 206).
+- 2026-11-11 15:01 MST: dispatched to parity-disco (running; context 1%, kept)
+
+## Also (added 2026-11-11)
+After 206, also check 208 (`208-ios-tab-soften.md`, softened active-tab highlight): end and middle tabs in RIPIT dark, Blossom dark, a light theme and E-ink; the slide still works and Reduce Motion still jumps.
