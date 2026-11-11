@@ -125,11 +125,14 @@ public struct CustomExerciseDraft: Sendable, Equatable {
         if case let bad = secondaryMuscles.filter({ !validMuscles.contains($0) }), !bad.isEmpty {
             problems.append(FieldProblem(field: "secondaryFAUs", message: "Invalid muscle groups: \(bad.joined(separator: ", "))"))
         }
-        if let instructions, instructions.utf16.count > 1000 {
-            problems.append(FieldProblem(field: "instructions", message: "Instructions must be 1000 characters or less"))
+        if let instructions, instructions.utf16.count > Self.maxInstructions {
+            problems.append(FieldProblem(field: "instructions", message: "Instructions must be \(Self.maxInstructions) characters or less"))
         }
         return problems
     }
+
+    /// The web's MAX_INSTRUCTIONS_LENGTH.
+    public static let maxInstructions = 4000
 
     /// The name as stored (PHONE: trimmed).
     var trimmedName: String { name.trimmingCharacters(in: .whitespacesAndNewlines) }

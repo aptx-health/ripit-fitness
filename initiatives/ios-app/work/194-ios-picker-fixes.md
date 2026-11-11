@@ -1,6 +1,6 @@
 ---
 id: 194
-state: ready
+state: done
 executor: ios-impl
 skill: handoff-implementer
 waiting_on:
@@ -25,3 +25,4 @@ Make 193's tests pass and fix review 191's two editor findings.
 
 ## Don't touch
 Tests, `initiatives/ios-app/work/`, `STATE.md`, `status.md`, the roadmap. Don't `rm`.
+- 2026-11-10 19:29 MST: dispatched to ios-impl (running; context 32%, kept)

@@ -1,6 +1,7 @@
 // Create or edit a custom exercise (slice 8; web ExerciseDefinitionEditorModal.tsx): name,
 // equipment and primary muscle (one each, as on the web), secondary muscles, instructions. A name
-// that already exists is flagged as you type, and Save waits until everything is valid.
+// that already exists is flagged under the name as you type. A field's error shows once that field
+// is touched or Save is tapped; Save saves only a valid form.
 
 import RipitCore
 import SwiftUI
@@ -16,6 +17,10 @@ struct CustomExerciseEditor: View {
     @State private var choosing: Field?
     @State private var confirmingCancel = false
     @State private var loaded = false
+    /// Fields (by problem field name) the person has changed or opened; their errors show.
+    @State private var touched: Set<String> = []
+    /// Save was tapped on an invalid form: every error shows.
+    @State private var tried = false
 
     private enum Field: String, Identifiable {
         case equipment, primary, secondary
@@ -42,49 +47,50 @@ struct CustomExerciseEditor: View {
     }
 
     var body: some View {
+        ScrollViewReader { proxy in
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                if duplicate {
-                    Text("An exercise with this name already exists.")
-                        .font(.ripit(.subheadline, .semibold))
-                        .foregroundStyle(Theme.errorForeground)
-                        .padding(12)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Theme.error)
-                        .accessibilityAddTraits(.isStaticText)
-                }
                 field("Name", required: true, problem: nameProblem) {
-                    TextField("e.g., Bench Press", text: $draft.name, axis: .vertical)
+                    TextField("e.g., Bench Press", text: name, axis: .vertical)
                         .font(.ripit(.headline))
                         .accessibilityIdentifier("exercise-name")
                         .textInputAutocapitalization(.words)
-                        // It wraps at large text sizes, but a name stays one line.
-                        .onChange(of: draft.name) { _, name in
-                            if name.contains(where: \.isNewline) { draft.name = name.filter { !$0.isNewline } }
-                        }
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
                         .frame(minHeight: Theme.touch)
                         .background(Theme.card, in: Rectangle())
                         .overlay(Rectangle().stroke(nameProblem != nil || duplicate ? Theme.edge(Theme.error) : Theme.border,
                                                     lineWidth: nameProblem != nil || duplicate ? 2 : 1))
+                    // Under the field, so it stays in view while the keyboard is up.
+                    if duplicate {
+                        Text("An exercise with this name already exists.")
+                            .font(.ripit(.subheadline, .semibold))
+                            .foregroundStyle(Theme.errorForeground)
+                            .padding(12)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Theme.error)
+                            .id("duplicate")
+                    }
                 }
-                field("Equipment", required: true, problem: problem("equipment")) {
+                field("Equipment", required: true, problem: shown("equipment")) {
                     chooser(draft.equipment.map(EquipmentLabel.of).joined(separator: ", "), placeholder: "Select equipment") {
+                        touched.insert("equipment")
                         choosing = .equipment
                     }
                 }
-                field("Primary muscle group", required: true, problem: problem("primaryFAUs")) {
+                field("Primary muscle group", required: true, problem: shown("primaryFAUs")) {
                     chooser(draft.primaryMuscles.map(ExerciseInfo.muscleName).joined(separator: ", "), placeholder: "Select primary muscle group") {
+                        touched.insert("primaryFAUs")
                         choosing = .primary
                     }
                 }
-                field("Secondary muscle groups", required: false, problem: problem("secondaryFAUs")) {
+                field("Secondary muscle groups", required: false, problem: shown("secondaryFAUs")) {
                     chooser(draft.secondaryMuscles.map(ExerciseInfo.muscleName).joined(separator: ", "), placeholder: "None") {
+                        touched.insert("secondaryFAUs")
                         choosing = .secondary
                     }
                 }
-                field("Instructions", required: false, problem: problem("instructions")) {
+                field("Instructions", required: false, problem: shown("instructions")) {
                     TextField("How to perform this exercise...", text: instructions, axis: .vertical)
                         .lineLimit(4...12)
                         .accessibilityIdentifier("exercise-instructions")
@@ -93,13 +99,18 @@ struct CustomExerciseEditor: View {
                         .background(Theme.card, in: Rectangle())
                         .overlay(Rectangle().stroke(Theme.border, lineWidth: 1))
                     let count = (draft.instructions ?? "").utf16.count
-                    Text("\(count)/1000")
+                    Text(verbatim: "\(count)/\(CustomExerciseDraft.maxInstructions)")
                         .font(.ripit(.caption))
-                        .foregroundStyle(count > 1000 ? Theme.text(Theme.error) : Theme.mutedForeground)
+                        .foregroundStyle(count > CustomExerciseDraft.maxInstructions ? Theme.text(Theme.error) : Theme.mutedForeground)
                         .frame(maxWidth: .infinity, alignment: .trailing)
                 }
             }
             .padding(16)
+        }
+        // At large text sizes the warning is taller than the gap above the keyboard: bring it into view.
+        .onChange(of: duplicate) { _, isDuplicate in
+            if isDuplicate { withAnimation { proxy.scrollTo("duplicate", anchor: .bottom) } }
+        }
         }
         .scrollDismissesKeyboard(.interactively)
         .background(Theme.background)
@@ -111,8 +122,8 @@ struct CustomExerciseEditor: View {
                     .frame(minHeight: Theme.touch)
             }
             ToolbarItem(placement: .confirmationAction) {
+                // Tappable while invalid: a tap shows every error instead of saving.
                 Button("Save", action: save)
-                    .disabled(!problems.isEmpty || duplicate)
                     .frame(minHeight: Theme.touch)
             }
         }
@@ -142,16 +153,26 @@ struct CustomExerciseEditor: View {
     }
 
     private var instructions: Binding<String> {
-        Binding(get: { draft.instructions ?? "" }, set: { draft.instructions = $0.isEmpty ? nil : $0 })
+        Binding(get: { draft.instructions ?? "" }, set: {
+            draft.instructions = $0.isEmpty ? nil : $0
+            touched.insert("instructions")
+        })
     }
 
-    /// The name's problem, once something is typed (an empty name just keeps Save off).
-    private var nameProblem: String? {
-        draft.name.isEmpty ? nil : problem("name")
+    /// The name wraps at large text sizes, but stays one line.
+    private var name: Binding<String> {
+        Binding(get: { draft.name }, set: {
+            draft.name = $0.filter { !$0.isNewline }
+            touched.insert("name")
+        })
     }
 
-    private func problem(_ field: String) -> String? {
-        problems.first { $0.field == field }?.message
+    private var nameProblem: String? { shown("name") }
+
+    /// A field's problem, once that field is touched or Save was tapped.
+    private func shown(_ field: String) -> String? {
+        guard tried || touched.contains(field) else { return nil }
+        return problems.first { $0.field == field }?.message
     }
 
     private func field<Content: View>(_ label: String, required: Bool, problem: String?,
@@ -198,6 +219,10 @@ struct CustomExerciseEditor: View {
     }
 
     private func save() {
+        guard problems.isEmpty, !duplicate else {
+            tried = true
+            return
+        }
         switch target {
         case .create:
             guard let id = store.createCustomExercise(draft) else { return }

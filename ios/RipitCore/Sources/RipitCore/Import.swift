@@ -10,7 +10,7 @@
 // - Plan (prescribedSets under exercises) and reality (loggedSets under completions) stay apart.
 // - LoggedSet.weight is a number with weightUnit "lbs" or "kg"; nothing is converted.
 // - An exercise ref resolves by id against the catalog, then by normalized name against the catalog
-//   (the web's normalizeExerciseName), else it is kept under its own id as a non-system definition.
+//   (the web's normalizeExerciseName), else it is kept under its own id as a built-in definition.
 //   Exercises and saved workout snapshots point at the resolved id.
 // - An imported draft session is resumable, with completedAt NULL like local drafts, when the phone
 //   has no open draft and the draft was active within 24 hours of the export; otherwise it is stored
@@ -234,10 +234,12 @@ private struct ExportImporter {
             definitionIds[ref.id] = local
             return
         }
-        // Not in the catalog: keep it under its own id, so its sets keep their exercise.
+        // Not in the phone's catalog: a web built-in added since the catalog was built (customs come
+        // through resolveCustom). Keep it under its own id, so its sets keep their exercise, and mark it
+        // built-in, so it isn't shown as mine or offered for editing.
         try db.execute(sql: """
             INSERT INTO exerciseDefinition (id, name, normalizedName, isSystem, createdAt, updatedAt, importHash)
-            VALUES (?, ?, ?, 0, ?, ?, 'insert-only')
+            VALUES (?, ?, ?, 1, ?, ?, 'insert-only')
             """, arguments: [ref.id, ref.name, normalizeExerciseName(ref.name), file.exportedAt, file.exportedAt])
         definitionIds[ref.id] = ref.id
     }
