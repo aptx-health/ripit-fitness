@@ -136,13 +136,18 @@ describeFeature(feature, ({ Scenario }) => {
         fireEvent.click(screen.getByRole('button', { name: /download my data/i }))
         await waitFor(() => expect(s.savedAs).toBeTruthy())
         expect(blobs).toHaveLength(1)
-        // jsdom's Blob has no text().
-        const text = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader()
-          reader.onload = () => resolve(reader.result as string)
-          reader.onerror = () => reject(reader.error)
-          reader.readAsText(blobs[0])
-        })
+        // The Blob may be Node's (has text()) or jsdom's (no text(), needs
+        // jsdom's FileReader); which one depends on the runner, so handle both.
+        const blob = blobs[0]
+        const text =
+          typeof blob.text === 'function'
+            ? await blob.text()
+            : await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader()
+                reader.onload = () => resolve(reader.result as string)
+                reader.onerror = () => reject(reader.error)
+                reader.readAsText(blob)
+              })
         s.file = JSON.parse(text) as Json
       } finally {
         click.mockRestore()
