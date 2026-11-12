@@ -205,6 +205,12 @@ export const coachSendLimiter = lazyLimiter({ keyPrefix: 'coach-send', points: 3
  */
 export const coachTraineesLimiter = lazyLimiter({ keyPrefix: 'coach-trainees', points: 60, duration: 60 })
 
+/**
+ * Download my data (GET /api/me/export), 5 req / 600s per user. Each request
+ * reads every training row the user has.
+ */
+export const dataExportLimiter = lazyLimiter({ keyPrefix: 'data-export', points: 5, duration: 600 })
+
 export type LimiterGetter = () => RateLimiterRedis | RateLimiterMemory
 
 /**
