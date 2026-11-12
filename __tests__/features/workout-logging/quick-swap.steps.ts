@@ -17,16 +17,22 @@
  *   components/workout-logging/wizards/SwapExerciseWizard.tsx (program logger), new props:
  *     currentExerciseDefinitionId: string
  *     currentPrescribedSets: Array<{ setNumber: number; reps: string; rir?: number | null; rpe?: number | null; weight?: string | null }>
- *     Opens on the picker. On it: a checkbox named "Keep original sets" (checked) with the prescription
- *     as text ("3 × 8 @ RIR 2"; "x" also accepted), and a checkbox named "Also swap in future weeks"
- *     (unchecked). With Keep checked, tapping an exercise POSTs the replace route at once (no set or
+ *     Opens on the picker. On it (work 216): a summary line with the prescription as text ("Keeps 3 × 8
+ *     @ RIR 2 · This week only"; "x" also accepted) and a button named "Change" that reveals two
+ *     switches (role switch): "Keep original sets" (on) and "Also swap in future weeks" (off); hidden
+ *     from role queries until then. With Keep on, tapping an exercise POSTs the replace route at once (no set or
  *     scope step) keeping the sets, then calls onComplete() and onOpenChange(false). With Keep
- *     unchecked, tapping opens the set editor (SetConfigurationInterface, existing) prefilled with the
+ *     off, tapping opens the set editor (SetConfigurationInterface, existing) prefilled with the
  *     original sets; a button named "Save..." or "Swap..." swaps with the edited sets. "Also swap in
  *     future weeks" sends applyToFuture: true.
  *     A failed swap shows role="alert" text saying the swap didn't happen (e.g. "Swap didn't happen. Try
  *     again."), does not call onComplete, keeps the picker open (it must still be open 2.5 s later)
  *     and lets the user tap again.
+ *   Both pickers (work 216): a button named "Cancel" in the header (the X); a button named "Filters"
+ *     next to search that reveals the existing "All Muscle Groups" / "All Equipment" triggers (hidden
+ *     from role queries until then); under Similar a "More like this" button that shows chips (buttons
+ *     with aria-pressed, named by FAU/equipment display name, all pressed) and a list named "More like
+ *     this" from the search route (muscles any AND equipment any), leaving out the Similar exercises.
  *   components/adhoc/AdHocExercisePickerModal.tsx (freestyle logger): PickerMode swap gains
  *     currentDefinitionId: string. The same Similar list; tapping one calls onConfirm([def]) once.
  *
@@ -356,8 +362,15 @@ async function tapSimilar(name: string) {
   fireEvent.click(await within(list).findByText(name))
 }
 const isChecked = (el: HTMLElement) => el.getAttribute('aria-checked') === 'true' || (el as HTMLInputElement).checked === true
-const keepBox = () => screen.getByRole('checkbox', { name: /keep original sets/i })
-const futureBox = () => screen.getByRole('checkbox', { name: /also swap in future weeks/i })
+// work 216: the switches sit behind the summary line's "Change" (was: visible checkboxes).
+const keepBox = () => screen.getByRole('switch', { name: /keep original sets/i })
+const futureBox = () => screen.getByRole('switch', { name: /also swap in future weeks/i })
+const openChange = () => fireEvent.click(screen.getByRole('button', { name: /^change$/i }))
+// The line is the text the Change/Done button is described by.
+const summaryLine = () => {
+  const button = screen.getByRole('button', { name: /^(change|done)$/i })
+  return document.getElementById(button.getAttribute('aria-describedby') ?? '') as HTMLElement
+}
 const replaceCalls = () => ui.calls.filter((c) => c.method === 'POST' && c.path.endsWith('/replace'))
 async function swappedTo(exerciseId: string, name: string) {
   await waitFor(async () => expect((await shape(exerciseId)).exerciseDefinitionId).toBe(s.d[name]), { timeout: 6000 })
@@ -526,7 +539,7 @@ describeFeature(feature, ({ Background, Scenario, ScenarioOutline }) => {
     })
   })
 
-  Scenario('The picker shows what will be kept', ({ Given, When, Then, And }) => {
+  Scenario('The picker shows what will be kept in one line', ({ Given, When, Then, And }) => {
     Given('I am in the program logger', () => {
       s.logger = 'program logger'
     })
@@ -534,19 +547,130 @@ describeFeature(feature, ({ Background, Scenario, ScenarioOutline }) => {
       await openProgramPicker()
       await similarList()
     })
-    Then('it shows "Keep original sets" checked, with the prescription (for example "3 × 8 @ RIR 2")', () => {
-      expect(isChecked(keepBox())).toBe(true)
-      expect(document.body.textContent ?? '').toMatch(/3\s*[×x]\s*8\s*@\s*RIR\s*2/i)
+    Then('one line reads "Keeps 3 × 8 @ RIR 2 · This week only" with a "Change" button', () => {
+      expect(summaryLine().textContent ?? '').toMatch(/Keeps 3\s*[×x]\s*8\s*@\s*RIR\s*2\s*·\s*This week only/i)
+      expect(screen.getByRole('button', { name: /^change$/i })).toBeTruthy()
+      // Closed: the switches are not on offer yet.
+      expect(screen.queryAllByRole('switch')).toHaveLength(0)
     })
-    And('an unchecked "Also swap in future weeks"', () => {
+    And('tapping "Change" shows "Keep original sets" (on) and "Also swap in future weeks" (off) as the app\'s switches', () => {
+      openChange()
+      expect(isChecked(keepBox())).toBe(true)
       expect(isChecked(futureBox())).toBe(false)
+    })
+    And('the line updates to match what I choose', () => {
+      fireEvent.click(futureBox())
+      expect(summaryLine().textContent ?? '').toMatch(/This and future weeks/i)
+      fireEvent.click(keepBox())
+      expect(summaryLine().textContent ?? '').not.toMatch(/Keeps 3/i)
+      fireEvent.click(keepBox())
+      fireEvent.click(futureBox())
+      expect(summaryLine().textContent ?? '').toMatch(/Keeps 3\s*[×x]\s*8.*This week only/i)
+    })
+  })
+
+  Scenario('The picker opens on similar exercises, not filters', ({ When, Then, And }) => {
+    When('I open the swap picker', async () => {
+      await openProgramPicker()
+      await similarList()
+    })
+    Then('the muscle and equipment filters are collapsed behind one filter button next to search', async () => {
+      for (const logger of ['program logger', 'freestyle logger'] as const) {
+        if (logger === 'freestyle logger') {
+          cleanup()
+          await openFreestylePicker()
+          await similarList()
+        }
+        const filters = screen.getByRole('button', { name: 'Filters' })
+        expect(filters.getAttribute('aria-expanded')).toBe('false')
+        expect(screen.queryByRole('button', { name: 'All Muscle Groups' })).toBeNull()
+        expect(screen.queryByRole('button', { name: 'All Equipment' })).toBeNull()
+        // Next to search: the same row as the search box.
+        expect(filters.parentElement?.contains(searchBox())).toBe(true)
+        fireEvent.click(filters)
+        expect(screen.getByRole('button', { name: 'All Muscle Groups' })).toBeTruthy()
+        expect(screen.getByRole('button', { name: 'All Equipment' })).toBeTruthy()
+      }
+    })
+    And('Cancel is an X in the header', async () => {
+      // Freestyle is on screen: one Cancel, above the search box, and it closes the picker.
+      const cancel = screen.getByRole('button', { name: 'Cancel' })
+      expect(cancel.compareDocumentPosition(searchBox()) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+      fireEvent.click(cancel)
+      expect(ui.close).toHaveBeenCalledTimes(1)
+      cleanup()
+      await openProgramPicker()
+      await similarList()
+      const programCancel = screen.getByRole('button', { name: 'Cancel' })
+      expect(programCancel.compareDocumentPosition(searchBox()) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+      fireEvent.click(programCancel)
+      expect(ui.openChange).toHaveBeenCalledWith(false)
+    })
+    And('at least 6 similar exercises fit on a phone screen', async () => {
+      // jsdom has no layout; the phone-width screenshots (assets/216) show the rows. Here: above the
+      // Similar list sit only the header, the summary line and the search row, nothing expanded.
+      cleanup()
+      await openProgramPicker()
+      await similarList()
+      expect(screen.queryAllByRole('switch')).toHaveLength(0)
+      expect(screen.queryByRole('button', { name: 'All Muscle Groups' })).toBeNull()
+      expect(screen.queryByRole('list', { name: 'More like this' })).toBeNull()
+    })
+  })
+
+  Scenario('More like this', ({ Given, When, Then, And }) => {
+    Given('the "Similar" list is showing', async () => {
+      // Three more two-muscle dumbbell exercises and a glute bridge push Dumbbell Step Up out of the top 8.
+      await makeDef('Dumbbell Split Squat', ['quads', 'glutes'], ['dumbbell'], null)
+      await makeDef('Goblet Box Squat', ['quads', 'glutes'], ['dumbbell'], null)
+      await makeDef('Dumbbell Reverse Lunge', ['quads', 'glutes'], ['dumbbell'], null)
+      await makeDef('Dumbbell Glute Bridge', ['glutes'], ['dumbbell'], null)
+      await openProgramPicker()
+      s.similar = await similarNames()
+      expect(s.similar).toHaveLength(8)
+      expect(s.similar.some((t) => t.includes('Dumbbell Step Up'))).toBe(false)
+    })
+    When('I tap "More like this"', () => {
+      fireEvent.click(screen.getByRole('button', { name: /more like this/i }))
+    })
+    Then('chips for the current exercise\'s muscles and equipment appear', () => {
+      for (const name of ['Quads', 'Glutes', 'Dumbbell']) {
+        expect(screen.getByRole('button', { name, pressed: true })).toBeTruthy()
+      }
+    })
+    And('the list below shows more exercises matching the chips I leave on', async () => {
+      const moreNames = async () => {
+        const list = await screen.findByRole('list', { name: 'More like this' }, { timeout: 4000 })
+        return within(list).getAllByRole('listitem').map((li) => li.textContent ?? '')
+      }
+      // All on: quads or glutes, with a dumbbell, not already in Similar.
+      let names = await moreNames()
+      expect(names.some((t) => t.includes('Dumbbell Step Up'))).toBe(true)
+      expect(names.some((t) => t.includes('Leg Extension') || t.includes('Hip Thrust'))).toBe(false)
+      expect(names.some((t) => t.includes('Dumbbell Curl'))).toBe(false)
+      expect(names.some((t) => s.similar.some((sim) => t === sim))).toBe(false)
+      // Dumbbell off: any equipment, still quads or glutes.
+      fireEvent.click(screen.getByRole('button', { name: 'Dumbbell', pressed: true }))
+      await waitFor(async () => {
+        names = await moreNames()
+        expect(names.some((t) => t.includes('Leg Extension'))).toBe(true)
+      }, { timeout: 4000 })
+      expect(names.some((t) => t.includes('Hip Thrust'))).toBe(true)
+      expect(names.some((t) => t.includes('Dumbbell Step Up'))).toBe(true)
+      expect(names.some((t) => t.includes('Dumbbell Curl') || t.includes('Plank'))).toBe(false)
+      // A row there swaps like a Similar one.
+      const list = await screen.findByRole('list', { name: 'More like this' })
+      fireEvent.click(within(list).getByText('Leg Extension'))
+      await swappedTo(s.current.exerciseId, 'Leg Extension')
+      expect((await shape(s.current.exerciseId)).prescribedSets).toEqual(sets(3, '8', 2))
     })
   })
 
   Scenario('Unchecking "Keep original sets" opens the set editor', ({ Given, When, Then, And }) => {
-    Given('I unchecked "Keep original sets"', async () => {
+    Given('I turned off "Keep original sets"', async () => {
       await openProgramPicker()
       await similarList()
+      openChange()
       fireEvent.click(keepBox())
       expect(isChecked(keepBox())).toBe(false)
     })
@@ -571,9 +695,10 @@ describeFeature(feature, ({ Background, Scenario, ScenarioOutline }) => {
   })
 
   Scenario('Also swap in future weeks', ({ Given, When, Then, And }) => {
-    Given('I checked "Also swap in future weeks"', async () => {
+    Given('I turned on "Also swap in future weeks"', async () => {
       await openProgramPicker()
       await similarList()
+      openChange()
       fireEvent.click(futureBox())
       expect(isChecked(futureBox())).toBe(true)
       expect(isChecked(keepBox())).toBe(true)

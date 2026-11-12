@@ -3,7 +3,8 @@
  * F1: with "Keep original sets" off, the edited swap keeps each original set's prescribed weight
  *     (the set editor has no weight column; a set the user adds has none).
  * F2: the "Similar" list hides while a muscle or equipment filter, or the Anchors view, is active,
- *     as it does while typing, and comes back when they are cleared.
+ *     as it does while typing, and comes back when they are cleared. Run in both layouts; the swap
+ *     layout (work 216) keeps the triggers behind its "Filters" button.
  * Fetch is stubbed; the route's storage of weight is in __tests__/api/exercise-replace-weight.test.ts.
  */
 
@@ -100,7 +101,8 @@ describe('F1: an edited swap keeps the prescribed weight', () => {
       />
     )
     const list = await screen.findByRole('list', { name: 'Similar' })
-    fireEvent.click(screen.getByRole('checkbox', { name: /keep original sets/i }))
+    fireEvent.click(screen.getByRole('button', { name: /^change$/i }))
+    fireEvent.click(screen.getByRole('switch', { name: /keep original sets/i }))
     fireEvent.click(within(list).getByText('Dumbbell Lunge'))
     fireEvent.click(await screen.findByText(/add set/i))
     await waitFor(() => expect(screen.getAllByRole('button', { name: '8' })).toHaveLength(3))
@@ -117,9 +119,18 @@ describe('F1: an edited swap keeps the prescribed weight', () => {
   })
 })
 
-describe('F2: filters hide the Similar list like typing does', () => {
+describe.each(['default', 'swap'] as const)('F2: filters hide the Similar list like typing does (%s layout)', (layout) => {
   function picker(extra: Record<string, unknown> = {}) {
-    render(<ExerciseSearchInterface onExerciseSelect={vi.fn()} preloadExercises similarToDefinitionId="def-goblet" {...extra} />)
+    render(
+      <ExerciseSearchInterface
+        onExerciseSelect={vi.fn()}
+        preloadExercises
+        similarToDefinitionId="def-goblet"
+        layout={layout}
+        {...extra}
+      />
+    )
+    if (layout === 'swap') fireEvent.click(screen.getByRole('button', { name: 'Filters' }))
   }
   async function pick(trigger: string, option: string) {
     fireEvent.click(screen.getByRole('button', { name: trigger }))

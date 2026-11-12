@@ -54,20 +54,33 @@ Feature: Quick exercise swap in an active workout
     And it keeps 3 sets of 8 at RIR 2
     And I am back in the logger on the new exercise
 
-  Scenario: The picker shows what will be kept
+  Scenario: The picker shows what will be kept in one line
     Given I am in the program logger
     When I open the swap picker
-    Then it shows "Keep original sets" checked, with the prescription (for example "3 × 8 @ RIR 2")
-    And an unchecked "Also swap in future weeks"
+    Then one line reads "Keeps 3 × 8 @ RIR 2 · This week only" with a "Change" button
+    And tapping "Change" shows "Keep original sets" (on) and "Also swap in future weeks" (off) as the app's switches
+    And the line updates to match what I choose
+
+  Scenario: The picker opens on similar exercises, not filters
+    When I open the swap picker
+    Then the muscle and equipment filters are collapsed behind one filter button next to search
+    And Cancel is an X in the header
+    And at least 6 similar exercises fit on a phone screen
+
+  Scenario: More like this
+    Given the "Similar" list is showing
+    When I tap "More like this"
+    Then chips for the current exercise's muscles and equipment appear
+    And the list below shows more exercises matching the chips I leave on
 
   Scenario: Unchecking "Keep original sets" opens the set editor
-    Given I unchecked "Keep original sets"
+    Given I turned off "Keep original sets"
     When I tap an exercise
     Then the set editor opens prefilled with the original sets
     And saving it swaps the exercise with the edited sets
 
   Scenario: Also swap in future weeks
-    Given I checked "Also swap in future weeks"
+    Given I turned on "Also swap in future weeks"
     When I tap an exercise
     Then this exercise and the same exercise in later weeks of the program are replaced
     And each keeps its own prescribed sets

@@ -9,6 +9,8 @@ import { checkRateLimit, exerciseSimilarLimiter } from '@/lib/rate-limit'
  * GET /api/exercises/similar?definitionId=<id>
  * Up to 8 exercises the user can use (library or their own custom) ranked by
  * rankSimilar, ties in name order. 404 for a definition the user can't see.
+ * `current` carries the definition's own muscles and equipment for the
+ * picker's "More like this" chips.
  */
 export async function GET(request: NextRequest) {
   try {
@@ -34,8 +36,9 @@ export async function GET(request: NextRequest) {
     if (!current) {
       return NextResponse.json({ error: 'Exercise not found' }, { status: 404 })
     }
+    const source = { primaryFAUs: current.primaryFAUs, equipment: current.equipment }
     if (current.primaryFAUs.length === 0) {
-      return NextResponse.json({ similar: [] })
+      return NextResponse.json({ similar: [], current: source })
     }
 
     // Every visible exercise sharing a primary muscle; ranking happens in memory.
@@ -54,7 +57,7 @@ export async function GET(request: NextRequest) {
       orderBy: { name: 'asc' },
     })
 
-    return NextResponse.json({ similar: rankSimilar(current, candidates) })
+    return NextResponse.json({ similar: rankSimilar(current, candidates), current: source })
   } catch (error) {
     logger.error({ error, context: 'exercise-similar' }, 'Failed to load similar exercises')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

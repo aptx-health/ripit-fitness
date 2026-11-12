@@ -6,6 +6,7 @@ import {
   type ExerciseDefinition,
   ExerciseSearchInterface,
 } from '@/components/exercise-selection/ExerciseSearchInterface'
+import { SwapPickerHeader } from '@/components/exercise-selection/SwapPickerParts'
 import ExerciseDefinitionEditorModal from '@/components/features/exercise-definition/ExerciseDefinitionEditorModal'
 import type { MuscleBalanceSnapshot } from '@/components/features/muscle-balance/types'
 import { Button } from '@/components/ui/Button'
@@ -101,10 +102,8 @@ export function AdHocExercisePickerModal({
   )
 
   const count = selectedDefs.length
-  const title = isAdd ? 'Search Exercises' : 'Swap Exercise'
-  const description = isAdd
-    ? 'Pick one or more to add to your workout'
-    : `Pick a replacement for ${mode.kind === 'swap' ? mode.replacingName : ''}`
+  const title = 'Search Exercises'
+  const description = 'Pick one or more to add to your workout'
 
   return (
     <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
@@ -116,23 +115,34 @@ export function AdHocExercisePickerModal({
         onOpenAutoFocus={(e) => e.preventDefault()}
         className="w-full h-full sm:w-[90vw] sm:max-w-3xl sm:h-auto sm:max-h-[85vh] rounded-none sm:rounded-none border border-border bg-card"
       >
-        <DialogHeader className="border-b border-border bg-primary py-2">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <DialogTitle className="text-lg font-bold text-primary-foreground tracking-wider uppercase">
-                {title}
-              </DialogTitle>
-              <DialogDescription className="text-base font-bold text-primary-foreground/70 uppercase tracking-wide">
-                {description}
-              </DialogDescription>
+        {isAdd ? (
+          <DialogHeader className="border-b border-border bg-primary py-2">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <DialogTitle className="text-lg font-bold text-primary-foreground tracking-wider uppercase">
+                  {title}
+                </DialogTitle>
+                <DialogDescription className="text-base font-bold text-primary-foreground/70 uppercase tracking-wide">
+                  {description}
+                </DialogDescription>
+              </div>
             </div>
-          </div>
-        </DialogHeader>
+          </DialogHeader>
+        ) : (
+          <SwapPickerHeader
+            title="Swap exercise"
+            subtitle={`For ${mode.replacingName}`}
+            onClose={onClose}
+            closeDisabled={isBusy}
+          />
+        )}
 
-        <DialogBody className="flex-1 min-h-0">
+        {/* Swap: only the list scrolls, so search and filters stay put (as in SwapExerciseWizard). */}
+        <DialogBody className={`flex-1 min-h-0 ${isAdd ? '' : 'flex flex-col overflow-hidden!'}`}>
           <ExerciseSearchInterface
             onExerciseSelect={isAdd ? handleAddToggle : handleSwapSelect}
             selectedIds={isAdd ? selectedIds : undefined}
+            layout={isAdd ? 'default' : 'swap'}
             preloadExercises
             similarToDefinitionId={mode.kind === 'swap' ? mode.currentDefinitionId || undefined : undefined}
             muscleBalanceSnapshot={isAdd ? muscleBalanceSnapshot : undefined}
@@ -142,34 +152,33 @@ export function AdHocExercisePickerModal({
           />
         </DialogBody>
 
-        <DialogFooter className="border-t border-border bg-card py-2">
-          <div className="flex items-center justify-end gap-2 w-full">
-            <Button variant="secondary" onClick={onClose} doom disabled={isBusy}>
-              Cancel
-            </Button>
-            {isAdd && (
-              <>
-                <Button
-                  variant="secondary"
-                  onClick={() => setShowCreateModal(true)}
-                  doom
-                  disabled={isBusy}
-                >
-                  + Create New Exercise
-                </Button>
-                <Button
-                  variant="primary"
-                  onClick={() => onConfirm(selectedDefs)}
-                  disabled={count === 0 || isBusy}
-                  loading={isBusy}
-                  doom
-                >
-                  {count === 0 ? 'Add' : count === 1 ? 'Add 1 exercise' : `Add all (${count})`}
-                </Button>
-              </>
-            )}
-          </div>
-        </DialogFooter>
+        {/* Swap cancels from the header X, so only add mode has a footer. */}
+        {isAdd && (
+          <DialogFooter className="border-t border-border bg-card py-2">
+            <div className="flex items-center justify-end gap-2 w-full">
+              <Button variant="secondary" onClick={onClose} doom disabled={isBusy}>
+                Cancel
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => setShowCreateModal(true)}
+                doom
+                disabled={isBusy}
+              >
+                + Create New Exercise
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => onConfirm(selectedDefs)}
+                disabled={count === 0 || isBusy}
+                loading={isBusy}
+                doom
+              >
+                {count === 0 ? 'Add' : count === 1 ? 'Add 1 exercise' : `Add all (${count})`}
+              </Button>
+            </div>
+          </DialogFooter>
+        )}
       </DialogContent>
       <ExerciseDefinitionEditorModal
         isOpen={showCreateModal}

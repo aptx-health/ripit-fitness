@@ -3,16 +3,9 @@
 import { ChevronLeft } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ExerciseSearchInterface } from '@/components/exercise-selection/ExerciseSearchInterface'
+import { Reveal, SwapPickerHeader, SwitchRow } from '@/components/exercise-selection/SwapPickerParts'
 import { Button } from '@/components/ui/Button'
-import {
-  Dialog,
-  DialogBody,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/radix/dialog'
+import { Dialog, DialogBody, DialogContent, DialogFooter } from '@/components/ui/radix/dialog'
 import { clientLogger } from '@/lib/client-logger'
 import type { ExerciseDefinition } from '../wizard-steps/ExerciseSearchStep'
 import {
@@ -41,9 +34,10 @@ interface SwapExerciseWizardProps {
 const SWAP_FAILED = "Swap didn't happen. Try again."
 
 /**
- * Program logger swap: opens on the picker (Similar list, then search). With
- * "Keep original sets" checked a tap swaps at once and keeps the prescribed
- * sets; unchecked, the tap opens the set editor prefilled with them.
+ * Program logger swap: opens on the picker (Similar list, then search). A summary
+ * line ("Keeps 3 × 8 @ RIR 2 · This week only") opens the two switches. With
+ * "Keep original sets" on a tap swaps at once and keeps the prescribed sets;
+ * off, the tap opens the set editor prefilled with them.
  */
 export function SwapExerciseWizard({
   open,
@@ -56,6 +50,8 @@ export function SwapExerciseWizard({
 }: SwapExerciseWizardProps) {
   const [keepSets, setKeepSets] = useState(true)
   const [applyToFuture, setApplyToFuture] = useState(false)
+  // The two switches sit behind the summary line's "Change".
+  const [optionsOpen, setOptionsOpen] = useState(false)
   // Set when "Keep original sets" is off: the set editor is showing for this pick.
   const [configuring, setConfiguring] = useState<ExerciseDefinition | null>(null)
   const [prescription, setPrescription] = useState<ExercisePrescription | null>(null)
@@ -69,6 +65,7 @@ export function SwapExerciseWizard({
     if (open) {
       setKeepSets(true)
       setApplyToFuture(false)
+      setOptionsOpen(false)
       setConfiguring(null)
       setPrescription(null)
       setIsSwapping(false)
@@ -176,14 +173,14 @@ export function SwapExerciseWizard({
         onOpenAutoFocus={(e) => e.preventDefault()}
         className="w-full h-full sm:w-[90vw] sm:max-w-3xl sm:h-auto sm:max-h-[85vh] rounded-none sm:rounded-none border border-border bg-card"
       >
-        <DialogHeader className="border-b border-border bg-primary py-2">
-          <DialogTitle className="text-lg font-bold text-primary-foreground tracking-wider uppercase">
-            {configuring ? 'Set up sets' : 'Swap Exercise'}
-          </DialogTitle>
-          <DialogDescription className="text-base font-bold text-primary-foreground/70 uppercase tracking-wide">
-            {configuring ? configuring.name : `Replace "${currentExerciseName}"`}
-          </DialogDescription>
-        </DialogHeader>
+        <SwapPickerHeader
+          title={configuring ? 'Set up sets' : 'Swap exercise'}
+          subtitle={
+            isSwapping ? 'Swapping...' : configuring ? configuring.name : `For ${currentExerciseName}`
+          }
+          onClose={() => onOpenChange(false)}
+          closeDisabled={isSwapping}
+        />
 
         {errorMessage && (
           <p role="alert" className="border-b-2 border-error bg-error-muted px-4 py-2 text-sm font-bold text-error">
@@ -200,32 +197,50 @@ export function SwapExerciseWizard({
             />
           ) : (
             <div className="flex flex-col h-full w-full overflow-hidden">
-              <div className="flex flex-col gap-2 border-b-2 border-border px-4 sm:px-6 py-3 flex-shrink-0">
-                <label className="flex min-h-10 items-center gap-3 text-foreground">
-                  <input
-                    type="checkbox"
-                    checked={keepSets}
-                    onChange={(e) => setKeepSets(e.target.checked)}
+              <div className="flex-shrink-0 border-b-2 border-border bg-muted/40">
+                <div className="flex min-h-11 items-center gap-2 pl-4 sm:pl-6">
+                  <p id="swap-summary" aria-live="polite" className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
+                    <span className="font-bold text-foreground">
+                      {keepSets ? (summary ? `Keeps ${summary}` : 'Keeps its sets') : 'Set up sets after picking'}
+                    </span>
+                    {' · '}
+                    {applyToFuture ? 'This and future weeks' : 'This week only'}
+                  </p>
+                  <button
+                    type="button"
+                    aria-expanded={optionsOpen}
+                    aria-controls="swap-options"
+                    aria-describedby="swap-summary"
+                    onClick={() => setOptionsOpen((o) => !o)}
                     disabled={isSwapping}
-                    className="accent-primary w-5 h-5"
-                  />
-                  <span className="font-bold">Keep original sets</span>
-                  {summary && <span className="ml-auto text-sm text-muted-foreground">{summary}</span>}
-                </label>
-                <label className="flex min-h-10 items-center gap-3 text-foreground">
-                  <input
-                    type="checkbox"
-                    checked={applyToFuture}
-                    onChange={(e) => setApplyToFuture(e.target.checked)}
-                    disabled={isSwapping}
-                    className="accent-primary w-5 h-5"
-                  />
-                  <span className="font-bold">Also swap in future weeks</span>
-                </label>
+                    className="flex min-h-11 items-center px-4 text-xs font-bold uppercase tracking-wider text-primary doom-focus-ring sm:px-6"
+                  >
+                    {optionsOpen ? 'Done' : 'Change'}
+                  </button>
+                </div>
+                <Reveal open={optionsOpen} id="swap-options">
+                  <div className="border-t border-border pb-1">
+                    <SwitchRow
+                      checked={keepSets}
+                      onChange={setKeepSets}
+                      label="Keep original sets"
+                      hint={summary || undefined}
+                      disabled={isSwapping}
+                    />
+                    <SwitchRow
+                      checked={applyToFuture}
+                      onChange={setApplyToFuture}
+                      label="Also swap in future weeks"
+                      hint="Later weeks of the program change too"
+                      disabled={isSwapping}
+                    />
+                  </div>
+                </Reveal>
               </div>
               <div className={`flex flex-col flex-1 min-h-0 ${isSwapping ? 'pointer-events-none opacity-60' : ''}`}>
                 <ExerciseSearchInterface
                   onExerciseSelect={handleExerciseSelect}
+                  layout="swap"
                   preloadExercises
                   similarToDefinitionId={currentExerciseDefinitionId || undefined}
                 />
@@ -234,39 +249,28 @@ export function SwapExerciseWizard({
           )}
         </DialogBody>
 
-        <DialogFooter className="border-t border-border bg-card py-2">
-          <div className="flex items-center justify-between w-full">
-            <div>
-              {configuring && (
-                <Button
-                  variant="secondary"
-                  onClick={() => {
-                    setConfiguring(null)
-                    setErrorMessage(null)
-                  }}
-                  disabled={isSwapping}
-                  doom
-                >
-                  <ChevronLeft className="w-4 h-4 mr-1 inline" />
-                  Back
-                </Button>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              {isSwapping && !configuring && (
-                <span className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Swapping...</span>
-              )}
-              <Button variant="secondary" onClick={() => onOpenChange(false)} disabled={isSwapping} doom>
-                Cancel
+        {/* Only the set editor has a footer; the picker cancels from the header X. */}
+        {configuring && (
+          <DialogFooter className="border-t border-border bg-card py-2">
+            <div className="flex items-center justify-between w-full">
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setConfiguring(null)
+                  setErrorMessage(null)
+                }}
+                disabled={isSwapping}
+                doom
+              >
+                <ChevronLeft className="w-4 h-4 mr-1 inline" />
+                Back
               </Button>
-              {configuring && (
-                <Button variant="primary" onClick={handleSaveEdited} disabled={isSwapping} loading={isSwapping} doom>
-                  Swap exercise
-                </Button>
-              )}
+              <Button variant="primary" onClick={handleSaveEdited} disabled={isSwapping} loading={isSwapping} doom>
+                Swap exercise
+              </Button>
             </div>
-          </div>
-        </DialogFooter>
+          </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   )
