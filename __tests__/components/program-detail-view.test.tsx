@@ -205,9 +205,12 @@ describe('program detail view: active program (as /training is today)', () => {
   it('restart goes to week 1 of the detail page', async () => {
     programComplete = true
     await renderView()
-    fireEvent.click(await screen.findByTitle(/view completion stats and restart program/i))
-    fireEvent.click(await screen.findByRole('button', { name: /restart program/i }))
-    await waitFor(() => expect(h.push).toHaveBeenCalled())
+    // The completion modal loads stats before Restart is enabled; slow CI
+    // runners have taken just over the 1 s default, so allow more time.
+    const slow = { timeout: 5000 }
+    fireEvent.click(await screen.findByTitle(/view completion stats and restart program/i, {}, slow))
+    fireEvent.click(await screen.findByRole('button', { name: /restart program/i }, slow))
+    await waitFor(() => expect(h.push).toHaveBeenCalled(), slow)
     expect(h.push).toHaveBeenCalledWith('/library/programs/p1?week=1')
     expect(h.push).not.toHaveBeenCalledWith(expect.stringContaining('/training'))
     expect(writes().map((c) => `${c.method} ${c.url}`)).toContain('POST /api/programs/p1/restart')
