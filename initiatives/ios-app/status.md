@@ -90,3 +90,4 @@
 - 2026-11-11 15:26 MST: Dustin: drop the top line on the active tab. Lead removed the pill (tiny, done inline); ios-check exit 0; committed, installed; parity-disco told.
 - 2026-11-11 16:45 MST: 207 re-check: 9/11 pass, 208 pass; 2 fixes. Dustin: confirms = accent; strengthen faint themes' muted text; E-ink tab underline only. 209 to ios-impl (kept), 210 re-check waits.
 - 2026-11-11 16:59 MST: 209 complete (swap idle wait not reproduced). Lead ios-check exit 0, 352. Committed, installed; 210 to parity-disco (kept).
+- 2026-11-11 17:50 MST: 210 re-check: accept 209. Dustin: plan sheet matches the logger tone; lead made the 2-line change (ios-check exit 0). Slice 9b done by lead; installed; Hub page next. Now awaiting Dustin: slices 8, 9a, 9b (pause new work).

@@ -1,6 +1,6 @@
 ---
 id: 210
-state: ready
+state: running
 executor: parity-disco
 skill: reviewer (method from 200)
 waiting_on:
@@ -19,3 +19,4 @@ Re-check each point of `209-ios-logger-fixes-2.md` by real taps on `ripit-review
 ## Also (lead, 2026-11-11)
 - Dracula light's muted text got lighter (#6272A4 to #9EA8C7) on a light theme. Check that its secondary text is still readable on the page background, not just on the tab bar.
 - Point 1 left the plan sheet's pink frame (shared FolderTab tone) alone; say whether it looks wrong next to the purple button.
+- 2026-11-11 16:59 MST: dispatched to parity-disco (running; context 2%, kept)

@@ -25,7 +25,7 @@ struct PlanSheet: View {
         let index = exercises.firstIndex { $0.id == currentId }
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .bottom, spacing: 0) {
-                FolderTab(title: "Workout plan \(index.map { "\($0 + 1)" } ?? "0")/\(exercises.count)", icon: "checklist", tone: .active)
+                FolderTab(title: "Workout plan \(index.map { "\($0 + 1)" } ?? "0")/\(exercises.count)", icon: "checklist", tone: .exercise)
                     .accessibilityAddTraits(.isHeader)
                 Spacer(minLength: 0)
                 Button { dismiss() } label: {
@@ -66,7 +66,7 @@ struct PlanSheet: View {
                     .padding(12)
             }
             .background(Theme.card)
-            .overlay(Rectangle().strokeBorder(Theme.edge(Theme.primary), lineWidth: Theme.folderLine))
+            .overlay(Rectangle().strokeBorder(Theme.edge(Theme.secondary), lineWidth: Theme.folderLine))
             .padding(.horizontal, 12)
         }
         .background(Theme.background)
