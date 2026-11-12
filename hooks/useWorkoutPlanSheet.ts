@@ -2,10 +2,18 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { elapsedSince, type WorkoutPlanEditorExercise } from '@/components/workout-logging/WorkoutPlanEditor'
+import type { SwapPrescribedSet } from '@/components/workout-logging/wizards/SwapExerciseWizard'
 import { clientLogger } from '@/lib/client-logger'
 import type { LoggedSet } from '@/types/workout'
 
-type PlanExercise = { id: string; name: string; setsPlanned?: number }
+// The definition and prescribed sets travel along for the swap picker (Similar list, sets kept).
+type PlanExercise = {
+  id: string
+  name: string
+  setsPlanned?: number
+  exerciseDefinitionId?: string
+  prescribedSets?: SwapPrescribedSet[]
+}
 
 /**
  * State for the logger's Workout plan sheet: open/closed, the plan's exercises
@@ -53,12 +61,16 @@ export function useWorkoutPlanSheet({
         `/api/workouts/${workoutId}/exercises${workoutCompletionId ? `?completionId=${encodeURIComponent(workoutCompletionId)}` : ''}`
       )
       if (!res.ok) throw new Error('Failed to load')
-      const data = (await res.json()) as { exercises: { id: string; name: string; prescribedSets?: unknown[] }[] }
+      const data = (await res.json()) as {
+        exercises: { id: string; name: string; exerciseDefinitionId?: string; prescribedSets?: SwapPrescribedSet[] }[]
+      }
       setExercises(
         data.exercises.map((e) => ({
           id: e.id,
           name: e.name,
           setsPlanned: Array.isArray(e.prescribedSets) ? e.prescribedSets.length : undefined,
+          exerciseDefinitionId: e.exerciseDefinitionId,
+          prescribedSets: e.prescribedSets,
         }))
       )
     } catch (err) {

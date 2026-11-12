@@ -459,6 +459,26 @@ export default function ExerciseLoggingModal({
     [planExercises, goToExercise],
   )
 
+  // The exercise the swap picker replaces: a plan-sheet row, else the current one.
+  const swapTarget = useMemo(() => {
+    const row = wizardTarget ? planExercises.find((e) => e.id === wizardTarget.id) : null
+    if (row) {
+      return {
+        id: row.id,
+        name: row.name,
+        exerciseDefinitionId: row.exerciseDefinitionId ?? '',
+        prescribedSets: row.prescribedSets ?? [],
+      }
+    }
+    if (!currentExercise) return null
+    return {
+      id: currentExercise.id,
+      name: currentExercise.name,
+      exerciseDefinitionId: currentExercise.exerciseDefinitionId,
+      prescribedSets: currentExercise.prescribedSets,
+    }
+  }, [wizardTarget, planExercises, currentExercise])
+
   const handlePlanSwap = useCallback(
     (exerciseId: string) => {
       const target = planExercises.find((e) => e.id === exerciseId)
@@ -913,7 +933,7 @@ export default function ExerciseLoggingModal({
         />
       )}
 
-      {activeWizard === 'swap' && (wizardTarget || currentExercise) && (
+      {activeWizard === 'swap' && swapTarget && (
         <SwapExerciseWizard
           open={true}
           onOpenChange={(open) => {
@@ -922,8 +942,10 @@ export default function ExerciseLoggingModal({
               setWizardTarget(null)
             }
           }}
-          currentExerciseId={wizardTarget?.id ?? currentExercise!.id}
-          currentExerciseName={wizardTarget?.name ?? currentExercise!.name}
+          currentExerciseId={swapTarget.id}
+          currentExerciseName={swapTarget.name}
+          currentExerciseDefinitionId={swapTarget.exerciseDefinitionId}
+          currentPrescribedSets={swapTarget.prescribedSets}
           onComplete={handleWizardComplete}
         />
       )}

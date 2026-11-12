@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, Filter, Search } from 'lucide-react'
+import { Check, Filter, Search, SlidersHorizontal } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
@@ -12,6 +12,7 @@ import type { AnchorStalenessRow } from '@/lib/recommendations/anchor-staleness'
 import type { FauNeed } from '@/lib/recommendations/fau-score'
 import { daysSinceLabel } from '@/lib/recommendations/staleness'
 import { FilterChoiceSheet } from './FilterChoiceSheet'
+import { MoreLikeThis, Reveal, SwapExerciseList, SwapSectionLabel, type SwapSource } from './SwapPickerParts'
 
 // A-Z / Neglected / Recovery reorder the same muscle-group list; 'anchors' is a
 // view swap — the sheet lists the user's curated movements by staleness instead.
@@ -57,6 +58,19 @@ interface ExerciseSearchInterfaceProps {
    * selection via onExerciseSelect rather than emitting once and closing.
    */
   selectedIds?: Set<string>
+  /**
+   * Swap pickers: the definition being replaced. Before anything is typed or
+   * filtered, a "Similar" list (GET /api/exercises/similar) shows above the
+   * results; tapping one selects it. No list when the API returns none (e.g.
+   * untagged exercise).
+   */
+  similarToDefinitionId?: string
+  /**
+   * 'swap' (the two swap pickers): search with one filter button whose muscle and
+   * equipment choices stay folded until tapped, flat tap-to-pick rows, and
+   * "More like this" under Similar. Other callers keep the default layout.
+   */
+  layout?: 'default' | 'swap'
 }
 
 const EQUIPMENT_TYPES = [
@@ -95,8 +109,11 @@ export function ExerciseSearchInterface({
   anchors,
   plannedFAUVolume = {},
   selectedIds,
+  similarToDefinitionId,
+  layout = 'default',
 }: ExerciseSearchInterfaceProps) {
   const isMultiSelect = selectedIds !== undefined
+  const isSwapLayout = layout === 'swap'
   const [searchQuery, setSearchQuery] = useState(initialQuery)
   const [selectedFAU, setSelectedFAU] = useState<string | null>(initialFauFilter)
   const [selectedEquipment, setSelectedEquipment] = useState<string | null>(null)
@@ -110,6 +127,14 @@ export function ExerciseSearchInterface({
   // Anchors view (#976): which curated movement is filtering the list, if any.
   const [selectedAnchorPattern, setSelectedAnchorPattern] = useState<string | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
+  const [similar, setSimilar] = useState<ExerciseDefinition[]>([])
+  // The exercise being replaced: its muscles and equipment seed "More like this".
+  const [similarSource, setSimilarSource] = useState<SwapSource | null>(null)
+  const [filtersOpen, setFiltersOpen] = useState(false)
+  const similarIds = useMemo(
+    () => [...similar.map((e) => e.id), ...(similarToDefinitionId ? [similarToDefinitionId] : [])],
+    [similar, similarToDefinitionId],
+  )
 
   const balanceByFau = useMemo(() => {
     if (!muscleBalanceSnapshot) return new Map<FAUKey, MuscleBalanceSnapshot['items'][number]>()
@@ -143,6 +168,10 @@ export function ExerciseSearchInterface({
         ? 'alphabetical'
         : fauSort
   const inAnchorsView = effectiveSort === 'anchors'
+  // Similar shows only before the user narrows the list: typing, a filter or the
+  // Anchors view all switch to normal results until cleared.
+  const showSimilar =
+    similar.length > 0 && !searchQuery.trim() && !selectedFAU && !selectedEquipment && !inAnchorsView
 
   const sortModes = useMemo(
     () =>
@@ -266,6 +295,32 @@ export function ExerciseSearchInterface({
     }
   }, [])
 
+  useEffect(() => {
+    setSimilar([])
+    setSimilarSource(null)
+    if (!similarToDefinitionId) return
+    let cancelled = false
+    const loadSimilar = async () => {
+      try {
+        const response = await fetch(
+          `/api/exercises/similar?definitionId=${encodeURIComponent(similarToDefinitionId)}`
+        )
+        if (!response.ok) throw new Error(`Similar exercises request failed (${response.status})`)
+        const body = (await response.json()) as { similar: ExerciseDefinition[]; current?: SwapSource }
+        if (cancelled) return
+        setSimilar(body.similar)
+        setSimilarSource(body.current ?? null)
+      } catch (error) {
+        // The picker still works without the list; normal search stays.
+        clientLogger.error('Error loading similar exercises:', error)
+      }
+    }
+    loadSimilar()
+    return () => {
+      cancelled = true
+    }
+  }, [similarToDefinitionId])
+
   const searchExercises = useCallback(async () => {
     setIsLoading(true)
     setError(null)
@@ -333,21 +388,93 @@ export function ExerciseSearchInterface({
     setSelectedEquipment(equipment)
   }, [])
 
+  // Swap layout: one filter button stands in for both triggers; its badge counts active filters.
+  const activeFilterCount = [selectedFAU, selectedEquipment, selectedAnchorPattern].filter(Boolean).length
+  const searchInput = (
+    <input
+      ref={searchInputRef}
+      type="text"
+      placeholder="Search exercises..."
+      value={searchQuery}
+      onChange={(e) => setSearchQuery(e.target.value)}
+      style={{ paddingLeft: isSwapLayout ? '2.5rem' : '3rem' }}
+      className={`w-full border-2 border-input focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-card text-foreground doom-input ${isSwapLayout ? 'h-11 pr-3' : 'pr-4 py-2'}`}
+    />
+  )
+  const fauTrigger = (
+    <button
+      type="button"
+      onClick={() => setFauSheetOpen(true)}
+      className="w-full px-4 py-2 border-2 border-input hover:border-primary focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-card text-foreground text-left font-bold"
+    >
+      {inAnchorsView
+        ? selectedAnchorPattern
+          ? (anchorByPattern.get(selectedAnchorPattern as AnchorPattern)?.displayName ??
+            'Movement')
+          : 'All configured movements'
+        : selectedFAU
+          ? FAU_DISPLAY_NAMES[selectedFAU]
+          : 'All Muscle Groups'}
+    </button>
+  )
+  const equipmentTrigger = (
+    <button
+      type="button"
+      onClick={() => setEquipmentSheetOpen(true)}
+      className="w-full px-4 py-2 border-2 border-input hover:border-primary focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-card text-foreground text-left font-bold"
+    >
+      {selectedEquipment ? EQUIPMENT_DISPLAY_NAMES[selectedEquipment] : 'All Equipment'}
+    </button>
+  )
+
   return (
     <div className="flex flex-col flex-1 min-h-0">
       {/* Search */}
+      {isSwapLayout ? (
+        <>
+          <div className="flex flex-shrink-0 gap-2 px-4 py-2.5 sm:px-6">
+            <div className="relative min-w-0 flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+              {searchInput}
+            </div>
+            <button
+              type="button"
+              aria-label="Filters"
+              aria-expanded={filtersOpen}
+              aria-controls="swap-filters"
+              onClick={() => setFiltersOpen((open) => !open)}
+              className={`relative flex h-11 w-11 shrink-0 items-center justify-center border-2 doom-focus-ring ${
+                filtersOpen || activeFilterCount > 0 ? 'border-primary text-primary' : 'border-input text-muted-foreground'
+              }`}
+            >
+              <SlidersHorizontal size={18} aria-hidden="true" />
+              {activeFilterCount > 0 && (
+                <span className="absolute -right-1.5 -top-1.5 bg-primary px-1 text-xs font-bold leading-4 text-primary-foreground">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+          </div>
+          <Reveal open={filtersOpen} id="swap-filters">
+            <div className="grid grid-cols-2 gap-2 border-b-2 border-border bg-muted/40 px-4 py-2.5 sm:px-6">
+              <div className="min-w-0">
+                <div className="mb-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  {inAnchorsView ? 'Movement' : 'Muscle group'}
+                </div>
+                {fauTrigger}
+              </div>
+              <div className="min-w-0">
+                <div className="mb-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">Equipment</div>
+                {equipmentTrigger}
+              </div>
+            </div>
+          </Reveal>
+        </>
+      ) : (
       <div className="px-4 sm:px-6 py-4 border-b-2 border-border flex-shrink-0">
         <div className="relative mb-3">
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
-          <input
-            ref={searchInputRef}
-            type="text"
-            placeholder="Search exercises..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ paddingLeft: '3rem' }}
-            className="w-full pr-4 py-2 border-2 border-input focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-card text-foreground doom-input"
-          />
+          {searchInput}
         </div>
 
         {/* FAU / Anchors Filter */}
@@ -355,34 +482,16 @@ export function ExerciseSearchInterface({
           <div className="text-sm font-bold text-foreground mb-2 tracking-wide">
             {inAnchorsView ? 'Filter by Movement:' : 'Filter by Muscle Group:'}
           </div>
-          <button
-            type="button"
-            onClick={() => setFauSheetOpen(true)}
-            className="w-full px-4 py-2 border-2 border-input hover:border-primary focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-card text-foreground text-left font-bold"
-          >
-            {inAnchorsView
-              ? selectedAnchorPattern
-                ? (anchorByPattern.get(selectedAnchorPattern as AnchorPattern)?.displayName ??
-                  'Movement')
-                : 'All configured movements'
-              : selectedFAU
-                ? FAU_DISPLAY_NAMES[selectedFAU]
-                : 'All Muscle Groups'}
-          </button>
+          {fauTrigger}
         </div>
 
         {/* Equipment Filter */}
         <div className="mt-3">
           <div className="text-sm font-bold text-foreground mb-2 tracking-wide">Filter by Equipment:</div>
-          <button
-            type="button"
-            onClick={() => setEquipmentSheetOpen(true)}
-            className="w-full px-4 py-2 border-2 border-input hover:border-primary focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] bg-card text-foreground text-left font-bold"
-          >
-            {selectedEquipment ? EQUIPMENT_DISPLAY_NAMES[selectedEquipment] : 'All Equipment'}
-          </button>
+          {equipmentTrigger}
         </div>
       </div>
+      )}
 
       <FilterChoiceSheet
         open={fauSheetOpen}
@@ -453,7 +562,63 @@ export function ExerciseSearchInterface({
       />
 
       {/* Results */}
+      {isSwapLayout ? (
+        <div className="flex-1 overflow-auto min-h-0 pb-4">
+          {showSimilar ? (
+            <>
+              <SwapSectionLabel>Similar</SwapSectionLabel>
+              <SwapExerciseList label="Similar" exercises={similar} onSelect={onExerciseSelect} />
+              {similarSource && (
+                <MoreLikeThis source={similarSource} excludeIds={similarIds} onSelect={onExerciseSelect} />
+              )}
+            </>
+          ) : error ? (
+            <div className="bg-error-muted border-2 border-error p-4 m-4">
+              <div className="text-error font-bold">{error}</div>
+            </div>
+          ) : isLoading || !hasSearched ? (
+            <div className="py-8 text-center font-bold tracking-wide text-muted-foreground">SEARCHING EXERCISES...</div>
+          ) : exercises.length === 0 ? (
+            <div className="py-8 text-center font-bold tracking-wide text-muted-foreground">
+              NO EXERCISES FOUND MATCHING YOUR SEARCH
+            </div>
+          ) : (
+            <>
+              <SwapSectionLabel>{searchQuery.trim() || activeFilterCount > 0 ? 'Results' : 'All exercises'}</SwapSectionLabel>
+              <SwapExerciseList label="Exercises" exercises={exercises} onSelect={onExerciseSelect} />
+            </>
+          )}
+        </div>
+      ) : (
       <div className="flex-1 overflow-auto px-4 sm:px-6 py-4 min-h-0">
+        {showSimilar && (
+          <section className="mb-5">
+            <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-2">Similar</h3>
+            <ul aria-label="Similar" className="grid gap-2">
+              {similar.map((exercise) => (
+                <li key={exercise.id}>
+                  <button
+                    type="button"
+                    onClick={() => onExerciseSelect(exercise)}
+                    className="w-full min-h-12 border-2 border-border bg-card px-4 py-2 text-left transition-colors hover:border-primary doom-focus-ring"
+                  >
+                    <span className="block font-bold text-foreground uppercase tracking-wide">{exercise.name}</span>
+                    <span className="block text-sm text-muted-foreground">
+                      {[
+                        exercise.primaryFAUs.map((fau) => FAU_DISPLAY_NAMES[fau] || fau).join(', '),
+                        exercise.equipment.map((eq) => EQUIPMENT_LABELS[eq] || eq.replace(/_/g, ' ')).join(', '),
+                      ]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <h3 className="mt-5 text-sm font-bold text-muted-foreground uppercase tracking-wider">All exercises</h3>
+          </section>
+        )}
+
         {error && (
           <div className="bg-error-muted border-2 border-error p-4 mb-4">
             <div className="text-error font-bold">{error}</div>
@@ -567,6 +732,7 @@ export function ExerciseSearchInterface({
           </div>
         )}
       </div>
+      )}
 
       {/* Fixed Footer - Create New Exercise */}
       {onCreateExercise && (
