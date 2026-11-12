@@ -1,4 +1,6 @@
-/** Text for the Progress report: dates, durations and signed changes. */
+import { type EffortScale, inScale } from '@/lib/insights/effort-scale'
+
+/** Text for the Progress report: dates, durations, effort and signed changes. */
 
 export const DASH = '–'
 const MINUS = '−'
@@ -17,9 +19,34 @@ export function weekOfLabel(weekStart: string): string {
   return new Date(`${weekStart}T00:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
 }
 
-/** One decimal, or "–" when there is no number. */
-export function formatRpe(rpe: number | null): string {
-  return rpe == null ? DASH : rpe.toFixed(1)
+/** "RPE" or "RIR". */
+export function effortLabel(scale: EffortScale): string {
+  return scale === 'rir' ? 'RIR' : 'RPE'
+}
+
+/** An RPE-scale effort in the user's scale to one decimal, or "–" when there is no number. */
+export function formatEffort(rpe: number | null, scale: EffortScale): string {
+  return rpe == null ? DASH : inScale(rpe, scale).toFixed(1)
+}
+
+/** The effort with its label: "RPE 8.0", "RIR 2.0". */
+export function labelledEffort(rpe: number | null, scale: EffortScale): string {
+  return `${effortLabel(scale)} ${formatEffort(rpe, scale)}`
+}
+
+/**
+ * An effort inside a note ("normal …", "8.0 → 8.7"): bare in RPE, as the page
+ * always read, and labelled in RIR ("RIR 2.0"), where a lower number is harder.
+ */
+export function noteEffort(rpe: number | null, scale: EffortScale): string {
+  return scale === 'rir' ? labelledEffort(rpe, scale) : formatEffort(rpe, scale)
+}
+
+/** The hard-set line under the effort tile: sets at RPE 9+ (RIR 1 or less) and at 10 (RIR 0). */
+export function hardSetsText(pctAtOrAbove9: number, setsAt10: string, scale: EffortScale): string {
+  return scale === 'rir'
+    ? `${pctAtOrAbove9}% of sets at RIR 1 or less · ${setsAt10} at RIR 0`
+    : `${pctAtOrAbove9}% of sets at 9+ · ${setsAt10} at 10`
 }
 
 /** Whole minutes as "3h 22m", or "45m" under an hour. */
