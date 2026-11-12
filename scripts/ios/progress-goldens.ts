@@ -201,7 +201,7 @@ function weeklyReport(spec: HistorySpec, built: Built, weekStart: string) {
   const rangeEnd = weekBounds(weekStart, TZ).end
   const shownStart = weekBounds(weekStart, TZ).start
   const summary = summarizeWeeks({
-    workouts: counted.map((w) => ({ completedAt: w.completedAt, startedAt: w.startedAt, durationSeconds: w.durationSeconds, sets: w.sets })),
+    workouts: counted.map((w) => ({ completedAt: w.completedAt, startedAt: w.startedAt, durationSeconds: w.durationSeconds, sets: w.sets.map((x) => ({ ...x, rpe: x.rpe ?? null, rir: x.rir ?? null })) })),
     cardio: [],
     weekStarts,
     timeZone: TZ,
@@ -216,7 +216,7 @@ function weeklyReport(spec: HistorySpec, built: Built, weekStart: string) {
   const allWeeks: string[] = []
   if (firstWeek) for (let w = firstWeek; w <= weekStart; w = addWeeks(w, 1)) allWeeks.push(w)
   const counts = summarizeWeeks({
-    workouts: counted.map((w) => ({ completedAt: w.completedAt, startedAt: w.startedAt, durationSeconds: w.durationSeconds, sets: w.sets })),
+    workouts: counted.map((w) => ({ completedAt: w.completedAt, startedAt: w.startedAt, durationSeconds: w.durationSeconds, sets: w.sets.map((x) => ({ ...x, rpe: x.rpe ?? null, rir: x.rir ?? null })) })),
     cardio: [],
     weekStarts: allWeeks,
     timeZone: TZ,

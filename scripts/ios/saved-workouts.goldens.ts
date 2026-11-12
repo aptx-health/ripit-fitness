@@ -331,9 +331,9 @@ async function seed(prisma: PrismaClient) {
   for (const c of COMPLETIONS) {
     const { completion, exercises, sets } = rowsFor(c)
     await prisma.workoutCompletion.create({ data: { ...completion, userId: USER } })
-    for (const e of exercises) await prisma.exercise.create({ data: { ...(e as never), userId: USER } })
+    for (const e of exercises) await prisma.exercise.create({ data: { ...e, userId: USER } as never })
     // One at a time, in logging order, so the rollup reads them back in that order.
-    for (const s of sets) await prisma.loggedSet.create({ data: { ...(s as never), userId: USER } })
+    for (const s of sets) await prisma.loggedSet.create({ data: { ...s, userId: USER } as never })
   }
   for (const s of SAVED) await prisma.savedWorkout.create({ data: { ...savedRow(s), userId: USER } })
 }
