@@ -3,7 +3,7 @@
 A native iPhone version of Ripit. Data lives on the phone; the web app stays as it is.
 Updated by the lead at each checkpoint. The full log is in `status.md`.
 
-**Now:** slice 9a on your phone for review (Hub `ios-slice9a-nav`). 9b (one-exercise logger): tests done; build (204, ios-impl), with the bar look B. After 9b I pause until you've reviewed 8, 9a and 9b.
+**Now:** paused. Slices 8, 9a and 9b are on your phone for review (Hub `ios-slice8-picker`, `ios-slice9a-nav`, `ios-slice9b-logger`). Next after your review: slice 10, the smart picker.
 
 ## Done (first sweep, 2026-11-07)
 
@@ -24,7 +24,7 @@ Updated by the lead at each checkpoint. The full log is in `status.md`.
 | 7 | **Settings + look:** Settings tab, all 13 web themes, E-ink display, workout defaults; web font, square corners, offset shadows, switching folder tabs; largest text everywhere | L | ✅ approved, on phone | 184–188 |
 | 8 | **Picker + custom exercises:** filters, pick several, create your own | S–M | 🟡 on your phone, your review (Hub: ios-slice8-picker) | 189–191, fixes 193–195 |
 | 9a | **Bottom bar + quick actions:** the web's bar Training · Library · ⊕ Workout · Progress · Settings; Quick Actions (continue program, freestyle, saved; resume or discard an open one); History under Training › Recent; Programs under Library | M | 🟡 on your phone, your review (Hub: ios-slice9a-nav) | 198–200, fixes 201–202 |
-| 9b | **One-exercise logger:** one exercise per screen, swipe, fixed ‹ Log set › bar, the web's keypads, Plan list (jump, reorder today only, swap, delete, add), supersets in order with a badge, light haptic on Log set | L | 🔨 build (204) | 203 tests · 204 build · 205 review |
+| 9b | **One-exercise logger:** one exercise per screen, swipe, fixed ‹ Log set › bar, the web's keypads, Plan list (jump, reorder today only, swap, delete, add), supersets in order with a badge, light haptic on Log set | L | 🟡 on your phone, your review (Hub `ios-slice9b-logger`) | 203–210 |
 | 10 | **Smart picker:** A–Z / Neglected ("+N planned") / Recovery / Anchors sorts in the workout's Add picker; Settings › Target movements; import muscle-balance targets | M | ⏳ | |
 | 11 | **Muscle balance settings:** 18 ratios, secondary credit, ignore warm-ups, live preview, reset | M | ⏳ | |
 | 12 | **Export from iOS + agent round trip:** phone writes the v1 JSON, plus CSV for a chosen date range (free for everyone); imports proposals to approve | M | ⏳ | |
