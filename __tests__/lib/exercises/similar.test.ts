@@ -1,16 +1,23 @@
 /**
- * Ranking for the swap picker's "Similar" list (work 211, quick swap).
- * Behaviour: features/workout-logging/quick-swap.feature ("Similar is ranked by muscles, then equipment").
+ * Ranking for the swap picker's "Similar" list (work 211, quick swap; load type and name words, work 217).
+ * Behaviour: features/workout-logging/quick-swap.feature ("Similar is ranked by muscles, then equipment",
+ * "A weighted exercise gets weighted swaps first").
  *
- * PINNED (new)
+ * PINNED (re-locked in work 217: rules 3 and 5 are new, so some old full ties now break)
  *   lib/exercises/similar.ts
  *     rankSimilar<T extends Candidate>(current: Candidate, candidates: T[]): T[]
- *       Candidate = { id: string; primaryFAUs: string[]; equipment: string[]; movementPattern?: string | null }
+ *       Candidate = { id: string; name?: string | null; primaryFAUs: string[]; equipment: string[];
+ *                     movementPattern?: string | null; isBodyweight?: boolean | null }
  *       Pure. Returns candidate objects (not copies of a different shape), at most 8, best first:
  *         1. more primary muscles shared with `current` (a count, not a fraction)
  *         2. then sharing at least one of `current`'s equipment
- *         3. then the same movementPattern, only when both are tagged (null/undefined never match)
- *         4. full ties keep the candidates' input order (stable), so the caller decides (e.g. by name)
+ *         3. then the same load type (loadType: isBodyweight -> bodyweight; else weighted equipment
+ *            such as barbell, dumbbell, kettlebell, machine, cable, plate -> weighted; else a band ->
+ *            band; else "bodyweight" equipment -> bodyweight; else unknown, which never matches)
+ *         4. then the same movementPattern, only when both are tagged (null/undefined never match)
+ *         5. then sharing a movement word in the name (MOVEMENT_WORDS: squat, lunge, press, row, curl,
+ *            deadlift, ...; plurals count)
+ *         6. full ties keep the candidates' input order (stable), so the caller decides (e.g. by name)
  *       Drops `current` itself (by id) and any candidate sharing no primary muscle (secondary
  *       muscles and equipment never qualify one). An untagged `current` gives []. Does not
  *       reorder or change the input array.
@@ -18,7 +25,14 @@
 
 import { describe, expect, it } from 'vitest'
 
-type Candidate = { id: string; primaryFAUs: string[]; equipment: string[]; movementPattern?: string | null }
+type Candidate = {
+  id: string
+  name?: string | null
+  primaryFAUs: string[]
+  equipment: string[]
+  movementPattern?: string | null
+  isBodyweight?: boolean | null
+}
 type Lib = { rankSimilar: <T extends Candidate>(current: Candidate, candidates: T[]) => T[] }
 const load = (spec: string) => import(/* @vite-ignore */ spec)
 const lib = async () => (await load('@/lib/exercises/similar')) as Lib
@@ -97,6 +111,142 @@ describe('rule: then the same movement pattern, only when both are tagged', () =
     const missing = { id: 'missing', primaryFAUs: ['quads', 'glutes'], equipment: ['dumbbell'] }
     const squat = def('squat', ['quads', 'glutes'], ['dumbbell'], 'squat')
     expect(await rank(goblet, [other, missing, squat])).toEqual(['squat', 'other', 'missing'])
+  })
+})
+
+describe('rule: then the same load type (weighted vs bodyweight vs band)', () => {
+  const backSquat = def('back-squat', ['quads', 'glutes'], ['barbell'], null, { name: 'Barbell Back Squat' })
+
+  it('a weighted current puts weighted candidates before band and bodyweight ones, whatever the input order', async () => {
+    const band = def('band', ['quads', 'glutes'], ['band'])
+    const bodyweight = def('bodyweight', ['quads', 'glutes'], ['bodyweight'], null, { isBodyweight: true })
+    const dumbbell = def('dumbbell', ['quads', 'glutes'], ['dumbbell'])
+    expect((await rank(backSquat, [band, bodyweight, dumbbell]))[0]).toBe('dumbbell')
+    expect((await rank(backSquat, [dumbbell, bodyweight, band]))[0]).toBe('dumbbell')
+  })
+
+  it('kettlebell, machine, cable and plate all count as weighted', async () => {
+    const band = def('band', ['quads'], ['resistance band'])
+    for (const eq of ['kettlebell', 'machine', 'cable', 'plate', 'smith-machine']) {
+      expect(await rank(backSquat, [band, def(eq, ['quads'], [eq])])).toEqual([eq, 'band'])
+    }
+  })
+
+  it('a bodyweight current puts bodyweight first; isBodyweight counts even with weighted equipment listed', async () => {
+    const current = def('cur', ['quads'], ['bodyweight'], null, { isBodyweight: true })
+    const weighted = def('weighted', ['quads'], ['dumbbell'])
+    const weightedVest = def('vest', ['quads'], ['dumbbell'], null, { isBodyweight: true })
+    expect(await rank(current, [weighted, weightedVest])).toEqual(['vest', 'weighted'])
+  })
+
+  it('"bodyweight" in the equipment counts as bodyweight when the flag is not set', async () => {
+    const current = def('cur', ['quads'], ['pull-up-bar', 'bodyweight'])
+    const band = def('band', ['quads'], ['band'])
+    const bodyweight = def('bodyweight', ['quads'], ['bodyweight'])
+    expect(await rank(current, [band, bodyweight])).toEqual(['bodyweight', 'band'])
+  })
+
+  it('a band current puts band first', async () => {
+    const current = def('cur', ['quads'], ['band'])
+    const weighted = def('weighted', ['quads'], ['dumbbell'])
+    const band = def('band', ['quads'], ['resistance-band'])
+    expect(await rank(current, [weighted, band])).toEqual(['band', 'weighted'])
+  })
+
+  it('an unknown load type matches nothing: no equipment on either side keeps input order', async () => {
+    const current = def('cur', ['quads'], [])
+    const a = def('a', ['quads'], [])
+    const b = def('b', ['quads'], [])
+    expect(await rank(current, [a, b])).toEqual(['a', 'b'])
+    expect(await rank(current, [b, a])).toEqual(['b', 'a'])
+  })
+
+  it('equipment outranks load type: a shared barbell beats a weighted dumbbell even when flagged bodyweight', async () => {
+    const current = def('cur', ['quads'], ['barbell'])
+    const bandBarbell = def('band-barbell', ['quads'], ['band', 'barbell'], null, { isBodyweight: true })
+    const dumbbell = def('dumbbell', ['quads'], ['dumbbell'])
+    expect(await rank(current, [dumbbell, bandBarbell])).toEqual(['band-barbell', 'dumbbell'])
+  })
+
+  it('load type outranks pattern', async () => {
+    const current = def('cur', ['quads'], ['barbell'], 'squat')
+    const bandSquat = def('band-squat', ['quads'], ['band'], 'squat')
+    const dumbbellLunge = def('db-lunge', ['quads'], ['dumbbell'], 'lunge')
+    expect(await rank(current, [bandSquat, dumbbellLunge])).toEqual(['db-lunge', 'band-squat'])
+  })
+})
+
+describe('rule: then a shared movement word in the name', () => {
+  const backSquat = def('back-squat', ['quads', 'glutes'], ['barbell'], null, { name: 'Barbell Back Squat' })
+
+  it('a squat beats a lunge among otherwise equal candidates, whatever the input order', async () => {
+    const lunge = def('lunge', ['quads', 'glutes'], ['dumbbell'], null, { name: 'Dumbbell Lunge' })
+    const goblet = def('goblet', ['quads', 'glutes'], ['dumbbell'], null, { name: 'Dumbbell Goblet Squat' })
+    expect(await rank(backSquat, [lunge, goblet])).toEqual(['goblet', 'lunge'])
+    expect(await rank(backSquat, [goblet, lunge])).toEqual(['goblet', 'lunge'])
+  })
+
+  it('plurals and case count ("Squats", "PRESSES")', async () => {
+    const press = def('press', ['chest'], ['dumbbell'], null, { name: 'Dumbbell Bench Press' })
+    const fly = def('fly', ['chest'], ['dumbbell'], null, { name: 'Dumbbell Fly' })
+    const presses = def('presses', ['chest'], ['dumbbell'], null, { name: 'Floor PRESSES' })
+    expect(await rank(press, [fly, presses])).toEqual(['presses', 'fly'])
+    const squats = def('squats', ['quads', 'glutes'], ['dumbbell'], null, { name: 'Jump Squats' })
+    const step = def('step', ['quads', 'glutes'], ['dumbbell'], null, { name: 'Step Up' })
+    expect(await rank(backSquat, [step, squats])).toEqual(['squats', 'step'])
+  })
+
+  it('only listed movement words count: sharing "Barbell" or "Back" does not', async () => {
+    const current = def('cur', ['back'], ['barbell'], null, { name: 'Barbell Back Extension' })
+    const barbellBack = def('barbell-back', ['back'], ['barbell'], null, { name: 'Barbell Back Thing' })
+    const extension = def('extension', ['back'], ['barbell'], null, { name: 'Hip Extension' })
+    expect(await rank(current, [barbellBack, extension])).toEqual(['extension', 'barbell-back'])
+  })
+
+  it('a word inside another word does not count ("Rower" is not "row")', async () => {
+    const current = def('cur', ['lats'], ['cable'], null, { name: 'Cable Row' })
+    const rower = def('rower', ['lats'], ['cable'], null, { name: 'Rower Sprint' })
+    const row = def('row', ['lats'], ['cable'], null, { name: 'Seated Row' })
+    expect(await rank(current, [rower, row])).toEqual(['row', 'rower'])
+  })
+
+  it('pattern outranks the name word', async () => {
+    const current = def('cur', ['quads', 'glutes'], ['barbell'], 'squat', { name: 'Barbell Back Squat' })
+    const splitSquat = def('split', ['quads', 'glutes'], ['dumbbell'], 'lunge', { name: 'Split Squat' })
+    const tagged = def('tagged', ['quads', 'glutes'], ['dumbbell'], 'squat', { name: 'Box Thing' })
+    expect(await rank(current, [splitSquat, tagged])).toEqual(['tagged', 'split'])
+  })
+
+  it('a current with no name, or no movement word, matches nothing by name', async () => {
+    const a = def('a', ['quads'], ['dumbbell'], null, { name: 'Alpha' })
+    const b = def('b', ['quads'], ['dumbbell'], null, { name: 'Goblet Squat' })
+    expect(await rank(def('cur', ['quads'], ['dumbbell']), [a, b])).toEqual(['a', 'b'])
+    expect(await rank(def('cur', ['quads'], ['dumbbell'], null, { name: 'Leg Thing' }), [a, b])).toEqual(['a', 'b'])
+  })
+})
+
+describe('scenario: Barbell Back Squat gets weighted squats first', () => {
+  it('weighted squats, then other weighted, then band and bodyweight ones (input in name order)', async () => {
+    const backSquat = def('Barbell Back Squat', ['quads', 'glutes'], ['barbell'], null, { name: 'Barbell Back Squat' })
+    const named = (name: string, equipment: string[], extra = {}) => def(name, ['quads', 'glutes'], equipment, null, { name, ...extra })
+    const byName = [
+      named('Band Leg Press', ['band']),
+      named('Band Squat', ['band']),
+      named('Bodyweight Squat', ['bodyweight'], { isBodyweight: true }),
+      named('Dumbbell Goblet Squat', ['dumbbell']),
+      named('Dumbbell Lunge', ['dumbbell']),
+      named('Kettlebell Front Squat', ['kettlebell']),
+      named('Leg Press', ['machine']),
+    ]
+    expect(await rank(backSquat, byName)).toEqual([
+      'Dumbbell Goblet Squat',
+      'Kettlebell Front Squat',
+      'Dumbbell Lunge',
+      'Leg Press',
+      'Band Squat',
+      'Bodyweight Squat',
+      'Band Leg Press',
+    ])
   })
 })
 

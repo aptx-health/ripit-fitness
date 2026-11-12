@@ -25,7 +25,13 @@ Feature: Quick exercise swap in an active workout
     Given candidates that share the current exercise's primary muscles
     Then exercises sharing more primary muscles rank higher
     And among equal muscle matches, ones sharing the current equipment rank higher
+    And among those, ones with the same load type rank higher (weighted vs bodyweight vs band)
     And among those, ones with the same movement pattern rank higher when both are tagged
+    And among those, ones sharing a movement word in the name rank higher (for example "squat")
+
+  Scenario: A weighted exercise gets weighted swaps first
+    Given the current exercise is "Barbell Back Squat"
+    Then weighted squats and lunges come before band and bodyweight ones in the "Similar" list
     And exercises sharing no primary muscle are not in the list
 
   Scenario: Similar only offers exercises I can use

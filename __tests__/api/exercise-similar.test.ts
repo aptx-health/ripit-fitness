@@ -5,7 +5,7 @@
  * PINNED (new)
  *   GET /api/exercises/similar?definitionId=<exercise definition id>
  *     200 { similar: [{ id, name, primaryFAUs, secondaryFAUs, equipment, ... }] }: up to 8, ranked by
- *       rankSimilar over every exercise the user can use (isSystem, or the user's own custom) that shares a
+ *       rankSimilar (work 217: with the definitions' names and isBodyweight, for load type and name words) over every exercise the user can use (isSystem, or the user's own custom) that shares a
  *       primary muscle, ties in name order. The definition itself is never listed. An untagged definition
  *       (no primaryFAUs) gives { similar: [] }.
  *     401 signed out; 400 no definitionId; 404 a definition that does not exist or the user can't see
@@ -87,14 +87,21 @@ let me: string
 let other: string
 const d: Record<string, string> = {}
 
-async function makeDef(name: string, primaryFAUs: string[], equipment: string[], movementPattern: string | null, owner?: string) {
+async function makeDef(
+  name: string,
+  primaryFAUs: string[],
+  equipment: string[],
+  movementPattern: string | null,
+  owner?: string,
+  isBodyweight = false
+) {
   const made = await createTestExerciseDefinition(prisma, {
     name,
     primaryFAUs,
     equipment,
     ...(owner ? { userId: owner, isSystem: false } : { isSystem: true }),
   })
-  await prisma.exerciseDefinition.update({ where: { id: made.id }, data: { movementPattern } })
+  await prisma.exerciseDefinition.update({ where: { id: made.id }, data: { movementPattern, isBodyweight } })
   d[name] = made.id
   return made.id
 }
@@ -132,17 +139,37 @@ async function similar(definitionId?: string) {
 }
 
 describe('GET /api/exercises/similar: ranking against the database', () => {
-  it('goblet squat: same pattern first, then the dumbbell pair, barbell, the one-muscle dumbbell, then the rest', async () => {
+  it('goblet squat: same pattern first, then the dumbbell pair (the "squat" name first), barbell, the one-muscle dumbbell, then the rest', async () => {
     const { status, names } = await similar(d['Dumbbell Goblet Squat'])
     expect(status).toBe(200)
     expect(names).toEqual([
       'Dumbbell Front Squat',
-      'Dumbbell Lunge',
       'My Split Squat',
+      'Dumbbell Lunge',
       'Barbell Back Squat',
       'Dumbbell Step Up',
       'Hip Thrust',
       'Leg Extension',
+    ])
+  })
+
+  it('barbell back squat (pattern untagged): weighted squats, then weighted lunges, then band and bodyweight ones', async () => {
+    // Like local data: no movementPattern anywhere, and nothing else on a barbell.
+    await prisma.exerciseDefinition.updateMany({ data: { movementPattern: null } })
+    await makeDef('Band Leg Press', ['quads', 'glutes'], ['band'], null)
+    await makeDef('Band Squat', ['quads', 'glutes'], ['resistance-band'], null)
+    await makeDef('Bodyweight Squat', ['quads', 'glutes'], ['bodyweight'], null, undefined, true)
+    const { status, names } = await similar(d['Barbell Back Squat'])
+    expect(status).toBe(200)
+    expect(names).toEqual([
+      'Dumbbell Front Squat',
+      'Dumbbell Goblet Squat',
+      'My Split Squat',
+      'Dumbbell Lunge',
+      'Band Squat',
+      'Bodyweight Squat',
+      'Band Leg Press',
+      'Hip Thrust',
     ])
   })
 

@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
 
     const current = await prisma.exerciseDefinition.findFirst({
       where: { id: definitionId, ...visible },
-      select: { id: true, primaryFAUs: true, equipment: true, movementPattern: true },
+      select: { id: true, name: true, primaryFAUs: true, equipment: true, movementPattern: true, isBodyweight: true },
     })
     if (!current) {
       return NextResponse.json({ error: 'Exercise not found' }, { status: 404 })
@@ -51,6 +51,7 @@ export async function GET(request: NextRequest) {
         secondaryFAUs: true,
         equipment: true,
         movementPattern: true,
+        isBodyweight: true,
         isSystem: true,
         createdBy: true,
       },

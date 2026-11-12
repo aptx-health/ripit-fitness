@@ -133,14 +133,21 @@ const WEEK_SETS = [
   { reps: '5', rir: 3, count: 5 },
 ]
 
-async function makeDef(name: string, primaryFAUs: string[], equipment: string[], movementPattern: string | null, owner?: string) {
+async function makeDef(
+  name: string,
+  primaryFAUs: string[],
+  equipment: string[],
+  movementPattern: string | null,
+  owner?: string,
+  isBodyweight = false
+) {
   const made = await createTestExerciseDefinition(s.prisma, {
     name,
     primaryFAUs,
     equipment,
     ...(owner ? { userId: owner, isSystem: false } : { isSystem: true }),
   })
-  await s.prisma.exerciseDefinition.update({ where: { id: made.id }, data: { movementPattern } })
+  await s.prisma.exerciseDefinition.update({ where: { id: made.id }, data: { movementPattern, isBodyweight } })
   s.d[name] = made.id
 }
 
@@ -221,6 +228,22 @@ async function plankCurrent() {
     },
   })
   s.current = { exerciseId: ex.id, definitionName: 'Plank' }
+}
+
+/** Barbell Back Squat as the current exercise in week 2 (work 217). */
+async function backSquatCurrent() {
+  const workoutId = (await s.prisma.exercise.findUniqueOrThrow({ where: { id: s.goblet[1] } })).workoutId
+  const ex = await s.prisma.exercise.create({
+    data: {
+      name: 'Barbell Back Squat',
+      exerciseDefinitionId: s.d['Barbell Back Squat'],
+      order: 3,
+      workoutId,
+      userId: s.me,
+      prescribedSets: { create: [{ setNumber: 1, reps: '5', userId: s.me }] },
+    },
+  })
+  s.current = { exerciseId: ex.id, definitionName: 'Barbell Back Squat' }
 }
 
 async function shape(exerciseId: string) {
@@ -417,6 +440,8 @@ describeFeature(feature, ({ Background, Scenario, ScenarioOutline }) => {
   Scenario('Similar is ranked by muscles, then equipment', ({ Given, Then, And }) => {
     const pos = (name: string) => s.similar.findIndex((t) => t.includes(name))
     Given('candidates that share the current exercise\'s primary muscles', async () => {
+      // A band squat: both muscles, no shared equipment, and named before "Barbell" (work 217).
+      await makeDef('Band Squat', ['quads', 'glutes'], ['band'], null)
       await openProgramPicker()
       s.similar = await similarNames()
     })
@@ -432,12 +457,41 @@ describeFeature(feature, ({ Background, Scenario, ScenarioOutline }) => {
       expect(pos('My Split Squat')).toBeLessThan(pos('Barbell Back Squat'))
       expect(pos('Dumbbell Step Up')).toBeLessThan(pos('Hip Thrust'))
     })
+    And('among those, ones with the same load type rank higher (weighted vs bodyweight vs band)', () => {
+      expect(pos('Band Squat')).toBeGreaterThanOrEqual(0)
+      expect(pos('Barbell Back Squat')).toBeLessThan(pos('Band Squat'))
+    })
     And('among those, ones with the same movement pattern rank higher when both are tagged', () => {
       expect(pos('Dumbbell Front Squat')).toBe(0)
+    })
+    And('among those, ones sharing a movement word in the name rank higher (for example "squat")', () => {
+      // Both untagged-or-unmatched dumbbell pairs; "My Split Squat" shares "squat" with the goblet squat.
+      expect(pos('My Split Squat')).toBeLessThan(pos('Dumbbell Lunge'))
+    })
+  })
+
+  Scenario('A weighted exercise gets weighted swaps first', ({ Given, Then, And }) => {
+    const pos = (name: string) => s.similar.findIndex((t) => t.includes(name))
+    Given('the current exercise is "Barbell Back Squat"', async () => {
+      await makeDef('Band Leg Press', ['quads', 'glutes'], ['band'], null)
+      await makeDef('Band Squat', ['quads', 'glutes'], ['band'], null)
+      await makeDef('Bodyweight Squat', ['quads', 'glutes'], ['bodyweight'], null, undefined, true)
+      await backSquatCurrent()
+      await openProgramPicker()
+      s.similar = await similarNames()
+    })
+    Then('weighted squats and lunges come before band and bodyweight ones in the "Similar" list', () => {
+      const weighted = ['Dumbbell Front Squat', 'Dumbbell Goblet Squat', 'My Split Squat', 'Dumbbell Lunge'].map(pos)
+      const unweighted = ['Band Squat', 'Bodyweight Squat', 'Band Leg Press'].map(pos)
+      expect(Math.min(...weighted, ...unweighted)).toBeGreaterThanOrEqual(0)
+      expect(Math.max(...weighted)).toBeLessThan(Math.min(...unweighted))
+      // The squats lead.
+      expect(pos('Dumbbell Lunge')).toBe(3)
     })
     And('exercises sharing no primary muscle are not in the list', () => {
       expect(pos('Dumbbell Curl')).toBe(-1)
       expect(pos('Plank')).toBe(-1)
+      expect(pos('Barbell Back Squat')).toBe(-1)
     })
   })
 
