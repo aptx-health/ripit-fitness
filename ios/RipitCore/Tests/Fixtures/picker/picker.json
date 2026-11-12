@@ -1,0 +1,4964 @@
+{
+ "collation": "en_US.utf8",
+ "choices": {
+  "equipment": [
+   {
+    "key": "barbell",
+    "label": "Barbell"
+   },
+   {
+    "key": "dumbbell",
+    "label": "Dumbbell"
+   },
+   {
+    "key": "kettlebell",
+    "label": "Kettlebell"
+   },
+   {
+    "key": "cable",
+    "label": "Cable"
+   },
+   {
+    "key": "machine",
+    "label": "Machine"
+   },
+   {
+    "key": "smith_machine",
+    "label": "Smith Machine"
+   },
+   {
+    "key": "bodyweight",
+    "label": "Bodyweight"
+   },
+   {
+    "key": "resistance_band",
+    "label": "Resistance Band"
+   },
+   {
+    "key": "ez_bar",
+    "label": "EZ Bar"
+   },
+   {
+    "key": "safety_squat_bar",
+    "label": "Safety Squat Bar"
+   },
+   {
+    "key": "trap_bar",
+    "label": "Trap Bar"
+   },
+   {
+    "key": "swiss_bar",
+    "label": "Swiss Bar"
+   },
+   {
+    "key": "chains",
+    "label": "Chains"
+   },
+   {
+    "key": "bands",
+    "label": "Bands"
+   },
+   {
+    "key": "sled",
+    "label": "Sled"
+   },
+   {
+    "key": "dip_bars",
+    "label": "Dip Bars"
+   },
+   {
+    "key": "incline_bench",
+    "label": "Incline Bench"
+   },
+   {
+    "key": "decline_bench",
+    "label": "Decline Bench"
+   },
+   {
+    "key": "preacher_bench",
+    "label": "Preacher Bench"
+   },
+   {
+    "key": "ab_wheel",
+    "label": "Ab Wheel"
+   },
+   {
+    "key": "parallel_bars",
+    "label": "Parallel Bars"
+   },
+   {
+    "key": "roman_chair",
+    "label": "Roman Chair"
+   },
+   {
+    "key": "hangboard",
+    "label": "Hangboard"
+   },
+   {
+    "key": "campus_board",
+    "label": "Campus Board"
+   },
+   {
+    "key": "system_board",
+    "label": "System Board"
+   },
+   {
+    "key": "climbing_wall",
+    "label": "Climbing Wall"
+   },
+   {
+    "key": "foam_roller",
+    "label": "Foam Roller"
+   },
+   {
+    "key": "weight_belt",
+    "label": "Weight Belt"
+   },
+   {
+    "key": "suspension_trainer",
+    "label": "Suspension Trainer"
+   },
+   {
+    "key": "plyo_box",
+    "label": "Plyo Box"
+   },
+   {
+    "key": "medicine_ball",
+    "label": "Medicine Ball"
+   },
+   {
+    "key": "functional_trainer",
+    "label": "Functional Trainer (Dual-Pulley)"
+   },
+   {
+    "key": "assisted_pullup_dip",
+    "label": "Assisted Pull-Up / Dip"
+   },
+   {
+    "key": "other",
+    "label": "Other"
+   }
+  ],
+  "muscles": [
+   {
+    "key": "chest",
+    "label": "Chest"
+   },
+   {
+    "key": "mid-back",
+    "label": "Mid Back"
+   },
+   {
+    "key": "lower-back",
+    "label": "Lower Back"
+   },
+   {
+    "key": "front-delts",
+    "label": "Front Delts"
+   },
+   {
+    "key": "side-delts",
+    "label": "Side Delts"
+   },
+   {
+    "key": "rear-delts",
+    "label": "Rear Delts"
+   },
+   {
+    "key": "lats",
+    "label": "Lats"
+   },
+   {
+    "key": "traps",
+    "label": "Traps"
+   },
+   {
+    "key": "biceps",
+    "label": "Biceps"
+   },
+   {
+    "key": "triceps",
+    "label": "Triceps"
+   },
+   {
+    "key": "forearms",
+    "label": "Forearms"
+   },
+   {
+    "key": "quads",
+    "label": "Quads"
+   },
+   {
+    "key": "adductors",
+    "label": "Adductors"
+   },
+   {
+    "key": "hamstrings",
+    "label": "Hamstrings"
+   },
+   {
+    "key": "glutes",
+    "label": "Glutes"
+   },
+   {
+    "key": "calves",
+    "label": "Calves"
+   },
+   {
+    "key": "abs",
+    "label": "Abs"
+   },
+   {
+    "key": "obliques",
+    "label": "Obliques"
+   }
+  ],
+  "other": [
+   "resistance_band",
+   "ez_bar",
+   "dip_bars",
+   "incline_bench",
+   "decline_bench",
+   "preacher_bench",
+   "ab_wheel",
+   "foam_roller",
+   "weight_belt",
+   "parallel_bars",
+   "roman_chair",
+   "hangboard",
+   "campus_board",
+   "system_board",
+   "climbing_wall",
+   "safety_squat_bar",
+   "trap_bar",
+   "swiss_bar",
+   "chains",
+   "bands",
+   "sled",
+   "suspension_trainer",
+   "plyo_box",
+   "medicine_ball",
+   "functional_trainer",
+   "assisted_pullup_dip",
+   "other"
+  ]
+ },
+ "customs": [
+  {
+   "name": "My Bench Squeeze",
+   "equipment": [
+    "bench"
+   ],
+   "primaryFAUs": [
+    "chest"
+   ],
+   "secondaryFAUs": [
+    "triceps"
+   ],
+   "instructions": "Squeeze."
+  },
+  {
+   "name": "Sled Push",
+   "equipment": [
+    "sled"
+   ],
+   "primaryFAUs": [
+    "quads"
+   ],
+   "secondaryFAUs": [
+    "glutes",
+    "calves"
+   ],
+   "instructions": null
+  },
+  {
+   "name": "Band Pull Apart Plus",
+   "equipment": [
+    "resistance_band"
+   ],
+   "primaryFAUs": [
+    "rear-delts"
+   ],
+   "secondaryFAUs": [],
+   "instructions": null
+  },
+  {
+   "name": "Zz Press Machine",
+   "equipment": [
+    "machine"
+   ],
+   "primaryFAUs": [
+    "front-delts"
+   ],
+   "secondaryFAUs": [],
+   "instructions": null
+  }
+ ],
+ "searches": [
+  {
+   "label": "text: bench (name and score order)",
+   "query": "bench",
+   "fau": null,
+   "equipment": null,
+   "limit": 50,
+   "results": [
+    {
+     "id": "ex_curated_027",
+     "name": "Bench Press"
+    },
+    {
+     "id": "cmiz7vjju0000vr0m4b1o6bec",
+     "name": "Barbell Bench Press"
+    },
+    {
+     "id": "ex_cm_046",
+     "name": "Close Grip Bench Press"
+    },
+    {
+     "id": "ex_db_002",
+     "name": "Decline Dumbbell Bench Press"
+    },
+    {
+     "id": "cmiz7vkpg0007vr0mpbaneax3",
+     "name": "Dumbbell Bench Press"
+    },
+    {
+     "id": "cmiz7vkji0006vr0mrxfixnvy",
+     "name": "Incline Barbell Bench Press"
+    },
+    {
+     "id": "ex_db_001",
+     "name": "Incline Dumbbell Bench Press"
+    },
+    {
+     "id": "ex_cm_029",
+     "name": "Smith Machine Bench Press"
+    },
+    {
+     "id": "ex_curated_031",
+     "name": "Smith Machine Incline Bench Press"
+    },
+    {
+     "id": "custom:My Bench Squeeze",
+     "name": "My Bench Squeeze"
+    }
+   ]
+  },
+  {
+   "label": "text: exact name scores first",
+   "query": "Bench Press",
+   "fau": null,
+   "equipment": null,
+   "limit": 50,
+   "results": [
+    {
+     "id": "cmiz7vjju0000vr0m4b1o6bec",
+     "name": "Barbell Bench Press"
+    },
+    {
+     "id": "ex_curated_027",
+     "name": "Bench Press"
+    },
+    {
+     "id": "ex_cm_046",
+     "name": "Close Grip Bench Press"
+    },
+    {
+     "id": "cmiz7vkpg0007vr0mpbaneax3",
+     "name": "Dumbbell Bench Press"
+    },
+    {
+     "id": "cmiz7vkji0006vr0mrxfixnvy",
+     "name": "Incline Barbell Bench Press"
+    },
+    {
+     "id": "ex_cm_029",
+     "name": "Smith Machine Bench Press"
+    },
+    {
+     "id": "ex_db_002",
+     "name": "Decline Dumbbell Bench Press"
+    },
+    {
+     "id": "ex_db_001",
+     "name": "Incline Dumbbell Bench Press"
+    },
+    {
+     "id": "ex_curated_031",
+     "name": "Smith Machine Incline Bench Press"
+    }
+   ]
+  },
+  {
+   "label": "text: case ignored",
+   "query": "BENCH PRESS",
+   "fau": null,
+   "equipment": null,
+   "limit": 50,
+   "results": [
+    {
+     "id": "cmiz7vjju0000vr0m4b1o6bec",
+     "name": "Barbell Bench Press"
+    },
+    {
+     "id": "ex_curated_027",
+     "name": "Bench Press"
+    },
+    {
+     "id": "ex_cm_046",
+     "name": "Close Grip Bench Press"
+    },
+    {
+     "id": "cmiz7vkpg0007vr0mpbaneax3",
+     "name": "Dumbbell Bench Press"
+    },
+    {
+     "id": "cmiz7vkji0006vr0mrxfixnvy",
+     "name": "Incline Barbell Bench Press"
+    },
+    {
+     "id": "ex_cm_029",
+     "name": "Smith Machine Bench Press"
+    },
+    {
+     "id": "ex_db_002",
+     "name": "Decline Dumbbell Bench Press"
+    },
+    {
+     "id": "ex_db_001",
+     "name": "Incline Dumbbell Bench Press"
+    },
+    {
+     "id": "ex_curated_031",
+     "name": "Smith Machine Incline Bench Press"
+    }
+   ]
+  },
+  {
+   "label": "text: surrounding spaces trimmed",
+   "query": "  squat  ",
+   "fau": null,
+   "equipment": null,
+   "limit": 50,
+   "results": [
+    {
+     "id": "cmiz7vjpo0001vr0msv9of7ib",
+     "name": "Barbell Back Squat"
+    },
+    {
+     "id": "ex_curated_023",
+     "name": "Barbell Squat"
+    },
+    {
+     "id": "ex_bw_013",
+     "name": "Bodyweight Squat"
+    },
+    {
+     "id": "ex_rb_020",
+     "name": "Band Squat"
+    },
+    {
+     "id": "ex_curated_057",
+     "name": "Bodyweight Bulgarian Split Squat"
+    },
+    {
+     "id": "ex_bw_016",
+     "name": "Bulgarian Split Squat"
+    },
+    {
+     "id": "ex_db_031",
+     "name": "Dumbbell Bulgarian Split Squat"
+    },
+    {
+     "id": "ex_db_029",
+     "name": "Dumbbell Front Squat"
+    },
+    {
+     "id": "ex_db_028",
+     "name": "Dumbbell Goblet Squat"
+    },
+    {
+     "id": "ex_db_030",
+     "name": "Dumbbell Sumo Squat"
+    },
+    {
+     "id": "cmiz7vm4s000fvr0mfh2shcrv",
+     "name": "Front Squat"
+    },
+    {
+     "id": "ex_curated_020",
+     "name": "Goblet Squat"
+    },
+    {
+     "id": "ex_bw_014",
+     "name": "Jump Squat"
+    },
+    {
+     "id": "ex_kb_013",
+     "name": "Kettlebell Front Squat"
+    },
+    {
+     "id": "ex_kb_012",
+     "name": "Kettlebell Goblet Squat"
+    },
+    {
+     "id": "ex_kb_014",
+     "name": "Kettlebell Pistol Squat"
+    },
+    {
+     "id": "ex_bw_015",
+     "name": "Pistol Squat"
+    },
+    {
+     "id": "ex_bw_017",
+     "name": "Sissy Squat"
+    },
+    {
+     "id": "ex_cm_030",
+     "name": "Smith Machine Squat"
+    },
+    {
+     "id": "ex_cm_059",
+     "name": "TRX Pistol Squat"
+    }
+   ]
+  },
+  {
+   "label": "text: press (alias-contains scores)",
+   "query": "press",
+   "fau": null,
+   "equipment": null,
+   "limit": 50,
+   "results": [
+    {
+     "id": "ex_db_007",
+     "name": "Arnold Press"
+    },
+    {
+     "id": "ex_rb_032",
+     "name": "Band Anti-Rotation Press"
+    },
+    {
+     "id": "ex_rb_001",
+     "name": "Band Chest Press"
+    },
+    {
+     "id": "ex_rb_021",
+     "name": "Band Leg Press"
+    },
+    {
+     "id": "ex_rb_030",
+     "name": "Band Pallof Press"
+    },
+    {
+     "id": "ex_rb_009",
+     "name": "Band Shoulder Press"
+    },
+    {
+     "id": "cmiz7vjju0000vr0m4b1o6bec",
+     "name": "Barbell Bench Press"
+    },
+    {
+     "id": "ex_curated_027",
+     "name": "Bench Press"
+    },
+    {
+     "id": "ex_cm_004",
+     "name": "Cable Chest Press"
+    },
+    {
+     "id": "ex_cm_027",
+     "name": "Cable Pallof Press"
+    },
+    {
+     "id": "ex_curated_000",
+     "name": "Chest Press"
+    },
+    {
+     "id": "ex_cm_046",
+     "name": "Close Grip Bench Press"
+    },
+    {
+     "id": "ex_db_002",
+     "name": "Decline Dumbbell Bench Press"
+    },
+    {
+     "id": "cmiz7vkpg0007vr0mpbaneax3",
+     "name": "Dumbbell Bench Press"
+    },
+    {
+     "id": "ex_db_049",
+     "name": "Dumbbell Clean and Press"
+    },
+    {
+     "id": "ex_curated_050",
+     "name": "Dumbbell Floor Press"
+    },
+    {
+     "id": "ex_db_006",
+     "name": "Dumbbell Shoulder Press"
+    },
+    {
+     "id": "cmiz7vkji0006vr0mrxfixnvy",
+     "name": "Incline Barbell Bench Press"
+    },
+    {
+     "id": "ex_db_001",
+     "name": "Incline Dumbbell Bench Press"
+    },
+    {
+     "id": "ex_curated_039",
+     "name": "Incline Dumbbell Press"
+    },
+    {
+     "id": "ex_kb_006",
+     "name": "Kettlebell Clean and Press"
+    },
+    {
+     "id": "ex_kb_010",
+     "name": "Kettlebell Floor Press"
+    },
+    {
+     "id": "ex_kb_008",
+     "name": "Kettlebell Press"
+    },
+    {
+     "id": "ex_kb_009",
+     "name": "Kettlebell Push Press"
+    },
+    {
+     "id": "cmiz7vldb000bvr0mw4qzzagc",
+     "name": "Leg Press"
+    },
+    {
+     "id": "ex_curated_062",
+     "name": "Leg Press Calf Press"
+    },
+    {
+     "id": "ex_cm_032",
+     "name": "Machine Chest Press"
+    },
+    {
+     "id": "ex_cm_033",
+     "name": "Machine Shoulder Press"
+    },
+    {
+     "id": "cmiz7vk780004vr0md53c57bz",
+     "name": "Overhead Press"
+    },
+    {
+     "id": "ex_mo_007",
+     "name": "Pallof Press"
+    },
+    {
+     "id": "ex_curated_001",
+     "name": "Shoulder Press"
+    },
+    {
+     "id": "ex_cm_029",
+     "name": "Smith Machine Bench Press"
+    },
+    {
+     "id": "ex_curated_031",
+     "name": "Smith Machine Incline Bench Press"
+    },
+    {
+     "id": "ex_curated_024",
+     "name": "Standing Dumbbell Press"
+    },
+    {
+     "id": "ex_db_026",
+     "name": "Tate Press"
+    },
+    {
+     "id": "ex_cm_056",
+     "name": "TRX Chest Press"
+    },
+    {
+     "id": "ex_curated_030",
+     "name": "Lying Triceps Press"
+    },
+    {
+     "id": "custom:Zz Press Machine",
+     "name": "Zz Press Machine"
+    }
+   ]
+  },
+  {
+   "label": "text: e (more than 50 matches: sorted by score, then cut)",
+   "query": "e",
+   "fau": null,
+   "equipment": null,
+   "limit": 50,
+   "results": [
+    {
+     "id": "ex_cm_052",
+     "name": "EZ Bar Curl"
+    },
+    {
+     "id": "ex_cm_054",
+     "name": "EZ Bar Preacher Curl"
+    },
+    {
+     "id": "ex_cm_053",
+     "name": "EZ Bar Skull Crusher"
+    },
+    {
+     "id": "ex_mo_015",
+     "name": "90/90 Hip Stretch"
+    },
+    {
+     "id": "ex_curated_010",
+     "name": "Ab Crunch Machine"
+    },
+    {
+     "id": "ex_mo_001",
+     "name": "Ab Wheel Rollout"
+    },
+    {
+     "id": "ex_db_017",
+     "name": "Alternating Dumbbell Curl"
+    },
+    {
+     "id": "ex_kb_003",
+     "name": "American Kettlebell Swing"
+    },
+    {
+     "id": "ex_bw_007",
+     "name": "Archer Push-Up"
+    },
+    {
+     "id": "ex_mo_017",
+     "name": "Arm Circle"
+    },
+    {
+     "id": "ex_db_007",
+     "name": "Arnold Press"
+    },
+    {
+     "id": "ex_curated_061",
+     "name": "Assisted Dip"
+    },
+    {
+     "id": "ex_cl_016",
+     "name": "Assisted One Arm Pull-Up"
+    },
+    {
+     "id": "ex_curated_060",
+     "name": "Assisted Pull-up"
+    },
+    {
+     "id": "ex_curated_005",
+     "name": "Back Extension"
+    },
+    {
+     "id": "ex_rb_032",
+     "name": "Band Anti-Rotation Press"
+    },
+    {
+     "id": "ex_rb_015",
+     "name": "Band Bicep Curl"
+    },
+    {
+     "id": "ex_rb_002",
+     "name": "Band Chest Fly"
+    },
+    {
+     "id": "ex_rb_001",
+     "name": "Band Chest Press"
+    },
+    {
+     "id": "ex_rb_028",
+     "name": "Band Clamshell"
+    },
+    {
+     "id": "ex_rb_007",
+     "name": "Band Deadlift"
+    },
+    {
+     "id": "ex_rb_013",
+     "name": "Band Face Pull"
+    },
+    {
+     "id": "ex_rb_011",
+     "name": "Band Front Raise"
+    },
+    {
+     "id": "ex_rb_024",
+     "name": "Band Glute Bridge"
+    },
+    {
+     "id": "ex_rb_016",
+     "name": "Band Hammer Curl"
+    },
+    {
+     "id": "ex_rb_010",
+     "name": "Band Lateral Raise"
+    },
+    {
+     "id": "ex_rb_023",
+     "name": "Band Leg Curl"
+    },
+    {
+     "id": "ex_rb_022",
+     "name": "Band Leg Extension"
+    },
+    {
+     "id": "ex_rb_021",
+     "name": "Band Leg Press"
+    },
+    {
+     "id": "ex_rb_026",
+     "name": "Band Lunge"
+    },
+    {
+     "id": "ex_rb_029",
+     "name": "Band Monster Walk"
+    },
+    {
+     "id": "ex_rb_030",
+     "name": "Band Pallof Press"
+    },
+    {
+     "id": "ex_rb_012",
+     "name": "Band Rear Delt Fly"
+    },
+    {
+     "id": "ex_rb_009",
+     "name": "Band Shoulder Press"
+    },
+    {
+     "id": "ex_rb_017",
+     "name": "Band Tricep Extension"
+    },
+    {
+     "id": "ex_rb_019",
+     "name": "Band Tricep Kickback"
+    },
+    {
+     "id": "ex_rb_018",
+     "name": "Band Tricep Pushdown"
+    },
+    {
+     "id": "cmiz7vjju0000vr0m4b1o6bec",
+     "name": "Barbell Bench Press"
+    },
+    {
+     "id": "cmiz7vl1k0009vr0m306fts69",
+     "name": "Barbell Curl"
+    },
+    {
+     "id": "ex_curated_049",
+     "name": "Barbell Glute Bridge"
+    },
+    {
+     "id": "ex_cm_044",
+     "name": "Barbell Lunge"
+    },
+    {
+     "id": "cmiz7vk1i0003vr0mqucd1f52",
+     "name": "Barbell Row"
+    },
+    {
+     "id": "ex_cm_045",
+     "name": "Barbell Shrug"
+    },
+    {
+     "id": "ex_cm_047",
+     "name": "Barbell Skull Crusher"
+    },
+    {
+     "id": "ex_curated_023",
+     "name": "Barbell Squat"
+    },
+    {
+     "id": "ex_curated_027",
+     "name": "Bench Press"
+    },
+    {
+     "id": "ex_curated_028",
+     "name": "Bent Over Barbell Row"
+    },
+    {
+     "id": "ex_db_012",
+     "name": "Bent Over Dumbbell Row"
+    },
+    {
+     "id": "ex_bw_024",
+     "name": "Bicycle Crunch"
+    },
+    {
+     "id": "ex_curated_057",
+     "name": "Bodyweight Bulgarian Split Squat"
+    }
+   ]
+  },
+  {
+   "label": "text: a, limit 100 (more than 100 matches: sorted by score, then cut)",
+   "query": "a",
+   "fau": null,
+   "equipment": null,
+   "limit": 100,
+   "results": [
+    {
+     "id": "ex_curated_010",
+     "name": "Ab Crunch Machine"
+    },
+    {
+     "id": "ex_mo_001",
+     "name": "Ab Wheel Rollout"
+    },
+    {
+     "id": "ex_db_017",
+     "name": "Alternating Dumbbell Curl"
+    },
+    {
+     "id": "ex_kb_003",
+     "name": "American Kettlebell Swing"
+    },
+    {
+     "id": "ex_bw_007",
+     "name": "Archer Push-Up"
+    },
+    {
+     "id": "ex_mo_017",
+     "name": "Arm Circle"
+    },
+    {
+     "id": "ex_db_007",
+     "name": "Arnold Press"
+    },
+    {
+     "id": "ex_curated_061",
+     "name": "Assisted Dip"
+    },
+    {
+     "id": "ex_cl_016",
+     "name": "Assisted One Arm Pull-Up"
+    },
+    {
+     "id": "ex_curated_060",
+     "name": "Assisted Pull-up"
+    },
+    {
+     "id": "ex_curated_005",
+     "name": "Back Extension"
+    },
+    {
+     "id": "ex_rb_032",
+     "name": "Band Anti-Rotation Press"
+    },
+    {
+     "id": "ex_rb_015",
+     "name": "Band Bicep Curl"
+    },
+    {
+     "id": "ex_rb_002",
+     "name": "Band Chest Fly"
+    },
+    {
+     "id": "ex_rb_001",
+     "name": "Band Chest Press"
+    },
+    {
+     "id": "ex_rb_028",
+     "name": "Band Clamshell"
+    },
+    {
+     "id": "ex_rb_007",
+     "name": "Band Deadlift"
+    },
+    {
+     "id": "ex_rb_013",
+     "name": "Band Face Pull"
+    },
+    {
+     "id": "ex_rb_011",
+     "name": "Band Front Raise"
+    },
+    {
+     "id": "ex_rb_024",
+     "name": "Band Glute Bridge"
+    },
+    {
+     "id": "ex_rb_008",
+     "name": "Band Good Morning"
+    },
+    {
+     "id": "ex_rb_016",
+     "name": "Band Hammer Curl"
+    },
+    {
+     "id": "ex_rb_025",
+     "name": "Band Hip Thrust"
+    },
+    {
+     "id": "ex_rb_010",
+     "name": "Band Lateral Raise"
+    },
+    {
+     "id": "ex_rb_006",
+     "name": "Band Lat Pulldown"
+    },
+    {
+     "id": "ex_rb_023",
+     "name": "Band Leg Curl"
+    },
+    {
+     "id": "ex_rb_022",
+     "name": "Band Leg Extension"
+    },
+    {
+     "id": "ex_rb_021",
+     "name": "Band Leg Press"
+    },
+    {
+     "id": "ex_rb_026",
+     "name": "Band Lunge"
+    },
+    {
+     "id": "ex_rb_029",
+     "name": "Band Monster Walk"
+    },
+    {
+     "id": "ex_rb_030",
+     "name": "Band Pallof Press"
+    },
+    {
+     "id": "ex_rb_004",
+     "name": "Band Pull Apart"
+    },
+    {
+     "id": "ex_rb_003",
+     "name": "Band Push-Up"
+    },
+    {
+     "id": "ex_rb_012",
+     "name": "Band Rear Delt Fly"
+    },
+    {
+     "id": "ex_rb_005",
+     "name": "Band Row"
+    },
+    {
+     "id": "ex_rb_009",
+     "name": "Band Shoulder Press"
+    },
+    {
+     "id": "ex_rb_020",
+     "name": "Band Squat"
+    },
+    {
+     "id": "ex_rb_027",
+     "name": "Band Standing Abduction"
+    },
+    {
+     "id": "ex_rb_017",
+     "name": "Band Tricep Extension"
+    },
+    {
+     "id": "ex_rb_019",
+     "name": "Band Tricep Kickback"
+    },
+    {
+     "id": "ex_rb_018",
+     "name": "Band Tricep Pushdown"
+    },
+    {
+     "id": "ex_rb_014",
+     "name": "Band Upright Row"
+    },
+    {
+     "id": "ex_rb_031",
+     "name": "Band Woodchop"
+    },
+    {
+     "id": "cmiz7vjpo0001vr0msv9of7ib",
+     "name": "Barbell Back Squat"
+    },
+    {
+     "id": "cmiz7vjju0000vr0m4b1o6bec",
+     "name": "Barbell Bench Press"
+    },
+    {
+     "id": "cmiz7vl1k0009vr0m306fts69",
+     "name": "Barbell Curl"
+    },
+    {
+     "id": "ex_cm_044",
+     "name": "Barbell Lunge"
+    },
+    {
+     "id": "cmiz7vk1i0003vr0mqucd1f52",
+     "name": "Barbell Row"
+    },
+    {
+     "id": "ex_cm_045",
+     "name": "Barbell Shrug"
+    },
+    {
+     "id": "ex_cm_047",
+     "name": "Barbell Skull Crusher"
+    },
+    {
+     "id": "ex_curated_023",
+     "name": "Barbell Squat"
+    },
+    {
+     "id": "ex_curated_028",
+     "name": "Bent Over Barbell Row"
+    },
+    {
+     "id": "ex_curated_057",
+     "name": "Bodyweight Bulgarian Split Squat"
+    },
+    {
+     "id": "ex_bw_013",
+     "name": "Bodyweight Squat"
+    },
+    {
+     "id": "ex_bw_016",
+     "name": "Bulgarian Split Squat"
+    },
+    {
+     "id": "ex_cm_016",
+     "name": "Cable Bicep Curl"
+    },
+    {
+     "id": "ex_cm_001",
+     "name": "Cable Chest Fly"
+    },
+    {
+     "id": "ex_cm_004",
+     "name": "Cable Chest Press"
+    },
+    {
+     "id": "ex_cm_002",
+     "name": "Cable Crossover"
+    },
+    {
+     "id": "ex_cm_025",
+     "name": "Cable Crunch"
+    },
+    {
+     "id": "ex_cm_014",
+     "name": "Cable Face Pull"
+    },
+    {
+     "id": "ex_cm_012",
+     "name": "Cable Front Raise"
+    },
+    {
+     "id": "ex_cm_017",
+     "name": "Cable Hammer Curl"
+    },
+    {
+     "id": "ex_cm_023",
+     "name": "Cable Hip Abduction"
+    },
+    {
+     "id": "ex_cm_024",
+     "name": "Cable Hip Adduction"
+    },
+    {
+     "id": "ex_cm_022",
+     "name": "Cable Kickback"
+    },
+    {
+     "id": "ex_cm_011",
+     "name": "Cable Lateral Raise"
+    },
+    {
+     "id": "ex_cm_019",
+     "name": "Cable Overhead Tricep Extension"
+    },
+    {
+     "id": "ex_cm_027",
+     "name": "Cable Pallof Press"
+    },
+    {
+     "id": "ex_cm_021",
+     "name": "Cable Pull Through"
+    },
+    {
+     "id": "ex_cm_013",
+     "name": "Cable Reverse Fly"
+    },
+    {
+     "id": "cmiz7vmmg000ivr0mojncaj84",
+     "name": "Cable Row"
+    },
+    {
+     "id": "ex_cm_028",
+     "name": "Cable Russian Twist"
+    },
+    {
+     "id": "ex_cm_020",
+     "name": "Cable Tricep Kickback"
+    },
+    {
+     "id": "ex_cm_018",
+     "name": "Cable Tricep Pushdown"
+    },
+    {
+     "id": "ex_cm_015",
+     "name": "Cable Upright Row"
+    },
+    {
+     "id": "ex_cm_026",
+     "name": "Cable Woodchop"
+    },
+    {
+     "id": "cmiz7vnam000mvr0mano9z27r",
+     "name": "Calf Raise"
+    },
+    {
+     "id": "ex_mo_008",
+     "name": "Cat-Cow Stretch"
+    },
+    {
+     "id": "ex_cm_006",
+     "name": "Close Grip Lat Pulldown"
+    },
+    {
+     "id": "ex_mo_013",
+     "name": "Cobra Stretch"
+    },
+    {
+     "id": "ex_db_019",
+     "name": "Concentration Curl"
+    },
+    {
+     "id": "cmiz7vjvh0002vr0mtcmhiz70",
+     "name": "Conventional Deadlift"
+    },
+    {
+     "id": "ex_mo_006",
+     "name": "Copenhagen Plank"
+    },
+    {
+     "id": "ex_mo_002",
+     "name": "Dead Bug"
+    },
+    {
+     "id": "ex_bw_003",
+     "name": "Diamond Push-Up"
+    },
+    {
+     "id": "ex_curated_007",
+     "name": "Dip Machine"
+    },
+    {
+     "id": "ex_mo_012",
+     "name": "Downward Dog"
+    },
+    {
+     "id": "ex_mo_004",
+     "name": "Dragon Flag"
+    },
+    {
+     "id": "ex_db_031",
+     "name": "Dumbbell Bulgarian Split Squat"
+    },
+    {
+     "id": "ex_db_036",
+     "name": "Dumbbell Calf Raise"
+    },
+    {
+     "id": "ex_db_048",
+     "name": "Dumbbell Clean"
+    },
+    {
+     "id": "ex_db_049",
+     "name": "Dumbbell Clean and Press"
+    },
+    {
+     "id": "ex_db_013",
+     "name": "Dumbbell Deadlift"
+    },
+    {
+     "id": "ex_db_029",
+     "name": "Dumbbell Front Squat"
+    },
+    {
+     "id": "ex_db_028",
+     "name": "Dumbbell Goblet Squat"
+    },
+    {
+     "id": "ex_db_023",
+     "name": "Dumbbell Overhead Tricep Extension"
+    },
+    {
+     "id": "ex_curated_067",
+     "name": "Dumbbell Overhead Triceps Extension"
+    },
+    {
+     "id": "ex_db_041",
+     "name": "Dumbbell Russian Twist"
+    },
+    {
+     "id": "ex_db_038",
+     "name": "Dumbbell Single Leg Deadlift"
+    }
+   ]
+  },
+  {
+   "label": "text: alias equal outscores name contains (flat bench)",
+   "query": "flat bench",
+   "fau": null,
+   "equipment": null,
+   "limit": 50,
+   "results": [
+    {
+     "id": "cmiz7vjju0000vr0m4b1o6bec",
+     "name": "Barbell Bench Press"
+    },
+    {
+     "id": "ex_curated_027",
+     "name": "Bench Press"
+    }
+   ]
+  },
+  {
+   "label": "text: curl",
+   "query": "curl",
+   "fau": null,
+   "equipment": null,
+   "limit": 50,
+   "results": [
+    {
+     "id": "ex_db_017",
+     "name": "Alternating Dumbbell Curl"
+    },
+    {
+     "id": "ex_rb_015",
+     "name": "Band Bicep Curl"
+    },
+    {
+     "id": "ex_rb_016",
+     "name": "Band Hammer Curl"
+    },
+    {
+     "id": "ex_rb_023",
+     "name": "Band Leg Curl"
+    },
+    {
+     "id": "cmiz7vl1k0009vr0m306fts69",
+     "name": "Barbell Curl"
+    },
+    {
+     "id": "ex_cm_016",
+     "name": "Cable Bicep Curl"
+    },
+    {
+     "id": "ex_cm_017",
+     "name": "Cable Hammer Curl"
+    },
+    {
+     "id": "ex_db_019",
+     "name": "Concentration Curl"
+    },
+    {
+     "id": "ex_db_016",
+     "name": "Dumbbell Curl"
+    },
+    {
+     "id": "ex_db_044",
+     "name": "Dumbbell Reverse Wrist Curl"
+    },
+    {
+     "id": "ex_db_043",
+     "name": "Dumbbell Wrist Curl"
+    },
+    {
+     "id": "ex_cm_052",
+     "name": "EZ Bar Curl"
+    },
+    {
+     "id": "ex_cm_054",
+     "name": "EZ Bar Preacher Curl"
+    },
+    {
+     "id": "cmiz7vnpc000ovr0mcuhs0bum",
+     "name": "Hammer Curl"
+    },
+    {
+     "id": "ex_db_018",
+     "name": "Incline Dumbbell Curl"
+    },
+    {
+     "id": "cmiz7vljh000cvr0mlk0r5kco",
+     "name": "Leg Curl"
+    },
+    {
+     "id": "ex_cm_042",
+     "name": "Machine Ab Curl"
+    },
+    {
+     "id": "ex_cm_039",
+     "name": "Machine Preacher Curl"
+    },
+    {
+     "id": "ex_curated_011",
+     "name": "Machine Preacher Curls"
+    },
+    {
+     "id": "ex_bw_040",
+     "name": "Nordic Curl"
+    },
+    {
+     "id": "ex_db_020",
+     "name": "Preacher Curl"
+    },
+    {
+     "id": "ex_curated_004",
+     "name": "Seated Leg Curl"
+    },
+    {
+     "id": "ex_db_021",
+     "name": "Spider Curl"
+    },
+    {
+     "id": "ex_curated_012",
+     "name": "Standing Biceps Cable Curl"
+    },
+    {
+     "id": "ex_cm_060",
+     "name": "TRX Hamstring Curl"
+    },
+    {
+     "id": "ex_db_022",
+     "name": "Zottman Curl"
+    },
+    {
+     "id": "ex_cl_018",
+     "name": "Reverse Wrist Curl"
+    }
+   ]
+  },
+  {
+   "label": "text: row (substring inside words)",
+   "query": "row",
+   "fau": null,
+   "equipment": null,
+   "limit": 50,
+   "results": [
+    {
+     "id": "ex_rb_005",
+     "name": "Band Row"
+    },
+    {
+     "id": "ex_rb_014",
+     "name": "Band Upright Row"
+    },
+    {
+     "id": "cmiz7vk1i0003vr0mqucd1f52",
+     "name": "Barbell Row"
+    },
+    {
+     "id": "ex_curated_028",
+     "name": "Bent Over Barbell Row"
+    },
+    {
+     "id": "ex_db_012",
+     "name": "Bent Over Dumbbell Row"
+    },
+    {
+     "id": "cmiz7vmmg000ivr0mojncaj84",
+     "name": "Cable Row"
+    },
+    {
+     "id": "ex_cm_015",
+     "name": "Cable Upright Row"
+    },
+    {
+     "id": "ex_curated_006",
+     "name": "Chest Supported Row"
+    },
+    {
+     "id": "cmiz7vmgd000hvr0mkidkt6uu",
+     "name": "Dumbbell Row"
+    },
+    {
+     "id": "ex_bw_036",
+     "name": "Inverted Row"
+    },
+    {
+     "id": "ex_kb_018",
+     "name": "Kettlebell Renegade Row"
+    },
+    {
+     "id": "ex_kb_017",
+     "name": "Kettlebell Row"
+    },
+    {
+     "id": "ex_cm_035",
+     "name": "Machine Chest Supported Row"
+    },
+    {
+     "id": "ex_curated_026",
+     "name": "One-Arm Dumbbell Row"
+    },
+    {
+     "id": "ex_cm_009",
+     "name": "Seated Cable Row"
+    },
+    {
+     "id": "ex_curated_019",
+     "name": "Seated Cable Rows"
+    },
+    {
+     "id": "ex_cm_010",
+     "name": "Single Arm Cable Row"
+    },
+    {
+     "id": "ex_db_011",
+     "name": "Single Arm Dumbbell Row"
+    },
+    {
+     "id": "ex_cm_055",
+     "name": "TRX Row"
+    },
+    {
+     "id": "ex_db_010",
+     "name": "Upright Row"
+    }
+   ]
+  },
+  {
+   "label": "text: alias exact only (cgbp)",
+   "query": "cgbp",
+   "fau": null,
+   "equipment": null,
+   "limit": 50,
+   "results": [
+    {
+     "id": "ex_cm_046",
+     "name": "Close Grip Bench Press"
+    }
+   ]
+  },
+  {
+   "label": "text: alias exact (rdl)",
+   "query": "rdl",
+   "fau": null,
+   "equipment": null,
+   "limit": 50,
+   "results": [
+    {
+     "id": "cmiz7vkdh0005vr0mr5dm18ls",
+     "name": "Romanian Deadlift"
+    }
+   ]
+  },
+  {
+   "label": "text: alias partial does not match (bench dip)",
+   "query": "bench di",
+   "fau": null,
+   "equipment": null,
+   "limit": 50,
+   "results": []
+  },
+  {
+   "label": "text: alias exact (bench dip)",
+   "query": "bench dip",
+   "fau": null,
+   "equipment": null,
+   "limit": 50,
+   "results": [
+    {
+     "id": "ex_bw_034",
+     "name": "Tricep Dip"
+    }
+   ]
+  },
+  {
+   "label": "text: hyphen in query (pull-up)",
+   "query": "pull-up",
+   "fau": null,
+   "equipment": null,
+   "limit": 50,
+   "results": [
+    {
+     "id": "cmiz7vkvr0008vr0m7rv3dapc",
+     "name": "Pull-Up"
+    },
+    {
+     "id": "ex_curated_051",
+     "name": "Pull-Ups"
+    },
+    {
+     "id": "ex_curated_060",
+     "name": "Assisted Pull-up"
+    },
+    {
+     "id": "ex_cl_016",
+     "name": "Assisted One Arm Pull-Up"
+    },
+    {
+     "id": "ex_bw_011",
+     "name": "L-Sit Pull-Up"
+    },
+    {
+     "id": "ex_bw_010",
+     "name": "Neutral Grip Pull-Up"
+    },
+    {
+     "id": "ex_cl_021",
+     "name": "Scapular Pull-Up"
+    },
+    {
+     "id": "ex_cl_015",
+     "name": "Typewriter Pull-Up"
+    },
+    {
+     "id": "ex_bw_009",
+     "name": "Wide Grip Pull-Up"
+    }
+   ]
+  },
+  {
+   "label": "text: space for hyphen (pull up)",
+   "query": "pull up",
+   "fau": null,
+   "equipment": null,
+   "limit": 50,
+   "results": [
+    {
+     "id": "cmiz7vkvr0008vr0m7rv3dapc",
+     "name": "Pull-Up"
+    }
+   ]
+  },
+  {
+   "label": "text: squashed (pullup)",
+   "query": "pullup",
+   "fau": null,
+   "equipment": null,
+   "limit": 50,
+   "results": [
+    {
+     "id": "cmiz7vkvr0008vr0m7rv3dapc",
+     "name": "Pull-Up"
+    },
+    {
+     "id": "ex_curated_051",
+     "name": "Pull-Ups"
+    }
+   ]
+  },
+  {
+   "label": "text: apostrophe dropped (farmers walk)",
+   "query": "farmers walk",
+   "fau": null,
+   "equipment": null,
+   "limit": 50,
+   "results": [
+    {
+     "id": "ex_db_045",
+     "name": "Farmer Walk"
+    }
+   ]
+  },
+  {
+   "label": "text: apostrophe kept (farmer's walk)",
+   "query": "farmer's walk",
+   "fau": null,
+   "equipment": null,
+   "limit": 50,
+   "results": [
+    {
+     "id": "ex_curated_021",
+     "name": "Farmer's Walk"
+    }
+   ]
+  },
+  {
+   "label": "text: punctuation only (acts as no query)",
+   "query": "!!",
+   "fau": null,
+   "equipment": null,
+   "limit": 50,
+   "results": [
+    {
+     "id": "ex_mo_015",
+     "name": "90/90 Hip Stretch"
+    },
+    {
+     "id": "ex_curated_010",
+     "name": "Ab Crunch Machine"
+    },
+    {
+     "id": "ex_mo_001",
+     "name": "Ab Wheel Rollout"
+    },
+    {
+     "id": "ex_db_017",
+     "name": "Alternating Dumbbell Curl"
+    },
+    {
+     "id": "ex_kb_003",
+     "name": "American Kettlebell Swing"
+    },
+    {
+     "id": "ex_bw_007",
+     "name": "Archer Push-Up"
+    },
+    {
+     "id": "ex_mo_017",
+     "name": "Arm Circle"
+    },
+    {
+     "id": "ex_db_007",
+     "name": "Arnold Press"
+    },
+    {
+     "id": "ex_curated_061",
+     "name": "Assisted Dip"
+    },
+    {
+     "id": "ex_cl_016",
+     "name": "Assisted One Arm Pull-Up"
+    },
+    {
+     "id": "ex_curated_060",
+     "name": "Assisted Pull-up"
+    },
+    {
+     "id": "ex_curated_005",
+     "name": "Back Extension"
+    },
+    {
+     "id": "ex_rb_032",
+     "name": "Band Anti-Rotation Press"
+    },
+    {
+     "id": "ex_rb_015",
+     "name": "Band Bicep Curl"
+    },
+    {
+     "id": "ex_rb_002",
+     "name": "Band Chest Fly"
+    },
+    {
+     "id": "ex_rb_001",
+     "name": "Band Chest Press"
+    },
+    {
+     "id": "ex_rb_028",
+     "name": "Band Clamshell"
+    },
+    {
+     "id": "ex_rb_007",
+     "name": "Band Deadlift"
+    },
+    {
+     "id": "ex_rb_013",
+     "name": "Band Face Pull"
+    },
+    {
+     "id": "ex_rb_011",
+     "name": "Band Front Raise"
+    },
+    {
+     "id": "ex_rb_024",
+     "name": "Band Glute Bridge"
+    },
+    {
+     "id": "ex_rb_008",
+     "name": "Band Good Morning"
+    },
+    {
+     "id": "ex_rb_016",
+     "name": "Band Hammer Curl"
+    },
+    {
+     "id": "ex_rb_025",
+     "name": "Band Hip Thrust"
+    },
+    {
+     "id": "ex_rb_010",
+     "name": "Band Lateral Raise"
+    },
+    {
+     "id": "ex_rb_006",
+     "name": "Band Lat Pulldown"
+    },
+    {
+     "id": "ex_rb_023",
+     "name": "Band Leg Curl"
+    },
+    {
+     "id": "ex_rb_022",
+     "name": "Band Leg Extension"
+    },
+    {
+     "id": "ex_rb_021",
+     "name": "Band Leg Press"
+    },
+    {
+     "id": "ex_rb_026",
+     "name": "Band Lunge"
+    },
+    {
+     "id": "ex_rb_029",
+     "name": "Band Monster Walk"
+    },
+    {
+     "id": "ex_rb_030",
+     "name": "Band Pallof Press"
+    },
+    {
+     "id": "ex_rb_004",
+     "name": "Band Pull Apart"
+    },
+    {
+     "id": "ex_rb_003",
+     "name": "Band Push-Up"
+    },
+    {
+     "id": "ex_rb_012",
+     "name": "Band Rear Delt Fly"
+    },
+    {
+     "id": "ex_rb_005",
+     "name": "Band Row"
+    },
+    {
+     "id": "ex_rb_009",
+     "name": "Band Shoulder Press"
+    },
+    {
+     "id": "ex_rb_020",
+     "name": "Band Squat"
+    },
+    {
+     "id": "ex_rb_027",
+     "name": "Band Standing Abduction"
+    },
+    {
+     "id": "ex_rb_017",
+     "name": "Band Tricep Extension"
+    },
+    {
+     "id": "ex_rb_019",
+     "name": "Band Tricep Kickback"
+    },
+    {
+     "id": "ex_rb_018",
+     "name": "Band Tricep Pushdown"
+    },
+    {
+     "id": "ex_rb_014",
+     "name": "Band Upright Row"
+    },
+    {
+     "id": "ex_rb_031",
+     "name": "Band Woodchop"
+    },
+    {
+     "id": "cmiz7vjpo0001vr0msv9of7ib",
+     "name": "Barbell Back Squat"
+    },
+    {
+     "id": "cmiz7vjju0000vr0m4b1o6bec",
+     "name": "Barbell Bench Press"
+    },
+    {
+     "id": "cmiz7vl1k0009vr0m306fts69",
+     "name": "Barbell Curl"
+    },
+    {
+     "id": "ex_curated_049",
+     "name": "Barbell Glute Bridge"
+    },
+    {
+     "id": "ex_cm_048",
+     "name": "Barbell Good Morning"
+    },
+    {
+     "id": "ex_cm_043",
+     "name": "Barbell Hip Thrust"
+    }
+   ]
+  },
+  {
+   "label": "text: punctuation only, with a filter (acts as no query)",
+   "query": " - ",
+   "fau": null,
+   "equipment": "barbell",
+   "limit": 50,
+   "results": [
+    {
+     "id": "cmiz7vjpo0001vr0msv9of7ib",
+     "name": "Barbell Back Squat"
+    },
+    {
+     "id": "cmiz7vjju0000vr0m4b1o6bec",
+     "name": "Barbell Bench Press"
+    },
+    {
+     "id": "cmiz7vl1k0009vr0m306fts69",
+     "name": "Barbell Curl"
+    },
+    {
+     "id": "ex_curated_049",
+     "name": "Barbell Glute Bridge"
+    },
+    {
+     "id": "ex_cm_048",
+     "name": "Barbell Good Morning"
+    },
+    {
+     "id": "ex_cm_043",
+     "name": "Barbell Hip Thrust"
+    },
+    {
+     "id": "ex_cm_044",
+     "name": "Barbell Lunge"
+    },
+    {
+     "id": "cmiz7vk1i0003vr0mqucd1f52",
+     "name": "Barbell Row"
+    },
+    {
+     "id": "ex_cm_045",
+     "name": "Barbell Shrug"
+    },
+    {
+     "id": "ex_cm_047",
+     "name": "Barbell Skull Crusher"
+    },
+    {
+     "id": "ex_curated_023",
+     "name": "Barbell Squat"
+    },
+    {
+     "id": "ex_curated_027",
+     "name": "Bench Press"
+    },
+    {
+     "id": "ex_curated_028",
+     "name": "Bent Over Barbell Row"
+    },
+    {
+     "id": "ex_cm_046",
+     "name": "Close Grip Bench Press"
+    },
+    {
+     "id": "cmiz7vjvh0002vr0mtcmhiz70",
+     "name": "Conventional Deadlift"
+    },
+    {
+     "id": "cmiz7vm4s000fvr0mfh2shcrv",
+     "name": "Front Squat"
+    },
+    {
+     "id": "ex_curated_058",
+     "name": "Hip Thrust"
+    },
+    {
+     "id": "cmiz7vkji0006vr0mrxfixnvy",
+     "name": "Incline Barbell Bench Press"
+    },
+    {
+     "id": "ex_bw_036",
+     "name": "Inverted Row"
+    },
+    {
+     "id": "cmiz7vk780004vr0md53c57bz",
+     "name": "Overhead Press"
+    },
+    {
+     "id": "cmiz7vkdh0005vr0mr5dm18ls",
+     "name": "Romanian Deadlift"
+    },
+    {
+     "id": "cmiz7vma9000gvr0mmjmxhp9s",
+     "name": "Sumo Deadlift"
+    }
+   ]
+  },
+  {
+   "label": "text: digits are enough (90)",
+   "query": "90",
+   "fau": null,
+   "equipment": null,
+   "limit": 50,
+   "results": [
+    {
+     "id": "ex_mo_015",
+     "name": "90/90 Hip Stretch"
+    }
+   ]
+  },
+  {
+   "label": "text: no match",
+   "query": "zzzz",
+   "fau": null,
+   "equipment": null,
+   "limit": 50,
+   "results": []
+  },
+  {
+   "label": "text: finds a custom (squeeze)",
+   "query": "squeeze",
+   "fau": null,
+   "equipment": null,
+   "limit": 50,
+   "results": [
+    {
+     "id": "custom:My Bench Squeeze",
+     "name": "My Bench Squeeze"
+    }
+   ]
+  },
+  {
+   "label": "text: customs after system on equal score (press)",
+   "query": "zz press",
+   "fau": null,
+   "equipment": null,
+   "limit": 50,
+   "results": [
+    {
+     "id": "custom:Zz Press Machine",
+     "name": "Zz Press Machine"
+    }
+   ]
+  },
+  {
+   "label": "fau: chest",
+   "query": "",
+   "fau": "chest",
+   "equipment": null,
+   "limit": 50,
+   "results": [
+    {
+     "id": "ex_bw_007",
+     "name": "Archer Push-Up"
+    },
+    {
+     "id": "ex_curated_061",
+     "name": "Assisted Dip"
+    },
+    {
+     "id": "ex_rb_002",
+     "name": "Band Chest Fly"
+    },
+    {
+     "id": "ex_rb_001",
+     "name": "Band Chest Press"
+    },
+    {
+     "id": "ex_rb_003",
+     "name": "Band Push-Up"
+    },
+    {
+     "id": "cmiz7vjju0000vr0m4b1o6bec",
+     "name": "Barbell Bench Press"
+    },
+    {
+     "id": "ex_curated_027",
+     "name": "Bench Press"
+    },
+    {
+     "id": "ex_bw_041",
+     "name": "Burpee"
+    },
+    {
+     "id": "ex_cm_001",
+     "name": "Cable Chest Fly"
+    },
+    {
+     "id": "ex_cm_004",
+     "name": "Cable Chest Press"
+    },
+    {
+     "id": "ex_cm_002",
+     "name": "Cable Crossover"
+    },
+    {
+     "id": "ex_bw_035",
+     "name": "Chest Dip"
+    },
+    {
+     "id": "ex_curated_000",
+     "name": "Chest Press"
+    },
+    {
+     "id": "ex_cm_046",
+     "name": "Close Grip Bench Press"
+    },
+    {
+     "id": "ex_db_002",
+     "name": "Decline Dumbbell Bench Press"
+    },
+    {
+     "id": "ex_bw_004",
+     "name": "Decline Push-Up"
+    },
+    {
+     "id": "ex_bw_003",
+     "name": "Diamond Push-Up"
+    },
+    {
+     "id": "cmiz7vmyl000kvr0mmr9a482v",
+     "name": "Dips"
+    },
+    {
+     "id": "cmiz7vkpg0007vr0mpbaneax3",
+     "name": "Dumbbell Bench Press"
+    },
+    {
+     "id": "ex_db_003",
+     "name": "Dumbbell Fly"
+    },
+    {
+     "id": "ex_db_005",
+     "name": "Dumbbell Pullover"
+    },
+    {
+     "id": "cmiz7vkji0006vr0mrxfixnvy",
+     "name": "Incline Barbell Bench Press"
+    },
+    {
+     "id": "ex_db_001",
+     "name": "Incline Dumbbell Bench Press"
+    },
+    {
+     "id": "ex_db_004",
+     "name": "Incline Dumbbell Fly"
+    },
+    {
+     "id": "ex_curated_039",
+     "name": "Incline Dumbbell Press"
+    },
+    {
+     "id": "ex_bw_005",
+     "name": "Incline Push-Up"
+    },
+    {
+     "id": "ex_kb_010",
+     "name": "Kettlebell Floor Press"
+    },
+    {
+     "id": "ex_cm_003",
+     "name": "Low to High Cable Fly"
+    },
+    {
+     "id": "ex_cm_032",
+     "name": "Machine Chest Press"
+    },
+    {
+     "id": "ex_cm_038",
+     "name": "Machine Dip"
+    },
+    {
+     "id": "ex_db_050",
+     "name": "Man Maker"
+    },
+    {
+     "id": "ex_bw_012",
+     "name": "Muscle-Up"
+    },
+    {
+     "id": "ex_curated_046",
+     "name": "Pushups"
+    },
+    {
+     "id": "ex_cm_029",
+     "name": "Smith Machine Bench Press"
+    },
+    {
+     "id": "ex_curated_031",
+     "name": "Smith Machine Incline Bench Press"
+    },
+    {
+     "id": "ex_bw_001",
+     "name": "Standard Push-Up"
+    },
+    {
+     "id": "ex_cm_056",
+     "name": "TRX Chest Press"
+    },
+    {
+     "id": "ex_bw_002",
+     "name": "Wide Push-Up"
+    },
+    {
+     "id": "custom:My Bench Squeeze",
+     "name": "My Bench Squeeze"
+    }
+   ]
+  },
+  {
+   "label": "fau: calves (secondary on a custom does not count)",
+   "query": "",
+   "fau": "calves",
+   "equipment": null,
+   "limit": 50,
+   "results": [
+    {
+     "id": "cmiz7vnam000mvr0mano9z27r",
+     "name": "Calf Raise"
+    },
+    {
+     "id": "ex_mo_012",
+     "name": "Downward Dog"
+    },
+    {
+     "id": "ex_db_036",
+     "name": "Dumbbell Calf Raise"
+    },
+    {
+     "id": "ex_curated_062",
+     "name": "Leg Press Calf Press"
+    },
+    {
+     "id": "ex_curated_032",
+     "name": "Smith Machine Calf Raise"
+    },
+    {
+     "id": "ex_curated_036",
+     "name": "Standing Calf Raise"
+    }
+   ]
+  },
+  {
+   "label": "fau: forearms",
+   "query": "",
+   "fau": "forearms",
+   "equipment": null,
+   "limit": 50,
+   "results": [
+    {
+     "id": "ex_db_044",
+     "name": "Dumbbell Reverse Wrist Curl"
+    },
+    {
+     "id": "ex_db_043",
+     "name": "Dumbbell Wrist Curl"
+    },
+    {
+     "id": "ex_curated_021",
+     "name": "Farmer's Walk"
+    },
+    {
+     "id": "ex_db_045",
+     "name": "Farmer Walk"
+    },
+    {
+     "id": "ex_kb_025",
+     "name": "Kettlebell Farmer Carry"
+    },
+    {
+     "id": "ex_cl_018",
+     "name": "Reverse Wrist Curl"
+    },
+    {
+     "id": "ex_cm_051",
+     "name": "Trap Bar Farmer Carry"
+    },
+    {
+     "id": "ex_db_022",
+     "name": "Zottman Curl"
+    }
+   ]
+  },
+  {
+   "label": "equipment: barbell",
+   "query": "",
+   "fau": null,
+   "equipment": "barbell",
+   "limit": 50,
+   "results": [
+    {
+     "id": "cmiz7vjpo0001vr0msv9of7ib",
+     "name": "Barbell Back Squat"
+    },
+    {
+     "id": "cmiz7vjju0000vr0m4b1o6bec",
+     "name": "Barbell Bench Press"
+    },
+    {
+     "id": "cmiz7vl1k0009vr0m306fts69",
+     "name": "Barbell Curl"
+    },
+    {
+     "id": "ex_curated_049",
+     "name": "Barbell Glute Bridge"
+    },
+    {
+     "id": "ex_cm_048",
+     "name": "Barbell Good Morning"
+    },
+    {
+     "id": "ex_cm_043",
+     "name": "Barbell Hip Thrust"
+    },
+    {
+     "id": "ex_cm_044",
+     "name": "Barbell Lunge"
+    },
+    {
+     "id": "cmiz7vk1i0003vr0mqucd1f52",
+     "name": "Barbell Row"
+    },
+    {
+     "id": "ex_cm_045",
+     "name": "Barbell Shrug"
+    },
+    {
+     "id": "ex_cm_047",
+     "name": "Barbell Skull Crusher"
+    },
+    {
+     "id": "ex_curated_023",
+     "name": "Barbell Squat"
+    },
+    {
+     "id": "ex_curated_027",
+     "name": "Bench Press"
+    },
+    {
+     "id": "ex_curated_028",
+     "name": "Bent Over Barbell Row"
+    },
+    {
+     "id": "ex_cm_046",
+     "name": "Close Grip Bench Press"
+    },
+    {
+     "id": "cmiz7vjvh0002vr0mtcmhiz70",
+     "name": "Conventional Deadlift"
+    },
+    {
+     "id": "cmiz7vm4s000fvr0mfh2shcrv",
+     "name": "Front Squat"
+    },
+    {
+     "id": "ex_curated_058",
+     "name": "Hip Thrust"
+    },
+    {
+     "id": "cmiz7vkji0006vr0mrxfixnvy",
+     "name": "Incline Barbell Bench Press"
+    },
+    {
+     "id": "ex_bw_036",
+     "name": "Inverted Row"
+    },
+    {
+     "id": "cmiz7vk780004vr0md53c57bz",
+     "name": "Overhead Press"
+    },
+    {
+     "id": "cmiz7vkdh0005vr0mr5dm18ls",
+     "name": "Romanian Deadlift"
+    },
+    {
+     "id": "cmiz7vma9000gvr0mmjmxhp9s",
+     "name": "Sumo Deadlift"
+    }
+   ]
+  },
+  {
+   "label": "equipment: kettlebell",
+   "query": "",
+   "fau": null,
+   "equipment": "kettlebell",
+   "limit": 50,
+   "results": [
+    {
+     "id": "ex_kb_003",
+     "name": "American Kettlebell Swing"
+    },
+    {
+     "id": "ex_kb_005",
+     "name": "Kettlebell Clean"
+    },
+    {
+     "id": "ex_kb_006",
+     "name": "Kettlebell Clean and Press"
+    },
+    {
+     "id": "ex_kb_019",
+     "name": "Kettlebell Deadlift"
+    },
+    {
+     "id": "ex_kb_025",
+     "name": "Kettlebell Farmer Carry"
+    },
+    {
+     "id": "ex_kb_010",
+     "name": "Kettlebell Floor Press"
+    },
+    {
+     "id": "ex_kb_013",
+     "name": "Kettlebell Front Squat"
+    },
+    {
+     "id": "ex_kb_012",
+     "name": "Kettlebell Goblet Squat"
+    },
+    {
+     "id": "ex_kb_023",
+     "name": "Kettlebell Halo"
+    },
+    {
+     "id": "ex_kb_007",
+     "name": "Kettlebell High Pull"
+    },
+    {
+     "id": "ex_kb_015",
+     "name": "Kettlebell Lunge"
+    },
+    {
+     "id": "ex_kb_027",
+     "name": "Kettlebell Overhead Carry"
+    },
+    {
+     "id": "ex_kb_014",
+     "name": "Kettlebell Pistol Squat"
+    },
+    {
+     "id": "ex_kb_008",
+     "name": "Kettlebell Press"
+    },
+    {
+     "id": "ex_kb_009",
+     "name": "Kettlebell Push Press"
+    },
+    {
+     "id": "ex_kb_026",
+     "name": "Kettlebell Rack Carry"
+    },
+    {
+     "id": "ex_kb_018",
+     "name": "Kettlebell Renegade Row"
+    },
+    {
+     "id": "ex_kb_016",
+     "name": "Kettlebell Reverse Lunge"
+    },
+    {
+     "id": "ex_kb_017",
+     "name": "Kettlebell Row"
+    },
+    {
+     "id": "ex_kb_024",
+     "name": "Kettlebell Russian Twist"
+    },
+    {
+     "id": "ex_kb_004",
+     "name": "Kettlebell Snatch"
+    },
+    {
+     "id": "ex_kb_001",
+     "name": "Kettlebell Swing"
+    },
+    {
+     "id": "ex_kb_011",
+     "name": "Kettlebell Thruster"
+    },
+    {
+     "id": "ex_kb_021",
+     "name": "Kettlebell Turkish Get-Up"
+    },
+    {
+     "id": "ex_kb_022",
+     "name": "Kettlebell Windmill"
+    },
+    {
+     "id": "ex_kb_002",
+     "name": "Single Arm Kettlebell Swing"
+    },
+    {
+     "id": "ex_kb_020",
+     "name": "Single Leg Kettlebell Deadlift"
+    }
+   ]
+  },
+  {
+   "label": "equipment: other",
+   "query": "",
+   "fau": null,
+   "equipment": "other",
+   "limit": 50,
+   "results": [
+    {
+     "id": "ex_mo_001",
+     "name": "Ab Wheel Rollout"
+    },
+    {
+     "id": "ex_rb_032",
+     "name": "Band Anti-Rotation Press"
+    },
+    {
+     "id": "ex_rb_015",
+     "name": "Band Bicep Curl"
+    },
+    {
+     "id": "ex_rb_002",
+     "name": "Band Chest Fly"
+    },
+    {
+     "id": "ex_rb_001",
+     "name": "Band Chest Press"
+    },
+    {
+     "id": "ex_rb_028",
+     "name": "Band Clamshell"
+    },
+    {
+     "id": "ex_rb_007",
+     "name": "Band Deadlift"
+    },
+    {
+     "id": "ex_rb_013",
+     "name": "Band Face Pull"
+    },
+    {
+     "id": "ex_rb_011",
+     "name": "Band Front Raise"
+    },
+    {
+     "id": "ex_rb_024",
+     "name": "Band Glute Bridge"
+    },
+    {
+     "id": "ex_rb_008",
+     "name": "Band Good Morning"
+    },
+    {
+     "id": "ex_rb_016",
+     "name": "Band Hammer Curl"
+    },
+    {
+     "id": "ex_rb_025",
+     "name": "Band Hip Thrust"
+    },
+    {
+     "id": "ex_rb_010",
+     "name": "Band Lateral Raise"
+    },
+    {
+     "id": "ex_rb_006",
+     "name": "Band Lat Pulldown"
+    },
+    {
+     "id": "ex_rb_023",
+     "name": "Band Leg Curl"
+    },
+    {
+     "id": "ex_rb_022",
+     "name": "Band Leg Extension"
+    },
+    {
+     "id": "ex_rb_021",
+     "name": "Band Leg Press"
+    },
+    {
+     "id": "ex_rb_026",
+     "name": "Band Lunge"
+    },
+    {
+     "id": "ex_rb_029",
+     "name": "Band Monster Walk"
+    },
+    {
+     "id": "ex_rb_030",
+     "name": "Band Pallof Press"
+    },
+    {
+     "id": "ex_rb_004",
+     "name": "Band Pull Apart"
+    },
+    {
+     "id": "ex_rb_003",
+     "name": "Band Push-Up"
+    },
+    {
+     "id": "ex_rb_012",
+     "name": "Band Rear Delt Fly"
+    },
+    {
+     "id": "ex_rb_005",
+     "name": "Band Row"
+    },
+    {
+     "id": "ex_rb_009",
+     "name": "Band Shoulder Press"
+    },
+    {
+     "id": "ex_rb_020",
+     "name": "Band Squat"
+    },
+    {
+     "id": "ex_rb_027",
+     "name": "Band Standing Abduction"
+    },
+    {
+     "id": "ex_rb_017",
+     "name": "Band Tricep Extension"
+    },
+    {
+     "id": "ex_rb_019",
+     "name": "Band Tricep Kickback"
+    },
+    {
+     "id": "ex_rb_018",
+     "name": "Band Tricep Pushdown"
+    },
+    {
+     "id": "ex_rb_014",
+     "name": "Band Upright Row"
+    },
+    {
+     "id": "ex_rb_031",
+     "name": "Band Woodchop"
+    },
+    {
+     "id": "ex_bw_035",
+     "name": "Chest Dip"
+    },
+    {
+     "id": "ex_db_002",
+     "name": "Decline Dumbbell Bench Press"
+    },
+    {
+     "id": "cmiz7vmyl000kvr0mmr9a482v",
+     "name": "Dips"
+    },
+    {
+     "id": "ex_cm_052",
+     "name": "EZ Bar Curl"
+    },
+    {
+     "id": "ex_cm_054",
+     "name": "EZ Bar Preacher Curl"
+    },
+    {
+     "id": "ex_cm_053",
+     "name": "EZ Bar Skull Crusher"
+    },
+    {
+     "id": "ex_mo_021",
+     "name": "Foam Roll IT Band"
+    },
+    {
+     "id": "ex_mo_022",
+     "name": "Foam Roll Quads"
+    },
+    {
+     "id": "ex_mo_023",
+     "name": "Foam Roll Upper Back"
+    },
+    {
+     "id": "ex_curated_030",
+     "name": "Lying Triceps Press"
+    },
+    {
+     "id": "ex_mo_007",
+     "name": "Pallof Press"
+    },
+    {
+     "id": "ex_db_020",
+     "name": "Preacher Curl"
+    },
+    {
+     "id": "ex_cm_049",
+     "name": "Trap Bar Deadlift"
+    },
+    {
+     "id": "ex_cm_051",
+     "name": "Trap Bar Farmer Carry"
+    },
+    {
+     "id": "ex_cm_050",
+     "name": "Trap Bar Shrug"
+    },
+    {
+     "id": "ex_bw_034",
+     "name": "Tricep Dip"
+    },
+    {
+     "id": "custom:Band Pull Apart Plus",
+     "name": "Band Pull Apart Plus"
+    }
+   ]
+  },
+  {
+   "label": "equipment: other, limit 100 (reaches the customs)",
+   "query": "",
+   "fau": null,
+   "equipment": "other",
+   "limit": 100,
+   "results": [
+    {
+     "id": "ex_mo_001",
+     "name": "Ab Wheel Rollout"
+    },
+    {
+     "id": "ex_rb_032",
+     "name": "Band Anti-Rotation Press"
+    },
+    {
+     "id": "ex_rb_015",
+     "name": "Band Bicep Curl"
+    },
+    {
+     "id": "ex_rb_002",
+     "name": "Band Chest Fly"
+    },
+    {
+     "id": "ex_rb_001",
+     "name": "Band Chest Press"
+    },
+    {
+     "id": "ex_rb_028",
+     "name": "Band Clamshell"
+    },
+    {
+     "id": "ex_rb_007",
+     "name": "Band Deadlift"
+    },
+    {
+     "id": "ex_rb_013",
+     "name": "Band Face Pull"
+    },
+    {
+     "id": "ex_rb_011",
+     "name": "Band Front Raise"
+    },
+    {
+     "id": "ex_rb_024",
+     "name": "Band Glute Bridge"
+    },
+    {
+     "id": "ex_rb_008",
+     "name": "Band Good Morning"
+    },
+    {
+     "id": "ex_rb_016",
+     "name": "Band Hammer Curl"
+    },
+    {
+     "id": "ex_rb_025",
+     "name": "Band Hip Thrust"
+    },
+    {
+     "id": "ex_rb_010",
+     "name": "Band Lateral Raise"
+    },
+    {
+     "id": "ex_rb_006",
+     "name": "Band Lat Pulldown"
+    },
+    {
+     "id": "ex_rb_023",
+     "name": "Band Leg Curl"
+    },
+    {
+     "id": "ex_rb_022",
+     "name": "Band Leg Extension"
+    },
+    {
+     "id": "ex_rb_021",
+     "name": "Band Leg Press"
+    },
+    {
+     "id": "ex_rb_026",
+     "name": "Band Lunge"
+    },
+    {
+     "id": "ex_rb_029",
+     "name": "Band Monster Walk"
+    },
+    {
+     "id": "ex_rb_030",
+     "name": "Band Pallof Press"
+    },
+    {
+     "id": "ex_rb_004",
+     "name": "Band Pull Apart"
+    },
+    {
+     "id": "ex_rb_003",
+     "name": "Band Push-Up"
+    },
+    {
+     "id": "ex_rb_012",
+     "name": "Band Rear Delt Fly"
+    },
+    {
+     "id": "ex_rb_005",
+     "name": "Band Row"
+    },
+    {
+     "id": "ex_rb_009",
+     "name": "Band Shoulder Press"
+    },
+    {
+     "id": "ex_rb_020",
+     "name": "Band Squat"
+    },
+    {
+     "id": "ex_rb_027",
+     "name": "Band Standing Abduction"
+    },
+    {
+     "id": "ex_rb_017",
+     "name": "Band Tricep Extension"
+    },
+    {
+     "id": "ex_rb_019",
+     "name": "Band Tricep Kickback"
+    },
+    {
+     "id": "ex_rb_018",
+     "name": "Band Tricep Pushdown"
+    },
+    {
+     "id": "ex_rb_014",
+     "name": "Band Upright Row"
+    },
+    {
+     "id": "ex_rb_031",
+     "name": "Band Woodchop"
+    },
+    {
+     "id": "ex_bw_035",
+     "name": "Chest Dip"
+    },
+    {
+     "id": "ex_db_002",
+     "name": "Decline Dumbbell Bench Press"
+    },
+    {
+     "id": "cmiz7vmyl000kvr0mmr9a482v",
+     "name": "Dips"
+    },
+    {
+     "id": "ex_cm_052",
+     "name": "EZ Bar Curl"
+    },
+    {
+     "id": "ex_cm_054",
+     "name": "EZ Bar Preacher Curl"
+    },
+    {
+     "id": "ex_cm_053",
+     "name": "EZ Bar Skull Crusher"
+    },
+    {
+     "id": "ex_mo_021",
+     "name": "Foam Roll IT Band"
+    },
+    {
+     "id": "ex_mo_022",
+     "name": "Foam Roll Quads"
+    },
+    {
+     "id": "ex_mo_023",
+     "name": "Foam Roll Upper Back"
+    },
+    {
+     "id": "ex_curated_030",
+     "name": "Lying Triceps Press"
+    },
+    {
+     "id": "ex_mo_007",
+     "name": "Pallof Press"
+    },
+    {
+     "id": "ex_db_020",
+     "name": "Preacher Curl"
+    },
+    {
+     "id": "ex_cm_049",
+     "name": "Trap Bar Deadlift"
+    },
+    {
+     "id": "ex_cm_051",
+     "name": "Trap Bar Farmer Carry"
+    },
+    {
+     "id": "ex_cm_050",
+     "name": "Trap Bar Shrug"
+    },
+    {
+     "id": "ex_bw_034",
+     "name": "Tricep Dip"
+    },
+    {
+     "id": "custom:Band Pull Apart Plus",
+     "name": "Band Pull Apart Plus"
+    },
+    {
+     "id": "custom:Sled Push",
+     "name": "Sled Push"
+    }
+   ]
+  },
+  {
+   "label": "equipment: bench is common, not other",
+   "query": "",
+   "fau": null,
+   "equipment": "bench",
+   "limit": 50,
+   "results": [
+    {
+     "id": "ex_db_007",
+     "name": "Arnold Press"
+    },
+    {
+     "id": "cmiz7vjju0000vr0m4b1o6bec",
+     "name": "Barbell Bench Press"
+    },
+    {
+     "id": "ex_curated_049",
+     "name": "Barbell Glute Bridge"
+    },
+    {
+     "id": "ex_cm_043",
+     "name": "Barbell Hip Thrust"
+    },
+    {
+     "id": "ex_cm_047",
+     "name": "Barbell Skull Crusher"
+    },
+    {
+     "id": "ex_curated_027",
+     "name": "Bench Press"
+    },
+    {
+     "id": "ex_bw_016",
+     "name": "Bulgarian Split Squat"
+    },
+    {
+     "id": "ex_cm_046",
+     "name": "Close Grip Bench Press"
+    },
+    {
+     "id": "ex_db_019",
+     "name": "Concentration Curl"
+    },
+    {
+     "id": "ex_mo_006",
+     "name": "Copenhagen Plank"
+    },
+    {
+     "id": "ex_bw_004",
+     "name": "Decline Push-Up"
+    },
+    {
+     "id": "ex_mo_004",
+     "name": "Dragon Flag"
+    },
+    {
+     "id": "cmiz7vkpg0007vr0mpbaneax3",
+     "name": "Dumbbell Bench Press"
+    },
+    {
+     "id": "ex_db_031",
+     "name": "Dumbbell Bulgarian Split Squat"
+    },
+    {
+     "id": "ex_db_003",
+     "name": "Dumbbell Fly"
+    },
+    {
+     "id": "ex_db_037",
+     "name": "Dumbbell Hip Thrust"
+    },
+    {
+     "id": "ex_db_005",
+     "name": "Dumbbell Pullover"
+    },
+    {
+     "id": "cmiz7vmgd000hvr0mkidkt6uu",
+     "name": "Dumbbell Row"
+    },
+    {
+     "id": "ex_db_006",
+     "name": "Dumbbell Shoulder Press"
+    },
+    {
+     "id": "ex_db_027",
+     "name": "Dumbbell Skull Crusher"
+    },
+    {
+     "id": "ex_db_035",
+     "name": "Dumbbell Step-Up"
+    },
+    {
+     "id": "ex_cm_053",
+     "name": "EZ Bar Skull Crusher"
+    },
+    {
+     "id": "ex_curated_058",
+     "name": "Hip Thrust"
+    },
+    {
+     "id": "cmiz7vkji0006vr0mrxfixnvy",
+     "name": "Incline Barbell Bench Press"
+    },
+    {
+     "id": "ex_db_001",
+     "name": "Incline Dumbbell Bench Press"
+    },
+    {
+     "id": "ex_db_018",
+     "name": "Incline Dumbbell Curl"
+    },
+    {
+     "id": "ex_db_004",
+     "name": "Incline Dumbbell Fly"
+    },
+    {
+     "id": "ex_curated_039",
+     "name": "Incline Dumbbell Press"
+    },
+    {
+     "id": "ex_bw_005",
+     "name": "Incline Push-Up"
+    },
+    {
+     "id": "ex_curated_030",
+     "name": "Lying Triceps Press"
+    },
+    {
+     "id": "ex_db_011",
+     "name": "Single Arm Dumbbell Row"
+    },
+    {
+     "id": "ex_cm_029",
+     "name": "Smith Machine Bench Press"
+    },
+    {
+     "id": "ex_db_021",
+     "name": "Spider Curl"
+    },
+    {
+     "id": "ex_db_026",
+     "name": "Tate Press"
+    },
+    {
+     "id": "custom:My Bench Squeeze",
+     "name": "My Bench Squeeze"
+    }
+   ]
+  },
+  {
+   "label": "both: press + front-delts",
+   "query": "press",
+   "fau": "front-delts",
+   "equipment": null,
+   "limit": 50,
+   "results": [
+    {
+     "id": "ex_db_007",
+     "name": "Arnold Press"
+    },
+    {
+     "id": "ex_rb_009",
+     "name": "Band Shoulder Press"
+    },
+    {
+     "id": "ex_db_049",
+     "name": "Dumbbell Clean and Press"
+    },
+    {
+     "id": "ex_db_006",
+     "name": "Dumbbell Shoulder Press"
+    },
+    {
+     "id": "ex_kb_006",
+     "name": "Kettlebell Clean and Press"
+    },
+    {
+     "id": "ex_kb_008",
+     "name": "Kettlebell Press"
+    },
+    {
+     "id": "ex_kb_009",
+     "name": "Kettlebell Push Press"
+    },
+    {
+     "id": "ex_cm_033",
+     "name": "Machine Shoulder Press"
+    },
+    {
+     "id": "cmiz7vk780004vr0md53c57bz",
+     "name": "Overhead Press"
+    },
+    {
+     "id": "ex_curated_001",
+     "name": "Shoulder Press"
+    },
+    {
+     "id": "ex_curated_024",
+     "name": "Standing Dumbbell Press"
+    },
+    {
+     "id": "custom:Zz Press Machine",
+     "name": "Zz Press Machine"
+    }
+   ]
+  },
+  {
+   "label": "both: curl + dumbbell",
+   "query": "curl",
+   "fau": null,
+   "equipment": "dumbbell",
+   "limit": 50,
+   "results": [
+    {
+     "id": "ex_db_017",
+     "name": "Alternating Dumbbell Curl"
+    },
+    {
+     "id": "ex_db_019",
+     "name": "Concentration Curl"
+    },
+    {
+     "id": "ex_db_016",
+     "name": "Dumbbell Curl"
+    },
+    {
+     "id": "ex_db_044",
+     "name": "Dumbbell Reverse Wrist Curl"
+    },
+    {
+     "id": "ex_db_043",
+     "name": "Dumbbell Wrist Curl"
+    },
+    {
+     "id": "cmiz7vnpc000ovr0mcuhs0bum",
+     "name": "Hammer Curl"
+    },
+    {
+     "id": "ex_db_018",
+     "name": "Incline Dumbbell Curl"
+    },
+    {
+     "id": "ex_db_020",
+     "name": "Preacher Curl"
+    },
+    {
+     "id": "ex_db_021",
+     "name": "Spider Curl"
+    },
+    {
+     "id": "ex_db_022",
+     "name": "Zottman Curl"
+    },
+    {
+     "id": "ex_cl_018",
+     "name": "Reverse Wrist Curl"
+    }
+   ]
+  },
+  {
+   "label": "both: row + mid-back + cable",
+   "query": "row",
+   "fau": "mid-back",
+   "equipment": "cable",
+   "limit": 50,
+   "results": [
+    {
+     "id": "cmiz7vmmg000ivr0mojncaj84",
+     "name": "Cable Row"
+    },
+    {
+     "id": "ex_cm_009",
+     "name": "Seated Cable Row"
+    },
+    {
+     "id": "ex_curated_019",
+     "name": "Seated Cable Rows"
+    },
+    {
+     "id": "ex_cm_010",
+     "name": "Single Arm Cable Row"
+    }
+   ]
+  },
+  {
+   "label": "both: bench + other",
+   "query": "bench",
+   "fau": null,
+   "equipment": "other",
+   "limit": 50,
+   "results": [
+    {
+     "id": "ex_db_002",
+     "name": "Decline Dumbbell Bench Press"
+    }
+   ]
+  },
+  {
+   "label": "both: squat + chest (none)",
+   "query": "squat",
+   "fau": "chest",
+   "equipment": null,
+   "limit": 50,
+   "results": []
+  },
+  {
+   "label": "none: first 50",
+   "query": "",
+   "fau": null,
+   "equipment": null,
+   "limit": 50,
+   "results": [
+    {
+     "id": "ex_mo_015",
+     "name": "90/90 Hip Stretch"
+    },
+    {
+     "id": "ex_curated_010",
+     "name": "Ab Crunch Machine"
+    },
+    {
+     "id": "ex_mo_001",
+     "name": "Ab Wheel Rollout"
+    },
+    {
+     "id": "ex_db_017",
+     "name": "Alternating Dumbbell Curl"
+    },
+    {
+     "id": "ex_kb_003",
+     "name": "American Kettlebell Swing"
+    },
+    {
+     "id": "ex_bw_007",
+     "name": "Archer Push-Up"
+    },
+    {
+     "id": "ex_mo_017",
+     "name": "Arm Circle"
+    },
+    {
+     "id": "ex_db_007",
+     "name": "Arnold Press"
+    },
+    {
+     "id": "ex_curated_061",
+     "name": "Assisted Dip"
+    },
+    {
+     "id": "ex_cl_016",
+     "name": "Assisted One Arm Pull-Up"
+    },
+    {
+     "id": "ex_curated_060",
+     "name": "Assisted Pull-up"
+    },
+    {
+     "id": "ex_curated_005",
+     "name": "Back Extension"
+    },
+    {
+     "id": "ex_rb_032",
+     "name": "Band Anti-Rotation Press"
+    },
+    {
+     "id": "ex_rb_015",
+     "name": "Band Bicep Curl"
+    },
+    {
+     "id": "ex_rb_002",
+     "name": "Band Chest Fly"
+    },
+    {
+     "id": "ex_rb_001",
+     "name": "Band Chest Press"
+    },
+    {
+     "id": "ex_rb_028",
+     "name": "Band Clamshell"
+    },
+    {
+     "id": "ex_rb_007",
+     "name": "Band Deadlift"
+    },
+    {
+     "id": "ex_rb_013",
+     "name": "Band Face Pull"
+    },
+    {
+     "id": "ex_rb_011",
+     "name": "Band Front Raise"
+    },
+    {
+     "id": "ex_rb_024",
+     "name": "Band Glute Bridge"
+    },
+    {
+     "id": "ex_rb_008",
+     "name": "Band Good Morning"
+    },
+    {
+     "id": "ex_rb_016",
+     "name": "Band Hammer Curl"
+    },
+    {
+     "id": "ex_rb_025",
+     "name": "Band Hip Thrust"
+    },
+    {
+     "id": "ex_rb_010",
+     "name": "Band Lateral Raise"
+    },
+    {
+     "id": "ex_rb_006",
+     "name": "Band Lat Pulldown"
+    },
+    {
+     "id": "ex_rb_023",
+     "name": "Band Leg Curl"
+    },
+    {
+     "id": "ex_rb_022",
+     "name": "Band Leg Extension"
+    },
+    {
+     "id": "ex_rb_021",
+     "name": "Band Leg Press"
+    },
+    {
+     "id": "ex_rb_026",
+     "name": "Band Lunge"
+    },
+    {
+     "id": "ex_rb_029",
+     "name": "Band Monster Walk"
+    },
+    {
+     "id": "ex_rb_030",
+     "name": "Band Pallof Press"
+    },
+    {
+     "id": "ex_rb_004",
+     "name": "Band Pull Apart"
+    },
+    {
+     "id": "ex_rb_003",
+     "name": "Band Push-Up"
+    },
+    {
+     "id": "ex_rb_012",
+     "name": "Band Rear Delt Fly"
+    },
+    {
+     "id": "ex_rb_005",
+     "name": "Band Row"
+    },
+    {
+     "id": "ex_rb_009",
+     "name": "Band Shoulder Press"
+    },
+    {
+     "id": "ex_rb_020",
+     "name": "Band Squat"
+    },
+    {
+     "id": "ex_rb_027",
+     "name": "Band Standing Abduction"
+    },
+    {
+     "id": "ex_rb_017",
+     "name": "Band Tricep Extension"
+    },
+    {
+     "id": "ex_rb_019",
+     "name": "Band Tricep Kickback"
+    },
+    {
+     "id": "ex_rb_018",
+     "name": "Band Tricep Pushdown"
+    },
+    {
+     "id": "ex_rb_014",
+     "name": "Band Upright Row"
+    },
+    {
+     "id": "ex_rb_031",
+     "name": "Band Woodchop"
+    },
+    {
+     "id": "cmiz7vjpo0001vr0msv9of7ib",
+     "name": "Barbell Back Squat"
+    },
+    {
+     "id": "cmiz7vjju0000vr0m4b1o6bec",
+     "name": "Barbell Bench Press"
+    },
+    {
+     "id": "cmiz7vl1k0009vr0m306fts69",
+     "name": "Barbell Curl"
+    },
+    {
+     "id": "ex_curated_049",
+     "name": "Barbell Glute Bridge"
+    },
+    {
+     "id": "ex_cm_048",
+     "name": "Barbell Good Morning"
+    },
+    {
+     "id": "ex_cm_043",
+     "name": "Barbell Hip Thrust"
+    }
+   ]
+  },
+  {
+   "label": "none: limit 100",
+   "query": "",
+   "fau": null,
+   "equipment": null,
+   "limit": 100,
+   "results": [
+    {
+     "id": "ex_mo_015",
+     "name": "90/90 Hip Stretch"
+    },
+    {
+     "id": "ex_curated_010",
+     "name": "Ab Crunch Machine"
+    },
+    {
+     "id": "ex_mo_001",
+     "name": "Ab Wheel Rollout"
+    },
+    {
+     "id": "ex_db_017",
+     "name": "Alternating Dumbbell Curl"
+    },
+    {
+     "id": "ex_kb_003",
+     "name": "American Kettlebell Swing"
+    },
+    {
+     "id": "ex_bw_007",
+     "name": "Archer Push-Up"
+    },
+    {
+     "id": "ex_mo_017",
+     "name": "Arm Circle"
+    },
+    {
+     "id": "ex_db_007",
+     "name": "Arnold Press"
+    },
+    {
+     "id": "ex_curated_061",
+     "name": "Assisted Dip"
+    },
+    {
+     "id": "ex_cl_016",
+     "name": "Assisted One Arm Pull-Up"
+    },
+    {
+     "id": "ex_curated_060",
+     "name": "Assisted Pull-up"
+    },
+    {
+     "id": "ex_curated_005",
+     "name": "Back Extension"
+    },
+    {
+     "id": "ex_rb_032",
+     "name": "Band Anti-Rotation Press"
+    },
+    {
+     "id": "ex_rb_015",
+     "name": "Band Bicep Curl"
+    },
+    {
+     "id": "ex_rb_002",
+     "name": "Band Chest Fly"
+    },
+    {
+     "id": "ex_rb_001",
+     "name": "Band Chest Press"
+    },
+    {
+     "id": "ex_rb_028",
+     "name": "Band Clamshell"
+    },
+    {
+     "id": "ex_rb_007",
+     "name": "Band Deadlift"
+    },
+    {
+     "id": "ex_rb_013",
+     "name": "Band Face Pull"
+    },
+    {
+     "id": "ex_rb_011",
+     "name": "Band Front Raise"
+    },
+    {
+     "id": "ex_rb_024",
+     "name": "Band Glute Bridge"
+    },
+    {
+     "id": "ex_rb_008",
+     "name": "Band Good Morning"
+    },
+    {
+     "id": "ex_rb_016",
+     "name": "Band Hammer Curl"
+    },
+    {
+     "id": "ex_rb_025",
+     "name": "Band Hip Thrust"
+    },
+    {
+     "id": "ex_rb_010",
+     "name": "Band Lateral Raise"
+    },
+    {
+     "id": "ex_rb_006",
+     "name": "Band Lat Pulldown"
+    },
+    {
+     "id": "ex_rb_023",
+     "name": "Band Leg Curl"
+    },
+    {
+     "id": "ex_rb_022",
+     "name": "Band Leg Extension"
+    },
+    {
+     "id": "ex_rb_021",
+     "name": "Band Leg Press"
+    },
+    {
+     "id": "ex_rb_026",
+     "name": "Band Lunge"
+    },
+    {
+     "id": "ex_rb_029",
+     "name": "Band Monster Walk"
+    },
+    {
+     "id": "ex_rb_030",
+     "name": "Band Pallof Press"
+    },
+    {
+     "id": "ex_rb_004",
+     "name": "Band Pull Apart"
+    },
+    {
+     "id": "ex_rb_003",
+     "name": "Band Push-Up"
+    },
+    {
+     "id": "ex_rb_012",
+     "name": "Band Rear Delt Fly"
+    },
+    {
+     "id": "ex_rb_005",
+     "name": "Band Row"
+    },
+    {
+     "id": "ex_rb_009",
+     "name": "Band Shoulder Press"
+    },
+    {
+     "id": "ex_rb_020",
+     "name": "Band Squat"
+    },
+    {
+     "id": "ex_rb_027",
+     "name": "Band Standing Abduction"
+    },
+    {
+     "id": "ex_rb_017",
+     "name": "Band Tricep Extension"
+    },
+    {
+     "id": "ex_rb_019",
+     "name": "Band Tricep Kickback"
+    },
+    {
+     "id": "ex_rb_018",
+     "name": "Band Tricep Pushdown"
+    },
+    {
+     "id": "ex_rb_014",
+     "name": "Band Upright Row"
+    },
+    {
+     "id": "ex_rb_031",
+     "name": "Band Woodchop"
+    },
+    {
+     "id": "cmiz7vjpo0001vr0msv9of7ib",
+     "name": "Barbell Back Squat"
+    },
+    {
+     "id": "cmiz7vjju0000vr0m4b1o6bec",
+     "name": "Barbell Bench Press"
+    },
+    {
+     "id": "cmiz7vl1k0009vr0m306fts69",
+     "name": "Barbell Curl"
+    },
+    {
+     "id": "ex_curated_049",
+     "name": "Barbell Glute Bridge"
+    },
+    {
+     "id": "ex_cm_048",
+     "name": "Barbell Good Morning"
+    },
+    {
+     "id": "ex_cm_043",
+     "name": "Barbell Hip Thrust"
+    },
+    {
+     "id": "ex_cm_044",
+     "name": "Barbell Lunge"
+    },
+    {
+     "id": "cmiz7vk1i0003vr0mqucd1f52",
+     "name": "Barbell Row"
+    },
+    {
+     "id": "ex_cm_045",
+     "name": "Barbell Shrug"
+    },
+    {
+     "id": "ex_cm_047",
+     "name": "Barbell Skull Crusher"
+    },
+    {
+     "id": "ex_curated_023",
+     "name": "Barbell Squat"
+    },
+    {
+     "id": "ex_curated_027",
+     "name": "Bench Press"
+    },
+    {
+     "id": "ex_curated_028",
+     "name": "Bent Over Barbell Row"
+    },
+    {
+     "id": "ex_db_012",
+     "name": "Bent Over Dumbbell Row"
+    },
+    {
+     "id": "ex_bw_024",
+     "name": "Bicycle Crunch"
+    },
+    {
+     "id": "ex_mo_003",
+     "name": "Bird Dog"
+    },
+    {
+     "id": "ex_curated_057",
+     "name": "Bodyweight Bulgarian Split Squat"
+    },
+    {
+     "id": "ex_bw_018",
+     "name": "Bodyweight Lunge"
+    },
+    {
+     "id": "ex_curated_054",
+     "name": "Bodyweight Lunges"
+    },
+    {
+     "id": "ex_bw_013",
+     "name": "Bodyweight Squat"
+    },
+    {
+     "id": "ex_curated_056",
+     "name": "Bodyweight Step-Ups"
+    },
+    {
+     "id": "ex_bw_016",
+     "name": "Bulgarian Split Squat"
+    },
+    {
+     "id": "ex_bw_041",
+     "name": "Burpee"
+    },
+    {
+     "id": "ex_cm_016",
+     "name": "Cable Bicep Curl"
+    },
+    {
+     "id": "ex_cm_001",
+     "name": "Cable Chest Fly"
+    },
+    {
+     "id": "ex_cm_004",
+     "name": "Cable Chest Press"
+    },
+    {
+     "id": "ex_cm_002",
+     "name": "Cable Crossover"
+    },
+    {
+     "id": "ex_cm_025",
+     "name": "Cable Crunch"
+    },
+    {
+     "id": "ex_cm_014",
+     "name": "Cable Face Pull"
+    },
+    {
+     "id": "ex_cm_012",
+     "name": "Cable Front Raise"
+    },
+    {
+     "id": "ex_cm_017",
+     "name": "Cable Hammer Curl"
+    },
+    {
+     "id": "ex_cm_023",
+     "name": "Cable Hip Abduction"
+    },
+    {
+     "id": "ex_cm_024",
+     "name": "Cable Hip Adduction"
+    },
+    {
+     "id": "ex_cm_022",
+     "name": "Cable Kickback"
+    },
+    {
+     "id": "ex_cm_011",
+     "name": "Cable Lateral Raise"
+    },
+    {
+     "id": "ex_cm_019",
+     "name": "Cable Overhead Tricep Extension"
+    },
+    {
+     "id": "ex_cm_027",
+     "name": "Cable Pallof Press"
+    },
+    {
+     "id": "ex_cm_021",
+     "name": "Cable Pull Through"
+    },
+    {
+     "id": "ex_cm_013",
+     "name": "Cable Reverse Fly"
+    },
+    {
+     "id": "cmiz7vmmg000ivr0mojncaj84",
+     "name": "Cable Row"
+    },
+    {
+     "id": "ex_cm_028",
+     "name": "Cable Russian Twist"
+    },
+    {
+     "id": "ex_cm_020",
+     "name": "Cable Tricep Kickback"
+    },
+    {
+     "id": "ex_cm_018",
+     "name": "Cable Tricep Pushdown"
+    },
+    {
+     "id": "ex_cm_015",
+     "name": "Cable Upright Row"
+    },
+    {
+     "id": "ex_cm_026",
+     "name": "Cable Woodchop"
+    },
+    {
+     "id": "cmiz7vnam000mvr0mano9z27r",
+     "name": "Calf Raise"
+    },
+    {
+     "id": "ex_mo_008",
+     "name": "Cat-Cow Stretch"
+    },
+    {
+     "id": "ex_bw_035",
+     "name": "Chest Dip"
+    },
+    {
+     "id": "ex_curated_000",
+     "name": "Chest Press"
+    },
+    {
+     "id": "ex_curated_006",
+     "name": "Chest Supported Row"
+    },
+    {
+     "id": "ex_mo_011",
+     "name": "Childs Pose"
+    },
+    {
+     "id": "ex_bw_008",
+     "name": "Chin-Up"
+    },
+    {
+     "id": "ex_cm_046",
+     "name": "Close Grip Bench Press"
+    },
+    {
+     "id": "ex_cm_006",
+     "name": "Close Grip Lat Pulldown"
+    },
+    {
+     "id": "ex_mo_013",
+     "name": "Cobra Stretch"
+    },
+    {
+     "id": "ex_db_019",
+     "name": "Concentration Curl"
+    }
+   ]
+  }
+ ],
+ "creates": [
+  {
+   "label": "ok: minimal",
+   "draft": {
+    "name": "Garage Press",
+    "equipment": [
+     "dumbbell"
+    ],
+    "primaryFAUs": [
+     "front-delts"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 200,
+   "stored": {
+    "name": "Garage Press",
+    "normalizedName": "garage press",
+    "equipment": [
+     "dumbbell"
+    ],
+    "primaryFAUs": [
+     "front-delts"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null,
+    "isSystem": false
+   }
+  },
+  {
+   "label": "ok: every field",
+   "draft": {
+    "name": "Tempo Goblet Squat",
+    "equipment": [
+     "kettlebell"
+    ],
+    "primaryFAUs": [
+     "quads"
+    ],
+    "secondaryFAUs": [
+     "glutes",
+     "abs"
+    ],
+    "instructions": "Three seconds down."
+   },
+   "status": 200,
+   "stored": {
+    "name": "Tempo Goblet Squat",
+    "normalizedName": "tempo goblet squat",
+    "equipment": [
+     "kettlebell"
+    ],
+    "primaryFAUs": [
+     "quads"
+    ],
+    "secondaryFAUs": [
+     "glutes",
+     "abs"
+    ],
+    "instructions": "Three seconds down.",
+    "isSystem": false
+   }
+  },
+  {
+   "label": "ok: spaces around the name (stored trimmed)",
+   "draft": {
+    "name": "  Spaced Name  ",
+    "equipment": [
+     "cable"
+    ],
+    "primaryFAUs": [
+     "lats"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 200,
+   "stored": {
+    "name": "Spaced Name",
+    "normalizedName": "spaced name",
+    "equipment": [
+     "cable"
+    ],
+    "primaryFAUs": [
+     "lats"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null,
+    "isSystem": false
+   }
+  },
+  {
+   "label": "ok: name of 100",
+   "draft": {
+    "name": "Nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "equipment": [
+     "machine"
+    ],
+    "primaryFAUs": [
+     "quads"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 200,
+   "stored": {
+    "name": "Nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "normalizedName": "nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "equipment": [
+     "machine"
+    ],
+    "primaryFAUs": [
+     "quads"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null,
+    "isSystem": false
+   }
+  },
+  {
+   "label": "ok: name of 100 once trimmed",
+   "draft": {
+    "name": "  Mxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  ",
+    "equipment": [
+     "machine"
+    ],
+    "primaryFAUs": [
+     "quads"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 200,
+   "stored": {
+    "name": "Mxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "normalizedName": "mxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "equipment": [
+     "machine"
+    ],
+    "primaryFAUs": [
+     "quads"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null,
+    "isSystem": false
+   }
+  },
+  {
+   "label": "ok: instructions of 4000",
+   "draft": {
+    "name": "Long Notes Lift",
+    "equipment": [
+     "machine"
+    ],
+    "primaryFAUs": [
+     "quads"
+    ],
+    "secondaryFAUs": [],
+    "instructions": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   },
+   "status": 200,
+   "stored": {
+    "name": "Long Notes Lift",
+    "normalizedName": "long notes lift",
+    "equipment": [
+     "machine"
+    ],
+    "primaryFAUs": [
+     "quads"
+    ],
+    "secondaryFAUs": [],
+    "instructions": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "isSystem": false
+   }
+  },
+  {
+   "label": "ok: instructions of 1001 (over the old limit of 1000)",
+   "draft": {
+    "name": "Old Limit Notes",
+    "equipment": [
+     "machine"
+    ],
+    "primaryFAUs": [
+     "quads"
+    ],
+    "secondaryFAUs": [],
+    "instructions": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   },
+   "status": 200,
+   "stored": {
+    "name": "Old Limit Notes",
+    "normalizedName": "old limit notes",
+    "equipment": [
+     "machine"
+    ],
+    "primaryFAUs": [
+     "quads"
+    ],
+    "secondaryFAUs": [],
+    "instructions": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "isSystem": false
+   }
+  },
+  {
+   "label": "ok: specialized equipment",
+   "draft": {
+    "name": "Trap Bar Shrug Hold",
+    "equipment": [
+     "trap_bar"
+    ],
+    "primaryFAUs": [
+     "traps"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 200,
+   "stored": {
+    "name": "Trap Bar Shrug Hold",
+    "normalizedName": "trap bar shrug hold",
+    "equipment": [
+     "trap_bar"
+    ],
+    "primaryFAUs": [
+     "traps"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null,
+    "isSystem": false
+   }
+  },
+  {
+   "label": "invalid: no name",
+   "draft": {
+    "name": "",
+    "equipment": [
+     "dumbbell"
+    ],
+    "primaryFAUs": [
+     "chest"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 422,
+   "details": [
+    {
+     "field": "name",
+     "message": "Name is required"
+    }
+   ],
+   "error": "Validation failed"
+  },
+  {
+   "label": "invalid: blank name",
+   "draft": {
+    "name": "   ",
+    "equipment": [
+     "dumbbell"
+    ],
+    "primaryFAUs": [
+     "chest"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 422,
+   "details": [
+    {
+     "field": "name",
+     "message": "Name is required"
+    }
+   ],
+   "error": "Validation failed"
+  },
+  {
+   "label": "invalid: name of 101",
+   "draft": {
+    "name": "Nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "equipment": [
+     "dumbbell"
+    ],
+    "primaryFAUs": [
+     "chest"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 422,
+   "details": [
+    {
+     "field": "name",
+     "message": "Name must be 100 characters or less"
+    }
+   ],
+   "error": "Validation failed"
+  },
+  {
+   "label": "invalid: no equipment",
+   "draft": {
+    "name": "No Gear",
+    "equipment": [],
+    "primaryFAUs": [
+     "chest"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 422,
+   "details": [
+    {
+     "field": "equipment",
+     "message": "At least one equipment type is required"
+    }
+   ],
+   "error": "Validation failed"
+  },
+  {
+   "label": "invalid: unknown equipment",
+   "draft": {
+    "name": "Spoon Lift",
+    "equipment": [
+     "spoon"
+    ],
+    "primaryFAUs": [
+     "chest"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 422,
+   "details": [
+    {
+     "field": "equipment",
+     "message": "Invalid equipment types: spoon"
+    }
+   ],
+   "error": "Validation failed"
+  },
+  {
+   "label": "invalid: no primary",
+   "draft": {
+    "name": "No Muscle",
+    "equipment": [
+     "dumbbell"
+    ],
+    "primaryFAUs": [],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 422,
+   "details": [
+    {
+     "field": "primaryFAUs",
+     "message": "At least one primary muscle group is required"
+    }
+   ],
+   "error": "Validation failed"
+  },
+  {
+   "label": "invalid: unknown primary",
+   "draft": {
+    "name": "Bad Muscle",
+    "equipment": [
+     "dumbbell"
+    ],
+    "primaryFAUs": [
+     "heart"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 422,
+   "details": [
+    {
+     "field": "primaryFAUs",
+     "message": "Invalid muscle groups: heart"
+    }
+   ],
+   "error": "Validation failed"
+  },
+  {
+   "label": "invalid: unknown secondary",
+   "draft": {
+    "name": "Bad Second",
+    "equipment": [
+     "dumbbell"
+    ],
+    "primaryFAUs": [
+     "chest"
+    ],
+    "secondaryFAUs": [
+     "tail"
+    ],
+    "instructions": null
+   },
+   "status": 422,
+   "details": [
+    {
+     "field": "secondaryFAUs",
+     "message": "Invalid muscle groups: tail"
+    }
+   ],
+   "error": "Validation failed"
+  },
+  {
+   "label": "invalid: instructions of 4001",
+   "draft": {
+    "name": "Too Long Notes",
+    "equipment": [
+     "dumbbell"
+    ],
+    "primaryFAUs": [
+     "chest"
+    ],
+    "secondaryFAUs": [],
+    "instructions": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   },
+   "status": 422,
+   "details": [
+    {
+     "field": "instructions",
+     "message": "Instructions must be 4000 characters or less"
+    }
+   ],
+   "error": "Validation failed"
+  },
+  {
+   "label": "invalid: everything at once",
+   "draft": {
+    "name": "",
+    "equipment": [],
+    "primaryFAUs": [],
+    "secondaryFAUs": [
+     "tail"
+    ],
+    "instructions": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   },
+   "status": 422,
+   "details": [
+    {
+     "field": "name",
+     "message": "Name is required"
+    },
+    {
+     "field": "equipment",
+     "message": "At least one equipment type is required"
+    },
+    {
+     "field": "primaryFAUs",
+     "message": "At least one primary muscle group is required"
+    },
+    {
+     "field": "secondaryFAUs",
+     "message": "Invalid muscle groups: tail"
+    },
+    {
+     "field": "instructions",
+     "message": "Instructions must be 4000 characters or less"
+    }
+   ],
+   "error": "Validation failed"
+  },
+  {
+   "label": "invalid beats duplicate",
+   "draft": {
+    "name": "Barbell Bench Press",
+    "equipment": [],
+    "primaryFAUs": [
+     "chest"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 422,
+   "details": [
+    {
+     "field": "equipment",
+     "message": "At least one equipment type is required"
+    }
+   ],
+   "error": "Validation failed"
+  },
+  {
+   "label": "duplicate: built-in, other case",
+   "draft": {
+    "name": "barbell bench press",
+    "equipment": [
+     "barbell"
+    ],
+    "primaryFAUs": [
+     "chest"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 409,
+   "existing": "cmiz7vjju0000vr0m4b1o6bec",
+   "error": "An exercise with this name already exists"
+  },
+  {
+   "label": "duplicate: built-in plus punctuation",
+   "draft": {
+    "name": "Barbell Bench Press!",
+    "equipment": [
+     "barbell"
+    ],
+    "primaryFAUs": [
+     "chest"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 409,
+   "existing": "cmiz7vjju0000vr0m4b1o6bec",
+   "error": "An exercise with this name already exists"
+  },
+  {
+   "label": "duplicate: built-in, extra spaces",
+   "draft": {
+    "name": " Barbell   Bench Press ",
+    "equipment": [
+     "barbell"
+    ],
+    "primaryFAUs": [
+     "chest"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 409,
+   "existing": "cmiz7vjju0000vr0m4b1o6bec",
+   "error": "An exercise with this name already exists"
+  },
+  {
+   "label": "duplicate: built-in with hyphen",
+   "draft": {
+    "name": "PULL-UP",
+    "equipment": [
+     "pull_up_bar"
+    ],
+    "primaryFAUs": [
+     "lats"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 409,
+   "existing": "cmiz7vkvr0008vr0m7rv3dapc",
+   "error": "An exercise with this name already exists"
+  },
+  {
+   "label": "duplicate: my own custom",
+   "draft": {
+    "name": "sled push",
+    "equipment": [
+     "sled"
+    ],
+    "primaryFAUs": [
+     "quads"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 409,
+   "existing": "custom:Sled Push",
+   "error": "An exercise with this name already exists"
+  },
+  {
+   "label": "duplicate: one just created",
+   "draft": {
+    "name": "Garage Press",
+    "equipment": [
+     "dumbbell"
+    ],
+    "primaryFAUs": [
+     "front-delts"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 409,
+   "existing": "custom:Garage Press",
+   "error": "An exercise with this name already exists"
+  },
+  {
+   "label": "not duplicate: hyphen instead of space",
+   "draft": {
+    "name": "Barbell-Bench Press",
+    "equipment": [
+     "barbell"
+    ],
+    "primaryFAUs": [
+     "chest"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 200,
+   "stored": {
+    "name": "Barbell-Bench Press",
+    "normalizedName": "barbell-bench press",
+    "equipment": [
+     "barbell"
+    ],
+    "primaryFAUs": [
+     "chest"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null,
+    "isSystem": false
+   }
+  },
+  {
+   "label": "not duplicate: built-in stored with apostrophe (Farmer's Walk)",
+   "draft": {
+    "name": "Farmer's Walk",
+    "equipment": [
+     "dumbbell"
+    ],
+    "primaryFAUs": [
+     "forearms"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 200,
+   "stored": {
+    "name": "Farmer's Walk",
+    "normalizedName": "farmers walk",
+    "equipment": [
+     "dumbbell"
+    ],
+    "primaryFAUs": [
+     "forearms"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null,
+    "isSystem": false
+   }
+  },
+  {
+   "label": "invalid: punctuation-only name",
+   "draft": {
+    "name": "!!!",
+    "equipment": [
+     "dumbbell"
+    ],
+    "primaryFAUs": [
+     "chest"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 422,
+   "details": [
+    {
+     "field": "name",
+     "message": "Name must include a letter or number"
+    }
+   ],
+   "error": "Validation failed"
+  },
+  {
+   "label": "invalid: punctuation-only name, spaces around",
+   "draft": {
+    "name": "  ?? -  ",
+    "equipment": [
+     "dumbbell"
+    ],
+    "primaryFAUs": [
+     "chest"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 422,
+   "details": [
+    {
+     "field": "name",
+     "message": "Name must include a letter or number"
+    }
+   ],
+   "error": "Validation failed"
+  },
+  {
+   "label": "invalid: punctuation-only name plus another problem",
+   "draft": {
+    "name": "???",
+    "equipment": [],
+    "primaryFAUs": [
+     "chest"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 422,
+   "details": [
+    {
+     "field": "name",
+     "message": "Name must include a letter or number"
+    },
+    {
+     "field": "equipment",
+     "message": "At least one equipment type is required"
+    }
+   ],
+   "error": "Validation failed"
+  },
+  {
+   "label": "ok: a single digit is enough",
+   "draft": {
+    "name": "7",
+    "equipment": [
+     "dumbbell"
+    ],
+    "primaryFAUs": [
+     "chest"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 200,
+   "stored": {
+    "name": "7",
+    "normalizedName": "7",
+    "equipment": [
+     "dumbbell"
+    ],
+    "primaryFAUs": [
+     "chest"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null,
+    "isSystem": false
+   }
+  },
+  {
+   "label": "ok: a letter outside a-z is enough",
+   "draft": {
+    "name": "Ñ",
+    "equipment": [
+     "dumbbell"
+    ],
+    "primaryFAUs": [
+     "chest"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 200,
+   "stored": {
+    "name": "Ñ",
+    "normalizedName": "",
+    "equipment": [
+     "dumbbell"
+    ],
+    "primaryFAUs": [
+     "chest"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null,
+    "isSystem": false
+   }
+  },
+  {
+   "label": "duplicate: trimmed name of one just created",
+   "draft": {
+    "name": " Spaced Name ",
+    "equipment": [
+     "cable"
+    ],
+    "primaryFAUs": [
+     "lats"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 409,
+   "existing": "custom:Spaced Name",
+   "error": "An exercise with this name already exists"
+  }
+ ],
+ "duplicates": [
+  {
+   "label": "built-in exact",
+   "name": "Barbell Bench Press",
+   "exclude": null,
+   "exists": true,
+   "existing": "cmiz7vjju0000vr0m4b1o6bec"
+  },
+  {
+   "label": "built-in other case and spaces",
+   "name": "  barbell  BENCH press ",
+   "exclude": null,
+   "exists": true,
+   "existing": "cmiz7vjju0000vr0m4b1o6bec"
+  },
+  {
+   "label": "built-in plus punctuation",
+   "name": "Barbell Bench Press?!",
+   "exclude": null,
+   "exists": true,
+   "existing": "cmiz7vjju0000vr0m4b1o6bec"
+  },
+  {
+   "label": "hyphen differs",
+   "name": "Barbell-Bench Press",
+   "exclude": null,
+   "exists": false,
+   "existing": null
+  },
+  {
+   "label": "built-in stored with apostrophe",
+   "name": "Farmer's Walk",
+   "exclude": null,
+   "exists": false,
+   "existing": null
+  },
+  {
+   "label": "built-in stored with apostrophe, typed without",
+   "name": "Farmers Walk",
+   "exclude": null,
+   "exists": false,
+   "existing": null
+  },
+  {
+   "label": "my custom",
+   "name": "SLED PUSH",
+   "exclude": null,
+   "exists": true,
+   "existing": "custom:Sled Push"
+  },
+  {
+   "label": "my custom, excluding itself",
+   "name": "Sled Push",
+   "exclude": "Sled Push",
+   "exists": false,
+   "existing": null
+  },
+  {
+   "label": "my custom, excluding another",
+   "name": "Sled Push",
+   "exclude": "Zz Press Machine",
+   "exists": true,
+   "existing": "custom:Sled Push"
+  },
+  {
+   "label": "new name",
+   "name": "Totally New Lift",
+   "exclude": null,
+   "exists": false,
+   "existing": null
+  }
+ ],
+ "edits": [
+  {
+   "label": "ok: rename and change fields",
+   "target": "Sled Push",
+   "draft": {
+    "name": "Heavy Sled Push",
+    "equipment": [
+     "sled"
+    ],
+    "primaryFAUs": [
+     "quads",
+     "glutes"
+    ],
+    "secondaryFAUs": [
+     "calves"
+    ],
+    "instructions": "Drive."
+   },
+   "status": 200,
+   "stored": {
+    "name": "Heavy Sled Push",
+    "normalizedName": "heavy sled push",
+    "equipment": [
+     "sled"
+    ],
+    "primaryFAUs": [
+     "quads",
+     "glutes"
+    ],
+    "secondaryFAUs": [
+     "calves"
+    ],
+    "instructions": "Drive.",
+    "isSystem": false
+   }
+  },
+  {
+   "label": "ok: same name, other case",
+   "target": "Sled Push",
+   "draft": {
+    "name": "SLED PUSH",
+    "equipment": [
+     "sled"
+    ],
+    "primaryFAUs": [
+     "quads"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 200,
+   "stored": {
+    "name": "SLED PUSH",
+    "normalizedName": "sled push",
+    "equipment": [
+     "sled"
+    ],
+    "primaryFAUs": [
+     "quads"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null,
+    "isSystem": false
+   }
+  },
+  {
+   "label": "ok: unchanged name",
+   "target": "Sled Push",
+   "draft": {
+    "name": "Sled Push",
+    "equipment": [
+     "sled",
+     "bodyweight"
+    ],
+    "primaryFAUs": [
+     "quads"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 200,
+   "stored": {
+    "name": "Sled Push",
+    "normalizedName": "sled push",
+    "equipment": [
+     "sled",
+     "bodyweight"
+    ],
+    "primaryFAUs": [
+     "quads"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null,
+    "isSystem": false
+   }
+  },
+  {
+   "label": "duplicate: rename to a built-in",
+   "target": "Sled Push",
+   "draft": {
+    "name": "Barbell Back Squat",
+    "equipment": [
+     "sled"
+    ],
+    "primaryFAUs": [
+     "quads"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 409,
+   "existing": "cmiz7vjpo0001vr0msv9of7ib",
+   "error": "An exercise with this name already exists"
+  },
+  {
+   "label": "duplicate: rename to another custom",
+   "target": "Sled Push",
+   "draft": {
+    "name": "zz press machine",
+    "equipment": [
+     "sled"
+    ],
+    "primaryFAUs": [
+     "quads"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 409,
+   "existing": "custom:Zz Press Machine",
+   "error": "An exercise with this name already exists"
+  },
+  {
+   "label": "invalid: no equipment",
+   "target": "Sled Push",
+   "draft": {
+    "name": "Sled Push",
+    "equipment": [],
+    "primaryFAUs": [
+     "quads"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 422,
+   "details": [
+    {
+     "field": "equipment",
+     "message": "At least one equipment type is required"
+    }
+   ],
+   "error": "Validation failed"
+  },
+  {
+   "label": "invalid: blank name",
+   "target": "Sled Push",
+   "draft": {
+    "name": " ",
+    "equipment": [
+     "sled"
+    ],
+    "primaryFAUs": [
+     "quads"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 422,
+   "details": [
+    {
+     "field": "name",
+     "message": "Name is required"
+    }
+   ],
+   "error": "Validation failed"
+  },
+  {
+   "label": "invalid: rename to punctuation only",
+   "target": "Sled Push",
+   "draft": {
+    "name": "!!!",
+    "equipment": [
+     "sled"
+    ],
+    "primaryFAUs": [
+     "quads"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 422,
+   "details": [
+    {
+     "field": "name",
+     "message": "Name must include a letter or number"
+    }
+   ],
+   "error": "Validation failed"
+  },
+  {
+   "label": "ok: rename with spaces around (stored trimmed)",
+   "target": "Sled Push",
+   "draft": {
+    "name": "  Heavy Sled  ",
+    "equipment": [
+     "sled"
+    ],
+    "primaryFAUs": [
+     "quads"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 200,
+   "stored": {
+    "name": "Heavy Sled",
+    "normalizedName": "heavy sled",
+    "equipment": [
+     "sled"
+    ],
+    "primaryFAUs": [
+     "quads"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null,
+    "isSystem": false
+   }
+  },
+  {
+   "label": "duplicate: rename to a built-in with spaces around",
+   "target": "Sled Push",
+   "draft": {
+    "name": " Barbell Back Squat ",
+    "equipment": [
+     "sled"
+    ],
+    "primaryFAUs": [
+     "quads"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 409,
+   "existing": "cmiz7vjpo0001vr0msv9of7ib",
+   "error": "An exercise with this name already exists"
+  },
+  {
+   "label": "refused: built-in",
+   "target": "seed:Barbell Bench Press",
+   "draft": {
+    "name": "My Bench",
+    "equipment": [
+     "barbell"
+    ],
+    "primaryFAUs": [
+     "chest"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 403,
+   "error": "Cannot edit system exercise definitions"
+  },
+  {
+   "label": "missing",
+   "target": "seed:no-such-id",
+   "draft": {
+    "name": "Ghost",
+    "equipment": [
+     "barbell"
+    ],
+    "primaryFAUs": [
+     "chest"
+    ],
+    "secondaryFAUs": [],
+    "instructions": null
+   },
+   "status": 404,
+   "error": "Exercise definition not found"
+  }
+ ]
+}

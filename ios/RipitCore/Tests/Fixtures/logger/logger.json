@@ -1,0 +1,924 @@
+{
+  "keypad": [
+    {
+      "label": "first digit replaces a prefilled value",
+      "start": "135",
+      "keys": [
+        "2",
+        "2",
+        "5"
+      ],
+      "values": [
+        "2",
+        "22",
+        "225"
+      ]
+    },
+    {
+      "label": "first digit on an empty value",
+      "start": "",
+      "keys": [
+        "8"
+      ],
+      "values": [
+        "8"
+      ]
+    },
+    {
+      "label": "first key 0 replaces with 0",
+      "start": "135",
+      "keys": [
+        "0"
+      ],
+      "values": [
+        "0"
+      ]
+    },
+    {
+      "label": "0 then 0 stays 0",
+      "start": "",
+      "keys": [
+        "0",
+        "0",
+        "0"
+      ],
+      "values": [
+        "0",
+        "0",
+        "0"
+      ]
+    },
+    {
+      "label": "0 then a digit replaces the 0",
+      "start": "",
+      "keys": [
+        "0",
+        "7",
+        "5"
+      ],
+      "values": [
+        "0",
+        "7",
+        "75"
+      ]
+    },
+    {
+      "label": "CLR empties, then digits append",
+      "start": "135",
+      "keys": [
+        "CLR",
+        "4",
+        "5"
+      ],
+      "values": [
+        "",
+        "4",
+        "45"
+      ]
+    },
+    {
+      "label": "CLR on an empty value",
+      "start": "",
+      "keys": [
+        "CLR",
+        "1"
+      ],
+      "values": [
+        "",
+        "1"
+      ]
+    },
+    {
+      "label": "DEL first clears a prefilled value",
+      "start": "135",
+      "keys": [
+        "DEL",
+        "9"
+      ],
+      "values": [
+        "",
+        "9"
+      ]
+    },
+    {
+      "label": "DEL after typing removes the last digit",
+      "start": "135",
+      "keys": [
+        "1",
+        "8",
+        "5",
+        "DEL",
+        "DEL"
+      ],
+      "values": [
+        "1",
+        "18",
+        "185",
+        "18",
+        "1"
+      ]
+    },
+    {
+      "label": "DEL on empty stays empty",
+      "start": "",
+      "keys": [
+        "5",
+        "DEL",
+        "DEL"
+      ],
+      "values": [
+        "5",
+        "",
+        ""
+      ]
+    },
+    {
+      "label": "up to 999 is accepted",
+      "start": "",
+      "keys": [
+        "9",
+        "9",
+        "9"
+      ],
+      "values": [
+        "9",
+        "99",
+        "999"
+      ]
+    },
+    {
+      "label": "over 999 is refused, keeps the value",
+      "start": "",
+      "keys": [
+        "9",
+        "9",
+        "9",
+        "1"
+      ],
+      "values": [
+        "9",
+        "99",
+        "999",
+        "999"
+      ]
+    },
+    {
+      "label": "1000 is refused",
+      "start": "",
+      "keys": [
+        "1",
+        "0",
+        "0",
+        "0"
+      ],
+      "values": [
+        "1",
+        "10",
+        "100",
+        "100"
+      ]
+    },
+    {
+      "label": "refused key, then DEL and a digit",
+      "start": "",
+      "keys": [
+        "5",
+        "0",
+        "0",
+        "0",
+        "DEL",
+        "1"
+      ],
+      "values": [
+        "5",
+        "50",
+        "500",
+        "500",
+        "50",
+        "501"
+      ]
+    },
+    {
+      "label": "CLR then 0 then digit",
+      "start": "45",
+      "keys": [
+        "CLR",
+        "0",
+        "3"
+      ],
+      "values": [
+        "",
+        "0",
+        "3"
+      ]
+    }
+  ],
+  "stepper": [
+    {
+      "label": "+ from empty is 1",
+      "start": "",
+      "presses": [
+        "+",
+        "+"
+      ],
+      "startCanDecrement": false,
+      "steps": [
+        {
+          "value": "1",
+          "canDecrement": true
+        },
+        {
+          "value": "2",
+          "canDecrement": true
+        }
+      ]
+    },
+    {
+      "label": "− from empty does nothing",
+      "start": "",
+      "presses": [
+        "-"
+      ],
+      "startCanDecrement": false,
+      "steps": [
+        {
+          "value": "",
+          "canDecrement": false
+        }
+      ]
+    },
+    {
+      "label": "− from 1 empties",
+      "start": "1",
+      "presses": [
+        "-",
+        "+"
+      ],
+      "startCanDecrement": true,
+      "steps": [
+        {
+          "value": "",
+          "canDecrement": false
+        },
+        {
+          "value": "1",
+          "canDecrement": true
+        }
+      ]
+    },
+    {
+      "label": "− and + from 8",
+      "start": "8",
+      "presses": [
+        "-",
+        "-",
+        "+",
+        "+",
+        "+"
+      ],
+      "startCanDecrement": true,
+      "steps": [
+        {
+          "value": "7",
+          "canDecrement": true
+        },
+        {
+          "value": "6",
+          "canDecrement": true
+        },
+        {
+          "value": "7",
+          "canDecrement": true
+        },
+        {
+          "value": "8",
+          "canDecrement": true
+        },
+        {
+          "value": "9",
+          "canDecrement": true
+        }
+      ]
+    },
+    {
+      "label": "+ has no upper bound",
+      "start": "999",
+      "presses": [
+        "+",
+        "+"
+      ],
+      "startCanDecrement": true,
+      "steps": [
+        {
+          "value": "1000",
+          "canDecrement": true
+        },
+        {
+          "value": "1001",
+          "canDecrement": true
+        }
+      ]
+    },
+    {
+      "label": "0 can only go up",
+      "start": "0",
+      "presses": [
+        "-",
+        "+"
+      ],
+      "startCanDecrement": false,
+      "steps": [
+        {
+          "value": "0",
+          "canDecrement": false
+        },
+        {
+          "value": "1",
+          "canDecrement": true
+        }
+      ]
+    }
+  ],
+  "swipe": [
+    {
+      "dx": -200,
+      "dy": 0,
+      "keypadOpen": false,
+      "result": "next"
+    },
+    {
+      "dx": -200,
+      "dy": 0,
+      "keypadOpen": true,
+      "result": "none"
+    },
+    {
+      "dx": 200,
+      "dy": 0,
+      "keypadOpen": false,
+      "result": "previous"
+    },
+    {
+      "dx": 200,
+      "dy": 0,
+      "keypadOpen": true,
+      "result": "none"
+    },
+    {
+      "dx": -50,
+      "dy": 0,
+      "keypadOpen": false,
+      "result": "next"
+    },
+    {
+      "dx": -50,
+      "dy": 0,
+      "keypadOpen": true,
+      "result": "none"
+    },
+    {
+      "dx": 50,
+      "dy": 0,
+      "keypadOpen": false,
+      "result": "previous"
+    },
+    {
+      "dx": 50,
+      "dy": 0,
+      "keypadOpen": true,
+      "result": "none"
+    },
+    {
+      "dx": -49,
+      "dy": 0,
+      "keypadOpen": false,
+      "result": "none"
+    },
+    {
+      "dx": -49,
+      "dy": 0,
+      "keypadOpen": true,
+      "result": "none"
+    },
+    {
+      "dx": 49,
+      "dy": 0,
+      "keypadOpen": false,
+      "result": "none"
+    },
+    {
+      "dx": 49,
+      "dy": 0,
+      "keypadOpen": true,
+      "result": "none"
+    },
+    {
+      "dx": -40,
+      "dy": 0,
+      "keypadOpen": false,
+      "result": "none"
+    },
+    {
+      "dx": -40,
+      "dy": 0,
+      "keypadOpen": true,
+      "result": "none"
+    },
+    {
+      "dx": 0,
+      "dy": 0,
+      "keypadOpen": false,
+      "result": "none"
+    },
+    {
+      "dx": 0,
+      "dy": 0,
+      "keypadOpen": true,
+      "result": "none"
+    },
+    {
+      "dx": -100,
+      "dy": 75,
+      "keypadOpen": false,
+      "result": "next"
+    },
+    {
+      "dx": -100,
+      "dy": 75,
+      "keypadOpen": true,
+      "result": "none"
+    },
+    {
+      "dx": -100,
+      "dy": 76,
+      "keypadOpen": false,
+      "result": "none"
+    },
+    {
+      "dx": -100,
+      "dy": 76,
+      "keypadOpen": true,
+      "result": "none"
+    },
+    {
+      "dx": 100,
+      "dy": -75,
+      "keypadOpen": false,
+      "result": "previous"
+    },
+    {
+      "dx": 100,
+      "dy": -75,
+      "keypadOpen": true,
+      "result": "none"
+    },
+    {
+      "dx": 100,
+      "dy": -76,
+      "keypadOpen": false,
+      "result": "none"
+    },
+    {
+      "dx": 100,
+      "dy": -76,
+      "keypadOpen": true,
+      "result": "none"
+    },
+    {
+      "dx": -50,
+      "dy": 37.5,
+      "keypadOpen": false,
+      "result": "next"
+    },
+    {
+      "dx": -50,
+      "dy": 37.5,
+      "keypadOpen": true,
+      "result": "none"
+    },
+    {
+      "dx": -50,
+      "dy": 38,
+      "keypadOpen": false,
+      "result": "none"
+    },
+    {
+      "dx": -50,
+      "dy": 38,
+      "keypadOpen": true,
+      "result": "none"
+    },
+    {
+      "dx": 0,
+      "dy": 200,
+      "keypadOpen": false,
+      "result": "none"
+    },
+    {
+      "dx": 0,
+      "dy": 200,
+      "keypadOpen": true,
+      "result": "none"
+    },
+    {
+      "dx": -30,
+      "dy": 300,
+      "keypadOpen": false,
+      "result": "none"
+    },
+    {
+      "dx": -30,
+      "dy": 300,
+      "keypadOpen": true,
+      "result": "none"
+    },
+    {
+      "dx": -60,
+      "dy": -10,
+      "keypadOpen": false,
+      "result": "next"
+    },
+    {
+      "dx": -60,
+      "dy": -10,
+      "keypadOpen": true,
+      "result": "none"
+    },
+    {
+      "dx": 120,
+      "dy": 40,
+      "keypadOpen": false,
+      "result": "previous"
+    },
+    {
+      "dx": 120,
+      "dy": 40,
+      "keypadOpen": true,
+      "result": "none"
+    }
+  ],
+  "pendingSetDetail": [
+    {
+      "reps": "8",
+      "weight": "135",
+      "weightUnit": "lbs",
+      "detail": "8 reps × 135 lbs"
+    },
+    {
+      "reps": "1",
+      "weight": "60",
+      "weightUnit": "kg",
+      "detail": "1 rep × 60 kg"
+    },
+    {
+      "reps": "5",
+      "weight": "0",
+      "weightUnit": "lbs",
+      "detail": "5 reps"
+    },
+    {
+      "reps": "12",
+      "weight": "",
+      "weightUnit": "lbs",
+      "detail": "12 reps"
+    },
+    {
+      "reps": "",
+      "weight": "135",
+      "weightUnit": "lbs",
+      "detail": null
+    },
+    {
+      "reps": "0",
+      "weight": "95",
+      "weightUnit": "lbs",
+      "detail": "0 reps × 95 lbs"
+    },
+    {
+      "reps": "10",
+      "weight": "132.5",
+      "weightUnit": "kg",
+      "detail": "10 reps × 132.5 kg"
+    }
+  ],
+  "afterLog": [
+    {
+      "label": "the second working set: a range takes its high end, with RPE",
+      "plan": "A",
+      "loggedWorking": 1,
+      "form": {
+        "reps": "7",
+        "weight": "185",
+        "weightUnit": "lbs",
+        "rpe": "9",
+        "rir": "4"
+      },
+      "expected": {
+        "reps": "12",
+        "weight": "185",
+        "weightUnit": "lbs",
+        "rpe": "8",
+        "rir": ""
+      }
+    },
+    {
+      "label": "\"15+\" and an RIR target",
+      "plan": "A",
+      "loggedWorking": 2,
+      "form": {
+        "reps": "7",
+        "weight": "185",
+        "weightUnit": "lbs",
+        "rpe": "9",
+        "rir": "4"
+      },
+      "expected": {
+        "reps": "15",
+        "weight": "185",
+        "weightUnit": "lbs",
+        "rpe": "",
+        "rir": "2"
+      }
+    },
+    {
+      "label": "AMRAP: no reps, effort left alone",
+      "plan": "A",
+      "loggedWorking": 3,
+      "form": {
+        "reps": "7",
+        "weight": "185",
+        "weightUnit": "lbs",
+        "rpe": "9",
+        "rir": "4"
+      },
+      "expected": {
+        "reps": "",
+        "weight": "185",
+        "weightUnit": "lbs",
+        "rpe": "9",
+        "rir": "4"
+      }
+    },
+    {
+      "label": "plan done: the form is kept",
+      "plan": "A",
+      "loggedWorking": 4,
+      "form": {
+        "reps": "7",
+        "weight": "185",
+        "weightUnit": "lbs",
+        "rpe": "9",
+        "rir": "4"
+      },
+      "expected": {
+        "reps": "7",
+        "weight": "185",
+        "weightUnit": "lbs",
+        "rpe": "9",
+        "rir": "4"
+      }
+    },
+    {
+      "label": "past the plan: the form is kept",
+      "plan": "A",
+      "loggedWorking": 9,
+      "form": {
+        "reps": "7",
+        "weight": "185",
+        "weightUnit": "lbs",
+        "rpe": "9",
+        "rir": "4"
+      },
+      "expected": {
+        "reps": "7",
+        "weight": "185",
+        "weightUnit": "lbs",
+        "rpe": "9",
+        "rir": "4"
+      }
+    },
+    {
+      "label": "warm-ups are not the plan: first working set",
+      "plan": "A",
+      "loggedWorking": 0,
+      "form": {
+        "reps": "7",
+        "weight": "185",
+        "weightUnit": "lbs",
+        "rpe": "9",
+        "rir": "4"
+      },
+      "expected": {
+        "reps": "5",
+        "weight": "185",
+        "weightUnit": "lbs",
+        "rpe": "7",
+        "rir": ""
+      }
+    },
+    {
+      "label": "plan sorted by set number",
+      "plan": "B",
+      "loggedWorking": 1,
+      "form": {
+        "reps": "7",
+        "weight": "185",
+        "weightUnit": "kg",
+        "rpe": "9",
+        "rir": "4"
+      },
+      "expected": {
+        "reps": "6",
+        "weight": "185",
+        "weightUnit": "kg",
+        "rpe": "",
+        "rir": "1"
+      }
+    },
+    {
+      "label": "no plan: the form is kept",
+      "plan": "none",
+      "loggedWorking": 1,
+      "form": {
+        "reps": "7",
+        "weight": "185",
+        "weightUnit": "lbs",
+        "rpe": "9",
+        "rir": "4"
+      },
+      "expected": {
+        "reps": "7",
+        "weight": "185",
+        "weightUnit": "lbs",
+        "rpe": "9",
+        "rir": "4"
+      }
+    }
+  ],
+  "plans": {
+    "A": [
+      {
+        "setNumber": 1,
+        "reps": "10",
+        "rpe": null,
+        "rir": null,
+        "isWarmup": true
+      },
+      {
+        "setNumber": 2,
+        "reps": "5",
+        "rpe": 7,
+        "rir": null,
+        "isWarmup": false
+      },
+      {
+        "setNumber": 3,
+        "reps": "8-12",
+        "rpe": 8,
+        "rir": null,
+        "isWarmup": false
+      },
+      {
+        "setNumber": 4,
+        "reps": "15+",
+        "rpe": null,
+        "rir": 2,
+        "isWarmup": false
+      },
+      {
+        "setNumber": 5,
+        "reps": "AMRAP",
+        "rpe": null,
+        "rir": null,
+        "isWarmup": false
+      }
+    ],
+    "B": [
+      {
+        "setNumber": 2,
+        "reps": "6",
+        "rpe": null,
+        "rir": 1,
+        "isWarmup": false
+      },
+      {
+        "setNumber": 1,
+        "reps": "6",
+        "rpe": null,
+        "rir": 3,
+        "isWarmup": false
+      }
+    ],
+    "none": []
+  },
+  "move": [
+    {
+      "ids": [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e"
+      ],
+      "from": 3,
+      "to": 0,
+      "result": [
+        "d",
+        "a",
+        "b",
+        "c",
+        "e"
+      ]
+    },
+    {
+      "ids": [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e"
+      ],
+      "from": 0,
+      "to": 4,
+      "result": [
+        "b",
+        "c",
+        "d",
+        "e",
+        "a"
+      ]
+    },
+    {
+      "ids": [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e"
+      ],
+      "from": 1,
+      "to": 2,
+      "result": [
+        "a",
+        "c",
+        "b",
+        "d",
+        "e"
+      ]
+    },
+    {
+      "ids": [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e"
+      ],
+      "from": 2,
+      "to": 1,
+      "result": [
+        "a",
+        "c",
+        "b",
+        "d",
+        "e"
+      ]
+    },
+    {
+      "ids": [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e"
+      ],
+      "from": 4,
+      "to": 0,
+      "result": [
+        "e",
+        "a",
+        "b",
+        "c",
+        "d"
+      ]
+    },
+    {
+      "ids": [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e"
+      ],
+      "from": 2,
+      "to": 2,
+      "result": [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e"
+      ]
+    }
+  ]
+}

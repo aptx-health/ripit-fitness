@@ -1,0 +1,2679 @@
+{
+ "about": "A gap week, a light week, rising RPE, an archived workout, a 15-rep set; closed and open (empty) weeks",
+ "generatedBy": "scripts/ios/progress-goldens.ts",
+ "timeZone": "America/Denver",
+ "now": "2026-11-10T15:00:00.000Z",
+ "unit": "lbs",
+ "target": 2,
+ "file": {
+  "format": "ripit-export",
+  "version": 1,
+  "exportedAt": "2026-11-10T15:00:00.000Z",
+  "userId": "golden-user",
+  "settings": {},
+  "balanceSettings": {},
+  "customExercises": [],
+  "exerciseRefs": [
+   {
+    "id": "cmiz7vjvh0002vr0mtcmhiz70",
+    "name": "Conventional Deadlift"
+   },
+   {
+    "id": "cmiz7vjju0000vr0m4b1o6bec",
+    "name": "Barbell Bench Press"
+   }
+  ],
+  "programs": [],
+  "workoutCompletions": [
+   {
+    "id": "c-gap-week-001",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-09-22T01:00:00.000Z",
+    "startedAt": "2026-09-22T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 1",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-gap-week-001-e1",
+      "name": "Conventional Deadlift",
+      "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-gap-week-001",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-gap-week-001-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-001-e1",
+      "completionId": "c-gap-week-001",
+      "createdAt": "2026-09-22T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-001-e1-s2",
+      "setNumber": 2,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-001-e1",
+      "completionId": "c-gap-week-001",
+      "createdAt": "2026-09-22T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-001-e1-s3",
+      "setNumber": 3,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-001-e1",
+      "completionId": "c-gap-week-001",
+      "createdAt": "2026-09-22T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-001-e1-s4",
+      "setNumber": 4,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-001-e1",
+      "completionId": "c-gap-week-001",
+      "createdAt": "2026-09-22T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-001-e1-s5",
+      "setNumber": 5,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-001-e1",
+      "completionId": "c-gap-week-001",
+      "createdAt": "2026-09-22T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-gap-week-002",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-09-24T01:00:00.000Z",
+    "startedAt": "2026-09-24T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 2",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-gap-week-002-e1",
+      "name": "Conventional Deadlift",
+      "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-gap-week-002",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-gap-week-002-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-002-e1",
+      "completionId": "c-gap-week-002",
+      "createdAt": "2026-09-24T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-002-e1-s2",
+      "setNumber": 2,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-002-e1",
+      "completionId": "c-gap-week-002",
+      "createdAt": "2026-09-24T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-002-e1-s3",
+      "setNumber": 3,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-002-e1",
+      "completionId": "c-gap-week-002",
+      "createdAt": "2026-09-24T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-002-e1-s4",
+      "setNumber": 4,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-002-e1",
+      "completionId": "c-gap-week-002",
+      "createdAt": "2026-09-24T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-002-e1-s5",
+      "setNumber": 5,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-002-e1",
+      "completionId": "c-gap-week-002",
+      "createdAt": "2026-09-24T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-gap-week-003",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-09-29T01:00:00.000Z",
+    "startedAt": "2026-09-29T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 3",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-gap-week-003-e1",
+      "name": "Conventional Deadlift",
+      "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-gap-week-003",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-gap-week-003-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-003-e1",
+      "completionId": "c-gap-week-003",
+      "createdAt": "2026-09-29T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-003-e1-s2",
+      "setNumber": 2,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-003-e1",
+      "completionId": "c-gap-week-003",
+      "createdAt": "2026-09-29T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-003-e1-s3",
+      "setNumber": 3,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-003-e1",
+      "completionId": "c-gap-week-003",
+      "createdAt": "2026-09-29T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-003-e1-s4",
+      "setNumber": 4,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-003-e1",
+      "completionId": "c-gap-week-003",
+      "createdAt": "2026-09-29T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-003-e1-s5",
+      "setNumber": 5,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-003-e1",
+      "completionId": "c-gap-week-003",
+      "createdAt": "2026-09-29T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-gap-week-004",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-10-01T01:00:00.000Z",
+    "startedAt": "2026-10-01T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 4",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-gap-week-004-e1",
+      "name": "Conventional Deadlift",
+      "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-gap-week-004",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-gap-week-004-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-004-e1",
+      "completionId": "c-gap-week-004",
+      "createdAt": "2026-10-01T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-004-e1-s2",
+      "setNumber": 2,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-004-e1",
+      "completionId": "c-gap-week-004",
+      "createdAt": "2026-10-01T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-004-e1-s3",
+      "setNumber": 3,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-004-e1",
+      "completionId": "c-gap-week-004",
+      "createdAt": "2026-10-01T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-004-e1-s4",
+      "setNumber": 4,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-004-e1",
+      "completionId": "c-gap-week-004",
+      "createdAt": "2026-10-01T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-004-e1-s5",
+      "setNumber": 5,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-004-e1",
+      "completionId": "c-gap-week-004",
+      "createdAt": "2026-10-01T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-gap-week-005",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-10-13T01:00:00.000Z",
+    "startedAt": "2026-10-13T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 5",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-gap-week-005-e1",
+      "name": "Conventional Deadlift",
+      "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-gap-week-005",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-gap-week-005-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-005-e1",
+      "completionId": "c-gap-week-005",
+      "createdAt": "2026-10-13T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-005-e1-s2",
+      "setNumber": 2,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-005-e1",
+      "completionId": "c-gap-week-005",
+      "createdAt": "2026-10-13T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-gap-week-006",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-10-20T01:00:00.000Z",
+    "startedAt": "2026-10-20T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 6",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-gap-week-006-e1",
+      "name": "Conventional Deadlift",
+      "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-gap-week-006",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-gap-week-006-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-006-e1",
+      "completionId": "c-gap-week-006",
+      "createdAt": "2026-10-20T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-006-e1-s2",
+      "setNumber": 2,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-006-e1",
+      "completionId": "c-gap-week-006",
+      "createdAt": "2026-10-20T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-006-e1-s3",
+      "setNumber": 3,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-006-e1",
+      "completionId": "c-gap-week-006",
+      "createdAt": "2026-10-20T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-006-e1-s4",
+      "setNumber": 4,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-006-e1",
+      "completionId": "c-gap-week-006",
+      "createdAt": "2026-10-20T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-006-e1-s5",
+      "setNumber": 5,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-006-e1",
+      "completionId": "c-gap-week-006",
+      "createdAt": "2026-10-20T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-gap-week-007",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-10-22T01:00:00.000Z",
+    "startedAt": "2026-10-22T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 7",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-gap-week-007-e1",
+      "name": "Conventional Deadlift",
+      "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-gap-week-007",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-gap-week-007-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-007-e1",
+      "completionId": "c-gap-week-007",
+      "createdAt": "2026-10-22T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-007-e1-s2",
+      "setNumber": 2,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 7,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-007-e1",
+      "completionId": "c-gap-week-007",
+      "createdAt": "2026-10-22T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-007-e1-s3",
+      "setNumber": 3,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-007-e1",
+      "completionId": "c-gap-week-007",
+      "createdAt": "2026-10-22T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-007-e1-s4",
+      "setNumber": 4,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-007-e1",
+      "completionId": "c-gap-week-007",
+      "createdAt": "2026-10-22T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-007-e1-s5",
+      "setNumber": 5,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-007-e1",
+      "completionId": "c-gap-week-007",
+      "createdAt": "2026-10-22T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-gap-week-008",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-10-27T01:00:00.000Z",
+    "startedAt": "2026-10-27T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 8",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-gap-week-008-e1",
+      "name": "Conventional Deadlift",
+      "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-gap-week-008",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-gap-week-008-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-008-e1",
+      "completionId": "c-gap-week-008",
+      "createdAt": "2026-10-27T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-008-e1-s2",
+      "setNumber": 2,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-008-e1",
+      "completionId": "c-gap-week-008",
+      "createdAt": "2026-10-27T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-008-e1-s3",
+      "setNumber": 3,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-008-e1",
+      "completionId": "c-gap-week-008",
+      "createdAt": "2026-10-27T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-008-e1-s4",
+      "setNumber": 4,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-008-e1",
+      "completionId": "c-gap-week-008",
+      "createdAt": "2026-10-27T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-008-e1-s5",
+      "setNumber": 5,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-008-e1",
+      "completionId": "c-gap-week-008",
+      "createdAt": "2026-10-27T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-gap-week-009",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-10-29T01:00:00.000Z",
+    "startedAt": "2026-10-29T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 9",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-gap-week-009-e1",
+      "name": "Conventional Deadlift",
+      "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-gap-week-009",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-gap-week-009-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-009-e1",
+      "completionId": "c-gap-week-009",
+      "createdAt": "2026-10-29T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-009-e1-s2",
+      "setNumber": 2,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-009-e1",
+      "completionId": "c-gap-week-009",
+      "createdAt": "2026-10-29T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-009-e1-s3",
+      "setNumber": 3,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-009-e1",
+      "completionId": "c-gap-week-009",
+      "createdAt": "2026-10-29T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-009-e1-s4",
+      "setNumber": 4,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-009-e1",
+      "completionId": "c-gap-week-009",
+      "createdAt": "2026-10-29T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-009-e1-s5",
+      "setNumber": 5,
+      "reps": 5,
+      "weight": 200,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-009-e1",
+      "completionId": "c-gap-week-009",
+      "createdAt": "2026-10-29T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-gap-week-010",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-10-30T01:00:00.000Z",
+    "startedAt": "2026-10-30T00:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": true,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 10",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-gap-week-010-e1",
+      "name": "Conventional Deadlift",
+      "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-gap-week-010",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-gap-week-010-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 405,
+      "weightUnit": "lbs",
+      "rpe": 10,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-010-e1",
+      "completionId": "c-gap-week-010",
+      "createdAt": "2026-10-30T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-010-e1-s2",
+      "setNumber": 2,
+      "reps": 5,
+      "weight": 405,
+      "weightUnit": "lbs",
+      "rpe": 10,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-010-e1",
+      "completionId": "c-gap-week-010",
+      "createdAt": "2026-10-30T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-010-e1-s3",
+      "setNumber": 3,
+      "reps": 5,
+      "weight": 405,
+      "weightUnit": "lbs",
+      "rpe": 10,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-010-e1",
+      "completionId": "c-gap-week-010",
+      "createdAt": "2026-10-30T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-010-e1-s4",
+      "setNumber": 4,
+      "reps": 5,
+      "weight": 405,
+      "weightUnit": "lbs",
+      "rpe": 10,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-010-e1",
+      "completionId": "c-gap-week-010",
+      "createdAt": "2026-10-30T01:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-010-e1-s5",
+      "setNumber": 5,
+      "reps": 5,
+      "weight": 405,
+      "weightUnit": "lbs",
+      "rpe": 10,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-010-e1",
+      "completionId": "c-gap-week-010",
+      "createdAt": "2026-10-30T01:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-gap-week-011",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-11-03T02:00:00.000Z",
+    "startedAt": "2026-11-03T01:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 11",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-gap-week-011-e1",
+      "name": "Conventional Deadlift",
+      "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-gap-week-011",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-gap-week-011-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 225,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-011-e1",
+      "completionId": "c-gap-week-011",
+      "createdAt": "2026-11-03T02:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-011-e1-s2",
+      "setNumber": 2,
+      "reps": 5,
+      "weight": 225,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-011-e1",
+      "completionId": "c-gap-week-011",
+      "createdAt": "2026-11-03T02:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-011-e1-s3",
+      "setNumber": 3,
+      "reps": 5,
+      "weight": 225,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-011-e1",
+      "completionId": "c-gap-week-011",
+      "createdAt": "2026-11-03T02:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-011-e1-s4",
+      "setNumber": 4,
+      "reps": 5,
+      "weight": 225,
+      "weightUnit": "lbs",
+      "rpe": 9,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-011-e1",
+      "completionId": "c-gap-week-011",
+      "createdAt": "2026-11-03T02:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-011-e1-s5",
+      "setNumber": 5,
+      "reps": 5,
+      "weight": 225,
+      "weightUnit": "lbs",
+      "rpe": 9,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-011-e1",
+      "completionId": "c-gap-week-011",
+      "createdAt": "2026-11-03T02:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-gap-week-012",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-11-05T02:00:00.000Z",
+    "startedAt": "2026-11-05T01:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 12",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-gap-week-012-e1",
+      "name": "Conventional Deadlift",
+      "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-gap-week-012",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-gap-week-012-e1-s1",
+      "setNumber": 1,
+      "reps": 5,
+      "weight": 230,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-012-e1",
+      "completionId": "c-gap-week-012",
+      "createdAt": "2026-11-05T02:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-012-e1-s2",
+      "setNumber": 2,
+      "reps": 5,
+      "weight": 230,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-012-e1",
+      "completionId": "c-gap-week-012",
+      "createdAt": "2026-11-05T02:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-012-e1-s3",
+      "setNumber": 3,
+      "reps": 5,
+      "weight": 230,
+      "weightUnit": "lbs",
+      "rpe": 8,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-012-e1",
+      "completionId": "c-gap-week-012",
+      "createdAt": "2026-11-05T02:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-012-e1-s4",
+      "setNumber": 4,
+      "reps": 5,
+      "weight": 230,
+      "weightUnit": "lbs",
+      "rpe": 9,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-012-e1",
+      "completionId": "c-gap-week-012",
+      "createdAt": "2026-11-05T02:00:00.000Z"
+     },
+     {
+      "id": "c-gap-week-012-e1-s5",
+      "setNumber": 5,
+      "reps": 5,
+      "weight": 230,
+      "weightUnit": "lbs",
+      "rpe": 9,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-012-e1",
+      "completionId": "c-gap-week-012",
+      "createdAt": "2026-11-05T02:00:00.000Z"
+     }
+    ]
+   },
+   {
+    "id": "c-gap-week-013",
+    "workoutId": null,
+    "savedWorkoutId": null,
+    "completedAt": "2026-11-07T02:00:00.000Z",
+    "startedAt": "2026-11-07T01:00:00.000Z",
+    "status": "completed",
+    "notes": null,
+    "isArchived": false,
+    "cycleNumber": 1,
+    "isAdHoc": true,
+    "name": "Workout 13",
+    "durationSeconds": 3600,
+    "sessionRpe": null,
+    "exercises": [
+     {
+      "id": "c-gap-week-013-e1",
+      "name": "Conventional Deadlift",
+      "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70",
+      "order": 1,
+      "exerciseGroup": null,
+      "workoutId": null,
+      "notes": null,
+      "isOneOff": true,
+      "workoutCompletionId": "c-gap-week-013",
+      "prescribedSets": []
+     }
+    ],
+    "loggedSets": [
+     {
+      "id": "c-gap-week-013-e1-s1",
+      "setNumber": 1,
+      "reps": 15,
+      "weight": 250,
+      "weightUnit": "lbs",
+      "rpe": 9,
+      "rir": null,
+      "isWarmup": false,
+      "exerciseId": "c-gap-week-013-e1",
+      "completionId": "c-gap-week-013",
+      "createdAt": "2026-11-07T02:00:00.000Z"
+     }
+    ]
+   }
+  ],
+  "savedWorkouts": [],
+  "pinnedExercises": [
+   {
+    "id": "pin-gap-week-0",
+    "userId": "golden-user",
+    "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70",
+    "position": 0,
+    "createdAt": "2026-11-10T15:00:00.000Z"
+   },
+   {
+    "id": "pin-gap-week-1",
+    "userId": "golden-user",
+    "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+    "position": 1,
+    "createdAt": "2026-11-10T15:00:00.000Z"
+   }
+  ]
+ },
+ "weekStarts": [
+  {
+   "instant": "2026-09-22T01:00:00.000Z",
+   "weekStart": "2026-09-21"
+  },
+  {
+   "instant": "2026-09-24T01:00:00.000Z",
+   "weekStart": "2026-09-21"
+  },
+  {
+   "instant": "2026-09-29T01:00:00.000Z",
+   "weekStart": "2026-09-28"
+  },
+  {
+   "instant": "2026-10-01T01:00:00.000Z",
+   "weekStart": "2026-09-28"
+  },
+  {
+   "instant": "2026-10-13T01:00:00.000Z",
+   "weekStart": "2026-10-12"
+  },
+  {
+   "instant": "2026-10-20T01:00:00.000Z",
+   "weekStart": "2026-10-19"
+  },
+  {
+   "instant": "2026-10-22T01:00:00.000Z",
+   "weekStart": "2026-10-19"
+  },
+  {
+   "instant": "2026-10-27T01:00:00.000Z",
+   "weekStart": "2026-10-26"
+  },
+  {
+   "instant": "2026-10-29T01:00:00.000Z",
+   "weekStart": "2026-10-26"
+  },
+  {
+   "instant": "2026-10-30T01:00:00.000Z",
+   "weekStart": "2026-10-26"
+  },
+  {
+   "instant": "2026-11-03T02:00:00.000Z",
+   "weekStart": "2026-11-02"
+  },
+  {
+   "instant": "2026-11-05T02:00:00.000Z",
+   "weekStart": "2026-11-02"
+  },
+  {
+   "instant": "2026-11-07T02:00:00.000Z",
+   "weekStart": "2026-11-02"
+  }
+ ],
+ "reports": {
+  "2026-11-09": {
+   "weekStart": "2026-11-09",
+   "isCurrentWeek": true,
+   "target": 2,
+   "current": {
+    "weekStart": "2026-11-09",
+    "workouts": 0,
+    "workingSets": 0,
+    "durationSeconds": 0,
+    "cardioMinutes": 0,
+    "effort": null
+   },
+   "normal": {
+    "workouts": 1.7142857142857142,
+    "workingSets": 7.571428571428571,
+    "durationSeconds": 6171.428571428572,
+    "cardioMinutes": 0,
+    "avgRpe": 7.509090909090909
+   },
+   "normalWeeks": 7,
+   "streak": 3,
+   "weeks": [
+    {
+     "weekStart": "2026-09-21",
+     "workouts": 2,
+     "workingSets": 10,
+     "durationSeconds": 7200,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 7,
+      "pctAtOrAbove9": 0,
+      "setsAt10": 0,
+      "ratedSets": 10
+     }
+    },
+    {
+     "weekStart": "2026-09-28",
+     "workouts": 2,
+     "workingSets": 10,
+     "durationSeconds": 7200,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 7,
+      "pctAtOrAbove9": 0,
+      "setsAt10": 0,
+      "ratedSets": 10
+     }
+    },
+    {
+     "weekStart": "2026-10-05",
+     "workouts": 0,
+     "workingSets": 0,
+     "durationSeconds": 0,
+     "cardioMinutes": 0,
+     "effort": null
+    },
+    {
+     "weekStart": "2026-10-12",
+     "workouts": 1,
+     "workingSets": 2,
+     "durationSeconds": 3600,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 7,
+      "pctAtOrAbove9": 0,
+      "setsAt10": 0,
+      "ratedSets": 2
+     }
+    },
+    {
+     "weekStart": "2026-10-19",
+     "workouts": 2,
+     "workingSets": 10,
+     "durationSeconds": 7200,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 7.6,
+      "pctAtOrAbove9": 0,
+      "setsAt10": 0,
+      "ratedSets": 10
+     }
+    },
+    {
+     "weekStart": "2026-10-26",
+     "workouts": 2,
+     "workingSets": 10,
+     "durationSeconds": 7200,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 8,
+      "pctAtOrAbove9": 0,
+      "setsAt10": 0,
+      "ratedSets": 10
+     }
+    },
+    {
+     "weekStart": "2026-11-02",
+     "workouts": 3,
+     "workingSets": 11,
+     "durationSeconds": 10800,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 8.454545454545455,
+      "pctAtOrAbove9": 45,
+      "setsAt10": 0,
+      "ratedSets": 11
+     }
+    },
+    {
+     "weekStart": "2026-11-09",
+     "workouts": 0,
+     "workingSets": 0,
+     "durationSeconds": 0,
+     "cardioMinutes": 0,
+     "effort": null
+    }
+   ],
+   "weightUnit": "lbs",
+   "records": [],
+   "lifts": [],
+   "trend": {
+    "effortRisingWeeks": 0,
+    "effortFrom": null,
+    "effortTo": null,
+    "lastLightWeeksAgo": 4,
+    "lightWeeksSearched": 8
+   },
+   "pinned": [
+    {
+     "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70",
+     "name": "Conventional Deadlift",
+     "lift": null,
+     "last": {
+      "weight": 250,
+      "reps": 15,
+      "e1rm": null,
+      "completedAt": "2026-11-07T02:00:00.000Z"
+     }
+    },
+    {
+     "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+     "name": "Barbell Bench Press",
+     "lift": null,
+     "last": null
+    }
+   ]
+  },
+  "2026-11-02": {
+   "weekStart": "2026-11-02",
+   "isCurrentWeek": false,
+   "target": 2,
+   "current": {
+    "weekStart": "2026-11-02",
+    "workouts": 3,
+    "workingSets": 11,
+    "durationSeconds": 10800,
+    "cardioMinutes": 0,
+    "effort": {
+     "avgRpe": 8.454545454545455,
+     "pctAtOrAbove9": 45,
+     "setsAt10": 0,
+     "ratedSets": 11
+    }
+   },
+   "normal": {
+    "workouts": 1.5,
+    "workingSets": 7,
+    "durationSeconds": 5400,
+    "cardioMinutes": 0,
+    "avgRpe": 7.32
+   },
+   "normalWeeks": 6,
+   "streak": 3,
+   "weeks": [
+    {
+     "weekStart": "2026-09-14",
+     "workouts": 0,
+     "workingSets": 0,
+     "durationSeconds": 0,
+     "cardioMinutes": 0,
+     "effort": null
+    },
+    {
+     "weekStart": "2026-09-21",
+     "workouts": 2,
+     "workingSets": 10,
+     "durationSeconds": 7200,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 7,
+      "pctAtOrAbove9": 0,
+      "setsAt10": 0,
+      "ratedSets": 10
+     }
+    },
+    {
+     "weekStart": "2026-09-28",
+     "workouts": 2,
+     "workingSets": 10,
+     "durationSeconds": 7200,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 7,
+      "pctAtOrAbove9": 0,
+      "setsAt10": 0,
+      "ratedSets": 10
+     }
+    },
+    {
+     "weekStart": "2026-10-05",
+     "workouts": 0,
+     "workingSets": 0,
+     "durationSeconds": 0,
+     "cardioMinutes": 0,
+     "effort": null
+    },
+    {
+     "weekStart": "2026-10-12",
+     "workouts": 1,
+     "workingSets": 2,
+     "durationSeconds": 3600,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 7,
+      "pctAtOrAbove9": 0,
+      "setsAt10": 0,
+      "ratedSets": 2
+     }
+    },
+    {
+     "weekStart": "2026-10-19",
+     "workouts": 2,
+     "workingSets": 10,
+     "durationSeconds": 7200,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 7.6,
+      "pctAtOrAbove9": 0,
+      "setsAt10": 0,
+      "ratedSets": 10
+     }
+    },
+    {
+     "weekStart": "2026-10-26",
+     "workouts": 2,
+     "workingSets": 10,
+     "durationSeconds": 7200,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 8,
+      "pctAtOrAbove9": 0,
+      "setsAt10": 0,
+      "ratedSets": 10
+     }
+    },
+    {
+     "weekStart": "2026-11-02",
+     "workouts": 3,
+     "workingSets": 11,
+     "durationSeconds": 10800,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 8.454545454545455,
+      "pctAtOrAbove9": 45,
+      "setsAt10": 0,
+      "ratedSets": 11
+     }
+    }
+   ],
+   "weightUnit": "lbs",
+   "records": [
+    {
+     "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70",
+     "name": "Conventional Deadlift",
+     "kind": "e1rm",
+     "weight": 230,
+     "reps": 5,
+     "e1rm": 268.33333333333337,
+     "previous": 233.33333333333334
+    }
+   ],
+   "lifts": [
+    {
+     "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70",
+     "name": "Conventional Deadlift",
+     "workingSets": 11,
+     "bestSet": {
+      "weight": 230,
+      "reps": 5
+     },
+     "e1rm": 268.33333333333337,
+     "previousE1rm": 233.33333333333334,
+     "bestE1rm": 268.33333333333337,
+     "sessionsBelowBest": 0
+    }
+   ],
+   "trend": {
+    "effortRisingWeeks": 4,
+    "effortFrom": 7,
+    "effortTo": 8.454545454545455,
+    "lastLightWeeksAgo": 3,
+    "lightWeeksSearched": 7
+   },
+   "pinned": [
+    {
+     "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70",
+     "name": "Conventional Deadlift",
+     "lift": {
+      "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70",
+      "name": "Conventional Deadlift",
+      "workingSets": 11,
+      "bestSet": {
+       "weight": 230,
+       "reps": 5
+      },
+      "e1rm": 268.33333333333337,
+      "previousE1rm": 233.33333333333334,
+      "bestE1rm": 268.33333333333337,
+      "sessionsBelowBest": 0
+     },
+     "last": null
+    },
+    {
+     "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+     "name": "Barbell Bench Press",
+     "lift": null,
+     "last": null
+    }
+   ]
+  },
+  "2026-10-26": {
+   "weekStart": "2026-10-26",
+   "isCurrentWeek": false,
+   "target": 2,
+   "current": {
+    "weekStart": "2026-10-26",
+    "workouts": 2,
+    "workingSets": 10,
+    "durationSeconds": 7200,
+    "cardioMinutes": 0,
+    "effort": {
+     "avgRpe": 8,
+     "pctAtOrAbove9": 0,
+     "setsAt10": 0,
+     "ratedSets": 10
+    }
+   },
+   "normal": {
+    "workouts": 1.4,
+    "workingSets": 6.4,
+    "durationSeconds": 5040,
+    "cardioMinutes": 0,
+    "avgRpe": 7.15
+   },
+   "normalWeeks": 5,
+   "streak": 2,
+   "weeks": [
+    {
+     "weekStart": "2026-09-07",
+     "workouts": 0,
+     "workingSets": 0,
+     "durationSeconds": 0,
+     "cardioMinutes": 0,
+     "effort": null
+    },
+    {
+     "weekStart": "2026-09-14",
+     "workouts": 0,
+     "workingSets": 0,
+     "durationSeconds": 0,
+     "cardioMinutes": 0,
+     "effort": null
+    },
+    {
+     "weekStart": "2026-09-21",
+     "workouts": 2,
+     "workingSets": 10,
+     "durationSeconds": 7200,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 7,
+      "pctAtOrAbove9": 0,
+      "setsAt10": 0,
+      "ratedSets": 10
+     }
+    },
+    {
+     "weekStart": "2026-09-28",
+     "workouts": 2,
+     "workingSets": 10,
+     "durationSeconds": 7200,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 7,
+      "pctAtOrAbove9": 0,
+      "setsAt10": 0,
+      "ratedSets": 10
+     }
+    },
+    {
+     "weekStart": "2026-10-05",
+     "workouts": 0,
+     "workingSets": 0,
+     "durationSeconds": 0,
+     "cardioMinutes": 0,
+     "effort": null
+    },
+    {
+     "weekStart": "2026-10-12",
+     "workouts": 1,
+     "workingSets": 2,
+     "durationSeconds": 3600,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 7,
+      "pctAtOrAbove9": 0,
+      "setsAt10": 0,
+      "ratedSets": 2
+     }
+    },
+    {
+     "weekStart": "2026-10-19",
+     "workouts": 2,
+     "workingSets": 10,
+     "durationSeconds": 7200,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 7.6,
+      "pctAtOrAbove9": 0,
+      "setsAt10": 0,
+      "ratedSets": 10
+     }
+    },
+    {
+     "weekStart": "2026-10-26",
+     "workouts": 2,
+     "workingSets": 10,
+     "durationSeconds": 7200,
+     "cardioMinutes": 0,
+     "effort": {
+      "avgRpe": 8,
+      "pctAtOrAbove9": 0,
+      "setsAt10": 0,
+      "ratedSets": 10
+     }
+    }
+   ],
+   "weightUnit": "lbs",
+   "records": [],
+   "lifts": [
+    {
+     "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70",
+     "name": "Conventional Deadlift",
+     "workingSets": 10,
+     "bestSet": {
+      "weight": 200,
+      "reps": 5
+     },
+     "e1rm": 233.33333333333334,
+     "previousE1rm": 233.33333333333334,
+     "bestE1rm": 233.33333333333334,
+     "sessionsBelowBest": 0
+    }
+   ],
+   "trend": {
+    "effortRisingWeeks": 3,
+    "effortFrom": 7,
+    "effortTo": 8,
+    "lastLightWeeksAgo": 2,
+    "lightWeeksSearched": 6
+   },
+   "pinned": [
+    {
+     "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70",
+     "name": "Conventional Deadlift",
+     "lift": {
+      "exerciseDefinitionId": "cmiz7vjvh0002vr0mtcmhiz70",
+      "name": "Conventional Deadlift",
+      "workingSets": 10,
+      "bestSet": {
+       "weight": 200,
+       "reps": 5
+      },
+      "e1rm": 233.33333333333334,
+      "previousE1rm": 233.33333333333334,
+      "bestE1rm": 233.33333333333334,
+      "sessionsBelowBest": 0
+     },
+     "last": null
+    },
+    {
+     "exerciseDefinitionId": "cmiz7vjju0000vr0m4b1o6bec",
+     "name": "Barbell Bench Press",
+     "lift": null,
+     "last": null
+    }
+   ]
+  }
+ },
+ "lifts": {
+  "cmiz7vjvh0002vr0mtcmhiz70": {
+   "history": {
+    "name": "Conventional Deadlift",
+    "weightUnit": "lbs",
+    "isBodyweight": false,
+    "sessions": [
+     {
+      "completionId": "c-gap-week-013",
+      "date": "2026-11-07T02:00:00.000Z",
+      "sets": [
+       {
+        "weight": 250,
+        "reps": 15
+       }
+      ],
+      "e1rm": null,
+      "topSet": {
+       "weight": 250,
+       "reps": 15
+      },
+      "avgRpe": 9
+     },
+     {
+      "completionId": "c-gap-week-012",
+      "date": "2026-11-05T02:00:00.000Z",
+      "sets": [
+       {
+        "weight": 230,
+        "reps": 5
+       },
+       {
+        "weight": 230,
+        "reps": 5
+       },
+       {
+        "weight": 230,
+        "reps": 5
+       },
+       {
+        "weight": 230,
+        "reps": 5
+       },
+       {
+        "weight": 230,
+        "reps": 5
+       }
+      ],
+      "e1rm": 268.33333333333337,
+      "topSet": {
+       "weight": 230,
+       "reps": 5
+      },
+      "avgRpe": 8.4
+     },
+     {
+      "completionId": "c-gap-week-011",
+      "date": "2026-11-03T02:00:00.000Z",
+      "sets": [
+       {
+        "weight": 225,
+        "reps": 5
+       },
+       {
+        "weight": 225,
+        "reps": 5
+       },
+       {
+        "weight": 225,
+        "reps": 5
+       },
+       {
+        "weight": 225,
+        "reps": 5
+       },
+       {
+        "weight": 225,
+        "reps": 5
+       }
+      ],
+      "e1rm": 262.5,
+      "topSet": {
+       "weight": 225,
+       "reps": 5
+      },
+      "avgRpe": 8.4
+     },
+     {
+      "completionId": "c-gap-week-009",
+      "date": "2026-10-29T01:00:00.000Z",
+      "sets": [
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       }
+      ],
+      "e1rm": 233.33333333333334,
+      "topSet": {
+       "weight": 200,
+       "reps": 5
+      },
+      "avgRpe": 8
+     },
+     {
+      "completionId": "c-gap-week-008",
+      "date": "2026-10-27T01:00:00.000Z",
+      "sets": [
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       }
+      ],
+      "e1rm": 233.33333333333334,
+      "topSet": {
+       "weight": 200,
+       "reps": 5
+      },
+      "avgRpe": 8
+     },
+     {
+      "completionId": "c-gap-week-007",
+      "date": "2026-10-22T01:00:00.000Z",
+      "sets": [
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       }
+      ],
+      "e1rm": 233.33333333333334,
+      "topSet": {
+       "weight": 200,
+       "reps": 5
+      },
+      "avgRpe": 7.6
+     },
+     {
+      "completionId": "c-gap-week-006",
+      "date": "2026-10-20T01:00:00.000Z",
+      "sets": [
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       }
+      ],
+      "e1rm": 233.33333333333334,
+      "topSet": {
+       "weight": 200,
+       "reps": 5
+      },
+      "avgRpe": 7.6
+     },
+     {
+      "completionId": "c-gap-week-005",
+      "date": "2026-10-13T01:00:00.000Z",
+      "sets": [
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       }
+      ],
+      "e1rm": 233.33333333333334,
+      "topSet": {
+       "weight": 200,
+       "reps": 5
+      },
+      "avgRpe": 7
+     },
+     {
+      "completionId": "c-gap-week-004",
+      "date": "2026-10-01T01:00:00.000Z",
+      "sets": [
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       }
+      ],
+      "e1rm": 233.33333333333334,
+      "topSet": {
+       "weight": 200,
+       "reps": 5
+      },
+      "avgRpe": 7
+     },
+     {
+      "completionId": "c-gap-week-003",
+      "date": "2026-09-29T01:00:00.000Z",
+      "sets": [
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       }
+      ],
+      "e1rm": 233.33333333333334,
+      "topSet": {
+       "weight": 200,
+       "reps": 5
+      },
+      "avgRpe": 7
+     },
+     {
+      "completionId": "c-gap-week-002",
+      "date": "2026-09-24T01:00:00.000Z",
+      "sets": [
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       }
+      ],
+      "e1rm": 233.33333333333334,
+      "topSet": {
+       "weight": 200,
+       "reps": 5
+      },
+      "avgRpe": 7
+     },
+     {
+      "completionId": "c-gap-week-001",
+      "date": "2026-09-22T01:00:00.000Z",
+      "sets": [
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       },
+       {
+        "weight": 200,
+        "reps": 5
+       }
+      ],
+      "e1rm": 233.33333333333334,
+      "topSet": {
+       "weight": 200,
+       "reps": 5
+      },
+      "avgRpe": 7
+     }
+    ],
+    "records": [
+     {
+      "reps": 5,
+      "weight": 230,
+      "date": "2026-11-05T02:00:00.000Z",
+      "isNew": false
+     },
+     {
+      "reps": 15,
+      "weight": 250,
+      "date": "2026-11-07T02:00:00.000Z",
+      "isNew": false
+     }
+    ],
+    "weeklySets": [
+     {
+      "weekStart": "2026-09-21",
+      "sets": 10
+     },
+     {
+      "weekStart": "2026-09-28",
+      "sets": 10
+     },
+     {
+      "weekStart": "2026-10-05",
+      "sets": 0
+     },
+     {
+      "weekStart": "2026-10-12",
+      "sets": 2
+     },
+     {
+      "weekStart": "2026-10-19",
+      "sets": 10
+     },
+     {
+      "weekStart": "2026-10-26",
+      "sets": 10
+     },
+     {
+      "weekStart": "2026-11-02",
+      "sets": 11
+     },
+     {
+      "weekStart": "2026-11-09",
+      "sets": 0
+     }
+    ]
+   },
+   "charts": {
+    "3M": {
+     "points": [
+      {
+       "date": "2026-09-22T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-24T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-29T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-01T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-13T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-20T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-22T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-27T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-29T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-11-03T02:00:00.000Z",
+       "e1rm": 262.5,
+       "topSet": {
+        "weight": 225,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-11-05T02:00:00.000Z",
+       "e1rm": 268.33333333333337,
+       "topSet": {
+        "weight": 230,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": true
+      },
+      {
+       "date": "2026-11-07T02:00:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 250,
+        "reps": 15
+       },
+       "reps": 15,
+       "isPr": false
+      }
+     ],
+     "change": {
+      "e1rm": {
+       "first": 233.33333333333334,
+       "last": 268.33333333333337,
+       "percent": 15.00000000000001
+      },
+      "topSet": {
+       "first": 200,
+       "last": 250,
+       "percent": 25
+      },
+      "reps": {
+       "first": 5,
+       "last": 15,
+       "percent": 200
+      }
+     },
+     "best": {
+      "e1rm": 268.33333333333337,
+      "date": "2026-11-05T02:00:00.000Z"
+     },
+     "heaviest": {
+      "weight": 250,
+      "reps": 15,
+      "date": "2026-11-07T02:00:00.000Z"
+     },
+     "mostReps": {
+      "reps": 15,
+      "date": "2026-11-07T02:00:00.000Z"
+     },
+     "sessions": 12,
+     "since": "2026-09-22T01:00:00.000Z"
+    },
+    "6M": {
+     "points": [
+      {
+       "date": "2026-09-22T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-24T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-29T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-01T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-13T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-20T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-22T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-27T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-29T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-11-03T02:00:00.000Z",
+       "e1rm": 262.5,
+       "topSet": {
+        "weight": 225,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-11-05T02:00:00.000Z",
+       "e1rm": 268.33333333333337,
+       "topSet": {
+        "weight": 230,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": true
+      },
+      {
+       "date": "2026-11-07T02:00:00.000Z",
+       "e1rm": null,
+       "topSet": {
+        "weight": 250,
+        "reps": 15
+       },
+       "reps": 15,
+       "isPr": false
+      }
+     ],
+     "change": {
+      "e1rm": {
+       "first": 233.33333333333334,
+       "last": 268.33333333333337,
+       "percent": 15.00000000000001
+      },
+      "topSet": {
+       "first": 200,
+       "last": 250,
+       "percent": 25
+      },
+      "reps": {
+       "first": 5,
+       "last": 15,
+       "percent": 200
+      }
+     },
+     "best": {
+      "e1rm": 268.33333333333337,
+      "date": "2026-11-05T02:00:00.000Z"
+     },
+     "heaviest": {
+      "weight": 250,
+      "reps": 15,
+      "date": "2026-11-07T02:00:00.000Z"
+     },
+     "mostReps": {
+      "reps": 15,
+      "date": "2026-11-07T02:00:00.000Z"
+     },
+     "sessions": 12,
+     "since": "2026-09-22T01:00:00.000Z"
+    },
+    "1Y": {
+     "points": [
+      {
+       "date": "2026-09-22T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-29T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-13T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-20T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-27T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-11-05T02:00:00.000Z",
+       "e1rm": 268.33333333333337,
+       "topSet": {
+        "weight": 250,
+        "reps": 15
+       },
+       "reps": 15,
+       "isPr": true
+      }
+     ],
+     "change": {
+      "e1rm": {
+       "first": 233.33333333333334,
+       "last": 268.33333333333337,
+       "percent": 15.00000000000001
+      },
+      "topSet": {
+       "first": 200,
+       "last": 250,
+       "percent": 25
+      },
+      "reps": {
+       "first": 5,
+       "last": 15,
+       "percent": 200
+      }
+     },
+     "best": {
+      "e1rm": 268.33333333333337,
+      "date": "2026-11-05T02:00:00.000Z"
+     },
+     "heaviest": {
+      "weight": 250,
+      "reps": 15,
+      "date": "2026-11-07T02:00:00.000Z"
+     },
+     "mostReps": {
+      "reps": 15,
+      "date": "2026-11-07T02:00:00.000Z"
+     },
+     "sessions": 12,
+     "since": "2026-09-22T01:00:00.000Z"
+    },
+    "All": {
+     "points": [
+      {
+       "date": "2026-09-22T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-09-29T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-13T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-20T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-10-27T01:00:00.000Z",
+       "e1rm": 233.33333333333334,
+       "topSet": {
+        "weight": 200,
+        "reps": 5
+       },
+       "reps": 5,
+       "isPr": false
+      },
+      {
+       "date": "2026-11-05T02:00:00.000Z",
+       "e1rm": 268.33333333333337,
+       "topSet": {
+        "weight": 250,
+        "reps": 15
+       },
+       "reps": 15,
+       "isPr": true
+      }
+     ],
+     "change": {
+      "e1rm": {
+       "first": 233.33333333333334,
+       "last": 268.33333333333337,
+       "percent": 15.00000000000001
+      },
+      "topSet": {
+       "first": 200,
+       "last": 250,
+       "percent": 25
+      },
+      "reps": {
+       "first": 5,
+       "last": 15,
+       "percent": 200
+      }
+     },
+     "best": {
+      "e1rm": 268.33333333333337,
+      "date": "2026-11-05T02:00:00.000Z"
+     },
+     "heaviest": {
+      "weight": 250,
+      "reps": 15,
+      "date": "2026-11-07T02:00:00.000Z"
+     },
+     "mostReps": {
+      "reps": 15,
+      "date": "2026-11-07T02:00:00.000Z"
+     },
+     "sessions": 12,
+     "since": "2026-09-22T01:00:00.000Z"
+    }
+   }
+  }
+ }
+}
