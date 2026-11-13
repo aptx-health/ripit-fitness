@@ -46,6 +46,7 @@ type Props = SingleProps | MultiProps
 function useIsDesktop(): boolean {
   const [isDesktop, setIsDesktop] = useState(false)
   useEffect(() => {
+    if (!window.matchMedia) return
     const mq = window.matchMedia('(min-width: 768px)')
     const update = () => setIsDesktop(mq.matches)
     update()

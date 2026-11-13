@@ -80,14 +80,14 @@ function parseFailure(error: z.ZodError, fallback: string) {
   return { ok: false as const, code: 'invalid' as const, error: issue.message, field: fieldPath(issue.path) ?? fallback }
 }
 
-/** Every id visible to the user; the first missing one is named by its position. */
-async function checkExercises(db: Db, exercises: ExerciseInput[], userId: string) {
+/** Every id visible to the user (or `bundled`, see checkProgram); the first missing one is named by its position. */
+async function checkExercises(db: Db, exercises: ExerciseInput[], userId: string, bundled: ReadonlyMap<string, string> = new Map()) {
   const ids = [...new Set(exercises.map((e) => e.exerciseDefinitionId))]
   const found = await db.exerciseDefinition.findMany({
     where: { id: { in: ids }, ...visibleTo(userId) },
     select: { id: true, name: true },
   })
-  const definitionNames = new Map(found.map((d) => [d.id, d.name]))
+  const definitionNames = new Map([...bundled, ...found.map((d) => [d.id, d.name] as const)])
   const index = exercises.findIndex((e) => !definitionNames.has(e.exerciseDefinitionId))
   if (index === -1) return { ok: true as const, definitionNames }
   return {
@@ -98,10 +98,15 @@ async function checkExercises(db: Db, exercises: ExerciseInput[], userId: string
   }
 }
 
-export async function checkWorkoutCreate(db: Db, input: unknown, userId: string): Promise<WorkoutCheck<WorkoutCreateInput>> {
+export async function checkWorkoutCreate(
+  db: Db,
+  input: unknown,
+  userId: string,
+  bundled?: ReadonlyMap<string, string>
+): Promise<WorkoutCheck<WorkoutCreateInput>> {
   const parsed = workoutCreateInput.safeParse(input)
   if (!parsed.success) return parseFailure(parsed.error, 'workout')
-  const check = await checkExercises(db, parsed.data.exercises, userId)
+  const check = await checkExercises(db, parsed.data.exercises, userId, bundled)
   if (!check.ok) return check
   return { ok: true, value: parsed.data, definitionNames: check.definitionNames }
 }
