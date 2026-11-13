@@ -36,6 +36,12 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
+# Commit SHA baked in at build time so /api/health/version can report which
+# image is live — post-deploy smoke tests gate on this to avoid asserting
+# against pods still serving the previous rollout.
+ARG GIT_SHA=unknown
+ENV APP_GIT_SHA=$GIT_SHA
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 

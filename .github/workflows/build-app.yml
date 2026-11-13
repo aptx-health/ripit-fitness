@@ -70,6 +70,7 @@ jobs:
           build-args: |
             NEXT_PUBLIC_APP_URL=${{ vars.NEXT_PUBLIC_APP_URL || 'https://staging.ripit.fit' }}
             NEXT_PUBLIC_VENMO_HANDLE=${{ vars.NEXT_PUBLIC_VENMO_HANDLE }}
+            GIT_SHA=${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
           # OCI standard labels — GHCR reads these to populate the "Source" link
           # on the package page, and `docker inspect` surfaces them for forensics
           # on a running image. Plus custom ripit.* labels for workflow/PR traceback.
