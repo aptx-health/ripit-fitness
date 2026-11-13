@@ -206,7 +206,11 @@ describe('program detail view: active program (as /training is today)', () => {
     programComplete = true
     await renderView()
     fireEvent.click(await screen.findByTitle(/view completion stats and restart program/i))
-    fireEvent.click(await screen.findByRole('button', { name: /restart program/i }))
+    // Restart stays disabled until the completion stats load. Clicking it
+    // earlier is ignored, which made this test hang on busy CI runners.
+    const restart = await screen.findByRole('button', { name: /restart program/i })
+    await waitFor(() => expect((restart as HTMLButtonElement).disabled).toBe(false))
+    fireEvent.click(restart)
     await waitFor(() => expect(h.push).toHaveBeenCalled())
     expect(h.push).toHaveBeenCalledWith('/library/programs/p1?week=1')
     expect(h.push).not.toHaveBeenCalledWith(expect.stringContaining('/training'))

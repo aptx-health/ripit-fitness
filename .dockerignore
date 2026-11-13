@@ -14,6 +14,8 @@ node_modules
 __tests__
 coverage
 vitest.config.*
+# iOS golden generators (dev-only, import vitest.config)
+scripts/ios
 
 # Docs
 docs

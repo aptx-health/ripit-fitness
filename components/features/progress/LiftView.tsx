@@ -9,6 +9,7 @@ import { PAPER_TAB_CLIP, PAPER_TAB_FOCUS } from '@/components/ui/PaperTabs'
 import PaperTabTitle from '@/components/ui/PaperTabTitle'
 import { clientLogger } from '@/lib/client-logger'
 import { pluralize } from '@/lib/format/pluralize'
+import { type EffortScale, inScale } from '@/lib/insights/effort-scale'
 import {
   type Change,
   type ChartRange,
@@ -21,7 +22,7 @@ import {
   weeksInRange,
 } from '@/lib/insights/lift-history'
 import { isMonday } from '@/lib/insights/progress'
-import { browserTimeZone, formatWeight, signed, unitLabel } from './format'
+import { browserTimeZone, effortLabel, formatWeight, signed, unitLabel } from './format'
 import { BarChart, LineChart, type LinePoint } from './LiftChart'
 import LiftSkeleton from './LiftSkeleton'
 import { PR_CHIP } from './rows'
@@ -38,6 +39,8 @@ import { PR_CHIP } from './rows'
 interface Lift {
   name: string
   weightUnit: 'lbs' | 'kg'
+  /** Absent in a payload from before the scale: RPE. */
+  effortScale?: EffortScale
   isBodyweight: boolean
   sessions: LiftSession[]
   records: RepRecord[]
@@ -257,7 +260,7 @@ function LiftHistory({ lift }: { lift: Lift }) {
         </div>
         <div className="folder-box border-2 border-secondary bg-card divide-y divide-border">
           {lift.sessions.slice(0, shown).map((s) => (
-            <SessionRow key={s.completionId} session={s} timeZone={timeZone} day={day} />
+            <SessionRow key={s.completionId} session={s} scale={lift.effortScale ?? 'rpe'} timeZone={timeZone} day={day} />
           ))}
           {shown < lift.sessions.length && (
             <button
@@ -547,10 +550,20 @@ function RecordRow({
   )
 }
 
-function SessionRow({ session, timeZone, day }: { session: LiftSession; timeZone: string; day: (date: Date) => string }) {
+function SessionRow({
+  session,
+  scale,
+  timeZone,
+  day,
+}: {
+  session: LiftSession
+  scale: EffortScale
+  timeZone: string
+  day: (date: Date) => string
+}) {
   const weekday = session.date.toLocaleDateString('en-US', { weekday: 'short', timeZone })
   const sets = session.sets.map((s) => (s.weight === 0 ? pluralize(s.reps, 'rep') : `${formatWeight(s.weight)}×${s.reps}`))
-  if (session.avgRpe != null) sets.push(`RPE ${Math.round(session.avgRpe * 10) / 10}`)
+  if (session.avgRpe != null) sets.push(`${effortLabel(scale)} ${Math.round(inScale(session.avgRpe, scale) * 10) / 10}`)
   return (
     <div data-session={session.completionId} className="flex min-h-14 items-center gap-3 px-3 py-2.5">
       <div className="min-w-0 flex-1">

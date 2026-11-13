@@ -1,0 +1,878 @@
+{
+  "format": "ripit-export",
+  "version": 1,
+  "exportedAt": "2026-11-07T18:04:05.123Z",
+  "userId": "test-user-pyq031e3h5i",
+  "settings": {
+    "id": "cmw6s044a00jmvrt4wsbbkgmj",
+    "userId": "test-user-pyq031e3h5i",
+    "displayName": "Dana",
+    "defaultWeightUnit": "lbs",
+    "defaultIntensityRating": "rir",
+    "dismissedPrimer": false,
+    "dismissedWarmup": false,
+    "dismissedStickNudge": false,
+    "completedTours": "[]",
+    "postSessionPromptCount": 0,
+    "lastPostSessionPromptAt": null,
+    "experienceLevel": null,
+    "equipmentPreference": null,
+    "onboardingCompleted": true,
+    "customProgramLimitBypass": false,
+    "intensityEnabled": true,
+    "loggingMode": "full",
+    "dismissedMessageIds": "[]",
+    "seenMessageIds": "[]",
+    "pwaPromptShownCount": 0,
+    "pwaPromptDismissedAt": null,
+    "signupIntent": null,
+    "weeklyWorkoutTarget": 4,
+    "pinnedLiftsCustomized": false,
+    "createdAt": "2026-09-01T15:00:00.000Z",
+    "updatedAt": "2026-11-07T19:07:56.507Z"
+  },
+  "balanceSettings": {
+    "id": "cmw6s044b00jnvrt4dh1jd4hd",
+    "userId": "test-user-pyq031e3h5i",
+    "targets": {
+      "lats": 14,
+      "chest": 12,
+      "quads": 12,
+      "hamstrings": 10
+    },
+    "lookbackWorkouts": 8,
+    "lookbackDays": 14,
+    "includeSecondary": true,
+    "secondaryWeight": 0.5,
+    "excludeWarmups": true,
+    "createdAt": "2026-09-01T15:00:00.000Z",
+    "updatedAt": "2026-11-07T19:07:56.508Z"
+  },
+  "customExercises": [
+    {
+      "id": "cmw6s043800hgvrt4dfj6k6d2",
+      "name": "Sled Push",
+      "normalizedName": "sled push",
+      "aliases": [],
+      "category": null,
+      "isSystem": false,
+      "createdBy": "test-user-pyq031e3h5i",
+      "createdAt": "2026-09-01T15:00:00.000Z",
+      "updatedAt": "2026-11-07T19:07:56.469Z",
+      "equipment": [
+        "sled"
+      ],
+      "instructions": "Drive the sled 20 m, low hips.",
+      "notes": null,
+      "imageUrls": [],
+      "primaryFAUs": [
+        "quads",
+        "glutes"
+      ],
+      "secondaryFAUs": [],
+      "force": null,
+      "mechanic": null,
+      "level": null,
+      "userId": "test-user-pyq031e3h5i",
+      "movementPattern": null,
+      "intensityClass": null,
+      "isBodyweight": false,
+      "taggedAt": null,
+      "taggedBy": null
+    }
+  ],
+  "exerciseRefs": [
+    {
+      "id": "cmw6s043300hbvrt40ipwfq83",
+      "name": "Barbell Back Squat"
+    },
+    {
+      "id": "cmw6s043500hcvrt4tbk13mxy",
+      "name": "Barbell Bench Press"
+    },
+    {
+      "id": "cmw6s043600hdvrt4qhnjofrj",
+      "name": "Barbell Bent-Over Row"
+    },
+    {
+      "id": "cmw6s043800hfvrt4qp54qppo",
+      "name": "Conventional Deadlift"
+    },
+    {
+      "id": "cmw6s043700hevrt431bics6d",
+      "name": "Pull-Up"
+    }
+  ],
+  "programs": [
+    {
+      "id": "cmw6s043s00ikvrt4zv8guobf",
+      "name": "Old Hypertrophy",
+      "description": null,
+      "userId": "test-user-pyq031e3h5i",
+      "isActive": false,
+      "createdAt": "2026-07-01T15:00:00.000Z",
+      "updatedAt": "2026-11-07T19:07:56.488Z",
+      "isUserCreated": true,
+      "programType": "strength",
+      "isArchived": true,
+      "archivedAt": "2026-09-30T12:00:00.000Z",
+      "deletedAt": null,
+      "copyStatus": "ready",
+      "goals": [
+        "strength"
+      ],
+      "level": "intermediate",
+      "durationWeeks": null,
+      "durationDisplay": null,
+      "targetDaysPerWeek": 1,
+      "equipmentNeeded": [],
+      "focusAreas": [],
+      "sourceCommunityProgramId": null,
+      "weeks": [
+        {
+          "id": "cmw6s043s00imvrt4di3kb1yq",
+          "weekNumber": 1,
+          "name": null,
+          "description": null,
+          "programId": "cmw6s043s00ikvrt4zv8guobf",
+          "userId": "test-user-pyq031e3h5i",
+          "workouts": [
+            {
+              "id": "cmw6s043t00iovrt4983vqrq2",
+              "name": "Upper",
+              "dayNumber": 1,
+              "weekId": "cmw6s043s00imvrt4di3kb1yq",
+              "userId": "test-user-pyq031e3h5i",
+              "exercises": [
+                {
+                  "id": "cmw6s043t00iqvrt49siceoom",
+                  "name": "Pull-Up",
+                  "exerciseDefinitionId": "cmw6s043700hevrt431bics6d",
+                  "order": 1,
+                  "exerciseGroup": null,
+                  "workoutId": "cmw6s043t00iovrt4983vqrq2",
+                  "notes": null,
+                  "userId": "test-user-pyq031e3h5i",
+                  "isOneOff": false,
+                  "workoutCompletionId": null,
+                  "prescribedSets": [
+                    {
+                      "id": "cmw6s043u00irvrt4n03cf21e",
+                      "setNumber": 1,
+                      "reps": "8-12",
+                      "weight": null,
+                      "rpe": null,
+                      "rir": null,
+                      "isWarmup": false,
+                      "exerciseId": "cmw6s043t00iqvrt49siceoom",
+                      "userId": "test-user-pyq031e3h5i"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cmw6s043900hhvrt49s708fgk",
+      "name": "Strength Block",
+      "description": null,
+      "userId": "test-user-pyq031e3h5i",
+      "isActive": true,
+      "createdAt": "2026-10-01T15:00:00.000Z",
+      "updatedAt": "2026-11-07T19:07:56.470Z",
+      "isUserCreated": true,
+      "programType": "strength",
+      "isArchived": false,
+      "archivedAt": null,
+      "deletedAt": null,
+      "copyStatus": "ready",
+      "goals": [
+        "strength"
+      ],
+      "level": "intermediate",
+      "durationWeeks": null,
+      "durationDisplay": null,
+      "targetDaysPerWeek": 2,
+      "equipmentNeeded": [],
+      "focusAreas": [],
+      "sourceCommunityProgramId": null,
+      "weeks": [
+        {
+          "id": "cmw6s043a00hjvrt4kbmzb0tl",
+          "weekNumber": 1,
+          "name": null,
+          "description": null,
+          "programId": "cmw6s043900hhvrt49s708fgk",
+          "userId": "test-user-pyq031e3h5i",
+          "workouts": [
+            {
+              "id": "cmw6s043b00hlvrt4s8a95u19",
+              "name": "Squat + Press",
+              "dayNumber": 1,
+              "weekId": "cmw6s043a00hjvrt4kbmzb0tl",
+              "userId": "test-user-pyq031e3h5i",
+              "exercises": [
+                {
+                  "id": "cmw6s043c00hnvrt4jkt7lo1o",
+                  "name": "Barbell Back Squat",
+                  "exerciseDefinitionId": "cmw6s043300hbvrt40ipwfq83",
+                  "order": 1,
+                  "exerciseGroup": null,
+                  "workoutId": "cmw6s043b00hlvrt4s8a95u19",
+                  "notes": null,
+                  "userId": "test-user-pyq031e3h5i",
+                  "isOneOff": false,
+                  "workoutCompletionId": null,
+                  "prescribedSets": [
+                    {
+                      "id": "cmw6s043d00hovrt4m4dnlyic",
+                      "setNumber": 1,
+                      "reps": "5",
+                      "weight": "135lbs",
+                      "rpe": null,
+                      "rir": null,
+                      "isWarmup": true,
+                      "exerciseId": "cmw6s043c00hnvrt4jkt7lo1o",
+                      "userId": "test-user-pyq031e3h5i"
+                    },
+                    {
+                      "id": "cmw6s043d00hpvrt4oc1ti8mt",
+                      "setNumber": 2,
+                      "reps": "5",
+                      "weight": "225lbs",
+                      "rpe": null,
+                      "rir": 2,
+                      "isWarmup": false,
+                      "exerciseId": "cmw6s043c00hnvrt4jkt7lo1o",
+                      "userId": "test-user-pyq031e3h5i"
+                    },
+                    {
+                      "id": "cmw6s043d00hqvrt4a23sshqm",
+                      "setNumber": 3,
+                      "reps": "5",
+                      "weight": "225lbs",
+                      "rpe": null,
+                      "rir": 2,
+                      "isWarmup": false,
+                      "exerciseId": "cmw6s043c00hnvrt4jkt7lo1o",
+                      "userId": "test-user-pyq031e3h5i"
+                    }
+                  ]
+                },
+                {
+                  "id": "cmw6s043e00hsvrt46i7hp0eo",
+                  "name": "Barbell Bench Press",
+                  "exerciseDefinitionId": "cmw6s043500hcvrt4tbk13mxy",
+                  "order": 2,
+                  "exerciseGroup": "A",
+                  "workoutId": "cmw6s043b00hlvrt4s8a95u19",
+                  "notes": null,
+                  "userId": "test-user-pyq031e3h5i",
+                  "isOneOff": false,
+                  "workoutCompletionId": null,
+                  "prescribedSets": [
+                    {
+                      "id": "cmw6s043f00htvrt4vvsbl0kj",
+                      "setNumber": 1,
+                      "reps": "8",
+                      "weight": "65%",
+                      "rpe": 8,
+                      "rir": null,
+                      "isWarmup": false,
+                      "exerciseId": "cmw6s043e00hsvrt46i7hp0eo",
+                      "userId": "test-user-pyq031e3h5i"
+                    },
+                    {
+                      "id": "cmw6s043f00huvrt4z9tre899",
+                      "setNumber": 2,
+                      "reps": "8",
+                      "weight": "65%",
+                      "rpe": 8,
+                      "rir": null,
+                      "isWarmup": false,
+                      "exerciseId": "cmw6s043e00hsvrt46i7hp0eo",
+                      "userId": "test-user-pyq031e3h5i"
+                    }
+                  ]
+                },
+                {
+                  "id": "cmw6s043g00hwvrt4ma5wnkh5",
+                  "name": "Barbell Bent-Over Row",
+                  "exerciseDefinitionId": "cmw6s043600hdvrt4qhnjofrj",
+                  "order": 3,
+                  "exerciseGroup": "A",
+                  "workoutId": "cmw6s043b00hlvrt4s8a95u19",
+                  "notes": null,
+                  "userId": "test-user-pyq031e3h5i",
+                  "isOneOff": false,
+                  "workoutCompletionId": null,
+                  "prescribedSets": [
+                    {
+                      "id": "cmw6s043h00hxvrt4vpnzb31c",
+                      "setNumber": 1,
+                      "reps": "10",
+                      "weight": "RPE 8",
+                      "rpe": null,
+                      "rir": null,
+                      "isWarmup": false,
+                      "exerciseId": "cmw6s043g00hwvrt4ma5wnkh5",
+                      "userId": "test-user-pyq031e3h5i"
+                    },
+                    {
+                      "id": "cmw6s043h00hyvrt432rmzkvr",
+                      "setNumber": 2,
+                      "reps": "10",
+                      "weight": "RPE 8",
+                      "rpe": null,
+                      "rir": null,
+                      "isWarmup": false,
+                      "exerciseId": "cmw6s043g00hwvrt4ma5wnkh5",
+                      "userId": "test-user-pyq031e3h5i"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "cmw6s043i00i0vrt4exvgusl8",
+              "name": "Pull",
+              "dayNumber": 2,
+              "weekId": "cmw6s043a00hjvrt4kbmzb0tl",
+              "userId": "test-user-pyq031e3h5i",
+              "exercises": [
+                {
+                  "id": "cmw6s043i00i2vrt45yt0676i",
+                  "name": "Conventional Deadlift",
+                  "exerciseDefinitionId": "cmw6s043800hfvrt4qp54qppo",
+                  "order": 1,
+                  "exerciseGroup": null,
+                  "workoutId": "cmw6s043i00i0vrt4exvgusl8",
+                  "notes": null,
+                  "userId": "test-user-pyq031e3h5i",
+                  "isOneOff": false,
+                  "workoutCompletionId": null,
+                  "prescribedSets": [
+                    {
+                      "id": "cmw6s043j00i3vrt4v527eqhr",
+                      "setNumber": 1,
+                      "reps": "3-5",
+                      "weight": "275lbs",
+                      "rpe": null,
+                      "rir": 2,
+                      "isWarmup": false,
+                      "exerciseId": "cmw6s043i00i2vrt45yt0676i",
+                      "userId": "test-user-pyq031e3h5i"
+                    }
+                  ]
+                },
+                {
+                  "id": "cmw6s043k00i5vrt4b8dsjzj3",
+                  "name": "Pull-Up",
+                  "exerciseDefinitionId": "cmw6s043700hevrt431bics6d",
+                  "order": 2,
+                  "exerciseGroup": null,
+                  "workoutId": "cmw6s043i00i0vrt4exvgusl8",
+                  "notes": null,
+                  "userId": "test-user-pyq031e3h5i",
+                  "isOneOff": false,
+                  "workoutCompletionId": null,
+                  "prescribedSets": [
+                    {
+                      "id": "cmw6s043l00i6vrt4vbjnfqp4",
+                      "setNumber": 1,
+                      "reps": "AMRAP",
+                      "weight": null,
+                      "rpe": null,
+                      "rir": null,
+                      "isWarmup": false,
+                      "exerciseId": "cmw6s043k00i5vrt4b8dsjzj3",
+                      "userId": "test-user-pyq031e3h5i"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmw6s043m00i8vrt408gtsjsk",
+          "weekNumber": 2,
+          "name": null,
+          "description": null,
+          "programId": "cmw6s043900hhvrt49s708fgk",
+          "userId": "test-user-pyq031e3h5i",
+          "workouts": [
+            {
+              "id": "cmw6s043n00iavrt4f6zdxdvk",
+              "name": "Squat + Press",
+              "dayNumber": 1,
+              "weekId": "cmw6s043m00i8vrt408gtsjsk",
+              "userId": "test-user-pyq031e3h5i",
+              "exercises": [
+                {
+                  "id": "cmw6s043n00icvrt4ngi53ydc",
+                  "name": "Barbell Back Squat",
+                  "exerciseDefinitionId": "cmw6s043300hbvrt40ipwfq83",
+                  "order": 1,
+                  "exerciseGroup": null,
+                  "workoutId": "cmw6s043n00iavrt4f6zdxdvk",
+                  "notes": null,
+                  "userId": "test-user-pyq031e3h5i",
+                  "isOneOff": false,
+                  "workoutCompletionId": null,
+                  "prescribedSets": [
+                    {
+                      "id": "cmw6s043o00idvrt41je2tbdl",
+                      "setNumber": 1,
+                      "reps": "5",
+                      "weight": "230lbs",
+                      "rpe": null,
+                      "rir": 2,
+                      "isWarmup": false,
+                      "exerciseId": "cmw6s043n00icvrt4ngi53ydc",
+                      "userId": "test-user-pyq031e3h5i"
+                    }
+                  ]
+                },
+                {
+                  "id": "cmw6s043p00ifvrt4jzzgruop",
+                  "name": "Barbell Bench Press",
+                  "exerciseDefinitionId": "cmw6s043500hcvrt4tbk13mxy",
+                  "order": 2,
+                  "exerciseGroup": "A",
+                  "workoutId": "cmw6s043n00iavrt4f6zdxdvk",
+                  "notes": null,
+                  "userId": "test-user-pyq031e3h5i",
+                  "isOneOff": false,
+                  "workoutCompletionId": null,
+                  "prescribedSets": [
+                    {
+                      "id": "cmw6s043p00igvrt440r1zi1e",
+                      "setNumber": 1,
+                      "reps": "8",
+                      "weight": "67.5%",
+                      "rpe": null,
+                      "rir": null,
+                      "isWarmup": false,
+                      "exerciseId": "cmw6s043p00ifvrt4jzzgruop",
+                      "userId": "test-user-pyq031e3h5i"
+                    }
+                  ]
+                },
+                {
+                  "id": "cmw6s043q00iivrt4hr2zfodb",
+                  "name": "Barbell Bent-Over Row",
+                  "exerciseDefinitionId": "cmw6s043600hdvrt4qhnjofrj",
+                  "order": 3,
+                  "exerciseGroup": "A",
+                  "workoutId": "cmw6s043n00iavrt4f6zdxdvk",
+                  "notes": null,
+                  "userId": "test-user-pyq031e3h5i",
+                  "isOneOff": false,
+                  "workoutCompletionId": null,
+                  "prescribedSets": [
+                    {
+                      "id": "cmw6s043r00ijvrt49k5og4ae",
+                      "setNumber": 1,
+                      "reps": "10",
+                      "weight": null,
+                      "rpe": null,
+                      "rir": null,
+                      "isWarmup": false,
+                      "exerciseId": "cmw6s043q00iivrt4hr2zfodb",
+                      "userId": "test-user-pyq031e3h5i"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "workoutCompletions": [
+    {
+      "id": "cmw6s043v00itvrt4l1ao0vfa",
+      "workoutId": "cmw6s043b00hlvrt4s8a95u19",
+      "savedWorkoutId": null,
+      "userId": "test-user-pyq031e3h5i",
+      "completedAt": "2026-10-06T14:05:00.000Z",
+      "startedAt": "2026-10-06T13:00:00.000Z",
+      "status": "completed",
+      "notes": "Felt quick.",
+      "isArchived": false,
+      "cycleNumber": 1,
+      "isAdHoc": false,
+      "name": null,
+      "durationSeconds": 3900,
+      "sessionRpe": 7,
+      "exercises": [],
+      "loggedSets": [
+        {
+          "id": "cmw6s043w00iuvrt4adtci65z",
+          "setNumber": 1,
+          "reps": 5,
+          "weight": 135,
+          "weightUnit": "lbs",
+          "rpe": null,
+          "rir": null,
+          "isWarmup": true,
+          "exerciseId": "cmw6s043c00hnvrt4jkt7lo1o",
+          "completionId": "cmw6s043v00itvrt4l1ao0vfa",
+          "createdAt": "2026-10-06T14:05:00.000Z",
+          "userId": "test-user-pyq031e3h5i"
+        },
+        {
+          "id": "cmw6s043w00ivvrt4pfrzbxiy",
+          "setNumber": 2,
+          "reps": 5,
+          "weight": 225,
+          "weightUnit": "lbs",
+          "rpe": null,
+          "rir": 2,
+          "isWarmup": false,
+          "exerciseId": "cmw6s043c00hnvrt4jkt7lo1o",
+          "completionId": "cmw6s043v00itvrt4l1ao0vfa",
+          "createdAt": "2026-10-06T14:05:00.000Z",
+          "userId": "test-user-pyq031e3h5i"
+        },
+        {
+          "id": "cmw6s043w00iwvrt4uc7bxkv5",
+          "setNumber": 3,
+          "reps": 5,
+          "weight": 225,
+          "weightUnit": "lbs",
+          "rpe": null,
+          "rir": 1,
+          "isWarmup": false,
+          "exerciseId": "cmw6s043c00hnvrt4jkt7lo1o",
+          "completionId": "cmw6s043v00itvrt4l1ao0vfa",
+          "createdAt": "2026-10-06T14:05:00.000Z",
+          "userId": "test-user-pyq031e3h5i"
+        },
+        {
+          "id": "cmw6s043x00ixvrt4upy40jgx",
+          "setNumber": 1,
+          "reps": 8,
+          "weight": 155,
+          "weightUnit": "lbs",
+          "rpe": 8,
+          "rir": null,
+          "isWarmup": false,
+          "exerciseId": "cmw6s043e00hsvrt46i7hp0eo",
+          "completionId": "cmw6s043v00itvrt4l1ao0vfa",
+          "createdAt": "2026-10-06T14:05:00.000Z",
+          "userId": "test-user-pyq031e3h5i"
+        },
+        {
+          "id": "cmw6s043x00iyvrt43bt4d3id",
+          "setNumber": 2,
+          "reps": 7,
+          "weight": 155,
+          "weightUnit": "lbs",
+          "rpe": 9,
+          "rir": null,
+          "isWarmup": false,
+          "exerciseId": "cmw6s043e00hsvrt46i7hp0eo",
+          "completionId": "cmw6s043v00itvrt4l1ao0vfa",
+          "createdAt": "2026-10-06T14:05:00.000Z",
+          "userId": "test-user-pyq031e3h5i"
+        },
+        {
+          "id": "cmw6s043z00izvrt4x7g579eh",
+          "setNumber": 1,
+          "reps": 10,
+          "weight": 135,
+          "weightUnit": "lbs",
+          "rpe": null,
+          "rir": null,
+          "isWarmup": false,
+          "exerciseId": "cmw6s043g00hwvrt4ma5wnkh5",
+          "completionId": "cmw6s043v00itvrt4l1ao0vfa",
+          "createdAt": "2026-10-06T14:05:00.000Z",
+          "userId": "test-user-pyq031e3h5i"
+        },
+        {
+          "id": "cmw6s043z00j0vrt4vxmxp5sb",
+          "setNumber": 2,
+          "reps": 10,
+          "weight": 135,
+          "weightUnit": "lbs",
+          "rpe": null,
+          "rir": null,
+          "isWarmup": false,
+          "exerciseId": "cmw6s043g00hwvrt4ma5wnkh5",
+          "completionId": "cmw6s043v00itvrt4l1ao0vfa",
+          "createdAt": "2026-10-06T14:05:00.000Z",
+          "userId": "test-user-pyq031e3h5i"
+        }
+      ]
+    },
+    {
+      "id": "cmw6s044000j2vrt4zeaco4hh",
+      "workoutId": "cmw6s043i00i0vrt4exvgusl8",
+      "savedWorkoutId": null,
+      "userId": "test-user-pyq031e3h5i",
+      "completedAt": "2026-10-08T13:20:00.000Z",
+      "startedAt": "2026-10-08T13:00:00.000Z",
+      "status": "abandoned",
+      "notes": null,
+      "isArchived": false,
+      "cycleNumber": 2,
+      "isAdHoc": false,
+      "name": null,
+      "durationSeconds": null,
+      "sessionRpe": null,
+      "exercises": [],
+      "loggedSets": [
+        {
+          "id": "cmw6s044100j3vrt4sb70jfon",
+          "setNumber": 1,
+          "reps": 4,
+          "weight": 275,
+          "weightUnit": "lbs",
+          "rpe": null,
+          "rir": 1,
+          "isWarmup": false,
+          "exerciseId": "cmw6s043i00i2vrt45yt0676i",
+          "completionId": "cmw6s044000j2vrt4zeaco4hh",
+          "createdAt": "2026-10-08T13:20:00.000Z",
+          "userId": "test-user-pyq031e3h5i"
+        }
+      ]
+    },
+    {
+      "id": "cmw6s044200j4vrt46cvp9bwl",
+      "workoutId": null,
+      "savedWorkoutId": null,
+      "userId": "test-user-pyq031e3h5i",
+      "completedAt": "2026-10-11T16:45:00.000Z",
+      "startedAt": "2026-10-11T16:00:00.000Z",
+      "status": "completed",
+      "notes": null,
+      "isArchived": false,
+      "cycleNumber": 1,
+      "isAdHoc": true,
+      "name": "Saturday Garage",
+      "durationSeconds": 2700,
+      "sessionRpe": null,
+      "exercises": [
+        {
+          "id": "cmw6s044300j6vrt49c1ltehl",
+          "name": "Sled Push",
+          "exerciseDefinitionId": "cmw6s043800hgvrt4dfj6k6d2",
+          "order": 1,
+          "exerciseGroup": null,
+          "workoutId": null,
+          "notes": null,
+          "userId": "test-user-pyq031e3h5i",
+          "isOneOff": true,
+          "workoutCompletionId": "cmw6s044200j4vrt46cvp9bwl",
+          "prescribedSets": [
+            {
+              "id": "cmw6s044400j7vrt48k2evf1f",
+              "setNumber": 1,
+              "reps": "20m",
+              "weight": null,
+              "rpe": null,
+              "rir": null,
+              "isWarmup": false,
+              "exerciseId": "cmw6s044300j6vrt49c1ltehl",
+              "userId": "test-user-pyq031e3h5i"
+            },
+            {
+              "id": "cmw6s044400j8vrt4m6cn6wh7",
+              "setNumber": 2,
+              "reps": "20m",
+              "weight": null,
+              "rpe": null,
+              "rir": null,
+              "isWarmup": false,
+              "exerciseId": "cmw6s044300j6vrt49c1ltehl",
+              "userId": "test-user-pyq031e3h5i"
+            }
+          ]
+        },
+        {
+          "id": "cmw6s044500javrt40j9ju1b7",
+          "name": "Pull-Up",
+          "exerciseDefinitionId": "cmw6s043700hevrt431bics6d",
+          "order": 2,
+          "exerciseGroup": null,
+          "workoutId": null,
+          "notes": null,
+          "userId": "test-user-pyq031e3h5i",
+          "isOneOff": true,
+          "workoutCompletionId": "cmw6s044200j4vrt46cvp9bwl",
+          "prescribedSets": [
+            {
+              "id": "cmw6s044500jbvrt4lzt76c9w",
+              "setNumber": 1,
+              "reps": "8",
+              "weight": null,
+              "rpe": null,
+              "rir": null,
+              "isWarmup": false,
+              "exerciseId": "cmw6s044500javrt40j9ju1b7",
+              "userId": "test-user-pyq031e3h5i"
+            },
+            {
+              "id": "cmw6s044500jcvrt4okrlmvpv",
+              "setNumber": 2,
+              "reps": "8",
+              "weight": null,
+              "rpe": null,
+              "rir": null,
+              "isWarmup": false,
+              "exerciseId": "cmw6s044500javrt40j9ju1b7",
+              "userId": "test-user-pyq031e3h5i"
+            }
+          ]
+        }
+      ],
+      "loggedSets": [
+        {
+          "id": "cmw6s044600jdvrt4ntppu4u2",
+          "setNumber": 1,
+          "reps": 1,
+          "weight": 80,
+          "weightUnit": "kg",
+          "rpe": null,
+          "rir": null,
+          "isWarmup": false,
+          "exerciseId": "cmw6s044300j6vrt49c1ltehl",
+          "completionId": "cmw6s044200j4vrt46cvp9bwl",
+          "createdAt": "2026-10-11T16:45:00.000Z",
+          "userId": "test-user-pyq031e3h5i"
+        },
+        {
+          "id": "cmw6s044600jevrt4at422nyj",
+          "setNumber": 2,
+          "reps": 1,
+          "weight": 100,
+          "weightUnit": "kg",
+          "rpe": null,
+          "rir": null,
+          "isWarmup": false,
+          "exerciseId": "cmw6s044300j6vrt49c1ltehl",
+          "completionId": "cmw6s044200j4vrt46cvp9bwl",
+          "createdAt": "2026-10-11T16:45:00.000Z",
+          "userId": "test-user-pyq031e3h5i"
+        },
+        {
+          "id": "cmw6s044700jfvrt4uhe0besj",
+          "setNumber": 1,
+          "reps": 8,
+          "weight": 0,
+          "weightUnit": "kg",
+          "rpe": null,
+          "rir": null,
+          "isWarmup": false,
+          "exerciseId": "cmw6s044500javrt40j9ju1b7",
+          "completionId": "cmw6s044200j4vrt46cvp9bwl",
+          "createdAt": "2026-10-11T16:45:00.000Z",
+          "userId": "test-user-pyq031e3h5i"
+        },
+        {
+          "id": "cmw6s044700jgvrt4cq7u4dxv",
+          "setNumber": 2,
+          "reps": 6,
+          "weight": 10,
+          "weightUnit": "kg",
+          "rpe": null,
+          "rir": 1,
+          "isWarmup": false,
+          "exerciseId": "cmw6s044500javrt40j9ju1b7",
+          "completionId": "cmw6s044200j4vrt46cvp9bwl",
+          "createdAt": "2026-10-11T16:45:00.000Z",
+          "userId": "test-user-pyq031e3h5i"
+        }
+      ]
+    }
+  ],
+  "savedWorkouts": [
+    {
+      "id": "cmw6s044800jhvrt47qme3at2",
+      "userId": "test-user-pyq031e3h5i",
+      "name": "Garage Day",
+      "notes": null,
+      "sourceCompletionId": "cmw6s044200j4vrt46cvp9bwl",
+      "workoutData": [
+        {
+          "name": "Sled Push",
+          "sets": [
+            {
+              "rir": null,
+              "rpe": null,
+              "reps": "20m",
+              "isWarmup": false,
+              "setNumber": 1
+            },
+            {
+              "rir": null,
+              "rpe": null,
+              "reps": "20m",
+              "isWarmup": false,
+              "setNumber": 2
+            }
+          ],
+          "notes": null,
+          "order": 1,
+          "exerciseGroup": null,
+          "exerciseDefinitionId": "cmw6s043800hgvrt4dfj6k6d2"
+        },
+        {
+          "name": "Pull-Up",
+          "sets": [
+            {
+              "rir": 1,
+              "rpe": null,
+              "reps": "8",
+              "isWarmup": false,
+              "setNumber": 1
+            },
+            {
+              "rir": 1,
+              "rpe": null,
+              "reps": "8",
+              "isWarmup": false,
+              "setNumber": 2
+            }
+          ],
+          "notes": "Add load if 8 is easy",
+          "order": 2,
+          "exerciseGroup": null,
+          "exerciseDefinitionId": "cmw6s043700hevrt431bics6d"
+        }
+      ],
+      "exerciseCount": 2,
+      "createdAt": "2026-10-11T17:00:00.000Z",
+      "updatedAt": "2026-11-07T19:07:56.505Z",
+      "lastUsedAt": null,
+      "pinnedAt": null,
+      "origin": "session",
+      "archivedAt": null,
+      "dismissedAt": null
+    }
+  ],
+  "pinnedExercises": [
+    {
+      "id": "cmw6s044900jjvrt4vv3j6c9x",
+      "userId": "test-user-pyq031e3h5i",
+      "exerciseDefinitionId": "cmw6s043300hbvrt40ipwfq83",
+      "position": 0,
+      "createdAt": "2026-10-02T12:00:00.000Z"
+    },
+    {
+      "id": "cmw6s044a00jlvrt4yvb14o5g",
+      "userId": "test-user-pyq031e3h5i",
+      "exerciseDefinitionId": "cmw6s043800hfvrt4qp54qppo",
+      "position": 1,
+      "createdAt": "2026-10-02T12:00:00.000Z"
+    }
+  ]
+}

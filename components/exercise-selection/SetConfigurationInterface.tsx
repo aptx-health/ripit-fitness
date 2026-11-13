@@ -18,6 +18,8 @@ export type ExercisePrescription = {
     reps: string
     intensityType: 'RIR' | 'RPE' | 'NONE'
     intensityValue?: number
+    /** Passed through from initialConfig untouched (no weight column here); added sets have none. */
+    weight?: string | null
   }>
   notes?: string
 }
@@ -30,6 +32,7 @@ interface SetConfigurationInterfaceProps {
       setNumber: number
       reps: string
       intensityValue?: number
+      weight?: string | null
     }>
     intensityType: 'RIR' | 'RPE' | 'NONE'
     notes: string
@@ -91,6 +94,7 @@ export function SetConfigurationInterface({
     setNumber: number
     reps: string
     intensityValue?: number
+    weight?: string | null
   }>>(
     initialConfig?.sets || [{ setNumber: 1, reps: '8-12' }]
   )
@@ -127,7 +131,8 @@ export function SetConfigurationInterface({
         setNumber: set.setNumber,
         reps: set.reps,
         intensityType: exerciseIntensityType,
-        intensityValue: exerciseIntensityType === 'NONE' ? undefined : set.intensityValue
+        intensityValue: exerciseIntensityType === 'NONE' ? undefined : set.intensityValue,
+        ...(set.weight !== undefined && { weight: set.weight })
       })),
       notes: exerciseNotes.trim() || undefined
     }

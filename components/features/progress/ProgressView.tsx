@@ -6,9 +6,10 @@ import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import PaperTabTitle from '@/components/ui/PaperTabTitle'
 import { clientLogger } from '@/lib/client-logger'
 import { pluralize } from '@/lib/format/pluralize'
+import type { EffortScale } from '@/lib/insights/effort-scale'
 import { addWeeks, isMonday, percentChange, type WeeklyReport, weekStartFor } from '@/lib/insights/progress'
 import type { TrendNote } from '@/lib/insights/progress-records'
-import { browserTimeZone, DASH, formatMinutes, formatRpe, signed, weekOfLabel } from './format'
+import { browserTimeZone, DASH, formatMinutes, hardSetsText, labelledEffort, noteEffort, signed, weekOfLabel } from './format'
 import RecordsLifts from './RecordsLifts'
 import WeeklySetsChart from './WeeklySetsChart'
 
@@ -169,10 +170,15 @@ export default function ProgressView() {
           </PaperTabTitle>
         </div>
         <div className="folder-box border-2 border-secondary bg-card p-3">
-          <WeeklySetsChart weeks={report.weeks} selected={report.weekStart} isCurrentWeek={report.isCurrentWeek} />
+          <WeeklySetsChart
+            weeks={report.weeks}
+            selected={report.weekStart}
+            isCurrentWeek={report.isCurrentWeek}
+            effortScale={scaleOf(report)}
+          />
           {report.trend && (
             <p className="-mx-3 -mb-3 mt-2 border-t border-dashed border-border px-3 py-2 text-sm text-muted-foreground">
-              {trendText(report.trend)}
+              {trendText(report.trend, scaleOf(report))}
             </p>
           )}
         </div>
@@ -181,11 +187,16 @@ export default function ProgressView() {
   )
 }
 
-/** The note's sentences: rising effort (3+ weeks), then the last light week. */
-function trendText(trend: TrendNote): string {
+/** The report's effort scale; a payload from before the scale reads in RPE. */
+function scaleOf(report: WeeklyReport): EffortScale {
+  return report.effortScale ?? 'rpe'
+}
+
+/** The note's sentences: rising effort (3+ weeks, harder in either scale), then the last light week. */
+function trendText(trend: TrendNote, scale: EffortScale): string {
   const effort =
     trend.effortRisingWeeks > 0
-      ? `Effort has risen ${trend.effortRisingWeeks} weeks running (${formatRpe(trend.effortFrom)} → ${formatRpe(trend.effortTo)}). `
+      ? `Effort has risen ${trend.effortRisingWeeks} weeks running (${noteEffort(trend.effortFrom, scale)} → ${noteEffort(trend.effortTo, scale)}). `
       : ''
   const ago = trend.lastLightWeeksAgo
   const light =
@@ -212,6 +223,8 @@ function ReportCard({ report }: { report: WeeklyReport }) {
   const setsChange = hasNormal ? percentChange(current.workingSets, normal.workingSets) : null
   const timeChange = hasNormal && normal.durationSeconds > 0 ? (current.durationSeconds - normal.durationSeconds) / 60 : null
   const effort = current.effort
+  const scale = scaleOf(report)
+  // In RPE either way, so harder training reads as up in RIR too.
   const effortChange = hasNormal && effort && normal.avgRpe != null ? effort.avgRpe - normal.avgRpe : null
 
   return (
@@ -274,10 +287,10 @@ function ReportCard({ report }: { report: WeeklyReport }) {
         <Row
           name="effort"
           label="Effort"
-          value={effort ? `RPE ${formatRpe(effort.avgRpe)}` : DASH}
+          value={effort ? labelledEffort(effort.avgRpe, scale) : DASH}
           detail={
             effort
-              ? `${effort.pctAtOrAbove9}% of sets at 9+ · ${pluralize(effort.setsAt10, 'set')} at 10`
+              ? hardSetsText(effort.pctAtOrAbove9, pluralize(effort.setsAt10, 'set'), scale)
               : current.workingSets > 0
                 ? "Effort isn't tracked enough this week"
                 : undefined
@@ -289,7 +302,7 @@ function ReportCard({ report }: { report: WeeklyReport }) {
             ) : (
               <>
                 <div className={CHANGE_FLAT}>{signed(effortChange, (n) => n.toFixed(1))}</div>
-                <Muted>normal {formatRpe(normal.avgRpe)}</Muted>
+                <Muted>normal {noteEffort(normal.avgRpe, scale)}</Muted>
               </>
             ))
           }

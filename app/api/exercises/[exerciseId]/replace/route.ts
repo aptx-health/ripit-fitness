@@ -14,6 +14,7 @@ type ReplaceExerciseRequest = {
     reps: string
     intensityType: 'RIR' | 'RPE' | 'NONE'
     intensityValue?: number
+    weight?: string | null
   }>
   notes?: string
 }
@@ -78,9 +79,13 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
-    // Verify new exercise definition exists
-    const newExerciseDefinition = await prisma.exerciseDefinition.findUnique({
-      where: { id: newExerciseDefinitionId }
+    // Verify new exercise definition exists and is one the user can use
+    // (library, or their own custom); another user's custom reads as not found.
+    const newExerciseDefinition = await prisma.exerciseDefinition.findFirst({
+      where: {
+        id: newExerciseDefinitionId,
+        OR: [{ isSystem: true }, { userId: user.id }]
+      }
     })
 
     if (!newExerciseDefinition) {
@@ -121,6 +126,7 @@ export async function POST(
               reps: set.reps,
               rpe: set.intensityType === 'RPE' ? set.intensityValue : null,
               rir: set.intensityType === 'RIR' ? set.intensityValue : null,
+              weight: set.weight ?? null,
               exerciseId,
               userId: user.id
             }))
@@ -192,6 +198,7 @@ export async function POST(
                 reps: set.reps,
                 rpe: set.intensityType === 'RPE' ? set.intensityValue : null,
                 rir: set.intensityType === 'RIR' ? set.intensityValue : null,
+                weight: set.weight ?? null,
                 exerciseId,
                 userId: user.id
               }))

@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
+import { loadEffortScale } from '@/lib/insights/effort-scale'
 import { getLiftHistory } from '@/lib/insights/lift-history'
 import { resolvePins } from '@/lib/insights/pinned-lifts'
 import { isValidTimeZone } from '@/lib/insights/progress'
@@ -22,7 +23,8 @@ async function pinnedLifts(userId: string): Promise<Array<{ exerciseDefinitionId
 /**
  * GET /api/progress/lift/[id]?tz=<IANA zone>
  * One lift's history for the signed-in user: its sessions, rep records and
- * weekly working sets as raw numbers, plus the pinned lifts for the chips.
+ * weekly working sets as raw numbers, plus the pinned lifts for the chips and
+ * the user's effort scale for the session averages.
  * 404 for an exercise that doesn't exist or is another user's private one.
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -41,11 +43,15 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     const { id } = await params
-    const [history, pinned] = await Promise.all([getLiftHistory(prisma, user.id, id, { timeZone }), pinnedLifts(user.id)])
+    const [history, pinned, effortScale] = await Promise.all([
+      getLiftHistory(prisma, user.id, id, { timeZone }),
+      pinnedLifts(user.id),
+      loadEffortScale(prisma, user.id),
+    ])
     if (!history) {
       return NextResponse.json({ error: 'Lift not found' }, { status: 404, headers: limited.headers })
     }
-    return NextResponse.json({ success: true, lift: { ...history, pinned } }, { headers: limited.headers })
+    return NextResponse.json({ success: true, lift: { ...history, pinned, effortScale } }, { headers: limited.headers })
   } catch (error) {
     logger.error({ error, context: 'progress-lift' }, 'Failed to load the lift history')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

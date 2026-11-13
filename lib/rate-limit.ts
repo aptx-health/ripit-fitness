@@ -129,6 +129,12 @@ export const progressPinsLimiter = lazyLimiter({ keyPrefix: 'progress-pins', poi
 export const progressLiftLimiter = lazyLimiter({ keyPrefix: 'progress-lift', points: 30, duration: 60 })
 
 /**
+ * Similar exercises for the swap picker (one request per picker open)
+ * Opening and closing the picker quickly: 30 req / 60s per user
+ */
+export const exerciseSimilarLimiter = lazyLimiter({ keyPrefix: 'exercise-similar', points: 30, duration: 60 })
+
+/**
  * Admin endpoints: 30 req / 60s per user
  */
 export const adminLimiter = lazyLimiter({ keyPrefix: 'admin', points: 60, duration: 60 })
@@ -198,6 +204,12 @@ export const coachSendLimiter = lazyLimiter({ keyPrefix: 'coach-send', points: 3
  * Coaching: listing your trainees for the Send button (Library pages), 60 req / 60s per user.
  */
 export const coachTraineesLimiter = lazyLimiter({ keyPrefix: 'coach-trainees', points: 60, duration: 60 })
+
+/**
+ * Download my data (GET /api/me/export), 5 req / 600s per user. Each request
+ * reads every training row the user has.
+ */
+export const dataExportLimiter = lazyLimiter({ keyPrefix: 'data-export', points: 5, duration: 600 })
 
 export type LimiterGetter = () => RateLimiterRedis | RateLimiterMemory
 
