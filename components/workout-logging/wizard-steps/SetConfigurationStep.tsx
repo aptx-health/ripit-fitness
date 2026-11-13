@@ -17,6 +17,7 @@ interface SetConfigurationStepProps {
       setNumber: number
       reps: string
       intensityValue?: number
+      weight?: string | null
     }>
   }
   onConfigChange: (config: ExercisePrescription) => void

@@ -484,7 +484,12 @@ export default function AdHocLoggerView({
       const target = exercises.find((e) => e.id === exerciseId)
       if (!target) return
       setPlanEditorOpen(false)
-      setPickerMode({ kind: 'swap', replacingName: target.name, targetId: target.id })
+      setPickerMode({
+        kind: 'swap',
+        replacingName: target.name,
+        targetId: target.id,
+        currentDefinitionId: target.exerciseDefinition.id ?? '',
+      })
     },
     [exercises]
   )
@@ -890,7 +895,11 @@ export default function AdHocLoggerView({
                   label: 'Swap this exercise',
                   icon: RefreshCw,
                   onClick: () =>
-                    setPickerMode({ kind: 'swap', replacingName: currentExercise.name }),
+                    setPickerMode({
+                      kind: 'swap',
+                      replacingName: currentExercise.name,
+                      currentDefinitionId: currentExercise.exerciseDefinition.id ?? '',
+                    }),
                 },
                 ...adminDefinitionEdit.actions,
                 {

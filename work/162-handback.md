@@ -1,0 +1,5 @@
+# 162 handback (implementer wE:p7, 2026-11-10) — Report: needs decision
+Verdict: checks out with adjustments. Math stays RPE; `lib/insights/effort-scale.ts` (effortScaleOf, inScale, loadEffortScale) + scale-aware formatters in `components/features/progress/format.ts`. Scale rides on API payloads (report.effortScale; lift route adds effortScale) because pinned tests say ProgressView takes no props; old payloads fall back to RPE.
+Verified: suite 4611 pass; tsc, biome, eslint clean on changed files. New tests `__tests__/components/progress-effort-scale-view.test.tsx` (real DB + routes + views), `progress-effort-direction-view.test.tsx`; break-checked (no conversion → 12 fail; lift route without scale → 1). Screenshots `initiatives/analytics/docs/assets/162/{progress-rir,progress-rir-chart,lift-rir}.png`.
+Needs a call: (1) buckets and session rating have no Progress surface (distribution MCP-only; session rating words in history) — formatter tests only. (2) RPE notes stay bare (pinned tests), RIR notes labelled. (3) change-from-normal stays RPE delta so "+" = harder in RIR too.
+Not verified: perf:tap; lift route adds one parallel settings query.
