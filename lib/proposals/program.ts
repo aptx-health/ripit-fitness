@@ -68,12 +68,14 @@ export function programSummary(program: ProgramInput): string {
 
 /**
  * Shape and limits, then every exercise definition must exist and be visible
- * to the user. Shared by propose and approve.
+ * to the user. Shared by propose and approve. `bundled` (id -> name) are the
+ * coach's exercises a coach send carries; they count as visible.
  */
 export async function checkProgram(
   db: PrismaClient | Prisma.TransactionClient,
   input: unknown,
-  userId: string
+  userId: string,
+  bundled: ReadonlyMap<string, string> = new Map()
 ): Promise<ProgramCheck> {
   const parsed = programInput.safeParse(input)
   if (!parsed.success) {
@@ -89,7 +91,7 @@ export async function checkProgram(
     where: { id: { in: ids }, ...visibleTo(userId) },
     select: { id: true, name: true },
   })
-  const definitionNames = new Map(found.map((d) => [d.id, d.name]))
+  const definitionNames = new Map([...bundled, ...found.map((d) => [d.id, d.name] as const)])
   const missing = ids.find((id) => !definitionNames.has(id))
   if (missing) {
     return { ok: false, code: 'invalid', error: `exercise not found: ${missing}`, field: 'exerciseDefinitionId' }

@@ -211,17 +211,20 @@ describe('1. what still can not be sent says where and why', () => {
     expect(await sendSaved(manySets)).toMatchObject({ reason: 'Bench Press has 11 sets (max 10)' })
   })
 
-  it('the route passes the reason through; the custom-exercise refusal is unchanged', async () => {
+  // Work 164: the coach's own exercises are now bundled (custom-exercises.feature);
+  // an exercise that is neither shared, Sam's nor the coach's is still refused.
+  it('the route passes the reason through; the missing-exercise refusal is unchanged', async () => {
     const id = await program('Long reps', [[[{ def: 'Bench Press', sets: [{ reps: '5 then a slow negative' }] }]]])
     expect(await postSend({ linkId: link, kind: 'program', sourceId: id })).toEqual({
       status: 400,
       body: { code: 'invalid', reason: 'Week 1, Day 1, Bench Press, set 1: reps is too long (max 20)' },
     })
-    defs.Fly = (await createTestExerciseDefinition(prisma, { name: "Dustin's Fly", isSystem: false, userId: coach })).id
+    const other = (await createTestUser()).id
+    defs.Fly = (await createTestExerciseDefinition(prisma, { name: "Alex's Fly", isSystem: false, userId: other })).id
     const fly = await program('Fly', [[[{ def: 'Fly' }]]])
     expect((await postSend({ linkId: link, kind: 'program', sourceId: fly })).body).toMatchObject({
       code: 'invalid',
-      missingExercises: ["Dustin's Fly"],
+      missingExercises: ["Alex's Fly"],
     })
   })
 })

@@ -387,7 +387,10 @@ export default function AdHocLoggerView({
               : ex
           )
         )
-        // Reset input so the new exercise's history can pre-fill.
+        // The row keeps its id: drop its cached history so the new exercise's loads and pre-fills.
+        setHistoryByExerciseId((p) => { const n = new Map(p); n.delete(target.id); return n })
+        setSessionsByExerciseId((p) => { const n = new Map(p); n.delete(target.id); return n })
+        prefilledFromHistoryIds.current.delete(target.id)
         setCurrentSet(EMPTY_SET)
         setExpandedInput(null)
         setPickerMode(null)

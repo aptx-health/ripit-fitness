@@ -8,6 +8,7 @@ import { clientLogger } from '@/lib/client-logger'
 import { libraryHref } from '@/lib/library/links'
 import type { SuggestionDetail } from '@/lib/suggestions/types'
 import { programDetailHref } from '@/lib/training/program-href'
+import BundledExerciseChoices, { type BundledChoice } from './BundledExerciseChoices'
 import SuggestionBody from './SuggestionBody'
 
 type Stage =
@@ -43,6 +44,8 @@ export default function SuggestionReview({ suggestion }: { suggestion: Suggestio
   const [working, setWorking] = useState(false)
   const [stage, setStage] = useState<Stage>({ name: 'deciding' })
   const [error, setError] = useState<string | null>(null)
+  const [choices, setChoices] = useState<Record<string, BundledChoice>>({})
+  const bundled = suggestion.customExercises ?? []
 
   const pending = suggestion.status === 'pending' && suggestion.outcome === null
 
@@ -62,8 +65,22 @@ export default function SuggestionReview({ suggestion }: { suggestion: Suggestio
 
   const accept = () =>
     run(async () => {
+      const unpicked = bundled.find((b) => {
+        const c = choices[b.sourceId]
+        return c?.use === 'mine' && !c.exerciseDefinitionId
+      })
+      if (unpicked) {
+        setError(`Pick one of your exercises for "${unpicked.name}", or add a copy.`)
+        return
+      }
       try {
-        const res = await fetch(`/api/suggestions/${suggestion.id}/accept`, { method: 'POST' })
+        const res = await fetch(`/api/suggestions/${suggestion.id}/accept`, {
+          method: 'POST',
+          ...(bundled.length > 0 && {
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ exercises: acceptChoices(bundled.map((b) => b.sourceId), choices) }),
+          }),
+        })
         const body = await res.json().catch(() => ({}))
         if (res.ok) {
           if (suggestion.kind === 'program.create' && body.programId) {
@@ -154,6 +171,16 @@ export default function SuggestionReview({ suggestion }: { suggestion: Suggestio
         <SuggestionBody body={suggestion.body} />
       </section>
 
+      {pending && stage.name === 'deciding' && bundled.length > 0 && (
+        <BundledExerciseChoices
+          exercises={bundled}
+          coachName={suggestion.coachFirstName ?? suggestion.from}
+          choices={choices}
+          onChange={(sourceId, choice) => setChoices((prev) => ({ ...prev, [sourceId]: choice }))}
+          disabled={working}
+        />
+      )}
+
       {error && (
         <p role="alert" className="border-2 border-error-border bg-error-muted text-error-text p-3 text-sm">
           {error}
@@ -171,6 +198,16 @@ export default function SuggestionReview({ suggestion }: { suggestion: Suggestio
         onNotNow={(programId) => router.push(programDetailHref(programId))}
       />
     </div>
+  )
+}
+
+/** The accept body's choices: each bundled exercise as a copy unless one of the user's own was picked. */
+function acceptChoices(sourceIds: string[], choices: Record<string, BundledChoice>) {
+  return Object.fromEntries(
+    sourceIds.map((id) => {
+      const c = choices[id]
+      return [id, c?.use === 'mine' ? { use: 'mine', exerciseDefinitionId: c.exerciseDefinitionId } : { use: 'copy' }]
+    })
   )
 }
 

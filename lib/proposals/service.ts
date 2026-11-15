@@ -1,4 +1,13 @@
 import { Prisma, type PrismaClient, type Proposal } from '@prisma/client'
+import {
+  type AcceptChoices,
+  BUNDLE_KEY,
+  ChoiceRefusal,
+  type CustomExercise,
+  remapExercises,
+  resolveBundle,
+  splitBundle,
+} from '@/lib/coaching/custom-exercises'
 import { pluralize } from '@/lib/format/pluralize'
 import { logger } from '@/lib/logger'
 import { notify as defaultNotify, type Notify } from '@/lib/notify'
@@ -85,7 +94,8 @@ export type DecisionCode = 'not_found' | 'not_pending' | 'not_applied' | 'confli
 
 export type DecisionResult =
   | { ok: true; proposal: Proposal }
-  | { ok: false; code: DecisionCode; error: string }
+  /** `userError` is written for the user (a refused accept choice); callers show it as is. */
+  | { ok: false; code: DecisionCode; error: string; userError?: string }
 
 /** Who sent a proposal: an agent token, or a coach link (coaching slice 2). Exactly one. */
 export type ProposalSender = { agentTokenId: string; coachLinkId?: null } | { agentTokenId: null; coachLinkId: string }
@@ -112,6 +122,8 @@ export type CreateProposalInput = ProposalSender &
       kind: 'program.create'
       rationale: string
       program: unknown
+      /** A coach send's custom exercises (coach senders only). */
+      customExercises?: CustomExercise[]
       feedbackId?: string
     }
   | {
@@ -135,6 +147,8 @@ export type CreateProposalInput = ProposalSender &
       kind: 'saved_workout.create'
       rationale: string
       workout: unknown
+      /** A coach send's custom exercises (coach senders only). */
+      customExercises?: CustomExercise[]
       feedbackId?: string
     }
   | {
@@ -226,6 +240,20 @@ async function resolveLinkedFeedback(tx: Prisma.TransactionClient, proposal: Pro
   })
 }
 
+/** A coach send's bundle as id -> name, or a refusal when anyone else tries to bundle. */
+function bundledNames(input: { coachLinkId?: string | null; customExercises?: CustomExercise[] }) {
+  if (!input.customExercises?.length) return { ok: true as const, names: new Map<string, string>() }
+  if (!input.coachLinkId) {
+    return { ok: false as const, code: 'invalid' as const, error: 'only a coach send can carry exercises', field: BUNDLE_KEY }
+  }
+  return { ok: true as const, names: new Map(input.customExercises.map((c) => [c.sourceId, c.name])) }
+}
+
+/** The payload with a coach send's bundle beside the content. */
+function withBundle(content: object, customExercises: CustomExercise[] | undefined): Prisma.InputJsonObject {
+  return (customExercises?.length ? { ...content, [BUNDLE_KEY]: customExercises } : content) as unknown as Prisma.InputJsonObject
+}
+
 function senderOf(input: ProposalSender) {
   return { agentTokenId: input.agentTokenId, coachLinkId: input.coachLinkId ?? null }
 }
@@ -270,7 +298,9 @@ export async function createProposal(
       payload: definition as Prisma.InputJsonObject,
     }
   } else if (input.kind === 'program.create') {
-    const check = await checkProgram(prisma, input.program, input.userId)
+    const bundled = bundledNames(input)
+    if (!bundled.ok) return bundled
+    const check = await checkProgram(prisma, input.program, input.userId, bundled.names)
     if (!check.ok) return check
     data = {
       userId: input.userId,
@@ -278,7 +308,7 @@ export async function createProposal(
       kind: input.kind,
       summary: programSummary(check.program),
       rationale: input.rationale,
-      payload: check.program as unknown as Prisma.InputJsonObject,
+      payload: withBundle(check.program, input.customExercises),
     }
   } else if (input.kind === 'anchors.update') {
     const check = await checkAnchorChanges(prisma, input.changes, input.userId)
@@ -307,7 +337,9 @@ export async function createProposal(
       before: before as Prisma.InputJsonObject,
     }
   } else if (input.kind === 'saved_workout.create') {
-    const check = await checkWorkoutCreate(prisma, input.workout, input.userId)
+    const bundled = bundledNames(input)
+    if (!bundled.ok) return bundled
+    const check = await checkWorkoutCreate(prisma, input.workout, input.userId, bundled.names)
     if (!check.ok) return check
     data = {
       userId: input.userId,
@@ -315,7 +347,7 @@ export async function createProposal(
       kind: input.kind,
       summary: createSummary(check.value),
       rationale: input.rationale,
-      payload: check.value as unknown as Prisma.InputJsonObject,
+      payload: withBundle(check.value, input.customExercises),
     }
   } else if (input.kind === 'saved_workout.update') {
     const current = await prisma.savedWorkout.findFirst({
@@ -379,11 +411,43 @@ async function findOwned(prisma: PrismaClient, proposalId: string, userId: strin
   return prisma.proposal.findFirst({ where: { id: proposalId, userId } })
 }
 
-/** Apply a pending proposal in one transaction. A stale update is marked `conflict`. */
+/**
+ * A coach send's content with its custom exercises resolved by the trainee's
+ * choices (copies made or reused), and the payload recording the copies.
+ * Without a bundle, the payload unchanged.
+ */
+async function resolveSend(tx: Prisma.TransactionClient, proposal: Proposal, userId: string, choices?: AcceptChoices) {
+  const { content, bundle } = splitBundle(proposal.payload)
+  if (bundle.length === 0) {
+    if (Object.keys(choices?.exercises ?? {}).length) {
+      throw new ChoiceRefusal('A choice names an exercise that is not in this suggestion.')
+    }
+    return { content: proposal.payload, payload: null }
+  }
+  const link = proposal.coachLinkId
+    ? await tx.coachLink.findUnique({ where: { id: proposal.coachLinkId }, select: { coachUserId: true } })
+    : null
+  if (!link) throw new Refusal('invalid', 'only a coach send can carry exercises')
+  const { chosen, recorded } = await resolveBundle(tx, {
+    proposalId: proposal.id,
+    bundle,
+    choices,
+    userId,
+    coachUserId: link.coachUserId,
+  })
+  return { content: remapExercises(content, chosen), payload: withBundle(content, recorded) }
+}
+
+/**
+ * Apply a pending proposal in one transaction. A stale update is marked
+ * `conflict`. `choices` are the trainee's picks for a coach send's custom
+ * exercises (default: a copy of each).
+ */
 export async function approveProposal(
   prisma: PrismaClient,
   proposalId: string,
-  userId: string
+  userId: string,
+  choices?: AcceptChoices
 ): Promise<DecisionResult> {
   const existing = await findOwned(prisma, proposalId, userId)
   if (!existing) return { ok: false, code: 'not_found', error: 'proposal not found' }
@@ -427,14 +491,15 @@ export async function approveProposal(
       }
 
       if (existing.kind === 'program.create') {
-        const check = await checkProgram(tx, existing.payload, userId)
+        const send = await resolveSend(tx, existing, userId, choices)
+        const check = await checkProgram(tx, send.content, userId)
         if (!check.ok) throw new Refusal('invalid', check.error)
         const created = await createProgram(tx, check.program, check.definitionNames, userId)
         await resolveLinkedFeedback(tx, existing, userId)
         // No inverse: an approved program is an ordinary program and can't be reverted.
         return tx.proposal.update({
           where: { id: proposalId },
-          data: { targetId: created.id, error: null },
+          data: { targetId: created.id, error: null, ...(send.payload && { payload: send.payload }) },
         })
       }
 
@@ -466,7 +531,8 @@ export async function approveProposal(
       }
 
       if (existing.kind === 'saved_workout.create') {
-        const check = await checkWorkoutCreate(tx, existing.payload, userId)
+        const send = await resolveSend(tx, existing, userId, choices)
+        const check = await checkWorkoutCreate(tx, send.content, userId)
         if (!check.ok) throw new Refusal('invalid', check.error)
         // A coach's send makes a "coach" workout; an agent's an "agent" one (the New group says who).
         const origin = existing.coachLinkId ? 'coach' : 'agent'
@@ -475,7 +541,12 @@ export async function approveProposal(
         await resolveLinkedFeedback(tx, existing, userId)
         return tx.proposal.update({
           where: { id: proposalId },
-          data: { targetId: created.id, inverse: inverse as unknown as Prisma.InputJsonObject, error: null },
+          data: {
+            targetId: created.id,
+            inverse: inverse as unknown as Prisma.InputJsonObject,
+            error: null,
+            ...(send.payload && { payload: send.payload }),
+          },
         })
       }
 
@@ -533,6 +604,10 @@ export async function approveProposal(
     return { ok: true, proposal }
   } catch (error) {
     if (error instanceof Refusal) return refuseApproval(prisma, proposalId, error.code, error.message)
+    if (error instanceof ChoiceRefusal) {
+      await refuseApproval(prisma, proposalId, 'invalid', error.message)
+      return { ok: false, code: 'invalid', error: error.message, userError: error.message }
+    }
     // A delete or merge that failed part-way (e.g. a constraint): the transaction rolled back.
     if (
       (existing.kind === LIBRARY_KINDS.delete || existing.kind === LIBRARY_KINDS.merge) &&

@@ -3,6 +3,7 @@ import { type ProgramInput, programInput } from '@/lib/proposals/program'
 import { type WorkoutCreateInput, workoutCreateInput } from '@/lib/proposals/saved-workout'
 import { createProposal } from '@/lib/proposals/service'
 import type { SavedWorkoutData } from '@/types/saved-workout'
+import { BUNDLE_KEY, snapshotSelect, toSnapshot } from './custom-exercises'
 import { normaliseProgram, normaliseWorkout, reasonFor } from './send-normalise'
 
 /**
@@ -12,6 +13,7 @@ import { normaliseProgram, normaliseWorkout, reasonFor } from './send-normalise'
  * the coach's note as its "Why". The payload is a snapshot: later edits to the
  * coach's copy don't reach it. A coach send never notifies anyone. The same
  * thing can't wait twice: a pending identical send on the link is refused.
+ * Exercises the coach made travel with it as a snapshot (./custom-exercises).
  */
 
 export type SendKind = 'program' | 'saved_workout'
@@ -166,19 +168,26 @@ async function activeLinkAsCoach(db: PrismaClient, coachUserId: string, linkId: 
 }
 
 /**
- * The definitions' names (for reasons), and the ones the trainee can't see
- * (in order of use, once each). One query.
+ * The definitions' names (for reasons), the coach's own ones the trainee can't
+ * see as snapshots to bundle, and the rest the trainee can't see (both in
+ * order of use, once each). One query.
  */
-async function exercisesFor(db: PrismaClient, traineeUserId: string, ids: string[]) {
+async function exercisesFor(db: PrismaClient, coachUserId: string, traineeUserId: string, ids: string[]) {
   const unique = [...new Set(ids)]
   const found = await db.exerciseDefinition.findMany({
     where: { id: { in: unique } },
-    select: { id: true, name: true, isSystem: true, userId: true },
+    select: { ...snapshotSelect, isSystem: true, userId: true },
   })
+  const byId = new Map(found.map((d) => [d.id, d]))
   const names = new Map(found.map((d) => [d.id, d.name]))
-  const visible = new Set(found.filter((d) => d.isSystem || d.userId === traineeUserId).map((d) => d.id))
-  const missing = unique.filter((id) => !visible.has(id)).map((id) => names.get(id) ?? id)
-  return { names, missing }
+  const hidden = unique.filter((id) => {
+    const d = byId.get(id)
+    return !d || !(d.isSystem || d.userId === traineeUserId)
+  })
+  const coachOwn = (id: string) => byId.get(id)?.userId === coachUserId
+  const bundle = hidden.filter(coachOwn).map((id) => toSnapshot(byId.get(id) as (typeof found)[number]))
+  const missing = hidden.filter((id) => !coachOwn(id)).map((id) => names.get(id) ?? id)
+  return { names, bundle, missing }
 }
 
 /** The coach's own program or saved workout as proposal input, or null when it isn't theirs (or is deleted). */
@@ -206,8 +215,9 @@ const noNotify = async () => {}
 
 /**
  * Send a copy of the coach's program or saved workout to the link's trainee.
- * The proposal checks run as the trainee, so an exercise only the coach can
- * see is refused by name before anything is written.
+ * The proposal checks run as the trainee: the coach's own exercises are
+ * bundled; any other exercise the trainee can't see is refused by name before
+ * anything is written.
  */
 export async function sendToTrainee(db: PrismaClient, coachUserId: string, input: SendInput): Promise<SendResult> {
   const link = await activeLinkAsCoach(db, coachUserId, input.linkId)
@@ -216,7 +226,7 @@ export async function sendToTrainee(db: PrismaClient, coachUserId: string, input
   const source = await snapshot(db, coachUserId, input.kind, input.sourceId)
   if (!source) return { ok: false, code: 'not_found' }
 
-  const { names, missing } = await exercisesFor(db, link.traineeUserId, source.ids)
+  const { names, bundle, missing } = await exercisesFor(db, coachUserId, link.traineeUserId, source.ids)
   if (missing.length) {
     return { ok: false, code: 'invalid', missingExercises: missing, reason: `Missing exercises: ${missing.join(', ')}` }
   }
@@ -229,13 +239,20 @@ export async function sendToTrainee(db: PrismaClient, coachUserId: string, input
   }
 
   const kind = input.kind === 'program' ? 'program.create' : 'saved_workout.create'
+  const payload = bundle.length ? { ...parsed.data, [BUNDLE_KEY]: bundle } : parsed.data
   const waiting = await db.proposal.findFirst({
-    where: { coachLinkId: link.id, status: 'pending', kind, payload: { equals: parsed.data as Prisma.InputJsonValue } },
+    where: { coachLinkId: link.id, status: 'pending', kind, payload: { equals: payload as Prisma.InputJsonValue } },
     select: { id: true },
   })
   if (waiting) return { ok: false, code: 'duplicate', reason: 'Already waiting for them to decide' }
 
-  const common = { userId: link.traineeUserId, agentTokenId: null, coachLinkId: link.id, rationale: input.note?.trim() ?? '' }
+  const common = {
+    userId: link.traineeUserId,
+    agentTokenId: null,
+    coachLinkId: link.id,
+    rationale: input.note?.trim() ?? '',
+    ...(bundle.length && { customExercises: bundle }),
+  }
   const result =
     input.kind === 'program'
       ? await createProposal(db, { ...common, kind: 'program.create', program: parsed.data }, noNotify)

@@ -1,0 +1,8 @@
+# 165 review (coach-review wE:pB, 2026-11-10) — Report: complete, verdict ship
+Checked fine: trainee can only pick visible exercises (visibleTo inside tx + re-check without bundled allowance; picking the coach's source → 422, stays pending); copies owned by trainee; one transaction, refusal keeps pending, double accept → 200 + 409 with one copy; snapshot names; earlier-copy reuse can't be spoofed (forged copyId ignored); name collisions + 100-char trim; 390px screenshots.
+Low findings: (1) review screen says "Dustin Coach's exercise" (full coaching name) vs spec/copy first name; (2) two-line legend straddles the fieldset border at 390px; (3) "Add a copy" hint doesn't show the copy's name; (4) P2002 race on the copy name → generic invalid, retry works (note); (5) admin proposal page shows live names, not snapshot (admin-only).
+Added (uncommitted): __tests__/lib/coaching/custom-exercises-review.test.ts (4: forged copyId; mine=source refused then retry; concurrent double accept; two sends share a copy). 201 coaching tests pass; tsc clean.
+Not verified: full suite; own 390px run; perf:tap; break-matrix on new tests.
+
+# 166 handback (coach-impl, 2026-11-10) — Report: complete
+1 first name ("Dustin's exercise", "Exercises from Dustin") via `coachFirstName`; sender line unchanged. 2 legend sr-only, visible name inside. 3 hint shows the copy name with next free number, or "You have this from an earlier send: <name>". 4 P2002 → 422 "Couldn't name the copy because that name was just taken. Try again.", stays pending, retry works. Test `__tests__/lib/coaching/custom-exercises-polish.test.ts` (5). Suite 4658 pass; tsc, biome, perf:scan clean. Screenshot assets/166/01-long-name.png. Cleanup (worktree1 DB): Coach Pull Day 166, 2 exercises, pending proposal.

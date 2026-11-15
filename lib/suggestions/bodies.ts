@@ -1,4 +1,5 @@
 import type { Proposal } from '@prisma/client'
+import { splitBundle } from '@/lib/coaching/custom-exercises'
 import { prisma } from '@/lib/db'
 import { ANCHOR_PATTERN_DISPLAY_NAMES, type AnchorPattern } from '@/lib/exercises/anchor-patterns'
 import { FAU_DISPLAY_NAMES } from '@/lib/fau-volume'
@@ -22,8 +23,13 @@ export function same(a: unknown, b: unknown): boolean {
   return JSON.stringify(a ?? null) === JSON.stringify(b ?? null)
 }
 
+/** A coach send's exercises by their names at send time; they override the coach's live names. */
+function snapshotNames(payload: unknown): Map<string, string> {
+  return new Map(splitBundle(payload).bundle.map((b) => [b.sourceId, b.name]))
+}
+
 export async function programDetail(payload: unknown, targetId: string | null, userId: string) {
-  const program = payload as ProgramInput
+  const program = splitBundle(payload).content as unknown as ProgramInput
   const ids = [
     ...new Set(program.weeks.flatMap((w) => w.workouts.flatMap((wo) => wo.exercises.map((e) => e.exerciseDefinitionId)))),
   ]
@@ -33,7 +39,8 @@ export async function programDetail(payload: unknown, targetId: string | null, u
       ? prisma.program.findFirst({ where: { id: targetId, userId, deletedAt: null }, select: { id: true } })
       : null,
   ])
-  return { program, definitionNames: Object.fromEntries(definitions.map((d) => [d.id, d.name])), created }
+  const definitionNames = Object.fromEntries([...definitions.map((d) => [d.id, d.name]), ...snapshotNames(payload)])
+  return { program, definitionNames, created }
 }
 
 /**
@@ -82,11 +89,17 @@ export async function balanceRows(
 
 type ExerciseInput = WorkoutCreateInput['exercises'][number]
 
-/** Proposed exercises with names from their definitions (one query); a deleted one shows as missing. */
-export async function namedExercises(exercises: ExerciseInput[]): Promise<ExerciseLine[]> {
+/**
+ * Proposed exercises with names from their definitions (one query), or from
+ * `snapshot` (a coach send's names at send time); a deleted one shows as missing.
+ */
+export async function namedExercises(
+  exercises: ExerciseInput[],
+  snapshot: ReadonlyMap<string, string> = new Map()
+): Promise<ExerciseLine[]> {
   const ids = [...new Set(exercises.map((e) => e.exerciseDefinitionId))]
   const definitions = await prisma.exerciseDefinition.findMany({ where: { id: { in: ids } }, select: { id: true, name: true } })
-  const names = new Map(definitions.map((d) => [d.id, d.name]))
+  const names = new Map([...definitions.map((d) => [d.id, d.name] as const), ...snapshot])
   return exercises.map((e) => ({
     name: names.get(e.exerciseDefinitionId) ?? 'Missing exercise',
     notes: e.notes,
@@ -151,7 +164,7 @@ export async function suggestionBody(proposal: BodySource, userId: string): Prom
         type: 'saved_workout_create',
         name: workout.name,
         notes: workout.notes ?? null,
-        exercises: await namedExercises(workout.exercises),
+        exercises: await namedExercises(workout.exercises, snapshotNames(proposal.payload)),
       }
     }
     case 'saved_workout.update':

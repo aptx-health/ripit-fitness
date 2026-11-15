@@ -28,10 +28,7 @@ Feature: Coaching, slice 2: send programs and workouts, and see what happened
     Given Dustin coaches nobody
     Then there is no Send option
 
-  Scenario: Custom exercises are refused
-    Given the program uses "Dustin's Cable Fly", an exercise Dustin made
-    When he tries to send it
-    Then it is refused with "Sam doesn't have these exercises: Dustin's Cable Fly" and nothing is sent
+  # Custom exercises: features/coaching/custom-exercises.feature (replaces the refusal, 2026-11-10).
 
   Scenario: A snapshot
     Given Dustin sent a program
