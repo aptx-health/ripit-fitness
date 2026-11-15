@@ -2,7 +2,7 @@
 
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { ChevronLeft, X } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { SegmentedControl } from '@/components/ui/SegmentedControl'
 import {
   loadQuickPanelPrefs,
@@ -32,12 +32,23 @@ export default function AdminQuickPanel() {
   const [open, setOpen] = useState(false)
   const [prefs, setPrefs] = useState<QuickPanelPrefs>(loadQuickPanelPrefs)
 
+  const tabRef = useRef<HTMLButtonElement>(null)
+
+  // An open Radix sheet closes on any pointerdown outside it, heard on the
+  // document. Stop the tab's pointerdown at the tab so the sheet stays open.
+  // (A native listener: React's own listener sits on the document too.)
+  useEffect(() => {
+    const el = tabRef.current
+    if (!el) return
+    const stop = (e: PointerEvent) => e.stopPropagation()
+    el.addEventListener('pointerdown', stop)
+    return () => el.removeEventListener('pointerdown', stop)
+  }, [])
+
   const update = (next: Partial<QuickPanelPrefs>) => {
-    setPrefs((prev) => {
-      const merged = { ...prev, ...next }
-      saveQuickPanelPrefs(merged)
-      return merged
-    })
+    const merged = { ...prefs, ...next }
+    setPrefs(merged)
+    saveQuickPanelPrefs(merged)
   }
 
   const recording = prefs.touchIndicators
@@ -46,6 +57,7 @@ export default function AdminQuickPanel() {
     <>
       {/* The hit area stays 20px wide; while recording only a faint 5px sliver shows. */}
       <button
+        ref={tabRef}
         type="button"
         aria-label="Open admin panel"
         data-recording={recording ? 'true' : 'false'}

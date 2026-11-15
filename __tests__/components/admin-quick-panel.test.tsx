@@ -56,10 +56,29 @@ const layer = () => screen.queryByTestId('touch-indicator-layer')
 const rings = () => Array.from(document.querySelectorAll('[data-touch-indicator="ring"]')) as HTMLElement[]
 const dots = () => document.querySelectorAll('[data-touch-indicator="trail"]')
 
-function pointer(type: string, x: number, y: number, target: EventTarget = document.body, id = 1) {
-  const ev = new PointerEvent(type, { clientX: x, clientY: y, pointerId: id, bubbles: true, cancelable: true })
+function pointer(
+  type: string,
+  x: number,
+  y: number,
+  target: EventTarget = document.body,
+  id = 1,
+  pointerType = ''
+) {
+  const ev = new PointerEvent(type, { clientX: x, clientY: y, pointerId: id, pointerType, bubbles: true, cancelable: true })
   act(() => {
     target.dispatchEvent(ev)
+  })
+  return ev
+}
+
+// A touch event as the browser sends it while a drag scrolls the page.
+function touch(type: string, x: number, y: number) {
+  const ev = new Event(type, { bubbles: true, cancelable: true })
+  const point = [{ identifier: 0, clientX: x, clientY: y }]
+  Object.defineProperty(ev, 'touches', { value: type === 'touchend' ? [] : point })
+  Object.defineProperty(ev, 'changedTouches', { value: point })
+  act(() => {
+    document.body.dispatchEvent(ev)
   })
   return ev
 }
@@ -179,14 +198,15 @@ describe('Scenario: The tab works over the loggers and sheets', () => {
     expect(Number(panel.style.zIndex)).toBeGreaterThan(highest)
   })
 
-  it('still opens the panel while a sheet (Radix dialog) is open', () => {
+  it('still opens the panel while a sheet (Radix dialog) is open, and the sheet stays open', async () => {
+    const onOpenChange = vi.fn()
     render(
       createElement(
         'div',
         null,
         createElement(
           Dialog,
-          { open: true },
+          { open: true, onOpenChange },
           createElement(DialogContent, null, createElement(DialogTitle, null, 'Swap exercise'))
         ),
         createElement(AdminQuickPanel)
@@ -195,8 +215,15 @@ describe('Scenario: The tab works over the loggers and sheets', () => {
     expect(screen.getByRole('dialog', { name: 'Swap exercise' })).toBeTruthy()
     // Radix sets pointer-events: none on body while a modal is open; the tab opts back in.
     expect(tab().style.pointerEvents).toBe('auto')
+    // Radix starts listening for outside taps on the next tick.
+    await act(() => new Promise((r) => setTimeout(r, 0)))
+    fireEvent.pointerDown(tab())
+    fireEvent.mouseDown(tab())
+    fireEvent.pointerUp(tab())
     fireEvent.click(tab())
-    expect(screen.getByRole('dialog', { name: 'Admin' })).toBeTruthy()
+    expect(screen.getByRole('dialog', { name: 'Admin', hidden: true })).toBeTruthy()
+    expect(onOpenChange).not.toHaveBeenCalled()
+    expect(screen.getByText('Swap exercise').closest('[role="dialog"]')?.getAttribute('data-state')).toBe('open')
   })
 })
 
@@ -282,12 +309,77 @@ describe('Scenario: Drag trail', () => {
     expect(rings()).toHaveLength(0)
   })
 
+  it('keeps following a finger drag after the browser cancels the pointer to scroll', () => {
+    render(createElement(AdminQuickPanel))
+    turnOnIndicators('Trail')
+    vi.useFakeTimers()
+    pointer('pointerdown', 300, 560, document.body, 1, 'touch')
+    touch('touchstart', 300, 560)
+    pointer('pointermove', 275, 520, document.body, 1, 'touch')
+    touch('touchmove', 275, 520)
+    // The drag turns into a scroll: no more pointer events, only touch events.
+    pointer('pointercancel', 275, 520, document.body, 1, 'touch')
+    expect(rings()).toHaveLength(1)
+    touch('touchmove', 250, 480)
+    touch('touchmove', 230, 440)
+    touch('touchmove', 210, 400)
+
+    expect(dots().length).toBeGreaterThanOrEqual(3)
+    expect(rings()).toHaveLength(1)
+    expect(rings()[0].style.left).toBe('210px')
+    expect(rings()[0].style.top).toBe('400px')
+
+    touch('touchend', 210, 400)
+    act(() => {
+      vi.advanceTimersByTime(RING_FADE_MS)
+    })
+    expect(rings()).toHaveLength(0)
+    expect(dots()).toHaveLength(0)
+  })
+
+  it('never blocks scrolling (touch events are not cancelled)', () => {
+    render(createElement(AdminQuickPanel))
+    turnOnIndicators('Trail')
+    pointer('pointerdown', 300, 560, document.body, 1, 'touch')
+    pointer('pointercancel', 300, 560, document.body, 1, 'touch')
+    expect(touch('touchmove', 250, 480).defaultPrevented).toBe(false)
+  })
+
   it('draws no trail with the Ring style', () => {
     render(createElement(AdminQuickPanel))
     turnOnIndicators('Ring')
     pointer('pointerdown', 300, 560)
     pointer('pointermove', 250, 480)
     expect(dots()).toHaveLength(0)
+  })
+})
+
+describe('Touch indicator listeners', () => {
+  const EVENTS = ['pointerdown', 'pointermove', 'pointerup', 'pointercancel', 'touchmove', 'touchend', 'touchcancel']
+
+  it('listen on window in the capture phase, passive, and are removed when turned off', () => {
+    const add = vi.spyOn(window, 'addEventListener')
+    const remove = vi.spyOn(window, 'removeEventListener')
+    render(createElement(AdminQuickPanel))
+    turnOnIndicators()
+
+    const added = new Map<string, unknown>()
+    for (const [type, fn, opts] of add.mock.calls) {
+      if (EVENTS.includes(type)) {
+        expect(opts).toEqual({ capture: true, passive: true })
+        added.set(type, fn)
+      }
+    }
+    expect([...added.keys()].sort()).toEqual([...EVENTS].sort())
+
+    const panel = openPanel()
+    fireEvent.click(within(panel).getByRole('switch', { name: /Touch indicators/ }))
+    for (const type of EVENTS) {
+      const call = remove.mock.calls.find(([t, fn]) => t === type && fn === added.get(type))
+      expect(call, type).toBeTruthy()
+      expect((call?.[2] as AddEventListenerOptions).capture).toBe(true)
+    }
+    expect(layer()).toBeNull()
   })
 })
 

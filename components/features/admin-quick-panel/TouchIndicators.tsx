@@ -69,8 +69,12 @@ export default function TouchIndicators({ touchStyle }: { touchStyle: TouchStyle
     const layer = layerRef.current
     if (!layer) return
 
+    type Live = { ring: HTMLDivElement; lastX: number; lastY: number }
     // One live ring per pointer while it is down (Trail style follows it).
-    const live = new Map<number, { ring: HTMLDivElement; lastX: number; lastY: number }>()
+    const live = new Map<number, Live>()
+    // A finger drag that turned into a scroll: the browser cancels the pointer
+    // and sends only touch events from then on, so follow those instead.
+    let scrolling: Live | null = null
     const timers = new Set<ReturnType<typeof setTimeout>>()
 
     const removeLater = (el: HTMLElement, ms: number) => {
@@ -86,6 +90,16 @@ export default function TouchIndicators({ touchStyle }: { touchStyle: TouchStyle
       removeLater(ring, RING_FADE_MS)
     }
 
+    const follow = (entry: Live, x: number, y: number) => {
+      placeAt(entry.ring, x, y)
+      if (Math.hypot(x - entry.lastX, y - entry.lastY) < DOT_SPACING) return
+      const dot = makeDot(entry.lastX, entry.lastY)
+      layer.insertBefore(dot, entry.ring)
+      removeLater(dot, TRAIL_FADE_MS)
+      entry.lastX = x
+      entry.lastY = y
+    }
+
     const onDown = (e: PointerEvent) => {
       const ring = makeRing(e.clientX, e.clientY)
       layer.appendChild(ring)
@@ -98,14 +112,7 @@ export default function TouchIndicators({ touchStyle }: { touchStyle: TouchStyle
 
     const onMove = (e: PointerEvent) => {
       const entry = live.get(e.pointerId)
-      if (!entry) return
-      placeAt(entry.ring, e.clientX, e.clientY)
-      if (Math.hypot(e.clientX - entry.lastX, e.clientY - entry.lastY) < DOT_SPACING) return
-      const dot = makeDot(entry.lastX, entry.lastY)
-      layer.insertBefore(dot, entry.ring)
-      removeLater(dot, TRAIL_FADE_MS)
-      entry.lastX = e.clientX
-      entry.lastY = e.clientY
+      if (entry) follow(entry, e.clientX, e.clientY)
     }
 
     const onUp = (e: PointerEvent) => {
@@ -115,16 +122,41 @@ export default function TouchIndicators({ touchStyle }: { touchStyle: TouchStyle
       fadeRing(entry.ring)
     }
 
+    const onCancel = (e: PointerEvent) => {
+      const entry = live.get(e.pointerId)
+      if (!entry || e.pointerType !== 'touch') return onUp(e)
+      live.delete(e.pointerId)
+      if (scrolling) fadeRing(scrolling.ring)
+      scrolling = entry
+    }
+
+    const onTouchMove = (e: TouchEvent) => {
+      const t = e.touches[0]
+      if (scrolling && t) follow(scrolling, t.clientX, t.clientY)
+    }
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (!scrolling || e.touches.length > 0) return
+      fadeRing(scrolling.ring)
+      scrolling = null
+    }
+
     const opts: AddEventListenerOptions = { capture: true, passive: true }
     window.addEventListener('pointerdown', onDown, opts)
     window.addEventListener('pointermove', onMove, opts)
     window.addEventListener('pointerup', onUp, opts)
-    window.addEventListener('pointercancel', onUp, opts)
+    window.addEventListener('pointercancel', onCancel, opts)
+    window.addEventListener('touchmove', onTouchMove, opts)
+    window.addEventListener('touchend', onTouchEnd, opts)
+    window.addEventListener('touchcancel', onTouchEnd, opts)
     return () => {
       window.removeEventListener('pointerdown', onDown, opts)
       window.removeEventListener('pointermove', onMove, opts)
       window.removeEventListener('pointerup', onUp, opts)
-      window.removeEventListener('pointercancel', onUp, opts)
+      window.removeEventListener('pointercancel', onCancel, opts)
+      window.removeEventListener('touchmove', onTouchMove, opts)
+      window.removeEventListener('touchend', onTouchEnd, opts)
+      window.removeEventListener('touchcancel', onTouchEnd, opts)
       for (const t of timers) clearTimeout(t)
       for (const el of layer.querySelectorAll('[data-touch-indicator]')) el.remove()
     }
