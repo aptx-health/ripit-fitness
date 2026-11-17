@@ -14,6 +14,7 @@ import { computeEffortSummary, EFFORT_SESSION_STATUSES, WEEK_MS } from '@/lib/in
 import { decodeCursor, EXPORT_COLUMNS, encodeCursor, fetchExportRows, parseRange } from '@/lib/insights/export'
 import { computeStallSignals, STALL_SESSION_STATUSES } from '@/lib/insights/stall'
 import { logger } from '@/lib/logger'
+import { getUserFeedbackScreenshot, listUserFeedback } from '@/lib/mcp/feedback'
 import { logLibrary } from '@/lib/mcp/library-log'
 import type { Notify } from '@/lib/notify'
 import { visibleTo } from '@/lib/proposals/exercise-definition'
@@ -85,6 +86,17 @@ export interface CallToolResult {
   [key: string]: unknown
   content: Array<{ type: 'text'; text: string }>
   isError?: boolean
+}
+
+type ImageContent = { type: 'image'; data: string; mimeType: string }
+
+/**
+ * A handler result sent as these content items instead of one JSON text item.
+ * Only get_feedback_screenshot uses it; CallToolResult stays text-typed for
+ * the many callers that read content[0].text.
+ */
+class RichContent {
+  constructor(readonly content: Array<ImageContent | { type: 'text'; text: string }>) {}
 }
 
 export interface ToolDescriptor {
@@ -232,6 +244,7 @@ const schemas = {
     category: z.enum(VALID_CATEGORIES).optional(),
     limit: z.number().int().min(1).max(50).optional().describe('Defaults to 20'),
   }),
+  get_feedback_screenshot: z.object({ feedbackId: z.string().min(1).describe('Id from list_feedback') }),
 }
 
 type ToolName = keyof typeof schemas
@@ -288,7 +301,9 @@ const descriptions: Record<ToolName, string> = {
     'Propose merging a duplicate (fromId) into the exercise that stays (intoId): every use moves to intoId, the old name becomes an alias, and fromId is deleted. Nothing changes until approved; an approved merge cannot be undone.',
   list_proposals: "List the user's proposals and their status.",
   list_feedback:
-    "List the user's app feedback, newest first (status defaults to new). Pass a feedback id as feedbackId on a propose tool to link the proposal; approving it resolves the feedback.",
+    "List the user's app feedback, newest first (status defaults to new). Pass a feedback id as feedbackId on a propose tool to link the proposal; approving it resolves the feedback. hasScreenshot marks bug reports with a screenshot.",
+  get_feedback_screenshot:
+    "Get the screenshot of one of the user's bug reports (list_feedback hasScreenshot) as an image, with its message, page URL and context: viewport, theme, build version and recent console errors.",
 }
 
 const savedWorkoutSummary = {
@@ -889,24 +904,14 @@ const handlers: { [N in ToolName]: Handler<N> } = {
     return { proposals }
   },
 
-  async list_feedback(prisma, ctx, { status, category, limit }) {
-    const feedback = await prisma.feedback.findMany({
-      where: { userId: ctx.userId, status: status ?? 'new', ...(category && { category }) },
-      orderBy: { createdAt: 'desc' },
-      take: limit ?? 20,
-      select: {
-        id: true,
-        category: true,
-        message: true,
-        pageUrl: true,
-        rating: true,
-        refinements: true,
-        status: true,
-        adminNote: true,
-        createdAt: true,
-      },
-    })
-    return { feedback }
+  async list_feedback(prisma, ctx, args) {
+    return { feedback: await listUserFeedback(prisma, ctx.userId, args) }
+  },
+
+  async get_feedback_screenshot(prisma, ctx, { feedbackId }) {
+    const found = await getUserFeedbackScreenshot(prisma, ctx.userId, feedbackId)
+    if (!found) throw new ToolError('No screenshot for that feedback id.')
+    return new RichContent([found.image, { type: 'text', text: JSON.stringify(found.info) }])
   },
 }
 
@@ -974,7 +979,7 @@ export async function callTool(
       const { exerciseId, proposalId, status } = data as { exerciseId?: string; proposalId?: string; status?: string }
       logLibrary(ctx, name, parsed.data, status === 'applied' ? 'applied' : 'proposed', { exerciseId, proposalId })
     }
-    return text(data)
+    return data instanceof RichContent ? ({ content: data.content } as CallToolResult) : text(data)
   } catch (error) {
     if (error instanceof ToolError) {
       if (isLibraryWrite) logLibrary(ctx, name, parsed.data, 'refused', { reason: error.message, field: error.extra.field })
