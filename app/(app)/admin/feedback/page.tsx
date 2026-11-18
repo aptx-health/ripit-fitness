@@ -4,7 +4,9 @@ import { ArrowDown, ArrowUp, Check, CheckCheck, ExternalLink, MessageSquarePlus,
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
+import FeedbackBugReport from '@/components/admin/FeedbackBugReport'
 import { SegmentedControl } from '@/components/ui/SegmentedControl'
+import type { BugContext } from '@/lib/feedback/context'
 import type { FeedbackStatus } from '@/types/feedback'
 import { POST_SESSION_REFINEMENTS } from '@/types/feedback'
 
@@ -38,6 +40,8 @@ interface FeedbackItem {
   createdAt: string
   rating: number | null
   refinements: string[]
+  hasScreenshot?: boolean
+  context?: BugContext | null
 }
 
 interface PostSessionStats {
@@ -81,19 +85,21 @@ export default function AdminFeedbackPage() {
   const [creatingIssue, setCreatingIssue] = useState<string | null>(null)
   const [issueLabels, setIssueLabels] = useState('')
   const searchParams = useSearchParams()
+  // Effects depend on the values, not the params object, so a new object with
+  // the same values doesn't refetch.
+  const expandParam = searchParams.get('expand')
+  const tabParam = searchParams.get('tab')
 
   // Auto-expand feedback item from URL (e.g., Discord deep link)
   useEffect(() => {
-    const expandId = searchParams.get('expand')
-    if (expandId) {
+    if (expandParam) {
       setActiveTab('all')
-      setExpandedId(expandId)
+      setExpandedId(expandParam)
     }
-    const tab = searchParams.get('tab')
-    if (tab === 'post_session') {
+    if (tabParam === 'post_session') {
       setActiveTab('post_session')
     }
-  }, [searchParams])
+  }, [expandParam, tabParam])
 
   useEffect(() => {
     let cancelled = false
@@ -125,9 +131,8 @@ export default function AdminFeedbackPage() {
           setLoading(false)
 
           // If auto-expanding from URL, set the admin note for the expanded item
-          const expandId = searchParams.get('expand')
-          if (expandId) {
-            const match = (json.feedback || []).find((f: FeedbackItem) => f.id === expandId)
+          if (expandParam) {
+            const match = (json.feedback || []).find((f: FeedbackItem) => f.id === expandParam)
             if (match) setAdminNote(match.adminNote || '')
           }
         }
@@ -135,7 +140,7 @@ export default function AdminFeedbackPage() {
       .catch(() => { if (!cancelled) setLoading(false) })
 
     return () => { cancelled = true }
-  }, [activeTab, sortBy, searchParams])
+  }, [activeTab, sortBy, expandParam])
 
   const updateFeedback = async (id: string, status: FeedbackStatus, note?: string) => {
     setUpdating(id)
@@ -508,6 +513,14 @@ export default function AdminFeedbackPage() {
                       {item.message || '(no message)'}
                     </p>
                   </div>
+
+                  {(item.hasScreenshot || item.context) && (
+                    <FeedbackBugReport
+                      feedbackId={item.id}
+                      hasScreenshot={item.hasScreenshot ?? false}
+                      context={item.context ?? null}
+                    />
+                  )}
 
                   {/* User agent */}
                   {item.userAgent && (
