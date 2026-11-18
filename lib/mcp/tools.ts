@@ -34,8 +34,10 @@ import {
   workoutExercises,
   workoutName,
   workoutNotes,
+  workoutTags,
 } from '@/lib/proposals/saved-workout'
 import { createProposal, PROPOSAL_STATUSES } from '@/lib/proposals/service'
+import { normaliseTag } from '@/lib/saved-workouts/tags'
 import { normalizeTargetMovements, normalizeUserTrainingProfile } from '@/lib/user-training-profile'
 import { VALID_CATEGORIES, VALID_STATUSES } from '@/types/feedback'
 import type { SavedWorkoutData } from '@/types/saved-workout'
@@ -196,6 +198,7 @@ const schemas = {
   }),
   list_saved_workouts: z.object({
     includeArchived: z.boolean().optional().describe('Include workouts the user archived (default false)'),
+    tag: z.string().trim().min(1).max(100).optional().describe('Only workouts carrying this tag (any case)'),
   }),
   get_saved_workout: z.object({ id: z.string().min(1) }),
   get_active_draft: z.object({}),
@@ -205,6 +208,7 @@ const schemas = {
     exercises: workoutExercises.describe(
       'In order. Each { exerciseDefinitionId, notes?, group?, sets: [{ reps, rir?, rpe?, isWarmup? }] }; no weight, put load guidance in notes. Same group label = superset'
     ),
+    tags: workoutTags.optional().describe("Up to 8 of the user's existing tags or starter tags (Push, Pull, Legs, Upper, Lower, Full body, Core, Cardio, Quick); others are dropped"),
     rationale,
     feedbackId,
   }),
@@ -281,7 +285,7 @@ const descriptions: Record<ToolName, string> = {
   propose_program_create:
     'Propose a new program (weeks > workouts > exercises > prescribed sets). Week, day, order and set numbers come from array position. Optional group on an exercise (1–3 letters, e.g. "A") makes a superset: give the same group to two or more exercises next to each other in one workout. Nothing is created until the user approves it; it is created inactive.',
   list_saved_workouts:
-    "List the user's saved workouts (templates started from My saved workouts), last used first (never-used ones by when they were saved), with origin (session | agent | coach), pinned and archived. Archived ones are left out unless includeArchived is true.",
+    "List the user's saved workouts (templates started from My saved workouts), last used first (never-used ones by when they were saved), with origin (session | agent | coach), pinned, archived and tags. Archived ones are left out unless includeArchived is true; tag keeps only workouts carrying that tag (any case).",
   get_saved_workout: "Get one of the user's saved workouts with its exercises and planned sets.",
   get_active_draft:
     "The user's live workout session (status draft), newest first, with each exercise's logged set count; null if none. Read only: agents never change a live session.",
@@ -715,14 +719,17 @@ const handlers: { [N in ToolName]: Handler<N> } = {
     return { proposalId: id, status, summary }
   },
 
-  async list_saved_workouts(prisma, ctx, { includeArchived }) {
+  async list_saved_workouts(prisma, ctx, { includeArchived, tag }) {
     const rows = await prisma.savedWorkout.findMany({
       where: { userId: ctx.userId, ...(!includeArchived && { archivedAt: null }) },
-      select: { ...savedWorkoutSummary, origin: true, pinnedAt: true, archivedAt: true },
+      select: { ...savedWorkoutSummary, origin: true, pinnedAt: true, archivedAt: true, tags: true },
     })
+    // Tags keep their typed case: compared here, tidied as the app tidies one, not with `has`.
+    const wanted = tag === undefined ? undefined : normaliseTag(tag, [])?.toLowerCase()
+    const tagged = wanted ? rows.filter((r) => r.tags.some((t) => t.toLowerCase() === wanted)) : rows
     // The app's order: last used, else when saved, newest first. Pins don't lift a row here.
     const activity = (r: (typeof rows)[number]) => (r.lastUsedAt ?? r.createdAt).getTime()
-    const savedWorkouts = rows
+    const savedWorkouts = tagged
       .sort((a, b) => activity(b) - activity(a))
       .map(({ pinnedAt, archivedAt, ...r }) => ({ ...r, pinned: pinnedAt !== null, archived: archivedAt !== null }))
     return { savedWorkouts }
@@ -786,14 +793,14 @@ const handlers: { [N in ToolName]: Handler<N> } = {
     }
   },
 
-  async propose_workout_create(prisma, ctx, { name, notes, exercises, rationale, feedbackId }) {
+  async propose_workout_create(prisma, ctx, { name, notes, exercises, tags, rationale, feedbackId }) {
     const result = await createProposal(
       prisma,
       {
         userId: ctx.userId,
         agentTokenId: ctx.tokenId,
         kind: 'saved_workout.create',
-        workout: { name, ...(notes !== undefined && { notes }), exercises },
+        workout: { name, ...(notes !== undefined && { notes }), exercises, ...(tags && { tags }) },
         rationale,
         feedbackId,
       },
@@ -801,7 +808,7 @@ const handlers: { [N in ToolName]: Handler<N> } = {
     )
     if (!result.ok) throw new ToolError(result.error, { field: result.field })
     const { id, status, summary } = result.proposal
-    return { proposalId: id, status, summary }
+    return { proposalId: id, status, summary, droppedTags: result.droppedTags ?? [] }
   },
 
   async propose_workout_update(prisma, ctx, { savedWorkoutId, name, notes, exercises, rationale, feedbackId }) {

@@ -8,12 +8,15 @@ import { useToast } from '@/components/ToastProvider'
 import { startFreestyleWorkout } from '@/lib/api/adhoc-workout'
 import { clientLogger } from '@/lib/client-logger'
 import { groupSavedWorkouts } from '@/lib/saved-workouts/groups'
+import { distinctTags, matchesFilter } from '@/lib/saved-workouts/tags'
 import ArchivedWorkoutRow from './ArchivedWorkoutRow'
 import DeleteSavedWorkoutDialog from './DeleteSavedWorkoutDialog'
 import GroupBox from './GroupBox'
 import RenameSavedWorkoutDialog from './RenameSavedWorkoutDialog'
 import SavedWorkoutDetailDialog from './SavedWorkoutDetailDialog'
 import SavedWorkoutRow, { type SavedWorkoutListItem } from './SavedWorkoutRow'
+import TagsSheet from './TagsSheet'
+import WorkoutFilterBar from './WorkoutFilterBar'
 
 type ArchiveState = Pick<SavedWorkoutListItem, 'archivedAt' | 'pinnedAt' | 'dismissedAt'>
 const stateOf = (item: SavedWorkoutListItem): ArchiveState => ({
@@ -30,7 +33,8 @@ const FOLD_BUTTON =
  * The saved workouts, inside the Library's Workouts folder box (the box itself
  * is the caller's): New, Pinned, Recent and a closed Older, each its own box
  * with a coloured header tab and count (GroupBox), and last a closed "Show
- * archived (n)". `onCountChange` reports the number of
+ * archived (n)". Above them, a search box and tag chips filter what was
+ * fetched (workout library slice 2). `onCountChange` reports the number of
  * unarchived workouts after each change, for the tab's count chip. A row
  * opens into a panel of its actions, one at a time; with `trainees` (the
  * Library page's, coaching slice 2) each panel also has Send.
@@ -46,6 +50,9 @@ export default function SavedWorkoutsList({
   const [loadError, setLoadError] = useState<string | null>(null)
   const [renameTarget, setRenameTarget] = useState<SavedWorkoutListItem | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<SavedWorkoutListItem | null>(null)
+  const [tagsTarget, setTagsTarget] = useState<SavedWorkoutListItem | null>(null)
+  const [query, setQuery] = useState('')
+  const [activeTag, setActiveTag] = useState<string | null>(null)
   const [detailId, setDetailId] = useState<string | null>(null)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [startingFreestyle, setStartingFreestyle] = useState(false)
@@ -202,6 +209,32 @@ export default function SavedWorkoutsList({
     [sendArchive]
   )
 
+  // Tags save when the sheet closes: the row changes now, takes its tags from
+  // the response, and goes back if the request fails.
+  const handleTagsClose = useCallback(
+    async (item: SavedWorkoutListItem, tags: string[]) => {
+      setTagsTarget(null)
+      const before = item.tags ?? []
+      if (JSON.stringify(tags) === JSON.stringify(before)) return
+      patchRow(item.id, { tags })
+      try {
+        const res = await fetch(`/api/workouts/saved/${item.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tags }),
+        })
+        const data = (await res.json().catch(() => ({}))) as { saved?: { tags: string[] }; error?: string }
+        if (!res.ok || !data.saved) throw new Error(data.error || `Request failed (${res.status})`)
+        patchRow(item.id, { tags: data.saved.tags })
+      } catch (err) {
+        clientLogger.error('Failed to save tags', err)
+        patchRow(item.id, { tags: before })
+        toast.error('Could not save tags', err instanceof Error ? err.message : 'Please try again.')
+      }
+    },
+    [patchRow, toast]
+  )
+
   // Start from a row's panel, as the detail dialog starts one.
   const handleStart = useCallback(
     async (item: SavedWorkoutListItem) => {
@@ -277,7 +310,19 @@ export default function SavedWorkoutsList({
   // The live row, so a pin toggled in the dialog shows in both places.
   const detailItem = items.find((item) => item.id === detailId) ?? null
 
-  const groups = groupSavedWorkouts(items)
+  // Chips are the tags on the workouts the list shows, so an archived
+  // workout's tags don't add one. An active tag that's gone counts as none.
+  const allGroups = groupSavedWorkouts(items)
+  const chipTags = distinctTags(items.filter((item) => !item.archivedAt))
+  const tag = activeTag && chipTags.includes(activeTag) ? activeTag : null
+  const filtering = query.trim() !== '' || tag !== null
+  const groups = filtering
+    ? groupSavedWorkouts(items.filter((item) => matchesFilter(item, query, tag)))
+    : allGroups
+  const clearFilter = () => {
+    setQuery('')
+    setActiveTag(null)
+  }
   const rows = (group: SavedWorkoutListItem[], id?: string, isNew = false) => (
     <ul id={id} className="divide-y divide-border">
       {group.map((item) => (
@@ -293,6 +338,7 @@ export default function SavedWorkoutsList({
             onStart={() => handleStart(item)}
             onTogglePin={() => handleTogglePin(item)}
             onRename={() => setRenameTarget(item)}
+            onTags={() => setTagsTarget(item)}
             onArchive={() => handleArchive(item)}
             onDismiss={() => handleArchive(item, true)}
             onDelete={() => setDeleteTarget(item)}
@@ -301,14 +347,37 @@ export default function SavedWorkoutsList({
       ))}
     </ul>
   )
-  const liveCount = items.length - groups.archived.length
+  const liveCount = items.length - allGroups.archived.length
+  const liveShown = groups.new.length + groups.pinned.length + groups.recent.length + groups.older.length
 
   return (
     <>
       {/* Boxes with space between them, not one shared grid (work 154). */}
       <div className="space-y-4 px-3 pt-1 pb-3">
+        {liveCount > 0 && (
+          <WorkoutFilterBar
+            query={query}
+            onQueryChange={setQuery}
+            tags={chipTags}
+            activeTag={tag}
+            onTagChange={setActiveTag}
+          />
+        )}
         {liveCount === 0 && (
           <p className="px-1 py-2 text-sm text-muted-foreground">All your saved workouts are archived.</p>
+        )}
+        {/* Above Show archived too, when only archived workouts match. */}
+        {filtering && liveShown === 0 && (
+          <div className="flex items-center justify-between gap-3 px-1">
+            <p className="text-sm text-muted-foreground">No workouts match</p>
+            <button
+              type="button"
+              onClick={clearFilter}
+              className="doom-focus-ring min-h-12 border-2 border-border px-4 text-sm font-semibold uppercase tracking-wider text-foreground hover:bg-muted"
+            >
+              Clear
+            </button>
+          </div>
         )}
         {groups.new.length > 0 && (
           <GroupBox label="New" tone="new" count={groups.new.length}>
@@ -325,16 +394,22 @@ export default function SavedWorkoutsList({
             {rows(groups.recent)}
           </GroupBox>
         )}
-        {groups.older.length > 0 && (
-          <GroupBox
-            label="Older"
-            tone="older"
-            count={groups.older.length}
-            fold={{ open: olderOpen, onToggle: () => setOlderOpen((open) => !open), controls: olderListId }}
-          >
-            {olderOpen && rows(groups.older, olderListId)}
-          </GroupBox>
-        )}
+        {/* While searching or filtering, Older's matches show without a tap. */}
+        {groups.older.length > 0 &&
+          (filtering ? (
+            <GroupBox label="Older" tone="older" count={groups.older.length}>
+              {rows(groups.older, olderListId)}
+            </GroupBox>
+          ) : (
+            <GroupBox
+              label="Older"
+              tone="older"
+              count={groups.older.length}
+              fold={{ open: olderOpen, onToggle: () => setOlderOpen((open) => !open), controls: olderListId }}
+            >
+              {olderOpen && rows(groups.older, olderListId)}
+            </GroupBox>
+          ))}
         {groups.archived.length > 0 && (
           <section aria-label="Archived">
             <button
@@ -377,6 +452,10 @@ export default function SavedWorkoutsList({
           }}
           onSuccess={handleRenameSuccess}
         />
+      )}
+
+      {tagsTarget && (
+        <TagsSheet item={tagsTarget} items={items} onClose={(tags) => handleTagsClose(tagsTarget, tags)} />
       )}
 
       {deleteTarget && (

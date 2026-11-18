@@ -47,6 +47,7 @@ import {
   createSummary,
   deleteSavedWorkout,
   fieldsBefore,
+  matchTags,
   restoreSavedWorkout,
   SavedWorkoutConflict,
   updateSummary,
@@ -93,7 +94,8 @@ export type ProposalStatus = (typeof PROPOSAL_STATUSES)[number]
 export type DecisionCode = 'not_found' | 'not_pending' | 'not_applied' | 'conflict' | 'in_use' | 'invalid'
 
 export type DecisionResult =
-  | { ok: true; proposal: Proposal }
+  /** `droppedTags`: approving a saved workout dropped these, as they'd take the user past 50 tags. */
+  | { ok: true; proposal: Proposal; droppedTags?: string[] }
   /** `userError` is written for the user (a refused accept choice); callers show it as is. */
   | { ok: false; code: DecisionCode; error: string; userError?: string }
 
@@ -163,7 +165,7 @@ export type CreateProposalInput = ProposalSender &
   )
 
 export type CreateProposalResult =
-  | { ok: true; proposal: Proposal }
+  | { ok: true; proposal: Proposal; /** saved_workout.create: tags dropped as neither the user's nor starters. */ droppedTags?: string[] }
   | { ok: false; code: 'invalid' | 'not_found'; error: string; field?: string; existingId?: string }
 
 interface UpdatePayload {
@@ -276,6 +278,7 @@ export async function createProposal(
   notify: Notify = defaultNotify
 ): Promise<CreateProposalResult> {
   let data: Prisma.ProposalUncheckedCreateInput
+  let droppedTags: string[] | undefined
 
   if (input.feedbackId !== undefined) {
     const feedback = await prisma.feedback.findFirst({
@@ -341,13 +344,17 @@ export async function createProposal(
     if (!bundled.ok) return bundled
     const check = await checkWorkoutCreate(prisma, input.workout, input.userId, bundled.names)
     if (!check.ok) return check
+    // Only tags the user already has, or starter tags, reach their library.
+    const { tags, ...workout } = check.value
+    const matched = await matchTags(prisma, input.userId, tags)
+    droppedTags = matched.dropped
     data = {
       userId: input.userId,
       ...senderOf(input),
       kind: input.kind,
       summary: createSummary(check.value),
       rationale: input.rationale,
-      payload: withBundle(check.value, input.customExercises),
+      payload: withBundle(matched.kept.length ? { ...workout, tags: matched.kept } : workout, input.customExercises),
     }
   } else if (input.kind === 'saved_workout.update') {
     const current = await prisma.savedWorkout.findFirst({
@@ -404,7 +411,7 @@ export async function createProposal(
     logger.warn({ error, proposalId: proposal.id }, 'Proposal notification failed')
   }
 
-  return { ok: true, proposal }
+  return { ok: true, proposal, ...(droppedTags && { droppedTags }) }
 }
 
 async function findOwned(prisma: PrismaClient, proposalId: string, userId: string) {
@@ -455,6 +462,7 @@ export async function approveProposal(
     return { ok: false, code: 'not_pending', error: 'proposal is not pending' }
   }
 
+  let droppedTags: string[] | undefined
   try {
     // A large program is many nested inserts; the 5 s default timeout is too short.
     const proposal = await prisma.$transaction(async (tx) => {
@@ -537,6 +545,7 @@ export async function approveProposal(
         // A coach's send makes a "coach" workout; an agent's an "agent" one (the New group says who).
         const origin = existing.coachLinkId ? 'coach' : 'agent'
         const created = await createSavedWorkout(tx, userId, check.value, check.definitionNames, origin)
+        if (created.droppedTags.length) droppedTags = created.droppedTags
         const inverse: CreateInverse = { op: 'delete', id: created.id }
         await resolveLinkedFeedback(tx, existing, userId)
         return tx.proposal.update({
@@ -600,8 +609,8 @@ export async function approveProposal(
       })
     }, { timeout: 30000 })
 
-    logger.info({ proposalId, userId, kind: proposal.kind }, 'Proposal applied')
-    return { ok: true, proposal }
+    logger.info({ proposalId, userId, kind: proposal.kind, droppedTags }, 'Proposal applied')
+    return { ok: true, proposal, ...(droppedTags && { droppedTags }) }
   } catch (error) {
     if (error instanceof Refusal) return refuseApproval(prisma, proposalId, error.code, error.message)
     if (error instanceof ChoiceRefusal) {
