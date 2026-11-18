@@ -3,17 +3,12 @@ import type { SavedWorkoutData, SavedWorkoutSet } from '@/types/saved-workout'
 const byOrder = (data: SavedWorkoutData) => [...data].sort((a, b) => a.order - b.order)
 const bySetNumber = (sets: SavedWorkoutSet[]) => [...sets].sort((a, b) => a.setNumber - b.setNumber)
 
-const sameSet = (a: SavedWorkoutSet, b: SavedWorkoutSet) =>
-  String(a.reps).trim() === String(b.reps).trim() &&
-  (a.rir ?? null) === (b.rir ?? null) &&
-  (a.rpe ?? null) === (b.rpe ?? null) &&
-  Boolean(a.isWarmup) === Boolean(b.isWarmup)
-
 /**
- * The "matches" rule for the session summary (workout library slice 4): the
- * same exercises in order, the same number of sets, and each set the same reps
- * (trimmed), RIR, RPE and warmup flag. That is what Update would write; names,
- * notes, groups and setNumber values are ignored.
+ * The "matches" rule for the session summary (workout library slice 4):
+ * structure only. The same exercises in order, the same number of sets, and
+ * each set the same warmup flag. Reps, RIR, RPE, names, notes, groups and
+ * setNumber values are ignored. Update still writes the session's reps, RIR
+ * and RPE, so a matching session can differ from the saved workout there.
  */
 export function sameExercisesAndSets(a: SavedWorkoutData, b: SavedWorkoutData): boolean {
   if (a.length !== b.length) return false
@@ -22,6 +17,6 @@ export function sameExercisesAndSets(a: SavedWorkoutData, b: SavedWorkoutData): 
     const other = right[i]
     if (ex.exerciseDefinitionId !== other.exerciseDefinitionId || ex.sets.length !== other.sets.length) return false
     const [sa, sb] = [bySetNumber(ex.sets), bySetNumber(other.sets)]
-    return sa.every((set, j) => sameSet(set, sb[j]))
+    return sa.every((set, j) => Boolean(set.isWarmup) === Boolean(sb[j].isWarmup))
   })
 }
