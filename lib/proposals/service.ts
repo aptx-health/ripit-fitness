@@ -47,6 +47,7 @@ import {
   createSummary,
   deleteSavedWorkout,
   fieldsBefore,
+  matchTags,
   restoreSavedWorkout,
   SavedWorkoutConflict,
   updateSummary,
@@ -163,7 +164,7 @@ export type CreateProposalInput = ProposalSender &
   )
 
 export type CreateProposalResult =
-  | { ok: true; proposal: Proposal }
+  | { ok: true; proposal: Proposal; /** saved_workout.create: tags dropped as neither the user's nor starters. */ droppedTags?: string[] }
   | { ok: false; code: 'invalid' | 'not_found'; error: string; field?: string; existingId?: string }
 
 interface UpdatePayload {
@@ -276,6 +277,7 @@ export async function createProposal(
   notify: Notify = defaultNotify
 ): Promise<CreateProposalResult> {
   let data: Prisma.ProposalUncheckedCreateInput
+  let droppedTags: string[] | undefined
 
   if (input.feedbackId !== undefined) {
     const feedback = await prisma.feedback.findFirst({
@@ -341,13 +343,17 @@ export async function createProposal(
     if (!bundled.ok) return bundled
     const check = await checkWorkoutCreate(prisma, input.workout, input.userId, bundled.names)
     if (!check.ok) return check
+    // Only tags the user already has, or starter tags, reach their library.
+    const { tags, ...workout } = check.value
+    const matched = await matchTags(prisma, input.userId, tags)
+    droppedTags = matched.dropped
     data = {
       userId: input.userId,
       ...senderOf(input),
       kind: input.kind,
       summary: createSummary(check.value),
       rationale: input.rationale,
-      payload: withBundle(check.value, input.customExercises),
+      payload: withBundle(matched.kept.length ? { ...workout, tags: matched.kept } : workout, input.customExercises),
     }
   } else if (input.kind === 'saved_workout.update') {
     const current = await prisma.savedWorkout.findFirst({
@@ -404,7 +410,7 @@ export async function createProposal(
     logger.warn({ error, proposalId: proposal.id }, 'Proposal notification failed')
   }
 
-  return { ok: true, proposal }
+  return { ok: true, proposal, ...(droppedTags && { droppedTags }) }
 }
 
 async function findOwned(prisma: PrismaClient, proposalId: string, userId: string) {

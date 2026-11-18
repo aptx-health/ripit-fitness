@@ -9,6 +9,14 @@ import {
   destructiveOpLimiter,
   workoutActionLimiter,
 } from '@/lib/rate-limit'
+import {
+  MAX_TAGS_PER_USER,
+  MAX_TAGS_PER_WORKOUT,
+  normaliseTags,
+  STARTER_TAGS,
+  TAG_MAX_LENGTH,
+  tagLimitBroken,
+} from '@/lib/saved-workouts/tags'
 
 const NAME_MAX_LENGTH = 100
 const NOTES_MAX_LENGTH = 2000
@@ -73,7 +81,7 @@ export async function GET(
  * doesn't move it; `false` clears it. A pin-only change leaves updatedAt as it
  * was. Another user's workout is a 404, the same as an unknown id.
  *
- * `archived` is sent on its own (see archive below).
+ * `archived` and `tags` are each sent on their own (see archive and setTags below).
  */
 export async function PATCH(
   request: NextRequest,
@@ -90,7 +98,15 @@ export async function PATCH(
     const limited = await checkRateLimit(workoutActionLimiter, user.id)
     if (limited) return limited
 
-    let body: { name?: unknown; notes?: unknown; pinned?: unknown; archived?: unknown; dismissed?: unknown; undo?: unknown }
+    let body: {
+      name?: unknown
+      notes?: unknown
+      pinned?: unknown
+      archived?: unknown
+      dismissed?: unknown
+      undo?: unknown
+      tags?: unknown
+    }
     try {
       body = await request.json()
     } catch {
@@ -99,6 +115,7 @@ export async function PATCH(
 
     // Awaited so a database failure lands in this catch (500, logged).
     if (body && typeof body === 'object' && 'archived' in body) return await archive(id, user.id, body)
+    if (body && typeof body === 'object' && 'tags' in body) return await setTags(id, user.id, body.tags)
 
     const updates: { name?: string; notes?: string | null } = {}
 
@@ -195,7 +212,55 @@ const LIST_FIELDS = {
   origin: true,
   archivedAt: true,
   dismissedAt: true,
+  tags: true,
 } satisfies Prisma.SavedWorkoutSelect
+
+const LIMIT_MESSAGES = {
+  length: `A tag can be at most ${TAG_MAX_LENGTH} characters`,
+  perWorkout: `A workout can have at most ${MAX_TAGS_PER_WORKOUT} tags`,
+  perUser: `You can have at most ${MAX_TAGS_PER_USER} different tags`,
+} as const
+
+/**
+ * Replace a workout's tags: { tags: string[] }. Each is tidied and matched,
+ * ignoring case, to a tag the user already has or a starter tag. Past a limit
+ * it's 400 { error, limit } and nothing is written. The user's other tags count
+ * archived workouts too, so un-archiving never breaks the 50. Three queries
+ * whatever the number of workouts. Tagging isn't an edit: updatedAt stays.
+ */
+async function setTags(id: string, userId: string, raw: unknown) {
+  if (!Array.isArray(raw) || raw.some((t) => typeof t !== 'string')) {
+    return NextResponse.json({ error: 'tags must be an array of strings' }, { status: 400 })
+  }
+
+  const existing = await prisma.savedWorkout.findUnique({
+    where: { id },
+    select: { userId: true, tags: true, updatedAt: true },
+  })
+  if (!existing || existing.userId !== userId) {
+    return NextResponse.json({ error: 'Saved workout not found' }, { status: 404 })
+  }
+
+  const others = (
+    await prisma.$queryRaw<{ tag: string }[]>`
+      SELECT DISTINCT unnest("tags") AS tag FROM "SavedWorkout" WHERE "userId" = ${userId} AND "id" <> ${id}`
+  ).map((r) => r.tag)
+  const tags = normaliseTags(raw as string[], [...others, ...existing.tags, ...STARTER_TAGS])
+  const limit = tagLimitBroken(tags, others)
+  if (limit) {
+    return NextResponse.json({ error: LIMIT_MESSAGES[limit], limit }, { status: 400 })
+  }
+
+  const updated = await prisma.savedWorkout.update({
+    where: { id },
+    data: { tags, updatedAt: existing.updatedAt },
+    select: LIST_FIELDS,
+  })
+
+  logger.info({ userId, savedWorkoutId: id, tagCount: tags.length }, 'Saved workout tags changed')
+
+  return NextResponse.json({ saved: updated })
+}
 
 /** An ISO date or null, as Undo sends back what archive returned. */
 function dateOrNull(value: unknown): Date | null | undefined {
