@@ -1,6 +1,6 @@
 'use client'
 
-import { Archive, ChevronDown, ChevronRight, Eye, Pencil, Pin, Play, Trash2, X } from 'lucide-react'
+import { Archive, ChevronDown, ChevronRight, Eye, Pencil, Pin, Play, Tag, Trash2, X } from 'lucide-react'
 import SendToTrainee, { type Trainee } from '@/components/coaching/SendToTrainee'
 import { panelButton, ROW_PANEL, ROW_PANEL_BUTTONS } from '@/components/ui/rowPanel'
 import { pluralize } from '@/lib/format/pluralize'
@@ -24,6 +24,8 @@ export type SavedWorkoutListItem = {
   fromCoach?: boolean
   /** The coach's name, as Coaching shows it, for "From Dustin". */
   coachName?: string | null
+  /** The user's own tags on it (workout library slice 2). */
+  tags?: string[]
 }
 
 type Props = {
@@ -39,6 +41,7 @@ type Props = {
   onStart: () => void
   onTogglePin: () => void
   onRename: () => void
+  onTags: () => void
   onArchive: () => void
   onDismiss?: () => void
   onDelete: () => void
@@ -66,6 +69,7 @@ export default function SavedWorkoutRow({
   onStart,
   onTogglePin,
   onRename,
+  onTags,
   onArchive,
   onDismiss,
   onDelete,
@@ -99,6 +103,15 @@ export default function SavedWorkoutRow({
             )}
           </div>
           <div className="mt-0.5 truncate text-sm text-muted-foreground">{summary}</div>
+          {item.tags && item.tags.length > 0 && (
+            <div className="mt-1 flex flex-wrap gap-1">
+              {item.tags.map((tag) => (
+                <span key={tag} className="border border-border px-1.5 text-xs leading-5 text-muted-foreground">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
         <Chevron size={18} aria-hidden="true" className="shrink-0 text-muted-foreground" />
       </button>
@@ -140,6 +153,10 @@ export default function SavedWorkoutRow({
             <button type="button" onClick={onRename} aria-label={`Rename ${item.name}`} {...panelButton()}>
               <Pencil size={14} aria-hidden="true" />
               Rename
+            </button>
+            <button type="button" onClick={onTags} aria-label={`Tags for ${item.name}`} {...panelButton()}>
+              <Tag size={14} aria-hidden="true" />
+              Tags…
             </button>
             <button type="button" onClick={onArchive} aria-label={`Archive ${item.name}`} {...panelButton()}>
               <Archive size={14} aria-hidden="true" />

@@ -1,6 +1,6 @@
 import type { Prisma, PrismaClient } from '@prisma/client'
 import { type ProgramInput, programInput } from '@/lib/proposals/program'
-import { type WorkoutCreateInput, workoutCreateInput } from '@/lib/proposals/saved-workout'
+import { matchTags, type WorkoutCreateInput, workoutCreateInput } from '@/lib/proposals/saved-workout'
 import { createProposal } from '@/lib/proposals/service'
 import type { SavedWorkoutData } from '@/types/saved-workout'
 import { BUNDLE_KEY, snapshotSelect, toSnapshot } from './custom-exercises'
@@ -14,6 +14,8 @@ import { normaliseProgram, normaliseWorkout, reasonFor } from './send-normalise'
  * coach's copy don't reach it. A coach send never notifies anyone. The same
  * thing can't wait twice: a pending identical send on the link is refused.
  * Exercises the coach made travel with it as a snapshot (./custom-exercises).
+ * A saved workout's tags travel only where the trainee has the tag or it's a
+ * starter tag; the rest are dropped and the result names them.
  */
 
 export type SendKind = 'program' | 'saved_workout'
@@ -27,7 +29,7 @@ export interface SendInput {
 }
 
 export type SendResult =
-  | { ok: true; proposalId: string }
+  | { ok: true; proposalId: string; /** A saved workout's tags the trainee doesn't have (nor starters). */ droppedTags: string[] }
   | {
       ok: false
       code: 'not_linked' | 'not_found' | 'invalid' | 'duplicate'
@@ -76,6 +78,7 @@ interface SavedWorkoutRow {
   name: string
   notes?: string | null
   workoutData: unknown
+  tags?: string[]
 }
 
 const by =
@@ -116,6 +119,7 @@ export function savedWorkoutToInput(saved: SavedWorkoutRow): WorkoutCreateInput 
   return {
     name: saved.name,
     ...(saved.notes && { notes: saved.notes }),
+    ...(saved.tags?.length && { tags: saved.tags }),
     exercises: sorted(data, (e) => e.order).map((exercise) => ({
       exerciseDefinitionId: exercise.exerciseDefinitionId,
       ...(exercise.notes && { notes: exercise.notes }),
@@ -204,7 +208,7 @@ async function snapshot(db: PrismaClient, coachUserId: string, kind: SendKind, s
   }
   const saved = await db.savedWorkout.findFirst({
     where: { id: sourceId, userId: coachUserId },
-    select: { name: true, notes: true, workoutData: true },
+    select: { name: true, notes: true, workoutData: true, tags: true },
   })
   if (!saved) return null
   const input = normaliseWorkout(savedWorkoutToInput(saved))
@@ -225,6 +229,16 @@ export async function sendToTrainee(db: PrismaClient, coachUserId: string, input
 
   const source = await snapshot(db, coachUserId, input.kind, input.sourceId)
   if (!source) return { ok: false, code: 'not_found' }
+
+  // Matched now, against the trainee's tags, so the duplicate check sees what will be stored.
+  let droppedTags: string[] = []
+  if (input.kind === 'saved_workout') {
+    const workout = source.input as WorkoutCreateInput
+    const { tags: raw, ...rest } = workout
+    const matched = await matchTags(db, link.traineeUserId, raw)
+    droppedTags = matched.dropped
+    source.input = matched.kept.length ? { ...rest, tags: matched.kept } : rest
+  }
 
   const { names, bundle, missing } = await exercisesFor(db, coachUserId, link.traineeUserId, source.ids)
   if (missing.length) {
@@ -258,7 +272,7 @@ export async function sendToTrainee(db: PrismaClient, coachUserId: string, input
       ? await createProposal(db, { ...common, kind: 'program.create', program: parsed.data }, noNotify)
       : await createProposal(db, { ...common, kind: 'saved_workout.create', workout: parsed.data }, noNotify)
   if (!result.ok) return { ok: false, code: 'invalid', reason: result.error }
-  return { ok: true, proposalId: result.proposal.id }
+  return { ok: true, proposalId: result.proposal.id, droppedTags }
 }
 
 const SENT_KIND: Record<string, SendKind> = { 'program.create': 'program', 'saved_workout.create': 'saved_workout' }

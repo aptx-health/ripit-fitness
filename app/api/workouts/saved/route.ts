@@ -50,6 +50,7 @@ export async function GET(_request: NextRequest) {
         origin: true,
         archivedAt: true,
         dismissedAt: true,
+        tags: true,
       },
     })
 

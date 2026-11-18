@@ -1,6 +1,7 @@
 import type { Prisma, PrismaClient, SavedWorkout } from '@prisma/client'
 import { z } from 'zod'
 import { pluralize } from '@/lib/format/pluralize'
+import { keepKnownTags } from '@/lib/saved-workouts/tags'
 import type { SavedWorkoutData } from '@/types/saved-workout'
 import { visibleTo } from './exercise-definition'
 import { exerciseGroup, withGroupRules } from './groups'
@@ -37,7 +38,12 @@ export const workoutNotes = z.string().trim().max(1000)
 const nonEmpty = (o: object) => Object.keys(o).length > 0
 export const WORKOUT_CHANGES_REQUIRED = 'give at least one of name, notes and exercises'
 
-export const workoutCreateInput = z.object({ name: workoutName, notes: workoutNotes.optional(), exercises: workoutExercises }).strict()
+// Tags are matched to the user's own and the starter tags when the proposal is made (matchTags).
+export const workoutTags = z.array(z.string().max(100)).max(50)
+
+export const workoutCreateInput = z
+  .object({ name: workoutName, notes: workoutNotes.optional(), exercises: workoutExercises, tags: workoutTags.optional() })
+  .strict()
 
 export const workoutChanges = z
   .object({ name: workoutName.optional(), notes: workoutNotes.nullable().optional(), exercises: workoutExercises.optional() })
@@ -206,6 +212,23 @@ async function writeFields(tx: Prisma.TransactionClient, row: SavedWorkout, fiel
   if (written.count === 0) throw new SavedWorkoutConflict(`saved workout changed ${when}`)
 }
 
+/** The user's tags: the distinct tags on their saved workouts, archived ones too. One query. */
+async function userTags(db: Db, userId: string): Promise<string[]> {
+  const rows = await db.$queryRaw<{ tag: string }[]>`
+    SELECT DISTINCT unnest("tags") AS tag FROM "SavedWorkout" WHERE "userId" = ${userId}`
+  return rows.map((r) => r.tag)
+}
+
+/**
+ * An agent's or coach's tags for the user's new workout: those matching a tag
+ * the user has or a starter tag are kept (at most 8, spelled as the user has
+ * them); the rest are dropped and reported.
+ */
+export async function matchTags(db: Db, userId: string, raw: readonly string[] | undefined) {
+  if (!raw?.length) return { kept: [], dropped: [] }
+  return keepKnownTags(raw, await userTags(db, userId))
+}
+
 /** Approve a create: the new saved workout, never started. `origin` is who sent it. */
 export async function createSavedWorkout(
   tx: Prisma.TransactionClient,
@@ -224,6 +247,7 @@ export async function createSavedWorkout(
       exerciseCount: workoutData.length,
       lastUsedAt: null,
       origin,
+      tags: input.tags ?? [],
     },
     select: { id: true },
   })
