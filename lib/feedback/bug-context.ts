@@ -16,16 +16,30 @@ function describe(arg: unknown): string {
   }
 }
 
-/** Records console.error calls for bug reports, keeping the last 10. Calling it again does nothing. */
+function record(args: unknown[]) {
+  recent.push(args.map(describe).join(' ').slice(0, MAX_ERROR_LENGTH))
+  if (recent.length > MAX_CONSOLE_ERRORS) recent.splice(0, recent.length - MAX_CONSOLE_ERRORS)
+}
+
+/**
+ * Records console.error calls, uncaught errors and unhandled promise
+ * rejections for bug reports, keeping the last 10. Calling it again does nothing.
+ */
 export function installConsoleErrorCapture(): void {
   if (installed || typeof console === 'undefined') return
   installed = true
   const original = console.error
   console.error = (...args: unknown[]) => {
-    recent.push(args.map(describe).join(' ').slice(0, MAX_ERROR_LENGTH))
-    if (recent.length > MAX_CONSOLE_ERRORS) recent.splice(0, recent.length - MAX_CONSOLE_ERRORS)
+    record(args)
     original.apply(console, args)
   }
+  if (typeof window === 'undefined') return
+  window.addEventListener('error', (e) => {
+    record(['Uncaught', e.error ?? e.message])
+  })
+  window.addEventListener('unhandledrejection', (e) => {
+    record(['Unhandled rejection', e.reason])
+  })
 }
 
 /** The page, screen, theme, build and recent console errors, for a bug report. */

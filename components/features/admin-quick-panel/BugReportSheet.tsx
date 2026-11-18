@@ -33,11 +33,13 @@ export default function BugReportSheet({ onClose }: { onClose: () => void }) {
   const toast = useToast()
   const [capturing, setCapturing] = useState(true)
   const [image, setImage] = useState<Blob | null>(null)
-  const [captureFailed, setCaptureFailed] = useState(false)
+  // 'first': no screenshot at all; 'retake': the preview is still the earlier one.
+  const [captureFailed, setCaptureFailed] = useState<'first' | 'retake' | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [message, setMessage] = useState('')
   const [sending, setSending] = useState(false)
-  const [sendFailed, setSendFailed] = useState(false)
+  // 'image': the picture couldn't be shrunk (e.g. an undecodable HEIC); 'send': the upload failed.
+  const [sendFailed, setSendFailed] = useState<'image' | 'send' | null>(null)
   const [captureRun, setCaptureRun] = useState(0)
   const fileRef = useRef<HTMLInputElement>(null)
 
@@ -51,12 +53,12 @@ export default function BugReportSheet({ onClose }: { onClose: () => void }) {
         (blob) => {
           if (cancelled) return
           setImage(blob)
-          setCaptureFailed(false)
+          setCaptureFailed(null)
         },
         (error) => {
           if (cancelled) return
           clientLogger.warn('Bug report: screen capture failed', error)
-          setCaptureFailed(true)
+          setCaptureFailed(captureRun === 0 ? 'first' : 'retake')
         }
       )
       .finally(() => {
@@ -82,12 +84,13 @@ export default function BugReportSheet({ onClose }: { onClose: () => void }) {
     e.target.value = ''
     if (!file) return
     setImage(file)
-    setCaptureFailed(false)
+    setCaptureFailed(null)
+    setSendFailed(null)
   }
 
   const send = async () => {
     setSending(true)
-    setSendFailed(false)
+    setSendFailed(null)
     try {
       const form = new FormData()
       form.append('category', 'bug')
@@ -96,7 +99,14 @@ export default function BugReportSheet({ onClose }: { onClose: () => void }) {
       form.append('userAgent', navigator.userAgent)
       form.append('context', JSON.stringify(collectBugContext()))
       if (image) {
-        const upload = await shrinkImage(image)
+        let upload: Blob
+        try {
+          upload = await shrinkImage(image)
+        } catch (error) {
+          clientLogger.warn('Bug report: image could not be shrunk', error)
+          setSendFailed('image')
+          return
+        }
         form.append('screenshot', upload, `screenshot.${EXTENSIONS[upload.type] ?? 'jpg'}`)
       }
       const res = await fetch('/api/feedback', { method: 'POST', body: form })
@@ -105,7 +115,7 @@ export default function BugReportSheet({ onClose }: { onClose: () => void }) {
       onClose()
     } catch (error) {
       clientLogger.warn('Bug report: send failed', error)
-      setSendFailed(true)
+      setSendFailed('send')
     } finally {
       setSending(false)
     }
@@ -149,11 +159,17 @@ export default function BugReportSheet({ onClose }: { onClose: () => void }) {
                 alt="Screenshot preview"
                 className="mx-auto max-h-[38dvh] w-auto max-w-full border border-border bg-muted object-contain"
               />
-            ) : captureFailed ? (
+            ) : null}
+            {captureFailed === 'first' && (
               <p className="border border-border bg-muted p-3 text-sm text-muted-foreground">
                 Screen capture didn&apos;t work. Use a photo, or send without an image.
               </p>
-            ) : null}
+            )}
+            {captureFailed === 'retake' && (
+              <p role="alert" className="text-sm font-semibold text-error">
+                Retake didn&apos;t work. The preview is still the earlier screenshot.
+              </p>
+            )}
 
             <div className="grid grid-cols-2 gap-2">
               <button
@@ -191,9 +207,14 @@ export default function BugReportSheet({ onClose }: { onClose: () => void }) {
               />
             </label>
 
-            {sendFailed && (
+            {sendFailed === 'send' && (
               <p role="alert" className="text-sm font-semibold text-error">
                 Report didn&apos;t send. Check your connection and try again.
+              </p>
+            )}
+            {sendFailed === 'image' && (
+              <p role="alert" className="text-sm font-semibold text-error">
+                That image couldn&apos;t be used. Pick another photo or Retake.
               </p>
             )}
 

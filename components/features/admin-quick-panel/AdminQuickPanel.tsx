@@ -40,14 +40,14 @@ export default function AdminQuickPanel() {
 
   const tabRef = useRef<HTMLButtonElement>(null)
 
-  // An open Radix sheet closes on any pointerdown outside it, heard on the
-  // document. Stop the tab's pointerdown at the tab so the sheet stays open.
-  // (A native listener: React's own listener sits on the document too.)
   // Bug reports carry the session's recent console errors.
   useEffect(() => {
     installConsoleErrorCapture()
   }, [])
 
+  // An open Radix sheet closes on any pointerdown outside it, heard on the
+  // document. Stop the tab's pointerdown at the tab so the sheet stays open.
+  // (A native listener: React's own listener sits on the document too.)
   useEffect(() => {
     const el = tabRef.current
     if (!el) return

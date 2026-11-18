@@ -18,7 +18,7 @@ ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
 ARG NEXT_PUBLIC_APP_URL
 ARG NEXT_PUBLIC_LOG_LEVEL
 ARG NEXT_PUBLIC_VENMO_HANDLE
-# Short commit SHA, shown in bug reports; the app falls back to "dev" without it
+# Full commit SHA, shown in bug reports; the app falls back to "dev" without it
 ARG NEXT_PUBLIC_BUILD_VERSION
 
 COPY --from=deps /app/node_modules ./node_modules

@@ -14,6 +14,8 @@ import { VALID_CATEGORIES, VALID_REFINEMENTS } from '@/types/feedback'
 
 const MAX_MESSAGE_LENGTH = 2000
 const MAX_CONTEXT_LENGTH = 20_000
+/** A full-size screenshot plus the text fields and multipart framing fits well under this. */
+const MAX_BODY_BYTES = 600_000
 
 interface FeedbackBody {
   category: string
@@ -77,6 +79,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Refuse an oversized upload from its declared length, before reading
+    // (and buffering) the body. Browsers always send it for a FormData body.
+    const declaredLength = Number(request.headers.get('content-length'))
+    if (declaredLength > MAX_BODY_BYTES) {
+      logger.warn({ userId: user.id, declaredLength }, 'Feedback refused: body too large')
+      return NextResponse.json({ error: 'Request too large' }, { status: 413 })
+    }
+
     // Rate limit: 5 submissions / hour / user. Replaces a prior DB-count
     // check that hit Postgres on every POST.
     const limited = await checkRateLimit(feedbackSubmissionLimiter, user.id)
@@ -88,7 +98,8 @@ export async function POST(request: NextRequest) {
     }
     const { category, message, pageUrl, userAgent, properties, rating, refinements, context, screenshot } = parsed
 
-    // Screenshots are an admin bug-report tool; refuse them before reading the bytes.
+    // Screenshots are an admin bug-report tool. The form is already parsed
+    // (bounded by MAX_BODY_BYTES), but nothing is checked or saved for a non-admin.
     if (screenshot && !isAdminRole(user.role)) {
       logger.warn({ userId: user.id }, 'Feedback screenshot refused: not an admin')
       return NextResponse.json({ error: 'Only admins can attach screenshots' }, { status: 403 })
