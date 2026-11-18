@@ -515,10 +515,10 @@ export default function SavedWorkoutsList({
       {selecting && (
         <SelectBar
           count={chosen.length}
-          busy={bulkDialog !== null}
-          onArchive={() => {
-            bulk.archive(chosen)
-            leaveSelect()
+          busy={bulkDialog !== null || bulk.pending}
+          onArchive={async () => {
+            // A failed Archive keeps the selection, to try again.
+            if ((await bulk.archive(chosen)) !== 'failed') leaveSelect()
           }}
           onTag={() => setBulkDialog('tag')}
           onDelete={() => setBulkDialog('delete')}

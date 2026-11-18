@@ -144,13 +144,23 @@ async function tag(userId: string, ids: string[], raw: unknown) {
     if (row.tags.length >= MAX_TAGS_PER_WORKOUT) skipped.push(id)
     else changed.push(id)
   }
-  if (changed.length) {
-    await prisma.$executeRaw`
-      UPDATE "SavedWorkout" SET "tags" = array_append("tags", ${name})
-      WHERE "id" = ANY(${changed}) AND "userId" = ${userId}`
-  }
-  logger.info({ userId, count: changed.length, skipped: skipped.length }, 'Saved workouts tagged in bulk')
-  return NextResponse.json({ ids: changed, skipped })
+  // The WHERE checks the 8 and the duplicate again, so a request racing this
+  // one can't leave a workout with 9 tags or the same tag twice.
+  const tagged = changed.length
+    ? new Set(
+        (
+          await prisma.$queryRaw<{ id: string }[]>`
+            UPDATE "SavedWorkout" SET "tags" = array_append("tags", ${name})
+            WHERE "id" = ANY(${changed}) AND "userId" = ${userId}
+              AND cardinality("tags") < ${MAX_TAGS_PER_WORKOUT}
+              AND NOT EXISTS (SELECT 1 FROM unnest("tags") AS t WHERE lower(t) = lower(${name}))
+            RETURNING "id"`
+        ).map((r) => r.id)
+      )
+    : new Set<string>()
+  const added = changed.filter((id) => tagged.has(id))
+  logger.info({ userId, count: added.length, skipped: skipped.length }, 'Saved workouts tagged in bulk')
+  return NextResponse.json({ ids: added, skipped })
 }
 
 /** Delete the user's ids. WorkoutCompletion.savedWorkoutId is a plain column, so sessions stay. */
