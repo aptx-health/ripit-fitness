@@ -43,7 +43,11 @@ export function decisionRoute(action: keyof typeof DECISIONS) {
           { status: STATUS_BY_CODE[result.code] }
         )
       }
-      return NextResponse.json({ success: true, data: result.proposal })
+      return NextResponse.json({
+        success: true,
+        data: result.proposal,
+        ...('droppedTags' in result && result.droppedTags && { droppedTags: result.droppedTags }),
+      })
     } catch (error) {
       logger.error({ error, action }, 'Error deciding proposal')
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

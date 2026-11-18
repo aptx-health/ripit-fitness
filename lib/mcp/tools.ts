@@ -37,6 +37,7 @@ import {
   workoutTags,
 } from '@/lib/proposals/saved-workout'
 import { createProposal, PROPOSAL_STATUSES } from '@/lib/proposals/service'
+import { normaliseTag } from '@/lib/saved-workouts/tags'
 import { normalizeTargetMovements, normalizeUserTrainingProfile } from '@/lib/user-training-profile'
 import { VALID_CATEGORIES, VALID_STATUSES } from '@/types/feedback'
 import type { SavedWorkoutData } from '@/types/saved-workout'
@@ -207,9 +208,7 @@ const schemas = {
     exercises: workoutExercises.describe(
       'In order. Each { exerciseDefinitionId, notes?, group?, sets: [{ reps, rir?, rpe?, isWarmup? }] }; no weight, put load guidance in notes. Same group label = superset'
     ),
-    tags: workoutTags
-      .optional()
-      .describe("Up to 8 of the user's existing tags or starter tags (Push, Pull, Legs, Upper, Lower, Full body, Core, Cardio, Quick); others are dropped"),
+    tags: workoutTags.optional().describe("Up to 8 of the user's existing tags or starter tags (Push, Pull, Legs, Upper, Lower, Full body, Core, Cardio, Quick); others are dropped"),
     rationale,
     feedbackId,
   }),
@@ -725,8 +724,8 @@ const handlers: { [N in ToolName]: Handler<N> } = {
       where: { userId: ctx.userId, ...(!includeArchived && { archivedAt: null }) },
       select: { ...savedWorkoutSummary, origin: true, pinnedAt: true, archivedAt: true, tags: true },
     })
-    // Tags keep their typed case, so the filter compares here rather than with `has`.
-    const wanted = tag?.toLowerCase()
+    // Tags keep their typed case: compared here, tidied as the app tidies one, not with `has`.
+    const wanted = tag === undefined ? undefined : normaliseTag(tag, [])?.toLowerCase()
     const tagged = wanted ? rows.filter((r) => r.tags.some((t) => t.toLowerCase() === wanted)) : rows
     // The app's order: last used, else when saved, newest first. Pins don't lift a row here.
     const activity = (r: (typeof rows)[number]) => (r.lastUsedAt ?? r.createdAt).getTime()

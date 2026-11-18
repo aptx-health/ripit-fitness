@@ -94,7 +94,8 @@ export type ProposalStatus = (typeof PROPOSAL_STATUSES)[number]
 export type DecisionCode = 'not_found' | 'not_pending' | 'not_applied' | 'conflict' | 'in_use' | 'invalid'
 
 export type DecisionResult =
-  | { ok: true; proposal: Proposal }
+  /** `droppedTags`: approving a saved workout dropped these, as they'd take the user past 50 tags. */
+  | { ok: true; proposal: Proposal; droppedTags?: string[] }
   /** `userError` is written for the user (a refused accept choice); callers show it as is. */
   | { ok: false; code: DecisionCode; error: string; userError?: string }
 
@@ -461,6 +462,7 @@ export async function approveProposal(
     return { ok: false, code: 'not_pending', error: 'proposal is not pending' }
   }
 
+  let droppedTags: string[] | undefined
   try {
     // A large program is many nested inserts; the 5 s default timeout is too short.
     const proposal = await prisma.$transaction(async (tx) => {
@@ -543,6 +545,7 @@ export async function approveProposal(
         // A coach's send makes a "coach" workout; an agent's an "agent" one (the New group says who).
         const origin = existing.coachLinkId ? 'coach' : 'agent'
         const created = await createSavedWorkout(tx, userId, check.value, check.definitionNames, origin)
+        if (created.droppedTags.length) droppedTags = created.droppedTags
         const inverse: CreateInverse = { op: 'delete', id: created.id }
         await resolveLinkedFeedback(tx, existing, userId)
         return tx.proposal.update({
@@ -606,8 +609,8 @@ export async function approveProposal(
       })
     }, { timeout: 30000 })
 
-    logger.info({ proposalId, userId, kind: proposal.kind }, 'Proposal applied')
-    return { ok: true, proposal }
+    logger.info({ proposalId, userId, kind: proposal.kind, droppedTags }, 'Proposal applied')
+    return { ok: true, proposal, ...(droppedTags && { droppedTags }) }
   } catch (error) {
     if (error instanceof Refusal) return refuseApproval(prisma, proposalId, error.code, error.message)
     if (error instanceof ChoiceRefusal) {

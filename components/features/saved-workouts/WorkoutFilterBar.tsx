@@ -1,6 +1,6 @@
 'use client'
 
-import { Search } from 'lucide-react'
+import { Search, X } from 'lucide-react'
 import { TAG_CHIP } from './TagsSheet'
 
 type Props = {
@@ -32,8 +32,19 @@ export default function WorkoutFilterBar({ query, onQueryChange, tags, activeTag
           value={query}
           onChange={(e) => onQueryChange(e.target.value)}
           autoComplete="off"
-          className="doom-focus-ring min-h-12 w-full border-2 border-border bg-background pl-9 pr-3 text-sm text-foreground focus:border-primary"
+          // The browser's own clear button ignores the theme, so it's hidden for ours.
+          className="doom-focus-ring min-h-12 w-full border-2 border-border bg-background pl-9 pr-12 text-sm text-foreground focus:border-primary [&::-webkit-search-cancel-button]:appearance-none"
         />
+        {query && (
+          <button
+            type="button"
+            aria-label="Clear search"
+            onClick={() => onQueryChange('')}
+            className="doom-focus-ring absolute right-0 top-0 flex h-12 w-12 items-center justify-center text-muted-foreground hover:text-foreground"
+          >
+            <X size={16} aria-hidden="true" />
+          </button>
+        )}
       </div>
       {tags.length > 0 && (
         // Scrolls sideways rather than wrapping, so the groups stay near the top.
