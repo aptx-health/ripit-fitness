@@ -8,14 +8,14 @@
  *
  *   lib/saved-workouts/match.ts (new)
  *     sameExercisesAndSets(a: SavedWorkoutData, b: SavedWorkoutData): boolean
- *       The "matches" rule for "Nothing changed". Each side's exercises are
- *       taken in `order`, and each exercise's sets in `setNumber` order. True
- *       when both have the same number of exercises, each pair has the same
- *       exerciseDefinitionId and the same number of sets, and each pair of
- *       sets has the same reps (compared as trimmed strings), rir, rpe and
- *       isWarmup (null is a value: null and 8 differ). That is exactly what
- *       Update would write. Everything else is ignored: names, notes,
- *       exerciseGroup, the setNumber values themselves, and weight (never stored).
+ *       The "matches" rule for "Nothing changed": structure only. Each side's
+ *       exercises are taken in `order`, and each exercise's sets in `setNumber`
+ *       order. True when both have the same number of exercises, each pair has
+ *       the same exerciseDefinitionId and the same number of sets, and each
+ *       pair of sets has the same isWarmup. Everything else is ignored: reps,
+ *       rir, rpe, names, notes, exerciseGroup, the setNumber values themselves,
+ *       and weight (never stored). Update still writes the session's reps, rir
+ *       and rpe, so a matching session can differ from the saved workout there.
  *     (__tests__/lib/saved-workout-match.test.ts)
  *
  *   lib/stats/workout-rollup.ts

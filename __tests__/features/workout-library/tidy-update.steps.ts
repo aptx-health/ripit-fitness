@@ -563,7 +563,8 @@ describeFeature(feature, ({ Background, Scenario }) => {
     })
     Then('the summary says it matches "Push A" and offers no Update', async () => {
       await freshState()
-      await sessionFrom('Push A', asPlanned())
+      // Other reps and RPE: the rule compares structure only.
+      await sessionFrom('Push A', [{ reps: [10, 9, 7], rpe: 9 }, { reps: [12, 11] }])
       await renderSummary(String(s.completion))
       expect(bodyText()).toMatch(/matches push a/i)
       expect(button(/^update\b/i)).toBeNull()
@@ -774,20 +775,24 @@ describe('update route', () => {
     expect(after.workoutData).toEqual(before.workoutData)
   })
 
-  it('a session that differs only in RPE or RIR does not match, so Update is offered and writes them', async () => {
-    const c = await sessionFrom('Push A', [{ reps: [8, 8, 8], rpe: 9 }, { reps: [12, 12] }])
-    expect((await rollupOf(c)).fromSaved?.matches).toBe(false)
+  it('a session that differs only in reps, RPE or RIR matches, and Update still writes them', async () => {
+    const c = await sessionFrom('Push A', [{ reps: [10, 9, 7], rpe: 9 }, { reps: [12, 11], rir: 2 }])
+    expect((await rollupOf(c)).fromSaved).toEqual({ id: s.ids['Push A'], name: 'Push A', gone: false, matches: true })
     expect((await update(s.ids['Push A'], { completionId: c })).status).toBe(200)
-    const sets = ((await row(s.ids['Push A']))?.workoutData as Json[])[0].sets as Json[]
-    expect(sets.map((x) => x.rpe)).toEqual([9, 9, 9])
-    await s.prisma.workoutCompletion.deleteMany({ where: { id: c } })
-    const rir = await sessionFrom('Push A', [{ reps: [8, 8, 8], rpe: 9 }, { reps: [12, 12], rir: 2 }])
-    expect((await rollupOf(rir)).fromSaved?.matches).toBe(false)
-    // The same again matches what Update wrote.
-    expect((await update(s.ids['Push A'], { completionId: rir })).status).toBe(200)
-    await s.prisma.workoutCompletion.deleteMany({ where: { id: rir } })
-    const again = await sessionFrom('Push A', [{ reps: [8, 8, 8], rpe: 9 }, { reps: [12, 12], rir: 2 }])
-    expect((await rollupOf(again)).fromSaved?.matches).toBe(true)
+    const data = (await row(s.ids['Push A']))?.workoutData as Json[]
+    const written = (e: Json) => (e.sets as Json[]).map((x) => [x.reps, x.rpe, x.rir])
+    expect(written(data[0])).toEqual([['10', 9, null], ['9', 9, null], ['7', 9, null]])
+    expect(written(data[1])).toEqual([['12', null, 2], ['11', null, 2]])
+  })
+
+  it('a session with a different warmup set, or another exercise in a slot, does not match', async () => {
+    const warm = await sessionFrom('Push A', [{ reps: [8, 8, 8], warm: 1 }, { reps: [12, 12] }])
+    expect((await rollupOf(warm)).fromSaved?.matches).toBe(false)
+    await s.prisma.workoutCompletion.deleteMany({ where: { id: warm } })
+    const swapped = await sessionFrom('Push A', asPlanned())
+    const fly = await s.prisma.exercise.findFirst({ where: { workoutCompletionId: swapped, order: 2 } })
+    await s.prisma.exercise.update({ where: { id: String(fly?.id) }, data: { exerciseDefinitionId: s.defs[2] } })
+    expect((await rollupOf(swapped)).fromSaved?.matches).toBe(false)
   })
 
   it('keeps a name changed during the session, not the name the session started with', async () => {

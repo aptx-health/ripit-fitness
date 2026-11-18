@@ -47,11 +47,17 @@ describe('sameExercisesAndSets', () => {
     expect(sameExercisesAndSets(plan(), other)).toBe(true)
   })
 
-  it('compares reps as trimmed text', async () => {
+  it('ignores reps, RPE and RIR: structure only', async () => {
     const { sameExercisesAndSets } = await load()
-    expect(sameExercisesAndSets(plan(), edit((d) => { d[0].sets[1].reps = ' 8 ' }))).toBe(true)
-    expect(sameExercisesAndSets(plan(), edit((d) => { d[0].sets[1].reps = '9' }))).toBe(false)
-    expect(sameExercisesAndSets(plan(), edit((d) => { d[0].sets[1].reps = '8-10' }))).toBe(false)
+    expect(sameExercisesAndSets(plan(), edit((d) => { d[0].sets[1].reps = '9' }))).toBe(true)
+    expect(sameExercisesAndSets(plan(), edit((d) => { d[0].sets[1].reps = '8-10' }))).toBe(true)
+    expect(sameExercisesAndSets(plan(), edit((d) => { d[0].sets[1].rpe = 9 }))).toBe(true)
+    expect(sameExercisesAndSets(plan(), edit((d) => { d[1].sets[0].rir = 2 }))).toBe(true)
+    const all = edit((d) => {
+      for (const e of d) e.sets = e.sets.map((x) => ({ ...x, reps: '3', rpe: 10, rir: 0 }))
+    })
+    expect(sameExercisesAndSets(plan(), all)).toBe(true)
+    expect(sameExercisesAndSets(all, plan())).toBe(true)
   })
 
   it('is false when a set is added or removed', async () => {
@@ -77,18 +83,18 @@ describe('sameExercisesAndSets', () => {
     expect(sameExercisesAndSets(plan(), shuffled)).toBe(true)
   })
 
-  it('is false when a set\'s RPE or RIR differs, null included', async () => {
-    const { sameExercisesAndSets } = await load()
-    expect(sameExercisesAndSets(plan(), edit((d) => { d[0].sets[1].rpe = 9 }))).toBe(false)
-    expect(sameExercisesAndSets(plan(), edit((d) => { d[1].sets[0].rir = 2 }))).toBe(false)
-    const rated = edit((d) => { d[0].sets[2].rpe = 8; d[0].sets[2].rir = 2 })
-    expect(sameExercisesAndSets(rated, structuredClone(rated))).toBe(true)
-    expect(sameExercisesAndSets(rated, edit((d) => { d[0].sets[2].rpe = 8; d[0].sets[2].rir = 1 }))).toBe(false)
-    expect(sameExercisesAndSets(rated, edit((d) => { d[0].sets[2].rir = 2 }))).toBe(false)
-  })
-
   it('is false when a warmup set becomes a working set', async () => {
     const { sameExercisesAndSets } = await load()
     expect(sameExercisesAndSets(plan(), edit((d) => { d[0].sets[0].isWarmup = false }))).toBe(false)
+    expect(sameExercisesAndSets(plan(), edit((d) => { d[1].sets[1].isWarmup = true }))).toBe(false)
+  })
+
+  it('is false when the exercises come in another order', async () => {
+    const { sameExercisesAndSets } = await load()
+    const swapped = edit((d) => {
+      d[0].order = 2
+      d[1].order = 1
+    })
+    expect(sameExercisesAndSets(plan(), swapped)).toBe(false)
   })
 })
