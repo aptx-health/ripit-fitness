@@ -47,6 +47,13 @@ export function distinctTags(rows: readonly { tags?: readonly string[] | null }[
 
 export type TagLimit = 'length' | 'perWorkout' | 'perUser'
 
+/** What a route answers when a tag change breaks a limit: 400 { error: TAG_LIMIT_MESSAGES[limit], limit }. */
+export const TAG_LIMIT_MESSAGES: Record<TagLimit, string> = {
+  length: `A tag can be at most ${TAG_MAX_LENGTH} characters`,
+  perWorkout: `A workout can have at most ${MAX_TAGS_PER_WORKOUT} tags`,
+  perUser: `You can have at most ${MAX_TAGS_PER_USER} different tags`,
+}
+
 /**
  * Whether giving a workout `tags` (in place of `current`) takes the user past 50
  * different tags. `others` are the user's tags on every other workout, archived
