@@ -65,7 +65,12 @@ export function suggestionDecisionRoute(action: 'accept' | 'reject') {
       const { id: proposalId, status, kind, targetId } = result.proposal
       const data = { id: proposalId, status, kind }
       if (action === 'reject') return NextResponse.json({ success: true, data })
-      return NextResponse.json({ success: true, data, programId: kind === 'program.create' ? targetId : null })
+      return NextResponse.json({
+        success: true,
+        data,
+        programId: kind === 'program.create' ? targetId : null,
+        ...(result.droppedTags && { droppedTags: result.droppedTags }),
+      })
     } catch (error) {
       logger.error({ error, action }, 'Error deciding suggestion')
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

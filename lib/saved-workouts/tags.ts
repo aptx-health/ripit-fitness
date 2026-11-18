@@ -48,15 +48,48 @@ export function distinctTags(rows: readonly { tags?: readonly string[] | null }[
 export type TagLimit = 'length' | 'perWorkout' | 'perUser'
 
 /**
- * Which limit, if any, a workout's new (normalised) tags break. `others` are the
- * user's tags on every other workout, archived ones included, so un-archiving
- * never breaks the 50.
+ * Whether giving a workout `tags` (in place of `current`) takes the user past 50
+ * different tags. `others` are the user's tags on every other workout, archived
+ * ones included, so un-archiving never breaks the 50. A change that doesn't
+ * raise the count is always allowed, so someone already over 50 can still
+ * remove or swap tags.
  */
-export function tagLimitBroken(tags: readonly string[], others: readonly string[]): TagLimit | null {
+export function overUserLimit(tags: readonly string[], others: readonly string[], current: readonly string[] = []): boolean {
+  const after = distinctTags([{ tags: others }, { tags }]).length
+  return after > MAX_TAGS_PER_USER && after > distinctTags([{ tags: others }, { tags: current }]).length
+}
+
+/** Which limit, if any, a workout's new (normalised) tags break; see overUserLimit for the 50. */
+export function tagLimitBroken(
+  tags: readonly string[],
+  others: readonly string[],
+  current: readonly string[] = []
+): TagLimit | null {
   if (tags.some((t) => t.length > TAG_MAX_LENGTH)) return 'length'
   if (tags.length > MAX_TAGS_PER_WORKOUT) return 'perWorkout'
-  if (distinctTags([{ tags: others }, { tags }]).length > MAX_TAGS_PER_USER) return 'perUser'
+  if (overUserLimit(tags, others, current)) return 'perUser'
   return null
+}
+
+/**
+ * At approval of an agent's or coach's workout: its tags the user already has
+ * are kept; a brand-new one (a starter the user hasn't used) only while the
+ * user stays at 50 or under. The rest are dropped.
+ */
+export function fitUserLimit(tags: readonly string[], userTags: readonly string[]): { kept: string[]; dropped: string[] } {
+  const have = new Set(userTags.map((t) => t.toLowerCase()))
+  let count = distinctTags([{ tags: userTags }]).length
+  const kept: string[] = []
+  const dropped: string[] = []
+  for (const tag of tags) {
+    if (have.has(tag.toLowerCase())) kept.push(tag)
+    else if (count < MAX_TAGS_PER_USER) {
+      kept.push(tag)
+      have.add(tag.toLowerCase())
+      count++
+    } else dropped.push(tag)
+  }
+  return { kept, dropped }
 }
 
 /**

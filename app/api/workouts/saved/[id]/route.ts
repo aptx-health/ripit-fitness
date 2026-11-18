@@ -225,7 +225,8 @@ const LIMIT_MESSAGES = {
  * Replace a workout's tags: { tags: string[] }. Each is tidied and matched,
  * ignoring case, to a tag the user already has or a starter tag. Past a limit
  * it's 400 { error, limit } and nothing is written. The user's other tags count
- * archived workouts too, so un-archiving never breaks the 50. Three queries
+ * archived workouts too, so un-archiving never breaks the 50; a change that
+ * doesn't raise the count is allowed even over 50. Three queries
  * whatever the number of workouts. Tagging isn't an edit: updatedAt stays.
  */
 async function setTags(id: string, userId: string, raw: unknown) {
@@ -246,7 +247,7 @@ async function setTags(id: string, userId: string, raw: unknown) {
       SELECT DISTINCT unnest("tags") AS tag FROM "SavedWorkout" WHERE "userId" = ${userId} AND "id" <> ${id}`
   ).map((r) => r.tag)
   const tags = normaliseTags(raw as string[], [...others, ...existing.tags, ...STARTER_TAGS])
-  const limit = tagLimitBroken(tags, others)
+  const limit = tagLimitBroken(tags, others, existing.tags)
   if (limit) {
     return NextResponse.json({ error: LIMIT_MESSAGES[limit], limit }, { status: 400 })
   }

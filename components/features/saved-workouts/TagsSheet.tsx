@@ -7,6 +7,7 @@ import {
   MAX_TAGS_PER_USER,
   MAX_TAGS_PER_WORKOUT,
   normaliseTag,
+  overUserLimit,
   STARTER_TAGS,
   TAG_MAX_LENGTH,
 } from '@/lib/saved-workouts/tags'
@@ -43,15 +44,24 @@ export default function TagsSheet({ item, items, onClose }: Props) {
   // The chips: the user's tags, the starters, then any added here, each once.
   const chips = distinctTags([{ tags: known }, { tags: chosen }])
 
-  /** Turn a tag on, unless that breaks a limit. */
+  /** Turn a tag on, unless that breaks a limit; false when refused. */
   const turnOn = (tag: string) => {
-    if (chosen.some((t) => sameTag(t, tag))) return setLimit(null)
-    if (tag.length > TAG_MAX_LENGTH) return setLimit(`A tag can be at most ${TAG_MAX_LENGTH} characters.`)
-    if (chosen.length >= MAX_TAGS_PER_WORKOUT) return setLimit(`A workout can have at most ${MAX_TAGS_PER_WORKOUT} tags.`)
-    if (distinctTags([{ tags: others }, { tags: [...chosen, tag] }]).length > MAX_TAGS_PER_USER)
-      return setLimit(`You can have at most ${MAX_TAGS_PER_USER} tags in all.`)
+    const refuse = (message: string) => {
+      setLimit(message)
+      return false
+    }
+    if (chosen.some((t) => sameTag(t, tag))) {
+      setLimit(null)
+      return true
+    }
+    if (tag.length > TAG_MAX_LENGTH) return refuse(`A tag can be at most ${TAG_MAX_LENGTH} characters.`)
+    if (chosen.length >= MAX_TAGS_PER_WORKOUT) return refuse(`A workout can have at most ${MAX_TAGS_PER_WORKOUT} tags.`)
+    // As the route counts: allowed unless it raises the count past 50.
+    if (overUserLimit([...chosen, tag], others, item.tags ?? []))
+      return refuse(`You can have at most ${MAX_TAGS_PER_USER} tags in all.`)
     setLimit(null)
     setChosen([...chosen, tag])
+    return true
   }
 
   const toggle = (tag: string) => {
@@ -64,9 +74,8 @@ export default function TagsSheet({ item, items, onClose }: Props) {
   const add = (e: React.FormEvent) => {
     e.preventDefault()
     const tag = normaliseTag(typed, [...known, ...chosen])
-    if (!tag) return
-    turnOn(tag)
-    setTyped('')
+    // A refused tag stays in the box, so it can be shortened.
+    if (tag && turnOn(tag)) setTyped('')
   }
 
   return (

@@ -1,7 +1,7 @@
 import type { Prisma, PrismaClient, SavedWorkout } from '@prisma/client'
 import { z } from 'zod'
 import { pluralize } from '@/lib/format/pluralize'
-import { keepKnownTags } from '@/lib/saved-workouts/tags'
+import { fitUserLimit, keepKnownTags, normaliseTags, STARTER_TAGS } from '@/lib/saved-workouts/tags'
 import type { SavedWorkoutData } from '@/types/saved-workout'
 import { visibleTo } from './exercise-definition'
 import { exerciseGroup, withGroupRules } from './groups'
@@ -229,7 +229,11 @@ export async function matchTags(db: Db, userId: string, raw: readonly string[] |
   return keepKnownTags(raw, await userTags(db, userId))
 }
 
-/** Approve a create: the new saved workout, never started. `origin` is who sent it. */
+/**
+ * Approve a create: the new saved workout, never started. `origin` is who sent
+ * it. Its tags are spelled as the user has them now; a brand-new one that would
+ * take the user past 50 is dropped and returned in `droppedTags`.
+ */
 export async function createSavedWorkout(
   tx: Prisma.TransactionClient,
   userId: string,
@@ -238,7 +242,13 @@ export async function createSavedWorkout(
   origin: 'agent' | 'coach'
 ) {
   const workoutData = buildWorkoutData(input.exercises, definitionNames)
-  return tx.savedWorkout.create({
+  let tags: string[] = []
+  let droppedTags: string[] = []
+  if (input.tags?.length) {
+    const have = await userTags(tx, userId)
+    ;({ kept: tags, dropped: droppedTags } = fitUserLimit(normaliseTags(input.tags, [...have, ...STARTER_TAGS]), have))
+  }
+  const created = await tx.savedWorkout.create({
     data: {
       userId,
       name: input.name,
@@ -247,10 +257,11 @@ export async function createSavedWorkout(
       exerciseCount: workoutData.length,
       lastUsedAt: null,
       origin,
-      tags: input.tags ?? [],
+      tags,
     },
     select: { id: true },
   })
+  return { id: created.id, droppedTags }
 }
 
 /** Approve an update: write the touched fields if each still holds `before`. */

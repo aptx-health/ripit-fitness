@@ -434,7 +434,8 @@ export default function SavedWorkoutsList({
         {liveCount === 0 && (
           <p className="px-1 py-2 text-sm text-muted-foreground">All your saved workouts are archived.</p>
         )}
-        {filtering && liveShown === 0 && groups.archived.length === 0 && (
+        {/* Above Show archived too, when only archived workouts match. */}
+        {filtering && liveShown === 0 && (
           <div className="flex items-center justify-between gap-3 px-1">
             <p className="text-sm text-muted-foreground">No workouts match</p>
             <button
