@@ -10,12 +10,17 @@ import { clientLogger } from '@/lib/client-logger'
 import { groupSavedWorkouts } from '@/lib/saved-workouts/groups'
 import { distinctTags, matchesFilter } from '@/lib/saved-workouts/tags'
 import ArchivedWorkoutRow from './ArchivedWorkoutRow'
+import BulkDeleteDialog from './BulkDeleteDialog'
+import BulkTagDialog from './BulkTagDialog'
 import DeleteSavedWorkoutDialog from './DeleteSavedWorkoutDialog'
 import GroupBox from './GroupBox'
 import RenameSavedWorkoutDialog from './RenameSavedWorkoutDialog'
 import SavedWorkoutDetailDialog from './SavedWorkoutDetailDialog'
 import SavedWorkoutRow, { type SavedWorkoutListItem } from './SavedWorkoutRow'
+import SelectableRow from './SelectableRow'
+import SelectBar from './SelectBar'
 import TagsSheet from './TagsSheet'
+import { useBulkActions } from './useBulkActions'
 import WorkoutFilterBar from './WorkoutFilterBar'
 
 type ArchiveState = Pick<SavedWorkoutListItem, 'archivedAt' | 'pinnedAt' | 'dismissedAt'>
@@ -26,6 +31,10 @@ const stateOf = (item: SavedWorkoutListItem): ArchiveState => ({
 })
 
 /** The Show archived fold header. */
+/** Select, Select all and Done above the groups. */
+const SELECT_BUTTON =
+  'doom-focus-ring min-h-12 border-2 border-border px-4 text-sm font-semibold uppercase tracking-wider text-foreground hover:bg-muted'
+
 const FOLD_BUTTON =
   'doom-focus-ring flex min-h-12 w-full items-center gap-2 px-1 text-left text-sm font-bold uppercase tracking-wider text-muted-foreground hover:bg-muted'
 
@@ -37,7 +46,9 @@ const FOLD_BUTTON =
  * fetched (workout library slice 2). `onCountChange` reports the number of
  * unarchived workouts after each change, for the tab's count chip. A row
  * opens into a panel of its actions, one at a time; with `trainees` (the
- * Library page's, coaching slice 2) each panel also has Send.
+ * Library page's, coaching slice 2) each panel also has Send. Select mode
+ * (slice 4) ticks rows instead, for Archive, Tag and Delete on many at once;
+ * it covers only the rows that show (archived ones never do).
  */
 export default function SavedWorkoutsList({
   onCountChange,
@@ -59,6 +70,9 @@ export default function SavedWorkoutsList({
   const [olderOpen, setOlderOpen] = useState(false)
   const [archivedOpen, setArchivedOpen] = useState(false)
   const [startingId, setStartingId] = useState<string | null>(null)
+  const [selecting, setSelecting] = useState(false)
+  const [selected, setSelected] = useState<Set<string>>(() => new Set())
+  const [bulkDialog, setBulkDialog] = useState<'tag' | 'delete' | null>(null)
   const olderListId = useId()
   const archivedListId = useId()
 
@@ -81,6 +95,8 @@ export default function SavedWorkoutsList({
   useEffect(() => {
     fetchList()
   }, [fetchList])
+
+  const bulk = useBulkActions(items, setItems, fetchList, toast)
 
   const count = items?.filter((item) => !item.archivedAt).length
   useEffect(() => {
@@ -323,10 +339,32 @@ export default function SavedWorkoutsList({
     setQuery('')
     setActiveTag(null)
   }
+  // Select mode acts on the ticked rows that show: Older's only when open or filtered.
+  const shown = [
+    ...groups.new,
+    ...groups.pinned,
+    ...groups.recent,
+    ...(filtering || olderOpen ? groups.older : []),
+  ]
+  const chosen = shown.filter((item) => selected.has(item.id))
+  const toggleSelected = (id: string) =>
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (!next.delete(id)) next.add(id)
+      return next
+    })
+  const leaveSelect = () => {
+    setSelecting(false)
+    setSelected(new Set())
+    setBulkDialog(null)
+  }
   const rows = (group: SavedWorkoutListItem[], id?: string, isNew = false) => (
     <ul id={id} className="divide-y divide-border">
       {group.map((item) => (
         <li key={item.id}>
+          {selecting ? (
+            <SelectableRow item={item} checked={selected.has(item.id)} onToggle={() => toggleSelected(item.id)} />
+          ) : (
           <SavedWorkoutRow
             item={item}
             isNew={isNew}
@@ -343,6 +381,7 @@ export default function SavedWorkoutsList({
             onDismiss={() => handleArchive(item, true)}
             onDelete={() => setDeleteTarget(item)}
           />
+          )}
         </li>
       ))}
     </ul>
@@ -353,7 +392,7 @@ export default function SavedWorkoutsList({
   return (
     <>
       {/* Boxes with space between them, not one shared grid (work 154). */}
-      <div className="space-y-4 px-3 pt-1 pb-3">
+      <div className={`space-y-4 px-3 pt-1 ${selecting ? 'pb-36' : 'pb-3'}`}>
         {liveCount > 0 && (
           <WorkoutFilterBar
             query={query}
@@ -362,6 +401,35 @@ export default function SavedWorkoutsList({
             activeTag={tag}
             onTagChange={setActiveTag}
           />
+        )}
+        {liveCount > 0 && (
+          <div className="flex justify-end gap-2">
+            {selecting ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setSelected(new Set(shown.map((item) => item.id)))}
+                  className={SELECT_BUTTON}
+                >
+                  Select all
+                </button>
+                <button type="button" onClick={leaveSelect} className={SELECT_BUTTON}>
+                  Done
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setExpandedId(null)
+                  setSelecting(true)
+                }}
+                className={SELECT_BUTTON}
+              >
+                Select
+              </button>
+            )}
+          </div>
         )}
         {liveCount === 0 && (
           <p className="px-1 py-2 text-sm text-muted-foreground">All your saved workouts are archived.</p>
@@ -409,7 +477,7 @@ export default function SavedWorkoutsList({
               {olderOpen && rows(groups.older, olderListId)}
             </GroupBox>
           ))}
-        {groups.archived.length > 0 && (
+        {!selecting && groups.archived.length > 0 && (
           <section aria-label="Archived">
             <button
               type="button"
@@ -442,6 +510,42 @@ export default function SavedWorkoutsList({
           </section>
         )}
       </div>
+
+      {selecting && (
+        <SelectBar
+          count={chosen.length}
+          busy={bulkDialog !== null}
+          onArchive={() => {
+            bulk.archive(chosen)
+            leaveSelect()
+          }}
+          onTag={() => setBulkDialog('tag')}
+          onDelete={() => setBulkDialog('delete')}
+        />
+      )}
+
+      {bulkDialog === 'tag' && (
+        <BulkTagDialog
+          count={chosen.length}
+          items={items}
+          onPick={(picked) => {
+            setBulkDialog(null)
+            bulk.tag(chosen, picked)
+          }}
+          onClose={() => setBulkDialog(null)}
+        />
+      )}
+
+      {bulkDialog === 'delete' && (
+        <BulkDeleteDialog
+          count={chosen.length}
+          onConfirm={() => {
+            bulk.remove(chosen)
+            leaveSelect()
+          }}
+          onClose={() => setBulkDialog(null)}
+        />
+      )}
 
       {renameTarget && (
         <RenameSavedWorkoutDialog

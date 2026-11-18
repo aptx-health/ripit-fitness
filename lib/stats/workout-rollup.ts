@@ -1,4 +1,7 @@
 import type { PrismaClient } from '@prisma/client'
+import { sameExercisesAndSets } from '@/lib/saved-workouts/match'
+import { SNAPSHOT_INCLUDE, snapshotFromCompletion } from '@/lib/saved-workouts/snapshot'
+import type { SavedWorkoutData } from '@/types/saved-workout'
 
 export type RollupExercise = {
   exerciseDefinitionId: string
@@ -31,6 +34,32 @@ export type WorkoutRollup = {
   workoutName: string | null
   isCommunitySourced: boolean
   isAdHoc: boolean
+  /**
+   * The saved workout the session started from (null for any other session),
+   * so the summary can offer Update. `gone` when it was deleted, archived or
+   * isn't the user's; `matches` when the session's exercises and sets are what
+   * it already has.
+   */
+  fromSaved: { id: string; name: string; gone: boolean; matches: boolean } | null
+}
+
+/** Compares the saved workout with the snapshot Save would build from this session. */
+async function fromSavedOf(
+  prisma: PrismaClient,
+  completion: { id: string; savedWorkoutId: string | null; name: string | null },
+  userId: string
+): Promise<WorkoutRollup['fromSaved']> {
+  const id = completion.savedWorkoutId
+  if (!id) return null
+  const saved = await prisma.savedWorkout.findFirst({
+    where: { id, userId, archivedAt: null },
+    select: { name: true, workoutData: true },
+  })
+  if (!saved) return { id, name: completion.name ?? '', gone: true, matches: false }
+  const session = await prisma.workoutCompletion.findUnique({ where: { id: completion.id }, include: SNAPSHOT_INCLUDE })
+  const data = saved.workoutData as unknown as SavedWorkoutData
+  const matches = session !== null && Array.isArray(data) && sameExercisesAndSets(data, snapshotFromCompletion(session))
+  return { id, name: saved.name, gone: false, matches }
 }
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000
@@ -103,6 +132,7 @@ export async function computeWorkoutRollup(
       workoutId: true,
       name: true,
       isAdHoc: true,
+      savedWorkoutId: true,
       workout: {
         select: {
           name: true,
@@ -141,7 +171,7 @@ export async function computeWorkoutRollup(
 
   const workingSets = loggedSets.filter((s) => !s.isWarmup)
 
-  const [lifetimeWorkoutCount, workoutsLast7Days] = await Promise.all([
+  const [lifetimeWorkoutCount, workoutsLast7Days, fromSaved] = await Promise.all([
     prisma.workoutCompletion.count({
       where: { userId, status: 'completed', isArchived: false },
     }),
@@ -153,6 +183,7 @@ export async function computeWorkoutRollup(
         completedAt: { gte: new Date(Date.now() - SEVEN_DAYS_MS) },
       },
     }),
+    fromSavedOf(prisma, completion, userId),
   ])
 
   const durationSeconds =
@@ -183,6 +214,7 @@ export async function computeWorkoutRollup(
       workoutName,
       isCommunitySourced,
       isAdHoc: completion.isAdHoc,
+      fromSaved,
     }
   }
 
@@ -287,5 +319,6 @@ export async function computeWorkoutRollup(
     workoutName,
     isCommunitySourced,
     isAdHoc: completion.isAdHoc,
+    fromSaved,
   }
 }
