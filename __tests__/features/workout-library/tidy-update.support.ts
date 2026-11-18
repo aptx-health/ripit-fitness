@@ -12,9 +12,10 @@
  *       taken in `order`, and each exercise's sets in `setNumber` order. True
  *       when both have the same number of exercises, each pair has the same
  *       exerciseDefinitionId and the same number of sets, and each pair of
- *       sets has the same reps (compared as trimmed strings) and isWarmup.
- *       Everything else is ignored: names, notes, exerciseGroup, rir, rpe,
- *       the setNumber values themselves, and weight (never stored).
+ *       sets has the same reps (compared as trimmed strings), rir, rpe and
+ *       isWarmup (null is a value: null and 8 differ). That is exactly what
+ *       Update would write. Everything else is ignored: names, notes,
+ *       exerciseGroup, the setNumber values themselves, and weight (never stored).
  *     (__tests__/lib/saved-workout-match.test.ts)
  *
  *   lib/stats/workout-rollup.ts
@@ -266,7 +267,8 @@ export function routedFetch() {
 }
 
 // --- sessions -------------------------------------------------------------------
-export type Logged = { reps: number[]; warm?: number }
+/** Logged sets; rpe and rir default to null, as Push A's plan has them. */
+export type Logged = { reps: number[]; warm?: number; rpe?: number | null; rir?: number | null }
 /**
  * Starts a session from a saved workout with the real start route, logs
  * `logged[i]` against the plan's i-th exercise (`extra` adds a new exercise),
@@ -287,7 +289,8 @@ export async function sessionFrom(name: string, logged: Logged[], extra?: Logged
         setNumber: i + 1,
         reps,
         weight: 100,
-        rpe: 8,
+        rpe: l.rpe ?? null,
+        rir: l.rir ?? null,
         isWarmup: i < (l.warm ?? 0),
       })),
     })

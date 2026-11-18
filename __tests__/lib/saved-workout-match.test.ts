@@ -36,14 +36,12 @@ describe('sameExercisesAndSets', () => {
     expect(sameExercisesAndSets(plan(), plan())).toBe(true)
   })
 
-  it('ignores names, notes, groups, rir, rpe and the setNumber values', async () => {
+  it('ignores names, notes, groups and the setNumber values', async () => {
     const { sameExercisesAndSets } = await load()
     const other = edit((d) => {
       d[0].name = 'Barbell bench'
       d[0].notes = null
       d[1].exerciseGroup = null
-      d[0].sets[1].rpe = 9
-      d[1].sets[0].rir = 2
       d[1].sets = d[1].sets.map((x, i) => ({ ...x, setNumber: i + 10 }))
     })
     expect(sameExercisesAndSets(plan(), other)).toBe(true)
@@ -77,6 +75,16 @@ describe('sameExercisesAndSets', () => {
       d[1].sets.reverse()
     })
     expect(sameExercisesAndSets(plan(), shuffled)).toBe(true)
+  })
+
+  it('is false when a set\'s RPE or RIR differs, null included', async () => {
+    const { sameExercisesAndSets } = await load()
+    expect(sameExercisesAndSets(plan(), edit((d) => { d[0].sets[1].rpe = 9 }))).toBe(false)
+    expect(sameExercisesAndSets(plan(), edit((d) => { d[1].sets[0].rir = 2 }))).toBe(false)
+    const rated = edit((d) => { d[0].sets[2].rpe = 8; d[0].sets[2].rir = 2 })
+    expect(sameExercisesAndSets(rated, structuredClone(rated))).toBe(true)
+    expect(sameExercisesAndSets(rated, edit((d) => { d[0].sets[2].rpe = 8; d[0].sets[2].rir = 1 }))).toBe(false)
+    expect(sameExercisesAndSets(rated, edit((d) => { d[0].sets[2].rir = 2 }))).toBe(false)
   })
 
   it('is false when a warmup set becomes a working set', async () => {

@@ -774,6 +774,22 @@ describe('update route', () => {
     expect(after.workoutData).toEqual(before.workoutData)
   })
 
+  it('a session that differs only in RPE or RIR does not match, so Update is offered and writes them', async () => {
+    const c = await sessionFrom('Push A', [{ reps: [8, 8, 8], rpe: 9 }, { reps: [12, 12] }])
+    expect((await rollupOf(c)).fromSaved?.matches).toBe(false)
+    expect((await update(s.ids['Push A'], { completionId: c })).status).toBe(200)
+    const sets = ((await row(s.ids['Push A']))?.workoutData as Json[])[0].sets as Json[]
+    expect(sets.map((x) => x.rpe)).toEqual([9, 9, 9])
+    await s.prisma.workoutCompletion.deleteMany({ where: { id: c } })
+    const rir = await sessionFrom('Push A', [{ reps: [8, 8, 8], rpe: 9 }, { reps: [12, 12], rir: 2 }])
+    expect((await rollupOf(rir)).fromSaved?.matches).toBe(false)
+    // The same again matches what Update wrote.
+    expect((await update(s.ids['Push A'], { completionId: rir })).status).toBe(200)
+    await s.prisma.workoutCompletion.deleteMany({ where: { id: rir } })
+    const again = await sessionFrom('Push A', [{ reps: [8, 8, 8], rpe: 9 }, { reps: [12, 12], rir: 2 }])
+    expect((await rollupOf(again)).fromSaved?.matches).toBe(true)
+  })
+
   it('keeps a name changed during the session, not the name the session started with', async () => {
     const c = await sessionFrom('Push A', changed())
     await s.prisma.savedWorkout.update({ where: { id: s.ids['Push A'] }, data: { name: 'Push Day' } })
@@ -795,6 +811,18 @@ describe('update route', () => {
 describe('select mode and summary styling', () => {
   beforeEach(async () => {
     await freshState()
+  })
+
+  it('Select all with Older folded and no search selects only the rows that show', async () => {
+    await renderList()
+    await enterSelect()
+    expect(screen.queryByRole('button', { name: /^older \(\d+\)/i })?.getAttribute('aria-expanded')).toBe('false')
+    await tap(button(/^select all$/i), 'a Select all button')
+    expect(sorted(checkedAmong(ALL))).toEqual(sorted(['Push A', ...RECENT]))
+    expect(toolbar().textContent).toMatch(/\b5 selected/i)
+    await barAction('Archive')
+    await untilDb(async () => archived('Full Eight'), 'shown rows archived')
+    for (const n of ['Old Pull', 'Squat Classic']) expect(await archived(n), n).toBe(false)
   })
 
   it('the Select bar, tag dialog and summary buttons use 48px tap targets and theme colours', async () => {
