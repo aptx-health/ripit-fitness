@@ -4,11 +4,10 @@ import { prisma } from '@/lib/db'
 import { logger } from '@/lib/logger'
 import { checkRateLimit, destructiveOpLimiter, workoutActionLimiter } from '@/lib/rate-limit'
 import {
-  MAX_TAGS_PER_USER,
   MAX_TAGS_PER_WORKOUT,
   normaliseTag,
   STARTER_TAGS,
-  TAG_MAX_LENGTH,
+  TAG_LIMIT_MESSAGES,
   tagLimitBroken,
 } from '@/lib/saved-workouts/tags'
 
@@ -17,11 +16,6 @@ const MAX_BULK = 100
 const ACTIONS = ['archive', 'undoArchive', 'tag', 'delete'] as const
 type Action = (typeof ACTIONS)[number]
 
-const LIMIT_MESSAGES = {
-  length: `A tag can be at most ${TAG_MAX_LENGTH} characters`,
-  perWorkout: `A workout can have at most ${MAX_TAGS_PER_WORKOUT} tags`,
-  perUser: `You can have at most ${MAX_TAGS_PER_USER} different tags`,
-} as const
 
 type Previous = Record<string, { pinnedAt: string | null; dismissedAt: string | null }>
 
@@ -138,7 +132,7 @@ async function tag(userId: string, ids: string[], raw: unknown) {
   const name = normaliseTag(raw, [...userTags, ...STARTER_TAGS])
   if (!name) return bad('tag cannot be empty')
   const limit = tagLimitBroken([name], userTags)
-  if (limit) return NextResponse.json({ error: LIMIT_MESSAGES[limit], limit }, { status: 400 })
+  if (limit) return NextResponse.json({ error: TAG_LIMIT_MESSAGES[limit], limit }, { status: 400 })
 
   const rows = await prisma.savedWorkout.findMany({ where: { id: { in: ids }, userId }, select: { id: true, tags: true } })
   const lower = name.toLowerCase()

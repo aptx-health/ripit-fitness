@@ -366,6 +366,11 @@ export function WorkoutRollupModal({ open, rollup, onClose }: WorkoutRollupModal
     }
   }
 
+  // Update is then the one filled button, so Done steps back to secondary.
+  const offersUpdate = Boolean(
+    canSave && rollup?.fromSaved && !rollup.fromSaved.gone && !rollup.fromSaved.matches && !updated && !savedWorkoutId
+  )
+
   const headerTitle =
     view === 'stats'
       ? 'Workout Complete'
@@ -733,7 +738,11 @@ export function WorkoutRollupModal({ open, rollup, onClose }: WorkoutRollupModal
               <button
                 type="button"
                 onClick={onClose}
-                className="ml-auto px-6 py-3 bg-primary text-primary-foreground doom-button-3d font-bold text-base uppercase tracking-wider doom-focus-ring"
+                className={
+                  offersUpdate
+                    ? 'ml-auto min-h-12 px-6 py-3 border-2 border-border bg-card text-foreground hover:bg-muted font-bold text-base uppercase tracking-wider doom-focus-ring'
+                    : 'ml-auto px-6 py-3 bg-primary text-primary-foreground doom-button-3d font-bold text-base uppercase tracking-wider doom-focus-ring'
+                }
               >
                 Done
               </button>
