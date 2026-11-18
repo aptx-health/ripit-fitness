@@ -143,18 +143,34 @@ export function multipartRequest(fields: Fields, url = 'http://localhost/api/fee
 }
 
 /**
- * Runs a route handler with Node's File as the global File. Under jsdom the global is jsdom's, and
- * undici's request.formData() then refuses to build the file entry. Node (production) is unaffected.
+ * Runs a route handler so undici's request.formData() can build the file entry under jsdom.
+ * Node 26's undici checks the file against the global File, so that is Node's File for the call.
+ * Node 20's undici builds the file with the File it saw when it loaded (jsdom's, here) and then checks it
+ * by its arrayBuffer() method, which jsdom's Blob lacks, so jsdom's Blob gets that standard method for the
+ * call. Node (production) is unaffected either way.
  */
 export async function withNodeFile<T>(fn: () => Promise<T>): Promise<T> {
-  const g = globalThis as { File: unknown }
+  const g = globalThis as { File: unknown; Blob?: { prototype: { arrayBuffer?: () => Promise<ArrayBuffer> } } }
   const prev = g.File
+  const blobProto = g.Blob?.prototype
+  const addArrayBuffer = blobProto !== undefined && typeof blobProto.arrayBuffer !== 'function'
+  if (addArrayBuffer) blobProto.arrayBuffer = readArrayBuffer
   g.File = NodeFile
   try {
     return await fn()
   } finally {
     g.File = prev
+    if (addArrayBuffer) delete blobProto.arrayBuffer
   }
+}
+
+function readArrayBuffer(this: Blob): Promise<ArrayBuffer> {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader()
+    r.onload = () => resolve(r.result as ArrayBuffer)
+    r.onerror = () => reject(r.error)
+    r.readAsArrayBuffer(this)
+  })
 }
 
 /** Bytes of a Blob or File from any realm (jsdom or node). */
