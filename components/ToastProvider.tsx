@@ -58,6 +58,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={{ success, error, warning }}>
       <Toast.Provider swipeDirection="right">
         {children}
+        {/* --toast-lift (set by a bar fixed at the bottom, such as select mode's) raises them above it. */}
         {toasts.map((toast) => (
           <Toast.Root
             key={toast.id}
@@ -65,7 +66,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             onOpenChange={(open) => {
               if (!open) removeToast(toast.id)
             }}
-            className={`fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 z-[100] sm:w-full sm:max-w-sm p-4 rounded-lg shadow-lg border animate-in slide-in-from-bottom-5 ${
+            className={`fixed bottom-[calc(1rem+var(--toast-lift,0px))] left-4 right-4 sm:left-auto sm:right-4 z-[100] sm:w-full sm:max-w-sm p-4 rounded-lg shadow-lg border animate-in slide-in-from-bottom-5 ${
               toast.type === 'success'
                 ? 'bg-success text-success-foreground border-success'
                 : toast.type === 'warning'
