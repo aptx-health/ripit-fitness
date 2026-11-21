@@ -29,6 +29,12 @@ This directory contains historical design discussions, planning documents, and t
 - `discussion-topics.md` - General discussion topics
 - `answers.md` - Q&A notes
 
+### Archived 2026-11-21 (repo cleanup)
+- `NEW_PROJECT_REFERENCE.md`, `APP-REPO-MIGRATION-PLAN.md` - Supabase/Vercel-era setup and migration plans
+- `AI_ARCHITECTURE.md`, `AI_IMPLEMENTATION_PLAN.md` - Early AI plans
+- `ROADMAP.md` - Old roadmap (the live one is `ROADMAP.md` at the repo root)
+- `CARDIO_DESIGN.md`, `CARDIO_EQUIPMENT_PROFILES.md`, `PERFORMANCE_ANALYSIS.md`, `EXERCISE_PERFORMANCE_TRACKING.md`, `PROGRAM_MANAGEMENT_IMPROVEMENTS.md` - Former `docs/features/` designs
+
 ## Current Documentation
 
 For current, maintained documentation, see:

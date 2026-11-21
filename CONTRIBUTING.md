@@ -9,23 +9,23 @@ Thanks for your interest in contributing! This is an early-stage personal projec
 - **Personal project**: Built primarily for my own strength training needs
 - **Early stage**: Active development, things change frequently
 - **Public but small**: Open source, but not a large community project (yet!)
-- **Learning-friendly**: Good codebase for learning Next.js 15, Supabase, Prisma patterns
+- **Learning-friendly**: Good codebase for learning Next.js, BetterAuth and Prisma patterns
 
 ### Current Limitations (Important!)
 
-1. **No dev database yet** - I don't have a separate development database in Supabase. All database changes and migrations are manually reviewed before being applied to production.
+1. **Migrations are reviewed by hand** - All database changes and migrations are reviewed before they reach staging and production.
 
-2. **No CI/CD pipeline** - Beyond Vercel's build checks, there are no automated tests or deployment pipelines. Manual testing is required.
+2. **CI runs tests and builds** - GitHub Actions runs the test suite and builds the image on pull requests. Manual testing is still expected for UI changes.
 
 3. **Manual code review** - All PRs are reviewed manually. Response time may vary depending on my availability.
 
-4. **Production database access** - Only the maintainer (me) has access to the production Supabase database and Vercel deployment.
+4. **Production access** - Only the maintainer (me) has access to the production database and deployment.
 
 ### What This Means for Contributors
 
-- **You develop against your own Supabase instance OR a local postresql database** (free tier works great!)
+- **You develop against a local PostgreSQL database** in Docker
 - **Database migrations require extra scrutiny** - PRs with schema changes will be carefully reviewed
-- **Testing is manual** - You'll need to test locally and document what you tested
+- **Test locally** - Run the checks below and document what you tested
 - **Be patient** - This is a side project, so PR review times may vary
 
 ## Getting Started
@@ -34,13 +34,12 @@ Thanks for your interest in contributing! This is an early-stage personal projec
 
 Before contributing, make sure you can:
 1. Run the project locally (see [README.md](README.md))
-2. Have your own Supabase project set up
-3. Understand the tech stack (Next.js 15, TypeScript, Prisma, Supabase)
+2. Understand the tech stack (Next.js, TypeScript, Prisma, BetterAuth)
 
 ### Understanding the Codebase
 
 Key resources:
-- [CLAUDE.md](CLAUDE.md) - Comprehensive guide to project structure and conventions
+- [AGENTS.md](AGENTS.md) - Commands, conventions and gotchas
 - [docs/STYLING.md](docs/STYLING.md) - Theme system and styling guide
 - [docs/features/](docs/features/) - Feature-specific documentation
 
@@ -57,9 +56,8 @@ cd ripit-fitness
 ### 2. Set Up Your Environment
 
 Follow the [README.md Quick Start](README.md#quick-start) to:
-- Create your own Supabase project
+- Start a local PostgreSQL database
 - Configure environment variables (Doppler or .env)
-- Run migrations on your local database
 - Start the dev server
 
 ### 3. Create a Feature Branch
@@ -141,7 +139,7 @@ The project uses a theme system (evolved from the original DOOM theme):
 
 ### 5. Test Your Changes
 
-Since there's no automated CI/CD, you need to test manually:
+Run these locally before opening a PR:
 
 #### Required Checks
 
@@ -150,13 +148,13 @@ Since there's no automated CI/CD, you need to test manually:
 npm run type-check
 
 # Linting
-npm run lint
+npm run lint:all
 
 # Build test
 npm run build
 
-# Run tests (if applicable)
-doppler run -- npm test
+# Run tests (Docker required)
+npm run test:run
 ```
 
 #### Manual Testing
@@ -165,7 +163,7 @@ Document what you tested in your PR:
 - [ ] Feature works as expected
 - [ ] No TypeScript errors
 - [ ] No console errors
-- [ ] Tested on your local Supabase instance
+- [ ] Tested against your local database
 - [ ] Checked mobile responsiveness (if UI changes)
 - [ ] Verified authentication still works (if auth-related)
 
@@ -239,7 +237,7 @@ Before working on major features:
 
 ## Things to Avoid
 
-- Don't create PRs that require access to production database or Vercel
+- Don't create PRs that require access to the production database or deployment
 - Don't add new external services without discussion
 - Don't make breaking changes to existing features without discussion
 - Don't bypass TypeScript's type system with excessive `any` types
