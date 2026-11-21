@@ -1,6 +1,6 @@
 'use client'
 
-import { Bookmark, BookmarkCheck, ChevronLeft, MessageSquarePlus, TrendingDown, TrendingUp, X } from 'lucide-react'
+import { Bookmark, BookmarkCheck, ChevronLeft, MessageSquarePlus, RefreshCw, TrendingDown, TrendingUp, X } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { clientLogger } from '@/lib/client-logger'
@@ -146,6 +146,9 @@ export function WorkoutRollupModal({ open, rollup, onClose }: WorkoutRollupModal
   const [saveSubmitting, setSaveSubmitting] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [savedWorkoutId, setSavedWorkoutId] = useState<string | null>(null)
+  const [updating, setUpdating] = useState(false)
+  const [updated, setUpdated] = useState(false)
+  const [updateError, setUpdateError] = useState<string | null>(null)
 
   const suggestedName = useMemo(() => {
     if (!rollup) return ''
@@ -170,6 +173,9 @@ export function WorkoutRollupModal({ open, rollup, onClose }: WorkoutRollupModal
       setSaveSubmitting(false)
       setSaveError(null)
       setSavedWorkoutId(null)
+      setUpdating(false)
+      setUpdated(false)
+      setUpdateError(null)
     }
   }, [open])
 
@@ -333,6 +339,37 @@ export function WorkoutRollupModal({ open, rollup, onClose }: WorkoutRollupModal
       setSaveSubmitting(false)
     }
   }
+
+  // A session from a saved workout that still exists and differs: Update writes
+  // this session's exercises and sets into it (workout library slice 4).
+  const handleUpdate = async () => {
+    const from = rollup?.fromSaved
+    if (!rollup || !from || updating) return
+    setUpdating(true)
+    setUpdateError(null)
+    try {
+      const res = await fetch(`/api/workouts/saved/${from.id}/update`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ completionId: rollup.completionId }),
+      })
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string }
+        throw new Error(data.error || `Request failed (${res.status})`)
+      }
+      setUpdated(true)
+    } catch (err) {
+      clientLogger.error('Error updating saved workout from completion:', err)
+      setUpdateError(`Could not update ${from.name}`)
+    } finally {
+      setUpdating(false)
+    }
+  }
+
+  // Update is then the one filled button, so Done steps back to secondary.
+  const offersUpdate = Boolean(
+    canSave && rollup?.fromSaved && !rollup.fromSaved.gone && !rollup.fromSaved.matches && !updated && !savedWorkoutId
+  )
 
   const headerTitle =
     view === 'stats'
@@ -633,14 +670,48 @@ export function WorkoutRollupModal({ open, rollup, onClose }: WorkoutRollupModal
         <div className="shrink-0 border-t-2 border-border">
           {view === 'stats' && canSave && (
             <div className="px-4 pt-3">
-              {savedWorkoutId ? (
+              {savedWorkoutId || updated ? (
                 <Link
                   href={libraryHref({ type: 'workouts' })}
                   className="flex w-full items-center justify-center gap-2 px-4 py-3 border-2 border-border bg-muted text-sm font-bold uppercase tracking-wider doom-focus-ring"
                 >
                   <BookmarkCheck className="w-4 h-4 text-primary" />
-                  Saved to your workouts
+                  {updated && rollup.fromSaved ? `Updated ${rollup.fromSaved.name}` : 'Saved to your workouts'}
                 </Link>
+              ) : rollup.fromSaved && !rollup.fromSaved.gone && rollup.fromSaved.matches ? (
+                <p className="flex w-full items-center justify-center gap-2 px-4 py-3 border-2 border-border text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                  <BookmarkCheck className="w-4 h-4 text-primary" aria-hidden="true" />
+                  Matches {rollup.fromSaved.name}
+                </p>
+              ) : rollup.fromSaved ? (
+                <>
+                  <div className="flex gap-2">
+                    {!rollup.fromSaved.gone && (
+                      <button
+                        type="button"
+                        onClick={handleUpdate}
+                        disabled={updating}
+                        className="flex min-h-12 min-w-0 flex-1 items-center justify-center gap-2 px-3 py-2 border-2 border-primary bg-primary text-primary-foreground hover:bg-primary-hover text-sm font-bold uppercase tracking-wider doom-focus-ring disabled:opacity-50"
+                      >
+                        <RefreshCw className="w-4 h-4 shrink-0" aria-hidden="true" />
+                        <span className="truncate">{updating ? 'Updating…' : `Update ${rollup.fromSaved.name}`}</span>
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={handleOpenSave}
+                      className="flex min-h-12 min-w-0 flex-1 items-center justify-center gap-2 px-3 py-2 border-2 border-border bg-muted hover:bg-secondary/10 text-sm font-bold uppercase tracking-wider doom-focus-ring"
+                    >
+                      <Bookmark className="w-4 h-4 shrink-0" aria-hidden="true" />
+                      Save as new
+                    </button>
+                  </div>
+                  {updateError && (
+                    <p className="mt-2 text-sm text-destructive" role="alert">
+                      {updateError}
+                    </p>
+                  )}
+                </>
               ) : (
                 <button
                   type="button"
@@ -667,7 +738,11 @@ export function WorkoutRollupModal({ open, rollup, onClose }: WorkoutRollupModal
               <button
                 type="button"
                 onClick={onClose}
-                className="ml-auto px-6 py-3 bg-primary text-primary-foreground doom-button-3d font-bold text-base uppercase tracking-wider doom-focus-ring"
+                className={
+                  offersUpdate
+                    ? 'ml-auto min-h-12 px-6 py-3 border-2 border-border bg-card text-foreground hover:bg-muted font-bold text-base uppercase tracking-wider doom-focus-ring'
+                    : 'ml-auto px-6 py-3 bg-primary text-primary-foreground doom-button-3d font-bold text-base uppercase tracking-wider doom-focus-ring'
+                }
               >
                 Done
               </button>

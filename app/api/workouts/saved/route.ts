@@ -6,7 +6,7 @@ import { prisma } from '@/lib/db'
 import { recordEvent } from '@/lib/events'
 import { logger } from '@/lib/logger'
 import { checkRateLimit, workoutActionLimiter } from '@/lib/rate-limit'
-import type { SavedWorkoutData, SavedWorkoutExercise } from '@/types/saved-workout'
+import { SNAPSHOT_INCLUDE, snapshotFromCompletion } from '@/lib/saved-workouts/snapshot'
 
 const MAX_NAME_LENGTH = 100
 const MAX_NOTES_LENGTH = 2000
@@ -153,14 +153,7 @@ export async function POST(request: NextRequest) {
     // Single query: pull completion + ordered exercises + ordered logged sets.
     const completion = await prisma.workoutCompletion.findUnique({
       where: { id: sourceCompletionId },
-      include: {
-        exercises: {
-          orderBy: { order: 'asc' },
-          include: {
-            loggedSets: { orderBy: { setNumber: 'asc' } },
-          },
-        },
-      },
+      include: SNAPSHOT_INCLUDE,
     })
 
     if (!completion || completion.userId !== user.id) {
@@ -188,22 +181,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Build snapshot in memory — no further DB calls.
-    const workoutData: SavedWorkoutData = completion.exercises.map(
-      (ex): SavedWorkoutExercise => ({
-        name: ex.name,
-        exerciseDefinitionId: ex.exerciseDefinitionId,
-        order: ex.order,
-        notes: ex.notes ?? null,
-        exerciseGroup: ex.exerciseGroup ?? null,
-        sets: ex.loggedSets.map((s) => ({
-          setNumber: s.setNumber,
-          reps: String(s.reps),
-          rir: s.rir ?? null,
-          rpe: s.rpe ?? null,
-          isWarmup: Boolean(s.isWarmup),
-        })),
-      })
-    )
+    const workoutData = snapshotFromCompletion(completion)
 
     const exerciseCount = workoutData.length
 

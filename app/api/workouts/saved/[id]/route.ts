@@ -1,4 +1,3 @@
-import type { Prisma } from '@prisma/client'
 import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { listTrainees } from '@/lib/coaching/links'
@@ -9,14 +8,8 @@ import {
   destructiveOpLimiter,
   workoutActionLimiter,
 } from '@/lib/rate-limit'
-import {
-  MAX_TAGS_PER_USER,
-  MAX_TAGS_PER_WORKOUT,
-  normaliseTags,
-  STARTER_TAGS,
-  TAG_MAX_LENGTH,
-  tagLimitBroken,
-} from '@/lib/saved-workouts/tags'
+import { SAVED_LIST_FIELDS } from '@/lib/saved-workouts/list-fields'
+import { normaliseTags, STARTER_TAGS, TAG_LIMIT_MESSAGES, tagLimitBroken } from '@/lib/saved-workouts/tags'
 
 const NAME_MAX_LENGTH = 100
 const NOTES_MAX_LENGTH = 2000
@@ -185,7 +178,7 @@ export async function PATCH(
         // Pinning isn't an edit: keep updatedAt so nothing reads it as one.
         ...(pinOnly && { updatedAt: existing.updatedAt }),
       },
-      select: LIST_FIELDS,
+      select: SAVED_LIST_FIELDS,
     })
 
     return NextResponse.json({ saved: updated })
@@ -201,25 +194,7 @@ export async function PATCH(
   }
 }
 
-const LIST_FIELDS = {
-  id: true,
-  name: true,
-  notes: true,
-  exerciseCount: true,
-  lastUsedAt: true,
-  pinnedAt: true,
-  createdAt: true,
-  origin: true,
-  archivedAt: true,
-  dismissedAt: true,
-  tags: true,
-} satisfies Prisma.SavedWorkoutSelect
 
-const LIMIT_MESSAGES = {
-  length: `A tag can be at most ${TAG_MAX_LENGTH} characters`,
-  perWorkout: `A workout can have at most ${MAX_TAGS_PER_WORKOUT} tags`,
-  perUser: `You can have at most ${MAX_TAGS_PER_USER} different tags`,
-} as const
 
 /**
  * Replace a workout's tags: { tags: string[] }. Each is tidied and matched,
@@ -249,13 +224,13 @@ async function setTags(id: string, userId: string, raw: unknown) {
   const tags = normaliseTags(raw as string[], [...others, ...existing.tags, ...STARTER_TAGS])
   const limit = tagLimitBroken(tags, others, existing.tags)
   if (limit) {
-    return NextResponse.json({ error: LIMIT_MESSAGES[limit], limit }, { status: 400 })
+    return NextResponse.json({ error: TAG_LIMIT_MESSAGES[limit], limit }, { status: 400 })
   }
 
   const updated = await prisma.savedWorkout.update({
     where: { id },
     data: { tags, updatedAt: existing.updatedAt },
-    select: LIST_FIELDS,
+    select: SAVED_LIST_FIELDS,
   })
 
   logger.info({ userId, savedWorkoutId: id, tagCount: tags.length }, 'Saved workout tags changed')
@@ -331,7 +306,7 @@ async function archive(id: string, userId: string, body: { archived?: unknown; d
   const updated = await prisma.savedWorkout.update({
     where: { id },
     data: { ...data, updatedAt: existing.updatedAt },
-    select: LIST_FIELDS,
+    select: SAVED_LIST_FIELDS,
   })
 
   logger.info({ userId, savedWorkoutId: id, archived, dismissed: !!dismissed, undo: !!undone }, 'Saved workout archive changed')
