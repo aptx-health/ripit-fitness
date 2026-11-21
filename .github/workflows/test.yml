@@ -7,7 +7,6 @@ on:
       - main
     paths-ignore:
       - '.claude/**'
-      - '.agent-minder/**'
       - 'docs/**'
       - '*.md'
 
