@@ -232,7 +232,6 @@ export function betaVariance(params: BetaParams): number {
 
 /** z-scores for common two-sided credible-interval levels. */
 export const Z_90 = 1.6449
-export const Z_95 = 1.96
 
 /**
  * Approximate central credible interval via the normal approximation

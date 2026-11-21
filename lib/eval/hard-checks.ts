@@ -13,9 +13,6 @@ import type {
   SuggestionResponse,
 } from './types'
 
-/** Nominal minutes per exercise; bounds are generous on both sides. */
-export const MINUTES_PER_EXERCISE = 8
-
 export function allowedExerciseCountRange(timeBudgetMinutes: number): {
   min: number
   max: number
@@ -144,11 +141,6 @@ function checkOption(
   }
 
   return results
-}
-
-export function gatePassRate(checks: HardCheckResult[]): number {
-  if (checks.length === 0) return 1
-  return checks.filter((c) => c.passed).length / checks.length
 }
 
 export function failedGates(checks: HardCheckResult[]): HardCheckResult[] {
