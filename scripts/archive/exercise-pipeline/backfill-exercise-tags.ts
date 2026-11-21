@@ -18,7 +18,7 @@ import {
   INTENSITY_CLASSES,
   buildTaggingPrompt,
   tagExercises,
-} from '../lib/exercises/auto-tag';
+} from '../../../lib/exercises/auto-tag';
 
 const BATCH_SIZE = 20;
 const TOP_N = 100;
