@@ -14,7 +14,7 @@ Learning is out of scope and was not looked at.
 
 ## The target: what "Training style" means
 
-Taken from `components/training/SectionTab.tsx`, `TabbedBlock.tsx`, `TrainingHome.tsx` and mockup `training-library/docs/mockups/054/`. See [01-training.png](screens/01-training.png).
+Taken from `components/training/SectionTab.tsx`, `TabbedBlock.tsx`, `TrainingHome.tsx` and mockup `initiatives/_archive/training-library/docs/mockups/054/`. See [01-training.png](screens/01-training.png).
 
 **Page title**
 - `text-4xl doom-title uppercase` (TRAINING).

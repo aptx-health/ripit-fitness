@@ -1,7 +1,7 @@
 Feature: Pinned workouts
   Users pin saved workouts so their informal routines are one tap away on
   Training. Pinned workouts still live in My Workouts.
-  Contract: initiatives/training-library/docs/spec.md ("TL4 Pinned workouts")
+  Contract: initiatives/_archive/training-library/docs/spec.md ("TL4 Pinned workouts")
 
   Background:
     Given the user has saved workouts "Upper Body", "Quick Machines" and "Mobility"

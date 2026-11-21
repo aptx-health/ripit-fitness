@@ -1,6 +1,6 @@
 Feature: Library
   The Library replaces Programs as the place to manage workouts and programs.
-  Contract: initiatives/training-library/docs/spec.md ("TL3 Library")
+  Contract: initiatives/_archive/training-library/docs/spec.md ("TL3 Library")
 
   Rule: Library is a tab with workouts and programs
 

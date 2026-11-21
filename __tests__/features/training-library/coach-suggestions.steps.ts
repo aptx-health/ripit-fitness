@@ -1,6 +1,6 @@
 /**
  * Step definitions for features/training-library/coach-suggestions.feature.
- * Codes strictly against initiatives/training-library/docs/spec.md
+ * Codes strictly against initiatives/_archive/training-library/docs/spec.md
  * ("TL5a Suggestions for users").
  *
  * Proposals are seeded through the real MCP tools (callTool) and decided

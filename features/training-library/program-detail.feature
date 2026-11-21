@@ -1,7 +1,7 @@
 Feature: Program Detail
   Each program has its own detail screen showing its weeks. Only the active
   program can be trained from it; other programs are view-only.
-  Contract: initiatives/training-library/docs/spec.md ("TL1 Program Detail")
+  Contract: initiatives/_archive/training-library/docs/spec.md ("TL1 Program Detail")
 
   Background:
     Given a user with programs "Machine Starter" (active, 5 weeks) and "Old Split" (not active, 3 weeks)

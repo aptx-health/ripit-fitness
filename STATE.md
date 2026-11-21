@@ -13,7 +13,7 @@ Running quietly: None.
 - Coaching (initiatives/coaching): slice 1 (invite + link) merged to dev 2026-11-07 (#1041). Slice 2 (send + Sent list) fixed; Dustin's phone preview next.
 - Workout library (initiatives/workout-library): tidy saved workouts (pinned + tags), incl. where AI and coach workouts land. Slices 1 (#1040) and 3 (#1043) merged to dev 2026-11-07. Later: slice 2 (tags + search), slice 4 (bulk tidy).
 - Learn linked from Settings (work 135): merged to dev 2026-11-06 (#1039); next release to prod.
-- E-ink theme + display toggle (initiatives/eink-theme): merged to dev 2026-11-06 (#1038); next release to prod.
+- E-ink theme + display toggle (initiatives/_archive/eink-theme): merged to dev 2026-11-06 (#1038); next release to prod.
 - Progress tab replacing Learn (initiatives/analytics): S1–S3 in prod 2026-11-02 (release #1034, infra #136). Per-lift page (/progress/lift/[id]) in prod 2026-11-05 (release #1037, infra #137).
 - Planned sets in the workout logger (initiatives/agent-tools): in prod 2026-11-02 (release #1034, infra #136).
 - Balance targets, one source of truth (initiatives/agent-tools): in prod (#1028, release #1029, infra #135, 2026-11-01).
