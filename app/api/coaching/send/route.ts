@@ -12,7 +12,8 @@ const STATUS = { not_linked: 403, not_found: 404, invalid: 400, duplicate: 409 }
 /**
  * POST /api/coaching/send { linkId, kind, sourceId, note? }: sends a copy of
  * the coach's own program or saved workout to the trainee on an active link,
- * as a pending proposal. 201 { proposalId }; refusals carry { code, reason }
+ * as a pending proposal. 201 { proposalId, droppedTags } (a saved workout's
+ * tags the trainee doesn't use, so not sent); refusals carry { code, reason }
  * (and missingExercises for exercises the trainee doesn't have). 409
  * duplicate: the same thing is already waiting for the trainee.
  */
@@ -49,8 +50,9 @@ export async function POST(request: NextRequest) {
         { status: STATUS[result.code] }
       )
     }
-    logger.info({ userId: user.id, linkId, kind, proposalId: result.proposalId }, 'Coach sent to trainee')
-    return NextResponse.json({ proposalId: result.proposalId }, { status: 201 })
+    const { proposalId, droppedTags } = result
+    logger.info({ userId: user.id, linkId, kind, proposalId, droppedTags }, 'Coach sent to trainee')
+    return NextResponse.json({ proposalId, droppedTags }, { status: 201 })
   } catch (error) {
     logger.error({ error, context: 'coaching-send' }, 'Failed to send to trainee')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

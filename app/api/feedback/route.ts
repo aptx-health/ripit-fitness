@@ -1,14 +1,76 @@
+import type { Prisma } from '@prisma/client'
 import { type NextRequest, NextResponse } from 'next/server'
 import { requireEditor } from '@/lib/admin/auth'
+import { isAdminRole } from '@/lib/auth/roles'
 import { getCurrentUser } from '@/lib/auth/server'
 import { prisma } from '@/lib/db'
 import { sendDiscordNotification } from '@/lib/discord'
+import { parseBugContext } from '@/lib/feedback/context'
+import { detectImageType, MAX_SCREENSHOT_BYTES } from '@/lib/feedback/screenshot'
 import { logger } from '@/lib/logger'
 import { checkRateLimit, feedbackSubmissionLimiter } from '@/lib/rate-limit'
 import type { FeedbackCategory } from '@/types/feedback'
 import { VALID_CATEGORIES, VALID_REFINEMENTS } from '@/types/feedback'
 
 const MAX_MESSAGE_LENGTH = 2000
+const MAX_CONTEXT_LENGTH = 20_000
+/** A full-size screenshot plus the text fields and multipart framing fits well under this. */
+const MAX_BODY_BYTES = 600_000
+
+interface FeedbackBody {
+  category: string
+  message?: string
+  pageUrl: string
+  userAgent?: string
+  properties?: Record<string, string>
+  rating?: number
+  refinements?: string[]
+  context: Prisma.InputJsonValue | null
+  /** The uploaded file (multipart only). */
+  screenshot: Blob | null
+}
+
+/**
+ * The submission from either a JSON body or a multipart form (bug reports with
+ * a screenshot). Any non-string form entry counts as the file.
+ */
+async function readFeedbackBody(request: NextRequest): Promise<FeedbackBody | { error: string }> {
+  const isForm = (request.headers.get('content-type') ?? '').includes('multipart/form-data')
+  let raw: Record<string, unknown>
+  let rawContext: unknown
+  let screenshot: Blob | null = null
+
+  if (isForm) {
+    const form = await request.formData()
+    const field = (name: string) => {
+      const v = form.get(name)
+      return typeof v === 'string' ? v : undefined
+    }
+    const file = form.get('screenshot')
+    if (file !== null && typeof file !== 'string' && file.size > 0) screenshot = file
+    raw = { category: field('category'), message: field('message'), pageUrl: field('pageUrl'), userAgent: field('userAgent') }
+    const contextText = field('context')
+    if (contextText) {
+      if (contextText.length > MAX_CONTEXT_LENGTH) return { error: 'Context too large' }
+      try {
+        rawContext = JSON.parse(contextText)
+      } catch {
+        return { error: 'Context must be JSON' }
+      }
+    }
+  } else {
+    raw = (await request.json()) as Record<string, unknown>
+    rawContext = raw.context
+  }
+
+  const context = rawContext === undefined ? null : parseBugContext(rawContext)
+  if (rawContext !== undefined && !context) return { error: 'Context must be an object' }
+  return {
+    ...(raw as Omit<FeedbackBody, 'context' | 'screenshot'>),
+    context: context as Prisma.InputJsonValue | null,
+    screenshot,
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,20 +79,42 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Refuse an oversized upload from its declared length, before reading
+    // (and buffering) the body. Browsers always send it for a FormData body.
+    const declaredLength = Number(request.headers.get('content-length'))
+    if (declaredLength > MAX_BODY_BYTES) {
+      logger.warn({ userId: user.id, declaredLength }, 'Feedback refused: body too large')
+      return NextResponse.json({ error: 'Request too large' }, { status: 413 })
+    }
+
     // Rate limit: 5 submissions / hour / user. Replaces a prior DB-count
     // check that hit Postgres on every POST.
     const limited = await checkRateLimit(feedbackSubmissionLimiter, user.id)
     if (limited) return limited
 
-    const body = await request.json()
-    const { category, message, pageUrl, userAgent, properties, rating, refinements } = body as {
-      category: string
-      message?: string
-      pageUrl: string
-      userAgent?: string
-      properties?: Record<string, string>
-      rating?: number
-      refinements?: string[]
+    const parsed = await readFeedbackBody(request)
+    if ('error' in parsed) {
+      return NextResponse.json({ error: parsed.error }, { status: 400 })
+    }
+    const { category, message, pageUrl, userAgent, properties, rating, refinements, context, screenshot } = parsed
+
+    // Screenshots are an admin bug-report tool. The form is already parsed
+    // (bounded by MAX_BODY_BYTES), but nothing is checked or saved for a non-admin.
+    if (screenshot && !isAdminRole(user.role)) {
+      logger.warn({ userId: user.id }, 'Feedback screenshot refused: not an admin')
+      return NextResponse.json({ error: 'Only admins can attach screenshots' }, { status: 403 })
+    }
+    let image: { bytes: Uint8Array<ArrayBuffer>; mimeType: string } | null = null
+    if (screenshot) {
+      if (screenshot.size > MAX_SCREENSHOT_BYTES) {
+        return NextResponse.json({ error: 'Screenshot must be 500 KB or less' }, { status: 413 })
+      }
+      const bytes = new Uint8Array(await screenshot.arrayBuffer())
+      const mimeType = detectImageType(bytes)
+      if (!mimeType) {
+        return NextResponse.json({ error: 'Screenshot must be a JPEG, PNG or WebP image' }, { status: 400 })
+      }
+      image = { bytes, mimeType }
     }
 
     // Validate category
@@ -109,10 +193,18 @@ export async function POST(request: NextRequest) {
         properties: propertiesJson,
         rating: rating ?? null,
         refinements: validatedRefinements,
+        context: context ?? undefined,
+        ...(image && {
+          screenshot: { create: { mimeType: image.mimeType, size: image.bytes.length, data: image.bytes } },
+        }),
       },
+      select: { id: true },
     })
 
-    logger.info({ feedbackId: feedback.id, category, rating, userId: user.id }, 'Feedback submitted')
+    logger.info(
+      { feedbackId: feedback.id, category, rating, userId: user.id, screenshotBytes: image?.bytes.length },
+      'Feedback submitted'
+    )
 
     // Discord notification (fire and forget)
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ripit.fit'
@@ -122,6 +214,9 @@ export async function POST(request: NextRequest) {
     ]
     if (isPostSession && rating) {
       discordFields.unshift({ name: 'Rating', value: `${rating}/5`, inline: true })
+    }
+    if (image) {
+      discordFields.push({ name: 'Screenshot', value: 'Attached (open in admin)', inline: true })
     }
     if (validatedRefinements.length > 0) {
       discordFields.push({ name: 'Issues', value: validatedRefinements.join(', '), inline: false })
@@ -178,12 +273,16 @@ export async function GET(request: NextRequest) {
     }
 
     const queries: [Promise<unknown[]>, Promise<number>, ...Promise<unknown>[]] = [
-      prisma.feedback.findMany({
-        where,
-        orderBy,
-        take: limit,
-        skip: offset,
-      }),
+      prisma.feedback
+        .findMany({
+          where,
+          orderBy,
+          take: limit,
+          skip: offset,
+          // Whether a screenshot exists, never its bytes.
+          include: { screenshot: { select: { size: true } } },
+        })
+        .then((rows) => rows.map(({ screenshot, ...row }) => ({ ...row, hasScreenshot: screenshot !== null }))),
       prisma.feedback.count({ where }),
     ]
 

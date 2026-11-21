@@ -223,10 +223,13 @@ model SavedWorkout {
   archivedAt         DateTime?
   /// Set by Dismiss (and by Restore), so the workout never returns to the New group.
   dismissedAt        DateTime?
+  /// The user's own tags (tidied by lib/saved-workouts/tags.ts). A user's tags are the distinct ones across their workouts.
+  tags               String[]  @default([])
 
   @@index([userId, lastUsedAt(sort: Desc)])
   @@index([userId, createdAt(sort: Desc)])
   @@index([userId, pinnedAt(sort: Desc)])
+  @@index([tags], type: Gin)
 }
 
 model LoggedSet {
@@ -662,26 +665,39 @@ model WaiverAcceptance {
 // -- User Feedback --
 
 model Feedback {
-  id             String     @id @default(cuid())
+  id             String              @id @default(cuid())
   userId         String
   category       String // "bug" | "feature" | "confusion" | "general" | "post_session"
-  message        String     @default("")
+  message        String              @default("")
   pageUrl        String
   userAgent      String?
   properties     String? // JSON blob for extra context (e.g. question shown for post_session)
   rating         Int? // 1-5 experience rating (post_session)
   refinements    String[] // ["confusing", "buggy", etc.] (post_session)
-  status         String     @default("new") // "new" | "reviewed" | "resolved"
+  status         String              @default("new") // "new" | "reviewed" | "resolved"
   adminNote      String?
   githubIssueUrl String?
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  context        Json? // bug reports: { pageUrl, viewport, theme, buildVersion, consoleErrors }
   proposals      Proposal[]
+  screenshot     FeedbackScreenshot?
 
   @@index([userId])
   @@index([status])
   @@index([category])
   @@index([createdAt(sort: Desc)])
+}
+
+// Bug report screenshot (admins only), at most MAX_SCREENSHOT_BYTES. Kept apart
+// from Feedback so listing feedback never loads the bytes.
+model FeedbackScreenshot {
+  feedbackId String   @id
+  mimeType   String
+  size       Int
+  data       Bytes
+  createdAt  DateTime @default(now())
+  feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
 }
 
 model InAppMessage {
@@ -778,13 +794,13 @@ model AgentToken {
 /// (lib/proposals/service.ts). kind: exercise_definition.create | .update.
 /// status: pending | applied | rejected | reverted | conflict.
 model Proposal {
-  id           String     @id @default(cuid())
+  id           String      @id @default(cuid())
   userId       String
   /// Exactly one of agentTokenId and coachLinkId is set (CHECK in the migration).
   agentTokenId String?
   coachLinkId  String?
   kind         String
-  status       String     @default("pending")
+  status       String      @default("pending")
   summary      String
   rationale    String
   payload      Json
@@ -794,7 +810,7 @@ model Proposal {
   /// Set on approve: what revert needs to undo the change.
   inverse      Json?
   error        String?
-  createdAt    DateTime   @default(now())
+  createdAt    DateTime    @default(now())
   decidedAt    DateTime?
   /// The user feedback this proposal addresses. Approving resolves it.
   feedbackId   String?

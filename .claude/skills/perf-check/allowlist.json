@@ -3,5 +3,11 @@
     "check": "no-loading",
     "file": "app/(app)/welcome/page.tsx",
     "reason": "Client page that renders at once with nothing to load; its only fetch is a fire-and-forget POST of the chosen intent after a tap, so a loading.tsx would have nothing to cover"
+  },
+  {
+    "check": "await-in-loop",
+    "file": "lib/feedback/shrink-image.ts",
+    "match": "await encode(blob, { scale, quality })",
+    "reason": "Local canvas re-encodes, no network; each try's size decides the next scale, so they must run in order and stop at the first that fits"
   }
 ]

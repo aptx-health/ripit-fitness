@@ -48,7 +48,8 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' https://cdn.ripit.fit data: blob:",
       "font-src 'self'",
-      "connect-src 'self'",
+      // cdn.ripit.fit: bug report capture fetches on-screen exercise images to draw them
+      "connect-src 'self' https://cdn.ripit.fit",
       "worker-src 'self'",
       "frame-ancestors 'none'",
       "base-uri 'self'",

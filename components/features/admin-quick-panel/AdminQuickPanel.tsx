@@ -1,7 +1,7 @@
 'use client'
 
 import * as DialogPrimitive from '@radix-ui/react-dialog'
-import { ChevronLeft, X } from 'lucide-react'
+import { Bug, ChevronLeft, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { SegmentedControl } from '@/components/ui/SegmentedControl'
 import {
@@ -10,11 +10,15 @@ import {
   saveQuickPanelPrefs,
   type TouchStyle,
 } from '@/lib/admin/quick-panel-prefs'
+import { installConsoleErrorCapture } from '@/lib/feedback/bug-context'
+import { CAPTURE_SKIP_ATTR } from '@/lib/feedback/screenshot'
+import BugReportSheet from './BugReportSheet'
 import TouchIndicators from './TouchIndicators'
 
 /**
  * Admin-only edge tab and side drawer. Rendered by the (app) layout for
- * admins only. Starts with touch indicators for recording tutorials.
+ * admins only: touch indicators for recording tutorials, and "Report a bug"
+ * (a screenshot of the page under the drawer, sent as bug feedback).
  *
  * Z-indexes sit above everything in the app (the highest in use is 9999), so
  * the tab still shows over loggers and sheets; the touch layer is above these.
@@ -31,8 +35,15 @@ const STYLE_OPTIONS = [
 export default function AdminQuickPanel() {
   const [open, setOpen] = useState(false)
   const [prefs, setPrefs] = useState<QuickPanelPrefs>(loadQuickPanelPrefs)
+  // Bumped per report so each one starts fresh; null when no report is open.
+  const [report, setReport] = useState<number | null>(null)
 
   const tabRef = useRef<HTMLButtonElement>(null)
+
+  // Bug reports carry the session's recent console errors.
+  useEffect(() => {
+    installConsoleErrorCapture()
+  }, [])
 
   // An open Radix sheet closes on any pointerdown outside it, heard on the
   // document. Stop the tab's pointerdown at the tab so the sheet stays open.
@@ -53,6 +64,12 @@ export default function AdminQuickPanel() {
 
   const recording = prefs.touchIndicators
 
+  // Closing the drawer first keeps it out of the screenshot; the sheet captures once it is gone.
+  const reportBug = () => {
+    setOpen(false)
+    setReport((n) => (n ?? 0) + 1)
+  }
+
   return (
     <>
       {/* The hit area stays 20px wide; while recording only a faint 5px sliver shows. */}
@@ -61,6 +78,7 @@ export default function AdminQuickPanel() {
         type="button"
         aria-label="Open admin panel"
         data-recording={recording ? 'true' : 'false'}
+        {...{ [CAPTURE_SKIP_ATTR]: '' }}
         onClick={() => setOpen(true)}
         style={{
           position: 'fixed',
@@ -157,9 +175,27 @@ export default function AdminQuickPanel() {
                 className="w-36 border border-border"
               />
             </div>
+
+            <div className="border-t border-border px-4 pt-3 pb-1 text-xs font-extrabold uppercase tracking-widest text-muted-foreground">
+              Feedback
+            </div>
+            <button
+              type="button"
+              aria-label="Report a bug"
+              onClick={reportBug}
+              className="flex min-h-12 w-full items-center gap-3 px-4 py-2 pb-4 text-left doom-focus-ring"
+            >
+              <Bug size={18} className="shrink-0 text-primary" aria-hidden="true" />
+              <span>
+                <span className="block text-sm font-semibold">Report a bug</span>
+                <span className="block text-xs text-muted-foreground">Screenshot this screen and describe it</span>
+              </span>
+            </button>
           </DialogPrimitive.Content>
         </DialogPrimitive.Portal>
       </DialogPrimitive.Root>
+
+      {report !== null && <BugReportSheet key={report} onClose={() => setReport(null)} />}
 
       {recording && <TouchIndicators touchStyle={prefs.touchStyle} />}
     </>

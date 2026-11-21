@@ -199,9 +199,9 @@ describe('row panel: buttons', () => {
   it('shows View, Start, Pin, Rename, Archive and Delete; Unpin when pinned', async () => {
     await renderWorkouts()
     open('Upper Body')
-    expect(panelLabels('Upper Body')).toEqual(['View', 'Start', 'Pin', 'Rename', 'Archive', 'Delete'])
+    expect(panelLabels('Upper Body')).toEqual(['View', 'Start', 'Pin', 'Rename', 'Tags…', 'Archive', 'Delete'])
     open('Mobility')
-    expect(panelLabels('Mobility')).toEqual(['View', 'Start', 'Unpin', 'Rename', 'Archive', 'Delete'])
+    expect(panelLabels('Mobility')).toEqual(['View', 'Start', 'Unpin', 'Rename', 'Tags…', 'Archive', 'Delete'])
   })
 
   it('each button is at least 48px tall and they wrap like the program panel', async () => {
@@ -277,7 +277,7 @@ describe('row panel: New workouts', () => {
   it('the panel also shows Dismiss, which archives it as dismissed with an Undo toast', async () => {
     await renderWorkouts()
     open('Machine Upper')
-    expect(panelLabels('Machine Upper')).toEqual(['View', 'Start', 'Pin', 'Dismiss', 'Rename', 'Archive', 'Delete'])
+    expect(panelLabels('Machine Upper')).toEqual(['View', 'Start', 'Pin', 'Dismiss', 'Rename', 'Tags…', 'Archive', 'Delete'])
     fireEvent.click(within(rowOf('Machine Upper')).getByRole('button', { name: 'Dismiss Machine Upper' }))
     await waitFor(() => expect(h.toastSuccess).toHaveBeenCalled())
     expect(calls.filter((c) => c.method === 'PATCH')[0].body).toBe(JSON.stringify({ archived: true, dismissed: true }))
