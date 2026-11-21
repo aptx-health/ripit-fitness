@@ -20,7 +20,7 @@ import TouchIndicators from './TouchIndicators'
  * admins only: touch indicators for recording tutorials, and "Report a bug"
  * (a screenshot of the page under the drawer, sent as bug feedback).
  *
- * Z-indexes sit above everything in the app (the highest in use is 9999), so
+ * Z-indexes sit above everything in the app (the test checks against the highest in use), so
  * the tab still shows over loggers and sheets; the touch layer is above these.
  */
 const TAB_Z = 10000
