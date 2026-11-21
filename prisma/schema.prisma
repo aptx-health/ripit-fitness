@@ -223,10 +223,13 @@ model SavedWorkout {
   archivedAt         DateTime?
   /// Set by Dismiss (and by Restore), so the workout never returns to the New group.
   dismissedAt        DateTime?
+  /// The user's own tags (tidied by lib/saved-workouts/tags.ts). A user's tags are the distinct ones across their workouts.
+  tags               String[]  @default([])
 
   @@index([userId, lastUsedAt(sort: Desc)])
   @@index([userId, createdAt(sort: Desc)])
   @@index([userId, pinnedAt(sort: Desc)])
+  @@index([tags], type: Gin)
 }
 
 model LoggedSet {

@@ -96,10 +96,21 @@ export default function SendToTrainee({ kind, sourceId, className = '', trainees
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ linkId: trainee.linkId, kind, sourceId, ...(note.trim() && { note: note.trim() }) }),
       })
-      const body = (await res.json().catch(() => ({}))) as { code?: string; missingExercises?: string[]; reason?: string }
+      const body = (await res.json().catch(() => ({}))) as {
+        code?: string
+        missingExercises?: string[]
+        reason?: string
+        droppedTags?: string[]
+      }
       if (res.status === 201) {
         setOpen(false)
-        toast.success(`Sent to ${trainee.name}`, 'They can accept or decline it.')
+        const dropped = body.droppedTags ?? []
+        toast.success(
+          `Sent to ${trainee.name}`,
+          dropped.length
+            ? `Not added: ${dropped.join(', ')} — your trainee doesn't use ${dropped.length === 1 ? 'it' : 'them'}.`
+            : 'They can accept or decline it.'
+        )
         return
       }
       setRefusal(res.status === 429 ? 'Too many sends. Try again later.' : refusalText(trainee.name, body))
