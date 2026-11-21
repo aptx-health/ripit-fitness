@@ -82,7 +82,7 @@ Follow these guidelines:
 
 #### Code Standards
 
-1. **File size limit**: Max 200 lines per file. If you exceed this, split into multiple files following Single Responsibility Principle.
+1. **File size limit**: Max 1000 lines per file (enforced by `scripts/check-file-length.sh` in the pre-commit hook). If you approach this, split into multiple files following Single Responsibility Principle.
 
 2. **TypeScript**: Use TypeScript strictly. No `any` types without good reason.
 
