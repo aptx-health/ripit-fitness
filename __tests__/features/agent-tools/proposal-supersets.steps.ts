@@ -12,7 +12,7 @@
 
 import { describeFeature, loadFeature } from '@amiceli/vitest-cucumber'
 import type { PrismaClient } from '@prisma/client'
-import { cleanup, render, screen, within } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { type ComponentType, createElement, type ReactElement } from 'react'
 import { expect, vi } from 'vitest'
 import { getTestDatabase } from '@/lib/test/database'
@@ -125,21 +125,24 @@ async function createdProgramExercises() {
   })
 }
 
-/** The logger's header for one exercise: it reads exerciseGroup and labels it "Superset X". */
+/** The logger's exercise title (Info tab): it reads exerciseGroup and labels it "Superset X". */
 async function loggerHeader(exercise: { id: string; name: string; notes: string | null; exerciseGroup: string | null }) {
   cleanup()
-  const { default: ExerciseNavigation } = (await load('@/components/workout-logging/ExerciseNavigation')) as {
+  const { default: ExerciseDisplayTabs } = (await load('@/components/workout-logging/ExerciseDisplayTabs')) as {
     default: ComponentType<Json>
   }
   render(
-    createElement(ExerciseNavigation, {
-      currentExercise: exercise,
-      currentExerciseIndex: 0,
-      totalExercises: 3,
-      onPrevious: () => {},
-      onNext: () => {},
+    createElement(ExerciseDisplayTabs, {
+      exercise,
+      prescribedSets: [],
+      loggedSets: [],
+      exerciseHistory: null,
+      onDeleteSet: () => {},
+      loggingForm: null,
+      currentSetNumber: 1,
     })
   )
+  fireEvent.click(screen.getByRole('tab', { name: /info/i }))
   return document.body.textContent ?? ''
 }
 
