@@ -1,6 +1,6 @@
 /**
  * Step definitions for features/training-library/user-agent-tokens.feature.
- * Codes strictly against initiatives/training-library/docs/spec.md
+ * Codes strictly against initiatives/_archive/training-library/docs/spec.md
  * ("TL5b User agent tokens and scoped notifications").
  *
  * Seams (all new unless marked; names are the contract):

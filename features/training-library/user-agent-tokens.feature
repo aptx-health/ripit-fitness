@@ -2,7 +2,7 @@ Feature: User agent tokens
   Any user can connect their own agent with a token from Settings. Their
   agent's suggestions are reviewed in the app and never reach the admin's
   notification channels.
-  Contract: initiatives/training-library/docs/spec.md ("TL5b User agent tokens and scoped notifications")
+  Contract: initiatives/_archive/training-library/docs/spec.md ("TL5b User agent tokens and scoped notifications")
 
   Rule: Users manage their own tokens
 

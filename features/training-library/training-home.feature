@@ -2,7 +2,7 @@ Feature: Training home
   Training answers "what should I do next?" with sections that appear only
   when relevant: Up Next, Recent Workouts and Current Program. It works
   without an active program.
-  Contract: initiatives/training-library/docs/spec.md ("TL2 Training home")
+  Contract: initiatives/_archive/training-library/docs/spec.md ("TL2 Training home")
 
   Rule: Up Next shows the active program's next workout
 

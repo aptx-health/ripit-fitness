@@ -69,3 +69,11 @@ initiatives/ios-app/handoff/slice7-assets/
 initiatives/ios-app/handoff/slice8-assets/
 initiatives/ios-app/handoff/smart-picker-assets/
 initiatives/ios-app/handoff/slice9-assets/
+# Initiative screenshots and recordings stay local (list: initiatives/_archive/LOCAL-ASSETS.txt)
+initiatives/**/assets/**/*.png
+initiatives/**/assets/**/*.jpg
+initiatives/**/assets/**/*.jpeg
+initiatives/**/assets/**/*.gif
+initiatives/**/assets/**/*.webp
+initiatives/**/assets/**/*.mov
+initiatives/**/assets/**/*.mp4

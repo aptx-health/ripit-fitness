@@ -1,6 +1,6 @@
 /**
  * Step definitions for features/training-library/pinned-workouts.feature.
- * Codes strictly against initiatives/training-library/docs/spec.md
+ * Codes strictly against initiatives/_archive/training-library/docs/spec.md
  * ("TL4 Pinned workouts").
  *
  * Schema the tests expect (the implementer migrates it):

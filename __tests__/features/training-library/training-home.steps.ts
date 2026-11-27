@@ -1,6 +1,6 @@
 /**
  * Step definitions for features/training-library/training-home.feature.
- * Codes strictly against initiatives/training-library/docs/spec.md
+ * Codes strictly against initiatives/_archive/training-library/docs/spec.md
  * ("TL2 Training home").
  *
  * Seams the implementer builds to (new modules; names are the contract):

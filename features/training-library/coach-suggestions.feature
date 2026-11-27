@@ -2,7 +2,7 @@ Feature: Coach Suggestions
   Agents suggest workouts, programs and training-target changes. The user
   reviews each suggestion in the app and accepts or rejects it. Nothing
   changes until they accept.
-  Contract: initiatives/training-library/docs/spec.md ("TL5a Suggestions for users")
+  Contract: initiatives/_archive/training-library/docs/spec.md ("TL5a Suggestions for users")
 
   Background:
     Given the user has an agent that made suggestions for them

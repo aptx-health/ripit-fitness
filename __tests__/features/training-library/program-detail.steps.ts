@@ -1,6 +1,6 @@
 /**
  * Step definitions for features/training-library/program-detail.feature.
- * Codes strictly against initiatives/training-library/docs/spec.md
+ * Codes strictly against initiatives/_archive/training-library/docs/spec.md
  * ("TL1 Program Detail").
  *
  * Seams the implementer builds to (all new modules; names are the contract):

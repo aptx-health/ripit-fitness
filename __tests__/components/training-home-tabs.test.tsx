@@ -1,7 +1,7 @@
 /**
  * TL6 Training as three tabbed blocks (mockup 054): the structure and text of
  * the Training home, rendered. Colours, classes and layout are the reviewer's
- * job. Spec: initiatives/training-library/docs/spec.md ("TL6 final layout").
+ * job. Spec: initiatives/_archive/training-library/docs/spec.md ("TL6 final layout").
  *
  * Seams:
  *   components/training/TrainingHome.tsx   (props { home }, as before)

@@ -1,6 +1,6 @@
 /**
  * Step definitions for features/training-library/library.feature.
- * Codes strictly against initiatives/training-library/docs/spec.md ("TL3 Library").
+ * Codes strictly against initiatives/_archive/training-library/docs/spec.md ("TL3 Library").
  * The seams are listed in library-support.ts. No database: the Library is
  * rendered with its data and search params, and the redirects are pure.
  *
