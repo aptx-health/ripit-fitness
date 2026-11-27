@@ -190,7 +190,9 @@ describe('Scenario: The tab works over the loggers and sheets', () => {
         highest = Math.max(highest, Number(m[1] ?? m[2]))
       }
     }
-    expect(highest).toBeGreaterThanOrEqual(9999)
+    // The scan must find real layers (the highest was 9999 until ActionsMenu
+    // was deleted in work 232).
+    expect(highest).toBeGreaterThan(0)
 
     render(createElement(AdminQuickPanel))
     expect(Number(tab().style.zIndex)).toBeGreaterThan(highest)

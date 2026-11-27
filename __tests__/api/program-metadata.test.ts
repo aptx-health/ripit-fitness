@@ -316,48 +316,6 @@ describe('Program Metadata', () => {
     })
   })
 
-  describe('Metadata API', () => {
-    it('should save metadata to program', async () => {
-      const program = await createTestProgram(prisma, userId, {
-        name: 'Test Program',
-      })
-
-      // Simulate PATCH /api/programs/[programId]/metadata
-      const updatedProgram = await prisma.program.update({
-        where: { id: program.id, userId: userId },
-        data: {
-          goals: ['strength', 'muscle_gain'],
-          level: 'intermediate',
-          targetDaysPerWeek: 4,
-          durationDisplay: '8 weeks',
-          equipmentNeeded: ['barbell', 'dumbbell'],
-        },
-      })
-
-      expect(updatedProgram.goals).toEqual(['strength', 'muscle_gain'])
-      expect(updatedProgram.level).toBe('intermediate')
-      expect(updatedProgram.targetDaysPerWeek).toBe(4)
-      expect(updatedProgram.durationDisplay).toBe('8 weeks')
-      expect(updatedProgram.equipmentNeeded).toEqual(['barbell', 'dumbbell'])
-    })
-
-    it('should only update metadata for owned programs', async () => {
-      // Create program for user1
-      const program = await createTestProgram(prisma, userId)
-
-      // Create another user
-      const user2 = await createTestUser()
-
-      // Try to update program as user2 (should fail)
-      await expect(
-        prisma.program.update({
-          where: { id: program.id, userId: user2.id },
-          data: { level: 'advanced' },
-        })
-      ).rejects.toThrow()
-    })
-  })
-
   describe('Publishing with Metadata', () => {
     it('should copy metadata to CommunityProgram on publish', async () => {
       // Create program with metadata

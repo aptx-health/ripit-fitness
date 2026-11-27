@@ -22,7 +22,6 @@ export default defineConfig({
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
-      '**/fitcsv-wt2/**',
       '**/fitcsv-wt3/**',
       '**/.claude/worktrees/**',
       '**/.git/**',

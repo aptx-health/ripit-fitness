@@ -171,13 +171,3 @@ export async function tagExercises(ids: string[], deps: TagDeps): Promise<void> 
   );
 }
 
-/**
- * Fire-and-forget lazy tagging — call this when candidate filtering
- * encounters an untagged exercise. Errors are swallowed (logged only)
- * so the request never blocks on the LLM.
- */
-export function queueLazyTag(exerciseId: string, deps: TagDeps): void {
-  void tagExercise(exerciseId, deps).catch((error) => {
-    logger.warn({ error, exerciseId }, 'auto-tag: lazy tag failed');
-  });
-}

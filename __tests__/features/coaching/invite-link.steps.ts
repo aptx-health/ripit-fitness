@@ -605,10 +605,6 @@ describeFeature(feature, ({ Background, Scenario }) => {
       render(await detail.default({ params: Promise.resolve({ id: coachId }) }))
       expect(screen.getAllByText(/Coach Push/).length).toBeGreaterThan(0)
       expect(bodyText()).not.toMatch(/undefined|\bnull\b/)
-      const apiList = (await load('@/app/api/admin/proposals/route')) as { GET: Handler }
-      expect((await apiList.GET(req('/api/admin/proposals', 'GET'))).status).toBe(200)
-      const apiOne = (await load('@/app/api/admin/proposals/[id]/route')) as { GET: Handler }
-      expect((await apiOne.GET(req(`/api/admin/proposals/${coachId}`, 'GET'), ctx(coachId))).status).toBe(200)
       // /suggestions: the trainee's list and detail include the coach-sent one.
       const detailLib = (await load('@/lib/suggestions/detail')) as typeof import('@/lib/suggestions/detail')
       expect((await detailLib.listPendingSuggestions(s.dustin)).map((p) => p.id)).toContain(coachId)

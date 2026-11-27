@@ -49,17 +49,6 @@ export const FOCUS_AREAS = {
   CARDIO: 'cardio',
 } as const;
 
-export const FOCUS_AREA_LABELS: Record<string, string> = {
-  upper_body: 'Upper Body',
-  lower_body: 'Lower Body',
-  full_body: 'Full Body',
-  push: 'Push',
-  pull: 'Pull',
-  legs: 'Legs',
-  core: 'Core',
-  cardio: 'Cardio',
-};
-
 export const COMMON_EQUIPMENT = {
   BARBELL: 'barbell',
   DUMBBELL: 'dumbbell',

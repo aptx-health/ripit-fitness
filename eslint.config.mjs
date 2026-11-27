@@ -27,7 +27,6 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Worktrees and other excluded dirs:
     ".claude/**",
-    "fitcsv-wt2/**",
     "cloud-functions/**/dist/**",
     "scripts/**",
   ]),

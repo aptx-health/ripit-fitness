@@ -143,10 +143,6 @@ export const EXERCISE_CATALOG: readonly CatalogEntry[] = [
 
 const byId = new Map(EXERCISE_CATALOG.map((e) => [e.id, e]))
 
-export function getCatalogExercise(id: string): CatalogEntry | undefined {
-  return byId.get(id)
-}
-
 export function exerciseName(id: string): string {
   return byId.get(id)?.name ?? id
 }

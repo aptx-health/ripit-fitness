@@ -9,7 +9,7 @@ import type { TouchStyle } from '@/lib/admin/quick-panel-prefs'
  * capture phase on window, so taps reach the page exactly as before.
  */
 
-// Above everything else in the app (the highest in use is 9999) and the panel.
+// Above everything else in the app (see AdminQuickPanel) and the panel.
 export const TOUCH_LAYER_Z = 10010
 export const RING_FADE_MS = 400
 export const TRAIL_FADE_MS = 300

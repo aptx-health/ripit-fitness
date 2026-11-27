@@ -65,7 +65,6 @@
       "!**/out",
       "!**/build",
       "!**/node_modules",
-      "!**/fitcsv-wt2",
       "!**/.claude",
       "!**/cloud-functions/**/node_modules",
       "!**/cloud-functions/**/dist"
